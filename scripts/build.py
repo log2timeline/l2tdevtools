@@ -13,9 +13,9 @@ try:
 except ImportError:
   import configparser
 
-import build_helper
-import download_helper
-import source_helper
+from l2tdevtools import build_helper
+from l2tdevtools import download_helper
+from l2tdevtools import source_helper
 
 
 # Since os.path.abspath() uses the current working directory (cwd)

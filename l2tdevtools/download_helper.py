@@ -22,7 +22,7 @@ class DownloadHelper(object):
     """Initializes the download helper."""
     super(DownloadHelper, self).__init__()
     self._cached_url = u''
-    self._cached_page_content = ''
+    self._cached_page_content = b''
 
   def Download(self, project_name, project_version):
     """Downloads the project for a given project name and version.
