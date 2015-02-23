@@ -38,6 +38,7 @@ class DependencyDefinition(object):
     """
     self.description_long = None
     self.description_short = None
+    self.disabled = False
     self.dpkg_dependencies = None
     self.dpkg_name = None
     self.download_url = None
@@ -82,19 +83,21 @@ class DependencyDefinitionReader(object):
     for section_name in config_parser.sections():
       dependency_definition = DependencyDefinition(section_name)
       dependency_definition.description_long = self._GetConfigValue(
-          config_parser, section_name, 'description_long')
+          config_parser, section_name, u'description_long')
       dependency_definition.description_short = self._GetConfigValue(
-          config_parser, section_name, 'description_short')
+          config_parser, section_name, u'description_short')
+      dependency_definition.disabled = self._GetConfigValue(
+          config_parser, section_name, u'disabled')
       dependency_definition.dpkg_dependencies = self._GetConfigValue(
-          config_parser, section_name, 'dpkg_dependencies')
+          config_parser, section_name, u'dpkg_dependencies')
       dependency_definition.dpkg_name = self._GetConfigValue(
-          config_parser, section_name, 'dpkg_name')
+          config_parser, section_name, u'dpkg_name')
       dependency_definition.download_url = self._GetConfigValue(
-          config_parser, section_name, 'download_url')
+          config_parser, section_name, u'download_url')
       dependency_definition.homepage_url = self._GetConfigValue(
-          config_parser, section_name, 'homepage_url')
+          config_parser, section_name, u'homepage_url')
       dependency_definition.maintainer = self._GetConfigValue(
-          config_parser, section_name, 'maintainer')
+          config_parser, section_name, u'maintainer')
 
       # Need at minimum a name and a download URL.
       if dependency_definition.name and dependency_definition.download_url:
@@ -106,15 +109,13 @@ class DependencyBuilder(object):
 
   # TODO: add phases for building sleuthkit/pytsk.
 
-  _LIBYAL_LIBRARIES = frozenset(['libewf'])
+  _LIBYAL_LIBRARIES = frozenset([u'libewf'])
 
   _PATCHES_URL = (
     u'https://googledrive.com/host/0B30H7z4S52FleW5vUHBnblJfcjg/'
     u'3rd%20party/patches')
 
-  _PYTHON_MODULES = frozenset([
-    'bencode', 'binplist', 'construct', 'dfvfs', 'dpkt', 'pyparsing',
-    'pysqlite', 'pytz', 'PyYAML', 'six'])
+  _PYTHON_MODULES = frozenset([u'binplist', u'dfvfs', u'dpkt', u'pyparsing'])
 
   def __init__(self, build_target):
     """Initializes the dependency builder.
@@ -141,7 +142,12 @@ class DependencyBuilder(object):
 
     source_helper_object.Clean()
 
-    if self._build_target == 'download':
+    # Unify http:// and https:// URLs for the download helper check.
+    download_url = dependency_definition.download_url
+    if download_url.startswith(u'https://'):
+      download_url = u'http://{0:s}'.format(download_url[8:])
+
+    if self._build_target == u'download':
       source_filename = source_helper_object.Download()
 
       # If available run the script post-download.sh after download.
@@ -153,18 +159,20 @@ class DependencyBuilder(object):
           return False
 
     elif (dependency_definition.name in self._LIBYAL_LIBRARIES or
-        dependency_definition.download_url.startswith(
-            u'http://github.com/libyal/')):
+        download_url.startswith(u'http://github.com/libyal/')):
       if not self._BuildLibyalLibrary(
           source_helper_object, dependency_definition):
         return False
 
-    elif dependency_definition.name in self._PYTHON_MODULES:
+    elif (dependency_definition.name in self._PYTHON_MODULES or
+        download_url.startswith(u'http://pypi.python.org/pypi/')):
       if not self._BuildPythonModule(
           source_helper_object, dependency_definition):
         return False
 
     else:
+      logging.warning(u'Unable to determine how to build: {0:s}'.format(
+          dependency_definition.name))
       return False
 
     return True
@@ -181,24 +189,24 @@ class DependencyBuilder(object):
       True if the build is successful or False on error.
     """
     build_helper_object = None
-    if self._build_target == 'dpkg':
+    if self._build_target == u'dpkg':
       build_helper_object = build_helper.LibyalDpkgBuildHelper(
           dependency_definition)
 
-    elif self._build_target == 'dpkg-source':
+    elif self._build_target == u'dpkg-source':
       build_helper_object = build_helper.LibyalSourceDpkgBuildHelper(
           dependency_definition)
 
-    elif self._build_target in ['msi']:
+    elif self._build_target == u'msi':
       # TODO: setup dokan and zlib in build directory.
       build_helper_object = build_helper.LibyalMsiBuildHelper(
           dependency_definition)
 
-    elif self._build_target == 'pkg':
+    elif self._build_target == u'pkg':
       build_helper_object = build_helper.LibyalPkgBuildHelper(
           dependency_definition)
 
-    elif self._build_target == 'rpm':
+    elif self._build_target == u'rpm':
       build_helper_object = build_helper.LibyalRpmBuildHelper(
           dependency_definition)
 
@@ -237,24 +245,24 @@ class DependencyBuilder(object):
       True if the build is successful or False on error.
     """
     build_helper_object = None
-    if self._build_target == 'dpkg':
+    if self._build_target == u'dpkg':
       build_helper_object = build_helper.PythonModuleDpkgBuildHelper(
           dependency_definition)
 
-    elif self._build_target == 'dpkg-source':
+    elif self._build_target == u'dpkg-source':
       build_helper_object = build_helper.PythonModuleSourceDpkgBuildHelper(
           dependency_definition)
 
-    elif self._build_target in ['msi']:
+    elif self._build_target == u'msi':
       # TODO: setup sqlite in build directory.
       build_helper_object = build_helper.PythonModuleMsiBuildHelper(
           dependency_definition)
 
-    elif self._build_target == 'pkg':
+    elif self._build_target == u'pkg':
       build_helper_object = build_helper.PythonModulePkgBuildHelper(
           dependency_definition)
 
-    elif self._build_target == 'rpm':
+    elif self._build_target == u'rpm':
       build_helper_object = build_helper.PythonModuleRpmBuildHelper(
           dependency_definition)
 
@@ -346,7 +354,7 @@ def Main():
       default=u'build', help=u'The location of the the build directory.')
 
   args_parser.add_argument(
-      u'-cu', u'--configu', dest=u'config_file', action=u'store',
+      u'-c', u'--config', dest=u'config_file', action=u'store',
       metavar=u'CONFIG_FILE', default=None,
       help=u'path of the build configuration file.')
 
@@ -367,8 +375,10 @@ def Main():
     return False
 
   if not options.config_file:
+    options.config_file = os.path.dirname(__file__)
+    options.config_file = os.path.dirname(options.config_file)
     options.config_file = os.path.join(
-        os.path.dirname(__file__), u'projects.ini')
+        options.config_file, u'data', u'projects.ini')
 
   if not os.path.exists(options.config_file):
     print u'No such config file: {0:s}.'.format(options.config_file)
@@ -425,7 +435,8 @@ def Main():
   with open(options.config_file) as file_object:
     dependency_definition_reader = DependencyDefinitionReader()
     for dependency_definition in dependency_definition_reader.Read(file_object):
-      builds.append(dependency_definition)
+      if not dependency_definition.disabled:
+        builds.append(dependency_definition)
 
   if not os.path.exists(options.build_directory):
     os.mkdir(options.build_directory)

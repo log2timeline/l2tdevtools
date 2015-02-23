@@ -643,9 +643,11 @@ class PythonModuleDpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
+    license_file = os.path.dirname(__file__)
+    license_file = os.path.dirname(license_file)
     license_file = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), u'config', u'licenses',
-        u'LICENSE.{0:s}'.format(self._project_name))
+        license_file, u'data', u'licenses', u'LICENSE.{0:s}'.format(
+            self._project_name))
 
     filename = os.path.join(dpkg_path, u'copyright')
 

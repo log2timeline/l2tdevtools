@@ -383,7 +383,7 @@ class LibyalGitHubDownloadHelper(DownloadHelper):
     config_parser = configparser.RawConfigParser()
     config_parser.readfp(io.BytesIO(page_content))
 
-    return json.loads(config_parser.get('source_package', 'url'))
+    return json.loads(config_parser.get(u'source_package', u'url'))
 
   def GetLatestVersion(self, project_name):
     """Retrieves the latest version number for a given project name.
@@ -397,10 +397,10 @@ class LibyalGitHubDownloadHelper(DownloadHelper):
     if not self._download_helper:
       download_url = self.GetWikiConfigurationSourcePackageUrl(project_name)
 
-      if download_url.startswith('https://github.com'):
+      if download_url.startswith(u'https://github.com'):
         self._download_helper = LibyalGithubReleasesDownloadHelper()
 
-      elif download_url.startswith('https://googledrive.com'):
+      elif download_url.startswith(u'https://googledrive.com'):
         self._download_helper = LibyalGoogleDriveDownloadHelper(download_url)
 
     return self._download_helper.GetLatestVersion(project_name)
@@ -418,10 +418,10 @@ class LibyalGitHubDownloadHelper(DownloadHelper):
     if not self._download_helper:
       download_url = self.GetWikiConfigurationSourcePackageUrl(project_name)
 
-      if download_url.startswith('https://github.com'):
+      if download_url.startswith(u'https://github.com'):
         self._download_helper = LibyalGithubReleasesDownloadHelper()
 
-      elif download_url.startswith('https://googledrive.com'):
+      elif download_url.startswith(u'https://googledrive.com'):
         self._download_helper = LibyalGoogleDriveDownloadHelper(download_url)
 
     return self._download_helper.GetDownloadUrl(project_name, project_version)
@@ -450,13 +450,24 @@ class LibyalGoogleDriveDownloadHelper(GoogleDriveDownloadHelper):
     """
     return self._google_drive_url
 
+  def GetProjectIdentifier(self, project_name):
+    """Retrieves the project identifier for a given project name.
+
+    Args:
+      project_name: the name of the project.
+
+    Returns:
+      The project identifier or None on error.
+    """
+    return u'com.github.libyal.{0:s}'.format(project_name)
+
 
 class LibyalGithubReleasesDownloadHelper(GithubReleasesDownloadHelper):
   """Class that helps in downloading a libyal project with GitHub releases."""
 
   def __init__(self):
     """Initializes the download helper."""
-    super(LibyalGithubReleasesDownloadHelper, self).__init__('libyal')
+    super(LibyalGithubReleasesDownloadHelper, self).__init__(u'libyal')
 
 
 class Log2TimelineGitHubDownloadHelper(GithubReleasesDownloadHelper):
@@ -464,7 +475,7 @@ class Log2TimelineGitHubDownloadHelper(GithubReleasesDownloadHelper):
 
   def __init__(self):
     """Initializes the download helper."""
-    super(Log2TimelineGitHubDownloadHelper, self).__init__('log2timeline')
+    super(Log2TimelineGitHubDownloadHelper, self).__init__(u'log2timeline')
 
 
 class PyPiDownloadHelper(DownloadHelper):
@@ -545,7 +556,7 @@ class SourceForgeDownloadHelper(DownloadHelper):
       The a string containing the latest version number or None on error.
     """
     # TODO: make this more robust to detect different naming schemes.
-    download_url = 'http://sourceforge.net/projects/{0:s}/files/{0:s}/'.format(
+    download_url = u'http://sourceforge.net/projects/{0:s}/files/{0:s}/'.format(
         project_name)
 
     page_content = self.DownloadPageContent(download_url)
@@ -555,14 +566,14 @@ class SourceForgeDownloadHelper(DownloadHelper):
     # The format of the project download URL is:
     # /projects/{project name}/files/{project name}/{project name}-{version}/
     expression_string = (
-        '<a href="/projects/{0:s}/files/{0:s}/'
-        '{0:s}-([0-9]+[.][0-9]+[.][0-9]+)/"').format(project_name)
+        u'<a href="/projects/{0:s}/files/{0:s}/'
+        u'{0:s}-([0-9]+[.][0-9]+[.][0-9]+)/"').format(project_name)
     matches = re.findall(expression_string, page_content)
 
     if not matches:
       return 0
 
-    numeric_matches = [''.join(match.split('.')) for match in matches]
+    numeric_matches = [u''.join(match.split(u'.')) for match in matches]
     return matches[numeric_matches.index(max(numeric_matches))]
 
   def GetDownloadUrl(self, project_name, project_version):
@@ -575,11 +586,9 @@ class SourceForgeDownloadHelper(DownloadHelper):
     Returns:
       The download URL of the project or None on error.
     """
-    download_url = (
-        'http://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
-        '/{0:s}-{1:s}.tar.gz').format(project_name, project_version)
-
-    return self.DownloadFile(download_url)
+    return (
+        u'http://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
+        u'/{0:s}-{1:s}.tar.gz').format(project_name, project_version)
 
   def GetProjectIdentifier(self, project_name):
     """Retrieves the project identifier for a given project name.
