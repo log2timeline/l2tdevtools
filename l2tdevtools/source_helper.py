@@ -104,7 +104,7 @@ class SourcePackageHelper(SourceHelper):
     directory_name = ''
 
     for tar_info in archive.getmembers():
-      filename = getattr(tar_info, 'name', None)
+      filename = getattr(tar_info, u'name', None)
       try:
         filename = filename.decode(self.ENCODING)
       except UnicodeDecodeError:

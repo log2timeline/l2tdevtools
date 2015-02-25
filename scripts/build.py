@@ -109,6 +109,9 @@ class DependencyBuilder(object):
 
   # TODO: add phases for building sleuthkit/pytsk.
 
+  # The distributions to build dpkg-source packages for.
+  _DPKG_SOURCE_DISTRIBUTIONS = frozenset([u'precise', u'trusty'])
+
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
 
   _PATCHES_URL = (
@@ -189,6 +192,7 @@ class DependencyBuilder(object):
       True if the build is successful or False on error.
     """
     build_helper_object = None
+    distributions = [None]
     if self._build_target == u'dpkg':
       build_helper_object = build_helper.LibyalDpkgBuildHelper(
           dependency_definition)
@@ -196,6 +200,7 @@ class DependencyBuilder(object):
     elif self._build_target == u'dpkg-source':
       build_helper_object = build_helper.LibyalSourceDpkgBuildHelper(
           dependency_definition)
+      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
 
     elif self._build_target == u'msi':
       # TODO: setup dokan and zlib in build directory.
@@ -213,23 +218,28 @@ class DependencyBuilder(object):
     if not build_helper_object:
       return False
 
-    output_filename = build_helper_object.GetOutputFilename(
-        source_helper_object)
+    for distribution in distributions:
+      if distribution:
+        build_helper_object.distribution = distribution
 
-    build_helper_object.Clean(source_helper_object)
+      output_filename = build_helper_object.GetOutputFilename(
+          source_helper_object)
 
-    if not os.path.exists(output_filename):
-      if not build_helper_object.Build(source_helper_object):
-        logging.warning((
-            u'Build of: {0:s} failed, for more information check '
-            u'{1:s}').format(
-                source_helper_object.project_name,
-                build_helper_object.LOG_FILENAME))
-        return False
+      build_helper_object.Clean(source_helper_object)
 
-    if os.path.exists(build_helper_object.LOG_FILENAME):
-      logging.info(u'Removing: {0:s}'.format(build_helper_object.LOG_FILENAME))
-      os.remove(build_helper_object.LOG_FILENAME)
+      if not os.path.exists(output_filename):
+        if not build_helper_object.Build(source_helper_object):
+          logging.warning((
+              u'Build of: {0:s} failed, for more information check '
+              u'{1:s}').format(
+                  source_helper_object.project_name,
+                  build_helper_object.LOG_FILENAME))
+          return False
+
+      if os.path.exists(build_helper_object.LOG_FILENAME):
+        logging.info(u'Removing: {0:s}'.format(
+            build_helper_object.LOG_FILENAME))
+        os.remove(build_helper_object.LOG_FILENAME)
 
     return True
 
@@ -245,6 +255,7 @@ class DependencyBuilder(object):
       True if the build is successful or False on error.
     """
     build_helper_object = None
+    distributions = [None]
     if self._build_target == u'dpkg':
       build_helper_object = build_helper.PythonModuleDpkgBuildHelper(
           dependency_definition)
@@ -252,6 +263,7 @@ class DependencyBuilder(object):
     elif self._build_target == u'dpkg-source':
       build_helper_object = build_helper.PythonModuleSourceDpkgBuildHelper(
           dependency_definition)
+      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
 
     elif self._build_target == u'msi':
       # TODO: setup sqlite in build directory.
@@ -269,23 +281,28 @@ class DependencyBuilder(object):
     if not build_helper_object:
       return False
 
-    output_filename = build_helper_object.GetOutputFilename(
-        source_helper_object)
+    for distribution in distributions:
+      if distribution:
+        build_helper_object.distribution = distribution
 
-    build_helper_object.Clean(source_helper_object)
+      output_filename = build_helper_object.GetOutputFilename(
+          source_helper_object)
 
-    if not os.path.exists(output_filename):
-      if not build_helper_object.Build(source_helper_object):
-        logging.warning((
-            u'Build of: {0:s} failed, for more information check '
-            u'{1:s}').format(
-                source_helper_object.project_name,
-                build_helper_object.LOG_FILENAME))
-        return False
+      build_helper_object.Clean(source_helper_object)
 
-    if os.path.exists(build_helper_object.LOG_FILENAME):
-      logging.info(u'Removing: {0:s}'.format(build_helper_object.LOG_FILENAME))
-      os.remove(build_helper_object.LOG_FILENAME)
+      if not os.path.exists(output_filename):
+        if not build_helper_object.Build(source_helper_object):
+          logging.warning((
+              u'Build of: {0:s} failed, for more information check '
+              u'{1:s}').format(
+                  source_helper_object.project_name,
+                  build_helper_object.LOG_FILENAME))
+          return False
+
+      if os.path.exists(build_helper_object.LOG_FILENAME):
+        logging.info(u'Removing: {0:s}'.format(
+            build_helper_object.LOG_FILENAME))
+        os.remove(build_helper_object.LOG_FILENAME)
 
     return True
 

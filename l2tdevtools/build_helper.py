@@ -33,26 +33,28 @@ class DpkgBuildHelper(BuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
   # TODO: determine BUILD_DEPENDENCIES from the build files?
-  # TODO: what about flex, byacc?
   _BUILD_DEPENDENCIES = frozenset([
-      'git',
-      'build-essential',
-      'autotools-dev',
-      'autoconf',
-      'automake',
-      'autopoint',
-      'libtool',
-      'gettext',
-      'debhelper',
-      'fakeroot',
-      'quilt',
-      'zlib1g-dev',
-      'libbz2-dev',
-      'libssl-dev',
-      'libfuse-dev',
-      'python-dev',
-      'python-setuptools',
-      'libsqlite3-dev',
+      u'git',
+      u'build-essential',
+      u'autotools-dev',
+      u'autoconf',
+      u'automake',
+      u'autopoint',
+      u'libtool',
+      u'gettext',
+      u'flex',
+      u'byacc',
+      u'debhelper',
+      u'devscripts',
+      u'fakeroot',
+      u'quilt',
+      u'zlib1g-dev',
+      u'libbz2-dev',
+      u'libssl-dev',
+      u'libfuse-dev',
+      u'python-dev',
+      u'python-setuptools',
+      u'libsqlite3-dev',
   ])
 
   def _BuildPrepare(
