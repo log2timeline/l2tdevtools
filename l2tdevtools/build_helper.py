@@ -46,6 +46,7 @@ class DpkgBuildHelper(BuildHelper):
       u'byacc',
       u'debhelper',
       u'devscripts',
+      u'dpkg-dev',
       u'fakeroot',
       u'quilt',
       u'zlib1g-dev',
@@ -720,6 +721,9 @@ class PythonModuleDpkgBuildFilesGenerator(object):
 class PythonModuleDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building python module dpkg packages (.deb)."""
 
+  # Names of projects that do not require the "python-" output filename prefix.
+  _NO_PREFIX_PROJECTS = frozenset([u'binplist'])
+
   def __init__(self, dependency_definition):
     """Initializes the build helper.
 
@@ -868,6 +872,10 @@ class PythonModuleDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper.project_name
+
+    if project_name in self._NO_PREFIX_PROJECTS:
+      return u'{0:s}_{1!s}-1_{2:s}.deb'.format(
+          project_name, source_helper.project_version, self.architecture)
 
     return u'python-{0:s}_{1!s}-1_{2:s}.deb'.format(
         project_name, source_helper.project_version, self.architecture)
