@@ -244,7 +244,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
     # project_version.orig.tar.gz
     filenames = glob.glob(
         u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
-            source_helper.project_name, self.architecture))
+            source_helper.project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -382,7 +382,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
     # project_version.orig.tar.gz
     filenames = glob.glob(
         u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
-            source_helper.project_name, self.architecture))
+            source_helper.project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -829,8 +829,7 @@ class PythonModuleDpkgBuildHelper(DpkgBuildHelper):
 
     # Remove files of previous versions in the format:
     # python-project_version.orig.tar.gz
-    filenames = glob.glob(u'python-{0:s}_*.orig.tar.gz'.format(
-        project_name, self.architecture))
+    filenames = glob.glob(u'python-{0:s}_*.orig.tar.gz'.format(project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -990,8 +989,7 @@ class PythonModuleSourceDpkgBuildHelper(DpkgBuildHelper):
 
     # Remove files of previous versions in the format:
     # python-project_version.orig.tar.gz
-    filenames = glob.glob(u'python-{0:s}_*.orig.tar.gz'.format(
-        project_name, self.architecture))
+    filenames = glob.glob(u'python-{0:s}_*.orig.tar.gz'.format(project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
