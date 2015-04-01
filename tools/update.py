@@ -10,101 +10,21 @@ import platform
 import re
 import subprocess
 import sys
-import urllib2
+
+from l2tdevtools import download_helper
 
 
-if platform.system() == 'Windows':
+if platform.system() == u'Windows':
   import wmi
 
 
-class DownloadHelper(object):
-  """Class that helps in downloading a project."""
+# TODO: merge this class with download_helper.GoogleDriveDownloadHelper.
+class GoogleDriveDownloadHelper(download_helper.DownloadHelper):
+  """Class that helps in downloading from Google Drive."""
 
-  def __init__(self):
-    """Initializes the build helper."""
-    super(DownloadHelper, self).__init__()
-    self._cached_url = u''
-    self._cached_page_content = ''
-
-  def DownloadPageContent(self, download_url):
-    """Downloads the page content from the URL and caches it.
-
-    Args:
-      download_url: the URL where to download the page content.
-
-    Returns:
-      The page content if successful, None otherwise.
-    """
-    if not download_url:
-      return
-
-    if self._cached_url != download_url:
-      url_object = urllib2.urlopen(download_url)
-
-      if url_object.code != 200:
-        return
-
-      self._cached_page_content = url_object.read()
-      self._cached_url = download_url
-
-    return self._cached_page_content
-
-  def DownloadFile(self, download_url):
-    """Downloads a file from the URL and returns the filename.
-
-       The filename is extracted from the last part of the URL.
-
-    Args:
-      download_url: the URL where to download the file.
-
-    Returns:
-      The filename if successful also if the file was already downloaded
-      or None on error.
-    """
-    _, _, filename = download_url.rpartition(u'/')
-
-    if not os.path.exists(filename):
-      logging.info(u'Downloading: {0:s}'.format(download_url))
-
-      url_object = urllib2.urlopen(download_url)
-      if url_object.code != 200:
-        return
-
-      file_object = open(filename, 'wb')
-      file_object.write(url_object.read())
-      file_object.close()
-
-    return filename
-
-
-class GoogleCodeDownloadHelper(DownloadHelper):
-  """Class that helps in downloading a Google Code project."""
-
-  def GetGoogleCodeDownloadsUrl(self, project_name):
-    """Retrieves the Download URL from the Google Code project page.
-
-    Args:
-      project_name: the name of the project.
-
-    Returns:
-      The downloads URL or None on error.
-    """
-    download_url = u'https://code.google.com/p/{0:s}/'.format(project_name)
-
-    page_content = self.DownloadPageContent(download_url)
-    if not page_content:
-      return
-
-    # The format of the project downloads URL is:
-    # https://googledrive.com/host/{random string}/
-    expression_string = (
-        u'<a href="(https://googledrive.com/host/[^/]*/)"[^>]*>Downloads</a>')
-    matches = re.findall(expression_string, page_content)
-
-    if not matches or len(matches) != 1:
-      return
-
-    return matches[0]
+  # pylint: disable=abstract-method
+  # Prevent pylint from remarking that GetDownloadUrl and GetProjectIdentifier
+  # are not overwritten.
 
   def GetPackageDownloadUrls(self, google_drive_url):
     """Retrieves the package downloads URL for a given URL.
@@ -130,8 +50,8 @@ class GoogleCodeDownloadHelper(DownloadHelper):
 
     return matches
 
-  def Download(self, download_url):
-    """Downloads the project for a given project name and version.
+  def DownloadPackage(self, download_url):
+    """Downloads the package for a given URL.
 
     Args:
       download_url: the download URL.
@@ -179,7 +99,20 @@ def Main():
       u'Installs the latest versions of plaso dependencies.'))
 
   args_parser.add_argument(
-      '-f', '--force', dest='force_install', action='store_true',
+      u'--download-directory', u'--download_directory', action=u'store',
+      metavar=u'DIRECTORY', dest=u'download_directory', type=unicode,
+      default=u'build', help=u'The location of the the download directory.')
+
+  args_parser.add_argument(
+      '--machine-type', '--machine_type', action=u'store', metavar=u'TYPE',
+      dest=u'machine_type', type=unicode, default=None, help=(
+          u'Manually sets the machine type instead of using the value returned '
+          u'by platform.machine(). Usage of this argument is not recommended '
+          u'unless want to force the installation of one machine type e.g. '
+          u'\'x86\' onto another \'amd64\'.'))
+
+  args_parser.add_argument(
+      '-f', '--force', action='store_true', dest='force_install',
       default=False, help=(
           u'Force installation. This option removes existing versions '
           u'of installed dependencies. The default behavior is to only'
@@ -188,7 +121,11 @@ def Main():
   options = args_parser.parse_args()
 
   operating_system = platform.system()
-  cpu_architecture = platform.machine().lower()
+
+  if options.machine_type:
+    cpu_architecture = options.machine_type
+  else:
+    cpu_architecture = platform.machine().lower()
   linux_name = None
   sub_directory = None
   noarch_sub_directory = None
@@ -245,24 +182,25 @@ def Main():
         operating_system))
     return False
 
-  download_helper = GoogleCodeDownloadHelper()
-  google_drive_url = download_helper.GetGoogleCodeDownloadsUrl(u'plaso')
+  google_drive_url = (
+      u'https://googledrive.com/host/0B30H7z4S52FleW5vUHBnblJfcjg')
 
-  package_urls = download_helper.GetPackageDownloadUrls(
+  download_helper_object = GoogleDriveDownloadHelper()
+  package_urls = download_helper_object.GetPackageDownloadUrls(
       u'{0:s}/3rd%20party/{1:s}'.format(google_drive_url, sub_directory))
 
   if noarch_sub_directory:
-    noarch_package_urls = download_helper.GetPackageDownloadUrls(
+    noarch_package_urls = download_helper_object.GetPackageDownloadUrls(
         u'{0:s}/3rd%20party/{1:s}'.format(
             google_drive_url, noarch_sub_directory))
 
     package_urls.extend(noarch_package_urls)
 
-  dependencies_directory = u'dependencies'
-  if not os.path.exists(dependencies_directory):
-    os.mkdir(dependencies_directory)
+  download_directory = u'build'
+  if not os.path.exists(download_directory):
+    os.mkdir(download_directory)
 
-  os.chdir(dependencies_directory)
+  os.chdir(download_directory)
 
   package_filenames = {}
   package_versions = {}
@@ -333,7 +271,7 @@ def Main():
         os.remove(filename)
 
       print u'Downloading: {0:s}'.format(package_filename)
-      _ = download_helper.Download(package_url)
+      _ = download_helper_object.DownloadPackage(package_url)
 
   os.chdir(u'..')
 
@@ -527,7 +465,7 @@ def Main():
       package_filename = package_filenames[name]
 
       command = u'sudo /usr/bin/hdiutil attach {0:s}'.format(
-          os.path.join(dependencies_directory, package_filename))
+          os.path.join(download_directory, package_filename))
       print 'Running: "{0:s}"'.format(command)
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
@@ -581,7 +519,7 @@ def Main():
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         result = False
 
-      command = u'sudo rpm -Fvh {0:s}/*'.format(dependencies_directory)
+      command = u'sudo rpm -Fvh {0:s}/*'.format(download_directory)
       print 'Running: "{0:s}"'.format(command)
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
@@ -613,7 +551,7 @@ def Main():
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         result = False
 
-      command = u'sudo dpkg -i {0:s}/*.deb'.format(dependencies_directory)
+      command = u'sudo dpkg -i {0:s}/*.deb'.format(download_directory)
       print 'Running: "{0:s}"'.format(command)
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
@@ -625,7 +563,7 @@ def Main():
       # TODO: add RunAs ?
       package_filename = package_filenames[name]
       command = u'msiexec.exe /i {0:s} /q'.format(os.path.join(
-          dependencies_directory, package_filename))
+          download_directory, package_filename))
       print 'Installing: {0:s} {1:s}'.format(name, u'.'.join(version))
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:

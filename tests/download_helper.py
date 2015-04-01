@@ -160,18 +160,17 @@ class LibyalGoogleDriveDownloadHelperTest(unittest.TestCase):
     self.assertEquals(project_identifier, expected_project_identifier)
 
 
-class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
-  """Tests for the libyal github releases download helper."""
+class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
+  """Tests for the docopt github releases download helper."""
 
-  _PROJECT_ORGANIZATION = u'libyal'
-  _PROJECT_NAME = u'libevt'
-  _PROJECT_STATUS = u'alpha'
-  _PROJECT_VERSION = 20150105
+  _PROJECT_ORGANIZATION = u'docopt'
+  _PROJECT_NAME = u'docopt'
+  _PROJECT_VERSION = u'0.6.2'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper_object = (
-        download_helper.LibyalGithubReleasesDownloadHelper())
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'docopt')
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
@@ -179,24 +178,23 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
-    download_helper_object = (
-        download_helper.LibyalGithubReleasesDownloadHelper())
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'docopt')
 
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        u'https://github.com/{0:s}/{1:s}/releases/download/{3:d}/'
-        u'{1:s}-{2:s}-{3:d}.tar.gz').format(
+        u'https://github.com/{0:s}/{1:s}/archive/{2:s}.tar.gz').format(
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
-            self._PROJECT_STATUS, self._PROJECT_VERSION)
+            self._PROJECT_VERSION)
 
     self.assertEquals(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper_object = (
-        download_helper.LibyalGithubReleasesDownloadHelper())
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'docopt')
 
     project_identifier = download_helper_object.GetProjectIdentifier(
         self._PROJECT_NAME)
@@ -207,16 +205,18 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
     self.assertEquals(project_identifier, expected_project_identifier)
 
 
-class Log2TimelineGitHubDownloadHelperTest(unittest.TestCase):
-  """Tests for the log2timeline github download helper."""
+class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
+  """Tests for the libyal github releases download helper."""
 
-  _PROJECT_ORGANIZATION = u'log2timeline'
-  _PROJECT_NAME = u'dfvfs'
-  _PROJECT_VERSION = 20150303
+  _PROJECT_ORGANIZATION = u'libyal'
+  _PROJECT_NAME = u'libevt'
+  _PROJECT_STATUS = u'alpha'
+  _PROJECT_VERSION = u'20150105'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.Log2TimelineGitHubDownloadHelper()
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'libyal')
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
@@ -224,14 +224,61 @@ class Log2TimelineGitHubDownloadHelperTest(unittest.TestCase):
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
-    download_helper_object = download_helper.Log2TimelineGitHubDownloadHelper()
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'libyal')
 
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        u'https://github.com/{0:s}/{1:s}/releases/download/{2:d}/'
-        u'{1:s}-{2:d}.tar.gz').format(
+        u'https://github.com/{0:s}/{1:s}/releases/download/{3:s}/'
+        u'{1:s}-{2:s}-{3:s}.tar.gz').format(
+            self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
+            self._PROJECT_STATUS, self._PROJECT_VERSION)
+
+    self.assertEquals(download_url, expected_download_url)
+
+  def testGetProjectIdentifier(self):
+    """Tests the GetProjectIdentifier functions."""
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'libyal')
+
+    project_identifier = download_helper_object.GetProjectIdentifier(
+        self._PROJECT_NAME)
+
+    expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
+        self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
+
+    self.assertEquals(project_identifier, expected_project_identifier)
+
+
+class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
+  """Tests for the log2timeline github releases download helper."""
+
+  _PROJECT_ORGANIZATION = u'log2timeline'
+  _PROJECT_NAME = u'dfvfs'
+  _PROJECT_VERSION = u'20150303'
+
+  def testGetLatestVersion(self):
+    """Tests the GetLatestVersion functions."""
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'log2timeline')
+
+    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
+
+    self.assertEquals(latest_version, self._PROJECT_VERSION)
+
+  def testGetDownloadUrl(self):
+    """Tests the GetDownloadUrl functions."""
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'log2timeline')
+
+    download_url = download_helper_object.GetDownloadUrl(
+        self._PROJECT_NAME, self._PROJECT_VERSION)
+
+    expected_download_url = (
+        u'https://github.com/{0:s}/{1:s}/releases/download/{2:s}/'
+        u'{1:s}-{2:s}.tar.gz').format(
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_VERSION)
 
@@ -239,7 +286,8 @@ class Log2TimelineGitHubDownloadHelperTest(unittest.TestCase):
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.Log2TimelineGitHubDownloadHelper()
+    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+        u'log2timeline')
 
     project_identifier = download_helper_object.GetProjectIdentifier(
         self._PROJECT_NAME)

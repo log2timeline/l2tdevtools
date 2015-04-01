@@ -36,6 +36,7 @@ class DependencyDefinition(object):
     Args:
       name: the name of the dependency.
     """
+    self.architecture_dependent = False
     self.description_long = None
     self.description_short = None
     self.disabled = False
@@ -45,6 +46,7 @@ class DependencyDefinition(object):
     self.homepage_url = None
     self.maintainer = None
     self.name = name
+    self.setup_name = None
 
 
 class DependencyDefinitionReader(object):
@@ -71,7 +73,7 @@ class DependencyDefinitionReader(object):
 
     Args:
       file_object: the file-like object to read from.
- 
+
     Yields:
       Dependency definitions (instances of DependencyDefinition).
     """
@@ -82,6 +84,9 @@ class DependencyDefinitionReader(object):
 
     for section_name in config_parser.sections():
       dependency_definition = DependencyDefinition(section_name)
+
+      dependency_definition.architecture_dependent = self._GetConfigValue(
+          config_parser, section_name, u'architecture_dependent')
       dependency_definition.description_long = self._GetConfigValue(
           config_parser, section_name, u'description_long')
       dependency_definition.description_short = self._GetConfigValue(
@@ -98,6 +103,8 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'homepage_url')
       dependency_definition.maintainer = self._GetConfigValue(
           config_parser, section_name, u'maintainer')
+      dependency_definition.setup_name = self._GetConfigValue(
+          config_parser, section_name, u'setup_name')
 
       # Need at minimum a name and a download URL.
       if dependency_definition.name and dependency_definition.download_url:
@@ -115,10 +122,12 @@ class DependencyBuilder(object):
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
 
   _PATCHES_URL = (
-    u'https://googledrive.com/host/0B30H7z4S52FleW5vUHBnblJfcjg/'
-    u'3rd%20party/patches')
+      u'https://googledrive.com/host/0B30H7z4S52FleW5vUHBnblJfcjg/'
+      u'3rd%20party/patches')
 
-  _PYTHON_MODULES = frozenset([u'binplist', u'dfvfs', u'dpkt', u'pyparsing'])
+  _PYTHON_MODULES = frozenset([
+      u'binplist', u'dateutil', u'docopt', u'dfvfs', u'dpkt', u'pefile',
+      u'pyparsing'])
 
   def __init__(self, build_target):
     """Initializes the dependency builder.
@@ -162,13 +171,13 @@ class DependencyBuilder(object):
           return False
 
     elif (dependency_definition.name in self._LIBYAL_LIBRARIES or
-        download_url.startswith(u'http://github.com/libyal/')):
+          download_url.startswith(u'http://github.com/libyal/')):
       if not self._BuildLibyalLibrary(
           source_helper_object, dependency_definition):
         return False
 
     elif (dependency_definition.name in self._PYTHON_MODULES or
-        download_url.startswith(u'http://pypi.python.org/pypi/')):
+          download_url.startswith(u'http://pypi.python.org/pypi/')):
       if not self._BuildPythonModule(
           source_helper_object, dependency_definition):
         return False
@@ -335,7 +344,7 @@ class DependencyBuilder(object):
       download_helper_object = download_helper.PyPiDownloadHelper()
 
     elif (download_url.startswith(u'http://sourceforge.net/projects/') and
-        download_url.endswith(u'/files')):
+          download_url.endswith(u'/files')):
       download_helper_object = download_helper.SourceForgeDownloadHelper()
 
     # TODO: make this a more generic github download helper when
@@ -344,12 +353,14 @@ class DependencyBuilder(object):
           download_url.startswith(u'http://googledrive.com/host/')):
       download_helper_object = download_helper.LibyalGitHubDownloadHelper()
 
-    elif download_url.startswith(u'http://github.com/log2timeline/'):
+    elif (download_url.startswith(u'http://github.com/') and
+          download_url.endswith(u'/releases')):
+      organization, _, _ = download_url[18:-9].rpartition(u'/')
       download_helper_object = (
-          download_helper.Log2TimelineGitHubDownloadHelper())
+          download_helper.GithubReleasesDownloadHelper(organization))
 
     else:
-      raise ValueError(u'Unsupported downloads URL.')
+      raise ValueError(u'Unsupported download URL: {0:s}.'.format(download_url))
 
     return self._BuildDependency(download_helper_object, dependency_definition)
 
@@ -463,6 +474,7 @@ def Main():
 
   result = True
   for dependency_definition in builds:
+    logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
     if not dependency_builder.Build(dependency_definition):
       print u'Failed building: {0:s}'.format(dependency_definition.name)
       result = False

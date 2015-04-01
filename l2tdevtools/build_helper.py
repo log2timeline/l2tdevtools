@@ -61,7 +61,7 @@ class DpkgBuildHelper(BuildHelper):
   def _BuildPrepare(
       self, source_directory, project_name, project_version, version_suffix,
       distribution, architecture):
-    """Make the necassary preperations before building the dpkg packages.
+    """Make the necessary preparations before building the dpkg packages.
 
     Args:
       source_directory: the name of the source directory.
@@ -90,7 +90,7 @@ class DpkgBuildHelper(BuildHelper):
   def _BuildFinalize(
       self, source_directory, project_name, project_version, version_suffix,
       distribution, architecture):
-    """Make the necassary finalizations after building the dpkg packages.
+    """Make the necessary finalizations after building the dpkg packages.
 
     Args:
       source_directory: the name of the source directory.
@@ -149,6 +149,8 @@ class DpkgBuildHelper(BuildHelper):
 
 class LibyalDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building libyal dpkg packages (.deb)."""
+
+  _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
   def __init__(self, dependency_definition):
     """Initializes the build helper.
@@ -242,9 +244,8 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames = glob.glob(
-        u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
-            source_helper.project_name))
+    filenames = glob.glob(u'{0:s}_{1:s}.orig.tar.gz'.format(
+        source_helper.project_name, self._VERSION_GLOB))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -256,9 +257,8 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
 
     # Remove files of previous versions in the format:
     # project[-_]version-1_architecture.*
-    filenames = glob.glob(
-        u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1_'
-        u'{1:s}.*'.format(source_helper.project_name, self.architecture))
+    filenames = glob.glob(u'{0:s}[-_]*{1:s}-1_{2:s}.*'.format(
+        source_helper.project_name, self._VERSION_GLOB, self.architecture))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -267,9 +267,8 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1.*
-    filenames = glob.glob(
-        u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-1.*'.format(
-            source_helper.project_name))
+    filenames = glob.glob(u'{0:s}[-_]*{1:s}-1.*'.format(
+        source_helper.project_name, self._VERSION_GLOB))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -292,6 +291,8 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
 
 class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building libyal source dpkg packages (.deb)."""
+
+  _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
   def __init__(self, dependency_definition):
     """Initializes the build helper.
@@ -380,9 +381,8 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames = glob.glob(
-        u'{0:s}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].orig.tar.gz'.format(
-            source_helper.project_name))
+    filenames = glob.glob(u'{0:s}_{1:s}.orig.tar.gz'.format(
+        source_helper.project_name, self._VERSION_GLOB))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -394,11 +394,9 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
 
     # Remove files of previous versions in the format:
     # project[-_]version-1suffix~distribution_architecture.*
-    filenames = glob.glob((
-        u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
-        u'-1{1:s}~{2:s}_{3:s}.*').format(
-            source_helper.project_name, self.version_suffix, self.distribution,
-            self.architecture))
+    filenames = glob.glob((u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}_{4:s}.*').format(
+        source_helper.project_name, self._VERSION_GLOB, self.version_suffix,
+        self.distribution, self.architecture))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -407,10 +405,9 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution.*
-    filenames = glob.glob((
-        u'{0:s}[-_]*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
-        u'-1{1:s}~{2:s}.*').format(
-            source_helper.project_name, self.version_suffix, self.distribution))
+    filenames = glob.glob((u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}.*').format(
+        source_helper.project_name, self._VERSION_GLOB, self.version_suffix,
+        self.distribution))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -461,7 +458,7 @@ class PythonModuleDpkgBuildFilesGenerator(object):
       u'Homepage: {upstream_homepage:s}',
       u'',
       u'Package: python-{project_name:s}',
-      u'Architecture: all',
+      u'Architecture: {architecture:s}',
       u'Depends: {depends:s}',
       u'Description: {description_short:s}',
       u' {description_long:s}',
@@ -611,6 +608,11 @@ class PythonModuleDpkgBuildFilesGenerator(object):
     else:
       project_name = self._project_name
 
+    if not self._dependency_definition.architecture_dependent:
+      architecture = u'all'
+    else:
+      architecture = u'any'
+
     depends = []
     if self._dependency_definition.dpkg_dependencies:
       depends.append(self._dependency_definition.dpkg_dependencies)
@@ -631,6 +633,7 @@ class PythonModuleDpkgBuildFilesGenerator(object):
         'project_name': project_name,
         'upstream_maintainer': self._dependency_definition.maintainer,
         'upstream_homepage': self._dependency_definition.homepage_url,
+        'architecture': architecture,
         'depends': depends,
         'description_short': description_short,
         'description_long': description_long}
@@ -1322,13 +1325,14 @@ class LibyalMsiBuildHelper(MsiBuildHelper):
     Args:
       source_helper: the source helper (instance of SourceHelper).
     """
-    # Remove previous versions of msis.
-    filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}.1.{2:s}-py2.7.msi'.format(
-        source_helper.project_name, source_helper.project_version,
-        self.architecture))
+    # Remove previous versions of MSIs.
+    filenames_to_ignore = re.compile(
+        u'py{0:s}-.*{1!s}.1.{2:s}-py2.7.msi'.format(
+            source_helper.project_name[3:], source_helper.project_version,
+            self.architecture))
 
-    msi_filenames_glob = u'{0:s}-*.1.{1:s}-py2.7.msi'.format(
-        source_helper.project_name, self.architecture)
+    msi_filenames_glob = u'py{0:s}-*.1.{1:s}-py2.7.msi'.format(
+        source_helper.project_name[3:], self.architecture)
 
     filenames = glob.glob(msi_filenames_glob)
     for filename in filenames:
@@ -1343,7 +1347,7 @@ class LibyalMsiBuildHelper(MsiBuildHelper):
       source_helper: the source helper (instance of SourceHelper).
 
     Returns:
-      A filename of one of the resulting msis.
+      A filename of one of the resulting MSIs.
     """
     return u'{0:s}-{1!s}.1.{2:s}-py2.7.msi'.format(
         source_helper.project_name, source_helper.project_version,
@@ -1352,6 +1356,27 @@ class LibyalMsiBuildHelper(MsiBuildHelper):
 
 class PythonModuleMsiBuildHelper(MsiBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
+
+  def _GetFilenameSafeProjectInformation(self, source_helper):
+    """Determines the filename safe project name and version.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+
+    Returns:
+      A tuple containing the filename safe project name and version.
+    """
+    if self._dependency_definition.setup_name:
+      project_name = self._dependency_definition.setup_name
+    else:
+      project_name = source_helper.project_name
+
+    if source_helper.project_name == u'dfvfs':
+      project_version = u'{0!s}.1'.format(source_helper.project_version)
+    else:
+      project_version = u'{0!s}'.format(source_helper.project_version)
+
+    return project_name, project_version
 
   def Build(self, source_helper):
     """Builds the msi.
@@ -1380,9 +1405,11 @@ class PythonModuleMsiBuildHelper(MsiBuildHelper):
       return False
 
     # Move the msi to the build directory.
+    project_name, _ = self._GetFilenameSafeProjectInformation(
+        source_helper)
+
     msi_filename = glob.glob(os.path.join(
-        source_directory, u'dist', u'{0:s}-*.msi'.format(
-            source_helper.project_name)))
+        source_directory, u'dist', u'{0:s}-*.msi'.format(project_name)))
 
     logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
     shutil.move(msi_filename[0], '.')
@@ -1401,13 +1428,15 @@ class PythonModuleMsiBuildHelper(MsiBuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         shutil.rmtree(filename, True)
 
-    # Remove previous versions of msis.
+    # Remove previous versions of MSIs.
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper)
+
     filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}.{2:s}.msi'.format(
-        source_helper.project_name, source_helper.project_version,
-        self.architecture))
+        project_name, project_version, self.architecture))
 
     msi_filenames_glob = u'{0:s}-*.{1:s}.msi'.format(
-        source_helper.project_name, self.architecture)
+        project_name, self.architecture)
 
     filenames = glob.glob(msi_filenames_glob)
     for filename in filenames:
@@ -1422,12 +1451,13 @@ class PythonModuleMsiBuildHelper(MsiBuildHelper):
       source_helper: the source helper (instance of SourceHelper).
 
     Returns:
-      A filename of one of the resulting msis.
+      A filename of one of the resulting MSIs.
     """
-    # TODO: this does not work for dfvfs at the moment. Fix this.
-    return u'{0:s}-{1!s}.{2:s}.msi'.format(
-        source_helper.project_name, source_helper.project_version,
-        self.architecture)
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper)
+
+    return u'{0:s}-{1:s}.{2:s}.msi'.format(
+        project_name, project_version, self.architecture)
 
 
 class PkgBuildHelper(BuildHelper):
@@ -1824,6 +1854,26 @@ class RpmBuildHelper(BuildHelper):
     """
     shutil.copy(source_filename, self._rpmbuild_sources_path)
 
+  def _GetFilenameSafeProjectInformation(self, source_helper):
+    """Determines the filename safe project name and version.
+
+    Args:
+      source_helper: the source helper (instance of SourceHelper).
+
+    Returns:
+      A tuple containing the filename safe project name and version.
+    """
+    if self._dependency_definition.setup_name:
+      project_name = self._dependency_definition.setup_name
+    else:
+      project_name = source_helper.project_name
+
+    project_version = source_helper.project_version
+    if isinstance(project_version, basestring):
+      project_version = project_version.replace(u'-', u'_')
+
+    return project_name, project_version
+
   def _MoveRpms(self, project_name, project_version):
     """Moves the rpms from the rpmbuild directory into to current directory.
 
@@ -1836,7 +1886,7 @@ class RpmBuildHelper(BuildHelper):
             project_name, project_version, self.architecture)))
     for filename in filenames:
       logging.info(u'Moving: {0:s}'.format(filename))
-      shutil.move(filename, '.')
+      shutil.move(filename, u'.')
 
   @classmethod
   def CheckBuildDependencies(cls):
@@ -1873,13 +1923,15 @@ class RpmBuildHelper(BuildHelper):
     Args:
       source_helper: the source helper (instance of SourceHelper).
     """
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper)
+
     # Remove previous versions build directories.
     filenames_to_ignore = re.compile(u'{0:s}-{1!s}'.format(
-        source_helper.project_name, source_helper.project_version))
+        project_name, project_version))
 
     filenames = glob.glob(os.path.join(
-        self.rpmbuild_path, u'BUILD', u'{0:s}-*'.format(
-            source_helper.project_name)))
+        self.rpmbuild_path, u'BUILD', u'{0:s}-*'.format(project_name)))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
@@ -1888,11 +1940,10 @@ class RpmBuildHelper(BuildHelper):
     # Remove previous versions of rpms.
     filenames_to_ignore = re.compile(
         u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
-            source_helper.project_name, source_helper.project_version,
-            self.architecture))
+            project_name, project_version, self.architecture))
 
     rpm_filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
-        source_helper.project_name, self.architecture)
+        project_name, self.architecture)
 
     filenames = glob.glob(rpm_filenames_glob)
     for filename in filenames:
@@ -1909,11 +1960,11 @@ class RpmBuildHelper(BuildHelper):
 
     # Remove previous versions of source rpms.
     filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}-1.src.rpm'.format(
-        source_helper.project_name, source_helper.project_version))
+        project_name, project_version))
 
     filenames = glob.glob(os.path.join(
         self.rpmbuild_path, u'SRPMS',
-        u'{0:s}-*-1.src.rpm'.format(source_helper.project_name)))
+        u'{0:s}-*-1.src.rpm'.format(project_name)))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
@@ -1928,9 +1979,11 @@ class RpmBuildHelper(BuildHelper):
     Returns:
       A filename of one of the resulting rpms.
     """
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper)
+
     return u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
-        source_helper.project_name, source_helper.project_version,
-        self.architecture)
+        project_name, project_version, self.architecture)
 
 
 class LibyalRpmBuildHelper(RpmBuildHelper):
@@ -1948,28 +2001,31 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
     source_filename = source_helper.Download()
     logging.info(u'Building rpm of: {0:s}'.format(source_filename))
 
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper)
+
     # rpmbuild wants the project filename without the status indication.
     rpm_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper.project_name, source_helper.project_version)
+        project_name, project_version)
     os.rename(source_filename, rpm_source_filename)
 
     build_successful = self._BuildFromSourcePackage(rpm_source_filename)
 
     if build_successful:
       # Move the rpms to the build directory.
-      self._MoveRpms(source_helper.project_name, source_helper.project_version)
+      self._MoveRpms(project_name, project_version)
 
       # Remove BUILD directory.
       filename = os.path.join(
           self.rpmbuild_path, u'BUILD', u'{0:s}-{1!s}'.format(
-              source_helper.project_name, source_helper.project_version))
+              project_name, project_version))
       logging.info(u'Removing: {0:s}'.format(filename))
       shutil.rmtree(filename)
 
       # Remove SRPMS file.
       filename = os.path.join(
           self.rpmbuild_path, u'SRPMS', u'{0:s}-{1!s}-1.src.rpm'.format(
-              source_helper.project_name, source_helper.project_version))
+              project_name, project_version))
       logging.info(u'Removing: {0:s}'.format(filename))
       os.remove(filename)
 
@@ -1990,7 +2046,8 @@ class PythonModuleRpmBuildHelper(RpmBuildHelper):
                              DependencyDefinition).
     """
     super(PythonModuleRpmBuildHelper, self).__init__(dependency_definition)
-    self.architecture = 'noarch'
+    if not dependency_definition.architecture_dependent:
+      self.architecture = 'noarch'
 
   def Build(self, source_helper):
     """Builds the rpms.
@@ -2019,10 +2076,12 @@ class PythonModuleRpmBuildHelper(RpmBuildHelper):
       return False
 
     # Move the rpms to the build directory.
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper)
+
     filenames = glob.glob(os.path.join(
         source_directory, u'dist', u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
-            source_helper.project_name, source_helper.project_version,
-            self.architecture)))
+            project_name, project_version, self.architecture)))
     for filename in filenames:
       logging.info(u'Moving: {0:s}'.format(filename))
       shutil.move(filename, '.')
@@ -2042,12 +2101,14 @@ class PythonModuleRpmBuildHelper(RpmBuildHelper):
         shutil.rmtree(filename, True)
 
     # Remove previous versions of rpms.
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper)
+
     filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
-        source_helper.project_name, source_helper.project_version,
-        self.architecture))
+        project_name, project_version, self.architecture))
 
     rpm_filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
-        source_helper.project_name, self.architecture)
+        project_name, self.architecture)
 
     filenames = glob.glob(rpm_filenames_glob)
     for filename in filenames:
