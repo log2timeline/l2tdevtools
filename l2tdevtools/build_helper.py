@@ -147,8 +147,8 @@ class DpkgBuildHelper(BuildHelper):
     return exit_code == 0
 
 
-class LibyalDpkgBuildHelper(DpkgBuildHelper):
-  """Class that helps in building libyal dpkg packages (.deb)."""
+class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
+  """Class that helps in building dpkg packages (.deb)."""
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
@@ -159,7 +159,7 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
     """
-    super(LibyalDpkgBuildHelper, self).__init__(dependency_definition)
+    super(ConfigureMakeDpkgBuildHelper, self).__init__(dependency_definition)
     self.architecture = platform.machine()
     self.distribution = u''
     self.version_suffix = u''
@@ -289,8 +289,8 @@ class LibyalDpkgBuildHelper(DpkgBuildHelper):
         self.architecture)
 
 
-class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
-  """Class that helps in building libyal source dpkg packages (.deb)."""
+class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
+  """Class that helps in building source dpkg packages (.deb)."""
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
@@ -301,7 +301,8 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
     """
-    super(LibyalSourceDpkgBuildHelper, self).__init__(dependency_definition)
+    super(ConfigureMakeSourceDpkgBuildHelper, self).__init__(
+        dependency_definition)
     self.architecture = u'source'
     self.distribution = u'trusty'
     self.version_suffix = u'ppa1'
@@ -428,7 +429,7 @@ class LibyalSourceDpkgBuildHelper(DpkgBuildHelper):
         self.version_suffix, self.distribution, self.architecture)
 
 
-class PythonModuleDpkgBuildFilesGenerator(object):
+class SetupPyDpkgBuildFilesGenerator(object):
   """Class that helps in generating dpkg build files for Python modules."""
 
   _EMAIL_ADDRESS = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
@@ -544,7 +545,7 @@ class PythonModuleDpkgBuildFilesGenerator(object):
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
     """
-    super(PythonModuleDpkgBuildFilesGenerator, self).__init__()
+    super(SetupPyDpkgBuildFilesGenerator, self).__init__()
     self._project_name = project_name
     self._project_version = project_version
     self._dependency_definition = dependency_definition
@@ -721,8 +722,8 @@ class PythonModuleDpkgBuildFilesGenerator(object):
     self._GenerateSourceFormatFile(dpkg_path)
 
 
-class PythonModuleDpkgBuildHelper(DpkgBuildHelper):
-  """Class that helps in building python module dpkg packages (.deb)."""
+class SetupPyDpkgBuildHelper(DpkgBuildHelper):
+  """Class that helps in building dpkg packages (.deb)."""
 
   # Names of projects that do not require the "python-" output filename prefix.
   _NO_PREFIX_PROJECTS = frozenset([u'binplist'])
@@ -734,7 +735,7 @@ class PythonModuleDpkgBuildHelper(DpkgBuildHelper):
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
     """
-    super(PythonModuleDpkgBuildHelper, self).__init__(dependency_definition)
+    super(SetupPyDpkgBuildHelper, self).__init__(dependency_definition)
     self.architecture = u'all'
     self.distribution = u''
     self.version_suffix = u''
@@ -771,7 +772,7 @@ class PythonModuleDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
-      build_files_generator = PythonModuleDpkgBuildFilesGenerator(
+      build_files_generator = SetupPyDpkgBuildFilesGenerator(
           source_helper.project_name, source_helper.project_version,
           self._dependency_definition)
       build_files_generator.GenerateFiles(u'dpkg')
@@ -883,8 +884,8 @@ class PythonModuleDpkgBuildHelper(DpkgBuildHelper):
         project_name, source_helper.project_version, self.architecture)
 
 
-class PythonModuleSourceDpkgBuildHelper(DpkgBuildHelper):
-  """Class that helps in building python module source dpkg packages (.deb)."""
+class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
+  """Class that helps in building source dpkg packages (.deb)."""
 
   def __init__(self, dependency_definition):
     """Initializes the build helper.
@@ -893,7 +894,7 @@ class PythonModuleSourceDpkgBuildHelper(DpkgBuildHelper):
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
     """
-    super(PythonModuleSourceDpkgBuildHelper, self).__init__(
+    super(SetupPySourceDpkgBuildHelper, self).__init__(
         dependency_definition)
     self.architecture = u'source'
     self.distribution = u'trusty'
@@ -931,7 +932,7 @@ class PythonModuleSourceDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
-      build_files_generator = PythonModuleDpkgBuildFilesGenerator(
+      build_files_generator = SetupPyDpkgBuildFilesGenerator(
           source_helper.project_name, source_helper.project_version,
           self._dependency_definition)
       build_files_generator.GenerateFiles(u'dpkg')
@@ -1063,7 +1064,7 @@ class MsiBuildHelper(BuildHelper):
       self.architecture = u'win-amd64'
 
 
-class LibyalMsiBuildHelper(MsiBuildHelper):
+class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
   def __init__(self, dependency_definition):
@@ -1077,7 +1078,7 @@ class LibyalMsiBuildHelper(MsiBuildHelper):
       RuntimeError: if the Visual Studio version could be determined or
                     msvscpp-convert.py could not be found.
     """
-    super(LibyalMsiBuildHelper, self).__init__(dependency_definition)
+    super(ConfigureMakeMsiBuildHelper, self).__init__(dependency_definition)
 
     if 'VS90COMNTOOLS' in os.environ:
       self.version = '2008'
@@ -1354,7 +1355,7 @@ class LibyalMsiBuildHelper(MsiBuildHelper):
         self.architecture)
 
 
-class PythonModuleMsiBuildHelper(MsiBuildHelper):
+class SetupPyMsiBuildHelper(MsiBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
   def _GetFilenameSafeProjectInformation(self, source_helper):
@@ -1561,7 +1562,7 @@ class PkgBuildHelper(BuildHelper):
         source_helper.project_name, source_helper.project_version)
 
 
-class LibyalPkgBuildHelper(PkgBuildHelper):
+class ConfigureMakePkgBuildHelper(PkgBuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
   def Build(self, source_helper):
@@ -1660,7 +1661,7 @@ class LibyalPkgBuildHelper(PkgBuildHelper):
     return True
 
 
-class PythonModulePkgBuildHelper(PkgBuildHelper):
+class SetupPyPkgBuildHelper(PkgBuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
   def Build(self, source_helper):
@@ -1986,8 +1987,8 @@ class RpmBuildHelper(BuildHelper):
         project_name, project_version, self.architecture)
 
 
-class LibyalRpmBuildHelper(RpmBuildHelper):
-  """Class that helps in building libyal rpm packages (.rpm)."""
+class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
+  """Class that helps in building rpm packages (.rpm)."""
 
   def Build(self, source_helper):
     """Builds the rpms.
@@ -2035,7 +2036,7 @@ class LibyalRpmBuildHelper(RpmBuildHelper):
     return build_successful
 
 
-class PythonModuleRpmBuildHelper(RpmBuildHelper):
+class SetupPyRpmBuildHelper(RpmBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
   def __init__(self, dependency_definition):
@@ -2045,7 +2046,7 @@ class PythonModuleRpmBuildHelper(RpmBuildHelper):
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
     """
-    super(PythonModuleRpmBuildHelper, self).__init__(dependency_definition)
+    super(SetupPyRpmBuildHelper, self).__init__(dependency_definition)
     if not dependency_definition.architecture_dependent:
       self.architecture = 'noarch'
 
