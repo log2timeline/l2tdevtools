@@ -241,11 +241,18 @@ class DependencyBuilder(object):
 
       if not os.path.exists(output_filename):
         if not build_helper_object.Build(source_helper_object):
-          logging.warning((
-              u'Build of: {0:s} failed, for more information check '
-              u'{1:s}').format(
-                  source_helper_object.project_name,
-                  build_helper_object.LOG_FILENAME))
+          if not os.path.exists(build_helper_object.LOG_FILENAME):
+            logging.warning(u'Build of: {0:s} failed.'.format(
+                source_helper_object.project_name))
+          else:
+            log_filename = u'{0:s}_{1:s}'.format(
+                source_helper_object.project_name,
+                build_helper_object.LOG_FILENAME)
+            os.rename(build_helper_object.LOG_FILENAME, log_filename)
+            logging.warning((
+                u'Build of: {0:s} failed, for more information check '
+                u'{1:s}').format(
+                    source_helper_object.project_name, log_filename))
           return False
 
       if os.path.exists(build_helper_object.LOG_FILENAME):
@@ -304,11 +311,18 @@ class DependencyBuilder(object):
 
       if not os.path.exists(output_filename):
         if not build_helper_object.Build(source_helper_object):
-          logging.warning((
-              u'Build of: {0:s} failed, for more information check '
-              u'{1:s}').format(
-                  source_helper_object.project_name,
-                  build_helper_object.LOG_FILENAME))
+          if not os.path.exists(build_helper_object.LOG_FILENAME):
+            logging.warning(u'Build of: {0:s} failed.'.format(
+                source_helper_object.project_name))
+          else:
+            log_filename = u'{0:s}_{1:s}'.format(
+                source_helper_object.project_name,
+                build_helper_object.LOG_FILENAME)
+            os.rename(build_helper_object.LOG_FILENAME, log_filename)
+            logging.warning((
+                u'Build of: {0:s} failed, for more information check '
+                u'{1:s}').format(
+                    source_helper_object.project_name, log_filename))
           return False
 
       if os.path.exists(build_helper_object.LOG_FILENAME):
@@ -476,17 +490,22 @@ def Main():
   current_working_directory = os.getcwd()
   os.chdir(options.build_directory)
 
-  result = True
+  failed_builds = []
   for dependency_definition in builds:
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
     if not dependency_builder.Build(dependency_definition):
       print u'Failed building: {0:s}'.format(dependency_definition.name)
-      result = False
-      break
+      failed_builds.append(dependency_definition.name)
 
   os.chdir(current_working_directory)
 
-  return result
+  if failed_builds:
+    print u''
+    print u'Failed buiding:'
+    for failed_build in failed_builds:
+      print u'\t{0:s}'.format(failed_build)
+
+  return not failed_builds
 
 
 if __name__ == '__main__':
