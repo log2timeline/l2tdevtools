@@ -217,7 +217,7 @@ class DependencyBuilder(object):
     elif self._build_target == u'msi':
       # TODO: setup dokan and zlib in build directory.
       build_helper_object = build_helper.ConfigureMakeMsiBuildHelper(
-          dependency_definition)
+          dependency_definition, os.path.dirname(__file__))
 
     elif self._build_target == u'pkg':
       build_helper_object = build_helper.ConfigureMakePkgBuildHelper(
@@ -248,6 +248,12 @@ class DependencyBuilder(object):
             log_filename = u'{0:s}_{1:s}'.format(
                 source_helper_object.project_name,
                 build_helper_object.LOG_FILENAME)
+
+            # Remove older logfiles if they exists otherwise the rename
+            # fails on Windows.
+            if os.path.exists(log_filename):
+              os.remove(log_filename)
+
             os.rename(build_helper_object.LOG_FILENAME, log_filename)
             logging.warning((
                 u'Build of: {0:s} failed, for more information check '
@@ -318,6 +324,12 @@ class DependencyBuilder(object):
             log_filename = u'{0:s}_{1:s}'.format(
                 source_helper_object.project_name,
                 build_helper_object.LOG_FILENAME)
+
+            # Remove older logfiles if they exists otherwise the rename
+            # fails on Windows.
+            if os.path.exists(log_filename):
+              os.remove(log_filename)
+
             os.rename(build_helper_object.LOG_FILENAME, log_filename)
             logging.warning((
                 u'Build of: {0:s} failed, for more information check '

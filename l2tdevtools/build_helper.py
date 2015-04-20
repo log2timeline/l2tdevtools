@@ -1113,12 +1113,14 @@ class MsiBuildHelper(BuildHelper):
 class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, tools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      tools_path: the path to the tools directory which contains the
+                  msvscpp-convert.py script.
 
     Raises:
       RuntimeError: if the Visual Studio version could be determined or
@@ -1142,8 +1144,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       raise RuntimeError(u'Unable to determine Visual Studio version.')
 
     if self.version != '2008':
-      self._msvscpp_convert = os.path.join(
-          os.path.dirname(__file__), u'msvscpp-convert.py')
+      self._msvscpp_convert = os.path.join(tools_path, u'msvscpp-convert.py')
 
       if not os.path.exists(self._msvscpp_convert):
         raise RuntimeError(u'Unable to find msvscpp-convert.py')
