@@ -225,7 +225,8 @@ class GithubReleasesDownloadHelper(DownloadHelper):
   _VERSION_EXPRESSIONS = [
       u'[0-9]+',
       u'[0-9]+[.][0-9]+',
-      u'[0-9]+[.][0-9]+[.][0-9]+']
+      u'[0-9]+[.][0-9]+[.][0-9]+',
+      u'[0-9]+[.][0-9]+[.][0-9]+[-][0-9]+']
 
   def __init__(self, organization):
     """Initializes the download helper.
@@ -273,14 +274,32 @@ class GithubReleasesDownloadHelper(DownloadHelper):
       matches = re.findall(expression_string, page_content)
 
     if not matches:
+      # The format of the project archive download URL is:
+      # /{organization}/{project name}/archive/{project name}-{version}.tar.gz
+      expression_string = (
+          u'/{0:s}/{1:s}/archive/{2:s}[-]({3:s})[.]tar[.]gz').format(
+              self.organization, project_name, project_name,
+              u'|'.join(self._VERSION_EXPRESSIONS))
+      matches = re.findall(expression_string, page_content)
+
+    if not matches:
       return 0
 
     # Split the version string and convert every digit into an integer.
     # A string compare of both version strings will yield an incorrect result.
-    matches = [map(int, match.split(u'.')) for match in matches]
+    matches = [
+        map(int, match.replace(u'-', u'.').split(u'.')) for match in matches]
 
     # Find the latest version number and transform it back into a string.
-    return u'.'.join([u'{0:d}'.format(digit) for digit in max(matches)])
+    latest_match = [u'{0:d}'.format(digit) for digit in max(matches)]
+
+    latest_match_string = u'.'.join(latest_match[:3])
+
+    # Handle the special case for the pefile version of "x.y.z-w".
+    if len(latest_match) == 4:
+      latest_match_string = u'-'.join([latest_match_string, latest_match[3]])
+
+    return latest_match_string
 
   def GetDownloadUrl(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
@@ -329,6 +348,17 @@ class GithubReleasesDownloadHelper(DownloadHelper):
         u'/{0:s}/{1:s}/archive/{2!s}[.]tar[.]gz').format(
             self.organization, project_name, project_version)
     matches = re.findall(expression_string, page_content)
+
+    if matches and len(matches) == 1:
+      return u'https://github.com{0:s}'.format(matches[0])
+
+    if len(matches) != 1:
+      # The format of the project archive download URL is:
+      # /{organization}/{project name}/archive/{project name}-{version}.tar.gz
+      expression_string = (
+          u'/{0:s}/{1:s}/archive/{2:s}[-]{3:s}[.]tar[.]gz').format(
+              self.organization, project_name, project_name, project_version)
+      matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
       return u'https://github.com{0:s}'.format(matches[0])
