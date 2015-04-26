@@ -733,9 +733,6 @@ class SetupPyDpkgBuildFilesGenerator(object):
 class SetupPyDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
-  # Names of projects that do not require the "python-" output filename prefix.
-  _NO_PREFIX_PROJECTS = frozenset([u'binplist'])
-
   def __init__(self, dependency_definition):
     """Initializes the build helper.
 
@@ -764,15 +761,10 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       return False
     logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
-    if source_helper.project_name in self._NO_PREFIX_PROJECTS:
-      prefix = u''
-    else:
-      prefix = u'python-'
-
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    deb_orig_source_filename = u'{0:s}{1:s}_{2!s}.orig.tar.gz'.format(
-        prefix, source_helper.project_name, source_helper.project_version)
+    deb_orig_source_filename = u'python-{0:s}_{1!s}.orig.tar.gz'.format(
+        source_helper.project_name, source_helper.project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
     source_directory = source_helper.Create()
@@ -845,31 +837,25 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
     else:
       project_name = source_helper.project_name
 
-    if project_name in self._NO_PREFIX_PROJECTS:
-      prefix = u''
-    else:
-      prefix = u'python-'
-
-    filenames_to_ignore = re.compile(u'^{0:s}{1:s}_{2!s}.orig.tar.gz'.format(
-        prefix, project_name, source_helper.project_version))
+    filenames_to_ignore = re.compile(u'^python-{0:s}_{1!s}.orig.tar.gz'.format(
+        project_name, source_helper.project_version))
 
     # Remove files of previous versions in the format:
-    # {prefix}project_version.orig.tar.gz
-    filenames = glob.glob(u'{0:s}{1:s}_*.orig.tar.gz'.format(
-        prefix, project_name))
+    # python-project_version.orig.tar.gz
+    filenames = glob.glob(u'python-{0:s}_*.orig.tar.gz'.format(project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(u'^{0:s}{1:s}[-_].*{2!s}'.format(
-        prefix, project_name, source_helper.project_version))
+    filenames_to_ignore = re.compile(u'^python-{0:s}[-_].*{1!s}'.format(
+        project_name, source_helper.project_version))
 
     # Remove files of previous versions in the format:
-    # {prefix}project[-_]*version-1_architecture.*
-    filenames = glob.glob(u'{0:s}{1:s}[-_]*-1_{2:s}.*'.format(
-        prefix, project_name, self.architecture))
+    # python-project[-_]*version-1_architecture.*
+    filenames = glob.glob(u'python-{0:s}[-_]*-1_{1:s}.*'.format(
+        project_name, self.architecture))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -877,9 +863,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # {prefix}project[-_]*version-1.*
-    filenames = glob.glob(u'{0:s}{1:s}[-_]*-1.*'.format(
-        prefix, project_name))
+    # python-project[-_]*version-1.*
+    filenames = glob.glob(u'python-{0:s}[-_]*-1.*'.format(project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -900,20 +885,12 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
     else:
       project_name = source_helper.project_name
 
-    if project_name in self._NO_PREFIX_PROJECTS:
-      prefix = u''
-    else:
-      prefix = u'python-'
-
-    return u'{0:s}{1:s}_{2!s}-1_{3:s}.deb'.format(
-        prefix, project_name, source_helper.project_version, self.architecture)
+    return u'python-{0:s}_{1!s}-1_{2:s}.deb'.format(
+        project_name, source_helper.project_version, self.architecture)
 
 
 class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building source dpkg packages (.deb)."""
-
-  # Names of projects that do not require the "python-" output filename prefix.
-  _NO_PREFIX_PROJECTS = frozenset([u'binplist'])
 
   def __init__(self, dependency_definition):
     """Initializes the build helper.
@@ -944,15 +921,10 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       return False
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
-    if source_helper.project_name in self._NO_PREFIX_PROJECTS:
-      prefix = u''
-    else:
-      prefix = u'python-'
-
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    deb_orig_source_filename = u'{0:s}{1:s}_{2!s}.orig.tar.gz'.format(
-        prefix, source_helper.project_name, source_helper.project_version)
+    deb_orig_source_filename = u'python-{0:s}_{1!s}.orig.tar.gz'.format(
+        source_helper.project_name, source_helper.project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
     source_directory = source_helper.Create()
@@ -1025,31 +997,25 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     else:
       project_name = source_helper.project_name
 
-    if project_name in self._NO_PREFIX_PROJECTS:
-      prefix = u''
-    else:
-      prefix = u'python-'
-
-    filenames_to_ignore = re.compile(u'^{0:s}{1:s}_{2!s}.orig.tar.gz'.format(
-        prefix, project_name, source_helper.project_version))
+    filenames_to_ignore = re.compile(u'^python-{0:s}_{1!s}.orig.tar.gz'.format(
+        project_name, source_helper.project_version))
 
     # Remove files of previous versions in the format:
-    # {prefix}project_version.orig.tar.gz
-    filenames = glob.glob(u'{0:s}{1:s}_*.orig.tar.gz'.format(
-        prefix, project_name))
+    # python-project_version.orig.tar.gz
+    filenames = glob.glob(u'python-{0:s}_*.orig.tar.gz'.format(project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(u'^{0:s}{1:s}[-_].*{2!s}'.format(
-        prefix, project_name, source_helper.project_version))
+    filenames_to_ignore = re.compile(u'^python-{0:s}[-_].*{1!s}'.format(
+        project_name, source_helper.project_version))
 
     # Remove files of previous versions in the format:
-    # {prefix}project[-_]*version-1suffix~distribution_architecture.*
-    filenames = glob.glob(u'{0:s}{1:s}[-_]*-1{2:s}~{3:s}_{4:s}.*'.format(
-        prefix, project_name, self.version_suffix, self.distribution,
+    # python-project[-_]*version-1suffix~distribution_architecture.*
+    filenames = glob.glob(u'python-{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
+        project_name, self.version_suffix, self.distribution,
         self.architecture))
 
     for filename in filenames:
@@ -1058,9 +1024,9 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # {prefix}project[-_]*version-1suffix~distribution.*
-    filenames = glob.glob(u'{0:s}{1:s}[-_]*-1{2:s}~{3:s}.*'.format(
-        prefix, project_name, self.version_suffix, self.distribution))
+    # python-project[-_]*version-1suffix~distribution.*
+    filenames = glob.glob(u'python-{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
+        project_name, self.version_suffix, self.distribution))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -1081,13 +1047,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     else:
       project_name = source_helper.project_name
 
-    if project_name in self._NO_PREFIX_PROJECTS:
-      prefix = u''
-    else:
-      prefix = u'python-'
-
-    return u'{0:s}{1:s}_{2!s}-1{3:s}~{4:s}_{5:s}.changes'.format(
-        prefix, project_name, source_helper.project_version,
+    return u'python-{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
+        project_name, source_helper.project_version,
         self.version_suffix, self.distribution, self.architecture)
 
 
