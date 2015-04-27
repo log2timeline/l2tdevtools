@@ -21,6 +21,7 @@ Copied with permission from: https://github.com/libyal/libyal
 # TODO: add vs2013 reader.
 # TODO: add vs2013 writer.
 
+from __future__ import print_function
 import abc
 import argparse
 import logging
@@ -4183,15 +4184,15 @@ def Main():
   options = args_parser.parse_args()
 
   if not options.solution_file:
-    print 'Solution file missing.'
-    print ''
+    print('Solution file missing.')
+    print('')
     args_parser.print_help()
-    print ''
+    print('')
     return False
 
   if options.output_format not in output_formats:
-    print 'Unsupported output format: {0:s}.'.format(options.format_to)
-    print ''
+    print('Unsupported output format: {0:s}.'.format(options.format_to))
+    print('')
     return False
 
   logging.basicConfig(
@@ -4203,7 +4204,7 @@ def Main():
     input_solution = VSSolution()
 
   if not input_solution.Convert(options.solution_file, options.output_format):
-    print 'Unable to convert Visual Studio solution file.'
+    print('Unable to convert Visual Studio solution file.')
     return False
 
   return True

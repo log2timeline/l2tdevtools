@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Script to automate creating builds of projects."""
 
+from __future__ import print_function
 import argparse
 import logging
 import os
@@ -418,17 +419,17 @@ def Main():
   options = args_parser.parse_args()
 
   if not options.build_target:
-    print u'Build target missing.'
-    print u''
+    print(u'Build target missing.')
+    print(u'')
     args_parser.print_help()
-    print u''
+    print(u'')
     return False
 
   if options.build_target not in build_targets:
-    print u'Unsupported build target: {0:s}.'.format(options.build_target)
-    print u''
+    print(u'Unsupported build target: {0:s}.'.format(options.build_target))
+    print(u'')
     args_parser.print_help()
-    print u''
+    print(u'')
     return False
 
   if not options.config_file:
@@ -438,8 +439,8 @@ def Main():
         options.config_file, u'data', u'projects.ini')
 
   if not os.path.exists(options.config_file):
-    print u'No such config file: {0:s}.'.format(options.config_file)
-    print u''
+    print(u'No such config file: {0:s}.'.format(options.config_file))
+    print(u'')
     return False
 
   logging.basicConfig(
@@ -448,17 +449,17 @@ def Main():
   if options.build_target in [u'dpkg', u'dpkg-source']:
     missing_packages = build_helper.DpkgBuildHelper.CheckBuildDependencies()
     if missing_packages:
-      print (u'Required build package(s) missing. Please install: '
-             u'{0:s}.'.format(u', '.join(missing_packages)))
-      print u''
+      print((u'Required build package(s) missing. Please install: '
+             u'{0:s}.'.format(u', '.join(missing_packages))))
+      print(u'')
       return False
 
   elif options.build_target == u'rpm':
     missing_packages = build_helper.RpmBuildHelper.CheckBuildDependencies()
     if missing_packages:
-      print (u'Required build package(s) missing. Please install: '
-             u'{0:s}.'.format(u', '.join(missing_packages)))
-      print u''
+      print((u'Required build package(s) missing. Please install: '
+             u'{0:s}.'.format(u', '.join(missing_packages))))
+      print(u'')
       return False
 
   dependency_builder = DependencyBuilder(options.build_target)
@@ -506,16 +507,16 @@ def Main():
   for dependency_definition in builds:
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
     if not dependency_builder.Build(dependency_definition):
-      print u'Failed building: {0:s}'.format(dependency_definition.name)
+      print(u'Failed building: {0:s}'.format(dependency_definition.name))
       failed_builds.append(dependency_definition.name)
 
   os.chdir(current_working_directory)
 
   if failed_builds:
-    print u''
-    print u'Failed buiding:'
+    print(u'')
+    print(u'Failed buiding:')
     for failed_build in failed_builds:
-      print u'\t{0:s}'.format(failed_build)
+      print(u'\t{0:s}'.format(failed_build))
 
   return not failed_builds
 

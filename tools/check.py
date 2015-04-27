@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Script to check for the availability and version of projects."""
 
+from __future__ import print_function
 import re
 import urllib2
 
@@ -116,7 +117,7 @@ def CheckLibyal(libyal_python_modules):
     try:
       module_object = map(__import__, [module_name])[0]
     except ImportError:
-      print u'[FAILURE]\tmissing: {0:s}.'.format(module_name)
+      print(u'[FAILURE]\tmissing: {0:s}.'.format(module_name))
       result = False
       continue
 
@@ -135,31 +136,31 @@ def CheckLibyal(libyal_python_modules):
         latest_version = 0
 
     if not latest_version:
-      print (
+      print((
           u'Unable to determine latest version of {0:s} ({1:s}).\n').format(
-              libyal_name, module_name)
+              libyal_name, module_name))
       latest_version = None
       connection_error = True
 
     if module_version is not None and installed_version < module_version:
-      print (
+      print((
           u'[FAILURE]\t{0:s} ({1:s}) version: {2:d} is too old, {3:d} or '
           u'later required.').format(
-              libyal_name, module_name, installed_version, module_version)
+              libyal_name, module_name, installed_version, module_version))
       result = False
 
     elif latest_version and installed_version != latest_version:
-      print (
+      print((
           u'[INFO]\t\t{0:s} ({1:s}) version: {2:d} installed, '
           u'version: {3:d} available.').format(
-              libyal_name, module_name, installed_version, latest_version)
+              libyal_name, module_name, installed_version, latest_version))
 
     else:
-      print u'[OK]\t\t{0:s} ({1:s}) version: {2:d}'.format(
-          libyal_name, module_name, installed_version)
+      print(u'[OK]\t\t{0:s} ({1:s}) version: {2:d}'.format(
+          libyal_name, module_name, installed_version))
 
   if connection_error:
-    print (
+    print(
         u'[INFO] to check for the latest versions this script needs Internet '
         u'access.')
 
@@ -188,7 +189,7 @@ def CheckPythonModule(
   try:
     module_object = map(__import__, [module_name])[0]
   except ImportError:
-    print u'[FAILURE]\tmissing: {0:s}.'.format(module_name)
+    print(u'[FAILURE]\tmissing: {0:s}.'.format(module_name))
     return False
 
   if version_attribute_name and minimum_version:
@@ -204,22 +205,22 @@ def CheckPythonModule(
     minimum_version_map = map(int, split_regex.split(minimum_version))
 
     if module_version_map < minimum_version_map:
-      print (
+      print((
           u'[FAILURE]\t{0:s} version: {1:s} is too old, {2:s} or later '
-          u'required.').format(module_name, module_version, minimum_version)
+          u'required.').format(module_name, module_version, minimum_version))
       return False
 
     if maximum_version:
       maximum_version_map = map(int, split_regex.split(maximum_version))
       if module_version_map > maximum_version_map:
-        print (
+        print((
             u'[FAILURE]\t{0:s} version: {1:s} is too recent, {2:s} or earlier '
-            u'required.').format(module_name, module_version, maximum_version)
+            u'required.').format(module_name, module_version, maximum_version))
         return False
 
-    print u'[OK]\t\t{0:s} version: {1:s}'.format(module_name, module_version)
+    print(u'[OK]\t\t{0:s} version: {1:s}'.format(module_name, module_version))
   else:
-    print u'[OK]\t\t{0:s}'.format(module_name)
+    print(u'[OK]\t\t{0:s}'.format(module_name))
 
   return True
 
@@ -235,7 +236,7 @@ def CheckPytsk():
   try:
     module_object = map(__import__, [module_name])[0]
   except ImportError:
-    print u'[FAILURE]\tmissing: {0:s}.'.format(module_name)
+    print(u'[FAILURE]\tmissing: {0:s}.'.format(module_name))
     return False
 
   minimum_version = '4.1.2'
@@ -246,34 +247,34 @@ def CheckPytsk():
   module_version_map = map(int, module_version.split('.'))
   minimum_version_map = map(int, minimum_version.split('.'))
   if module_version_map < minimum_version_map:
-    print (
+    print((
         u'[FAILURE]\tSleuthKit version: {0:s} is too old, {1:s} or later '
-        u'required.').format(module_version, minimum_version)
+        u'required.').format(module_version, minimum_version))
     return False
 
-  print u'[OK]\t\tSleuthKit version: {0:s}'.format(module_version)
+  print(u'[OK]\t\tSleuthKit version: {0:s}'.format(module_version))
 
   minimum_version = '20140506'
   if not hasattr(module_object, 'get_version'):
-    print u'[FAILURE]\t{0:s} is too old, {1:s} or later required.'.format(
-        module_name, minimum_version)
+    print(u'[FAILURE]\t{0:s} is too old, {1:s} or later required.'.format(
+        module_name, minimum_version))
     return False
 
   module_version = module_object.get_version()
   if module_version < minimum_version:
-    print (
+    print((
         u'[FAILURE]\t{0:s} version: {1:s} is too old, {2:s} or later '
-        u'required.').format(module_name, module_version, minimum_version)
+        u'required.').format(module_name, module_version, minimum_version))
     return False
 
-  print u'[OK]\t\t{0:s} version: {1:s}'.format(module_name, module_version)
+  print(u'[OK]\t\t{0:s} version: {1:s}'.format(module_name, module_version))
 
   return True
 
 
 if __name__ == '__main__':
   check_result = True
-  print u'Checking availability and versions of plaso dependencies.'
+  print(u'Checking availability and versions of plaso dependencies.')
 
   # The bencode module does not appear to have no version information.
   if not CheckPythonModule('bencode', '', ''):
@@ -364,7 +365,7 @@ if __name__ == '__main__':
         u'https://sites.google.com/a/kiddaland.net/plaso/developer'
         u'/building-the-tool')
 
-    print u'See: {0:s} on how to set up plaso.'.format(
-        build_instructions_url)
+    print(u'See: {0:s} on how to set up plaso.'.format(
+        build_instructions_url))
 
-  print u''
+  print(u'')

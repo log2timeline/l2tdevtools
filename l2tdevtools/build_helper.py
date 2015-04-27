@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Build helper object implementations."""
 
+from __future__ import print_function
 import fileinput
 import glob
 import logging
@@ -1141,20 +1142,20 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
         if parsing_mode == 1:
           if self.version == '2008':
             if not line.startswith('#define WINVER 0x0501'):
-              print '#define WINVER 0x0501'
-              print ''
+              print('#define WINVER 0x0501')
+              print('')
 
           else:
             if not line.startswith('#define WINVER 0x0600'):
-              print '#define WINVER 0x0600'
-              print ''
+              print('#define WINVER 0x0600')
+              print('')
 
           parsing_mode = 2
 
         elif line.startswith('#define _CONFIG_'):
           parsing_mode = 1
 
-      print line
+      print(line)
 
   def _ConvertSolutionFiles(self, source_directory):
     """Converts the Visual Studio solution and project files.
