@@ -127,7 +127,8 @@ class DependencyBuilder(object):
   # TODO: add phases for building sleuthkit/pytsk.
 
   # The distributions to build dpkg-source packages for.
-  _DPKG_SOURCE_DISTRIBUTIONS = frozenset([u'precise', u'trusty'])
+  _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
+      u'precise', u'trusty', u'utopic', u'vivid'])
 
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
 
