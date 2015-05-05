@@ -1,5 +1,5 @@
 #!/bin/bash
-# A small script that submits a code for code review.
+# Script that submits a code for code review.
 
 EXIT_FAILURE=1;
 EXIT_MISSING_ARGS=2;

@@ -161,19 +161,14 @@ class DependencyUpdater(object):
         sub_directory = u'fedora20-x86_64'
         self._noarch_sub_directory = u'fedora20-noarch'
 
-      elif linux_name == u'Ubuntu' and linux_version == u'12.04':
-        if cpu_architecture == u'i686':
-          sub_directory = u'ubuntu12.04-i386'
-          self._noarch_sub_directory = u'ubuntu12.04-all'
-
-        elif cpu_architecture == u'x86_64':
-          sub_directory = u'ubuntu12.04-amd64'
-          self._noarch_sub_directory = u'ubuntu12.04-all'
-
-        else:
-          logging.error(u'CPU architecture: {0:s} not supported.'.format(
-              cpu_architecture))
-          return
+      elif linux_name == u'Ubuntu':
+        wiki_url = (
+            u'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
+            u'#prepackaged-dependencies')
+        logging.warning((
+            u'Ubuntu is no longer supported by this script. Use the gift PPA '
+            u'instead. For more info see: {0:s}').format(wiki_url))
+        return
 
       else:
         logging.error(u'Linux variant: {0:s} {1:s} not supported.'.format(
@@ -208,6 +203,8 @@ class DependencyUpdater(object):
       another the package versions per package name.
     """
     package_urls = self._GetPackageUrls()
+    if not package_urls:
+      return None, None
 
     if not os.path.exists(self._download_directory):
       os.mkdir(self._download_directory)
@@ -344,10 +341,6 @@ class DependencyUpdater(object):
         return self._InstallPackagesFedoraLinux(
             package_filenames, package_versions)
 
-      elif self._linux_name == u'Ubuntu':
-        return self._InstallPackagesUbuntuLinux(
-            package_filenames, package_versions)
-
     elif self._operating_system == u'Windows':
       return self._InstallPackagesWindows(
           package_filenames, package_versions)
@@ -445,52 +438,6 @@ class DependencyUpdater(object):
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         result = False
-
-    return result
-
-  def _InstallPackagesUbuntuLinux(
-      self, unused_package_filenames, unused_package_versions):
-    """Installs packages on Ubuntu Linux.
-
-    Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
-
-    Returns:
-      A boolean value indicating the install was successful.
-    """
-    # TODO: add -dbg package support.
-    # TODO: move these to a separate file?
-    dependencies = [
-        u'ipython',
-        u'libprotobuf7',
-        u'libyaml-0-2',
-        u'python-bencode',
-        u'python-dateutil',
-        u'python-dpkt',
-        u'python-hachoir-core',
-        u'python-hachoir-metadata',
-        u'python-hachoir-parser',
-        u'python-protobuf',
-        u'python-six',
-        u'python-tz',
-        u'python-yaml']
-
-    command = u'sudo apt-get install {0:s}'.format(u' '.join(dependencies))
-    logging.info(u'Running: "{0:s}"'.format(command))
-    exit_code = subprocess.call(command, shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      result = False
-
-    command = u'sudo dpkg -i {0:s}/*.deb'.format(self._download_directory)
-    logging.info(u'Running: "{0:s}"'.format(command))
-    exit_code = subprocess.call(command, shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      result = False
 
     return result
 
@@ -747,13 +694,31 @@ class DependencyUpdater(object):
 
     return True
 
-  def UpdatePackages(self):
+  def UpdatePackages(self, package_names):
     """Updates packages.
+
+    Args:
+      package_names: a list of package names that should be updated
+                     if an update is available. An empty list represents
+                     all available packges.
 
     Returns:
       A boolean value indicating the update was successful.
     """
     package_filenames, package_versions = self._GetPackageFilenamesAndVersions()
+    if not package_filenames:
+      return False
+
+    if package_names:
+      # Since the dictionary is going to change a list of the keys is needed.
+      for package_name in package_filenames.keys():
+        if package_name not in package_names:
+          del package_filenames[package_name]
+
+      # Since the dictionary is going to change a list of the keys is needed.
+      for package_name in package_versions.keys():
+        if package_name not in package_names:
+          del package_versions[package_name]
 
     if not self._UninstallPackages(package_versions):
       return False
@@ -762,22 +727,29 @@ class DependencyUpdater(object):
 
 
 def Main():
-  args_parser = argparse.ArgumentParser(description=(
+  argument_parser = argparse.ArgumentParser(description=(
       u'Installs the latest versions of project dependencies.'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
+      u'package_names', nargs=u'*', action=u'store', metavar=u'NAME',
+      type=unicode, help=(
+          u'Optional package names which should be updated if an update is '
+          u'available. If no value is provided all available packages are '
+          u'updated.'))
+
+  argument_parser.add_argument(
       u'--download-directory', u'--download_directory', action=u'store',
       metavar=u'DIRECTORY', dest=u'download_directory', type=unicode,
       default=u'build', help=u'The location of the the download directory.')
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       '-f', '--force', action='store_true', dest='force_install',
       default=False, help=(
           u'Force installation. This option removes existing versions '
           u'of installed dependencies. The default behavior is to only'
           u'install a dependency if not or an older version is installed.'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       '--machine-type', '--machine_type', action=u'store', metavar=u'TYPE',
       dest=u'machine_type', type=unicode, default=None, help=(
           u'Manually sets the machine type instead of using the value returned '
@@ -785,7 +757,7 @@ def Main():
           u'unless want to force the installation of one machine type e.g. '
           u'\'x86\' onto another \'amd64\'.'))
 
-  options = args_parser.parse_args()
+  options = argument_parser.parse_args()
 
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
@@ -795,7 +767,7 @@ def Main():
       force_install=options.force_install,
       preferred_machine_type=options.machine_type)
 
-  return dependency_updater.UpdatePackages()
+  return dependency_updater.UpdatePackages(options.package_names)
 
 
 if __name__ == '__main__':

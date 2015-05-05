@@ -1,5 +1,5 @@
 #!/bin/bash
-# A small script that runs the linter on all changed files.
+# Script that runs the linter on all changed files.
 
 EXIT_FAILURE=1;
 EXIT_SUCCESS=0;

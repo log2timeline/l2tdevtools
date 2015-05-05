@@ -399,36 +399,36 @@ def Main():
   build_targets = frozenset([
       u'download', u'dpkg', u'dpkg-source', u'msi', u'pkg', u'rpm'])
 
-  args_parser = argparse.ArgumentParser(description=(
+  argument_parser = argparse.ArgumentParser(description=(
       u'Downloads and builds the latest versions of projects.'))
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       u'build_target', choices=sorted(build_targets), action=u'store',
       metavar=u'BUILD_TARGET', default=None, help=u'The build target.')
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       u'--build-directory', u'--build_directory', action=u'store',
       metavar=u'DIRECTORY', dest=u'build_directory', type=unicode,
       default=u'build', help=u'The location of the the build directory.')
 
-  args_parser.add_argument(
+  argument_parser.add_argument(
       u'-c', u'--config', dest=u'config_file', action=u'store',
       metavar=u'CONFIG_FILE', default=None,
       help=u'path of the build configuration file.')
 
-  options = args_parser.parse_args()
+  options = argument_parser.parse_args()
 
   if not options.build_target:
     print(u'Build target missing.')
     print(u'')
-    args_parser.print_help()
+    argument_parser.print_help()
     print(u'')
     return False
 
   if options.build_target not in build_targets:
     print(u'Unsupported build target: {0:s}.'.format(options.build_target))
     print(u'')
-    args_parser.print_help()
+    argument_parser.print_help()
     print(u'')
     return False
 

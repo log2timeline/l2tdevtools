@@ -1,5 +1,5 @@
 #!/bin/bash
-# A small script that contains common functions for code review checks.
+# Script that contains common functions for code review checks.
 
 EXIT_FAILURE=1;
 EXIT_SUCCESS=0;

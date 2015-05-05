@@ -1,5 +1,5 @@
 #!/bin/bash
-# A small script that updates a change list for code review.
+# Script that updates a change list for code review.
 
 EXIT_FAILURE=1;
 EXIT_MISSING_ARGS=2;
