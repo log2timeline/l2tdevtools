@@ -463,7 +463,8 @@ class SetupPyDpkgBuildFilesGenerator(object):
       u'Section: python',
       u'Priority: extra',
       u'Maintainer: {upstream_maintainer:s}',
-      u'Build-Depends: debhelper (>= 7), python, python-setuptools',
+      (u'Build-Depends: debhelper (>= 7), python, '
+       u'python-setuptools{build_depends:s}'),
       u'Standards-Version: 3.9.5',
       u'Homepage: {upstream_homepage:s}',
       u'',
@@ -623,6 +624,11 @@ class SetupPyDpkgBuildFilesGenerator(object):
     else:
       architecture = u'any'
 
+    if not self._dependency_definition.architecture_dependent:
+      build_depends = u', python-dev'
+    else:
+      build_depends = u''
+
     depends = []
     if self._dependency_definition.dpkg_dependencies:
       depends.append(self._dependency_definition.dpkg_dependencies)
@@ -640,6 +646,7 @@ class SetupPyDpkgBuildFilesGenerator(object):
     description_long = u'\n '.join(description_long.split(u'\n'))
 
     template_values = {
+        'build_depends': build_depends,
         'project_name': project_name,
         'upstream_maintainer': self._dependency_definition.maintainer,
         'upstream_homepage': self._dependency_definition.homepage_url,
@@ -742,9 +749,16 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
                              DependencyDefinition).
     """
     super(SetupPyDpkgBuildHelper, self).__init__(dependency_definition)
-    self.architecture = u'all'
+    self.architecture = platform.machine()
     self.distribution = u''
     self.version_suffix = u''
+
+    if not dependency_definition.architecture_dependent:
+      self.architecture = u'all'
+    elif self.architecture == u'i686':
+      self.architecture = u'i386'
+    elif self.architecture == u'x86_64':
+      self.architecture = u'amd64'
 
   def Build(self, source_helper):
     """Builds the dpkg packages.
