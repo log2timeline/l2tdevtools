@@ -4,10 +4,10 @@
 
 import argparse
 import glob
+import json
 import logging
 import os
 import platform
-import re
 import subprocess
 import sys
 
@@ -49,56 +49,125 @@ def CompareVersions(first_version_list, second_version_list):
   return 0
 
 
-# TODO: merge this class with download_helper.GoogleDriveDownloadHelper.
-class GoogleDriveDownloadHelper(download_helper.DownloadHelper):
-  """Class that helps in downloading from Google Drive."""
+class GithubRepoDownloadHelper(download_helper.DownloadHelper):
+  """Class that helps in downloading from a GitHub repository."""
 
-  # pylint: disable=abstract-method
-  # Prevent pylint from remarking that GetDownloadUrl and GetProjectIdentifier
-  # are not overwritten.
+  _GITHUB_REPO_URL = (
+      u'https://api.github.com/repos/log2timeline/l2tbinaries')
 
-  def GetPackageDownloadUrls(self, google_drive_url):
+  def _GetDownloadUrl(self, preferred_machine_type=None):
+    """Retrieves the download URL.
+
+    Args:
+      preferred_machine_type: optional preferred machine type. The default
+                              is None, which will auto-detect the current
+                              machine type.
+    Returns:
+      The download URL or None.
+    """
+    operating_system = platform.system()
+
+    if preferred_machine_type:
+      cpu_architecture = preferred_machine_type
+    else:
+      cpu_architecture = platform.machine().lower()
+
+    sub_directory = None
+
+    if operating_system == u'Darwin':
+      # TODO: determine OSX version.
+      if cpu_architecture != u'x86_64':
+        logging.error(u'CPU architecture: {0:s} not supported.'.format(
+            cpu_architecture))
+        return
+
+      sub_directory = u'macosx'
+
+    elif operating_system == u'Linux':
+      linux_name, linux_version, _ = platform.linux_distribution()
+      logging.error(u'Linux: {0:s} {1:s} not supported.'.format(
+          linux_name, linux_version))
+
+      if linux_name == u'Ubuntu':
+        wiki_url = (
+            u'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
+            u'#prepackaged-dependencies')
+        logging.error(
+            u'Use the gift PPA instead. For more info see: {0:s}'.format(
+                wiki_url))
+
+      return
+
+    elif operating_system == u'Windows':
+      if cpu_architecture == u'x86':
+        sub_directory = u'win32'
+
+      elif cpu_architecture == u'amd64':
+        sub_directory = u'win64'
+
+      else:
+        logging.error(u'CPU architecture: {0:s} not supported.'.format(
+            cpu_architecture))
+        return
+
+    else:
+      logging.error(u'Operating system: {0:s} not supported.'.format(
+          operating_system))
+      return
+
+    return u'{0:s}/contents/{1:s}'.format(
+        self._GITHUB_REPO_URL, sub_directory)
+
+  def GetPackageDownloadUrls(self, preferred_machine_type=None):
     """Retrieves the package downloads URL for a given URL.
 
     Args:
-      google_drive_url: the Google Drive URL.
+      preferred_machine_type: optional preferred machine type. The default
+                              is None, which will auto-detect the current
+                              machine type.
 
     Returns:
-      A list of package download URLs.
+      A list of package download URLs or None.
     """
-    page_content = self.DownloadPageContent(google_drive_url)
+    download_url = self._GetDownloadUrl(
+        preferred_machine_type=preferred_machine_type)
+    if not download_url:
+      return
+
+    page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return
 
-    # The format of the project download URL is:
-    # /host/{random string}/3rd%20party/{sub directory}/{filename}
-    expression_string = u'/host/[^/]+/3rd%20party/[^/">]+/[^">]+'
-    matches = re.findall(expression_string, page_content)
+    # The page content consist of JSON data that contains a list of dicts.
+    # Each dict consists of:
+    # {
+    #   "name":"PyYAML-3.11.win-amd64-py2.7.msi",
+    #   "path":"win64/PyYAML-3.11.win-amd64-py2.7.msi",
+    #   "sha":"8fca8c1e2549cf54bf993c55930365d01658f418",
+    #   "size":196608,
+    #   "url":"https://api.github.com/...",
+    #   "html_url":"https://github.com/...",
+    #   "git_url":"https://api.github.com/...",
+    #   "download_url":"https://raw.githubusercontent.com/...",
+    #   "type":"file",
+    #   "_links":{
+    #     "self":"https://api.github.com/...",
+    #     "git":"https://api.github.com/...",
+    #     "html":"https://github.com/..."
+    #   }
+    # }
 
-    for match_index in range(0, len(matches)):
-      matches[match_index] = u'https://googledrive.com{0:s}'.format(
-          matches[match_index])
+    download_urls = []
+    for directory_entry in json.loads(page_content):
+      download_url = directory_entry.get(u'download_url', None)
+      if download_url:
+        download_urls.append(download_url)
 
-    return matches
-
-  def DownloadPackage(self, download_url):
-    """Downloads the package for a given URL.
-
-    Args:
-      download_url: the download URL.
-
-    Returns:
-      The filename if successful also if the file was already downloaded
-      or None on error.
-    """
-    return self.DownloadFile(download_url)
+    return download_urls
 
 
 class DependencyUpdater(object):
   """Class that helps in updating dependencies."""
-
-  _GOOGLE_DRIVE_URL = (
-      u'https://googledrive.com/host/0B30H7z4S52FleW5vUHBnblJfcjg')
 
   def __init__(
       self, download_directory=u'build', force_install=False,
@@ -116,84 +185,14 @@ class DependencyUpdater(object):
     """
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
-    self._download_helper = GoogleDriveDownloadHelper()
+    self._download_helper = GithubRepoDownloadHelper()
     self._force_install = force_install
-    self._linux_name = None
-    self._noarch_sub_directory = None
     self._operating_system = platform.system()
 
     if preferred_machine_type:
       self._preferred_machine_type = preferred_machine_type.lower()
     else:
       self._preferred_machine_type = None
-
-  def _GetDownloadUrl(self):
-    """Retrieves the download URL.
-
-    Returns:
-      The download URL or None.
-    """
-    if self._preferred_machine_type:
-      cpu_architecture = self._preferred_machine_type
-    else:
-      cpu_architecture = platform.machine().lower()
-
-    sub_directory = None
-
-    if self._operating_system == u'Darwin':
-      # TODO: determine OSX version
-      if cpu_architecture != u'x86_64':
-        logging.error(u'CPU architecture: {0:s} not supported.'.format(
-            cpu_architecture))
-        return
-
-      # Note that the sub directory should be URL encoded.
-      sub_directory = u'macosx%2010.10'
-
-    elif self._operating_system == u'Linux':
-      linux_name, linux_version, _ = platform.linux_distribution()
-      if linux_name == u'Fedora' and linux_version == u'20':
-        if cpu_architecture != u'x86_64':
-          logging.error(u'CPU architecture: {0:s} not supported.'.format(
-              cpu_architecture))
-          return
-
-        sub_directory = u'fedora20-x86_64'
-        self._noarch_sub_directory = u'fedora20-noarch'
-
-      elif linux_name == u'Ubuntu':
-        wiki_url = (
-            u'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
-            u'#prepackaged-dependencies')
-        logging.warning((
-            u'Ubuntu is no longer supported by this script. Use the gift PPA '
-            u'instead. For more info see: {0:s}').format(wiki_url))
-        return
-
-      else:
-        logging.error(u'Linux variant: {0:s} {1:s} not supported.'.format(
-            self._linux_name, linux_version))
-        return
-
-    elif self._operating_system == u'Windows':
-      if cpu_architecture == u'x86':
-        sub_directory = u'win32-vs2008'
-
-      elif cpu_architecture == u'amd64':
-        sub_directory = u'win-amd64-vs2010'
-
-      else:
-        logging.error(u'CPU architecture: {0:s} not supported.'.format(
-            cpu_architecture))
-        return
-
-    else:
-      logging.error(u'Operating system: {0:s} not supported.'.format(
-          self._operating_system))
-      return
-
-    return u'{0:s}/3rd%20party/{1:s}'.format(
-        self._GOOGLE_DRIVE_URL, sub_directory)
 
   def _GetPackageFilenamesAndVersions(self):
     """Determines the package filenames and versions.
@@ -202,7 +201,8 @@ class DependencyUpdater(object):
       A tuple of two dictionaries one containing the package filenames
       another the package versions per package name.
     """
-    package_urls = self._GetPackageUrls()
+    package_urls = self._download_helper.GetPackageDownloadUrls(
+        preferred_machine_type=self._preferred_machine_type)
     if not package_urls:
       return None, None
 
@@ -288,37 +288,11 @@ class DependencyUpdater(object):
           os.remove(filename)
 
         logging.info(u'Downloading: {0:s}'.format(package_filename))
-        _ = self._download_helper.DownloadPackage(package_url)
+        _ = self._download_helper.DownloadFile(package_url)
 
     os.chdir(u'..')
 
     return package_filenames, package_versions
-
-  def _GetPackageUrls(self):
-    """Retrieves a list of package URLs.
-
-    The package URL are determined based on the files in an architecture
-    specific sub directories of the download URL.
-
-    Returns:
-      A list of package URLs or None.
-    """
-    download_url = self._GetDownloadUrl()
-    if not download_url:
-      return
-
-    package_urls = self._download_helper.GetPackageDownloadUrls(download_url)
-
-    if self._noarch_sub_directory:
-      noarch_package_urls = self._download_helper.GetPackageDownloadUrls(
-          u'{0:s}/3rd%20party/{1:s}'.format(
-              self._GOOGLE_DRIVE_URL, self._noarch_sub_directory))
-
-      package_urls.extend(noarch_package_urls)
-
-    # TODO: do something with noarch_package_urls.
-
-    return package_urls
 
   def _InstallPackages(self, package_filenames, package_versions):
     """Installs packages.
@@ -337,7 +311,8 @@ class DependencyUpdater(object):
           package_filenames, package_versions)
 
     elif self._operating_system == u'Linux':
-      if self._linux_name == u'Fedora':
+      linux_name, _, _ = platform.linux_distribution()
+      if linux_name == u'Fedora':
         return self._InstallPackagesFedoraLinux(
             package_filenames, package_versions)
 

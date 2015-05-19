@@ -11,7 +11,8 @@ import re
 import shutil
 import subprocess
 import sys
-import time
+
+from l2tdevtools import dpkg_files
 
 
 class BuildHelper(object):
@@ -59,6 +60,17 @@ class DpkgBuildHelper(BuildHelper):
       u'libsqlite3-dev',
   ])
 
+  def __init__(self, dependency_definition):
+    """Initializes the build helper.
+
+    Args:
+      dependency_definition: the dependency definition object (instance of
+                             DependencyDefinition).
+    """
+    super(DpkgBuildHelper, self).__init__(dependency_definition)
+    self._prep_script = u'prep-dpkg.sh'
+    self._post_script = u'post-dpkg.sh'
+
   def _BuildPrepare(
       self, source_directory, project_name, project_version, version_suffix,
       distribution, architecture):
@@ -76,10 +88,10 @@ class DpkgBuildHelper(BuildHelper):
       True if the preparations were successful, False otherwise.
     """
     # Script to run before building, e.g. to change the dpkg packaging files.
-    if os.path.exists(u'prep-dpkg.sh'):
-      command = u'sh ../prep-dpkg.sh {0:s} {1!s} {2:s} {3:s} {4:s}'.format(
-          project_name, project_version, version_suffix, distribution,
-          architecture)
+    if os.path.exists(self._prep_script):
+      command = u'sh ../{0:s} {1:s} {2!s} {3:s} {4:s} {5:s}'.format(
+          self._prep_script, project_name, project_version, version_suffix,
+          distribution, architecture)
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
@@ -106,10 +118,10 @@ class DpkgBuildHelper(BuildHelper):
     """
     # Script to run after building, e.g. to automatically upload the dpkg
     # package files to an apt repository.
-    if os.path.exists(u'post-dpkg.sh'):
-      command = u'sh ../post-dpkg.sh {0:s} {1!s} {2:s} {3:s} {4:s}'.format(
-          project_name, project_version, version_suffix, distribution,
-          architecture)
+    if os.path.exists(self._post_script):
+      command = u'sh ../{0:s} {1:s} {2!s} {3:s} {4:s} {5:s}'.format(
+          self._post_script, project_name, project_version, version_suffix,
+          distribution, architecture)
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
@@ -201,6 +213,19 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
     dpkg_directory = os.path.join(source_directory, u'dpkg')
     if not os.path.exists(dpkg_directory):
       dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
+
+    if not os.path.exists(dpkg_directory):
+      # Generate the dpkg build files if necessary.
+      os.chdir(source_directory)
+
+      build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
+          source_helper.project_name, source_helper.project_version,
+          self._dependency_definition)
+      build_files_generator.GenerateFiles(u'dpkg')
+
+      os.chdir(u'..')
+
+      dpkg_directory = os.path.join(source_directory, u'dpkg')
 
     if not os.path.exists(dpkg_directory):
       logging.error(u'Missing dpkg sub directory in: {0:s}'.format(
@@ -308,6 +333,8 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
     """
     super(ConfigureMakeSourceDpkgBuildHelper, self).__init__(
         dependency_definition)
+    self._prep_script = u'prep-dpkg-source.sh'
+    self._post_script = u'post-dpkg-source.sh'
     self.architecture = u'source'
     self.distribution = u'trusty'
     self.version_suffix = u'ppa1'
@@ -343,6 +370,19 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
     dpkg_directory = os.path.join(source_directory, u'dpkg')
     if not os.path.exists(dpkg_directory):
       dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
+
+    if not os.path.exists(dpkg_directory):
+      # Generate the dpkg build files if necessary.
+      os.chdir(source_directory)
+
+      build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
+          source_helper.project_name, source_helper.project_version,
+          self._dependency_definition)
+      build_files_generator.GenerateFiles(u'dpkg')
+
+      os.chdir(u'..')
+
+      dpkg_directory = os.path.join(source_directory, u'dpkg')
 
     if not os.path.exists(dpkg_directory):
       logging.error(u'Missing dpkg sub directory in: {0:s}'.format(
@@ -438,306 +478,6 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
         self.version_suffix, self.distribution, self.architecture)
 
 
-class SetupPyDpkgBuildFilesGenerator(object):
-  """Class that helps in generating dpkg build files for Python modules."""
-
-  _EMAIL_ADDRESS = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
-
-  _DOCS_FILENAMES = [
-      u'CHANGES', u'CHANGES.txt', u'CHANGES.TXT',
-      u'LICENSE', u'LICENSE.txt', u'LICENSE.TXT',
-      u'README', u'README.txt', u'README.TXT']
-
-  _CHANGELOG_TEMPLATE = u'\n'.join([
-      u'python-{project_name:s} ({project_version!s}-1) unstable; urgency=low',
-      u'',
-      u'  * Auto-generated',
-      u'',
-      u' -- {maintainer_email_address:s}  {date_time:s}'])
-
-  _COMPAT_TEMPLATE = u'\n'.join([
-      u'7'])
-
-  _CONTROL_TEMPLATE = u'\n'.join([
-      u'Source: python-{project_name:s}',
-      u'Section: python',
-      u'Priority: extra',
-      u'Maintainer: {upstream_maintainer:s}',
-      (u'Build-Depends: debhelper (>= 7), python, '
-       u'python-setuptools{build_depends:s}'),
-      u'Standards-Version: 3.9.5',
-      u'Homepage: {upstream_homepage:s}',
-      u'',
-      u'Package: python-{project_name:s}',
-      u'Architecture: {architecture:s}',
-      u'Depends: {depends:s}',
-      u'Description: {description_short:s}',
-      u' {description_long:s}',
-      u''])
-
-  _COPYRIGHT_TEMPLATE = u'\n'.join([
-      u''])
-
-  _RULES_TEMPLATE = u'\n'.join([
-      u'#!/usr/bin/make -f',
-      u'# debian/rules that uses debhelper >= 7.',
-      u'',
-      u'# Uncomment this to turn on verbose mode.',
-      u'#export DH_VERBOSE=1',
-      u'',
-      u'# This has to be exported to make some magic below work.',
-      u'export DH_OPTIONS',
-      u'',
-      u'',
-      u'%:',
-      u'	dh  $@ --with python2',
-      u'',
-      u'.PHONY: override_dh_auto_test',
-      u'override_dh_auto_test:',
-      u'',
-      u'.PHONY: override_dh_installmenu',
-      u'override_dh_installmenu:',
-      u'',
-      u'.PHONY: override_dh_installmime',
-      u'override_dh_installmime:',
-      u'',
-      u'.PHONY: override_dh_installmodules',
-      u'override_dh_installmodules:',
-      u'',
-      u'.PHONY: override_dh_installlogcheck',
-      u'override_dh_installlogcheck:',
-      u'',
-      u'.PHONY: override_dh_installlogrotate',
-      u'override_dh_installlogrotate:',
-      u'',
-      u'.PHONY: override_dh_installpam',
-      u'override_dh_installpam:',
-      u'',
-      u'.PHONY: override_dh_installppp',
-      u'override_dh_installppp:',
-      u'',
-      u'.PHONY: override_dh_installudev',
-      u'override_dh_installudev:',
-      u'',
-      u'.PHONY: override_dh_installwm',
-      u'override_dh_installwm:',
-      u'',
-      u'.PHONY: override_dh_installxfonts',
-      u'override_dh_installxfonts:',
-      u'',
-      u'.PHONY: override_dh_gconf',
-      u'override_dh_gconf:',
-      u'',
-      u'.PHONY: override_dh_icons',
-      u'override_dh_icons:',
-      u'',
-      u'.PHONY: override_dh_perl',
-      u'override_dh_perl:',
-      u'',
-      u'.PHONY: override_dh_pysupport',
-      u'override_dh_pysupport:',
-      u'',
-      u'.PHONY: override_dh_python2',
-      u'override_dh_python2:',
-      u'	dh_python2 -V 2.7 setup.py',
-      u''])
-
-  _SOURCE_FORMAT_TEMPLATE = u'\n'.join([
-      u'1.0'])
-
-  def __init__(
-      self, project_name, project_version, dependency_definition):
-    """Initializes the dpkg build files generator.
-
-    Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
-    """
-    super(SetupPyDpkgBuildFilesGenerator, self).__init__()
-    self._project_name = project_name
-    self._project_version = project_version
-    self._dependency_definition = dependency_definition
-
-  def _GenerateChangelogFile(self, dpkg_path):
-    """Generate the dpkg build changelog file.
-
-    Args:
-      dpkg_path: the path to the dpkg files.
-    """
-    timezone_minutes, _ = divmod(time.timezone, 60)
-    timezone_hours, timezone_minutes = divmod(timezone_minutes, 60)
-
-    # If timezone_hours is -1 {0:02d} will format as -1 instead of -01
-    # hence we detect the sign and force a leading zero.
-    if timezone_hours < 0:
-      timezone_string = u'-{0:02d}{1:02d}'.format(
-          -timezone_hours, timezone_minutes)
-    else:
-      timezone_string = u'+{0:02d}{1:02d}'.format(
-          timezone_hours, timezone_minutes)
-
-    date_time_string = u'{0:s} {1:s}'.format(
-        time.strftime('%a, %d %b %Y %H:%M:%S'), timezone_string)
-
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
-    else:
-      project_name = self._project_name
-
-    template_values = {
-        'project_name': project_name,
-        'project_version': self._project_version,
-        'maintainer_email_address': self._EMAIL_ADDRESS,
-        'date_time': date_time_string}
-
-    filename = os.path.join(dpkg_path, u'changelog')
-    with open(filename, 'wb') as file_object:
-      data = self._CHANGELOG_TEMPLATE.format(**template_values)
-      file_object.write(data.encode('utf-8'))
-
-  def _GenerateCompatFile(self, dpkg_path):
-    """Generate the dpkg build compat file.
-
-    Args:
-      dpkg_path: the path to the dpkg files.
-    """
-    filename = os.path.join(dpkg_path, u'compat')
-    with open(filename, 'wb') as file_object:
-      data = self._COMPAT_TEMPLATE
-      file_object.write(data.encode('utf-8'))
-
-  def _GenerateControlFile(self, dpkg_path):
-    """Generate the dpkg build control file.
-
-    Args:
-      dpkg_path: the path to the dpkg files.
-    """
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
-    else:
-      project_name = self._project_name
-
-    if not self._dependency_definition.architecture_dependent:
-      architecture = u'all'
-    else:
-      architecture = u'any'
-
-    if not self._dependency_definition.architecture_dependent:
-      build_depends = u', python-dev'
-    else:
-      build_depends = u''
-
-    depends = []
-    if self._dependency_definition.dpkg_dependencies:
-      depends.append(self._dependency_definition.dpkg_dependencies)
-    depends.append('${shlibs:Depends}')
-    depends.append('${misc:Depends}')
-    depends = u', '.join(depends)
-
-    # description short needs to be a single line.
-    description_short = self._dependency_definition.description_short
-    description_short = u' '.join(description_short.split(u'\n'))
-
-    # description long needs a space at the start of every line after
-    # the first.
-    description_long = self._dependency_definition.description_long
-    description_long = u'\n '.join(description_long.split(u'\n'))
-
-    template_values = {
-        'build_depends': build_depends,
-        'project_name': project_name,
-        'upstream_maintainer': self._dependency_definition.maintainer,
-        'upstream_homepage': self._dependency_definition.homepage_url,
-        'architecture': architecture,
-        'depends': depends,
-        'description_short': description_short,
-        'description_long': description_long}
-
-    filename = os.path.join(dpkg_path, u'control')
-    with open(filename, 'wb') as file_object:
-      data = self._CONTROL_TEMPLATE.format(**template_values)
-      file_object.write(data.encode('utf-8'))
-
-  def _GenerateCopyrightFile(self, dpkg_path):
-    """Generate the dpkg build copyright file.
-
-    Args:
-      dpkg_path: the path to the dpkg files.
-    """
-    license_file = os.path.dirname(__file__)
-    license_file = os.path.dirname(license_file)
-    license_file = os.path.join(
-        license_file, u'data', u'licenses', u'LICENSE.{0:s}'.format(
-            self._project_name))
-
-    filename = os.path.join(dpkg_path, u'copyright')
-
-    shutil.copy(license_file, filename)
-
-  def _GenerateDocsFile(self, dpkg_path):
-    """Generate the dpkg build .docs file.
-
-    Args:
-      dpkg_path: the path to the dpkg files.
-    """
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
-    else:
-      project_name = self._project_name
-
-    # Determine the available doc files.
-    doc_files = []
-    for filename in self._DOCS_FILENAMES:
-      if os.path.exists(filename):
-        doc_files.append(filename)
-
-    filename = os.path.join(
-        dpkg_path, u'python-{0:s}.docs'.format(project_name))
-    with open(filename, 'wb') as file_object:
-      file_object.write(u'\n'.join(doc_files))
-
-  def _GenerateRulesFile(self, dpkg_path):
-    """Generate the dpkg build rules file.
-
-    Args:
-      dpkg_path: the path to the dpkg files.
-    """
-    filename = os.path.join(dpkg_path, u'rules')
-    with open(filename, 'wb') as file_object:
-      data = self._RULES_TEMPLATE
-      file_object.write(data.encode('utf-8'))
-
-  def _GenerateSourceFormatFile(self, dpkg_path):
-    """Generate the dpkg build source/format file.
-
-    Args:
-      dpkg_path: the path to the dpkg files.
-    """
-    filename = os.path.join(dpkg_path, u'source', u'format')
-    with open(filename, 'wb') as file_object:
-      data = self._SOURCE_FORMAT_TEMPLATE
-      file_object.write(data.encode('utf-8'))
-
-  def GenerateFiles(self, dpkg_path):
-    """Generate the dpkg build files.
-
-    Args:
-      dpkg_path: the path to the dpkg files.
-    """
-    os.mkdir(dpkg_path)
-    self._GenerateChangelogFile(dpkg_path)
-    self._GenerateCompatFile(dpkg_path)
-    self._GenerateControlFile(dpkg_path)
-    self._GenerateCopyrightFile(dpkg_path)
-    self._GenerateDocsFile(dpkg_path)
-    self._GenerateRulesFile(dpkg_path)
-
-    os.mkdir(os.path.join(dpkg_path, u'source'))
-    self._GenerateSourceFormatFile(dpkg_path)
-
-
 class SetupPyDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
@@ -796,7 +536,7 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
-      build_files_generator = SetupPyDpkgBuildFilesGenerator(
+      build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           source_helper.project_name, source_helper.project_version,
           self._dependency_definition)
       build_files_generator.GenerateFiles(u'dpkg')
@@ -916,6 +656,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     """
     super(SetupPySourceDpkgBuildHelper, self).__init__(
         dependency_definition)
+    self._prep_script = u'prep-dpkg-source.sh'
+    self._post_script = u'post-dpkg-source.sh'
     self.architecture = u'source'
     self.distribution = u'trusty'
     self.version_suffix = u'ppa1'
@@ -956,7 +698,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
-      build_files_generator = SetupPyDpkgBuildFilesGenerator(
+      build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           source_helper.project_name, source_helper.project_version,
           self._dependency_definition)
       build_files_generator.GenerateFiles(u'dpkg')
@@ -1104,17 +846,19 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """
     super(ConfigureMakeMsiBuildHelper, self).__init__(dependency_definition)
 
-    if 'VS90COMNTOOLS' in os.environ:
-      self.version = '2008'
-
-    elif 'VS100COMNTOOLS' in os.environ:
-      self.version = '2010'
+    if 'VS120COMNTOOLS' in os.environ:
+      self.version = '2013'
 
     elif 'VS110COMNTOOLS' in os.environ:
       self.version = '2012'
 
-    elif 'VS120COMNTOOLS' in os.environ:
-      self.version = '2013'
+    elif 'VS100COMNTOOLS' in os.environ:
+      self.version = '2010'
+
+    # Since the script exports VS90COMNTOOLS to the environment we need
+    # to check the other Visual Studio environment variables first.
+    elif 'VS90COMNTOOLS' in os.environ:
+      self.version = '2008'
 
     else:
       raise RuntimeError(u'Unable to determine Visual Studio version.')
@@ -1125,10 +869,11 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       if not os.path.exists(self._msvscpp_convert):
         raise RuntimeError(u'Unable to find msvscpp-convert.py')
 
-  def _BuildPrepare(self, source_directory):
+  def _BuildPrepare(self, source_helper, source_directory):
     """Prepares the source for building with Visual Studio.
 
     Args:
+      source_helper: the source helper (instance of SourceHelper).
       source_directory: the name of the source directory.
     """
     # For the vs2008 build make sure the binary is XP compatible,
@@ -1154,7 +899,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
       if parsing_mode != 2 or line:
         if parsing_mode == 1:
-          if self.version == '2008':
+          # TODO: currently we want libbde not use Windows Crypto API, hence
+          # we set WINVER to 0x0501.
+          if self.version == '2008' or source_helper.project_name == 'libbde':
             if not line.startswith('#define WINVER 0x0501'):
               print('#define WINVER 0x0501')
               print('')
@@ -1270,7 +1017,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     if self.version in ['2010', '2012', '2013']:
       self._ConvertSolutionFiles(source_directory)
 
-    self._BuildPrepare(source_directory)
+    self._BuildPrepare(source_helper, source_directory)
 
     # Detect architecture based on Visual Studion Platform environment
     # variable. If not set the platform with default to Win32.
@@ -1469,6 +1216,10 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     else:
       suffix = u''
 
+    # MSI does not support a single number version therefore we add '.1'.
+    if u'.' not in project_version:
+      project_version = u'{0!s}.1'.format(project_version)
+
     filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}.{2:s}{3:s}.msi'.format(
         project_name, project_version, self.architecture, suffix))
 
@@ -1493,10 +1244,17 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper)
 
-    if self._dependency_definition.architecture_dependent:
+    # TODO: it looks like coverage is no architecture dependent on Windows.
+    # Check if it is architecture dependent on other platforms.
+    if (self._dependency_definition.architecture_dependent and
+        project_name != u'coverage'):
       suffix = u'-py2.7'
     else:
       suffix = u''
+
+    # MSI does not support a single number version therefore we add '.1'.
+    if u'.' not in project_version:
+      project_version = u'{0!s}.1'.format(project_version)
 
     return u'{0:s}-{1:s}.{2:s}{3:s}.msi'.format(
         project_name, project_version, self.architecture, suffix)

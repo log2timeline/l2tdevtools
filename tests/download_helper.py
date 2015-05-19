@@ -50,7 +50,7 @@ class DownloadHelperTest(unittest.TestCase):
     with open(self._FILENAME, 'rb') as file_object:
       expected_page_content = file_object.read()
 
-    self.assertEquals(page_content, expected_page_content)
+    self.assertEqual(page_content, expected_page_content)
 
   def testDownloadFile(self):
     """Tests the DownloadFile functions."""
@@ -72,7 +72,7 @@ class DownloadHelperTest(unittest.TestCase):
     with open(self._FILENAME, 'rb') as file_object:
       expected_page_content = file_object.read()
 
-    self.assertEquals(page_content, expected_page_content)
+    self.assertEqual(page_content, expected_page_content)
 
 
 class GoogleCodeWikiDownloadHelperTest(unittest.TestCase):
@@ -87,7 +87,7 @@ class GoogleCodeWikiDownloadHelperTest(unittest.TestCase):
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
-    self.assertEquals(latest_version, self._PROJECT_VERSION)
+    self.assertEqual(latest_version, self._PROJECT_VERSION)
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
@@ -100,7 +100,7 @@ class GoogleCodeWikiDownloadHelperTest(unittest.TestCase):
         u'https://{0:s}.googlecode.com/files/{0:s}-{1:s}.tar.gz').format(
             self._PROJECT_NAME, self._PROJECT_VERSION)
 
-    self.assertEquals(download_url, expected_download_url)
+    self.assertEqual(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
@@ -112,7 +112,7 @@ class GoogleCodeWikiDownloadHelperTest(unittest.TestCase):
     expected_project_identifier = u'com.google.code.p.{0:s}'.format(
         self._PROJECT_NAME)
 
-    self.assertEquals(project_identifier, expected_project_identifier)
+    self.assertEqual(project_identifier, expected_project_identifier)
 
 
 class LibyalGoogleDriveDownloadHelperTest(unittest.TestCase):
@@ -130,7 +130,7 @@ class LibyalGoogleDriveDownloadHelperTest(unittest.TestCase):
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
-    self.assertEquals(latest_version, self._PROJECT_VERSION)
+    self.assertEqual(latest_version, self._PROJECT_VERSION)
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
@@ -144,7 +144,7 @@ class LibyalGoogleDriveDownloadHelperTest(unittest.TestCase):
         u'{0:s}/{1:s}-{2:d}.tar.gz').format(
             self._DRIVE_URL, self._PROJECT_NAME, self._PROJECT_VERSION)
 
-    self.assertEquals(download_url, expected_download_url)
+    self.assertEqual(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
@@ -157,7 +157,7 @@ class LibyalGoogleDriveDownloadHelperTest(unittest.TestCase):
     expected_project_identifier = u'com.github.libyal.{0:s}'.format(
         self._PROJECT_NAME)
 
-    self.assertEquals(project_identifier, expected_project_identifier)
+    self.assertEqual(project_identifier, expected_project_identifier)
 
 
 class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
@@ -174,7 +174,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
-    self.assertEquals(latest_version, self._PROJECT_VERSION)
+    self.assertEqual(latest_version, self._PROJECT_VERSION)
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
@@ -189,7 +189,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_VERSION)
 
-    self.assertEquals(download_url, expected_download_url)
+    self.assertEqual(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
@@ -202,7 +202,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
     expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
 
-    self.assertEquals(project_identifier, expected_project_identifier)
+    self.assertEqual(project_identifier, expected_project_identifier)
 
 
 class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
@@ -220,7 +220,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
-    self.assertEquals(latest_version, self._PROJECT_VERSION)
+    self.assertEqual(latest_version, self._PROJECT_VERSION)
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
@@ -236,7 +236,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_STATUS, self._PROJECT_VERSION)
 
-    self.assertEquals(download_url, expected_download_url)
+    self.assertEqual(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
@@ -249,7 +249,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
     expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
 
-    self.assertEquals(project_identifier, expected_project_identifier)
+    self.assertEqual(project_identifier, expected_project_identifier)
 
 
 class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
@@ -266,7 +266,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
-    self.assertEquals(latest_version, self._PROJECT_VERSION)
+    self.assertEqual(latest_version, self._PROJECT_VERSION)
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
@@ -282,7 +282,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_VERSION)
 
-    self.assertEquals(download_url, expected_download_url)
+    self.assertEqual(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
@@ -295,7 +295,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
     expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
 
-    self.assertEquals(project_identifier, expected_project_identifier)
+    self.assertEqual(project_identifier, expected_project_identifier)
 
 
 class PyPiDownloadHelperTest(unittest.TestCase):
@@ -310,7 +310,7 @@ class PyPiDownloadHelperTest(unittest.TestCase):
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
-    self.assertEquals(latest_version, self._PROJECT_VERSION)
+    self.assertEqual(latest_version, self._PROJECT_VERSION)
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
@@ -324,7 +324,7 @@ class PyPiDownloadHelperTest(unittest.TestCase):
         u'{1:s}-{2:s}.tar.gz').format(
             self._PROJECT_NAME[0], self._PROJECT_NAME, self._PROJECT_VERSION)
 
-    self.assertEquals(download_url, expected_download_url)
+    self.assertEqual(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
@@ -336,7 +336,7 @@ class PyPiDownloadHelperTest(unittest.TestCase):
     expected_project_identifier = u'org.python.pypi.{0:s}'.format(
         self._PROJECT_NAME)
 
-    self.assertEquals(project_identifier, expected_project_identifier)
+    self.assertEqual(project_identifier, expected_project_identifier)
 
 
 class SourceForgeDownloadHelperTest(unittest.TestCase):
@@ -351,7 +351,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
-    self.assertEquals(latest_version, self._PROJECT_VERSION)
+    self.assertEqual(latest_version, self._PROJECT_VERSION)
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
@@ -365,7 +365,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
         u'/{0:s}-{1:s}.tar.gz').format(
             self._PROJECT_NAME, self._PROJECT_VERSION)
 
-    self.assertEquals(download_url, expected_download_url)
+    self.assertEqual(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
@@ -377,4 +377,8 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
     expected_project_identifier = u'net.sourceforge.projects.{0:s}'.format(
         self._PROJECT_NAME)
 
-    self.assertEquals(project_identifier, expected_project_identifier)
+    self.assertEqual(project_identifier, expected_project_identifier)
+
+
+if __name__ == '__main__':
+  unittest.main()

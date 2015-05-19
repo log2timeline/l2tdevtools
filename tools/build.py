@@ -9,12 +9,8 @@ import os
 import subprocess
 import sys
 
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser
-
 from l2tdevtools import build_helper
+from l2tdevtools import dependencies
 from l2tdevtools import download_helper
 from l2tdevtools import source_helper
 
@@ -26,99 +22,6 @@ __file__ = os.path.abspath(__file__)
 
 
 # TODO: look into merging functionality with update dependencies script.
-
-
-class DependencyDefinition(object):
-  """Class that implements a dependency definition."""
-
-  def __init__(self, name):
-    """Initializes the dependency definition.
-
-    Args:
-      name: the name of the dependency.
-    """
-    self.architecture_dependent = False
-    self.build_system = None
-    self.description_long = None
-    self.description_short = None
-    self.disabled = None
-    self.dpkg_dependencies = None
-    self.dpkg_name = None
-    self.download_url = None
-    self.homepage_url = None
-    self.maintainer = None
-    self.name = name
-    self.setup_name = None
-
-
-class DependencyDefinitionReader(object):
-  """Class that implements a dependency definition reader."""
-
-  def _GetConfigValue(self, config_parser, section_name, value_name):
-    """Retrieves a value from the config parser.
-
-    Args:
-      config_parser: the configuration parser (instance of ConfigParser).
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
-
-    Returns:
-      An object containing the value or None if the value does not exists.
-    """
-    try:
-      return config_parser.get(section_name, value_name).decode('utf-8')
-    except configparser.NoOptionError:
-      return
-
-  def Read(self, file_object):
-    """Reads dependency definitions.
-
-    Args:
-      file_object: the file-like object to read from.
-
-    Yields:
-      Dependency definitions (instances of DependencyDefinition).
-    """
-    # TODO: replace by:
-    # config_parser = configparser. ConfigParser(interpolation=None)
-    config_parser = configparser.RawConfigParser()
-    config_parser.readfp(file_object)
-
-    for section_name in config_parser.sections():
-      dependency_definition = DependencyDefinition(section_name)
-
-      dependency_definition.architecture_dependent = self._GetConfigValue(
-          config_parser, section_name, u'architecture_dependent')
-      dependency_definition.build_system = self._GetConfigValue(
-          config_parser, section_name, u'build_system')
-      dependency_definition.description_long = self._GetConfigValue(
-          config_parser, section_name, u'description_long')
-      dependency_definition.description_short = self._GetConfigValue(
-          config_parser, section_name, u'description_short')
-      dependency_definition.disabled = self._GetConfigValue(
-          config_parser, section_name, u'disabled')
-      dependency_definition.dpkg_dependencies = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_dependencies')
-      dependency_definition.dpkg_name = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_name')
-      dependency_definition.download_url = self._GetConfigValue(
-          config_parser, section_name, u'download_url')
-      dependency_definition.homepage_url = self._GetConfigValue(
-          config_parser, section_name, u'homepage_url')
-      dependency_definition.maintainer = self._GetConfigValue(
-          config_parser, section_name, u'maintainer')
-      dependency_definition.setup_name = self._GetConfigValue(
-          config_parser, section_name, u'setup_name')
-
-      if dependency_definition.disabled is None:
-        dependency_definition.disabled = []
-      elif isinstance(dependency_definition.disabled, basestring):
-        dependency_definition.disabled = dependency_definition.disabled.split(
-            u',')
-
-      # Need at minimum a name and a download URL.
-      if dependency_definition.name and dependency_definition.download_url:
-        yield dependency_definition
 
 
 class DependencyBuilder(object):
@@ -417,6 +320,14 @@ def Main():
       metavar=u'CONFIG_FILE', default=None,
       help=u'path of the build configuration file.')
 
+  argument_parser.add_argument(
+      u'--projects', dest=u'projects', action=u'store',
+      metavar=u'PROJECT_NAME(S)', default=None,
+      help=(
+          u'comma separated list of specific project names to build. The '
+          u'default is to build all project defined in the configuration '
+          u'file.'))
+
   options = argument_parser.parse_args()
 
   if not options.build_target:
@@ -492,7 +403,7 @@ def Main():
 
   builds = []
   with open(options.config_file) as file_object:
-    dependency_definition_reader = DependencyDefinitionReader()
+    dependency_definition_reader = dependencies.DependencyDefinitionReader()
     for dependency_definition in dependency_definition_reader.Read(file_object):
       if (options.build_target not in dependency_definition.disabled and
           u'all' not in dependency_definition.disabled):
@@ -504,8 +415,16 @@ def Main():
   current_working_directory = os.getcwd()
   os.chdir(options.build_directory)
 
+  if options.projects:
+    projects = options.projects.split(u',')
+  else:
+    projects = None
+
   failed_builds = []
   for dependency_definition in builds:
+    if projects and dependency_definition.name not in projects:
+      continue
+
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
     if not dependency_builder.Build(dependency_definition):
       print(u'Failed building: {0:s}'.format(dependency_definition.name))
