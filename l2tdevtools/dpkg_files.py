@@ -73,25 +73,25 @@ class DpkgBuildFilesGenerator(object):
       u'export DH_OPTIONS',
       u'',
       u'%:',
-      u'	dh  $@ {build_system:s} {with_quilt:s}',
+      u'\tdh  $@ {build_system:s} {with_quilt:s}',
       u'',
       u'.PHONY: override_dh_auto_configure',
       u'override_dh_auto_configure:',
-      u'	dh_auto_configure -- {configure_options:s} CFLAGS="-g"',
+      u'\tdh_auto_configure -- {configure_options:s} CFLAGS="-g"',
       u'',
       u'.PHONY: override_dh_auto_test',
       u'override_dh_auto_test:',
       u'',
       u'.PHONY: override_dh_install',
       u'override_dh_install:',
-      u'	# Create the {package_library:s} package.',
+      u'\t# Create the {package_library:s} package.',
       u'{install_library:s}',
-      u'	# Create the {package_development:s} package.',
+      u'\t# Create the {package_development:s} package.',
       u'{install_development:s}',
-      u'	# Create the {package_tools:s} package.',
+      u'\t# Create the {package_tools:s} package.',
       u'{install_tools:s}',
-      u'	# The {package_debug:s} package is created by dh_strip.',
-      u'	dh_install',
+      u'\t# The {package_debug:s} package is created by dh_strip.',
+      u'\tdh_install',
       u'',
       u'.PHONY: override_dh_installmenu',
       u'override_dh_installmenu:',
@@ -138,19 +138,20 @@ class DpkgBuildFilesGenerator(object):
       u'.PHONY: override_dh_strip',
       u'override_dh_strip:',
       u'ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))',
-      u'	dh_strip -p{package_library:s} --dbg-package={package_debug:s}',
+      u'\tdh_strip -p{package_library:s} --dbg-package={package_debug:s}',
       u'endif',
       u'',
       u'.PHONY: override_dh_shlibdeps',
       u'override_dh_shlibdeps:',
-      (u'	dh_shlibdeps -L{package_library:s} '
-       u'-l${{CURDIR}}/debian/tmp/usr/lib'),
+      u'\tdh_shlibdeps -L{package_library:s} -l${{CURDIR}}/debian/tmp/usr/lib',
       u'',
       u'.PHONY: override_dh_makeshlibs',
       u'override_dh_makeshlibs:',
-      u'	dh_makeshlibs -X{package_development:s}',
+      u'\tdh_makeshlibs -X{package_development:s}',
       u''])
 
+  # Force the build system to setup.py here in case the package ships
+  # a Makefile or equivalent.
   _RULES_TEMPLATE_SETUP_PY = u'\n'.join([
       u'#!/usr/bin/make -f',
       u'# debian/rules that uses debhelper >= 7.',
@@ -163,8 +164,8 @@ class DpkgBuildFilesGenerator(object):
       u'',
       u'',
       u'%:',
-      u'	dh  $@ --with python2 {with_quilt:s}',
-      u'',
+      u'\tdh  $@ --buildsystem=python_distutils --with=python2 {with_quilt:s}',
+      u'{dh_auto_install_override:s}',
       u'.PHONY: override_dh_auto_test',
       u'override_dh_auto_test:',
       u'',
@@ -212,7 +213,7 @@ class DpkgBuildFilesGenerator(object):
       u'',
       u'.PHONY: override_dh_python2',
       u'override_dh_python2:',
-      u'	dh_python2 -V 2.7 setup.py',
+      u'\tdh_python2 -V 2.7 setup.py',
       u''])
 
   _SOURCE_FORMAT_TEMPLATE = u'\n'.join([
@@ -565,12 +566,48 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
+    if self._dependency_definition.dpkg_name:
+      project_name = self._dependency_definition.dpkg_name
+    else:
+      project_name = self._project_name
+
+    package_name = u'python-{0:s}'.format(project_name)
+
     if self._dependency_definition.patches:
       with_quilt = u'--with quilt'
     else:
       with_quilt = u''
 
+    if not self._dependency_definition.dpkg_manual_install:
+      dh_auto_install_override = u''
+    else:
+      dh_auto_install_override = u'\n'.join([
+          u'.PHONY: override_dh_auto_install',
+          u'override_dh_auto_install:',
+          u'\t# Manually install the Python module files.',
+          (u'\tmkdir -p debian/{package_name:s}/usr/lib/python2.7/'
+           u'site-packages'),
+          (u'\tPYTHONPATH=debian/{package_name:s}/usr/lib/python2.7/'
+           u'site-packages python ./setup.py install --prefix debian/'
+           u'{package_name:s}}/usr'),
+          (u'\tmv debian/{{package_name:s}/usr/lib/python2.7/site-packages '
+           u'debian/{package_name:s}/usr/lib/python2.7/dist-packages'),
+          u'\t# Remove overrides of existing files.',
+          (u'\trm -f debian/{package_name:s}/usr/lib/python2.7/dist-packages/'
+           u'easy-install.*'),
+          (u'\trm -f debian/{package_name:s}/usr/lib/python2.7/dist-packages/'
+           u'site.*'),
+          u'\t# Move the Python module files out of the .egg directory.',
+          (u'\tmv debian/{package_name:s}/usr/lib/python2.7/dist-packages/'
+           u'*.egg/{project_name:s} debian/{package_name:s}/usr/lib/python2.7/'
+           u'dist-packages'),
+          u'',
+          u'']).format({
+              u'package_name': package_name,
+              u'project_name': project_name})
+
     template_values = {
+        u'dh_auto_install_override': dh_auto_install_override,
         u'with_quilt': with_quilt}
 
     filename = os.path.join(dpkg_path, u'rules')

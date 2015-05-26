@@ -27,6 +27,7 @@ class DependencyDefinition(object):
     self.disabled = None
     self.dpkg_build_dependencies = None
     self.dpkg_dependencies = None
+    self.dpkg_manual_install = False
     self.dpkg_name = None
     self.download_url = None
     self.homepage_url = None
@@ -136,6 +137,8 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'dpkg_build_dependencies')
       dependency_definition.dpkg_dependencies = self._GetConfigValue(
           config_parser, section_name, u'dpkg_dependencies')
+      dependency_definition.dpkg_manual_install = self._GetConfigValue(
+          config_parser, section_name, u'dpkg_manual_install')
       dependency_definition.dpkg_name = self._GetConfigValue(
           config_parser, section_name, u'dpkg_name')
       dependency_definition.download_url = self._GetConfigValue(
