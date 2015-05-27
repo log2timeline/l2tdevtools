@@ -104,6 +104,7 @@ then
 
     exit ${EXIT_FAILURE};
   fi
+  git fetch upstream;
 
   if have_master_branch;
   then
@@ -191,6 +192,8 @@ then
 
   TEMP_FILE=`mktemp .tmp_l2tdevtools_code_review.XXXXXX`;
 
+  git push;
+
   python utils/upload.py \
       --oauth2 ${BROWSER_PARAM} \
       --send_mail -r ${REVIEWERS} --cc log2timeline-dev@googlegroups.com \
@@ -216,12 +219,13 @@ then
 
   POST_DATA="{
   \"title\": \"${DESCRIPTION}\",
-  \"body\": \"[Code review: ${CL}: ${DESCRIPTION}](https://codereview.appspot.com/${CL})/\",
+  \"body\": \"[Code review: ${CL}: ${DESCRIPTION}](https://codereview.appspot.com/${CL}/)\",
   \"head\": \"${ORGANIZATION}:${BRANCH}\",
   \"base\": \"master\"
 }";
 
-  curl -s --data "${POST_DATA}" https://api.github.com/repos/log2timeline/l2tdevtools/pulls?access_token=${ACCESS_TOKEN};
+  echo "Creating pull request.";
+  curl -s --data "${POST_DATA}" https://api.github.com/repos/log2timeline/l2tdevtools/pulls?access_token=${ACCESS_TOKEN} >/dev/null;
 
   if test $? -ne 0;
   then
@@ -282,7 +286,7 @@ then
   echo ${CL} > ${CL_FILENAME};
 
   echo "";
-  echo "Saved code review number for future updates/submits.";
+  echo "Saved code review number for future updates.";
 fi
 
 exit ${EXIT_SUCCESS};
