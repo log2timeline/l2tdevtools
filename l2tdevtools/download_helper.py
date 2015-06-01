@@ -110,15 +110,21 @@ class ProjectDownloadHelper(DownloadHelper):
 
     filename = self.DownloadFile(download_url)
 
-    # The github archive packages filename is:
+    # github archive package filenames can be:
     # {project version}.tar.gz
-    github_archive_filename = u'{0!s}.tar.gz'.format(project_version)
-    if filename == github_archive_filename:
+    # v{project version}.tar.gz
+    github_archive_filenames = [
+        u'{0!s}.tar.gz'.format(project_version),
+        u'v{0!s}.tar.gz'.format(project_version)]
+
+    if filename in github_archive_filenames:
       # The desired source package filename is:
       # {project name}-{project version}.tar.gz
-      filename = u'{0:s}-{1:s}'.format(project_name, filename)
+      package_filename = u'{0:s}-{1:s}.tar.gz'.format(
+          project_name, project_version)
 
-      os.rename(github_archive_filename, filename)
+      os.rename(filename, package_filename)
+      filename = package_filename
 
     return filename
 
