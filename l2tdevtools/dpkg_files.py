@@ -4,6 +4,7 @@
 import logging
 import os
 import shutil
+import stat
 import time
 
 from l2tdevtools import download_helper
@@ -479,6 +480,10 @@ class DpkgBuildFilesGenerator(object):
 
     elif self._dependency_definition.build_system == u'setup_py':
       self._GenerateSetupPyRulesFile(dpkg_path)
+
+    filename = os.path.join(dpkg_path, u'rules')
+    stat_info = os.stat(filename)
+    os.chmod(filename, stat_info.st_mode | stat.S_IEXEC)
 
   def _GenerateConfigureMakeRulesFile(self, dpkg_path):
     """Generate the dpkg build rules file.
