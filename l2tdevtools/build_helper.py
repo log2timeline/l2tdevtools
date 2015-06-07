@@ -516,10 +516,14 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       return False
     logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
+    project_name = source_helper.project_name
+    if project_name.startswith(u'python-'):
+      project_name = project_name[7:]
+
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     deb_orig_source_filename = u'python-{0:s}_{1!s}.orig.tar.gz'.format(
-        source_helper.project_name, source_helper.project_version)
+        project_name, source_helper.project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
     source_directory = source_helper.Create()
@@ -537,7 +541,7 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       os.chdir(source_directory)
 
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
-          source_helper.project_name, source_helper.project_version,
+          project_name, source_helper.project_version,
           self._dependency_definition)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -560,9 +564,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
     shutil.copytree(dpkg_directory, debian_directory)
 
     if not self._BuildPrepare(
-        source_directory, source_helper.project_name,
-        source_helper.project_version, self.version_suffix, self.distribution,
-        self.architecture):
+        source_directory, project_name, source_helper.project_version,
+        self.version_suffix, self.distribution, self.architecture):
       return False
 
     command = u'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
@@ -574,9 +577,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       return False
 
     if not self._BuildFinalize(
-        source_directory, source_helper.project_name,
-        source_helper.project_version, self.version_suffix, self.distribution,
-        self.architecture):
+        source_directory, project_name, source_helper.project_version,
+        self.version_suffix, self.distribution, self.architecture):
       return False
 
     return True
@@ -591,6 +593,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper.project_name
+      if project_name.startswith(u'python-'):
+        project_name = project_name[7:]
 
     filenames_to_ignore = re.compile(u'^python-{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, source_helper.project_version))
@@ -639,6 +643,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper.project_name
+      if project_name.startswith(u'python-'):
+        project_name = project_name[7:]
 
     return u'python-{0:s}_{1!s}-1_{2:s}.deb'.format(
         project_name, source_helper.project_version, self.architecture)
@@ -678,10 +684,14 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       return False
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
+    project_name = source_helper.project_name
+    if project_name.startswith(u'python-'):
+      project_name = project_name[7:]
+
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     deb_orig_source_filename = u'python-{0:s}_{1!s}.orig.tar.gz'.format(
-        source_helper.project_name, source_helper.project_version)
+        project_name, source_helper.project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
     source_directory = source_helper.Create()
@@ -699,7 +709,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       os.chdir(source_directory)
 
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
-          source_helper.project_name, source_helper.project_version,
+          project_name, source_helper.project_version,
           self._dependency_definition)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -722,9 +732,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     shutil.copytree(dpkg_directory, debian_directory)
 
     if not self._BuildPrepare(
-        source_directory, source_helper.project_name,
-        source_helper.project_version, self.version_suffix, self.distribution,
-        self.architecture):
+        source_directory, project_name, source_helper.project_version,
+        self.version_suffix, self.distribution, self.architecture):
       return False
 
     command = u'debuild -S -sa > {0:s} 2>&1'.format(
@@ -736,9 +745,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       return False
 
     if not self._BuildFinalize(
-        source_directory, source_helper.project_name,
-        source_helper.project_version, self.version_suffix, self.distribution,
-        self.architecture):
+        source_directory, project_name, source_helper.project_version,
+        self.version_suffix, self.distribution, self.architecture):
       return False
 
     return True
@@ -753,6 +761,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper.project_name
+      if project_name.startswith(u'python-'):
+        project_name = project_name[7:]
 
     filenames_to_ignore = re.compile(u'^python-{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, source_helper.project_version))
@@ -803,6 +813,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper.project_name
+      if project_name.startswith(u'python-'):
+        project_name = project_name[7:]
 
     return u'python-{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
         project_name, source_helper.project_version,
