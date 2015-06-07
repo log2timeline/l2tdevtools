@@ -216,26 +216,29 @@ class DependencyUpdater(object):
     for package_url in package_urls:
       _, _, package_filename = package_url.rpartition(u'/')
       if package_filename.endswith(u'.dmg'):
-        # We need to use the most right '-' character as the separator of the
-        # name and the version, since names can contain the '-' character.
-        name, _, version = package_filename.rpartition(u'-')
-        version, _, _ = version.partition(u'.dmg')
-        package_prefix = name
+        # Strip off the trailing part starting with '.dmg'.
+        package_name, _, _ = package_filename.partition(u'.dmg')
         package_suffix = u'.dmg'
 
       elif package_filename.endswith(u'.msi'):
         # Strip off the trailing part starting with '.win'.
         package_name, _, _ = package_filename.partition(u'.win')
-        # We need to use the most right '-' character as the separator of the
-        # name and the version, since names can contain the '-' character.
-        name, _, version = package_name.rpartition(u'-')
-        version, _, _ = version.partition(u'.win')
-        package_prefix = name
         package_suffix = u'.msi'
 
       else:
         # Ignore all other file exensions.
         continue
+
+      if name.startswith(u'pytsk3'):
+        # We need to use the most left '-' character as the separator of the
+        # name and the version, since version can contain the '-' character.
+        name, _, version = package_name.partition(u'-')
+      else:
+        # We need to use the most right '-' character as the separator of the
+        # name and the version, since name can contain the '-' character.
+        name, _, version = package_name.rpartition(u'-')
+
+      package_prefix = name
 
       version = version.split(u'.')
       if name == u'pytsk3':
