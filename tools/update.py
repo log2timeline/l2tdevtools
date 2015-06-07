@@ -238,7 +238,7 @@ class DependencyUpdater(object):
         continue
 
       version = version.split(u'.')
-      if name == u'pytsk':
+      if name == u'pytsk3':
         last_part = version.pop()
         version.extend(last_part.split(u'-'))
 
@@ -536,8 +536,8 @@ class DependencyUpdater(object):
             compare_result = -1
           elif name not in package_versions:
             compare_result = 1
-          elif name == u'pytsk':
-            # We cannot really tell by the version number that pytsk needs to
+          elif name == u'pytsk3':
+            # We cannot really tell by the version number that pytsk3 needs to
             # be updated, so just uninstall and update it any way.
             compare_result = -1
           else:
@@ -626,8 +626,8 @@ class DependencyUpdater(object):
           compare_result = -1
         elif name not in package_versions:
           compare_result = 1
-        elif name == u'pytsk':
-          # We cannot really tell by the version number that pytsk needs to
+        elif name == u'pytsk3':
+          # We cannot really tell by the version number that pytsk3 needs to
           # be updated, so just uninstall and update it any way.
           compare_result = -1
         else:
