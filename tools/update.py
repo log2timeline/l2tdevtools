@@ -215,56 +215,30 @@ class DependencyUpdater(object):
     package_versions = {}
     for package_url in package_urls:
       _, _, package_filename = package_url.rpartition(u'/')
-      if package_filename.endswith(u'.deb'):
-        name, _, version = package_filename.partition(u'_')
-
-        # Ignore development and tools DEB packages.
-        if name.endswith(u'-dev') or name.endswith(u'-tools'):
-          continue
-
-        if name.endswith(u'-python'):
-          package_prefix = name
-          name, _, _ = name.partition(u'-')
-        else:
-          package_prefix = u'{0:s}_'.format(name)
-        version, _, _ = version.partition(u'-')
-        package_suffix = u'.deb'
-
-      elif package_filename.endswith(u'.dmg'):
-        name, _, version = package_filename.partition(u'-')
+      if package_filename.endswith(u'.dmg'):
+        # We need to use the most right '-' character as the separator of the
+        # name and the version, since names can contain the '-' character.
+        name, _, version = package_filename.rpartition(u'-')
         version, _, _ = version.partition(u'.dmg')
         package_prefix = name
         package_suffix = u'.dmg'
 
       elif package_filename.endswith(u'.msi'):
-        name, _, version = package_filename.partition(u'-')
+        # Strip off the trailing part starting with '.win'.
+        package_name, _, _ = package_filename.partition(u'.win')
+        # We need to use the most right '-' character as the separator of the
+        # name and the version, since names can contain the '-' character.
+        name, _, version = package_name.rpartition(u'-')
         version, _, _ = version.partition(u'.win')
         package_prefix = name
         package_suffix = u'.msi'
-
-      elif package_filename.endswith(u'.rpm'):
-        name, _, version = package_filename.partition(u'-')
-
-        # Ignore debuginfo, devel and tools RPM packages.
-        if (version.startswith(u'debuginfo') or version.startswith(u'devel') or
-            version.startswith(u'tools')):
-          continue
-
-        # Ignore the sleuthkit tools RPM package.
-        if name == u'sleuthkit' and not version.startswith(u'libs'):
-          continue
-
-        package_prefix, _, version = version.partition(u'-')
-        version, _, _ = version.partition(u'-')
-        package_prefix = u'{0:s}-{1:s}'.format(name, package_prefix)
-        package_suffix = u'.rpm'
 
       else:
         # Ignore all other file exensions.
         continue
 
       version = version.split(u'.')
-      if name == u'pytsk':
+      if name == u'pytsk3':
         last_part = version.pop()
         version.extend(last_part.split(u'-'))
 
@@ -562,8 +536,8 @@ class DependencyUpdater(object):
             compare_result = -1
           elif name not in package_versions:
             compare_result = 1
-          elif name == u'pytsk':
-            # We cannot really tell by the version number that pytsk needs to
+          elif name == u'pytsk3':
+            # We cannot really tell by the version number that pytsk3 needs to
             # be updated, so just uninstall and update it any way.
             compare_result = -1
           else:
@@ -652,8 +626,8 @@ class DependencyUpdater(object):
           compare_result = -1
         elif name not in package_versions:
           compare_result = 1
-        elif name == u'pytsk':
-          # We cannot really tell by the version number that pytsk needs to
+        elif name == u'pytsk3':
+          # We cannot really tell by the version number that pytsk3 needs to
           # be updated, so just uninstall and update it any way.
           compare_result = -1
         else:
