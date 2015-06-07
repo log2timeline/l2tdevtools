@@ -498,7 +498,7 @@ class DependencyUpdater(object):
         elif package_name.startswith(u'com.github.google.'):
           name = package_name[18:]
 
-        elif package_name.startswith(u'org.github.ipython'):
+        elif package_name.startswith(u'org.github.ipython.'):
           name = package_name[19:]
 
         elif package_name.startswith(u'com.github.kennethreitz.'):
