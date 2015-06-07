@@ -468,7 +468,14 @@ class DependencyUpdater(object):
       if not package_name:
         continue
 
-      if (package_name.startswith(u'com.github.libyal.') or
+      if (package_name.startswith(u'com.github.dateutil.') or
+          package_name.startswith(u'com.github.dfvfs.') or
+          package_name.startswith(u'com.github.erocarrer.') or
+          package_name.startswith(u'com.github.ForensicArtifacts.') or
+          package_name.startswith(u'com.github.kennethreitz.') or
+          package_name.startswith(u'com.github.google.') or
+          package_name.startswith(u'org.github.ipython.') or
+          package_name.startswith(u'com.github.libyal.') or
           package_name.startswith(u'com.github.log2timeline.') or
           package_name.startswith(u'com.github.sleuthkit.') or
           package_name.startswith(u'com.google.code.p.') or
@@ -476,7 +483,28 @@ class DependencyUpdater(object):
           package_name.startswith(u'org.python.pypi.') or
           package_name.startswith(u'net.sourceforge.projects.')):
 
-        if package_name.startswith(u'com.github.libyal.'):
+        if package_name.startswith(u'com.github.dateutil.'):
+          name = package_name[20:]
+
+        elif package_name.startswith(u'com.github.dfvfs.'):
+          name = package_name[17:]
+
+        elif package_name.startswith(u'com.github.erocarrer.'):
+          name = package_name[21:]
+
+        elif package_name.startswith(u'com.github.ForensicArtifacts.'):
+          name = package_name[29:]
+
+        elif package_name.startswith(u'com.github.google.'):
+          name = package_name[18:]
+
+        elif package_name.startswith(u'org.github.ipython'):
+          name = package_name[19:]
+
+        elif package_name.startswith(u'com.github.kennethreitz.'):
+          name = package_name[24:]
+
+        elif package_name.startswith(u'com.github.libyal.'):
           name = package_name[18:]
 
         elif package_name.startswith(u'com.github.log2timeline.'):
@@ -539,7 +567,7 @@ class DependencyUpdater(object):
             compare_result = -1
           elif name not in package_versions:
             compare_result = 1
-          elif name == u'pytsk3':
+          elif name in [u'pytsk', u'pytsk3']:
             # We cannot really tell by the version number that pytsk3 needs to
             # be updated, so just uninstall and update it any way.
             compare_result = -1
@@ -629,7 +657,7 @@ class DependencyUpdater(object):
           compare_result = -1
         elif name not in package_versions:
           compare_result = 1
-        elif name == u'pytsk3':
+        elif name in [u'pytsk', u'pytsk3']:
           # We cannot really tell by the version number that pytsk3 needs to
           # be updated, so just uninstall and update it any way.
           compare_result = -1
