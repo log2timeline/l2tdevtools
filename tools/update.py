@@ -229,7 +229,7 @@ class DependencyUpdater(object):
         # Ignore all other file exensions.
         continue
 
-      if name.startswith(u'pytsk3'):
+      if package_name.startswith(u'pytsk3'):
         # We need to use the most left '-' character as the separator of the
         # name and the version, since version can contain the '-' character.
         name, _, version = package_name.partition(u'-')
