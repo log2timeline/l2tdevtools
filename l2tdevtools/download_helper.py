@@ -609,7 +609,8 @@ class PyPiDownloadHelper(ProjectDownloadHelper):
   _VERSION_EXPRESSIONS = [
       u'[0-9]+[.][0-9]+',
       u'[0-9]+[.][0-9]+a[0-9]',
-      u'[0-9]+[.][0-9]+[.][0-9]+']
+      u'[0-9]+[.][0-9]+[.][0-9]+',
+      u'[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+']
 
   def GetLatestVersion(self, project_name):
     """Retrieves the latest version number for a given project name.
