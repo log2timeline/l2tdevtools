@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import platform
+import re
 import subprocess
 import sys
 
@@ -52,18 +53,22 @@ def CompareVersions(first_version_list, second_version_list):
 class GithubRepoDownloadHelper(download_helper.DownloadHelper):
   """Class that helps in downloading from a GitHub repository."""
 
-  _GITHUB_REPO_URL = (
+  _GITHUB_REPO_API_URL = (
       u'https://api.github.com/repos/log2timeline/l2tbinaries')
 
-  def _GetDownloadUrl(self, preferred_machine_type=None):
-    """Retrieves the download URL.
+  _GITHUB_REPO_URL = (
+      u'https://github.com/log2timeline/l2tbinaries')
+
+  def _GetMachineTypeSubDirectory(self, preferred_machine_type=None):
+    """Retrieves the machine type sub directory.
 
     Args:
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
+
     Returns:
-      The download URL or None.
+      The machine type sub directory or None.
     """
     operating_system = platform.system()
 
@@ -115,22 +120,51 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
           operating_system))
       return
 
-    return u'{0:s}/contents/{1:s}'.format(
-        self._GITHUB_REPO_URL, sub_directory)
+    return sub_directory
 
-  def GetPackageDownloadUrls(self, preferred_machine_type=None):
+  def _GetDownloadUrl(self, preferred_machine_type=None, use_api=False):
+    """Retrieves the download URL.
+
+    Args:
+      preferred_machine_type: optional preferred machine type. The default
+                              is None, which will auto-detect the current
+                              machine type.
+      use_api: optional boolean value to indicate if the API should be used.
+               The default is False.
+
+    Returns:
+      The download URL or None.
+    """
+    sub_directory = self._GetMachineTypeSubDirectory(
+        preferred_machine_type=preferred_machine_type)
+    if not sub_directory:
+      return
+
+    if use_api:
+      download_url = u'{0:s}/contents/{1:s}'.format(
+          self._GITHUB_REPO_API_URL, sub_directory)
+
+    else:
+      download_url = u'{0:s}/tree/master/{1:s}'.format(
+          self._GITHUB_REPO_URL, sub_directory)
+
+    return download_url
+
+  def GetPackageDownloadUrls(self, preferred_machine_type=None, use_api=False):
     """Retrieves the package downloads URL for a given URL.
 
     Args:
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
+      use_api: optional boolean value to indicate if the API should be used.
+               The default is False.
 
     Returns:
       A list of package download URLs or None.
     """
     download_url = self._GetDownloadUrl(
-        preferred_machine_type=preferred_machine_type)
+        preferred_machine_type=preferred_machine_type, use_api=use_api)
     if not download_url:
       return
 
@@ -138,29 +172,48 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
     if not page_content:
       return
 
-    # The page content consist of JSON data that contains a list of dicts.
-    # Each dict consists of:
-    # {
-    #   "name":"PyYAML-3.11.win-amd64-py2.7.msi",
-    #   "path":"win64/PyYAML-3.11.win-amd64-py2.7.msi",
-    #   "sha":"8fca8c1e2549cf54bf993c55930365d01658f418",
-    #   "size":196608,
-    #   "url":"https://api.github.com/...",
-    #   "html_url":"https://github.com/...",
-    #   "git_url":"https://api.github.com/...",
-    #   "download_url":"https://raw.githubusercontent.com/...",
-    #   "type":"file",
-    #   "_links":{
-    #     "self":"https://api.github.com/...",
-    #     "git":"https://api.github.com/...",
-    #     "html":"https://github.com/..."
-    #   }
-    # }
-
     download_urls = []
-    for directory_entry in json.loads(page_content):
-      download_url = directory_entry.get(u'download_url', None)
-      if download_url:
+    if use_api:
+      # The page content consist of JSON data that contains a list of dicts.
+      # Each dict consists of:
+      # {
+      #   "name":"PyYAML-3.11.win-amd64-py2.7.msi",
+      #   "path":"win64/PyYAML-3.11.win-amd64-py2.7.msi",
+      #   "sha":"8fca8c1e2549cf54bf993c55930365d01658f418",
+      #   "size":196608,
+      #   "url":"https://api.github.com/...",
+      #   "html_url":"https://github.com/...",
+      #   "git_url":"https://api.github.com/...",
+      #   "download_url":"https://raw.githubusercontent.com/...",
+      #   "type":"file",
+      #   "_links":{
+      #     "self":"https://api.github.com/...",
+      #     "git":"https://api.github.com/...",
+      #     "html":"https://github.com/..."
+      #   }
+      # }
+
+      for directory_entry in json.loads(page_content):
+        download_url = directory_entry.get(u'download_url', None)
+        if download_url:
+          download_urls.append(download_url)
+
+    else:
+      sub_directory = self._GetMachineTypeSubDirectory(
+          preferred_machine_type=preferred_machine_type)
+      if not sub_directory:
+        return
+
+      # The format of the download URL is:
+      # <a href="{path}" class="js-directory-link"
+      expression_string = u'<a href="([^"]*)" class="js-directory-link"'
+      matches = re.findall(expression_string, page_content)
+
+      for match in matches:
+        _, _, download_url = match.rpartition(u'/')
+        download_url = (
+            u'https://github.com/log2timeline/l2tbinaries/raw/master/{0:s}/'
+            u'{1:s}').format(sub_directory, download_url)
         download_urls.append(download_url)
 
     return download_urls
@@ -201,6 +254,7 @@ class DependencyUpdater(object):
       A tuple of two dictionaries one containing the package filenames
       another the package versions per package name.
     """
+    # The API is rate limited, so we scrape the web page instead.
     package_urls = self._download_helper.GetPackageDownloadUrls(
         preferred_machine_type=self._preferred_machine_type)
     if not package_urls:
