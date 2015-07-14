@@ -155,7 +155,7 @@ class DpkgBuildHelper(BuildHelper):
       A boolean value containing true if the package is installed
       false otherwise.
     """
-    command = u'dpkg-query -l {0:s} >/dev/null 2>&1'.format(package_name)
+    command = u'dpkg-query -s {0:s} >/dev/null 2>&1'.format(package_name)
     exit_code = subprocess.call(command, shell=True)
     return exit_code == 0
 
