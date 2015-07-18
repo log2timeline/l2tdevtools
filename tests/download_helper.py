@@ -361,7 +361,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        u'http://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
+        u'https://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
         u'/{0:s}-{1:s}.tar.gz').format(
             self._PROJECT_NAME, self._PROJECT_VERSION)
 

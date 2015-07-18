@@ -8,10 +8,15 @@ import os
 import re
 import shutil
 import tarfile
+import zipfile
 
 
 class SourceHelper(object):
-  """Base class that helps in managing the source code."""
+  """Base class that helps in managing the source code.
+
+  Attributes:
+    project_name: the name of the project.
+  """
 
   def __init__(self, project_name):
     """Initializes the source helper.
@@ -64,6 +69,100 @@ class SourcePackageHelper(SourceHelper):
           self.project_name)
     return self._project_version
 
+  def _CreateFromTarGz(self, source_filename):
+    """Creates the source directory from a .tar.gz source package.
+
+    Args:
+      source_filename: the filename of the source package.
+
+    Returns:
+      The name of the source directory if successful or None on error.
+    """
+    archive = tarfile.open(source_filename, 'r:gz', encoding='utf-8')
+    directory_name = ''
+
+    for tar_info in archive.getmembers():
+      filename = getattr(tar_info, u'name', None)
+      try:
+        filename = filename.decode(self.ENCODING)
+      except UnicodeDecodeError:
+        logging.warning(
+            u'Unable to decode filename in tar file: {0:s}'.format(
+                source_filename))
+        continue
+
+      if filename is None:
+        logging.warning(u'Missing filename in tar file: {0:s}'.format(
+            source_filename))
+        continue
+
+      if not directory_name:
+        # Note that this will set directory name to an empty string
+        # if filename start with a /.
+        directory_name, _, _ = filename.partition(u'/')
+        if not directory_name or directory_name.startswith(u'..'):
+          logging.error(
+              u'Unsuppored directory name in tar file: {0:s}'.format(
+                  source_filename))
+          return
+        if os.path.exists(directory_name):
+          break
+        logging.info(u'Extracting: {0:s}'.format(source_filename))
+
+      elif not filename.startswith(directory_name):
+        logging.warning(
+            u'Skipping: {0:s} in tar file: {1:s}'.format(
+                filename, source_filename))
+        continue
+
+      archive.extract(tar_info)
+    archive.close()
+
+    return directory_name
+
+  def _CreateFromZip(self, source_filename):
+    """Creates the source directory from a .zip source package.
+
+    Args:
+      source_filename: the filename of the source package.
+
+    Returns:
+      The name of the source directory if successful or None on error.
+    """
+    archive = zipfile.ZipFile(source_filename, 'r')
+    directory_name = ''
+
+    for zip_info in archive.infolist():
+      filename = getattr(zip_info, u'filename', None)
+      if filename is None:
+        logging.warning(u'Missing filename in zip file: {0:s}'.format(
+            source_filename))
+        continue
+
+      if not directory_name:
+        # Note that this will set directory name to an empty string
+        # if filename start with a /.
+        directory_name, _, _ = filename.partition(u'/')
+        if not directory_name or directory_name.startswith(u'..'):
+          logging.error(
+              u'Unsuppored directory name in zip file: {0:s}'.format(
+                  source_filename))
+          return
+        if os.path.exists(directory_name):
+          break
+        logging.info(u'Extracting: {0:s}'.format(source_filename))
+
+      elif not filename.startswith(directory_name):
+        logging.warning(
+            u'Skipping: {0:s} in zip file: {1:s}'.format(
+                filename, source_filename))
+        continue
+
+      archive.extract(zip_info)
+    archive.close()
+
+    return directory_name
+
   def Clean(self):
     """Removes previous versions of source packages and directories."""
     if not self.project_version:
@@ -75,6 +174,22 @@ class SourcePackageHelper(SourceHelper):
     # Remove previous versions of source packages in the format:
     # project-*.tar.gz
     filenames = glob.glob(u'{0:s}-*.tar.gz'.format(self.project_name))
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove previous versions of source packages in the format:
+    # project-*.tgz
+    filenames = glob.glob(u'{0:s}-*.tgz'.format(self.project_name))
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove previous versions of source packages in the format:
+    # project-*.zip
+    filenames = glob.glob(u'{0:s}-*.zip'.format(self.project_name))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
@@ -100,45 +215,13 @@ class SourcePackageHelper(SourceHelper):
     if not self._source_filename or not os.path.exists(self._source_filename):
       return
 
-    archive = tarfile.open(self._source_filename, 'r:gz', encoding='utf-8')
-    directory_name = ''
+    directory_name = None
+    if (self._source_filename.endswith(u'.tar.gz') or
+        self._source_filename.endswith(u'.tgz')):
+      directory_name = self._CreateFromTarGz(self._source_filename)
 
-    for tar_info in archive.getmembers():
-      filename = getattr(tar_info, u'name', None)
-      try:
-        filename = filename.decode(self.ENCODING)
-      except UnicodeDecodeError:
-        logging.warning(
-            u'Unable to decode filename in tar file: {0:s}'.format(
-                self._source_filename))
-        continue
-
-      if filename is None:
-        logging.warning(u'Missing filename in tar file: {0:s}'.format(
-            self._source_filename))
-        continue
-
-      if not directory_name:
-        # Note that this will set directory name to an empty string
-        # if filename start with a /.
-        directory_name, _, _ = filename.partition(u'/')
-        if not directory_name or directory_name.startswith(u'..'):
-          logging.error(
-              u'Unsuppored directory name in tar file: {0:s}'.format(
-                  self._source_filename))
-          return
-        if os.path.exists(directory_name):
-          break
-        logging.info(u'Extracting: {0:s}'.format(self._source_filename))
-
-      elif not filename.startswith(directory_name):
-        logging.warning(
-            u'Skipping: {0:s} in tar file: {1:s}'.format(
-                filename, self._source_filename))
-        continue
-
-      archive.extract(tar_info)
-    archive.close()
+    elif self._source_filename.endswith(u'.zip'):
+      directory_name = self._CreateFromZip(self._source_filename)
 
     return directory_name
 

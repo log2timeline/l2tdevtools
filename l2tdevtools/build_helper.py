@@ -196,7 +196,6 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
-    logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
@@ -209,6 +208,8 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
+
+    logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
     dpkg_directory = os.path.join(source_directory, u'dpkg')
     if not os.path.exists(dpkg_directory):
@@ -353,7 +354,6 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
-    logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
@@ -366,6 +366,8 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
+
+    logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
     dpkg_directory = os.path.join(source_directory, u'dpkg')
     if not os.path.exists(dpkg_directory):
@@ -514,7 +516,6 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
-    logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
     project_name = source_helper.project_name
     if project_name.startswith(u'python-'):
@@ -531,6 +532,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
+
+    logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
     dpkg_directory = os.path.join(source_directory, u'dpkg')
     if not os.path.exists(dpkg_directory):
@@ -682,7 +685,6 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
-    logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
     project_name = source_helper.project_name
     if project_name.startswith(u'python-'):
@@ -699,6 +701,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
+
+    logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
     dpkg_directory = os.path.join(source_directory, u'dpkg')
     if not os.path.exists(dpkg_directory):
@@ -936,6 +940,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     Args:
       source_directory: the name of the source directory.
     """
+    logging.info(u'Converting Visual Studio solution and project files.')
     os.chdir(source_directory)
 
     solution_filenames = glob.glob(os.path.join(u'msvscpp', u'*.sln'))
@@ -976,14 +981,15 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
-    logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
-        source_filename, self.version))
 
     source_directory = source_helper.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
+
+    logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
+        source_filename, self.version))
 
     # Search common locations for MSBuild.exe
     if self.version == '2008':
@@ -1023,6 +1029,16 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       if not os.environ['VS120COMNTOOLS']:
         logging.error(u'Missing VS120COMNTOOLS environment variable.')
         return False
+
+    zlib_project_file = os.path.join(
+        source_directory, u'msvscpp', u'zlib', u'zlib.vcproj')
+    zlib_source_directory = os.path.join(
+        os.path.dirname(source_directory), u'zlib')
+
+    if (os.path.exists(zlib_project_file) and
+        not os.path.exists(zlib_source_directory)):
+      logging.error(u'Missing dependency: zlib.')
+      return False
 
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
@@ -1179,13 +1195,14 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
-    logging.info(u'Building msi of: {0:s}'.format(source_filename))
 
     source_directory = source_helper.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
+
+    logging.info(u'Building msi of: {0:s}'.format(source_filename))
 
     command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
         sys.executable, os.path.join(u'..', self.LOG_FILENAME))
@@ -1390,13 +1407,14 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
-    logging.info(u'Building pkg of: {0:s}'.format(source_filename))
 
     source_directory = source_helper.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
+
+    logging.info(u'Building pkg of: {0:s}'.format(source_filename))
 
     dmg_filename = u'{0:s}-{1!s}.dmg'.format(
         source_helper.project_name, source_helper.project_version)
@@ -1493,13 +1511,14 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
-    logging.info(u'Building pkg of: {0:s}'.format(source_filename))
 
     source_directory = source_helper.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
+
+    logging.info(u'Building pkg of: {0:s}'.format(source_filename))
 
     dmg_filename = u'{0:s}-{1!s}.dmg'.format(
         source_helper.project_name, source_helper.project_version)
@@ -1823,6 +1842,7 @@ class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
+
     logging.info(u'Building rpm of: {0:s}'.format(source_filename))
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
@@ -1887,6 +1907,7 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper.project_name))
       return False
+
     logging.info(u'Building rpm of: {0:s}'.format(source_filename))
 
     source_directory = source_helper.Create()

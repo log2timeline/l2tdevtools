@@ -699,9 +699,6 @@ class PyPiDownloadHelper(ProjectDownloadHelper):
 class SourceForgeDownloadHelper(ProjectDownloadHelper):
   """Class that helps in downloading a Source Forge project."""
 
-  _VERSION_EXPRESSIONS = [
-      u'[0-9]+[.][0-9]+[.][0-9]+']
-
   def GetLatestVersion(self, project_name):
     """Retrieves the latest version number for a given project name.
 
@@ -709,29 +706,46 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
       project_name: the name of the project.
 
     Returns:
-      The a string containing the latest version number or None on error.
+      The a string containing the latest version number or 0 on error.
     """
+    if project_name == u'zlib':
+      main_project_name = u'libpng'
+    else:
+      main_project_name = project_name
+
     # TODO: make this more robust to detect different naming schemes.
-    download_url = u'http://sourceforge.net/projects/{0:s}/files/{0:s}/'.format(
-        project_name)
+    download_url = (
+        u'https://sourceforge.net/projects/{0:s}/files/{1:s}/').format(
+            main_project_name, project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return 0
 
-    # The format of the project download URL is:
-    # /projects/{project name}/files/{project name}/{project name}-{version}/
-    expression_string = (
-        u'<a href="/projects/{0:s}/files/{0:s}/{0:s}-({1:s})/"').format(
-            project_name, u'|'.join(self._VERSION_EXPRESSIONS))
-    matches = re.findall(expression_string, page_content)
+    if project_name == u'pyparsing':
+      # The format of the project download URL is:
+      # /projects/{project name}/files/{project name}/{project name}-{version}/
+      expression_string = (
+          u'<a href="/projects/{0:s}/files/{1:s}/'
+          u'{1:s}-([0-9]+[.][0-9]+[.][0-9]+)/"').format(
+              main_project_name, project_name)
+      matches = re.findall(expression_string, page_content)
 
-    if not matches:
+    elif project_name == u'pywin32':
+      # The format of the project download URL is:
+      # /projects/{project name}/files/{project name}/Build%20{version}/
+      expression_string = (
+          u'<a href="/projects/{0:s}/files/{1:s}/Build%20([0-9]+)/"').format(
+              main_project_name, project_name)
+      matches = re.findall(expression_string, page_content)
+
+    elif project_name in [u'sleuthkit', u'zlib']:
       # The format of the project download URL is:
       # /projects/{project name}/files/{project name}/{version}/
       expression_string = (
-          u'<a href="/projects/{0:s}/files/{0:s}/({1:s})/"').format(
-              project_name, u'|'.join(self._VERSION_EXPRESSIONS))
+          u'<a href="/projects/{0:s}/files/{1:s}/'
+          u'([0-9]+[.][0-9]+[.][0-9]+)/"').format(
+              main_project_name, project_name)
       matches = re.findall(expression_string, page_content)
 
     if not matches:
@@ -750,37 +764,64 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
     Returns:
       The download URL of the project or None on error.
     """
+    if project_name == u'zlib':
+      main_project_name = u'libpng'
+    else:
+      main_project_name = project_name
+
     # TODO: make this more robust to detect different naming schemes.
-    download_url = u'http://sourceforge.net/projects/{0:s}/files/{0:s}/'.format(
-        project_name)
+    download_url = (
+        u'https://sourceforge.net/projects/{0:s}/files/{1:s}/').format(
+            main_project_name, project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return 0
+      return
 
-    # The format of the project download URL is:
-    # /projects/{project name}/files/{project name}/{project name}-{version}/
-    expression_string = (
-        u'<a href="/projects/{0:s}/files/{0:s}/{0:s}-({1:s})/"').format(
-            project_name, project_version)
-    matches = re.findall(expression_string, page_content)
+    download_url = None
+    if project_name == u'pyparsing':
+      # The format of the project download URL is:
+      # /projects/{project name}/files/{project name}/{project name}-{version}/
+      expression_string = (
+          u'<a href="/projects/{0:s}/files/{1:s}/{1:s}-({2:s})/"').format(
+              main_project_name, project_name, project_version)
+      matches = re.findall(expression_string, page_content)
 
-    if matches:
-      return (
-          u'http://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
-          u'/{0:s}-{1:s}.tar.gz').format(project_name, project_version)
+      if matches:
+        download_url = (
+            u'https://downloads.sourceforge.net/project/{0:s}/{1:s}/{1:s}-{2:s}'
+            u'/{1:s}-{2:s}.tar.gz').format(
+                main_project_name, project_name, project_version)
 
-    # The format of the project download URL is:
-    # /projects/{project name}/files/{project name}/{version}/
-    expression_string = (
-        u'<a href="/projects/{0:s}/files/{0:s}/({1:s})/"').format(
-            project_name, project_version)
-    matches = re.findall(expression_string, page_content)
+    elif project_name == u'pywin32':
+      # The format of the project download URL is:
+      # /projects/{project name}/files/{project name}/Build%20{version}/
+      expression_string = (
+          u'<a href="/projects/{0:s}/files/{1:s}/Build%20({2:s})/"').format(
+              main_project_name, project_name, project_version)
+      matches = re.findall(expression_string, page_content)
 
-    if matches:
-      return (
-          u'http://downloads.sourceforge.net/project/{0:s}/{0:s}/{1:s}'
-          u'/{0:s}-{1:s}.tar.gz').format(project_name, project_version)
+      if matches:
+        download_url = (
+            u'https://downloads.sourceforge.net/project/{0:s}/{1:s}'
+            u'/Build%20{2:s}/{1:s}-{2:s}.zip').format(
+                main_project_name, project_name, project_version)
+
+    elif project_name in [u'sleuthkit', u'zlib']:
+      # The format of the project download URL is:
+      # /projects/{project name}/files/{project name}/{version}/
+      expression_string = (
+          u'<a href="/projects/{0:s}/files/{1:s}/({2:s})/"').format(
+              main_project_name, project_name, project_version)
+      matches = re.findall(expression_string, page_content)
+
+      if matches:
+        download_url = (
+            u'https://downloads.sourceforge.net/project/{0:s}/{1:s}/{2:s}'
+            u'/{1:s}-{2:s}.tar.gz').format(
+                main_project_name, project_name, project_version)
+
+    return download_url
 
   def GetProjectIdentifier(self, project_name):
     """Retrieves the project identifier for a given project name.
