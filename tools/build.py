@@ -357,11 +357,6 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
-  if options.projects:
-    projects = options.projects.split(u',')
-  else:
-    projects = []
-
   if options.build_target in [u'dpkg', u'dpkg-source']:
     missing_packages = build_helper.DpkgBuildHelper.CheckBuildDependencies()
     if missing_packages:
@@ -369,28 +364,6 @@ def Main():
              u'{0:s}.'.format(u', '.join(missing_packages))))
       print(u'')
       return False
-
-  elif options.build_target == u'msi':
-    zlib_dependent_projects = frozenset([u'libewf', u'libqcow', u'libvmdk'])
-    if set(projects).intersection(zlib_dependent_projects):
-      download_helper_object = download_helper.SourceForgeDownloadHelper()
-      source_helper_object = source_helper.SourcePackageHelper(
-          download_helper_object, u'zlib')
-
-      source_filename = source_helper_object.Download()
-      if not source_filename:
-        logging.info(u'Download of: {0:s} failed'.format(
-            source_helper_object.project_name))
-        return False
-
-      source_directory = source_helper_object.Create()
-      if not source_directory:
-        logging.error(
-            u'Extraction of source package: {0:s} failed'.format(
-                source_filename))
-        return False
-
-    # TODO: setup dokan in build directory.
 
   elif options.build_target == u'rpm':
     missing_packages = build_helper.RpmBuildHelper.CheckBuildDependencies()
@@ -427,6 +400,11 @@ def Main():
   # TODO: rpm build of psutil is broken, fix upstream or add patching.
   # (u'psutil', DependencyBuilder.PROJECT_TYPE_PYPI),
 
+  if options.projects:
+    projects = options.projects.split(u',')
+  else:
+    projects = []
+
   builds = []
   with open(options.config_file) as file_object:
     dependency_definition_reader = dependencies.DependencyDefinitionReader()
@@ -449,6 +427,32 @@ def Main():
 
   current_working_directory = os.getcwd()
   os.chdir(options.build_directory)
+
+  if options.build_target == u'msi':
+    zlib_dependent_projects = frozenset([u'libewf', u'libqcow', u'libvmdk'])
+    if set(projects).intersection(zlib_dependent_projects):
+      download_helper_object = download_helper.SourceForgeDownloadHelper()
+      source_helper_object = source_helper.SourcePackageHelper(
+          download_helper_object, u'zlib')
+
+      source_filename = source_helper_object.Download()
+      if not source_filename:
+        logging.info(u'Download of: {0:s} failed'.format(
+            source_helper_object.project_name))
+        os.chdir(current_working_directory)
+        return False
+
+      source_directory = source_helper_object.Create()
+      if not source_directory:
+        logging.error(
+            u'Extraction of source package: {0:s} failed'.format(
+                source_filename))
+        os.chdir(current_working_directory)
+        return False
+
+      os.rename(source_directory, u'zlib')
+
+    # TODO: setup dokan in build directory.
 
   failed_builds = []
   for dependency_definition in builds:
