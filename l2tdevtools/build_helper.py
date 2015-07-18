@@ -1040,6 +1040,16 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       logging.error(u'Missing dependency: zlib.')
       return False
 
+    dokan_project_file = os.path.join(
+        source_directory, u'msvscpp', u'dokan', u'dokan.vcproj')
+    dokan_source_directory = os.path.join(
+        os.path.dirname(source_directory), u'dokan')
+
+    if (os.path.exists(dokan_project_file) and
+        not os.path.exists(dokan_source_directory)):
+      logging.error(u'Missing dependency: dokan.')
+      return False
+
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
     if self.version in ['2010', '2012', '2013']:
