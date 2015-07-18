@@ -20,14 +20,17 @@ class BuildHelper(object):
 
   LOG_FILENAME = u'build.log'
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
     super(BuildHelper, self).__init__()
+    self._data_path = data_path
     self._dependency_definition = dependency_definition
 
 
@@ -60,14 +63,16 @@ class DpkgBuildHelper(BuildHelper):
       u'libsqlite3-dev',
   ])
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
-    super(DpkgBuildHelper, self).__init__(dependency_definition)
+    super(DpkgBuildHelper, self).__init__(dependency_definition, data_path)
     self._prep_script = u'prep-dpkg.sh'
     self._post_script = u'post-dpkg.sh'
 
@@ -165,14 +170,17 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
-    super(ConfigureMakeDpkgBuildHelper, self).__init__(dependency_definition)
+    super(ConfigureMakeDpkgBuildHelper, self).__init__(
+        dependency_definition, data_path)
     self.architecture = platform.machine()
     self.distribution = u''
     self.version_suffix = u''
@@ -221,7 +229,7 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
 
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           source_helper.project_name, source_helper.project_version,
-          self._dependency_definition)
+          self._dependency_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
       os.chdir(u'..')
@@ -325,15 +333,17 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
     super(ConfigureMakeSourceDpkgBuildHelper, self).__init__(
-        dependency_definition)
+        dependency_definition, data_path)
     self._prep_script = u'prep-dpkg-source.sh'
     self._post_script = u'post-dpkg-source.sh'
     self.architecture = u'source'
@@ -379,7 +389,7 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           source_helper.project_name, source_helper.project_version,
-          self._dependency_definition)
+          self._dependency_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
       os.chdir(u'..')
@@ -483,14 +493,17 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 class SetupPyDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
-    super(SetupPyDpkgBuildHelper, self).__init__(dependency_definition)
+    super(SetupPyDpkgBuildHelper, self).__init__(
+        dependency_definition, data_path)
     self.architecture = platform.machine()
     self.distribution = u''
     self.version_suffix = u''
@@ -545,7 +558,7 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
 
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           project_name, source_helper.project_version,
-          self._dependency_definition)
+          self._dependency_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
       os.chdir(u'..')
@@ -656,15 +669,17 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
 class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building source dpkg packages (.deb)."""
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
     super(SetupPySourceDpkgBuildHelper, self).__init__(
-        dependency_definition)
+        dependency_definition, data_path)
     self._prep_script = u'prep-dpkg-source.sh'
     self._post_script = u'post-dpkg-source.sh'
     self.architecture = u'source'
@@ -714,7 +729,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
 
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           project_name, source_helper.project_version,
-          self._dependency_definition)
+          self._dependency_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
       os.chdir(u'..')
@@ -828,14 +843,16 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
 class MsiBuildHelper(BuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
-    super(MsiBuildHelper, self).__init__(dependency_definition)
+    super(MsiBuildHelper, self).__init__(dependency_definition, data_path)
     self.architecture = platform.machine()
 
     if self.architecture == u'x86':
@@ -847,12 +864,14 @@ class MsiBuildHelper(BuildHelper):
 class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
-  def __init__(self, dependency_definition, tools_path):
+  def __init__(self, dependency_definition, data_path, tools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
       tools_path: the path to the tools directory which contains the
                   msvscpp-convert.py script.
 
@@ -860,7 +879,8 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       RuntimeError: if the Visual Studio version could be determined or
                     msvscpp-convert.py could not be found.
     """
-    super(ConfigureMakeMsiBuildHelper, self).__init__(dependency_definition)
+    super(ConfigureMakeMsiBuildHelper, self).__init__(
+        dependency_definition, data_path)
 
     if 'VS120COMNTOOLS' in os.environ:
       self.version = '2013'
@@ -1302,14 +1322,16 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 class PkgBuildHelper(BuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
-    super(PkgBuildHelper, self).__init__(dependency_definition)
+    super(PkgBuildHelper, self).__init__(dependency_definition, data_path)
     self._pkgbuild = os.path.join(u'/', u'usr', u'bin', u'pkgbuild')
 
   def _BuildDmg(self, pkg_filename, dmg_filename):
@@ -1609,14 +1631,16 @@ class RpmBuildHelper(BuildHelper):
       'sqlite-devel',
   ])
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
-    super(RpmBuildHelper, self).__init__(dependency_definition)
+    super(RpmBuildHelper, self).__init__(dependency_definition, data_path)
     self.architecture = platform.machine()
 
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
@@ -1892,14 +1916,17 @@ class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
 class SetupPyRpmBuildHelper(RpmBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
-  def __init__(self, dependency_definition):
+  def __init__(self, dependency_definition, data_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
-    super(SetupPyRpmBuildHelper, self).__init__(dependency_definition)
+    super(SetupPyRpmBuildHelper, self).__init__(
+        dependency_definition, data_path)
     if not dependency_definition.architecture_dependent:
       self.architecture = 'noarch'
 

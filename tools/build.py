@@ -35,10 +35,6 @@ class DependencyBuilder(object):
 
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
 
-  _PATCHES_URL = (
-      u'https://googledrive.com/host/0B30H7z4S52FleW5vUHBnblJfcjg/'
-      u'3rd%20party/patches')
-
   def __init__(self, build_target):
     """Initializes the dependency builder.
 
@@ -108,28 +104,31 @@ class DependencyBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
+    tools_path = os.path.dirname(__file__)
+    data_path = os.path.join(os.path.dirname(tools_path), u'data')
+
     build_helper_object = None
     distributions = [None]
     if self._build_target == u'dpkg':
       build_helper_object = build_helper.ConfigureMakeDpkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'dpkg-source':
       build_helper_object = build_helper.ConfigureMakeSourceDpkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
       distributions = self._DPKG_SOURCE_DISTRIBUTIONS
 
     elif self._build_target == u'msi':
       build_helper_object = build_helper.ConfigureMakeMsiBuildHelper(
-          dependency_definition, os.path.dirname(__file__))
+          dependency_definition, data_path, tools_path)
 
     elif self._build_target == u'pkg':
       build_helper_object = build_helper.ConfigureMakePkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'rpm':
       build_helper_object = build_helper.ConfigureMakeRpmBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     if not build_helper_object:
       return False
@@ -183,29 +182,32 @@ class DependencyBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
+    tools_path = os.path.dirname(__file__)
+    data_path = os.path.join(os.path.dirname(tools_path), u'data')
+
     build_helper_object = None
     distributions = [None]
     if self._build_target == u'dpkg':
       build_helper_object = build_helper.SetupPyDpkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'dpkg-source':
       build_helper_object = build_helper.SetupPySourceDpkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
       distributions = self._DPKG_SOURCE_DISTRIBUTIONS
 
     elif self._build_target == u'msi':
       # TODO: setup sqlite in build directory.
       build_helper_object = build_helper.SetupPyMsiBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'pkg':
       build_helper_object = build_helper.SetupPyPkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'rpm':
       build_helper_object = build_helper.SetupPyRpmBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     if not build_helper_object:
       return False
@@ -396,6 +398,12 @@ def Main():
   # TODO: download and build sqlite3 from source?
   # http://www.sqlite.org/download.html
   # or copy sqlite3.h, .lib and .dll to src/ directory?
+
+  # <a id='a3' href='hp1.html'>sqlite-amalgamation-3081002.zip
+  # d391('a3','2015/sqlite-amalgamation-3081002.zip');
+  # http://www.sqlite.org/2015/sqlite-amalgamation-3081002.zip
+
+  # Create msvscpp files and build dll
 
   # TODO: rpm build of psutil is broken, fix upstream or add patching.
   # (u'psutil', DependencyBuilder.PROJECT_TYPE_PYPI),
