@@ -401,12 +401,26 @@ def Main():
   # TODO: rpm build of psutil is broken, fix upstream or add patching.
   # (u'psutil', DependencyBuilder.PROJECT_TYPE_PYPI),
 
+  if options.projects:
+    projects = options.projects.split(u',')
+  else:
+    projects = []
+
   builds = []
   with open(options.config_file) as file_object:
     dependency_definition_reader = dependencies.DependencyDefinitionReader()
     for dependency_definition in dependency_definition_reader.Read(file_object):
-      if (options.build_target not in dependency_definition.disabled and
-          u'all' not in dependency_definition.disabled):
+      is_disabled = False
+      if (options.build_target in dependency_definition.disabled or
+          u'all' in dependency_definition.disabled):
+        if dependency_definition.name not in projects:
+          disabled = True
+        else:
+          # If a project is manually specified ignore the disabled status.
+          logging.info(u'Ignoring disabled status for: {0:s}'.format(
+              dependency_definition.name))
+
+      if not is_disabled:
         builds.append(dependency_definition)
 
   if not os.path.exists(options.build_directory):
@@ -415,14 +429,9 @@ def Main():
   current_working_directory = os.getcwd()
   os.chdir(options.build_directory)
 
-  if options.projects:
-    projects = options.projects.split(u',')
-  else:
-    projects = None
-
   failed_builds = []
   for dependency_definition in builds:
-    if projects and dependency_definition.name not in projects:
+    if dependency_definition.name not in projects:
       continue
 
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
