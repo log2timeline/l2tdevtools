@@ -21,6 +21,7 @@ class DependencyDefinition(object):
     """
     super(DependencyDefinition, self).__init__()
     self.architecture_dependent = False
+    self.build_dependencies = None
     self.build_system = None
     self.description_long = None
     self.description_short = None
@@ -125,6 +126,8 @@ class DependencyDefinitionReader(object):
 
       dependency_definition.architecture_dependent = self._GetConfigValue(
           config_parser, section_name, u'architecture_dependent')
+      dependency_definition.build_dependencies = self._GetConfigValue(
+          config_parser, section_name, u'build_dependencies')
       dependency_definition.build_system = self._GetConfigValue(
           config_parser, section_name, u'build_system')
       dependency_definition.description_long = self._GetConfigValue(
@@ -153,6 +156,13 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'setup_name')
       dependency_definition.version = self._GetConfigValue(
           config_parser, section_name, u'version')
+
+      if dependency_definition.build_dependencies is None:
+        dependency_definition.build_dependencies = []
+      elif isinstance(
+          dependency_definition.build_dependencies, basestring):
+        dependency_definition.build_dependencies = (
+            dependency_definition.build_dependencies.split(u','))
 
       if dependency_definition.disabled is None:
         dependency_definition.disabled = []

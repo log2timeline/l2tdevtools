@@ -299,6 +299,46 @@ class DependencyBuilder(object):
 
     return self._BuildDependency(download_helper_object, dependency_definition)
 
+  def SetupBuildDependencyZlib(self):
+    """Downloads and extracts the zlib build dependency.
+
+    Returns:
+      A boolean value indicating if the build dependency was set up correctly.
+    """
+    if options.build_target in [u'dpkg', u'dpkg-source']:
+      return build_helper.DpkgBuildHelper.CheckIsInstalled(u'zlib1g-dev')
+
+    elif options.build_target in [u'rpm']:
+      return  build_helper.RpmBuildHelper.CheckIsInstalled(u'zlib-devel')
+
+    # TODO: add Mac OS X support.
+    if self._build_target != u'msi':
+      return True
+
+    # TODO: check for latest version.
+    if os.path.exists(u'zlib'):
+      return True
+
+    download_helper_object = download_helper.SourceForgeDownloadHelper()
+    source_helper_object = source_helper.SourcePackageHelper(
+        download_helper_object, u'zlib')
+
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    source_directory = source_helper_object.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(
+              source_filename))
+      return False
+
+    os.rename(source_directory, u'zlib')
+    return True
+
 
 def Main():
   build_targets = frozenset([
@@ -436,38 +476,30 @@ def Main():
   current_working_directory = os.getcwd()
   os.chdir(options.build_directory)
 
-  if options.build_target == u'msi':
-    zlib_dependent_projects = frozenset([u'libewf', u'libqcow', u'libvmdk'])
-    if set(projects).intersection(zlib_dependent_projects):
-      download_helper_object = download_helper.SourceForgeDownloadHelper()
-      source_helper_object = source_helper.SourcePackageHelper(
-          download_helper_object, u'zlib')
-
-      source_filename = source_helper_object.Download()
-      if not source_filename:
-        logging.info(u'Download of: {0:s} failed'.format(
-            source_helper_object.project_name))
-        os.chdir(current_working_directory)
-        return False
-
-      source_directory = source_helper_object.Create()
-      if not source_directory:
-        logging.error(
-            u'Extraction of source package: {0:s} failed'.format(
-                source_filename))
-        os.chdir(current_working_directory)
-        return False
-
-      os.rename(source_directory, u'zlib')
-
-    # TODO: setup dokan in build directory.
-
   failed_builds = []
   for dependency_definition in builds:
     if dependency_definition.name not in projects:
       continue
 
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
+
+    build_dependencies = list(dependency_definition.build_dependencies)
+
+    # TODO: merge with CheckBuildDependencies
+    # TODO: add support for dokan, bzip2
+    if u'zlib' in build_dependencies:
+      if not dependency_definition.SetupBuildDependencyZlib():
+        print(u'Unable to setup build dependency: zlib')
+        failed_builds.append(dependency_definition.name)
+        continue
+      build_dependencies.remove(u'zlib')
+
+    if build_dependencies:
+      print(u'Unsupported build dependences: {0:s}'.format(
+          u', '.join(build_dependencies)))
+      failed_builds.append(dependency_definition.name)
+      continue
+
     if not dependency_builder.Build(dependency_definition):
       print(u'Failed building: {0:s}'.format(dependency_definition.name))
       failed_builds.append(dependency_definition.name)
