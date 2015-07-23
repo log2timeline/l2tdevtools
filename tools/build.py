@@ -56,7 +56,7 @@ class DependencyBuilder(object):
       True if the build is successful or False on error.
     """
     source_helper_object = source_helper.SourcePackageHelper(
-        download_helper_object, dependency_definition.name)
+        dependency_definition.name, download_helper_object)
 
     source_helper_object.Clean()
 
@@ -133,6 +133,13 @@ class DependencyBuilder(object):
     if not build_helper_object:
       return False
 
+    build_dependencies = build_helper_object.CheckBuildDependencies()
+    if build_dependencies:
+      logging.warning(
+          u'Missing build dependencies: {0:s}.'.format(
+              u', '.join(build_dependencies)))
+      return False
+
     for distribution in distributions:
       if distribution:
         build_helper_object.distribution = distribution
@@ -197,7 +204,6 @@ class DependencyBuilder(object):
       distributions = self._DPKG_SOURCE_DISTRIBUTIONS
 
     elif self._build_target == u'msi':
-      # TODO: setup sqlite in build directory.
       build_helper_object = build_helper.SetupPyMsiBuildHelper(
           dependency_definition, data_path)
 
@@ -210,6 +216,13 @@ class DependencyBuilder(object):
           dependency_definition, data_path)
 
     if not build_helper_object:
+      return False
+
+    build_dependencies = build_helper_object.CheckBuildDependencies()
+    if build_dependencies:
+      logging.warning(
+          u'Missing build dependencies: {0:s}.'.format(
+              u', '.join(build_dependencies)))
       return False
 
     for distribution in distributions:
@@ -299,46 +312,6 @@ class DependencyBuilder(object):
 
     return self._BuildDependency(download_helper_object, dependency_definition)
 
-  def SetupBuildDependencyZlib(self):
-    """Downloads and extracts the zlib build dependency.
-
-    Returns:
-      A boolean value indicating if the build dependency was set up correctly.
-    """
-    if options.build_target in [u'dpkg', u'dpkg-source']:
-      return build_helper.DpkgBuildHelper.CheckIsInstalled(u'zlib1g-dev')
-
-    elif options.build_target in [u'rpm']:
-      return  build_helper.RpmBuildHelper.CheckIsInstalled(u'zlib-devel')
-
-    # TODO: add Mac OS X support.
-    if self._build_target != u'msi':
-      return True
-
-    # TODO: check for latest version.
-    if os.path.exists(u'zlib'):
-      return True
-
-    download_helper_object = download_helper.SourceForgeDownloadHelper()
-    source_helper_object = source_helper.SourcePackageHelper(
-        download_helper_object, u'zlib')
-
-    source_filename = source_helper_object.Download()
-    if not source_filename:
-      logging.info(u'Download of: {0:s} failed'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          u'Extraction of source package: {0:s} failed'.format(
-              source_filename))
-      return False
-
-    os.rename(source_directory, u'zlib')
-    return True
-
 
 def Main():
   build_targets = frozenset([
@@ -399,26 +372,7 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
-  if options.build_target in [u'dpkg', u'dpkg-source']:
-    missing_packages = build_helper.DpkgBuildHelper.CheckBuildDependencies()
-    if missing_packages:
-      print((u'Required build package(s) missing. Please install: '
-             u'{0:s}.'.format(u', '.join(missing_packages))))
-      print(u'')
-      return False
-
-  elif options.build_target == u'rpm':
-    missing_packages = build_helper.RpmBuildHelper.CheckBuildDependencies()
-    if missing_packages:
-      print((u'Required build package(s) missing. Please install: '
-             u'{0:s}.'.format(u', '.join(missing_packages))))
-      print(u'')
-      return False
-
   dependency_builder = DependencyBuilder(options.build_target)
-
-  # TODO: allow for patching e.g. dpkt 1.8.
-  # Have builder check patches URL.
 
   # TODO: package ipython.
 
@@ -434,16 +388,6 @@ def Main():
   # python setup.py bdist_rpm
   #
   # Solution: use protobuf-python.spec to build
-
-  # TODO: download and build sqlite3 from source?
-  # http://www.sqlite.org/download.html
-  # or copy sqlite3.h, .lib and .dll to src/ directory?
-
-  # <a id='a3' href='hp1.html'>sqlite-amalgamation-3081002.zip
-  # d391('a3','2015/sqlite-amalgamation-3081002.zip');
-  # http://www.sqlite.org/2015/sqlite-amalgamation-3081002.zip
-
-  # Create msvscpp files and build dll
 
   # TODO: rpm build of psutil is broken, fix upstream or add patching.
   # (u'psutil', DependencyBuilder.PROJECT_TYPE_PYPI),
@@ -483,23 +427,8 @@ def Main():
 
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
 
-    build_dependencies = list(dependency_definition.build_dependencies)
-
-    # TODO: merge with CheckBuildDependencies
     # TODO: add support for dokan, bzip2
-    if u'zlib' in build_dependencies:
-      if not dependency_definition.SetupBuildDependencyZlib():
-        print(u'Unable to setup build dependency: zlib')
-        failed_builds.append(dependency_definition.name)
-        continue
-      build_dependencies.remove(u'zlib')
-
-    if build_dependencies:
-      print(u'Unsupported build dependences: {0:s}'.format(
-          u', '.join(build_dependencies)))
-      failed_builds.append(dependency_definition.name)
-      continue
-
+    # TODO: setup sqlite in build directory.
     if not dependency_builder.Build(dependency_definition):
       print(u'Failed building: {0:s}'.format(dependency_definition.name))
       failed_builds.append(dependency_definition.name)

@@ -7,22 +7,19 @@ import logging
 import os
 import re
 import shutil
+import subprocess
 import tarfile
 import zipfile
 
 
 class SourceHelper(object):
-  """Base class that helps in managing the source code.
-
-  Attributes:
-    project_name: the name of the project.
-  """
+  """Base class that helps in managing the source code."""
 
   def __init__(self, project_name):
     """Initializes the source helper.
 
     Args:
-      project_name: the name of the project.
+       project_name: the name of the project.
     """
     super(SourceHelper, self).__init__()
     self.project_name = project_name
@@ -44,17 +41,109 @@ class SourceHelper(object):
     """
 
 
+class GitRepositorySourceHelper(SourceHelper):
+  """Class that manages the source code from a git repository."""
+
+  def __init__(self, project_name, git_url):
+    """Initializes the source helper.
+
+    Args:
+       project_name: the name of the project.
+       git_url: the URL of the git repository.
+    """
+    super(GitRepositorySourceHelper, self).__init__(project_name)
+    self._git_url = git_url
+
+  def Clean(self):
+    """Removes a previous version of the source directory."""
+    if os.path.exists(self.project_name):
+      logging.info(u'Removing: {0:s}'.format(self.project_name))
+      shutil.rmtree(self.project_name)
+
+  def Create(self):
+    """Creates the source directory from the git repository.
+
+    Returns:
+      The name of the source directory if successful or None on error.
+    """
+    if not self.project_name or not self._git_url:
+      return
+
+    command = u'git clone {0:s}'.format(self._git_url)
+    exit_code = subprocess.call(
+        u'{0:s}'.format(command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    return self.project_name
+
+  def GetProjectIdentifier(self):
+    """Retrieves the project identifier for a given project name.
+
+    Returns:
+      The project identifier or None on error.
+    """
+    # TODO: determine project identifier based on git url.
+    return
+
+
+class LibyalGitRepositorySourceHelper(GitRepositorySourceHelper):
+  """Class that manages the source code from a libyal git repository."""
+
+  def Create(self):
+    """Creates the source directory from the git repository.
+
+    Returns:
+      The name of the source directory if successful or None on error.
+    """
+    if not self.project_name or not self._git_url:
+      return
+
+    command = u'git clone {0:s}'.format(self._git_url)
+    exit_code = subprocess.call(
+        u'{0:s}'.format(command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    source_directory = self.project_name
+
+    command = u'./synclibs.sh'
+    exit_code = subprocess.call(
+        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    command = u'./autogen.sh'
+    exit_code = subprocess.call(
+        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    command = u'./configure'
+    exit_code = subprocess.call(
+        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    return source_directory
+
+
 class SourcePackageHelper(SourceHelper):
   """Class that manages the source code from a source package."""
 
   ENCODING = 'utf-8'
 
-  def __init__(self, download_helper_object, project_name):
+  def __init__(self, project_name, download_helper_object,):
     """Initializes the source package helper.
 
     Args:
-      download_helper_object: the download helper (instance of DownloadHelper).
       project_name: the name of the project.
+      download_helper_object: the download helper (instance of DownloadHelper).
     """
     super(SourcePackageHelper, self).__init__(project_name)
     self._download_helper = download_helper_object
