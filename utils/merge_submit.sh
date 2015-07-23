@@ -46,8 +46,6 @@ CL_NUMBER=$1;
 USERNAME=$2;
 FEATURE_BRANCH=$3;
 
-GITHUB_URL="https://github.com/${USERNAME}/l2tdevtools.git";
-
 if ! ${HAVE_REMOTE_ORIGIN};
 then
   echo "Submit aborted - invalid origin";
@@ -92,7 +90,7 @@ then
   exit ${EXIT_FAILURE};
 fi
 
-if ! linting_is_correct;
+if ! linting_is_correct_remote_origin;
 then
   echo "Submit aborted - fix the issues reported by the linter.";
 
@@ -104,6 +102,16 @@ then
   echo "Submit aborted - fix the issues reported by the failing test.";
 
   exit ${EXIT_FAILURE};
+fi
+
+if test "${PROJECT_NAME}" = "plaso";
+then
+  if ! generate_api_documentation;
+  then
+    echo "Submit aborted - unable to generate API documentation";
+
+    exit ${EXIT_FAILURE};
+  fi
 fi
 
 URL_CODEREVIEW="https://codereview.appspot.com";
