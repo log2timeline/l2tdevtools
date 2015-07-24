@@ -910,28 +910,60 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     super(ConfigureMakeMsiBuildHelper, self).__init__(
         dependency_definition, data_path)
 
-    if 'VS120COMNTOOLS' in os.environ:
-      self.version = '2013'
+    if u'VS120COMNTOOLS' in os.environ:
+      self.version = u'2013'
 
-    elif 'VS110COMNTOOLS' in os.environ:
-      self.version = '2012'
+    elif u'VS110COMNTOOLS' in os.environ:
+      self.version = u'2012'
 
-    elif 'VS100COMNTOOLS' in os.environ:
-      self.version = '2010'
+    elif u'VS100COMNTOOLS' in os.environ:
+      self.version = u'2010'
 
     # Since the script exports VS90COMNTOOLS to the environment we need
     # to check the other Visual Studio environment variables first.
-    elif 'VS90COMNTOOLS' in os.environ:
-      self.version = '2008'
+    elif u'VS90COMNTOOLS' in os.environ:
+      self.version = u'2008'
 
     else:
       raise RuntimeError(u'Unable to determine Visual Studio version.')
 
-    if self.version != '2008':
+    if self.version != u'2008':
       self._msvscpp_convert = os.path.join(tools_path, u'msvscpp-convert.py')
 
       if not os.path.exists(self._msvscpp_convert):
         raise RuntimeError(u'Unable to find msvscpp-convert.py')
+
+  def _ApplyPatches(self, patches):
+    """Applies patches.
+
+    Args:
+      patches: list of patch file names.
+
+    Returns:
+      A boolean value indicating if applying the patches was successful.
+    """
+    # Search common locations for patch.exe
+    patch = u'{0:s}:{1:s}{2:s}'.format(
+        u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe'))
+
+    if not os.path.exists(patch):
+      logging.error(u'Unable to find patch.exe')
+      return False
+
+    for patch_filename in self._dependency_definition.patches:
+      filename = os.path.join(self._data_path, u'patches', patch_filename)
+      if not os.path.exists(filename):
+        logging.warning(u'Missing patch file: {0:s}'.format(filename))
+        continue
+
+      # TODO: apply patch make sure to use non-interactive mode.
+      command = u'{0:s} {1:s}'.format(patch, filename)
+      exit_code = subprocess.call(command, shell=False)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+    return True
 
   def _BuildPrepare(self, source_helper_object, source_directory):
     """Prepares the source for building with Visual Studio.
@@ -965,20 +997,20 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
         if parsing_mode == 1:
           # TODO: currently we want libbde not use Windows Crypto API, hence
           # we set WINVER to 0x0501.
-          if (self.version == '2008' or
-              source_helper_object.project_name == 'libbde'):
-            if not line.startswith('#define WINVER 0x0501'):
-              print('#define WINVER 0x0501')
-              print('')
+          if (self.version == u'2008' or
+              source_helper_object.project_name == u'libbde'):
+            if not line.startswith(b'#define WINVER 0x0501'):
+              print(b'#define WINVER 0x0501')
+              print(b'')
 
           else:
-            if not line.startswith('#define WINVER 0x0600'):
-              print('#define WINVER 0x0600')
-              print('')
+            if not line.startswith(b'#define WINVER 0x0600'):
+              print(b'#define WINVER 0x0600')
+              print(b'')
 
           parsing_mode = 2
 
-        elif line.startswith('#define _CONFIG_'):
+        elif line.startswith(b'#define _CONFIG_'):
           parsing_mode = 1
 
       print(line)
@@ -1103,7 +1135,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
         source_filename, self.version))
 
     # Search common locations for MSBuild.exe
-    if self.version == '2008':
+    if self.version == u'2008':
       msbuild = u'{0:s}:{1:s}{2:s}'.format(
           u'C', os.sep, os.path.join(
               u'Windows', u'Microsoft.NET', u'Framework', u'v3.5',
@@ -1111,33 +1143,36 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     # Note that MSBuild in .NET 3.5 does not support vs2010 solution files
     # and MSBuild in .NET 4.0 is needed instead.
-    elif self.version in ['2010', '2012', '2013']:
+    elif self.version in [u'2010', u'2012', u'2013']:
       msbuild = u'{0:s}:{1:s}{2:s}'.format(
           u'C', os.sep, os.path.join(
               u'Windows', u'Microsoft.NET', u'Framework', u'v4.0.30319',
               u'MSBuild.exe'))
 
-    if not os.path.exists(msbuild):
+    else:
+      msbuild = u''
+
+    if not msbuild or not os.path.exists(msbuild):
       logging.error(u'Unable to find MSBuild.exe')
       return False
 
-    if self.version == '2008':
-      if not os.environ['VS90COMNTOOLS']:
+    if self.version == u'2008':
+      if not os.environ[u'VS90COMNTOOLS']:
         logging.error(u'Missing VS90COMNTOOLS environment variable.')
         return False
 
-    elif self.version == '2010':
-      if not os.environ['VS100COMNTOOLS']:
+    elif self.version == u'2010':
+      if not os.environ[u'VS100COMNTOOLS']:
         logging.error(u'Missing VS100COMNTOOLS environment variable.')
         return False
 
-    elif self.version == '2012':
-      if not os.environ['VS110COMNTOOLS']:
+    elif self.version == u'2012':
+      if not os.environ[u'VS110COMNTOOLS']:
         logging.error(u'Missing VS110COMNTOOLS environment variable.')
         return False
 
-    elif self.version == '2013':
-      if not os.environ['VS120COMNTOOLS']:
+    elif self.version == u'2013':
+      if not os.environ[u'VS120COMNTOOLS']:
         logging.error(u'Missing VS120COMNTOOLS environment variable.')
         return False
 
@@ -1163,26 +1198,29 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
-    if self.version in ['2010', '2012', '2013']:
+    if self.version in [u'2010', u'2012', u'2013']:
       self._ConvertSolutionFiles(source_directory)
 
-    self._BuildPrepare(source_helper_object, source_directory)
+    if self._dependency_definition.patches:
+      self._ApplyPatches(self._dependency_definition.patches)
 
     # Detect architecture based on Visual Studion Platform environment
+    self._BuildPrepare(source_helper_object, source_directory)
+
     # variable. If not set the platform with default to Win32.
-    msvscpp_platform = os.environ.get('Platform', None)
+    msvscpp_platform = os.environ.get(u'Platform', None)
     if not msvscpp_platform:
-      msvscpp_platform = os.environ.get('TARGET_CPU', None)
+      msvscpp_platform = os.environ.get(u'TARGET_CPU', None)
 
-    if not msvscpp_platform or msvscpp_platform == 'x86':
-      msvscpp_platform = 'Win32'
+    if not msvscpp_platform or msvscpp_platform == u'x86':
+      msvscpp_platform = u'Win32'
 
-    if msvscpp_platform not in ['Win32', 'x64']:
+    if msvscpp_platform not in [u'Win32', u'x64']:
       logging.error(u'Unsupported build platform: {0:s}'.format(
           msvscpp_platform))
       return False
 
-    if self.version == '2008' and msvscpp_platform == 'x64':
+    if self.version == u'2008' and msvscpp_platform == u'x64':
       logging.error(u'Unsupported 64-build platform for vs2008.')
       return False
 
@@ -1217,14 +1255,14 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
       # Setup.py uses VS90COMNTOOLS which is vs2008 specific
       # so we need to set it for the other Visual Studio versions.
-      if self.version == '2010':
-        os.environ['VS90COMNTOOLS'] = os.environ['VS100COMNTOOLS']
+      if self.version == u'2010':
+        os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS100COMNTOOLS']
 
-      elif self.version == '2012':
-        os.environ['VS90COMNTOOLS'] = os.environ['VS110COMNTOOLS']
+      elif self.version == u'2012':
+        os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS110COMNTOOLS']
 
-      elif self.version == '2013':
-        os.environ['VS90COMNTOOLS'] = os.environ['VS120COMNTOOLS']
+      elif self.version == u'2013':
+        os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS120COMNTOOLS']
 
       command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
       exit_code = subprocess.call(command, shell=False)
@@ -1714,7 +1752,6 @@ class RpmBuildHelper(BuildHelper):
       u'byacc',
       u'rpm-build',
       u'python-devel',
-      u'git',
       u'python-dateutil',
       u'python-setuptools'
   ])
@@ -2028,7 +2065,7 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
     super(SetupPyRpmBuildHelper, self).__init__(
         dependency_definition, data_path)
     if not dependency_definition.architecture_dependent:
-      self.architecture = 'noarch'
+      self.architecture = u'noarch'
 
   def Build(self, source_helper_object):
     """Builds the rpms.
