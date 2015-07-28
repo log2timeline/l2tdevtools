@@ -80,7 +80,7 @@ then
   if ! have_remote_upstream;
   then
     echo "Update aborted - missing upstream.";
-    echo "Run: 'git remote add upstream https://github.com/log2timeline/l2tdevtools.git'";
+    echo "Run: 'git remote add upstream https://github.com/log2timeline/${PROJECT_NAME}.git'";
 
     exit ${EXIT_FAILURE};
   fi
@@ -113,7 +113,7 @@ then
     fi
   fi
 
-  if ! linter_pass;
+  if ! linting_is_correct_remote_upstream;
   then
     echo "Update aborted - fix the issues reported by the linter.";
 
@@ -128,7 +128,7 @@ else
     exit ${EXIT_FAILURE};
   fi
 
-  if ! linting_is_correct;
+  if ! linting_is_correct_remote_origin;
   then
     echo "Update aborted - fix the issues reported by the linter.";
 
