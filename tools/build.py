@@ -31,7 +31,7 @@ class DependencyBuilder(object):
 
   # The distributions to build dpkg-source packages for.
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
-      u'precise', u'trusty', u'utopic', u'vivid', u'wily'])
+      u'precise', u'trusty', u'vivid', u'wily'])
 
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
 
