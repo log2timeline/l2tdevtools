@@ -559,13 +559,16 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
           source_helper_object.project_name))
       return False
 
-    project_name = source_helper_object.project_name
-    if project_name.startswith(u'python-'):
-      project_name = project_name[7:]
+    if self._dependency_definition.dpkg_name:
+      project_name = self._dependency_definition.dpkg_name
+    else:
+      project_name = source_helper_object.project_name
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    deb_orig_source_filename = u'python-{0:s}_{1!s}.orig.tar.gz'.format(
+    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, source_helper_object.project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
@@ -638,27 +641,27 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
-      if project_name.startswith(u'python-'):
-        project_name = project_name[7:]
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
 
-    filenames_to_ignore = re.compile(u'^python-{0:s}_{1!s}.orig.tar.gz'.format(
+    filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, source_helper_object.project_version))
 
     # Remove files of previous versions in the format:
-    # python-project_version.orig.tar.gz
-    filenames = glob.glob(u'python-{0:s}_*.orig.tar.gz'.format(project_name))
+    # project_version.orig.tar.gz
+    filenames = glob.glob(u'{0:s}_*.orig.tar.gz'.format(project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(u'^python-{0:s}[-_].*{1!s}'.format(
+    filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
         project_name, source_helper_object.project_version))
 
     # Remove files of previous versions in the format:
-    # python-project[-_]*version-1_architecture.*
-    filenames = glob.glob(u'python-{0:s}[-_]*-1_{1:s}.*'.format(
+    # project[-_]*version-1_architecture.*
+    filenames = glob.glob(u'{0:s}[-_]*-1_{1:s}.*'.format(
         project_name, self.architecture))
 
     for filename in filenames:
@@ -667,8 +670,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # python-project[-_]*version-1.*
-    filenames = glob.glob(u'python-{0:s}[-_]*-1.*'.format(project_name))
+    # project[-_]*version-1.*
+    filenames = glob.glob(u'{0:s}[-_]*-1.*'.format(project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -688,10 +691,10 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
-      if project_name.startswith(u'python-'):
-        project_name = project_name[7:]
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
 
-    return u'python-{0:s}_{1!s}-1_{2:s}.deb'.format(
+    return u'{0:s}_{1!s}-1_{2:s}.deb'.format(
         project_name, source_helper_object.project_version, self.architecture)
 
 
@@ -730,13 +733,16 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
           source_helper_object.project_name))
       return False
 
-    project_name = source_helper_object.project_name
-    if project_name.startswith(u'python-'):
-      project_name = project_name[7:]
+    if self._dependency_definition.dpkg_name:
+      project_name = self._dependency_definition.dpkg_name
+    else:
+      project_name = source_helper_object.project_name
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    deb_orig_source_filename = u'python-{0:s}_{1!s}.orig.tar.gz'.format(
+    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, source_helper_object.project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
@@ -809,27 +815,27 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
-      if project_name.startswith(u'python-'):
-        project_name = project_name[7:]
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
 
-    filenames_to_ignore = re.compile(u'^python-{0:s}_{1!s}.orig.tar.gz'.format(
+    filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, source_helper_object.project_version))
 
     # Remove files of previous versions in the format:
-    # python-project_version.orig.tar.gz
-    filenames = glob.glob(u'python-{0:s}_*.orig.tar.gz'.format(project_name))
+    # project_version.orig.tar.gz
+    filenames = glob.glob(u'{0:s}_*.orig.tar.gz'.format(project_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(u'^python-{0:s}[-_].*{1!s}'.format(
+    filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
         project_name, source_helper_object.project_version))
 
     # Remove files of previous versions in the format:
-    # python-project[-_]*version-1suffix~distribution_architecture.*
-    filenames = glob.glob(u'python-{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
+    # project[-_]*version-1suffix~distribution_architecture.*
+    filenames = glob.glob(u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
         project_name, self.version_suffix, self.distribution,
         self.architecture))
 
@@ -839,8 +845,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # python-project[-_]*version-1suffix~distribution.*
-    filenames = glob.glob(u'python-{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
+    # project[-_]*version-1suffix~distribution.*
+    filenames = glob.glob(u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
         project_name, self.version_suffix, self.distribution))
 
     for filename in filenames:
@@ -861,10 +867,10 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       project_name = self._dependency_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
-      if project_name.startswith(u'python-'):
-        project_name = project_name[7:]
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
 
-    return u'python-{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
+    return u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
         project_name, source_helper_object.project_version,
         self.version_suffix, self.distribution, self.architecture)
 
