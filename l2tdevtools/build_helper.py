@@ -72,6 +72,7 @@ class DpkgBuildHelper(BuildHelper):
       u'fuse': u'libfuse-dev',
       u'libcrypto': u'libssl-dev',
       u'sqlite': u'libsqlite3-dev',
+      u'zeromq': u'libzmq3-dev',
       u'zlib': u'zlib1g-dev'
   }
 
@@ -1065,6 +1066,15 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     # Create msvscpp files and build dll
     return False
 
+  def _SetupBuildDependencyZeroMQ(self):
+    """Sets up the zeromq build dependency.
+
+    Returns:
+      A boolean value indicating if the build dependency was set up correctly.
+    """
+    # TODO: implement.
+    return False
+
   def _SetupBuildDependencyZlib(self):
     """Sets up the zlib build dependency.
 
@@ -1101,6 +1111,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     for package_name in self._dependency_definition.build_dependencies:
       if package_name == u'sqlite':
         self._SetupBuildDependencySqlite()
+
+      elif package_name == u'zeromq':
+        self._SetupBuildDependencyZeroMQ()
 
       elif package_name == u'zlib':
         self._SetupBuildDependencyZlib()
@@ -1761,6 +1774,7 @@ class RpmBuildHelper(BuildHelper):
       u'fuse': u'fuse-devel',
       u'libcrypto': u'openssl-devel',
       u'sqlite': u'sqlite-devel',
+      u'zeromq': u'libzmq3-devel',
       u'zlib': u'zlib-devel'
   }
 
