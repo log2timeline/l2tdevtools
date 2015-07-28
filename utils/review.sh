@@ -83,7 +83,7 @@ then
   echo "Usage: ./${SCRIPTNAME} [--nobrowser] [--noclfile] REVIEWERS";
   echo "";
   echo "  REVIEWERS: the email address of the reviewers that are registered"
-  echo "             with: Rietveld (https://codereview.appspot.com)";
+  echo "             with Rietveld (https://codereview.appspot.com)";
   echo "";
   echo "  --nobrowser: forces upload.py not to open a separate browser";
   echo "               process to obtain OAuth2 credentials for Rietveld";
@@ -101,7 +101,7 @@ then
   if ! have_remote_upstream;
   then
     echo "Review aborted - missing upstream.";
-    echo "Run: 'git remote add upstream https://github.com/log2timeline/l2tdevtools.git'";
+    echo "Run: 'git remote add upstream https://github.com/log2timeline/${PROJECT_NAME}.git'";
 
     exit ${EXIT_FAILURE};
   fi
@@ -134,7 +134,7 @@ then
     fi
   fi
 
-  if ! linter_pass;
+  if ! linting_is_correct_remote_upstream;
   then
     echo "Review aborted - fix the issues reported by the linter.";
 
@@ -150,7 +150,7 @@ else
     exit ${EXIT_FAILURE};
   fi
 
-  if ! linting_is_correct;
+  if ! linting_is_correct_remote_origin;
   then
     echo "Review aborted - fix the issues reported by the linter.";
 
@@ -199,11 +199,11 @@ then
 
   if ! test -z "${BROWSER_PARAM}";
   then
-    echo "You need to visit: https://codereview.appspot.com/get-access-token";
+    echo "You need to visit https://codereview.appspot.com/get-access-token";
     echo "and copy+paste the access token to the window (no prompt)";
   fi
 
-  TEMP_FILE=`mktemp .tmp_l2tdevtools_code_review.XXXXXX`;
+  TEMP_FILE=`mktemp .tmp_${PROJECT_NAME}_code_review.XXXXXX`;
 
   python utils/upload.py \
       --oauth2 ${BROWSER_PARAM} \
@@ -236,7 +236,7 @@ then
 }";
 
   echo "Creating pull request.";
-  curl -s --data "${POST_DATA}" https://api.github.com/repos/log2timeline/l2tdevtools/pulls?access_token=${ACCESS_TOKEN} >/dev/null;
+  curl -s --data "${POST_DATA}" https://api.github.com/repos/log2timeline/${PROJECT_NAME}/pulls?access_token=${ACCESS_TOKEN} >/dev/null;
 
   if test $? -ne 0;
   then
@@ -264,11 +264,11 @@ else
 
   if ! test -z "${BROWSER_PARAM}";
   then
-    echo "You need to visit: https://codereview.appspot.com/get-access-token";
+    echo "You need to visit https://codereview.appspot.com/get-access-token";
     echo "and copy+paste the access token to the window (no prompt)";
   fi
 
-  TEMP_FILE=`mktemp .tmp_l2tdevtools_code_review.XXXXXX`;
+  TEMP_FILE=`mktemp .tmp_${PROJECT_NAME}_code_review.XXXXXX`;
 
   python utils/upload.py \
       --oauth2 ${BROWSER_PARAM} ${CACHE_PARAM} \
