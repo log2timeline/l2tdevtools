@@ -262,7 +262,8 @@ class DpkgBuildFilesGenerator(object):
     else:
       project_name = self._project_name
 
-    if self._dependency_definition.build_system == u'setup_py':
+    if (not self._dependency_definition.dpkg_name and
+        self._dependency_definition.build_system == u'setup_py'):
       project_prefix = u'python-'
     else:
       project_prefix = u''
@@ -308,7 +309,11 @@ class DpkgBuildFilesGenerator(object):
       section = u'libs'
 
     else:
-      package_name = u'python-{0:s}'.format(project_name)
+      if self._dependency_definition.dpkg_name:
+        package_name = self._dependency_definition.dpkg_name
+      else:
+        package_name = u'python-{0:s}'.format(project_name)
+
       packages = [package_name]
       section = u'python'
 
@@ -383,6 +388,7 @@ class DpkgBuildFilesGenerator(object):
             depends = []
 
             # TODO: put pytsk3 in lookup list.
+            # Check if check for python- is correct.
             if package_name.startswith(u'python-') or package_name == u'pytsk3':
               section = u'python'
             else:
@@ -453,7 +459,8 @@ class DpkgBuildFilesGenerator(object):
     else:
       project_name = self._project_name
 
-    if self._dependency_definition.build_system == u'setup_py':
+    if (not self._dependency_definition.dpkg_name and
+        self._dependency_definition.build_system == u'setup_py'):
       project_prefix = u'python-'
     else:
       project_prefix = u''
@@ -574,10 +581,10 @@ class DpkgBuildFilesGenerator(object):
     """
     if self._dependency_definition.dpkg_name:
       project_name = self._dependency_definition.dpkg_name
+      package_name = self._dependency_definition.dpkg_name
     else:
       project_name = self._project_name
-
-    package_name = u'python-{0:s}'.format(project_name)
+      package_name = u'python-{0:s}'.format(self._project_name)
 
     if self._dependency_definition.patches:
       with_quilt = u'--with quilt'
