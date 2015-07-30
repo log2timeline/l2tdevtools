@@ -220,8 +220,14 @@ then
 
   if ! test -z "${BROWSER_PARAM}";
   then
-    echo "You need to visit https://codereview.appspot.com/get-access-token";
-    echo "and copy+paste the access token to the window (no prompt)";
+    echo "Upload server: codereview.appspot.com (change with -s/--server)";
+    echo "Go to the following link in your browser:";
+
+    echo "    https://codereview.appspot.com/get-access-token";
+
+    echo "and copy the access token.";
+
+    echo -n "Enter access token: ";
   fi
 
   TEMP_FILE=`mktemp .tmp_${PROJECT_NAME}_code_review.XXXXXX`;
@@ -285,8 +291,14 @@ else
 
   if ! test -z "${BROWSER_PARAM}";
   then
-    echo "You need to visit https://codereview.appspot.com/get-access-token";
-    echo "and copy+paste the access token to the window (no prompt)";
+    echo "Upload server: codereview.appspot.com (change with -s/--server)";
+    echo "Go to the following link in your browser:";
+
+    echo "    https://codereview.appspot.com/get-access-token";
+
+    echo "and copy the access token.";
+
+    echo -n "Enter access token: ";
   fi
 
   TEMP_FILE=`mktemp .tmp_${PROJECT_NAME}_code_review.XXXXXX`;
