@@ -957,7 +957,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       logging.error(u'Unable to find patch.exe')
       return False
 
-    for patch_filename in self._dependency_definition.patches:
+    for patch_filename in patches:
       filename = os.path.join(self._data_path, u'patches', patch_filename)
       if not os.path.exists(filename):
         logging.warning(u'Missing patch file: {0:s}'.format(filename))
