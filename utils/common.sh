@@ -255,6 +255,7 @@ linting_is_correct_remote_upstream()
     then
       # TODO: allow lint all before erroring.
       echo "Fix linter errors before proceeding.";
+
       return ${FALSE};
     fi
   done
