@@ -46,7 +46,7 @@ CL_NUMBER=$1;
 USERNAME=$2;
 FEATURE_BRANCH=$3;
 
-GITHUB_URL="https://github.com/${USERNAME}/l2tdevtools.git";
+GITHUB_URL="https://github.com/${USERNAME}/${PROJECT_NAME}.git";
 
 if ! ${HAVE_REMOTE_ORIGIN};
 then
@@ -92,7 +92,7 @@ then
   exit ${EXIT_FAILURE};
 fi
 
-if ! linting_is_correct;
+if ! linting_is_correct_remote_origin;
 then
   echo "Submit aborted - fix the issues reported by the linter.";
 
@@ -104,6 +104,20 @@ then
   echo "Submit aborted - fix the issues reported by the failing test.";
 
   exit ${EXIT_FAILURE};
+fi
+
+if test "${PROJECT_NAME}" = "plaso";
+then
+  if ! generate_api_documentation;
+  then
+    echo "Submit aborted - unable to generate API documentation";
+
+    exit ${EXIT_FAILURE};
+  fi
+  # Trigger a readthedocs build for the docs.
+  # The plaso readthedocs content is mirrored with the wiki repo
+  # and has no trigger on update webhook for readthedocs.
+  curl -X POST http://readthedocs.org/build/plaso
 fi
 
 URL_CODEREVIEW="https://codereview.appspot.com";

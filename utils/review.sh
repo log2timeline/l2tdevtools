@@ -83,7 +83,7 @@ then
   echo "Usage: ./${SCRIPTNAME} [--nobrowser] [--noclfile] REVIEWERS";
   echo "";
   echo "  REVIEWERS: the email address of the reviewers that are registered"
-  echo "             with: Rietveld (https://codereview.appspot.com)";
+  echo "             with Rietveld (https://codereview.appspot.com)";
   echo "";
   echo "  --nobrowser: forces upload.py not to open a separate browser";
   echo "               process to obtain OAuth2 credentials for Rietveld";
@@ -101,7 +101,7 @@ then
   if ! have_remote_upstream;
   then
     echo "Review aborted - missing upstream.";
-    echo "Run: 'git remote add upstream https://github.com/log2timeline/l2tdevtools.git'";
+    echo "Run: 'git remote add upstream https://github.com/log2timeline/${PROJECT_NAME}.git'";
 
     exit ${EXIT_FAILURE};
   fi
@@ -132,9 +132,17 @@ then
 
       exit ${EXIT_FAILURE};
     fi
+    git push -f
+
+    if test $? -ne 0;
+    then
+      echo "Review aborted - unable to run: 'git push -f' after update with upstream.";
+
+      exit ${EXIT_FAILURE};
+    fi
   fi
 
-  if ! linter_pass;
+  if ! linting_is_correct_remote_upstream;
   then
     echo "Review aborted - fix the issues reported by the linter.";
 
@@ -150,7 +158,7 @@ else
     exit ${EXIT_FAILURE};
   fi
 
-  if ! linting_is_correct;
+  if ! linting_is_correct_remote_origin;
   then
     echo "Review aborted - fix the issues reported by the linter.";
 
@@ -197,13 +205,32 @@ then
   DESCRIPTION="";
   get_last_change_description "DESCRIPTION";
 
-  if ! test -z "${BROWSER_PARAM}";
+  echo "Automatic generated description of code review request:";
+  echo "${DESCRIPTION}";
+  echo "";
+
+  echo "Hit enter to use the automatic description or enter an alternative";
+  echo "description of code review request:";
+  read INPUT_DESCRIPTION
+
+  if ! test -z "${INPUT_DESCRIPTION}";
   then
-    echo "You need to visit: https://codereview.appspot.com/get-access-token";
-    echo "and copy+paste the access token to the window (no prompt)";
+    DESCRIPTION=${INPUT_DESCRIPTION};
   fi
 
-  TEMP_FILE=`mktemp .tmp_l2tdevtools_code_review.XXXXXX`;
+  if ! test -z "${BROWSER_PARAM}";
+  then
+    echo "Upload server: codereview.appspot.com (change with -s/--server)";
+    echo "Go to the following link in your browser:";
+    echo "";
+    echo "    https://codereview.appspot.com/get-access-token";
+    echo "";
+    echo "and copy the access token.";
+    echo "";
+    echo -n "Enter access token: ";
+  fi
+
+  TEMP_FILE=`mktemp .tmp_${PROJECT_NAME}_code_review.XXXXXX`;
 
   python utils/upload.py \
       --oauth2 ${BROWSER_PARAM} \
@@ -236,7 +263,7 @@ then
 }";
 
   echo "Creating pull request.";
-  curl -s --data "${POST_DATA}" https://api.github.com/repos/log2timeline/l2tdevtools/pulls?access_token=${ACCESS_TOKEN} >/dev/null;
+  curl -s --data "${POST_DATA}" https://api.github.com/repos/log2timeline/${PROJECT_NAME}/pulls?access_token=${ACCESS_TOKEN} >/dev/null;
 
   if test $? -ne 0;
   then
@@ -247,7 +274,7 @@ then
   fi
 
 else
-  echo -n "Short description of code review request: ";
+  echo "Enter a description of code review request:";
   read DESCRIPTION
 
   # Check if we need to set --cache.
@@ -264,11 +291,17 @@ else
 
   if ! test -z "${BROWSER_PARAM}";
   then
-    echo "You need to visit: https://codereview.appspot.com/get-access-token";
-    echo "and copy+paste the access token to the window (no prompt)";
+    echo "Upload server: codereview.appspot.com (change with -s/--server)";
+    echo "Go to the following link in your browser:";
+    echo "";
+    echo "    https://codereview.appspot.com/get-access-token";
+    echo "";
+    echo "and copy the access token.";
+    echo "";
+    echo -n "Enter access token: ";
   fi
 
-  TEMP_FILE=`mktemp .tmp_l2tdevtools_code_review.XXXXXX`;
+  TEMP_FILE=`mktemp .tmp_${PROJECT_NAME}_code_review.XXXXXX`;
 
   python utils/upload.py \
       --oauth2 ${BROWSER_PARAM} ${CACHE_PARAM} \
