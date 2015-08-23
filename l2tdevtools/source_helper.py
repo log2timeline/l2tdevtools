@@ -19,7 +19,7 @@ class SourceHelper(object):
     """Initializes the source helper.
 
     Args:
-       project_name: the name of the project.
+      project_name: the name of the project.
     """
     super(SourceHelper, self).__init__()
     self.project_name = project_name
