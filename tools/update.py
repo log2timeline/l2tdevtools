@@ -224,7 +224,7 @@ class DependencyUpdater(object):
 
   def __init__(
       self, download_directory=u'build', force_install=False,
-      preferred_machine_type=None):
+      msi_targetdir=None, preferred_machine_type=None):
     """Initializes the dependency updater.
 
     Args:
@@ -232,6 +232,8 @@ class DependencyUpdater(object):
                           to match the build directory of the build script.
       force_install: optional boolean value to indicate installation (update)
                      should be forced. The default is False.
+      msi_targetdir: optional string value containing the MSI TARGETDIR
+                     property. The default is None.
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
@@ -240,6 +242,7 @@ class DependencyUpdater(object):
     self._download_directory = download_directory
     self._download_helper = GithubRepoDownloadHelper()
     self._force_install = force_install
+    self._msi_targetdir = msi_targetdir
     self._operating_system = platform.system()
 
     if preferred_machine_type:
@@ -459,12 +462,22 @@ class DependencyUpdater(object):
     Returns:
       A boolean value indicating the install was successful.
     """
+    log_file = u'msiexec.log'
+    if os.path.exists(log_file):
+      os.remove(log_file)
+
+    if self._msi_targetdir:
+      parameters = u' TARGETDIR={0:s}'.format(self._msi_targetdir)
+    else:
+      parameters = u''
+
     result = True
     for name, version in package_versions.iteritems():
       # TODO: add RunAs ?
       package_filename = package_filenames[name]
-      command = u'msiexec.exe /i {0:s} /q'.format(os.path.join(
-          self._download_directory, package_filename))
+      package_path = os.path.join(self._download_directory, package_filename)
+      command = u'msiexec.exe /i {0:s} /q /log {1:s}{2:s}'.format(
+          package_path, log_file, parameters)
       logging.info(u'Installing: {0:s} {1:s}'.format(name, u'.'.join(version)))
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
@@ -791,6 +804,13 @@ def Main():
           u'unless want to force the installation of one machine type e.g. '
           u'\'x86\' onto another \'amd64\'.'))
 
+  argument_parser.add_argument(
+      '--msi-targetdir', '--msi_targetdir', action=u'store', metavar=u'TYPE',
+      dest=u'msi_targetdir', type=unicode, default=None, help=(
+          u'Manually sets the MSI TARGETDIR property. Usage of this argument '
+          u'is not recommended unless want to force the installation of the '
+          u'MSIs into different directory than the system default.'))
+
   options = argument_parser.parse_args()
 
   logging.basicConfig(
@@ -799,6 +819,7 @@ def Main():
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
       force_install=options.force_install,
+      msi_targetdir=options.msi_targetdir,
       preferred_machine_type=options.machine_type)
 
   return dependency_updater.UpdatePackages(options.package_names)
