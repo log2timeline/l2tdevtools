@@ -7,8 +7,6 @@ import shutil
 import stat
 import time
 
-from l2tdevtools import download_helper
-
 
 class DpkgBuildFilesGenerator(object):
   """Class that helps in generating dpkg build files."""
@@ -221,7 +219,7 @@ class DpkgBuildFilesGenerator(object):
       u'1.0'])
 
   def __init__(
-      self, project_name, project_version, dependency_definition):
+      self, project_name, project_version, dependency_definition, data_path):
     """Initializes the dpkg build files generator.
 
     Args:
@@ -229,11 +227,14 @@ class DpkgBuildFilesGenerator(object):
       project_version: the version of the project.
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
     """
     super(DpkgBuildFilesGenerator, self).__init__()
+    self._data_path = data_path
+    self._dependency_definition = dependency_definition
     self._project_name = project_name
     self._project_version = project_version
-    self._dependency_definition = dependency_definition
 
   def _GenerateChangelogFile(self, dpkg_path):
     """Generate the dpkg build changelog file.
@@ -261,7 +262,8 @@ class DpkgBuildFilesGenerator(object):
     else:
       project_name = self._project_name
 
-    if self._dependency_definition.build_system == u'setup_py':
+    if (not self._dependency_definition.dpkg_name and
+        self._dependency_definition.build_system == u'setup_py'):
       project_prefix = u'python-'
     else:
       project_prefix = u''
@@ -307,7 +309,11 @@ class DpkgBuildFilesGenerator(object):
       section = u'libs'
 
     else:
-      package_name = u'python-{0:s}'.format(project_name)
+      if self._dependency_definition.dpkg_name:
+        package_name = self._dependency_definition.dpkg_name
+      else:
+        package_name = u'python-{0:s}'.format(project_name)
+
       packages = [package_name]
       section = u'python'
 
@@ -382,6 +388,7 @@ class DpkgBuildFilesGenerator(object):
             depends = []
 
             # TODO: put pytsk3 in lookup list.
+            # Check if check for python- is correct.
             if package_name.startswith(u'python-') or package_name == u'pytsk3':
               section = u'python'
             else:
@@ -452,7 +459,8 @@ class DpkgBuildFilesGenerator(object):
     else:
       project_name = self._project_name
 
-    if self._dependency_definition.build_system == u'setup_py':
+    if (not self._dependency_definition.dpkg_name and
+        self._dependency_definition.build_system == u'setup_py'):
       project_prefix = u'python-'
     else:
       project_prefix = u''
@@ -573,10 +581,10 @@ class DpkgBuildFilesGenerator(object):
     """
     if self._dependency_definition.dpkg_name:
       project_name = self._dependency_definition.dpkg_name
+      package_name = self._dependency_definition.dpkg_name
     else:
       project_name = self._project_name
-
-    package_name = u'python-{0:s}'.format(project_name)
+      package_name = u'python-{0:s}'.format(self._project_name)
 
     if self._dependency_definition.patches:
       with_quilt = u'--with quilt'
@@ -649,8 +657,6 @@ class DpkgBuildFilesGenerator(object):
     self._GenerateSourceFormatFile(dpkg_path)
 
     if self._dependency_definition.patches:
-      download_helper_object = download_helper.DownloadHelper()
-
       patches_directory = os.path.join(dpkg_path, u'patches')
       os.mkdir(patches_directory)
 
@@ -658,10 +664,13 @@ class DpkgBuildFilesGenerator(object):
       os.chdir(patches_directory)
 
       patch_filenames = []
-      for patch_url in self._dependency_definition.patches:
-        filename = download_helper_object.DownloadFile(patch_url)
+      for patch_filename in self._dependency_definition.patches:
+        filename = os.path.join(self._data_path, u'patches', patch_filename)
+        if not os.path.exists(filename):
+          logging.warning(u'Missing patch file: {0:s}'.format(filename))
+          continue
 
-        _, _, patch_filename = patch_url.rpartition(u'/')
+        shutil.copy(filename, patch_filename)
         patch_filenames.append(patch_filename)
 
       os.chdir(current_path)

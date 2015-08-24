@@ -31,13 +31,9 @@ class DependencyBuilder(object):
 
   # The distributions to build dpkg-source packages for.
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
-      u'precise', u'trusty', u'utopic', u'vivid', u'wily'])
+      u'precise', u'trusty', u'vivid', u'wily'])
 
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
-
-  _PATCHES_URL = (
-      u'https://googledrive.com/host/0B30H7z4S52FleW5vUHBnblJfcjg/'
-      u'3rd%20party/patches')
 
   def __init__(self, build_target):
     """Initializes the dependency builder.
@@ -60,7 +56,7 @@ class DependencyBuilder(object):
       True if the build is successful or False on error.
     """
     source_helper_object = source_helper.SourcePackageHelper(
-        download_helper_object, dependency_definition.name)
+        dependency_definition.name, download_helper_object)
 
     source_helper_object.Clean()
 
@@ -108,31 +104,40 @@ class DependencyBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
+    tools_path = os.path.dirname(__file__)
+    data_path = os.path.join(os.path.dirname(tools_path), u'data')
+
     build_helper_object = None
     distributions = [None]
     if self._build_target == u'dpkg':
       build_helper_object = build_helper.ConfigureMakeDpkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'dpkg-source':
       build_helper_object = build_helper.ConfigureMakeSourceDpkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
       distributions = self._DPKG_SOURCE_DISTRIBUTIONS
 
     elif self._build_target == u'msi':
-      # TODO: setup dokan and zlib in build directory.
       build_helper_object = build_helper.ConfigureMakeMsiBuildHelper(
-          dependency_definition, os.path.dirname(__file__))
+          dependency_definition, data_path, tools_path)
 
     elif self._build_target == u'pkg':
       build_helper_object = build_helper.ConfigureMakePkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'rpm':
       build_helper_object = build_helper.ConfigureMakeRpmBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     if not build_helper_object:
+      return False
+
+    build_dependencies = build_helper_object.CheckBuildDependencies()
+    if build_dependencies:
+      logging.warning(
+          u'Missing build dependencies: {0:s}.'.format(
+              u', '.join(build_dependencies)))
       return False
 
     for distribution in distributions:
@@ -184,31 +189,40 @@ class DependencyBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
+    tools_path = os.path.dirname(__file__)
+    data_path = os.path.join(os.path.dirname(tools_path), u'data')
+
     build_helper_object = None
     distributions = [None]
     if self._build_target == u'dpkg':
       build_helper_object = build_helper.SetupPyDpkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'dpkg-source':
       build_helper_object = build_helper.SetupPySourceDpkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
       distributions = self._DPKG_SOURCE_DISTRIBUTIONS
 
     elif self._build_target == u'msi':
-      # TODO: setup sqlite in build directory.
       build_helper_object = build_helper.SetupPyMsiBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'pkg':
       build_helper_object = build_helper.SetupPyPkgBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     elif self._build_target == u'rpm':
       build_helper_object = build_helper.SetupPyRpmBuildHelper(
-          dependency_definition)
+          dependency_definition, data_path)
 
     if not build_helper_object:
+      return False
+
+    build_dependencies = build_helper_object.CheckBuildDependencies()
+    if build_dependencies:
+      logging.warning(
+          u'Missing build dependencies: {0:s}.'.format(
+              u', '.join(build_dependencies)))
       return False
 
     for distribution in distributions:
@@ -358,26 +372,7 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
-  if options.build_target in [u'dpkg', u'dpkg-source']:
-    missing_packages = build_helper.DpkgBuildHelper.CheckBuildDependencies()
-    if missing_packages:
-      print((u'Required build package(s) missing. Please install: '
-             u'{0:s}.'.format(u', '.join(missing_packages))))
-      print(u'')
-      return False
-
-  elif options.build_target == u'rpm':
-    missing_packages = build_helper.RpmBuildHelper.CheckBuildDependencies()
-    if missing_packages:
-      print((u'Required build package(s) missing. Please install: '
-             u'{0:s}.'.format(u', '.join(missing_packages))))
-      print(u'')
-      return False
-
   dependency_builder = DependencyBuilder(options.build_target)
-
-  # TODO: allow for patching e.g. dpkt 1.8.
-  # Have builder check patches URL.
 
   # TODO: package ipython.
 
@@ -394,19 +389,29 @@ def Main():
   #
   # Solution: use protobuf-python.spec to build
 
-  # TODO: download and build sqlite3 from source?
-  # http://www.sqlite.org/download.html
-  # or copy sqlite3.h, .lib and .dll to src/ directory?
-
   # TODO: rpm build of psutil is broken, fix upstream or add patching.
   # (u'psutil', DependencyBuilder.PROJECT_TYPE_PYPI),
+
+  if options.projects:
+    projects = options.projects.split(u',')
+  else:
+    projects = []
 
   builds = []
   with open(options.config_file) as file_object:
     dependency_definition_reader = dependencies.DependencyDefinitionReader()
     for dependency_definition in dependency_definition_reader.Read(file_object):
-      if (options.build_target not in dependency_definition.disabled and
-          u'all' not in dependency_definition.disabled):
+      is_disabled = False
+      if (options.build_target in dependency_definition.disabled or
+          u'all' in dependency_definition.disabled):
+        if dependency_definition.name not in projects:
+          is_disabled = True
+        else:
+          # If a project is manually specified ignore the disabled status.
+          logging.info(u'Ignoring disabled status for: {0:s}'.format(
+              dependency_definition.name))
+
+      if not is_disabled:
         builds.append(dependency_definition)
 
   if not os.path.exists(options.build_directory):
@@ -415,17 +420,15 @@ def Main():
   current_working_directory = os.getcwd()
   os.chdir(options.build_directory)
 
-  if options.projects:
-    projects = options.projects.split(u',')
-  else:
-    projects = None
-
   failed_builds = []
   for dependency_definition in builds:
-    if projects and dependency_definition.name not in projects:
+    if dependency_definition.name not in projects:
       continue
 
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
+
+    # TODO: add support for dokan, bzip2
+    # TODO: setup sqlite in build directory.
     if not dependency_builder.Build(dependency_definition):
       print(u'Failed building: {0:s}'.format(dependency_definition.name))
       failed_builds.append(dependency_definition.name)

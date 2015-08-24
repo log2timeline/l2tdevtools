@@ -11,7 +11,31 @@ except ImportError:
 
 
 class DependencyDefinition(object):
-  """Class that implements a dependency definition."""
+  """Class that implements a dependency definition.
+
+  Attributes:
+    architecture_dependent: boolean value to indicate the dependency is
+                            architecture dependent.
+    build_dependencies: list of build dependencies.
+    build_system: string containing the build system.
+    description_long: string of the long description of the dependency.
+    description_short: string of the short description of the dependency.
+    disabled: list containing the names of the build targets that are disabled
+              for this dependency.
+    dpkg_build_dependencies: list of dpkg build dependencies.
+    dpkg_dependencies: list of dpkg dependencies.
+    dpkg_manual_install: boolean value to indicate if a dh_auto_install
+                         override should be used.
+    dpkg_name: string of the dpkg package name.
+    download_url: string of the source package download URL.
+    git_url: string of the git repository URL.
+    homepage_url: string of the project homepage URL.
+    maintainer: string of the name and email address of the maintainer.
+    name: string of the name of the dependency.
+    setup_name: string of the name used in setup.py.
+    patches: list of patch file names.
+    version: the version requirements (instance of DependencyVersion).
+  """
 
   def __init__(self, name):
     """Initializes the dependency definition.
@@ -21,6 +45,7 @@ class DependencyDefinition(object):
     """
     super(DependencyDefinition, self).__init__()
     self.architecture_dependent = False
+    self.build_dependencies = None
     self.build_system = None
     self.description_long = None
     self.description_short = None
@@ -30,6 +55,7 @@ class DependencyDefinition(object):
     self.dpkg_manual_install = False
     self.dpkg_name = None
     self.download_url = None
+    self.git_url = None
     self.homepage_url = None
     self.maintainer = None
     self.name = name
@@ -125,6 +151,8 @@ class DependencyDefinitionReader(object):
 
       dependency_definition.architecture_dependent = self._GetConfigValue(
           config_parser, section_name, u'architecture_dependent')
+      dependency_definition.build_dependencies = self._GetConfigValue(
+          config_parser, section_name, u'build_dependencies')
       dependency_definition.build_system = self._GetConfigValue(
           config_parser, section_name, u'build_system')
       dependency_definition.description_long = self._GetConfigValue(
@@ -143,6 +171,8 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'dpkg_name')
       dependency_definition.download_url = self._GetConfigValue(
           config_parser, section_name, u'download_url')
+      dependency_definition.git_url = self._GetConfigValue(
+          config_parser, section_name, u'git_url')
       dependency_definition.homepage_url = self._GetConfigValue(
           config_parser, section_name, u'homepage_url')
       dependency_definition.maintainer = self._GetConfigValue(
@@ -153,6 +183,13 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'setup_name')
       dependency_definition.version = self._GetConfigValue(
           config_parser, section_name, u'version')
+
+      if dependency_definition.build_dependencies is None:
+        dependency_definition.build_dependencies = []
+      elif isinstance(
+          dependency_definition.build_dependencies, basestring):
+        dependency_definition.build_dependencies = (
+            dependency_definition.build_dependencies.split(u','))
 
       if dependency_definition.disabled is None:
         dependency_definition.disabled = []

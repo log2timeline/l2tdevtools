@@ -1,0 +1,16 @@
+--- setup.py.orig	2015-07-18 16:42:34.937500000 +0200
++++ setup.py	2015-07-18 16:44:49.562500000 +0200
+@@ -2479,8 +2479,12 @@
+              'build_scripts' : my_build_scripts,
+            }
+ 
++pywin32_version = str(build_id)
++if 'bdist_msi' in sys.argv:
++  pywin32_version = '%s.1' % pywin32_version
++
+ dist = setup(name="pywin32",
+-      version=str(build_id),
++      version=pywin32_version,
+       description="Python for Window Extensions",
+       long_description="Python extensions for Microsoft Windows\n"
+                        "Provides access to much of the Win32 API, the\n"
