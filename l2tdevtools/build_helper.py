@@ -972,187 +972,16 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     return True
 
-  def _BuildPrepare(self, source_helper_object, source_directory):
-    """Prepares the source for building with Visual Studio.
+  def _BuildMSBuild(self, source_helper_object, source_directory):
+    """Builds using Visual Studio and MSBuild.
 
     Args:
       source_helper_object: the source helper object (instance of SourceHelper).
       source_directory: the name of the source directory.
-    """
-    # For the vs2008 build make sure the binary is XP compatible,
-    # by setting WINVER to 0x0501. For the vs2010 build WINVER is
-    # set to 0x0600 (Windows Vista).
-
-    # WINVER is set in common\config_winapi.h or common\config_msc.h.
-    config_filename = os.path.join(
-        source_directory, u'common', u'config_winapi.h')
-
-    # If the WINAPI configuration file is not available use
-    # the MSC compiler configuration file instead.
-    if not os.path.exists(config_filename):
-      config_filename = os.path.join(
-          source_directory, u'common', u'config_msc.h')
-
-    # Add a line to the config file that sets WINVER.
-    parsing_mode = 0
-
-    for line in fileinput.input(config_filename, inplace=1):
-      # Remove trailing whitespace and end-of-line characters.
-      line = line.rstrip()
-
-      if parsing_mode != 2 or line:
-        if parsing_mode == 1:
-          # TODO: currently we want libbde not use Windows Crypto API, hence
-          # we set WINVER to 0x0501.
-          if (self.version == u'2008' or
-              source_helper_object.project_name == u'libbde'):
-            if not line.startswith(b'#define WINVER 0x0501'):
-              print(b'#define WINVER 0x0501')
-              print(b'')
-
-          else:
-            if not line.startswith(b'#define WINVER 0x0600'):
-              print(b'#define WINVER 0x0600')
-              print(b'')
-
-          parsing_mode = 2
-
-        elif line.startswith(b'#define _CONFIG_'):
-          parsing_mode = 1
-
-      print(line)
-
-  def _ConvertSolutionFiles(self, source_directory):
-    """Converts the Visual Studio solution and project files.
-
-    Args:
-      source_directory: the name of the source directory.
-    """
-    logging.info(u'Converting Visual Studio solution and project files.')
-    os.chdir(source_directory)
-
-    solution_filenames = glob.glob(os.path.join(u'msvscpp', u'*.sln'))
-    if len(solution_filenames) != 1:
-      logging.error(u'Unable to find Visual Studio solution file')
-      return False
-
-    solution_filename = solution_filenames[0]
-
-    if not os.path.exists(u'vs2008'):
-      command = u'{0:s} {1:s} --to {2:s} {3:s}'.format(
-          sys.executable, self._msvscpp_convert, self.version,
-          solution_filename)
-      exit_code = subprocess.call(command, shell=False)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
-
-      # Note that setup.py needs the Visual Studio solution directory
-      # to be named: msvscpp. So replace the Visual Studio 2008 msvscpp
-      # solution directory with the converted one.
-      os.rename(u'msvscpp', u'vs2008')
-      os.rename(u'vs{0:s}'.format(self.version), u'msvscpp')
-
-    os.chdir(u'..')
-
-  def _SetupBuildDependencySqlite(self):
-    """Sets up the sqlite build dependency.
-
-    Returns:
-      A boolean value indicating if the build dependency was set up correctly.
-    """
-    # TODO: download and build sqlite3 from source
-    # http://www.sqlite.org/download.html
-    # or copy sqlite3.h, .lib and .dll to src/ directory?
-
-    # <a id='a3' href='hp1.html'>sqlite-amalgamation-3081002.zip
-    # d391('a3','2015/sqlite-amalgamation-3081002.zip');
-    # http://www.sqlite.org/2015/sqlite-amalgamation-3081002.zip
-
-    # Create msvscpp files and build dll
-    return False
-
-  def _SetupBuildDependencyZeroMQ(self):
-    """Sets up the zeromq build dependency.
-
-    Returns:
-      A boolean value indicating if the build dependency was set up correctly.
-    """
-    # TODO: implement.
-    return False
-
-  def _SetupBuildDependencyZlib(self):
-    """Sets up the zlib build dependency.
-
-    Returns:
-      A boolean value indicating if the build dependency was set up correctly.
-    """
-    download_helper_object = download_helper.SourceForgeDownloadHelper()
-    source_helper_object = source_helper.SourcePackageHelper(
-        u'zlib', download_helper_object)
-
-    source_filename = source_helper_object.Download()
-    if not source_filename:
-      logging.info(u'Download of: {0:s} failed'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          u'Extraction of source package: {0:s} failed'.format(
-              source_filename))
-      return False
-
-    os.rename(source_directory, u'zlib')
-    return True
-
-  def CheckBuildDependencies(self):
-    """Checks if the build dependencies are met.
-
-    Returns:
-      A list of build dependency names that are not met or an empty list.
-    """
-    missing_packages = []
-    for package_name in self._dependency_definition.build_dependencies:
-      if package_name == u'sqlite':
-        self._SetupBuildDependencySqlite()
-
-      elif package_name == u'zeromq':
-        self._SetupBuildDependencyZeroMQ()
-
-      elif package_name == u'zlib':
-        self._SetupBuildDependencyZlib()
-
-      else:
-        missing_packages.append(package_name)
-
-    return missing_packages
-
-  def Build(self, source_helper_object):
-    """Builds using Visual Studio.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
       True if the build was successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
-    if not source_filename:
-      logging.info(u'Download of: {0:s} failed'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          u'Extraction of source package: {0:s} failed'.format(source_filename))
-      return False
-
-    logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
-        source_filename, self.version))
-
     # Search common locations for MSBuild.exe
     if self.version == u'2008':
       msbuild = u'{0:s}:{1:s}{2:s}'.format(
@@ -1272,33 +1101,260 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
       os.chdir(python_module_directory)
 
-      # Setup.py uses VS90COMNTOOLS which is vs2008 specific
-      # so we need to set it for the other Visual Studio versions.
-      if self.version == u'2010':
-        os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS100COMNTOOLS']
+      if not self._BuildSetupPy():
+        os.chdir(build_directory)
+        return False
 
-      elif self.version == u'2012':
-        os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS110COMNTOOLS']
+      self._MoveMsi(python_module_name, build_directory)
 
-      elif self.version == u'2013':
-        os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS120COMNTOOLS']
+      os.chdir(build_directory)
 
-      command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
+    return True
+
+  def _BuildPrepare(self, source_helper_object, source_directory):
+    """Prepares the source for building with Visual Studio.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+      source_directory: the name of the source directory.
+    """
+    # For the vs2008 build make sure the binary is XP compatible,
+    # by setting WINVER to 0x0501. For the vs2010 build WINVER is
+    # set to 0x0600 (Windows Vista).
+
+    # WINVER is set in common\config_winapi.h or common\config_msc.h.
+    config_filename = os.path.join(
+        source_directory, u'common', u'config_winapi.h')
+
+    # If the WINAPI configuration file is not available use
+    # the MSC compiler configuration file instead.
+    if not os.path.exists(config_filename):
+      config_filename = os.path.join(
+          source_directory, u'common', u'config_msc.h')
+
+    # Add a line to the config file that sets WINVER.
+    parsing_mode = 0
+
+    for line in fileinput.input(config_filename, inplace=1):
+      # Remove trailing whitespace and end-of-line characters.
+      line = line.rstrip()
+
+      if parsing_mode != 2 or line:
+        if parsing_mode == 1:
+          # TODO: currently we want libbde not use Windows Crypto API, hence
+          # we set WINVER to 0x0501.
+          if (self.version == u'2008' or
+              source_helper_object.project_name == u'libbde'):
+            if not line.startswith(b'#define WINVER 0x0501'):
+              print(b'#define WINVER 0x0501')
+              print(b'')
+
+          else:
+            if not line.startswith(b'#define WINVER 0x0600'):
+              print(b'#define WINVER 0x0600')
+              print(b'')
+
+          parsing_mode = 2
+
+        elif line.startswith(b'#define _CONFIG_'):
+          parsing_mode = 1
+
+      print(line)
+
+  def _BuildSetupPy(self):
+    """Builds using Visual Studio and setup.py.
+
+    This function assumes setup.py is present in the current working
+    directory.
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    # Setup.py uses VS90COMNTOOLS which is vs2008 specific
+    # so we need to set it for the other Visual Studio versions.
+    if self.version == u'2010':
+      os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS100COMNTOOLS']
+
+    elif self.version == u'2012':
+      os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS110COMNTOOLS']
+
+    elif self.version == u'2013':
+      os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS120COMNTOOLS']
+
+    command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
+    exit_code = subprocess.call(command, shell=False)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+  def _ConvertSolutionFiles(self, source_directory):
+    """Converts the Visual Studio solution and project files.
+
+    Args:
+      source_directory: the name of the source directory.
+    """
+    logging.info(u'Converting Visual Studio solution and project files.')
+    os.chdir(source_directory)
+
+    solution_filenames = glob.glob(os.path.join(u'msvscpp', u'*.sln'))
+    if len(solution_filenames) != 1:
+      logging.error(u'Unable to find Visual Studio solution file')
+      return False
+
+    solution_filename = solution_filenames[0]
+
+    if not os.path.exists(u'vs2008'):
+      command = u'{0:s} {1:s} --to {2:s} {3:s}'.format(
+          sys.executable, self._msvscpp_convert, self.version,
+          solution_filename)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      # Move the msi to the build directory.
-      msi_filename = glob.glob(os.path.join(
-          u'dist', u'{0:s}-*.msi'.format(python_module_name)))
+      # Note that setup.py needs the Visual Studio solution directory
+      # to be named: msvscpp. So replace the Visual Studio 2008 msvscpp
+      # solution directory with the converted one.
+      os.rename(u'msvscpp', u'vs2008')
+      os.rename(u'vs{0:s}'.format(self.version), u'msvscpp')
 
-      logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
-      shutil.move(msi_filename[0], build_directory)
+    os.chdir(u'..')
 
-      os.chdir(build_directory)
+  def _MoveMsi(self, python_module_name, build_directory):
+    """Moves the msi from the dist sub directory into the build directory.
 
+    Args:
+      python_module_name: the Python module name.
+      build_directory: the build directory.
+    """
+    msi_filename = glob.glob(os.path.join(
+        u'dist', u'{0:s}-*.msi'.format(python_module_name)))
+
+    logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
+    shutil.move(msi_filename[0], build_directory)
+
+  def _SetupBuildDependencySqlite(self):
+    """Sets up the sqlite build dependency.
+
+    Returns:
+      A boolean value indicating if the build dependency was set up correctly.
+    """
+    # TODO: download and build sqlite3 from source
+    # http://www.sqlite.org/download.html
+    # or copy sqlite3.h, .lib and .dll to src/ directory?
+
+    # <a id='a3' href='hp1.html'>sqlite-amalgamation-3081002.zip
+    # d391('a3','2015/sqlite-amalgamation-3081002.zip');
+    # http://www.sqlite.org/2015/sqlite-amalgamation-3081002.zip
+
+    # Create msvscpp files and build dll
+    return False
+
+  def _SetupBuildDependencyZeroMQ(self):
+    """Sets up the zeromq build dependency.
+
+    Returns:
+      A boolean value indicating if the build dependency was set up correctly.
+    """
+    # TODO: implement.
+    return False
+
+  def _SetupBuildDependencyZlib(self):
+    """Sets up the zlib build dependency.
+
+    Returns:
+      A boolean value indicating if the build dependency was set up correctly.
+    """
+    download_helper_object = download_helper.SourceForgeDownloadHelper()
+    source_helper_object = source_helper.SourcePackageHelper(
+        u'zlib', download_helper_object)
+
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    source_directory = source_helper_object.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(
+              source_filename))
+      return False
+
+    os.rename(source_directory, u'zlib')
     return True
+
+  def CheckBuildDependencies(self):
+    """Checks if the build dependencies are met.
+
+    Returns:
+      A list of build dependency names that are not met or an empty list.
+    """
+    missing_packages = []
+    for package_name in self._dependency_definition.build_dependencies:
+      if package_name == u'sqlite':
+        self._SetupBuildDependencySqlite()
+
+      elif package_name == u'zeromq':
+        self._SetupBuildDependencyZeroMQ()
+
+      elif package_name == u'zlib':
+        self._SetupBuildDependencyZlib()
+
+      else:
+        missing_packages.append(package_name)
+
+    return missing_packages
+
+  def Build(self, source_helper_object):
+    """Builds using Visual Studio.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    source_directory = source_helper_object.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(source_filename))
+      return False
+
+    logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
+        source_filename, self.version))
+
+    setup_py_path = os.path.join(source_directory, u'setup.py')
+    if not os.path.exists(setup_py_path):
+      result = self._BuildMSBuild(source_helper_object, source_directory)
+
+    else:
+      python_module_name, _, _ = source_directory.partition(u'-')
+      python_module_name = u'py{0:s}'.format(python_module_name[3:])
+      python_module_dist_directory = os.path.join(
+          source_directory, u'dist')
+
+      if not os.path.exists(python_module_dist_directory):
+        build_directory = os.path.join(u'..')
+
+        os.chdir(source_directory)
+
+        if not self._BuildSetupPy():
+          os.chdir(build_directory)
+          return False
+
+        self._MoveMsi(python_module_name, build_directory)
+
+        os.chdir(build_directory)
+
+    return result
 
   def Clean(self, source_helper_object):
     """Cleans the build and dist directory.
@@ -1915,7 +1971,7 @@ class RpmBuildHelper(BuildHelper):
     return project_name, project_version
 
   def _MoveRpms(self, project_name, project_version):
-    """Moves the rpms from the rpmbuild directory into to current directory.
+    """Moves the rpms from the rpmbuild directory into the current directory.
 
     Args:
       project_name: the name of the project.
@@ -2047,7 +2103,6 @@ class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
     build_successful = self._BuildFromSourcePackage(rpm_source_filename)
 
     if build_successful:
-      # Move the rpms to the build directory.
       self._MoveRpms(project_name, project_version)
 
       # Remove BUILD directory.
