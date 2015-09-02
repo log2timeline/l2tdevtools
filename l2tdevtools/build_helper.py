@@ -1096,20 +1096,20 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     python_module_dist_directory = os.path.join(
         python_module_directory, u'dist')
 
-    if not os.path.exists(python_module_dist_directory):
-      build_directory = os.path.join(u'..', u'..')
+    if os.path.exists(python_module_dist_directory):
+      return True
 
-      os.chdir(python_module_directory)
+    build_directory = os.path.join(u'..', u'..')
 
-      if not self._BuildSetupPy():
-        os.chdir(build_directory)
-        return False
+    os.chdir(python_module_directory)
 
+    result = self._BuildSetupPy()
+    if result:
       self._MoveMsi(python_module_name, build_directory)
 
-      os.chdir(build_directory)
+    os.chdir(build_directory)
 
-    return True
+    return result
 
   def _BuildPrepare(self, source_helper_object, source_directory):
     """Prepares the source for building with Visual Studio.
@@ -1186,6 +1186,8 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
+
+    return True
 
   def _ConvertSolutionFiles(self, source_directory):
     """Converts the Visual Studio solution and project files.
@@ -1346,11 +1348,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
         os.chdir(source_directory)
 
-        if not self._BuildSetupPy():
-          os.chdir(build_directory)
-          return False
-
-        self._MoveMsi(python_module_name, build_directory)
+        result = self._BuildSetupPy()
+        if result:
+          self._MoveMsi(python_module_name, build_directory)
 
         os.chdir(build_directory)
 
