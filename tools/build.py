@@ -422,7 +422,7 @@ def Main():
 
   failed_builds = []
   for dependency_definition in builds:
-    if dependency_definition.name not in projects:
+    if projects and dependency_definition.name not in projects:
       continue
 
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
