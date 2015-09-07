@@ -1828,7 +1828,8 @@ class RpmBuildHelper(BuildHelper):
       u'rpm-build',
       u'python-devel',
       u'python-dateutil',
-      u'python-setuptools'
+      u'python-setuptools',
+      u'python-test'
   ])
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
