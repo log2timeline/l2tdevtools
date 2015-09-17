@@ -917,7 +917,10 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     super(ConfigureMakeMsiBuildHelper, self).__init__(
         dependency_definition, data_path)
 
-    if u'VS120COMNTOOLS' in os.environ:
+    if u'VS140COMNTOOLS' in os.environ:
+      self.version = u'2015'
+
+    elif u'VS120COMNTOOLS' in os.environ:
       self.version = u'2013'
 
     elif u'VS110COMNTOOLS' in os.environ:
@@ -991,7 +994,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     # Note that MSBuild in .NET 3.5 does not support vs2010 solution files
     # and MSBuild in .NET 4.0 is needed instead.
-    elif self.version in [u'2010', u'2012', u'2013']:
+    elif self.version in [u'2010', u'2012', u'2013', u'2015']:
       msbuild = u'{0:s}:{1:s}{2:s}'.format(
           u'C', os.sep, os.path.join(
               u'Windows', u'Microsoft.NET', u'Framework', u'v4.0.30319',
@@ -1024,6 +1027,11 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
         logging.error(u'Missing VS120COMNTOOLS environment variable.')
         return False
 
+    elif self.version == u'2015':
+      if not os.environ[u'VS140COMNTOOLS']:
+        logging.error(u'Missing VS140COMNTOOLS environment variable.')
+        return False
+
     zlib_project_file = os.path.join(
         source_directory, u'msvscpp', u'zlib', u'zlib.vcproj')
     zlib_source_directory = os.path.join(
@@ -1046,7 +1054,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
-    if self.version in [u'2010', u'2012', u'2013']:
+    if self.version in [u'2010', u'2012', u'2013', u'2015']:
       self._ConvertSolutionFiles(source_directory)
 
     if self._dependency_definition.patches:
@@ -1180,6 +1188,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     elif self.version == u'2013':
       os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS120COMNTOOLS']
+
+    elif self.version == u'2015':
+      os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS140COMNTOOLS']
 
     command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
     exit_code = subprocess.call(command, shell=False)
@@ -1332,6 +1343,8 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
         source_filename, self.version))
+
+    result = False
 
     setup_py_path = os.path.join(source_directory, u'setup.py')
     if not os.path.exists(setup_py_path):
