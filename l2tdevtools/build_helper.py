@@ -1367,6 +1367,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
         os.chdir(build_directory)
 
+    # TODO: result could not be set if source directory is present.
     return result
 
   def Clean(self, source_helper_object):
