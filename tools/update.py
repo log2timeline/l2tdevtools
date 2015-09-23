@@ -754,6 +754,7 @@ class DependencyUpdater(object):
     """
     package_filenames, package_versions = self._GetPackageFilenamesAndVersions()
     if not package_filenames:
+      logging.error(u'No packages found.')
       return False
 
     if package_names:
@@ -768,6 +769,7 @@ class DependencyUpdater(object):
           del package_versions[package_name]
 
     if not self._UninstallPackages(package_versions):
+      logging.error(u'Unable to uninstall packages.')
       return False
 
     return self._InstallPackages(package_filenames, package_versions)
