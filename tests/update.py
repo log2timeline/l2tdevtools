@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the update tool."""
 
-import os
 import unittest
 
 from tools import update
