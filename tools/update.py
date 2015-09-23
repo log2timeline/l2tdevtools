@@ -59,18 +59,25 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
   _GITHUB_REPO_URL = (
       u'https://github.com/log2timeline/l2tbinaries')
 
-  def _GetMachineTypeSubDirectory(self, preferred_machine_type=None):
+  def _GetMachineTypeSubDirectory(
+      self, preferred_machine_type=None, preferred_operating_system=None):
     """Retrieves the machine type sub directory.
 
     Args:
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
+      preferred_operating_system: optional preferred operating system. The
+                                  default is None, which will auto-detect
+                                  the current operating system.
 
     Returns:
       The machine type sub directory or None.
     """
-    operating_system = platform.system()
+    if preferred_operating_system:
+      operating_system = preferred_operating_system
+    else:
+      operating_system = platform.system()
 
     if preferred_machine_type:
       cpu_architecture = preferred_machine_type
@@ -122,13 +129,18 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
     return sub_directory
 
-  def _GetDownloadUrl(self, preferred_machine_type=None, use_api=False):
+  def _GetDownloadUrl(
+      self, preferred_machine_type=None, preferred_operating_system=None,
+      use_api=False):
     """Retrieves the download URL.
 
     Args:
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
+      preferred_operating_system: optional preferred operating system. The
+                                  default is None, which will auto-detect
+                                  the current operating system.
       use_api: optional boolean value to indicate if the API should be used.
                The default is False.
 
@@ -136,7 +148,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       The download URL or None.
     """
     sub_directory = self._GetMachineTypeSubDirectory(
-        preferred_machine_type=preferred_machine_type)
+        preferred_machine_type=preferred_machine_type,
+        preferred_operating_system=preferred_operating_system)
     if not sub_directory:
       return
 
@@ -150,13 +163,18 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
     return download_url
 
-  def GetPackageDownloadUrls(self, preferred_machine_type=None, use_api=False):
+  def GetPackageDownloadURLs(
+      self, preferred_machine_type=None, preferred_operating_system=None,
+      use_api=False):
     """Retrieves the package downloads URL for a given URL.
 
     Args:
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
+      preferred_operating_system: optional preferred operating system. The
+                                  default is None, which will auto-detect
+                                  the current operating system.
       use_api: optional boolean value to indicate if the API should be used.
                The default is False.
 
@@ -164,8 +182,10 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       A list of package download URLs or None.
     """
     download_url = self._GetDownloadUrl(
-        preferred_machine_type=preferred_machine_type, use_api=use_api)
+        preferred_machine_type=preferred_machine_type,
+        preferred_operating_system=preferred_operating_system, use_api=use_api)
     if not download_url:
+      logging.info(u'Missing download URL.')
       return
 
     page_content = self.DownloadPageContent(download_url)
@@ -200,13 +220,15 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
     else:
       sub_directory = self._GetMachineTypeSubDirectory(
-          preferred_machine_type=preferred_machine_type)
+          preferred_machine_type=preferred_machine_type,
+          preferred_operating_system=preferred_operating_system)
       if not sub_directory:
         return
 
       # The format of the download URL is:
       # <a href="{path}" class="js-directory-link"
-      expression_string = u'<a href="([^"]*)" class="js-directory-link"'
+      # <a href="{path}" class="js-directory-link js-navigation-open"
+      expression_string = u'<a href="([^"]*)" class="js-directory-link'
       matches = re.findall(expression_string, page_content)
 
       for match in matches:
@@ -224,7 +246,8 @@ class DependencyUpdater(object):
 
   def __init__(
       self, download_directory=u'build', force_install=False,
-      msi_targetdir=None, preferred_machine_type=None):
+      msi_targetdir=None, preferred_machine_type=None,
+      preferred_operating_system=None):
     """Initializes the dependency updater.
 
     Args:
@@ -237,13 +260,20 @@ class DependencyUpdater(object):
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
+      preferred_operating_system: optional preferred operating system. The
+                                  default is None, which will auto-detect
+                                  the current operating system.
     """
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
     self._download_helper = GithubRepoDownloadHelper()
     self._force_install = force_install
     self._msi_targetdir = msi_targetdir
-    self._operating_system = platform.system()
+
+    if preferred_operating_system:
+      self._operating_system = preferred_operating_system
+    else:
+      self._operating_system = platform.system()
 
     if preferred_machine_type:
       self._preferred_machine_type = preferred_machine_type.lower()
@@ -258,9 +288,11 @@ class DependencyUpdater(object):
       another the package versions per package name.
     """
     # The API is rate limited, so we scrape the web page instead.
-    package_urls = self._download_helper.GetPackageDownloadUrls(
-        preferred_machine_type=self._preferred_machine_type)
+    package_urls = self._download_helper.GetPackageDownloadURLs(
+        preferred_machine_type=self._preferred_machine_type,
+        preferred_operating_system=self._operating_system)
     if not package_urls:
+      logging.error(u'Unable to determine package download URLs.')
       return None, None
 
     if not os.path.exists(self._download_directory):
