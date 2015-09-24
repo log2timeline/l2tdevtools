@@ -257,7 +257,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
-  _PROJECT_VERSION = u'20150708'
+  _PROJECT_VERSION = u'20150915'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
