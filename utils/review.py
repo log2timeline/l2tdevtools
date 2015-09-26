@@ -98,8 +98,9 @@ class CodeReviewHelper(CLIHelper):
 
     url_object = urllib2.urlopen(request)
     if url_object.code != 200:
-      logging.error(u'Failed closing codereview: {0:d}'.format(
-          codereview_issue_number))
+      logging.error(
+          u'Failed closing codereview: {0:d} with return code: {1:d}'.format(
+              codereview_issue_number, url_object.code))
       return False
 
     return True
@@ -301,6 +302,10 @@ class GitHelper(CLIHelper):
         u'git log HEAD..upstream/master --oneline')
     return exit_code == 0 and not output
 
+  def DropUncommittedChanges(self):
+    """Drops the uncommitted changes."""
+    self.RunCommand(u'git stash && git stash drop')
+
   def GetActiveBranch(self):
     """Retrieves the active branch.
 
@@ -388,6 +393,20 @@ class GitHelper(CLIHelper):
         if len(values) == 3:
           return values[1]
 
+  def PullFromFork(self, git_repo_url, branch):
+    """Pulls changes from a feature branch on a fork.
+
+    Args:
+      git_repo_url: string containing the git repo url of the fork.
+      branch: name of the feature branch of the fork.
+
+    Returns:
+      A boolean indicating the pull was successful.
+    """
+    command = u'git pull --squash {0:s} {1:s}'.format(git_repo_url, branch)
+    exit_code, _, _ = self.RunCommand(command)
+    return exit_code == 0
+
   def PushToOrigin(self, branch, force=False):
     """Forces a push of the active branch of the git repo to origin.
 
@@ -419,6 +438,21 @@ class GitHelper(CLIHelper):
     self.RunCommand(u'git push origin --delete {0:s}'.format(branch))
     self.RunCommand(u'git branch -D {0:s}'.format(branch))
 
+  def SynchronizeWithOrigin(self):
+    """Synchronizes git with origin.
+
+    Returns:
+      A boolean indicating the git repo has synchronized with origin.
+    """
+    exit_code, _, _ = self.RunCommand(u'git fetch origin')
+    if exit_code != 0:
+      return False
+
+    exit_code, _, _ = self.RunCommand(
+        u'git pull --no-edit origin master')
+
+    return exit_code == 0
+
   def SynchronizeWithUpstream(self):
     """Synchronizes git with upstream.
 
@@ -435,10 +469,8 @@ class GitHelper(CLIHelper):
       return False
 
     exit_code, _, _ = self.RunCommand(u'git push')
-    if exit_code != 0:
-      return False
 
-    return True
+    return exit_code == 0
 
   def SwitchToMasterBranch(self):
     """Switches git to the master branch.
@@ -453,24 +485,23 @@ class GitHelper(CLIHelper):
 class GitHubHelper(object):
   """Class that defines github helper functions."""
 
-  def __init__(self, organization, project, access_token):
+  def __init__(self, organization, project):
     """Initializes a github helper object.
 
     Args:
       organization: string containing the github organization name.
       project: string containing the github project name.
-      access_token: string containing the github access token.
     """
     super(GitHubHelper, self).__init__()
-    self._access_token = access_token
     self._organization = organization
     self._project = project
 
   def CreatePullRequest(
-      self, codereview_issue_number, origin, description):
+      self, access_token, codereview_issue_number, origin, description):
     """Creates a pull request.
 
     Args:
+      access_token: string containing the github access token.
       codereview_issue_number: an integer containing the codereview
                                issue number.
       origin: a string containing the origin of the pull request e.g.
@@ -497,7 +528,7 @@ class GitHubHelper(object):
     github_url = (
         u'https://api.github.com/repos/{0:s}/{1:s}/pulls?'
         u'access_token={2:s}').format(
-            self._organization, self._project, self._access_token)
+            self._organization, self._project, access_token)
 
     request = urllib2.Request(github_url)
 
@@ -506,11 +537,24 @@ class GitHubHelper(object):
 
     url_object = urllib2.urlopen(request)
     if url_object.code != 200:
-      logging.error(u'Failed creating pull request: {0:d}'.format(
-          codereview_issue_number))
+      # TODO: determine why this is failing while PR is created.
+      logging.error(
+          u'Failed creating pull request: {0:d} with return code: {1:d}'.format(
+              codereview_issue_number, url_object.code))
       return False
 
     return True
+
+  def GetForkGitRepoUrl(self, username):
+    """Retrieves the git repo URL of a fork.
+
+    Args:
+      username: string containing the github username of the fork.
+
+    Returns:
+      A string containing the git repo URL or None.
+    """
+    return u'https://github.com/{0:s}/{1:s}.git'.format(username, self._project)
 
 
 class PylintHelper(CLIHelper):
@@ -708,7 +752,24 @@ def Main():
       help=(u'name of the corresponding feature branch.'))
 
   commands_parser.add_parser(u'create')
-  commands_parser.add_parser(u'merge')
+
+  merge_command_parser = commands_parser.add_parser(u'merge')
+
+  # TODO: add this to help output.
+  merge_command_parser.add_argument(
+      u'codereview_issue_number', action=u'store',
+      metavar=u'CODEREVIEW_ISSIE_NUMBER', default=None,
+      help=(u'the codereview issue number to be merged.'))
+
+  # TODO: add this to help output.
+  merge_command_parser.add_argument(
+      u'github_origin', action=u'store',
+      metavar=u'GITHUB_ORIGIN', default=None,
+      help=(u'the github origin to merged e.g. username:feature.'))
+
+  # TODO: add dry-run option to run merge without commit.
+  # useful to test pending CLs.
+
   commands_parser.add_parser(u'update')
 
   options = argument_parser.parse_args()
@@ -716,6 +777,22 @@ def Main():
   feature_branch = getattr(options, u'branch', None)
   if options.command == u'close' and not feature_branch:
     print(u'Feature branch value is missing.')
+    print(u'')
+    argument_parser.print_help()
+    print(u'')
+    return False
+
+  codereview_issue_number = getattr(options, u'codereview_issue_number', None)
+  if options.command == u'merge' and not codereview_issue_number:
+    print(u'Codereview issue number value is missing.')
+    print(u'')
+    argument_parser.print_help()
+    print(u'')
+    return False
+
+  github_origin = getattr(options, u'github_origin', None)
+  if options.command == u'merge' and not github_origin:
+    print(u'Github origin value is missing.')
     print(u'')
     argument_parser.print_help()
     print(u'')
@@ -742,17 +819,17 @@ def Main():
 
   git_helper = GitHelper(git_repo_url)
 
-  if options.command == u'merge':
-    if not git_helper.CheckHasProjectOrigin():
-      print(u'{0:s} aborted - missing project origin.'.format(
-          options.command.title()))
-      return False
-
-  elif options.command in [u'close', u'create', u'update']:
+  if options.command in [u'close', u'create', u'update']:
     if not git_helper.CheckHasProjectUpstream():
       print(u'{0:s} aborted - missing project upstream.'.format(
           options.command.title()))
       print(u'Run: git remote add upstream {0:s}'.format(git_repo_url))
+      return False
+
+  elif options.command == u'merge':
+    if not git_helper.CheckHasProjectOrigin():
+      print(u'{0:s} aborted - missing project origin.'.format(
+          options.command.title()))
       return False
 
   if git_helper.CheckHasUncommittedChanges():
@@ -768,6 +845,17 @@ def Main():
           options.command.title()))
       return False
 
+  elif options.command == u'close':
+    if feature_branch == u'master':
+      print(u'{0:s} aborted - feature branch cannot be master.'.format(
+          options.command.title()))
+      return False
+
+    if active_branch != u'master':
+      git_helper.SwitchToMasterBranch()
+      active_branch = u'master'
+
+  if options.command in [u'create', u'close', u'update']:
     if not git_helper.CheckSynchronizedWithUpstream():
       if not git_helper.SynchronizeWithUpstream():
         print((
@@ -784,6 +872,15 @@ def Main():
           options.command.title(), active_branch))
       return False
 
+  elif options.command == u'merge':
+    if not git_helper.SynchronizeWithOrigin():
+      print((
+          u'{0:s} aborted - unable to synchronize with '
+          u'origin/master.').format(options.command.title()))
+      return False
+
+  github_helper = GitHubHelper(u'log2timeline', project_name)
+
   if options.command in [u'create', u'merge', u'update']:
     pylint_helper = PylintHelper()
     if not pylint_helper.CheckUpToDateVersion():
@@ -792,6 +889,14 @@ def Main():
       return False
 
     if options.command == u'merge':
+      fork_username, _, fork_feature_branch = github_origin.partition(u':')
+      fork_git_repo_url = github_helper.GetForkGitRepoUrl(fork_username)
+
+      if not git_helper.PullFromFork(fork_git_repo_url, fork_feature_branch):
+        print(u'{0:s} aborted - unable to pull changes from fork.'.format(
+            options.command.title()))
+        return False
+
       changed_python_files = git_helper.GetChangedPythonFiles(u'origin/master')
     else:
       changed_python_files = git_helper.GetChangedPythonFiles(options.diffbase)
@@ -799,6 +904,9 @@ def Main():
     if not pylint_helper.CheckFiles(changed_python_files):
       print(u'{0:s} aborted - unable to pass linter.'.format(
           options.command.title()))
+
+      if options.command == u'merge':
+        git_helper.DropUncommittedChanges()
       return False
 
     # TODO: determine why this alters the behavior of argparse.
@@ -807,6 +915,9 @@ def Main():
     if exit_code != 0:
       print(u'{0:s} aborted - unable to pass tests.'.format(
           options.command.title()))
+
+      if options.command == u'merge':
+        git_helper.DropUncommittedChanges()
       return False
 
   if options.command == u'create':
@@ -852,26 +963,13 @@ def Main():
     review_file = ReviewFile(active_branch)
     review_file.Create(codereview_issue_number)
 
-    github_helper = GitHubHelper(
-        u'log2timeline', project_name, github_access_token)
-
     github_origin = u'{0:s}:{1:s}'.format(git_origin, active_branch)
     if github_helper.CreatePullRequest(
-        codereview_issue_number, github_origin, description):
+        github_access_token, codereview_issue_number, github_origin,
+        description):
       print(u'Unable to create pull request.')
 
   elif options.command == u'close':
-    if feature_branch == u'master':
-      print(u'{0:s} aborted - feature branch cannot be master.'.format(
-          options.command.title()))
-      return False
-
-    if active_branch != u'master':
-      git_helper.SwitchToMasterBranch()
-
-    if not git_helper.SynchronizeWithUpstream():
-      print(u'Unable to synchronize with upstream.')
-
     if not git_helper.CheckHasBranch(feature_branch):
       print(u'No such feature branch: {0:s}'.format(feature_branch))
     else:
@@ -890,7 +988,15 @@ def Main():
             u'{0:d}').format(codereview_issue_number))
 
   elif options.command == u'merge':
-    # TODO: implement.
+    # On error: git stash && git stash drop
+    # git_helper.DropUncommittedChanges()
+
+    # TODO: generate API documentation
+    # TODO: update version information
+
+    # TODO: determine full name and email address for commit
+
+    # TODO: add commit message to codereview
     pass
 
   elif options.command == u'update':

@@ -172,7 +172,7 @@ linting_is_correct_remote_origin()
 
   for FILE in ${FILES};
   do
-    if test "${FILE}" = "setup.py" || test "${FILE}" = "utils/upload.py";
+    if test "${FILE}" = "setup.py" || test "${FILE}" = "utils/upload.py" || test "${FILE}" = "test_data/linter_fail.py" || test "${FILE}" = "test_data/linter_pass.py";
     then
       echo "Skipping: ${FILE}";
       continue
@@ -232,7 +232,7 @@ linting_is_correct_remote_diffbase()
 
   for FILE in ${FILES};
   do
-    if test "${FILE}" = "setup.py" || test "${FILE}" = "utils/upload.py";
+    if test "${FILE}" = "setup.py" || test "${FILE}" = "utils/upload.py" || test "${FILE}" = "test_data/linter_fail.py" || test "${FILE}" = "test_data/linter_pass.py";
     then
       echo "Skipping: ${FILE}";
       continue
