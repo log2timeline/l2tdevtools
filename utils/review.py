@@ -1000,7 +1000,7 @@ def Main():
     pass
 
   elif options.command == u'update':
-    review_file = ReviewFile(feature_branch)
+    review_file = ReviewFile(active_branch)
     codereview_issue_number = review_file.GetCodeReviewIssueNumber()
 
     last_commit_message = git_helper.GetLastCommitMessage()
