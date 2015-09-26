@@ -11,7 +11,7 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
   """Tests for the github repo download helper class."""
 
   def testGetPackageDownloadURLs(self):
-    """Tests the GetPackageDownloadURLs functions."""
+    """Tests the GetPackageDownloadURLs function."""
     download_helper = update.GithubRepoDownloadHelper()
 
     package_download_urls = download_helper.GetPackageDownloadURLs(
@@ -27,7 +27,7 @@ class DependencyUpdaterTest(unittest.TestCase):
   """Tests for the dependency updater class."""
 
   def testGetPackageFilenamesAndVersions(self):
-    """Tests the GetPackageFilenamesAndVersions functions."""
+    """Tests the GetPackageFilenamesAndVersions function."""
     dependency_updater = update.DependencyUpdater(
         preferred_machine_type=u'x86', preferred_operating_system=u'Windows')
 
