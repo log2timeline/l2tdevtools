@@ -865,6 +865,114 @@ class ReviewFile(object):
     os.remove(self._path)
 
 
+def UpdateDpkgChangelogFile(project_name, project_version):
+  """Updates the dpkg changelog file.
+
+  Args:
+    project_name: a string containing the name of the project.
+    project_version: a string containing the version of the project.
+
+  Returns:
+    A boolean indicating the dpkg changelog file was updated. This function
+    will return True if the dpkg changelog file does not exists.
+  """
+  dpkg_changelog_path = os.path.join(u'config', u'dpkg', u'changelog')
+  if not os.path.exists(dpkg_changelog_path):
+    return True
+
+  dpkg_maintainter = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
+  dpkg_date = time.strftime(u'%a, %d %b %Y %H:%M:%S %z')
+  dpkg_changelog_content = u'\n'.join([
+      u'python-{0:s} ({1:s}-1) unstable; urgency=low'.format(
+          project_name, project_version),
+      u'',
+      u'  * Auto-generated',
+      u'',
+      u' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)])
+
+  try:
+    dpkg_changelog_content = dpkg_changelog_content.encode(u'utf-8')
+  except UnicodeEncodeError as exception:
+    logging.error(
+        u'Unable to write dpkg changelog file with error: {0:s}'.format(
+            exception))
+    return False
+
+  try:
+    with open(dpkg_changelog_path, u'wb') as file_object:
+      file_object.write(dpkg_changelog_content)
+  except IOError as exception:
+    logging.error(
+        u'Unable to write dpkg changelog file with error: {0:s}'.format(
+            exception))
+    return False
+
+  return True
+
+
+def UpdateVersionFile(project_name):
+  """Updates the version file.
+
+  Args:
+    project_name: a string containing the name of the project.
+
+  Returns:
+    A boolean indicating the version file was updated.
+  """
+  version_file_path = os.path.join(project_name, u'__init__.py')
+  if not is.path.exists(version_file_path):
+    logging.error(
+        u'Missing version file: {0:s}'.format(version_file_path))
+    return False
+
+  try:
+    with open(version_file_path, u'rb') as file_object:
+      version_file_contents = file_object.read()
+
+  except IOError as exception:
+    logging.error(
+        u'Unable to read version file with error: {0:s}'.format(exception))
+    return False
+
+  date_version = time.strftime(u'%Y%m%d')
+
+  try:
+    version_file_contents = version_file_contents.decode('utf-8')
+  except UnicodeDecodeError as exception:
+    logging.error(
+        u'Unable to read version file with error: {0:s}'.format(exception))
+    return False
+
+  lines = version_file_contents.split(u'\n')
+
+  for line_index, line in enumerate(lines):
+    if project == u'plaso' and line.startswith(u'VERSION_DATE = '):
+      version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
+      line[line_index] = version_string
+
+    else project != u'plaso' and line.startswith(u'__version__ = '):
+      version_string = u'__version__ = \'{0:s}\''.format(date_version)
+      line[line_index] = version_string
+
+  try:
+    version_file_contents = version_file_contents.encode(u'utf-8')
+  except UnicodeEncodeError as exception:
+    logging.error(
+        u'Unable to write version file with error: {0:s}'.format(exception))
+   return False
+
+  try:
+    with open(version_file_path, u'wb') as file_object:
+      file_object.write(version_file_contents)
+
+  except IOError as exception:
+    logging.error(
+        u'Unable to write version file with error: {0:s}'.format(exception))
+   return False
+
+  return True
+
+
 def Main():
   argument_parser = argparse.ArgumentParser(
       description=u'Script to manage code reviews.')
@@ -1108,6 +1216,7 @@ def Main():
       return False
 
     # TODO: determine why this alters the behavior of argparse.
+    # Currently affects this script being used in plaso.
     command = u'{0:s} run_tests.py'.format(sys.executable)
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
@@ -1188,70 +1297,17 @@ def Main():
             u'{0:d}').format(codereview_issue_number))
 
   elif options.command == u'merge':
-    # TODO: refactor into separate function/class?
-    version_file_path = os.path.join(project_name, u'__init__.py')
-    if not is.path.exists(version_file_path):
-      # TODO: error
+    if not UpdateVersionFile(project_name):
+      print(u'Unable to update version file.')
       git_helper.DropUncommittedChanges()
+      return False
 
-    try:
-      with open(version_file_path, u'rb') as file_object:
-        version_file_contents = file_object.read()
-
-    except IOError as exception:
-      print(u'Unable to read version file with error: {0:s}'.format(
-          exception))
-        git_helper.DropUncommittedChanges()
-
-    date_version = time.strftime(u'%Y%m%d')
-    # TODO: catch decode error.
-    version_file_contents = version_file_contents.decode('utf-8')
-    lines = version_file_contents.split(u'\n')
-
-    for line_index, line in enumerate(lines):
-      if project == u'plaso' and line.startswith(u'VERSION_DATE = '):
-        version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
-        line[line_index] = version_string
-
-      else project != u'plaso' and line.startswith(u'__version__ = '):
-        version_string = u'__version__ = \'{0:s}\''.format(date_version)
-        line[line_index] = version_string
-
-    # TODO: catch encode error.
-    version_file_contents = version_file_contents.encode(u'utf-8')
-
-    try:
-      with open(version_file_path, u'wb') as file_object:
-        file_object.write(version_file_contents)
-
-    except IOError as exception:
-      print(u'Unable to write version file with error: {0:s}'.format(
-          exception))
-        git_helper.DropUncommittedChanges()
-
-    # TODO: refactor into separate function/class?
-    dpkg_changelog_path = os.path.join(u'config', u'dpkg', u'changelog')
-    if os.path.exists(dpkg_changelog_path):
-      dpkg_date = time.strftime(u'%a, %d %b %Y %H:%M:%S %z')
-      dpkg_maintainter = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
-      dpkg_changelog_content = u'\n'.join([
-          u'python-{0:s} ({1:s}-1) unstable; urgency=low'.format(
-              project_name, project_version),
-          u'',
-          u'  * Auto-generated',
-          u'',
-          u' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)])
-
-      # TODO: catch encode error.
-      dpkg_changelog_content = dpkg_changelog_content.encode(u'utf-8')
-
-      try:
-        with open(dpkg_changelog_path, u'wb') as file_object:
-          file_object.write(dpkg_changelog_content)
-      except IOError as exception:
-        print(u'Unable to write dpkg changelog file with error: {0:s}'.format(
-            exception))
-        git_helper.DropUncommittedChanges()
+    # TODO: get project version.
+    project_version = u''
+    if not UpdateDpkgChangelogFile(project_name, project_version):
+      print(u'Unable to update dpkg changelog file.')
+      git_helper.DropUncommittedChanges()
+      return False
 
     # On error: git stash && git stash drop
     # git_helper.DropUncommittedChanges()
