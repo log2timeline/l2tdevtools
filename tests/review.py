@@ -8,6 +8,29 @@ import unittest
 from utils import review
 
 
+class CodeReviewHelperTest(unittest.TestCase):
+  """Tests for the codereview helper class."""
+
+  def testQueryIssue(self):
+    """Tests the QueryIssue function."""
+    codereview_helper = review.CodeReviewHelper(
+        u'test@example.com', no_browser=True)
+
+    codereview_information = codereview_helper.QueryIssue(269830043)
+    self.assertIsNotNone(codereview_information)
+
+    expected_description = (
+        u'Updated review scripts and added Python variant #40')
+    description = codereview_information.get(u'subject')
+    self.assertEqual(description, expected_description)
+
+    codereview_information = codereview_helper.QueryIssue(0)
+    self.assertIsNone(codereview_information)
+
+    codereview_information = codereview_helper.QueryIssue(1)
+    self.assertIsNone(codereview_information)
+
+
 class GitHelperTest(unittest.TestCase):
   """Tests for the git helper class."""
 
@@ -57,10 +80,34 @@ class GitHelperTest(unittest.TestCase):
     # Only test if the method completes without errors.
     self._git_helper.GetChangedPythonFiles(u'origin/master')
 
+  def testGetEmailAddress(self):
+    """Tests the GetEmailAddress function."""
+    email_address = self._git_helper.GetEmailAddress()
+    self.assertIsNotNone(email_address)
+
   def testGetLastCommitMessage(self):
     """Tests the GetLastCommitMessage function."""
     last_commit_message = self._git_helper.GetLastCommitMessage()
     self.assertIsNotNone(last_commit_message)
+
+
+class GitHubHelperTest(unittest.TestCase):
+  """Tests for the github helper class."""
+
+  def testQueryUser(self):
+    """Tests the QueryUser function."""
+    github_helper = review.GitHubHelper(u'log2timeline', u'l2tdevtools')
+
+    user_information = github_helper.QueryUser(u'joachimmetz')
+    self.assertIsNotNone(user_information)
+
+    expected_name = u'Joachim Metz'
+    name = user_information.get(u'name')
+    self.assertEqual(name, expected_name)
+
+    user_information = github_helper.QueryUser(
+        u'df07128937706371903f6ca7241a73db')
+    self.assertIsNone(user_information)
 
 
 class PylintHelperTest(unittest.TestCase):
@@ -83,6 +130,18 @@ class PylintHelperTest(unittest.TestCase):
     self.assertFalse(self._pylint_helper.CheckFiles([test_file]))
 
     # TODO: capture output and compare.
+
+
+class SphinxAPIDocHelperTest(unittest.TestCase):
+  """Tests for the sphinx-apidoc helper class."""
+
+  def setUp(self):
+    """Sets up a test case."""
+    self._sphinxapidoc_helper = review.SphinxAPIDocHelper()
+
+  def testCheckUpToDateVersion(self):
+    """Tests the CheckUpToDateVersion function."""
+    self.assertTrue(self._sphinxapidoc_helper.CheckUpToDateVersion())
 
 
 class NetRCFileTest(unittest.TestCase):

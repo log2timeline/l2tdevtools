@@ -4,11 +4,13 @@
 
 from __future__ import print_function
 import argparse
+import json
 import logging
 import os
 import shlex
 import subprocess
 import sys
+import time
 # Keep urllib2 here since we this code should be able to be used
 # by a default Python set up.
 import urllib2
@@ -60,25 +62,26 @@ class CodeReviewHelper(CLIHelper):
       u'joachim.metz@gmail.com',
       u'onager@deerpie.com'])
 
-  def __init__(self, no_browser=False):
+  def __init__(self, email_address, no_browser=False):
     """Initializes a codereview helper object.
 
     Args:
+      email_address: string containing the email address.
       no_browser: optional boolean value to indicate if the functionality
                   to use the webbrowser to get the OAuth token should be
                   disabled.
     """
     super(CodeReviewHelper, self).__init__()
     self._access_token = None
+    self._email_address = email_address
     self._no_browser = no_browser
     self._upload_py_path = os.path.join(u'utils', u'upload.py')
 
-  def CloseIssue(self, codereview_issue_number):
+  def CloseIssue(self, issue_number):
     """Closes the code review issue.
 
     Args:
-      codereview_issue_number: an integer containing the codereview
-                               issue number.
+      issue_number: an integer containing the codereview issue number.
 
     Returns:
       A boolean indicating the code review was closed.
@@ -87,8 +90,8 @@ class CodeReviewHelper(CLIHelper):
     if not codereview_access_token:
       return False
 
-    codereview_url = b'https://codereview.appspot.com/{0:s}/close'.format(
-        codereview_issue_number)
+    codereview_url = b'https://codereview.appspot.com/{0:d}/close'.format(
+        issue_number)
 
     request = urllib2.Request(codereview_url)
 
@@ -96,11 +99,18 @@ class CodeReviewHelper(CLIHelper):
     request.add_header(
         u'Authorization', u'OAuth {0:s}'.format(codereview_access_token))
 
-    url_object = urllib2.urlopen(request)
-    if url_object.code != 200:
+    try:
+      url_object = urllib2.urlopen(request)
+    except urllib2.HTTPError as exception:
       logging.error(
-          u'Failed closing codereview: {0:d} with return code: {1:d}'.format(
-              codereview_issue_number, url_object.code))
+          u'Failed closing codereview issue: {0:d} with error: {1:s}'.format(
+              issue_number, exception))
+      return False
+
+    if url_object.code != 200:
+      logging.error((
+          u'Failed closing codereview issue: {0:d} with status code: '
+          u'{1:d}').format(issue_number, url_object.code))
       return False
 
     return True
@@ -115,8 +125,14 @@ class CodeReviewHelper(CLIHelper):
     Returns:
       An integer containing the code review number or None.
     """
-    # TODO: remove self from reviewers.
     reviewers = u','.join(self._REVIEWERS)
+
+    # Remove self from reviewers list.
+    try:
+      list_index = reviewers.index(self._email_address)
+      reviewers.pop(list_index)
+    except ValueError:
+      pass
 
     command = u'{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
@@ -170,12 +186,42 @@ class CodeReviewHelper(CLIHelper):
 
     return self._access_token
 
-  def UpdateIssue(self, codereview_issue_number, diffbase, description):
+  def QueryIssue(self, issue_number):
+    """Queries a code review issue.
+
+    Args:
+      issue_number: an integer containing the codereview issue number.
+
+    Returns:
+      A dictonary containing the JSON response or None.
+    """
+    codereview_url = b'https://codereview.appspot.com/api/{0:d}'.format(
+        issue_number)
+
+    request = urllib2.Request(codereview_url)
+
+    try:
+      url_object = urllib2.urlopen(request)
+    except urllib2.HTTPError as exception:
+      logging.error(
+          u'Failed querying codereview issue: {0:d} with error: {1:s}'.format(
+              issue_number, exception))
+      return
+
+    if url_object.code != 200:
+      logging.error((
+          u'Failed querying codereview issue: {0:d} with status code: '
+          u'{1:d}').format(issue_number, url_object.code))
+      return
+
+    response_data = url_object.read()
+    return json.loads(response_data)
+
+  def UpdateIssue(self, issue_number, diffbase, description):
     """Updates a new code review issue.
 
     Args:
-      codereview_issue_number: an integer containing the codereview
-                               issue number.
+      issue_number: an integer containing the codereview issue number.
       diffbase: string containing the diffbase.
       description: string containing the description.
 
@@ -190,8 +236,7 @@ class CodeReviewHelper(CLIHelper):
 
     command = (
         u'{0:s} -i {1:d} -m "Code updated." -t "{2:s}" -y -- '
-        u'{3:s}').format(
-            command, codereview_issue_number, description, diffbase)
+        u'{3:s}').format(command, issue_number, description, diffbase)
 
     exit_code, output, _ = self.RunCommand(command)
     print(output)
@@ -224,6 +269,19 @@ class GitHelper(CLIHelper):
         self._remotes = output.split(b'\n')
 
     return self._remotes
+
+  def AddPath(self, path):
+    """Adds a specific path to be managed by git.
+
+    Args:
+      path: string containing the path.
+
+    Returns:
+      A boolean indicating the path was added.
+    """
+    command = u'git add -A {0:s}'.format(path)
+    exit_code, _, _ = self.RunCommand(command)
+    return exit_code == 0
 
   def CheckHasBranch(self, branch):
     """Checks if the git repo has a specific branch.
@@ -361,6 +419,22 @@ class GitHelper(CLIHelper):
       python_files.append(changed_file)
 
     return python_files
+
+  def GetEmailAddress(self):
+    """Retrieves the email address.
+
+    Returns:
+      A string containing the email address or None.
+    """
+    exit_code, output, _ = self.RunCommand(u'git config user.email')
+    if exit_code != 0:
+      return
+
+    output_lines = output.split(b'\n')
+    if len(output_lines) != 1:
+      return
+
+    return output_lines[0]
 
   def GetLastCommitMessage(self):
     """Retrieves the last commit message.
@@ -535,11 +609,18 @@ class GitHubHelper(object):
     # This will change the request into a POST.
     request.add_data(post_data)
 
-    url_object = urllib2.urlopen(request)
+    try:
+      url_object = urllib2.urlopen(request)
+    except urllib2.HTTPError as exception:
+      logging.error(
+          u'Failed creating pull request: {0:d} with error: {1:s}'.format(
+              codereview_issue_number, exception))
+      return False
+
     if url_object.code != 200:
       # TODO: determine why this is failing while PR is created.
       logging.error(
-          u'Failed creating pull request: {0:d} with return code: {1:d}'.format(
+          u'Failed creating pull request: {0:d} with status code: {1:d}'.format(
               codereview_issue_number, url_object.code))
       return False
 
@@ -555,6 +636,36 @@ class GitHubHelper(object):
       A string containing the git repo URL or None.
     """
     return u'https://github.com/{0:s}/{1:s}.git'.format(username, self._project)
+
+  def QueryUser(self, username):
+    """Queries a github user.
+
+    Args:
+      username: a github user name.
+
+    Returns:
+      A dictonary containing the JSON response or None.
+    """
+    github_url = b'https://api.github.com/users/{0:s}'.format(username)
+
+    request = urllib2.Request(github_url)
+
+    try:
+      url_object = urllib2.urlopen(request)
+    except urllib2.HTTPError as exception:
+      logging.error(
+          u'Failed querying github user: {0:s} with error: {1:s}'.format(
+              username, exception))
+      return
+
+    if url_object.code != 200:
+      logging.error(
+          u'Failed querying github user: {0:d} with status code: {1:d}'.format(
+              username, url_object.code))
+      return
+
+    response_data = url_object.read()
+    return json.loads(response_data)
 
 
 class PylintHelper(CLIHelper):
@@ -592,7 +703,7 @@ class PylintHelper(CLIHelper):
     """Checks if the pylint version is up to date.
 
     Returns:
-      A boolean indicating the git repo has the specific branch.
+      A boolean indicating the version is up to date.
     """
     exit_code, output, _ = self.RunCommand(u'pylint --version')
     if exit_code != 0:
@@ -610,6 +721,36 @@ class PylintHelper(CLIHelper):
     return version_tuple >= self._MINIMUM_VERSION_TUPLE
 
 
+class SphinxAPIDocHelper(CLIHelper):
+  """Class that defines sphinx-apidoc helper functions."""
+
+  _MINIMUM_VERSION_TUPLE = (1, 2, 0)
+
+  def CheckUpToDateVersion(self):
+    """Checks if the sphinx-apidoc version is up to date.
+
+    Returns:
+      A boolean indicating the version is up to date.
+    """
+    exit_code, output, _ = self.RunCommand(u'sphinx-apidoc --version')
+    if exit_code != 0:
+      return False
+
+    version_tuple = (0, 0, 0)
+    for line in output.split(b'\n'):
+      if line.startswith(b'Sphinx (sphinx-apidoc) '):
+        _, _, version = line.rpartition(b' ')
+
+        version_tuple = tuple([int(digit) for digit in version.split(b'.')])
+
+    return version_tuple >= self._MINIMUM_VERSION_TUPLE
+
+  def UpdateAPIDocs(self):
+    """Updates the API docs."""
+    # TODO: implement.
+    command = u'sphinx-apidoc -f -o docs {0:s}'.format(self._project_name)
+
+
 class NetRCFile(object):
   """Class that defines a .netrc file."""
 
@@ -619,7 +760,8 @@ class NetRCFile(object):
     self._contents = None
     self._values = None
 
-    self._path = os.path.join(os.path.expanduser(u'~'), u'.netrc')
+    home_path = os.path.expanduser(u'~')
+    self._path = os.path.join(home_path, u'.netrc')
     if not os.path.exists(self._path):
       return
 
@@ -774,31 +916,33 @@ def Main():
 
   options = argument_parser.parse_args()
 
-  feature_branch = getattr(options, u'branch', None)
-  if options.command == u'close' and not feature_branch:
-    print(u'Feature branch value is missing.')
+  print_help_on_error = False
+  if options.command == u'close':
+    close_feature_branch = getattr(options, u'branch', None)
+    if not close_feature_branch:
+      print(u'Feature branch value is missing.')
+      print_help_on_error = True
+
+  elif options.command == u'merge':
+    merge_codereview_issue_number = getattr(
+        options, u'codereview_issue_number', None)
+    if not merge_codereview_issue_number:
+      print(u'Codereview issue number value is missing.')
+      print_help_on_error = True
+
+    merge_github_origin = getattr(options, u'github_origin', None)
+    if not merge_github_origin:
+      print(u'Github origin value is missing.')
+      print_help_on_error = True
+
+  if print_help_on_error:
     print(u'')
     argument_parser.print_help()
     print(u'')
     return False
 
-  codereview_issue_number = getattr(options, u'codereview_issue_number', None)
-  if options.command == u'merge' and not codereview_issue_number:
-    print(u'Codereview issue number value is missing.')
-    print(u'')
-    argument_parser.print_help()
-    print(u'')
-    return False
-
-  github_origin = getattr(options, u'github_origin', None)
-  if options.command == u'merge' and not github_origin:
-    print(u'Github origin value is missing.')
-    print(u'')
-    argument_parser.print_help()
-    print(u'')
-    return False
-
-  netrc_path = os.path.join(os.path.expanduser(u'~'), u'.netrc')
+  home_path = os.path.expanduser(u'~')
+  netrc_path = os.path.join(home_path, u'.netrc')
   if not os.path.exists(netrc_path):
     print(u'{0:s} aborted - unable to find .netrc.'.format(
         options.command.title()))
@@ -846,7 +990,7 @@ def Main():
       return False
 
   elif options.command == u'close':
-    if feature_branch == u'master':
+    if close_feature_branch == u'master':
       print(u'{0:s} aborted - feature branch cannot be master.'.format(
           options.command.title()))
       return False
@@ -854,6 +998,8 @@ def Main():
     if active_branch != u'master':
       git_helper.SwitchToMasterBranch()
       active_branch = u'master'
+
+  github_helper = GitHubHelper(u'log2timeline', project_name)
 
   if options.command in [u'create', u'close', u'update']:
     if not git_helper.CheckSynchronizedWithUpstream():
@@ -879,7 +1025,60 @@ def Main():
           u'origin/master.').format(options.command.title()))
       return False
 
-  github_helper = GitHubHelper(u'log2timeline', project_name)
+    codereview_helper = CodeReviewHelper(no_browser=options.no_browser)
+    codereview_information = codereview_helper.QueryIssue(
+        merge_codereview_issue_number)
+    if not codereview_information:
+      print((
+          u'{0:s} aborted - unable to retrieve code review: {1:d} '
+          u'information.').format(
+              options.command.title(), merge_codereview_issue_number))
+      return False
+
+    merge_description = codereview_information.get(u'subject', None)
+    if not merge_description:
+      print((
+          u'{0:s} aborted - unable to determine description of code review: '
+          u'{1:d}.').format(
+              options.command.title(), merge_codereview_issue_number))
+      return False
+
+    merge_email_address = codereview_information.get(u'owner_email', None)
+    if not merge_email_address:
+      print((
+          u'{0:s} aborted - unable to determine email address of owner of '
+          u'code review: {1:d}.').format(
+              options.command.title(), merge_codereview_issue_number))
+      return False
+
+    fork_username, _, fork_feature_branch = merge_github_origin.partition(u':')
+
+    github_user_information = github_helper.QueryUser(fork_username)
+    if not github_user_information:
+      print((
+          u'{0:s} aborted - unable to retrieve github user: {1:s} '
+          u'information.').format(options.command.title(), fork_username))
+      return False
+
+    merge_fullname = github_user_information.get(u'name', None)
+    if not merge_fullname:
+      merge_fullname = codereview_information.get(u'owner', None)
+    if not merge_fullname:
+      merge_fullname = github_user_information.get(u'company', None)
+    if not merge_fullname:
+      print((
+          u'{0:s} aborted - unable to determine full name.').format(
+              options.command.title()))
+      return False
+
+    merge_author = u'{0:s} <{1:s}>'.format(merge_fullname, merge_email_address)
+
+  if options.command == u'merge':
+    sphinxapidoc_helper = SphinxAPIDocHelper()
+    if not sphinxapidoc_helper.CheckUpToDateVersion():
+      print(u'{0:s} aborted - sphinx-apidoc verion 1.2.0 or later required.'.format(
+          options.command.title()))
+      return False
 
   if options.command in [u'create', u'merge', u'update']:
     pylint_helper = PylintHelper()
@@ -889,7 +1088,6 @@ def Main():
       return False
 
     if options.command == u'merge':
-      fork_username, _, fork_feature_branch = github_origin.partition(u':')
       fork_git_repo_url = github_helper.GetForkGitRepoUrl(fork_username)
 
       if not git_helper.PullFromFork(fork_git_repo_url, fork_feature_branch):
@@ -953,7 +1151,9 @@ def Main():
     else:
       description = user_input
 
-    codereview_helper = CodeReviewHelper(no_browser=options.no_browser)
+    email_address = git_helper.GetEmailAddress()
+    codereview_helper = CodeReviewHelper(
+        email_address, no_browser=options.no_browser)
     codereview_issue_number = codereview_helper.CreateIssue(
         options.diffbase, description)
 
@@ -963,19 +1163,19 @@ def Main():
     review_file = ReviewFile(active_branch)
     review_file.Create(codereview_issue_number)
 
-    github_origin = u'{0:s}:{1:s}'.format(git_origin, active_branch)
+    create_github_origin = u'{0:s}:{1:s}'.format(git_origin, active_branch)
     if github_helper.CreatePullRequest(
-        github_access_token, codereview_issue_number, github_origin,
+        github_access_token, codereview_issue_number, create_github_origin,
         description):
       print(u'Unable to create pull request.')
 
   elif options.command == u'close':
-    if not git_helper.CheckHasBranch(feature_branch):
-      print(u'No such feature branch: {0:s}'.format(feature_branch))
+    if not git_helper.CheckHasBranch(close_feature_branch):
+      print(u'No such feature branch: {0:s}'.format(close_feature_branch))
     else:
-      git_helper.RemoveFeatureBranch(feature_branch)
+      git_helper.RemoveFeatureBranch(close_feature_branch)
 
-    review_file = ReviewFile(feature_branch)
+    review_file = ReviewFile(close_feature_branch)
     codereview_issue_number = review_file.GetCodeReviewIssueNumber()
     review_file.Remove()
 
@@ -988,24 +1188,99 @@ def Main():
             u'{0:d}').format(codereview_issue_number))
 
   elif options.command == u'merge':
+    # TODO: refactor into separate function/class?
+    version_file_path = os.path.join(project_name, u'__init__.py')
+    if not is.path.exists(version_file_path):
+      # TODO: error
+      git_helper.DropUncommittedChanges()
+
+    try:
+      with open(version_file_path, u'rb') as file_object:
+        version_file_contents = file_object.read()
+
+    except IOError as exception:
+      print(u'Unable to read version file with error: {0:s}'.format(
+          exception))
+        git_helper.DropUncommittedChanges()
+
+    date_version = time.strftime(u'%Y%m%d')
+    # TODO: catch decode error.
+    version_file_contents = version_file_contents.decode('utf-8')
+    lines = version_file_contents.split(u'\n')
+
+    for line_index, line in enumerate(lines):
+      if project == u'plaso' and line.startswith(u'VERSION_DATE = '):
+        version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
+        line[line_index] = version_string
+
+      else project != u'plaso' and line.startswith(u'__version__ = '):
+        version_string = u'__version__ = \'{0:s}\''.format(date_version)
+        line[line_index] = version_string
+
+    # TODO: catch encode error.
+    version_file_contents = version_file_contents.encode(u'utf-8')
+
+    try:
+      with open(version_file_path, u'wb') as file_object:
+        file_object.write(version_file_contents)
+
+    except IOError as exception:
+      print(u'Unable to write version file with error: {0:s}'.format(
+          exception))
+        git_helper.DropUncommittedChanges()
+
+    # TODO: refactor into separate function/class?
+    dpkg_changelog_path = os.path.join(u'config', u'dpkg', u'changelog')
+    if os.path.exists(dpkg_changelog_path):
+      dpkg_date = time.strftime(u'%a, %d %b %Y %H:%M:%S %z')
+      dpkg_maintainter = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
+      dpkg_changelog_content = u'\n'.join([
+          u'python-{0:s} ({1:s}-1) unstable; urgency=low'.format(
+              project_name, project_version),
+          u'',
+          u'  * Auto-generated',
+          u'',
+          u' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)])
+
+      # TODO: catch encode error.
+      dpkg_changelog_content = dpkg_changelog_content.encode(u'utf-8')
+
+      try:
+        with open(dpkg_changelog_path, u'wb') as file_object:
+          file_object.write(dpkg_changelog_content)
+      except IOError as exception:
+        print(u'Unable to write dpkg changelog file with error: {0:s}'.format(
+            exception))
+        git_helper.DropUncommittedChanges()
+
     # On error: git stash && git stash drop
     # git_helper.DropUncommittedChanges()
 
-    # TODO: generate API documentation
-    # TODO: update version information
+    apidoc_config_path = os.path.join(u'docs', u'conf.py')
+    if os.path.exists(apidoc_config_path):
+      sphinxapidoc_helper.UpdateAPIDocs()
 
-    # TODO: determine full name and email address for commit
+      git_helper.AddPath(u'docs')
+
+      # Trigger a readthedocs build for the docs.
+      # The plaso readthedocs content is mirrored with the wiki repo
+      # and has no trigger on update webhook for readthedocs.
+      # TODO: curl -X POST http://readthedocs.org/build/plaso
+
+    # TODO: commit changes.
+    _ = merge_description
+    _ = merge_author
 
     # TODO: add commit message to codereview
-    pass
 
   elif options.command == u'update':
     review_file = ReviewFile(active_branch)
     codereview_issue_number = review_file.GetCodeReviewIssueNumber()
 
     last_commit_message = git_helper.GetLastCommitMessage()
-    print(u'Automatic generated description of the update: {0:s}'.format(
-        last_commit_message))
+    print(u'Automatic generated description of the update:')
+    print(last_commit_message)
+    print(u'')
 
     print(u'Enter a description for the update or hit enter to use the')
     print(u'automatic generated one:')
@@ -1017,7 +1292,9 @@ def Main():
     else:
       description = user_input
 
-    codereview_helper = CodeReviewHelper(no_browser=options.no_browser)
+    email_address = git_helper.GetEmailAddress()
+    codereview_helper = CodeReviewHelper(
+        email_address, no_browser=options.no_browser)
     if not codereview_helper.UpdateIssue(
         codereview_issue_number, options.diffbase, description):
       print(u'Unable to update code review: {0:d}'.format(
