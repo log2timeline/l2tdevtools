@@ -21,10 +21,6 @@ sys.path.insert(0, u'.')
 import utils.upload
 
 
-SUPPORTED_PROJECTS = frozenset([
-    u'dfvfs', u'dfwinreg', u'l2tdevtools', u'plaso'])
-
-
 class CLIHelper(object):
   """Class that defines CLI helper functions."""
 
@@ -431,7 +427,7 @@ class GitHelper(CLIHelper):
       return
 
     output_lines = output.split(b'\n')
-    if len(output_lines) != 1:
+    if not output_lines:
       return
 
     return output_lines[0]
@@ -668,6 +664,176 @@ class GitHubHelper(object):
     return json.loads(response_data)
 
 
+class ProjectHelper(object):
+  """Class that defines project helper functions."""
+
+  _SUPPORTED_PROJECTS = frozenset([
+      u'dfvfs', u'dfwinreg', u'l2tdevtools', u'plaso'])
+
+  def __init__(self):
+    """Initializes a project helper object."""
+    super(ProjectHelper, self).__init__()
+    self._project_name = None
+
+  def _ReadVersionFile(self):
+    """Reads the contents of the version file.
+
+    Returns:
+      A string containing the version file content or None.
+    """
+    project_name = self.GetName()
+    if not project_name:
+      logging.error(u'Missing project name.')
+      return
+
+    self._version_file_path = os.path.join(project_name, u'__init__.py')
+    if not os.path.exists(self._version_file_path):
+      logging.error(
+          u'Missing version file: {0:s}'.format(self._version_file_path))
+      return
+
+    try:
+      with open(self._version_file_path, u'rb') as file_object:
+        version_file_contents = file_object.read()
+
+    except IOError as exception:
+      logging.error(
+          u'Unable to read version file with error: {0:s}'.format(exception))
+      return
+
+    try:
+      version_file_contents = version_file_contents.decode('utf-8')
+    except UnicodeDecodeError as exception:
+      logging.error(
+          u'Unable to read version file with error: {0:s}'.format(exception))
+      return
+
+  def GetName(self):
+    """Retrieves the project name from the path of the script.
+
+    Returns:
+      A string containing the project name or None.
+    """
+    if not self._project_name:
+      project_name = os.path.abspath(__file__)
+      project_name = os.path.dirname(project_name)
+      project_name = os.path.dirname(project_name)
+      project_name = os.path.basename(project_name)
+
+      if not project_name in self._SUPPORTED_PROJECTS:
+        logging.error(
+            u'Unsupported project name: {0:s}.'.format(project_name))
+        return
+
+      self._project_name = project_name
+
+    return self._project_name
+
+  def GetVersion(self):
+    """Retrieves the project version from the version file.
+
+    Returns:
+      A string containing the project version or None.
+    """
+    version_file_contents = self._ReadVersionFile()
+    if not version_file_contents:
+      return
+
+    # The version is formatted as:
+    # __version__ = 'VERSION'
+    version_line_prefix = u'__version__ = \''
+
+    lines = version_file_contents.split(u'\n')
+    for line in lines:
+      if line.startswith(version_line_prefix):
+        return line[len(version_line_prefix):-1]
+
+    return
+
+  def UpdateDpkgChangelogFile(self):
+    """Updates the dpkg changelog file.
+
+    Returns:
+      A boolean indicating the dpkg changelog file was updated. This function
+      will return True if the dpkg changelog file does not exists.
+    """
+    project_name = self.GetName()
+    project_version = self.GetVersion()
+
+    dpkg_changelog_path = os.path.join(u'config', u'dpkg', u'changelog')
+    if not os.path.exists(dpkg_changelog_path):
+      return True
+
+    dpkg_maintainter = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
+    dpkg_date = time.strftime(u'%a, %d %b %Y %H:%M:%S %z')
+    dpkg_changelog_content = u'\n'.join([
+        u'python-{0:s} ({1:s}-1) unstable; urgency=low'.format(
+            project_name, project_version),
+        u'',
+        u'  * Auto-generated',
+        u'',
+        u' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)])
+
+    try:
+      dpkg_changelog_content = dpkg_changelog_content.encode(u'utf-8')
+    except UnicodeEncodeError as exception:
+      logging.error(
+          u'Unable to write dpkg changelog file with error: {0:s}'.format(
+              exception))
+      return False
+
+    try:
+      with open(dpkg_changelog_path, u'wb') as file_object:
+        file_object.write(dpkg_changelog_content)
+    except IOError as exception:
+      logging.error(
+          u'Unable to write dpkg changelog file with error: {0:s}'.format(
+              exception))
+      return False
+
+    return True
+
+  def UpdateVersionFile(self):
+    """Updates the version file.
+
+    Returns:
+      A boolean indicating the version file was updated.
+    """
+    version_file_contents = self._ReadVersionFile()
+    if not version_file_contents:
+      return False
+
+    date_version = time.strftime(u'%Y%m%d')
+    project_name = self.GetName()
+    lines = version_file_contents.split(u'\n')
+    for line_index, line in enumerate(lines):
+      if project_name == u'plaso' and line.startswith(u'VERSION_DATE = '):
+        version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
+        line[line_index] = version_string
+
+      elif project_name != u'plaso' and line.startswith(u'__version__ = '):
+        version_string = u'__version__ = \'{0:s}\''.format(date_version)
+        line[line_index] = version_string
+
+    try:
+      version_file_contents = version_file_contents.encode(u'utf-8')
+    except UnicodeEncodeError as exception:
+      logging.error(
+          u'Unable to write version file with error: {0:s}'.format(exception))
+      return False
+
+    try:
+      with open(self._version_file_path, u'wb') as file_object:
+        file_object.write(version_file_contents)
+
+    except IOError as exception:
+      logging.error(
+          u'Unable to write version file with error: {0:s}'.format(exception))
+      return False
+
+    return True
+
+
 class PylintHelper(CLIHelper):
   """Class that defines pylint helper functions."""
 
@@ -865,114 +1031,6 @@ class ReviewFile(object):
     os.remove(self._path)
 
 
-def UpdateDpkgChangelogFile(project_name, project_version):
-  """Updates the dpkg changelog file.
-
-  Args:
-    project_name: a string containing the name of the project.
-    project_version: a string containing the version of the project.
-
-  Returns:
-    A boolean indicating the dpkg changelog file was updated. This function
-    will return True if the dpkg changelog file does not exists.
-  """
-  dpkg_changelog_path = os.path.join(u'config', u'dpkg', u'changelog')
-  if not os.path.exists(dpkg_changelog_path):
-    return True
-
-  dpkg_maintainter = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
-  dpkg_date = time.strftime(u'%a, %d %b %Y %H:%M:%S %z')
-  dpkg_changelog_content = u'\n'.join([
-      u'python-{0:s} ({1:s}-1) unstable; urgency=low'.format(
-          project_name, project_version),
-      u'',
-      u'  * Auto-generated',
-      u'',
-      u' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)])
-
-  try:
-    dpkg_changelog_content = dpkg_changelog_content.encode(u'utf-8')
-  except UnicodeEncodeError as exception:
-    logging.error(
-        u'Unable to write dpkg changelog file with error: {0:s}'.format(
-            exception))
-    return False
-
-  try:
-    with open(dpkg_changelog_path, u'wb') as file_object:
-      file_object.write(dpkg_changelog_content)
-  except IOError as exception:
-    logging.error(
-        u'Unable to write dpkg changelog file with error: {0:s}'.format(
-            exception))
-    return False
-
-  return True
-
-
-def UpdateVersionFile(project_name):
-  """Updates the version file.
-
-  Args:
-    project_name: a string containing the name of the project.
-
-  Returns:
-    A boolean indicating the version file was updated.
-  """
-  version_file_path = os.path.join(project_name, u'__init__.py')
-  if not is.path.exists(version_file_path):
-    logging.error(
-        u'Missing version file: {0:s}'.format(version_file_path))
-    return False
-
-  try:
-    with open(version_file_path, u'rb') as file_object:
-      version_file_contents = file_object.read()
-
-  except IOError as exception:
-    logging.error(
-        u'Unable to read version file with error: {0:s}'.format(exception))
-    return False
-
-  date_version = time.strftime(u'%Y%m%d')
-
-  try:
-    version_file_contents = version_file_contents.decode('utf-8')
-  except UnicodeDecodeError as exception:
-    logging.error(
-        u'Unable to read version file with error: {0:s}'.format(exception))
-    return False
-
-  lines = version_file_contents.split(u'\n')
-
-  for line_index, line in enumerate(lines):
-    if project == u'plaso' and line.startswith(u'VERSION_DATE = '):
-      version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
-      line[line_index] = version_string
-
-    else project != u'plaso' and line.startswith(u'__version__ = '):
-      version_string = u'__version__ = \'{0:s}\''.format(date_version)
-      line[line_index] = version_string
-
-  try:
-    version_file_contents = version_file_contents.encode(u'utf-8')
-  except UnicodeEncodeError as exception:
-    logging.error(
-        u'Unable to write version file with error: {0:s}'.format(exception))
-   return False
-
-  try:
-    with open(version_file_path, u'wb') as file_object:
-      file_object.write(version_file_contents)
-
-  except IOError as exception:
-    logging.error(
-        u'Unable to write version file with error: {0:s}'.format(exception))
-   return False
-
-  return True
-
-
 def Main():
   argument_parser = argparse.ArgumentParser(
       description=u'Script to manage code reviews.')
@@ -1056,14 +1114,12 @@ def Main():
         options.command.title()))
     return False
 
-  project_name = os.path.abspath(__file__)
-  project_name = os.path.dirname(project_name)
-  project_name = os.path.dirname(project_name)
-  project_name = os.path.basename(project_name)
+  project_helper = ProjectHelper()
 
-  if not project_name in SUPPORTED_PROJECTS:
-    print(u'{0:s} aborted - unsupported project name: {1:s}.'.format(
-        options.command.title(), project_name))
+  project_name = project_helper.GetName()
+  if not project_name:
+    print(u'{0:s} aborted - unable to determine project name.'.format(
+        options.command.title()))
     return False
 
   git_repo_url = b'https://github.com/log2timeline/{0:s}.git'.format(
@@ -1133,7 +1189,9 @@ def Main():
           u'origin/master.').format(options.command.title()))
       return False
 
-    codereview_helper = CodeReviewHelper(no_browser=options.no_browser)
+    email_address = git_helper.GetEmailAddress()
+    codereview_helper = CodeReviewHelper(
+        email_address, no_browser=options.no_browser)
     codereview_information = codereview_helper.QueryIssue(
         merge_codereview_issue_number)
     if not codereview_information:
@@ -1184,8 +1242,9 @@ def Main():
   if options.command == u'merge':
     sphinxapidoc_helper = SphinxAPIDocHelper()
     if not sphinxapidoc_helper.CheckUpToDateVersion():
-      print(u'{0:s} aborted - sphinx-apidoc verion 1.2.0 or later required.'.format(
-          options.command.title()))
+      print((
+          u'{0:s} aborted - sphinx-apidoc verion 1.2.0 or later '
+          u'required.').format(options.command.title()))
       return False
 
   if options.command in [u'create', u'merge', u'update']:
@@ -1297,14 +1356,12 @@ def Main():
             u'{0:d}').format(codereview_issue_number))
 
   elif options.command == u'merge':
-    if not UpdateVersionFile(project_name):
+    if not project_helper.UpdateVersionFile():
       print(u'Unable to update version file.')
       git_helper.DropUncommittedChanges()
       return False
 
-    # TODO: get project version.
-    project_version = u''
-    if not UpdateDpkgChangelogFile(project_name, project_version):
+    if not project_helper.UpdateDpkgChangelogFile():
       print(u'Unable to update dpkg changelog file.')
       git_helper.DropUncommittedChanges()
       return False

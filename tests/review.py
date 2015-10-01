@@ -110,6 +110,17 @@ class GitHubHelperTest(unittest.TestCase):
     self.assertIsNone(user_information)
 
 
+class ProjectHelper(unittest.TestCase):
+  """Tests for the project helper class."""
+
+  def testGetName(self):
+    """Tests the GetName function."""
+    project_helper = review.ProjectHelper()
+
+    project_name = project_helper.GetName()
+    self.assertEqual(project_name, u'l2tdevtools')
+
+
 class PylintHelperTest(unittest.TestCase):
   """Tests for the pylint helper class."""
 
