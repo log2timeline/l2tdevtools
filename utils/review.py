@@ -914,7 +914,8 @@ class SphinxAPIDocHelper(CLIHelper):
   def UpdateAPIDocs(self):
     """Updates the API docs."""
     # TODO: implement.
-    command = u'sphinx-apidoc -f -o docs {0:s}'.format(self._project_name)
+    # command = u'sphinx-apidoc -f -o docs {0:s}'.format(self._project_name)
+    return
 
 
 class NetRCFile(object):
