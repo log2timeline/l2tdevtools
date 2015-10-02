@@ -73,6 +73,20 @@ class CodeReviewHelper(CLIHelper):
     self._no_browser = no_browser
     self._upload_py_path = os.path.join(u'utils', u'upload.py')
 
+  def AddCommitMessage(self, issue_number):
+    """Adds a commit message to the code review message.
+
+    Args:
+      issue_number: an integer containing the codereview issue number.
+
+    Returns:
+      A boolean indicating the commit message was added to
+      the code review issue.
+    """
+    # TODO: implement
+    # https://github.com/rietveld-codereview/rietveld/blob/master/
+    # codereview/views.py#L2652
+
   def CloseIssue(self, issue_number):
     """Closes the code review issue.
 
@@ -355,6 +369,29 @@ class GitHelper(CLIHelper):
     exit_code, output, _ = self.RunCommand(
         u'git log HEAD..upstream/master --oneline')
     return exit_code == 0 and not output
+
+  def CommitToOriginInNameOf(self, author, description):
+    """Commits changes in name of an author to the master branch of origin.
+
+    Args:
+      author: string containing the full name and email address of the author.
+              E.g. "Full Name <email.address@example.com>".
+      description: string containing the description of the commit.
+
+    Returns:
+      A boolean indicating the changes were committed to the git repo.
+    """
+    command = u'git commit -a --author={0:s} -m {1:s}'.format(
+        author, description)
+    exit_code, _, _ = self.RunCommand(command)
+    if exit_code != 0:
+      return False
+
+    exit_code, _, _ = self.RunCommand(u'git push origin master')
+    if exit_code != 0:
+      return False
+
+    return True
 
   def DropUncommittedChanges(self):
     """Drops the uncommitted changes."""
@@ -887,6 +924,49 @@ class PylintHelper(CLIHelper):
     return version_tuple >= self._MINIMUM_VERSION_TUPLE
 
 
+class ReadTheDocsHelper(object):
+  """Class that defines readthedocs helper functions."""
+
+  def __init__(self, project):
+    """Initializes a readthedocs helper object.
+
+    Args:
+      project: string containing the github project name.
+    """
+    super(ReadTheDocsHelper, self).__init__()
+    self._project = project
+
+  def TriggerBuild(self):
+    """Triggers readthedocs to build the docs of the project.
+
+    Returns:
+      A boolean indicating the build was triggered.
+    """
+    readthedocs_url = u'http://readthedocs.org/build/{0:s}'.format(
+        self._project_name)
+
+    request = urllib2.Request(readthedocs_url)
+
+    # This will change the request into a POST.
+    request.add_data(b'')
+
+    try:
+      url_object = urllib2.urlopen(request)
+    except urllib2.HTTPError as exception:
+      logging.error(
+          u'Failed triggering build with error: {0:s}'.format(
+              exception))
+      return False
+
+    if url_object.code != 200:
+      logging.error((
+          u'Failed triggering build with status code: {1:d}'.format(
+              url_object.code))
+      return False
+
+    return True
+
+
 class SphinxAPIDocHelper(CLIHelper):
   """Class that defines sphinx-apidoc helper functions."""
 
@@ -913,9 +993,11 @@ class SphinxAPIDocHelper(CLIHelper):
 
   def UpdateAPIDocs(self):
     """Updates the API docs."""
-    # TODO: implement.
-    # command = u'sphinx-apidoc -f -o docs {0:s}'.format(self._project_name)
-    return
+    command = u'sphinx-apidoc -f -o docs {0:s}'.format(self._project_name)
+    exit_code, output, _ = self.RunCommand(command)
+    print(output)
+
+    return exit_code == 0
 
 
 class NetRCFile(object):
@@ -1372,25 +1454,24 @@ def Main():
       git_helper.DropUncommittedChanges()
       return False
 
-    # On error: git stash && git stash drop
-    # git_helper.DropUncommittedChanges()
-
     apidoc_config_path = os.path.join(u'docs', u'conf.py')
     if os.path.exists(apidoc_config_path):
       sphinxapidoc_helper.UpdateAPIDocs()
-
       git_helper.AddPath(u'docs')
 
-      # Trigger a readthedocs build for the docs.
-      # The plaso readthedocs content is mirrored with the wiki repo
-      # and has no trigger on update webhook for readthedocs.
-      # TODO: curl -X POST http://readthedocs.org/build/plaso
+      readthedocs_helper = ReadTheDocsHelper(project_name)
 
-    # TODO: commit changes.
-    _ = merge_description
-    _ = merge_author
+      # The project wiki repo contains the documentation and
+      # has no trigger on update webhook for readthedocs.
+      # So we trigger readthedocs directly to build the docs.
+      readthedocs_helper.TriggerBuild()
 
-    # TODO: add commit message to codereview
+    if not git_helper.CommitToOriginInNameOf(merge_author, merge_description):
+      print(u'Unable to commit changes.')
+      git_helper.DropUncommittedChanges()
+      return False
+
+    codereview_helper.AddCommitMessage(merge_codereview_issue_number)
 
   elif options.command == u'update':
     review_file = ReviewFile(active_branch)
