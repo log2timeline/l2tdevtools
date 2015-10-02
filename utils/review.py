@@ -977,7 +977,12 @@ class NetRCFile(object):
 
 
 class ReviewFile(object):
-  """Class that defines a review file."""
+  """Class that defines a review file.
+
+  A review file is use to track code review relevant information like the
+  codereview issue number. It is stored in the .review subdirectory and
+  named after the feature branch e.g. ".review/feature".
+  """
 
   def __init__(self, branch_name):
     """Initializes a review file object.
@@ -1066,7 +1071,7 @@ def Main():
   # TODO: add this to help output.
   merge_command_parser.add_argument(
       u'codereview_issue_number', action=u'store',
-      metavar=u'CODEREVIEW_ISSIE_NUMBER', default=None,
+      metavar=u'CODEREVIEW_ISSUE_NUMBER', default=None,
       help=(u'the codereview issue number to be merged.'))
 
   # TODO: add this to help output.
