@@ -11,12 +11,19 @@ from utils import review
 class CodeReviewHelperTest(unittest.TestCase):
   """Tests for the codereview helper class."""
 
-  def testQueryIssue(self):
-    """Tests the QueryIssue function."""
-    codereview_helper = review.CodeReviewHelper(
+  def setUp(self):
+    """Sets up a test case."""
+    self._codereview_helper = review.CodeReviewHelper(
         u'test@example.com', no_browser=True)
 
-    codereview_information = codereview_helper.QueryIssue(269830043)
+  def testGetXSRFToken(self):
+    """Tests the GetXSRFToken function."""
+    # Only test if the method completes without errors.
+    self._codereview_helper.GetXSRFToken()
+
+  def testQueryIssue(self):
+    """Tests the QueryIssue function."""
+    codereview_information = self._codereview_helper.QueryIssue(269830043)
     self.assertIsNotNone(codereview_information)
 
     expected_description = (
@@ -24,10 +31,10 @@ class CodeReviewHelperTest(unittest.TestCase):
     description = codereview_information.get(u'subject')
     self.assertEqual(description, expected_description)
 
-    codereview_information = codereview_helper.QueryIssue(0)
+    codereview_information = self._codereview_helper.QueryIssue(0)
     self.assertIsNone(codereview_information)
 
-    codereview_information = codereview_helper.QueryIssue(1)
+    codereview_information = self._codereview_helper.QueryIssue(1)
     self.assertIsNone(codereview_information)
 
 

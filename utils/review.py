@@ -11,6 +11,7 @@ import shlex
 import subprocess
 import sys
 import time
+import urllib
 # Keep urllib2 here since we this code should be able to be used
 # by a default Python set up.
 import urllib2
@@ -72,8 +73,9 @@ class CodeReviewHelper(CLIHelper):
     self._email_address = email_address
     self._no_browser = no_browser
     self._upload_py_path = os.path.join(u'utils', u'upload.py')
+    self._xsrf_token = None
 
-  def AddCommitMessage(self, issue_number):
+  def AddCommitMessage(self, issue_number, message):
     """Adds a commit message to the code review message.
 
     Args:
@@ -83,9 +85,46 @@ class CodeReviewHelper(CLIHelper):
       A boolean indicating the commit message was added to
       the code review issue.
     """
-    # TODO: implement
-    # https://github.com/rietveld-codereview/rietveld/blob/master/
-    # codereview/views.py#L2652
+    codereview_access_token = self.GetAccessToken()
+    xsrf_token = self.GetXSRFToken()
+    if not codereview_access_token or not xsrf_token:
+      return False
+
+    codereview_url = b'https://codereview.appspot.com/{0:d}/publish'.format(
+        issue_number)
+
+    post_data = urllib.urlencode({
+        u'add_as_reviewer': u'False',
+        u'message': message,
+        u'message_only': u'True',
+        u'no_redirect': 'True',
+        u'send_mail': 'True',
+        u'xsrf_token': xsrf_token})
+
+    request = urllib2.Request(codereview_url)
+
+    # Add header: Authorization: OAuth <codereview access token>
+    request.add_header(
+        u'Authorization', u'OAuth {0:s}'.format(codereview_access_token))
+
+    # This will change the request into a POST.
+    request.add_data(post_data)
+
+    try:
+      url_object = urllib2.urlopen(request)
+    except urllib2.HTTPError as exception:
+      logging.error(
+          u'Failed publish to codereview issue: {0:d} with error: {1:s}'.format(
+              issue_number, exception))
+      return False
+
+    if url_object.code != 200:
+      logging.error((
+          u'Failed publish to codereview issue: {0:d} with status code: '
+          u'{1:d}').format(issue_number, url_object.code))
+      return False
+
+    return True
 
   def CloseIssue(self, issue_number):
     """Closes the code review issue.
@@ -97,17 +136,24 @@ class CodeReviewHelper(CLIHelper):
       A boolean indicating the code review was closed.
     """
     codereview_access_token = self.GetAccessToken()
-    if not codereview_access_token:
+    xsrf_token = self.GetXSRFToken()
+    if not codereview_access_token or not xsrf_token:
       return False
 
     codereview_url = b'https://codereview.appspot.com/{0:d}/close'.format(
         issue_number)
+
+    post_data = urllib.urlencode({
+        u'xsrf_token': xsrf_token})
 
     request = urllib2.Request(codereview_url)
 
     # Add header: Authorization: OAuth <codereview access token>
     request.add_header(
         u'Authorization', u'OAuth {0:s}'.format(codereview_access_token))
+
+    # This will change the request into a POST.
+    request.add_data(post_data)
 
     try:
       url_object = urllib2.urlopen(request)
@@ -195,6 +241,45 @@ class CodeReviewHelper(CLIHelper):
         logging.error(u'Unable to retrieve access token.')
 
     return self._access_token
+
+  def GetXSRFToken(self):
+    """Retrieves the XSRF token.
+
+    Returns:
+      String containing a codereview XSRF token or None if the token
+      could not be obtained.
+    """
+    if not self._xsrf_token:
+      codereview_access_token = self.GetAccessToken()
+      if not codereview_access_token:
+        return
+
+      codereview_url = b'https://codereview.appspot.com/xsrf_token'
+
+      request = urllib2.Request(codereview_url)
+
+      # Add header: Authorization: OAuth <codereview access token>
+      request.add_header(
+          u'Authorization', u'OAuth {0:s}'.format(codereview_access_token))
+      request.add_header(u'X-Requesting-XSRF-Token', u'1')
+
+      try:
+        url_object = urllib2.urlopen(request)
+      except urllib2.HTTPError as exception:
+        logging.error(
+            u'Failed retrieving codereview XSRF token with error: {0:s}'.format(
+                exception))
+        return
+
+      if url_object.code != 200:
+        logging.error((
+            u'Failed retrieving codereview XSRF token with status code: '
+            u'{0:d}').format(url_object.code))
+        return
+
+      self._xsrf_token = url_object.read()
+
+    return self._xsrf_token
 
   def QueryIssue(self, issue_number):
     """Queries a code review issue.
@@ -959,7 +1044,7 @@ class ReadTheDocsHelper(object):
       return False
 
     if url_object.code != 200:
-      logging.error((
+      logging.error(
           u'Failed triggering build with status code: {1:d}'.format(
               url_object.code))
       return False
@@ -1163,6 +1248,8 @@ def Main():
       metavar=u'GITHUB_ORIGIN', default=None,
       help=(u'the github origin to merged e.g. username:feature.'))
 
+  # TODO: add run linter command.
+  # TODO: add run tests command.
   # TODO: add dry-run option to run merge without commit.
   # useful to test pending CLs.
 
@@ -1471,7 +1558,12 @@ def Main():
       git_helper.DropUncommittedChanges()
       return False
 
-    codereview_helper.AddCommitMessage(merge_codereview_issue_number)
+    commit_message = (
+        u'Changes have been merged with master branch. '
+        u'To close the review and clean up the feature branch you can run: '
+        u'python ./utils/review.py close {0:s}').format(fork_feature_branch)
+    codereview_helper.AddCommitMessage(
+        merge_codereview_issue_number, commit_message)
 
   elif options.command == u'update':
     review_file = ReviewFile(active_branch)
