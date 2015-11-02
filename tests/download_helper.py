@@ -257,7 +257,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
-  _PROJECT_VERSION = u'20150915'
+  _PROJECT_VERSION = u'20151008'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -343,7 +343,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
   """Tests for the Source Forge download helper."""
 
   _PROJECT_NAME = u'pyparsing'
-  _PROJECT_VERSION = u'2.0.3'
+  _PROJECT_VERSION = u'2.0.5'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
