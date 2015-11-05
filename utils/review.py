@@ -220,7 +220,7 @@ class CodeReviewHelper(CLIHelper):
       return
 
     issue_url_line_start = (
-        u'Issue created. URL: http://codereview.appspot.com/')
+        u'Issue created. URL: https://codereview.appspot.com/')
     for line in output.split(b'\n'):
       if line.startswith(issue_url_line_start):
         try:
@@ -1053,7 +1053,7 @@ class ReadTheDocsHelper(object):
     Returns:
       A boolean indicating the build was triggered.
     """
-    readthedocs_url = u'http://readthedocs.org/build/{0:s}'.format(
+    readthedocs_url = u'https://readthedocs.org/build/{0:s}'.format(
         self._project_name)
 
     request = urllib2.Request(readthedocs_url)
