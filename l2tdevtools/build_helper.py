@@ -1113,7 +1113,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     result = self._BuildSetupPy()
     if result:
-      self._MoveMsi(python_module_name, build_directory)
+      result = self._MoveMsi(python_module_name, build_directory)
 
     os.chdir(build_directory)
 
@@ -1234,17 +1234,31 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     os.chdir(u'..')
 
   def _MoveMsi(self, python_module_name, build_directory):
-    """Moves the msi from the dist sub directory into the build directory.
+    """Moves the MSI from the dist sub directory into the build directory.
 
     Args:
       python_module_name: the Python module name.
       build_directory: the build directory.
-    """
-    msi_filename = glob.glob(os.path.join(
-        u'dist', u'{0:s}-*.msi'.format(python_module_name)))
 
-    logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
-    shutil.move(msi_filename[0], build_directory)
+    Returns:
+      True if the move was successful, False otherwise.
+    """
+    msi_filename = os.path.join(
+        u'dist', u'{0:s}-*.msi'.format(python_module_name))
+    msi_glob = glob.glob(msi_filename)
+    if len(msi_glob) != 1:
+      logging.error(u'Unable to find MSI file.')
+      return False
+
+    _, _, msi_filename = msi_glob[0].rpartition(os.path.sep)
+    msi_filename = os.path.join(build_directory, msi_filename)
+    if os.path.exists(msi_filename):
+      logging.warning(u'MSI file already exists.')
+    else:
+      logging.info(u'Moving: {0:s}'.format(msi_glob[0]))
+      shutil.move(msi_glob[0], build_directory)
+
+    return True
 
   def _SetupBuildDependencySqlite(self):
     """Sets up the sqlite build dependency.
@@ -1363,7 +1377,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
         result = self._BuildSetupPy()
         if result:
-          self._MoveMsi(python_module_name, build_directory)
+          result = self._MoveMsi(python_module_name, build_directory)
 
         os.chdir(build_directory)
 
@@ -1463,11 +1477,19 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     project_name, _ = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    msi_filename = glob.glob(os.path.join(
-        source_directory, u'dist', u'{0:s}-*.msi'.format(project_name)))
+    msi_filename = os.path.join(
+        source_directory, u'dist', u'{0:s}-*.msi'.format(project_name))
+    msi_glob = glob.glob(msi_filename)
+    if len(msi_glob) != 1:
+      logging.error(u'Unable to find MSI file.')
+      return False
 
-    logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
-    shutil.move(msi_filename[0], '.')
+    _, _, msi_filename = msi_glob[0].rpartition(os.path.sep)
+    if os.path.exists(msi_filename):
+      logging.warning(u'MSI file already exists.')
+    else:
+      logging.info(u'Moving: {0:s}'.format(msi_glob[0]))
+      shutil.move(msi_glob[0], u'.')
 
     return True
 
