@@ -12,8 +12,8 @@ import subprocess
 import sys
 import time
 import urllib
-# Use urllib2 here since we this code should be able to be used
-# by a default Python set up. Otherwise usage of requests is preferred.
+# Use urllib2 here since this code should be able to be used by a default
+# Python set up. Otherwise usage of requests is preferred.
 import urllib2
 
 # Change PYTHONPATH to include utils.
