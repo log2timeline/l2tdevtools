@@ -11,7 +11,7 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
   """Tests for the github repo download helper class."""
 
   def testGetPackageDownloadURLs(self):
-    """Tests the GetPackageDownloadURLs functions."""
+    """Tests the GetPackageDownloadURLs function."""
     download_helper = update.GithubRepoDownloadHelper()
 
     package_download_urls = download_helper.GetPackageDownloadURLs(
@@ -27,7 +27,7 @@ class DependencyUpdaterTest(unittest.TestCase):
   """Tests for the dependency updater class."""
 
   def testGetPackageFilenamesAndVersions(self):
-    """Tests the GetPackageFilenamesAndVersions functions."""
+    """Tests the GetPackageFilenamesAndVersions function."""
     dependency_updater = update.DependencyUpdater(
         preferred_machine_type=u'x86', preferred_operating_system=u'Windows')
 
@@ -35,9 +35,9 @@ class DependencyUpdaterTest(unittest.TestCase):
         dependency_updater._GetPackageFilenamesAndVersions())
 
     self.assertEqual(
-        package_filenames.get(u'dfvfs', None), u'dfvfs-20150915.1.win32.msi')
+        package_filenames.get(u'dfvfs', None), u'dfvfs-20151008.1.win32.msi')
 
-    self.assertEqual(package_versions.get(u'dfvfs', None), [u'20150915', u'1'])
+    self.assertEqual(package_versions.get(u'dfvfs', None), [u'20151008', u'1'])
 
 
 if __name__ == '__main__':
