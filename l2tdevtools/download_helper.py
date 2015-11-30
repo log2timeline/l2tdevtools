@@ -533,7 +533,8 @@ class PyPiDownloadHelper(ProjectDownloadHelper):
       u'[0-9]+[.][0-9]+',
       u'[0-9]+[.][0-9]+a[0-9]',
       u'[0-9]+[.][0-9]+[.][0-9]+',
-      u'[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+']
+      u'[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+',
+      u'[0-9]+[.][0-9]+[.][0-9]+rc[0-9]+']
 
   def GetLatestVersion(self, project_name):
     """Retrieves the latest version number for a given project name.
@@ -577,7 +578,8 @@ class PyPiDownloadHelper(ProjectDownloadHelper):
       return
 
     # The letter a is used in some versions to denote an alpha release.
-    numeric_matches = [match for match in matches if u'a' not in match]
+    # The suffix rc# is used in some versions to denote a release candidate.
+    numeric_matches = [match for match in matches if match.isdigit()]
 
     # If there are stable releases prefer those:
     if numeric_matches:
