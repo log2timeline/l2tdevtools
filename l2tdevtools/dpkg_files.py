@@ -263,7 +263,8 @@ class DpkgBuildFilesGenerator(object):
       project_name = self._project_name
 
     if (not self._dependency_definition.dpkg_name and
-        self._dependency_definition.build_system == u'setup_py'):
+        self._dependency_definition.build_system == u'setup_py' and
+        not project_name.startswith(u'python-')):
       project_prefix = u'python-'
     else:
       project_prefix = u''
@@ -308,11 +309,16 @@ class DpkgBuildFilesGenerator(object):
       packages = [u'libtsk', u'libtsk-dbg', u'libtsk-dev', package_name]
       section = u'libs'
 
-    else:
+    elif self._dependency_definition.build_system == u'setup_py':
       if self._dependency_definition.dpkg_name:
         package_name = self._dependency_definition.dpkg_name
       else:
-        package_name = u'python-{0:s}'.format(project_name)
+        if not project_name.startswith(u'python-'):
+          project_prefix = u'python-'
+        else:
+          project_prefix = u''
+
+        package_name = u'{0:s}{1:s}'.format(project_prefix, project_name)
 
       packages = [package_name]
       section = u'python'
@@ -460,7 +466,8 @@ class DpkgBuildFilesGenerator(object):
       project_name = self._project_name
 
     if (not self._dependency_definition.dpkg_name and
-        self._dependency_definition.build_system == u'setup_py'):
+        self._dependency_definition.build_system == u'setup_py' and
+        not project_name.startswith(u'python-')):
       project_prefix = u'python-'
     else:
       project_prefix = u''
@@ -584,7 +591,12 @@ class DpkgBuildFilesGenerator(object):
       package_name = self._dependency_definition.dpkg_name
     else:
       project_name = self._project_name
-      package_name = u'python-{0:s}'.format(self._project_name)
+      if not project_name.startswith(u'python-'):
+        project_prefix = u'python-'
+      else:
+        project_prefix = u''
+
+      package_name = u'{0:s}{1:s}'.format(project_prefix, project_name)
 
     if self._dependency_definition.patches:
       with_quilt = u'--with quilt'

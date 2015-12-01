@@ -588,8 +588,10 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
+      # Pass the project name without the python- prefix.
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
-          project_name, source_helper_object.project_version,
+          source_helper_object.project_name,
+          source_helper_object.project_version,
           self._dependency_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -762,8 +764,10 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
+      # Pass the project name without the python- prefix.
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
-          project_name, source_helper_object.project_version,
+          source_helper_object.project_name,
+          source_helper_object.project_version,
           self._dependency_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -1309,7 +1313,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
               source_filename))
       return False
 
-    os.rename(source_directory, u'zlib')
+    if not os.path.exists(u'zlib'):
+      os.rename(source_directory, u'zlib')
+
     return True
 
   def CheckBuildDependencies(self):
