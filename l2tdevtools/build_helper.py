@@ -1264,6 +1264,15 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     return True
 
+  def _SetupBuildDependencyDokan(self):
+    """Sets up the dokan build dependency.
+
+    Returns:
+      A boolean value indicating if the build dependency was set up correctly.
+    """
+    # TODO: implement.
+    return False
+
   def _SetupBuildDependencySqlite(self):
     """Sets up the sqlite build dependency.
 
@@ -1326,7 +1335,10 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """
     missing_packages = []
     for package_name in self._dependency_definition.build_dependencies:
-      if package_name == u'sqlite':
+      if package_name == u'fuse':
+        self._SetupBuildDependencyDokan()
+
+      elif package_name == u'sqlite':
         self._SetupBuildDependencySqlite()
 
       elif package_name == u'zeromq':
@@ -1335,7 +1347,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       elif package_name == u'zlib':
         self._SetupBuildDependencyZlib()
 
-      else:
+      elif package_name != u'libcrypto':
         missing_packages.append(package_name)
 
     return missing_packages
