@@ -1208,7 +1208,7 @@ class ReviewFile(object):
       A boolean indicating the review file was created.
     """
     with open(self._path, 'w') as file_object:
-      file_object.write(u'{0:d}'.format(codereview_issue_number))
+      file_object.write(u'{0!s}'.format(codereview_issue_number))
 
   def GetCodeReviewIssueNumber(self):
     """Retrieves the codereview issue number.

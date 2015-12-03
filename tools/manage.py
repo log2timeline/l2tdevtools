@@ -5,6 +5,7 @@
 from __future__ import print_function
 import argparse
 import logging
+import os
 import sys
 
 from l2tdevtools import download_helper
@@ -99,11 +100,11 @@ class BinariesManager(object):
     """
     new_packages = {}
     new_versions = {}
-    for package, version in iter(reference_packages.items()):
-      if package not in packages:
-        new_packages[package] = version
-      elif version != packages[package]:
-        new_versions[package] = version
+    for name, version in iter(reference_packages.items()):
+      if name not in packages:
+        new_packages[name] = version
+      elif version != packages[name]:
+        new_versions[name] = version
 
     return new_packages, new_versions
 
@@ -121,11 +122,17 @@ class BinariesManager(object):
       version, those packages that have a newer version in the reference
       directory.
     """
-    # TODO: determine packages from reference directory.
-    _ = reference_directory
     reference_packages = {}
-    packages = self._ppa_manager.GetPackages(track)
+    for directory_entry in os.listdir(reference_directory):
+      if not directory_entry.endswith(u'ppa1~trusty_source.changes'):
+        continue
 
+      name, _, _ = directory_entry.rpartition(u'-')
+      name, _, version = name.rpartition(u'_')
+
+      reference_packages[name] = version
+
+    packages = self._ppa_manager.GetPackages(track)
     return self._ComparePackages(reference_packages, packages)
 
   def ComparePPATracks(self, reference_track, track):
@@ -157,6 +164,11 @@ def Main():
       u'action', choices=sorted(actions), action=u'store',
       metavar=u'ACTION', default=None, help=u'The action.')
 
+  argument_parser.add_argument(
+      u'--build-directory', u'--build_directory', action=u'store',
+      metavar=u'DIRECTORY', dest=u'build_directory', type=unicode,
+      default=u'build', help=u'The location of the the build directory.')
+
   options = argument_parser.parse_args()
 
   if not options.action:
@@ -175,7 +187,7 @@ def Main():
 
   if options.action.startswith(u'gift-diff-'):
     if options.action.endswith(u'-testing'):
-      reference_directory = u''
+      reference_directory = options.build_directory
       track = u'testing'
 
       new_packages, new_versions = (
