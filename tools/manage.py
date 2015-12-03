@@ -1,0 +1,221 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""Script to manage the GIFT launchpad PPA and l2tbinaries."""
+
+from __future__ import print_function
+import argparse
+import logging
+import sys
+
+from l2tdevtools import download_helper
+
+
+class LaunchpadPPAManager(object):
+  """Defines a Launchpad PPA manager object."""
+
+  _LAUNCHPAD_URL = (
+      u'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
+      u'/trusty/main/source/Sources')
+
+  def __init__(self, name):
+    """Initializes the Launchpad PPA manager object.
+
+    Args:
+      name: a string containing the name of the PPA.
+    """
+    super(LaunchpadPPAManager, self).__init__()
+    self._download_helper = download_helper.DownloadHelper()
+    self._name = name
+
+  def CopyPackages(self):
+    # TODO: implement:
+    # send post to https://launchpad.net/~gift/+archive/ubuntu/testing
+    #              /+copy-packages
+    return
+
+  def GetPackages(self, track):
+    """Retrieves a list of packages of a specific PPA track.
+
+    Args:
+      track: a string containing the PPA track name.
+
+    Returns:
+      A dictionary object containing the project names as keys and
+      versions as values or None if the projects cannot be determined.
+    """
+    kwargs = {
+        u'name': self._name,
+        u'track': track}
+    download_url = self._LAUNCHPAD_URL.format(**kwargs)
+
+    ppa_sources = self._download_helper.DownloadPageContent(download_url)
+    if not ppa_sources:
+      logging.error(u'Unable to retrieve PPA sources list.')
+      return
+
+    try:
+      ppa_sources = ppa_sources.decode(u'utf-8')
+    except UnicodeDecodeError as exception:
+      logging.error(
+          u'Unable to decode PPA sources list with error: {0:s}'.format(
+              exception))
+      return
+
+    projects = {}
+    for line in ppa_sources.split(u'\n'):
+      if line.startswith(u'Package: '):
+        _, _, project = line.rpartition(u'Package: ')
+
+      elif line.startswith(u'Version: '):
+        _, _, version = line.rpartition(u'Version: ')
+        version, _, _ = version.rpartition(u'-')
+
+        projects[project] = version
+
+    return projects
+
+
+class BinariesManager(object):
+  """Defines the binaries manager."""
+
+  def __init__(self):
+    """Initializes the binaries manager object."""
+    super(BinariesManager, self).__init__()
+    self._ppa_manager = LaunchpadPPAManager(u'gift')
+
+  def _ComparePackages(self, reference_packages, packages):
+    """Compares the packages.
+
+    Args:
+      reference_packages: a dictionary containing the reference package names
+                          and versions.
+      packages: a dictionary containing the package names and versions.
+
+    Returns:
+      A tuple containing a dictionary of the new packages, those packages that
+      are present in the reference packages but not in the packages, and new
+      version, those packages that have a newer version in the reference
+      packages.
+    """
+    new_packages = {}
+    new_versions = {}
+    for package, version in iter(reference_packages.items()):
+      if package not in packages:
+        new_packages[package] = version
+      elif version != packages[package]:
+        new_versions[package] = version
+
+    return new_packages, new_versions
+
+  def CompareDirectoryWithPPATrack(self, reference_directory, track):
+    """Compares a directory containing dpkg packages with a GIFT PPA track.
+
+    Args:
+      reference_directory: a string containing the path of the reference
+                           directory that contains dpkg source packages.
+      track: a string containing the name of the track.
+
+    Returns:
+      A tuple containing a dictionary of the new packages, those packages that
+      are present in the reference directory but not in the track, and new
+      version, those packages that have a newer version in the reference
+      directory.
+    """
+    # TODO: determine packages from reference directory.
+    _ = reference_directory
+    reference_packages = {}
+    packages = self._ppa_manager.GetPackages(track)
+
+    return self._ComparePackages(reference_packages, packages)
+
+  def ComparePPATracks(self, reference_track, track):
+    """Compares two GIFT PPA tracks.
+
+    Args:
+      reference_track: a string containing the name of the reference track.
+      track: a string containing the name of the track.
+
+    Returns:
+      A tuple containing a dictionary of the new packages, those packages that
+      are present in the reference track but not in the track, and new
+      version, those packages that have a newer version in the reference track.
+    """
+    reference_packages = self._ppa_manager.GetPackages(reference_track)
+    packages = self._ppa_manager.GetPackages(track)
+
+    return self._ComparePackages(reference_packages, packages)
+
+
+def Main():
+  actions = frozenset([
+      u'gift-diff-dev', u'gift-diff-stable', u'gift-diff-testing'])
+
+  argument_parser = argparse.ArgumentParser(description=(
+      u'Manages the GIFT launchpad PPA and l2tbinaries.'))
+
+  argument_parser.add_argument(
+      u'action', choices=sorted(actions), action=u'store',
+      metavar=u'ACTION', default=None, help=u'The action.')
+
+  options = argument_parser.parse_args()
+
+  if not options.action:
+    print(u'Missing action.')
+    print(u'')
+    argument_parser.print_help()
+    print(u'')
+    return False
+
+  # TODO: add action to upload files to PPA.
+  # TODO: add action to copy files between PPA tracks.
+  # TODO: add l2tbinaries support.
+  # TODO: add pypi support.
+
+  binaries_manager = BinariesManager()
+
+  if options.action.startswith(u'gift-diff-'):
+    if options.action.endswith(u'-testing'):
+      reference_directory = u''
+      track = u'testing'
+
+      new_packages, new_versions = (
+          binaries_manager.CompareDirectoryWithPPATrack(
+              reference_directory, track))
+
+      print(u'Difference between: {0:s} and GIFT PPA track: {1:s}'.format(
+          reference_directory, track))
+
+    else:
+      if options.action.endswith(u'-dev'):
+        reference_track = u'testing'
+        track = u'dev'
+      else:
+        reference_track = u'dev'
+        track = u'stable'
+
+      new_packages, new_versions = binaries_manager.ComparePPATracks(
+          reference_track, track)
+
+      print(u'Difference between GIFT PPA tracks: {0:s} and {1:s}'.format(
+          reference_track, track))
+
+    print(u'')
+
+    print(u'New packages:')
+    for package in sorted(new_packages.keys()):
+      print(u'  {0:s}'.format(package))
+    print(u'')
+
+    print(u'New versions:')
+    for package in sorted(new_versions.keys()):
+      print(u'  {0:s}'.format(package))
+    print(u'')
+
+  return True
+
+
+if __name__ == '__main__':
+  if not Main():
+    sys.exit(1)
+  else:
+    sys.exit(0)

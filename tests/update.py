@@ -19,7 +19,7 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
 
     expected_url = (
         u'https://github.com/log2timeline/l2tbinaries/raw/master/win32/'
-        u'artifacts-20150409.1.win32.msi')
+        u'artifacts-20151105.1.win32.msi')
     self.assertIn(expected_url, package_download_urls)
 
 
@@ -35,9 +35,9 @@ class DependencyUpdaterTest(unittest.TestCase):
         dependency_updater._GetPackageFilenamesAndVersions())
 
     self.assertEqual(
-        package_filenames.get(u'dfvfs', None), u'dfvfs-20151008.1.win32.msi')
+        package_filenames.get(u'dfvfs', None), u'dfvfs-20151125.1.win32.msi')
 
-    self.assertEqual(package_versions.get(u'dfvfs', None), [u'20151008', u'1'])
+    self.assertEqual(package_versions.get(u'dfvfs', None), [u'20151125', u'1'])
 
 
 if __name__ == '__main__':

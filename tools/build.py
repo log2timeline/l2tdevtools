@@ -284,11 +284,7 @@ class DependencyBuilder(object):
     if download_url.startswith(u'https://'):
       download_url = u'http://{0:s}'.format(download_url[8:])
 
-    if (download_url.startswith(u'http://code.google.com/p/') and
-        download_url.endswith(u'/downloads/list')):
-      download_helper_object = download_helper.GoogleCodeWikiDownloadHelper()
-
-    elif download_url.startswith(u'http://pypi.python.org/pypi/'):
+    if download_url.startswith(u'http://pypi.python.org/pypi/'):
       download_helper_object = download_helper.PyPiDownloadHelper()
 
     elif (download_url.startswith(u'http://sourceforge.net/projects/') and

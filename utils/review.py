@@ -181,7 +181,7 @@ class CodeReviewHelper(CLIHelper):
     Returns:
       An integer containing the code review number or None.
     """
-    reviewers = u','.join(self._REVIEWERS)
+    reviewers = list(self._REVIEWERS)
 
     # Remove self from reviewers list.
     try:
@@ -189,6 +189,8 @@ class CodeReviewHelper(CLIHelper):
       reviewers.pop(list_index)
     except ValueError:
       pass
+
+    reviewers = u','.join(self._REVIEWERS)
 
     command = u'{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)

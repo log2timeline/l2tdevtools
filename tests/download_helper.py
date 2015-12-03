@@ -75,46 +75,6 @@ class DownloadHelperTest(unittest.TestCase):
     self.assertEqual(page_content, expected_page_content)
 
 
-class GoogleCodeWikiDownloadHelperTest(unittest.TestCase):
-  """Tests for the Google code wiki download helper."""
-
-  _PROJECT_NAME = u'binplist'
-  _PROJECT_VERSION = u'0.1.4'
-
-  def testGetLatestVersion(self):
-    """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.GoogleCodeWikiDownloadHelper()
-
-    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
-
-    self.assertEqual(latest_version, self._PROJECT_VERSION)
-
-  def testGetDownloadUrl(self):
-    """Tests the GetDownloadUrl functions."""
-    download_helper_object = download_helper.GoogleCodeWikiDownloadHelper()
-
-    download_url = download_helper_object.GetDownloadUrl(
-        self._PROJECT_NAME, self._PROJECT_VERSION)
-
-    expected_download_url = (
-        u'https://{0:s}.googlecode.com/files/{0:s}-{1:s}.tar.gz').format(
-            self._PROJECT_NAME, self._PROJECT_VERSION)
-
-    self.assertEqual(download_url, expected_download_url)
-
-  def testGetProjectIdentifier(self):
-    """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.GoogleCodeWikiDownloadHelper()
-
-    project_identifier = download_helper_object.GetProjectIdentifier(
-        self._PROJECT_NAME)
-
-    expected_project_identifier = u'com.google.code.p.{0:s}'.format(
-        self._PROJECT_NAME)
-
-    self.assertEqual(project_identifier, expected_project_identifier)
-
-
 class LibyalGoogleDriveDownloadHelperTest(unittest.TestCase):
   """Tests for the libyal Google drive download helper."""
 
@@ -257,7 +217,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
-  _PROJECT_VERSION = u'20151008'
+  _PROJECT_VERSION = u'20151125'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -343,7 +303,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
   """Tests for the Source Forge download helper."""
 
   _PROJECT_NAME = u'pyparsing'
-  _PROJECT_VERSION = u'2.0.5'
+  _PROJECT_VERSION = u'2.0.6'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
