@@ -1281,7 +1281,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """
     # TODO: download and build sqlite3 from source
     # http://www.sqlite.org/download.html
-    # or copy sqlite3.h, .lib and .dll to src/ directory?
+    # copy sqlite3.h to <source>/src/ directory?
+    # copy .lib and .dll to <source>/ directory?
+    # bundle .dll
 
     # <a id='a3' href='hp1.html'>sqlite-amalgamation-3081002.zip
     # d391('a3','2015/sqlite-amalgamation-3081002.zip');
@@ -1384,9 +1386,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     else:
       python_module_name, _, _ = source_directory.partition(u'-')
-      python_module_name = u'py{0:s}'.format(python_module_name[3:])
-      python_module_dist_directory = os.path.join(
-          source_directory, u'dist')
+      python_module_dist_directory = os.path.join(source_directory, u'dist')
 
       if not os.path.exists(python_module_dist_directory):
         build_directory = os.path.join(u'..')
@@ -1422,6 +1422,20 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
+    filenames_to_ignore = re.compile(
+        u'{0:s}-python-.*{1!s}.1.{2:s}-py2.7.msi'.format(
+            source_helper_object.project_name,
+            source_helper_object.project_version, self.architecture))
+
+    msi_filenames_glob = u'{0:s}-python-*.1.{1:s}-py2.7.msi'.format(
+        source_helper_object.project_name, self.architecture)
+
+    filenames = glob.glob(msi_filenames_glob)
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
   def GetOutputFilename(self, source_helper_object):
     """Retrieves the filename of one of the resulting files.
 
@@ -1431,7 +1445,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     Returns:
       A filename of one of the resulting MSIs.
     """
-    return u'{0:s}-{1!s}.1.{2:s}-py2.7.msi'.format(
+    return u'{0:s}-python-{1!s}.1.{2:s}-py2.7.msi'.format(
         source_helper_object.project_name, source_helper_object.project_version,
         self.architecture)
 

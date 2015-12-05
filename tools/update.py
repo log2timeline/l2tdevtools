@@ -749,12 +749,14 @@ class DependencyUpdater(object):
         if name.startswith(u'2.7 '):
           _, _, name = name.rpartition(u' ')
 
-        name, _, version = name.partition(u'-')
+        name, _, version = name.rpartition(u'-')
+
+        found_package = name in package_versions
 
         version = version.split(u'.')
         if self._force_install:
           compare_result = -1
-        elif name not in package_versions:
+        elif not found_package:
           compare_result = 1
         elif name in [u'pytsk', u'pytsk3']:
           # We cannot really tell by the version number that pytsk3 needs to
@@ -765,6 +767,12 @@ class DependencyUpdater(object):
           if compare_result >= 0:
             # The latest or newer version is already installed.
             del package_versions[name]
+
+        if not found_package and name.startswith(u'py'):
+          # Remove libyal Python packages using the old naming convention.
+          new_name = u'lib{0:s}-python'.format(name[2:])
+          if new_name in package_versions:
+            compare_result = -1
 
         if compare_result < 0:
           logging.info(u'Removing: {0:s} {1:s}'.format(
