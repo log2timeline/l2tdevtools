@@ -643,7 +643,7 @@ class GitHelper(CLIHelper):
       A boolean indicating the push was successful.
     """
     if force:
-      command = u'git push --set-upstream origi {0:s}'.format(branch)
+      command = u'git push --set-upstream origin {0:s}'.format(branch)
     else:
       command = u'git push -f --set-upstream origin {0:s}'.format(branch)
 
@@ -1531,6 +1531,10 @@ def Main():
         email_address, no_browser=options.no_browser)
     codereview_issue_number = codereview_helper.CreateIssue(
         options.diffbase, description)
+    if not codereview_issue_number:
+      print(u'{0:s} aborted - unable to create codereview issue.'.format(
+          options.command.title()))
+      return False
 
     if not os.path.isdir(u'.review'):
       os.mkdir(u'.review')
