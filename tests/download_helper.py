@@ -171,7 +171,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = u'libyal'
   _PROJECT_NAME = u'libevt'
   _PROJECT_STATUS = u'alpha'
-  _PROJECT_VERSION = u'20150706'
+  _PROJECT_VERSION = u'20151205'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
