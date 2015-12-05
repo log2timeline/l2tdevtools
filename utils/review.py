@@ -79,7 +79,8 @@ class CodeReviewHelper(CLIHelper):
     """Adds a commit message to the code review message.
 
     Args:
-      issue_number: an integer containing the codereview issue number.
+      issue_number: an integer or string containing the codereview
+                    issue number.
 
     Returns:
       A boolean indicating the commit message was added to
@@ -90,7 +91,7 @@ class CodeReviewHelper(CLIHelper):
     if not codereview_access_token or not xsrf_token:
       return False
 
-    codereview_url = b'https://codereview.appspot.com/{0:d}/publish'.format(
+    codereview_url = b'https://codereview.appspot.com/{0!s}/publish'.format(
         issue_number)
 
     post_data = urllib.urlencode({
@@ -114,13 +115,13 @@ class CodeReviewHelper(CLIHelper):
       url_object = urllib2.urlopen(request)
     except urllib2.HTTPError as exception:
       logging.error(
-          u'Failed publish to codereview issue: {0:d} with error: {1:s}'.format(
+          u'Failed publish to codereview issue: {0!s} with error: {1:s}'.format(
               issue_number, exception))
       return False
 
     if url_object.code != 200:
       logging.error((
-          u'Failed publish to codereview issue: {0:d} with status code: '
+          u'Failed publish to codereview issue: {0!s} with status code: '
           u'{1:d}').format(issue_number, url_object.code))
       return False
 
@@ -130,7 +131,8 @@ class CodeReviewHelper(CLIHelper):
     """Closes a code review issue.
 
     Args:
-      issue_number: an integer containing the codereview issue number.
+      issue_number: an integer or string containing the codereview
+                    issue number.
 
     Returns:
       A boolean indicating the code review was closed.
@@ -140,7 +142,7 @@ class CodeReviewHelper(CLIHelper):
     if not codereview_access_token or not xsrf_token:
       return False
 
-    codereview_url = b'https://codereview.appspot.com/{0:d}/close'.format(
+    codereview_url = b'https://codereview.appspot.com/{0!s}/close'.format(
         issue_number)
 
     post_data = urllib.urlencode({
@@ -159,13 +161,13 @@ class CodeReviewHelper(CLIHelper):
       url_object = urllib2.urlopen(request)
     except urllib2.HTTPError as exception:
       logging.error(
-          u'Failed closing codereview issue: {0:d} with error: {1:s}'.format(
+          u'Failed closing codereview issue: {0!s} with error: {1:s}'.format(
               issue_number, exception))
       return False
 
     if url_object.code != 200:
       logging.error((
-          u'Failed closing codereview issue: {0:d} with status code: '
+          u'Failed closing codereview issue: {0!s} with status code: '
           u'{1:d}').format(issue_number, url_object.code))
       return False
 
@@ -181,7 +183,7 @@ class CodeReviewHelper(CLIHelper):
     Returns:
       An integer containing the code review number or None.
     """
-    reviewers = u','.join(self._REVIEWERS)
+    reviewers = list(self._REVIEWERS)
 
     # Remove self from reviewers list.
     try:
@@ -189,6 +191,8 @@ class CodeReviewHelper(CLIHelper):
       reviewers.pop(list_index)
     except ValueError:
       pass
+
+    reviewers = u','.join(self._REVIEWERS)
 
     command = u'{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
@@ -306,12 +310,13 @@ class CodeReviewHelper(CLIHelper):
     "YYYY-MM-DD hh:mm:ss.######"
 
     Args:
-      issue_number: an integer containing the codereview issue number.
+      issue_number: an integer or string containing the codereview
+                    issue number.
 
     Returns:
       A dictonary containing the JSON response or None.
     """
-    codereview_url = b'https://codereview.appspot.com/api/{0:d}'.format(
+    codereview_url = b'https://codereview.appspot.com/api/{0!s}'.format(
         issue_number)
 
     request = urllib2.Request(codereview_url)
@@ -320,13 +325,13 @@ class CodeReviewHelper(CLIHelper):
       url_object = urllib2.urlopen(request)
     except urllib2.HTTPError as exception:
       logging.error(
-          u'Failed querying codereview issue: {0:d} with error: {1:s}'.format(
+          u'Failed querying codereview issue: {0!s} with error: {1:s}'.format(
               issue_number, exception))
       return
 
     if url_object.code != 200:
       logging.error((
-          u'Failed querying codereview issue: {0:d} with status code: '
+          u'Failed querying codereview issue: {0!s} with status code: '
           u'{1:d}').format(issue_number, url_object.code))
       return
 
@@ -337,7 +342,8 @@ class CodeReviewHelper(CLIHelper):
     """Updates a code review issue.
 
     Args:
-      issue_number: an integer containing the codereview issue number.
+      issue_number: an integer or string containing the codereview
+                    issue number.
       diffbase: string containing the diffbase.
       description: string containing the description.
 
@@ -351,7 +357,7 @@ class CodeReviewHelper(CLIHelper):
       command = u'{0:s} --no_oauth2_webbrowser'.format(command)
 
     command = (
-        u'{0:s} -i {1:d} -m "Code updated." -t "{2:s}" -y -- '
+        u'{0:s} -i {1!s} -m "Code updated." -t "{2:s}" -y -- '
         u'{3:s}').format(command, issue_number, description, diffbase)
 
     exit_code, output, _ = self.RunCommand(command)
@@ -720,7 +726,7 @@ class GitHubHelper(object):
 
     Args:
       access_token: string containing the github access token.
-      codereview_issue_number: an integer containing the codereview
+      codereview_issue_number: an integer or string containing the codereview
                                issue number.
       origin: a string containing the origin of the pull request e.g.
               "username:feature".
@@ -729,10 +735,10 @@ class GitHubHelper(object):
     Returns:
       A boolean indicating the pull request was created.
     """
-    title = b'{0:d}: {1:s}'.format(codereview_issue_number, description)
+    title = b'{0!s}: {1:s}'.format(codereview_issue_number, description)
     body = (
-        b'[Code review: {0:d}: {1:s}]'
-        b'(https://codereview.appspot.com/{0:d}/)').format(
+        b'[Code review: {0!s}: {1:s}]'
+        b'(https://codereview.appspot.com/{0!s}/)').format(
             codereview_issue_number, description)
 
     post_data = (
@@ -757,14 +763,14 @@ class GitHubHelper(object):
       url_object = urllib2.urlopen(request)
     except urllib2.HTTPError as exception:
       logging.error(
-          u'Failed creating pull request: {0:d} with error: {1:s}'.format(
+          u'Failed creating pull request: {0!s} with error: {1:s}'.format(
               codereview_issue_number, exception))
       return False
 
     if url_object.code != 200:
       # TODO: determine why this is failing while PR is created.
       logging.error(
-          u'Failed creating pull request: {0:d} with status code: {1:d}'.format(
+          u'Failed creating pull request: {0!s} with status code: {1:d}'.format(
               codereview_issue_number, url_object.code))
       return False
 
@@ -1199,14 +1205,14 @@ class ReviewFile(object):
     """Creates a new review file.
 
     Args:
-      codereview_issue_number: an integer containing the codereview
+      codereview_issue_number: an integer or string containing the codereview
                                issue number.
 
     Returns:
       A boolean indicating the review file was created.
     """
     with open(self._path, 'w') as file_object:
-      file_object.write(u'{0:d}'.format(codereview_issue_number))
+      file_object.write(u'{0!s}'.format(codereview_issue_number))
 
   def GetCodeReviewIssueNumber(self):
     """Retrieves the codereview issue number.
@@ -1397,7 +1403,7 @@ def Main():
         merge_codereview_issue_number)
     if not codereview_information:
       print((
-          u'{0:s} aborted - unable to retrieve code review: {1:d} '
+          u'{0:s} aborted - unable to retrieve code review: {1!s} '
           u'information.').format(
               options.command.title(), merge_codereview_issue_number))
       return False
@@ -1406,7 +1412,7 @@ def Main():
     if not merge_description:
       print((
           u'{0:s} aborted - unable to determine description of code review: '
-          u'{1:d}.').format(
+          u'{1!s}.').format(
               options.command.title(), merge_codereview_issue_number))
       return False
 
@@ -1414,7 +1420,7 @@ def Main():
     if not merge_email_address:
       print((
           u'{0:s} aborted - unable to determine email address of owner of '
-          u'code review: {1:d}.').format(
+          u'code review: {1!s}.').format(
               options.command.title(), merge_codereview_issue_number))
       return False
 
@@ -1550,11 +1556,11 @@ def Main():
 
     if codereview_issue_number:
       if not codereview_helper.CloseIssue(codereview_issue_number):
-        print(u'Unable to close code review: {0:d}'.format(
+        print(u'Unable to close code review: {0!s}'.format(
             codereview_issue_number))
         print((
             u'Close it manually on: https://codereview.appspot.com/'
-            u'{0:d}').format(codereview_issue_number))
+            u'{0!s}').format(codereview_issue_number))
 
   elif options.command == u'merge':
     if not project_helper.UpdateVersionFile():
@@ -1615,7 +1621,7 @@ def Main():
         email_address, no_browser=options.no_browser)
     if not codereview_helper.UpdateIssue(
         codereview_issue_number, options.diffbase, description):
-      print(u'Unable to update code review: {0:d}'.format(
+      print(u'Unable to update code review: {0!s}'.format(
           codereview_issue_number))
       return False
 
