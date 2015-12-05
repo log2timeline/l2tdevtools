@@ -124,6 +124,9 @@ class BinariesManager(object):
     """
     reference_packages = {}
     for directory_entry in os.listdir(reference_directory):
+      # The directory contains various files and we are only interested
+      # in the source dpkg packges that use the naming convention:
+      # package_version-#ppa1~trusty_source.changes
       if not directory_entry.endswith(u'ppa1~trusty_source.changes'):
         continue
 
