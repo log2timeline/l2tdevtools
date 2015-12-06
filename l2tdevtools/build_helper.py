@@ -1653,6 +1653,15 @@ class PkgBuildHelper(BuildHelper):
 
     return True
 
+  def CheckBuildDependencies(self):
+    """Checks if the build dependencies are met.
+
+    Returns:
+      A list of build dependency names that are not met or an empty list.
+    """
+    # TODO: implement build dependency check.
+    return []
+
   def Clean(self, source_helper_object):
     """Cleans the MacOS-X packages in the current directory.
 
