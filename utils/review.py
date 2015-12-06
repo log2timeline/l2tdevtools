@@ -507,7 +507,8 @@ class GitHelper(CLIHelper):
 
   def DropUncommittedChanges(self):
     """Drops the uncommitted changes."""
-    self.RunCommand(u'git stash && git stash drop')
+    self.RunCommand(u'git stash')
+    self.RunCommand(u'git stash drop')
 
   def GetActiveBranch(self):
     """Retrieves the active branch.
@@ -643,7 +644,7 @@ class GitHelper(CLIHelper):
       A boolean indicating the push was successful.
     """
     if force:
-      command = u'git push --set-upstream origi {0:s}'.format(branch)
+      command = u'git push --set-upstream origin {0:s}'.format(branch)
     else:
       command = u'git push -f --set-upstream origin {0:s}'.format(branch)
 
@@ -955,6 +956,7 @@ class ProjectHelper(object):
     """
     version_file_contents = self._ReadVersionFile()
     if not version_file_contents:
+      logging.error(u'Unable to read version file.')
       return False
 
     date_version = time.strftime(u'%Y%m%d')
@@ -1531,6 +1533,10 @@ def Main():
         email_address, no_browser=options.no_browser)
     codereview_issue_number = codereview_helper.CreateIssue(
         options.diffbase, description)
+    if not codereview_issue_number:
+      print(u'{0:s} aborted - unable to create codereview issue.'.format(
+          options.command.title()))
+      return False
 
     if not os.path.isdir(u'.review'):
       os.mkdir(u'.review')

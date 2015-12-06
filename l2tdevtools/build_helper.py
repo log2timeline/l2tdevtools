@@ -588,8 +588,10 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
+      # Pass the project name without the python- prefix.
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
-          project_name, source_helper_object.project_version,
+          source_helper_object.project_name,
+          source_helper_object.project_version,
           self._dependency_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -762,8 +764,10 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
+      # Pass the project name without the python- prefix.
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
-          project_name, source_helper_object.project_version,
+          source_helper_object.project_name,
+          source_helper_object.project_version,
           self._dependency_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -1113,7 +1117,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     result = self._BuildSetupPy()
     if result:
-      self._MoveMsi(python_module_name, build_directory)
+      result = self._MoveMsi(python_module_name, build_directory)
 
     os.chdir(build_directory)
 
@@ -1234,17 +1238,40 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     os.chdir(u'..')
 
   def _MoveMsi(self, python_module_name, build_directory):
-    """Moves the msi from the dist sub directory into the build directory.
+    """Moves the MSI from the dist sub directory into the build directory.
 
     Args:
       python_module_name: the Python module name.
       build_directory: the build directory.
-    """
-    msi_filename = glob.glob(os.path.join(
-        u'dist', u'{0:s}-*.msi'.format(python_module_name)))
 
-    logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
-    shutil.move(msi_filename[0], build_directory)
+    Returns:
+      True if the move was successful, False otherwise.
+    """
+    msi_filename = os.path.join(
+        u'dist', u'{0:s}-*.msi'.format(python_module_name))
+    msi_glob = glob.glob(msi_filename)
+    if len(msi_glob) != 1:
+      logging.error(u'Unable to find MSI file.')
+      return False
+
+    _, _, msi_filename = msi_glob[0].rpartition(os.path.sep)
+    msi_filename = os.path.join(build_directory, msi_filename)
+    if os.path.exists(msi_filename):
+      logging.warning(u'MSI file already exists.')
+    else:
+      logging.info(u'Moving: {0:s}'.format(msi_glob[0]))
+      shutil.move(msi_glob[0], build_directory)
+
+    return True
+
+  def _SetupBuildDependencyDokan(self):
+    """Sets up the dokan build dependency.
+
+    Returns:
+      A boolean value indicating if the build dependency was set up correctly.
+    """
+    # TODO: implement.
+    return False
 
   def _SetupBuildDependencySqlite(self):
     """Sets up the sqlite build dependency.
@@ -1254,7 +1281,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """
     # TODO: download and build sqlite3 from source
     # http://www.sqlite.org/download.html
-    # or copy sqlite3.h, .lib and .dll to src/ directory?
+    # copy sqlite3.h to <source>/src/ directory?
+    # copy .lib and .dll to <source>/ directory?
+    # bundle .dll
 
     # <a id='a3' href='hp1.html'>sqlite-amalgamation-3081002.zip
     # d391('a3','2015/sqlite-amalgamation-3081002.zip');
@@ -1295,7 +1324,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
               source_filename))
       return False
 
-    os.rename(source_directory, u'zlib')
+    if not os.path.exists(u'zlib'):
+      os.rename(source_directory, u'zlib')
+
     return True
 
   def CheckBuildDependencies(self):
@@ -1306,7 +1337,10 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """
     missing_packages = []
     for package_name in self._dependency_definition.build_dependencies:
-      if package_name == u'sqlite':
+      if package_name == u'fuse':
+        self._SetupBuildDependencyDokan()
+
+      elif package_name == u'sqlite':
         self._SetupBuildDependencySqlite()
 
       elif package_name == u'zeromq':
@@ -1315,7 +1349,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       elif package_name == u'zlib':
         self._SetupBuildDependencyZlib()
 
-      else:
+      elif package_name != u'libcrypto':
         missing_packages.append(package_name)
 
     return missing_packages
@@ -1352,9 +1386,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     else:
       python_module_name, _, _ = source_directory.partition(u'-')
-      python_module_name = u'py{0:s}'.format(python_module_name[3:])
-      python_module_dist_directory = os.path.join(
-          source_directory, u'dist')
+      python_module_dist_directory = os.path.join(source_directory, u'dist')
 
       if not os.path.exists(python_module_dist_directory):
         build_directory = os.path.join(u'..')
@@ -1363,7 +1395,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
         result = self._BuildSetupPy()
         if result:
-          self._MoveMsi(python_module_name, build_directory)
+          result = self._MoveMsi(python_module_name, build_directory)
 
         os.chdir(build_directory)
 
@@ -1390,6 +1422,20 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
+    filenames_to_ignore = re.compile(
+        u'{0:s}-python-.*{1!s}.1.{2:s}-py2.7.msi'.format(
+            source_helper_object.project_name,
+            source_helper_object.project_version, self.architecture))
+
+    msi_filenames_glob = u'{0:s}-python-*.1.{1:s}-py2.7.msi'.format(
+        source_helper_object.project_name, self.architecture)
+
+    filenames = glob.glob(msi_filenames_glob)
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
   def GetOutputFilename(self, source_helper_object):
     """Retrieves the filename of one of the resulting files.
 
@@ -1399,7 +1445,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     Returns:
       A filename of one of the resulting MSIs.
     """
-    return u'{0:s}-{1!s}.1.{2:s}-py2.7.msi'.format(
+    return u'{0:s}-python-{1!s}.1.{2:s}-py2.7.msi'.format(
         source_helper_object.project_name, source_helper_object.project_version,
         self.architecture)
 
@@ -1463,11 +1509,19 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     project_name, _ = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    msi_filename = glob.glob(os.path.join(
-        source_directory, u'dist', u'{0:s}-*.msi'.format(project_name)))
+    msi_filename = os.path.join(
+        source_directory, u'dist', u'{0:s}-*.msi'.format(project_name))
+    msi_glob = glob.glob(msi_filename)
+    if len(msi_glob) != 1:
+      logging.error(u'Unable to find MSI file.')
+      return False
 
-    logging.info(u'Moving: {0:s}'.format(msi_filename[0]))
-    shutil.move(msi_filename[0], '.')
+    _, _, msi_filename = msi_glob[0].rpartition(os.path.sep)
+    if os.path.exists(msi_filename):
+      logging.warning(u'MSI file already exists.')
+    else:
+      logging.info(u'Moving: {0:s}'.format(msi_glob[0]))
+      shutil.move(msi_glob[0], u'.')
 
     return True
 
