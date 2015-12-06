@@ -507,7 +507,8 @@ class GitHelper(CLIHelper):
 
   def DropUncommittedChanges(self):
     """Drops the uncommitted changes."""
-    self.RunCommand(u'git stash && git stash drop')
+    self.RunCommand(u'git stash')
+    self.RunCommand(u'git stash drop')
 
   def GetActiveBranch(self):
     """Retrieves the active branch.
@@ -955,6 +956,7 @@ class ProjectHelper(object):
     """
     version_file_contents = self._ReadVersionFile()
     if not version_file_contents:
+      logging.error(u'Unable to read version file.')
       return False
 
     date_version = time.strftime(u'%Y%m%d')
