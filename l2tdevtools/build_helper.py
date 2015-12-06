@@ -1741,9 +1741,10 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
         u'/', u'Applications', u'Xcode.app', u'Contents', u'Developer',
         u'Platforms', u'MacOSX.platform', u'Developer', u'SDKs')
 
-    for sub_path in [u'MacOSX10.7.sdk', u'MacOSX10.8.sdk', u'MacOSX10.9.sdk']:
-      sdk_path = os.path.join(sdks_path, sub_path)
-      if os.path.isdir(sub_path):
+    for sdk_version in (u'10.7', u'10.8', '10.9', '10.10', '10.11'):
+      sdk_sub_path = u'MacOSX{0:s}.sdk'.format(sdk_version)
+      sdk_path = os.path.join(sdks_path, sdk_sub_path)
+      if os.path.isdir(sdk_sub_path):
         break
 
     if sdk_path:
@@ -1754,15 +1755,16 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
       ldflags = u''
 
     if not os.path.exists(pkg_filename):
+      prefix = u'/usr/local'
       if cflags and ldflags:
         command = (
-            u'{0:s} {1:s} ./configure --prefix=/usr --enable-python '
-            u'--with-pyprefix --disable-dependency-tracking > {2:s} '
-            u'2>&1').format(cflags, ldflags, log_filename)
+            u'{0:s} {1:s} ./configure --prefix={2:s} --enable-python '
+            u'--with-pyprefix --disable-dependency-tracking > {3:s} '
+            u'2>&1').format(cflags, ldflags, prefix, log_filename)
       else:
         command = (
-            u'./configure --prefix=/usr --enable-python --with-pyprefix '
-            u'> {0:s} 2>&1').format(log_filename)
+            u'./configure --prefix={0:s} --enable-python --with-pyprefix '
+            u'> {1:s} 2>&1').format(prefix, log_filename)
 
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
@@ -1786,7 +1788,7 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
         return False
 
       share_doc_path = os.path.join(
-          source_directory, u'tmp', u'usr', u'share', u'doc',
+          source_directory, u'tmp', u'usr', u'local', u'share', u'doc',
           source_helper_object.project_name)
       if not os.path.exists(share_doc_path):
         os.makedirs(share_doc_path)
