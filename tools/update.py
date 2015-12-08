@@ -661,7 +661,6 @@ class DependencyUpdater(object):
             elif attribute.startswith(u'volume: '):
               _, _, volume = attribute.rpartition(u'volume: ')
 
-          version = version.split(u'.')
           if self._force_install:
             compare_result = -1
           elif name not in package_versions:
@@ -671,7 +670,8 @@ class DependencyUpdater(object):
             # be updated, so just uninstall and update it any way.
             compare_result = -1
           else:
-            compare_result = CompareVersions(version, package_versions[name])
+            compare_result = CompareVersions(
+                version.split(u'.'), package_versions[name])
             if compare_result >= 0:
               # The latest or newer version is already installed.
               del package_versions[name]
