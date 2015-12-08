@@ -1851,8 +1851,10 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      command = u'python setup.py install --root={0:s}/tmp > {1:s} 2>&1'.format(
-          os.path.abspath(source_directory), log_filename)
+      command = (
+          u'python setup.py install --root={0:s}/tmp '
+          u'--install-data=/usr/local > {1:s} 2>&1').format(
+              os.path.abspath(source_directory), log_filename)
       exit_code = subprocess.call(
           u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
       if exit_code != 0:
