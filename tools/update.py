@@ -524,6 +524,10 @@ class DependencyUpdater(object):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         result = False
 
+        with file_object as open(log_file, 'r'):
+          log_file_contents = file_object.read()
+          print(log_file_contents)
+
     return result
 
   def _UninstallPackages(self, package_versions):
