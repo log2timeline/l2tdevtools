@@ -23,6 +23,13 @@ __file__ = os.path.abspath(__file__)
 
 # TODO: look into merging functionality with update dependencies script.
 
+class ProtobufBuildHelper(build_helper.BuildHelper):
+  """Custom build helper for protobuf."""
+
+  # TODO: implement.
+  # * build libprotobuf
+  # * build Python bindings
+
 
 class DependencyBuilder(object):
   """Class that helps in building dependencies."""
@@ -31,9 +38,13 @@ class DependencyBuilder(object):
 
   # The distributions to build dpkg-source packages for.
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
-      u'precise', u'trusty', u'vivid', u'wily'])
+      u'precise', u'trusty', u'vivid', u'wily', u'xenial', u'y-series'])
 
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
+
+  _CUSTOM_BUILD_HELPERS = {
+      u'protobuf': ProtobufBuildHelper,
+  }
 
   def __init__(self, build_target):
     """Initializes the dependency builder.
@@ -86,6 +97,15 @@ class DependencyBuilder(object):
           source_helper_object, dependency_definition):
         return False
 
+    elif dependency_definition.build_system == u'custom':
+      if not self._BuildCustom(source_helper_object, dependency_definition):
+        # TODO: implement
+        pass
+
+      # TODO: implement
+      logging.warning(u'Not implemented yet.')
+      return False
+
     else:
       logging.warning(u'Unable to determine how to build: {0:s}'.format(
           dependency_definition.name))
@@ -107,29 +127,8 @@ class DependencyBuilder(object):
     tools_path = os.path.dirname(__file__)
     data_path = os.path.join(os.path.dirname(tools_path), u'data')
 
-    build_helper_object = None
-    distributions = [None]
-    if self._build_target == u'dpkg':
-      build_helper_object = build_helper.ConfigureMakeDpkgBuildHelper(
-          dependency_definition, data_path)
-
-    elif self._build_target == u'dpkg-source':
-      build_helper_object = build_helper.ConfigureMakeSourceDpkgBuildHelper(
-          dependency_definition, data_path)
-      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
-
-    elif self._build_target == u'msi':
-      build_helper_object = build_helper.ConfigureMakeMsiBuildHelper(
-          dependency_definition, data_path, tools_path)
-
-    elif self._build_target == u'pkg':
-      build_helper_object = build_helper.ConfigureMakePkgBuildHelper(
-          dependency_definition, data_path)
-
-    elif self._build_target == u'rpm':
-      build_helper_object = build_helper.ConfigureMakeRpmBuildHelper(
-          dependency_definition, data_path)
-
+    build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
+        dependency_definition, self._build_target, data_path)
     if not build_helper_object:
       return False
 
@@ -139,6 +138,11 @@ class DependencyBuilder(object):
           u'Missing build dependencies: {0:s}.'.format(
               u', '.join(build_dependencies)))
       return False
+
+    if self._build_target == u'dpkg-source':
+      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
+    else:
+      distributions = [None]
 
     for distribution in distributions:
       if distribution:
@@ -178,6 +182,31 @@ class DependencyBuilder(object):
 
     return True
 
+  def _BuildCustom(self, source_helper_object, dependency_definition):
+    """Builds a Python module with a custom build helper.
+
+    Args:
+      source_helper_object: the source helper (instance of SourceHelper).
+      dependency_definition: the dependency definition object (instance of
+                             DependencyDefinition).
+
+    Returns:
+      True if the build is successful or False on error.
+    """
+    if dependency_definition.name not in self._CUSTOM_BUILD_HELPERS:
+      logging.warning(u'Missing custom build helper for: {0:s}'.format(
+          dependency_definition.name))
+      return False
+
+    build_helper_class = self._CUSTOM_BUILD_HELPERS[dependency_definition.name]
+    build_helper_object = build_helper_class(dependency_definition)
+
+    _ = source_helper_object
+    _ = build_helper_object
+
+    # TODO: implement.
+    return False
+
   def _BuildSetupPy(self, source_helper_object, dependency_definition):
     """Builds a Python module that comes with setup.py.
 
@@ -192,29 +221,8 @@ class DependencyBuilder(object):
     tools_path = os.path.dirname(__file__)
     data_path = os.path.join(os.path.dirname(tools_path), u'data')
 
-    build_helper_object = None
-    distributions = [None]
-    if self._build_target == u'dpkg':
-      build_helper_object = build_helper.SetupPyDpkgBuildHelper(
-          dependency_definition, data_path)
-
-    elif self._build_target == u'dpkg-source':
-      build_helper_object = build_helper.SetupPySourceDpkgBuildHelper(
-          dependency_definition, data_path)
-      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
-
-    elif self._build_target == u'msi':
-      build_helper_object = build_helper.SetupPyMsiBuildHelper(
-          dependency_definition, data_path)
-
-    elif self._build_target == u'pkg':
-      build_helper_object = build_helper.SetupPyPkgBuildHelper(
-          dependency_definition, data_path)
-
-    elif self._build_target == u'rpm':
-      build_helper_object = build_helper.SetupPyRpmBuildHelper(
-          dependency_definition, data_path)
-
+    build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
+        dependency_definition, self._build_target, data_path)
     if not build_helper_object:
       return False
 
@@ -224,6 +232,11 @@ class DependencyBuilder(object):
           u'Missing build dependencies: {0:s}.'.format(
               u', '.join(build_dependencies)))
       return False
+
+    if self._build_target == u'dpkg-source':
+      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
+    else:
+      distributions = [None]
 
     for distribution in distributions:
       if distribution:
@@ -283,6 +296,9 @@ class DependencyBuilder(object):
     # Unify http:// and https:// URLs for the download helper check.
     if download_url.startswith(u'https://'):
       download_url = u'http://{0:s}'.format(download_url[8:])
+
+    # Remove URL arguments.
+    download_url, _, _ = download_url.partition(u'?')
 
     if download_url.startswith(u'http://pypi.python.org/pypi/'):
       download_helper_object = download_helper.PyPiDownloadHelper()

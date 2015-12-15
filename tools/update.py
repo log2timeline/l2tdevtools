@@ -280,9 +280,13 @@ class DependencyUpdater(object):
     else:
       self._preferred_machine_type = None
 
-  def _GetPackageFilenamesAndVersions(self):
+  def _GetPackageFilenamesAndVersions(self, package_names):
     """Determines the package filenames and versions.
 
+    Args:
+      package_names: a list of package names that should be updated
+                     if an update is available. An empty list represents
+                     all available packages.
     Args:
       A tuple of two dictionaries one containing the package filenames
       another the package versions per package name.
@@ -333,6 +337,10 @@ class DependencyUpdater(object):
       if name == u'pytsk3':
         last_part = version.pop()
         version.extend(last_part.split(u'-'))
+
+      # Ignore unspecified package names if provided.
+      if package_names and name not in package_names:
+        continue
 
       if name not in package_versions:
         compare_result = 1
@@ -787,26 +795,16 @@ class DependencyUpdater(object):
     Args:
       package_names: a list of package names that should be updated
                      if an update is available. An empty list represents
-                     all available packges.
+                     all available packages.
 
     Returns:
       A boolean value indicating the update was successful.
     """
-    package_filenames, package_versions = self._GetPackageFilenamesAndVersions()
+    package_filenames, package_versions = self._GetPackageFilenamesAndVersions(
+        package_names)
     if not package_filenames:
       logging.error(u'No packages found.')
       return False
-
-    if package_names:
-      # Since the dictionary is going to change a list of the keys is needed.
-      for package_name in package_filenames.keys():
-        if package_name not in package_names:
-          del package_filenames[package_name]
-
-      # Since the dictionary is going to change a list of the keys is needed.
-      for package_name in package_versions.keys():
-        if package_name not in package_names:
-          del package_versions[package_name]
 
     if not self._UninstallPackages(package_versions):
       logging.error(u'Unable to uninstall packages.')

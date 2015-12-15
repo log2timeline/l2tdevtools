@@ -76,13 +76,40 @@ class LaunchpadPPAManager(object):
     return projects
 
 
+class OpenSuseBuildServiceManager(object):
+  """Defines an OpenSuse build service manager object."""
+
+  # http://download.opensuse.org/repositories/home:/joachimmetz:/testing/
+  # Fedora_22/src/
+
+  # TODO: update
+  # ocs checkout home:joachimmetz:testing
+  # cd home:joachimmetz:testing
+  #
+  # osc meta pkg -F - home:joachimmetz:testing libevt << EOT
+  # <package name="libevt" project="home:joachimmetz:testing">
+  #   <title>{title:s}</title>
+  #   <description>{description:s}</description>
+  # </package>
+  # EOT
+  #
+  # osc up
+  #
+  # cp libevt-alpha-20151206.tar.gz libevt/libevt-20151206.tar.gz
+  # tar xfO libevt/libevt-20151206.tar.gz libevt-20151206/libevt.spec
+  # > libevt/libevt.spec
+  #
+  # osc add libevt/libevt*
+  # osc commit -n
+
+
 class BinariesManager(object):
   """Defines the binaries manager."""
 
   def __init__(self):
     """Initializes the binaries manager object."""
     super(BinariesManager, self).__init__()
-    self._ppa_manager = LaunchpadPPAManager(u'gift')
+    self._launchpad_ppa_manager = LaunchpadPPAManager(u'gift')
 
   def _ComparePackages(self, reference_packages, packages):
     """Compares the packages.
@@ -108,8 +135,8 @@ class BinariesManager(object):
 
     return new_packages, new_versions
 
-  def CompareDirectoryWithPPATrack(self, reference_directory, track):
-    """Compares a directory containing dpkg packages with a GIFT PPA track.
+  def CompareDirectoryWithReleaseTrack(self, reference_directory, track):
+    """Compares a directory containing dpkg packages with a release track.
 
     Args:
       reference_directory: a string containing the path of the reference
@@ -135,11 +162,11 @@ class BinariesManager(object):
 
       reference_packages[name] = version
 
-    packages = self._ppa_manager.GetPackages(track)
+    packages = self._launchpad_ppa_manager.GetPackages(track)
     return self._ComparePackages(reference_packages, packages)
 
-  def ComparePPATracks(self, reference_track, track):
-    """Compares two GIFT PPA tracks.
+  def CompareReleaseTracks(self, reference_track, track):
+    """Compares two release tracks.
 
     Args:
       reference_track: a string containing the name of the reference track.
@@ -150,15 +177,17 @@ class BinariesManager(object):
       are present in the reference track but not in the track, and new
       version, those packages that have a newer version in the reference track.
     """
-    reference_packages = self._ppa_manager.GetPackages(reference_track)
-    packages = self._ppa_manager.GetPackages(track)
+    reference_packages = self._launchpad_ppa_manager.GetPackages(
+        reference_track)
+    packages = self._launchpad_ppa_manager.GetPackages(track)
 
     return self._ComparePackages(reference_packages, packages)
 
 
 def Main():
   actions = frozenset([
-      u'gift-diff-dev', u'gift-diff-stable', u'gift-diff-testing'])
+      u'launchpad-diff-dev', u'launchpad-diff-stable',
+      u'launchpad-diff-testing', u'osb-update-testing'])
 
   argument_parser = argparse.ArgumentParser(description=(
       u'Manages the GIFT launchpad PPA and l2tbinaries.'))
@@ -188,17 +217,18 @@ def Main():
 
   binaries_manager = BinariesManager()
 
-  if options.action.startswith(u'gift-diff-'):
+  if options.action.startswith(u'launchpad-diff-'):
     if options.action.endswith(u'-testing'):
       reference_directory = options.build_directory
       track = u'testing'
 
       new_packages, new_versions = (
-          binaries_manager.CompareDirectoryWithPPATrack(
+          binaries_manager.CompareDirectoryWithReleaseTrack(
               reference_directory, track))
 
-      print(u'Difference between: {0:s} and GIFT PPA track: {1:s}'.format(
-          reference_directory, track))
+      diff_header = (
+          u'Difference between: {0:s} and release track: {1:s}'.format(
+              reference_directory, track))
 
     else:
       if options.action.endswith(u'-dev'):
@@ -208,12 +238,17 @@ def Main():
         reference_track = u'dev'
         track = u'stable'
 
-      new_packages, new_versions = binaries_manager.ComparePPATracks(
+      new_packages, new_versions = binaries_manager.CompareReleaseTracks(
           reference_track, track)
 
-      print(u'Difference between GIFT PPA tracks: {0:s} and {1:s}'.format(
-          reference_track, track))
+      diff_header = (
+          u'Difference between release tracks: {0:s} and {1:s}'.format(
+              reference_track, track))
 
+  # elif options.action.startswith(u'osb-diff-'):
+
+  if u'-diff-' in options.action:
+    print(diff_header)
     print(u'')
 
     print(u'New packages:')

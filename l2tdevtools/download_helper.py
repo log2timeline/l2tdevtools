@@ -112,9 +112,11 @@ class ProjectDownloadHelper(DownloadHelper):
 
     # github archive package filenames can be:
     # {project version}.tar.gz
+    # release-{project version}.tar.gz
     # v{project version}.tar.gz
     github_archive_filenames = [
         u'{0!s}.tar.gz'.format(project_version),
+        u'release-{0!s}.tar.gz'.format(project_version),
         u'v{0!s}.tar.gz'.format(project_version)]
 
     if filename in github_archive_filenames:
@@ -159,6 +161,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       u'[0-9]+',
       u'[0-9]+[.][0-9]+',
       u'[0-9]+[.][0-9]+[.][0-9]+',
+      u'release-[0-9]+[.][0-9]+[.][0-9]+',
       u'v[0-9]+[.][0-9]+[.][0-9]+',
       u'[0-9]+[.][0-9]+[.][0-9]+[-][0-9]+']
 
@@ -180,6 +183,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     Returns:
       The latest version number or 0 on error.
     """
+    # TODO: add support for URL arguments u'?after=release-2.2.0'
     download_url = u'https://github.com/{0:s}/{1:s}/releases'.format(
         self.organization, project_name)
 
@@ -224,8 +228,11 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     comparable_matches = {}
 
     for match in matches:
+      # Remove a leading 'release-'.
+      if match.startswith(u'release-'):
+        match = match[8:]
       # Remove a leading 'v'.
-      if match.startswith(u'v'):
+      elif match.startswith(u'v'):
         match = match[1:]
 
       # Some versions contain '-' as the release number separator for the split
@@ -255,6 +262,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     Returns:
       The download URL of the project or None on error.
     """
+    # TODO: add support for URL arguments u'?after=release-2.2.0'
     download_url = u'https://github.com/{0:s}/{1:s}/releases'.format(
         self.organization, project_name)
 
@@ -292,6 +300,17 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
         u'/{0:s}/{1:s}/archive/{2!s}[.]tar[.]gz').format(
             self.organization, project_name, project_version)
     matches = re.findall(expression_string, page_content)
+
+    if matches and len(matches) == 1:
+      return u'https://github.com{0:s}'.format(matches[0])
+
+    if len(matches) != 1:
+      # The format of the project archive download URL is:
+      # /{organization}/{project name}/archive/release-{version}.tar.gz
+      expression_string = (
+          u'/{0:s}/{1:s}/archive/release-{2!s}[.]tar[.]gz').format(
+              self.organization, project_name, project_version)
+      matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
       return u'https://github.com{0:s}'.format(matches[0])

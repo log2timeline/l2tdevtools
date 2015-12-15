@@ -2294,3 +2294,53 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
+
+
+class BuildHelperFactory(object):
+  """Factory class for build helpers."""
+
+  _CONFIGURE_MAKE_BUILD_HELPER_CLASSES = {
+      u'dpkg': ConfigureMakeDpkgBuildHelper,
+      u'dpkg-source': ConfigureMakeSourceDpkgBuildHelper,
+      u'msi': ConfigureMakeSourceDpkgBuildHelper,
+      u'pkg': ConfigureMakePkgBuildHelper,
+      u'rpm': ConfigureMakeRpmBuildHelper,
+  }
+
+  _SETUP_PY_BUILD_HELPER_CLASSES = {
+      u'dpkg': SetupPyDpkgBuildHelper,
+      u'dpkg-source': SetupPySourceDpkgBuildHelper,
+      u'msi': SetupPyMsiBuildHelper,
+      u'pkg': SetupPyPkgBuildHelper,
+      u'rpm': SetupPyRpmBuildHelper,
+  }
+
+  @classmethod
+  def NewBuildHelper(cls, dependency_definition, build_target, data_path):
+    """Creates a new build helper object.
+
+    Args:
+      dependency_definition: the dependency definition object (instance of
+                             DependencyDefinition).
+      build_target: a string containing the build target.
+      data_path: the path to the data directory which contains the patches
+                 sub directory.
+
+    Returns:
+      A build helper object (instance of BuildHelper) or None.
+    """
+    if dependency_definition.build_system == u'configure_make':
+      build_helper_class = cls._CONFIGURE_MAKE_BUILD_HELPER_CLASSES.get(
+          build_target, None)
+
+    elif dependency_definition.build_system == u'setup_py':
+      build_helper_class = cls._SETUP_PY_BUILD_HELPER_CLASSES.get(
+          build_target, None)
+
+    else:
+      build_helper_class = None
+
+    if not build_helper_class:
+      return
+
+    return build_helper_class(dependency_definition, data_path)

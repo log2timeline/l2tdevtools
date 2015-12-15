@@ -32,7 +32,7 @@ class DependencyUpdaterTest(unittest.TestCase):
         preferred_machine_type=u'x86', preferred_operating_system=u'Windows')
 
     package_filenames, package_versions = (
-        dependency_updater._GetPackageFilenamesAndVersions())
+        dependency_updater._GetPackageFilenamesAndVersions([]))
 
     self.assertEqual(
         package_filenames.get(u'dfvfs', None), u'dfvfs-20151227.1.win32.msi')
