@@ -524,7 +524,7 @@ class DependencyUpdater(object):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         result = False
 
-        with file_object as open(log_file, 'r'):
+        with open(log_file, 'r') as file_object:
           log_file_contents = file_object.read()
           print(log_file_contents)
 
