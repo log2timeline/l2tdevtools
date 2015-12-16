@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Script to update prebuilt versions of the projects."""
 
+from __future__ import print_function
 import argparse
 import glob
 import json
