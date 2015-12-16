@@ -246,18 +246,20 @@ class DependencyUpdater(object):
   """Class that helps in updating dependencies."""
 
   def __init__(
-      self, download_directory=u'build', force_install=False,
-      msi_targetdir=None, preferred_machine_type=None,
+      self, download_directory=u'build', exclude_packages=False,
+      force_install=False, msi_targetdir=None, preferred_machine_type=None,
       preferred_operating_system=None):
     """Initializes the dependency updater.
 
     Args:
       download_directory: optional download directory. The default is 'build'
                           to match the build directory of the build script.
+      exclude_packages: optional boolean value to indicate pacakge names
+                        should be excluded instead of included.
       force_install: optional boolean value to indicate installation (update)
-                     should be forced. The default is False.
+                     should be forced.
       msi_targetdir: optional string value containing the MSI TARGETDIR
-                     property. The default is None.
+                     property.
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
@@ -268,6 +270,7 @@ class DependencyUpdater(object):
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
     self._download_helper = GithubRepoDownloadHelper()
+    self._exclude_packages = exclude_packages
     self._force_install = force_install
     self._msi_targetdir = msi_targetdir
 
@@ -339,8 +342,10 @@ class DependencyUpdater(object):
         last_part = version.pop()
         version.extend(last_part.split(u'-'))
 
-      # Ignore unspecified package names if provided.
-      if package_names and name not in package_names:
+      # Ignore package names if defined.
+      if package_names and (
+          (not self._exclude_packages and name not in package_names) or
+          (self._exclude_packages and name in package_names)):
         continue
 
       if name not in package_versions:
@@ -835,6 +840,11 @@ def Main():
       default=u'build', help=u'The location of the the download directory.')
 
   argument_parser.add_argument(
+      '-e', '--exclude', action='store_true', dest='exclude_packages',
+      default=False, help=(
+          u'Excludes the package names instead of including them.'))
+
+  argument_parser.add_argument(
       '-f', '--force', action='store_true', dest='force_install',
       default=False, help=(
           u'Force installation. This option removes existing versions '
@@ -863,6 +873,7 @@ def Main():
 
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
+      exclude_packages=options.exclude_packages,
       force_install=options.force_install,
       msi_targetdir=options.msi_targetdir,
       preferred_machine_type=options.machine_type)
