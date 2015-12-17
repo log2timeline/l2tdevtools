@@ -55,6 +55,8 @@ class DependencyBuilder(object):
     """
     super(DependencyBuilder, self).__init__()
     self._build_target = build_target
+    self._tools_path = os.path.dirname(__file__)
+    self._data_path = os.path.join(os.path.dirname(self._tools_path), u'data')
 
   def _BuildDependency(self, download_helper_object, dependency_definition):
     """Builds a dependency.
@@ -125,11 +127,8 @@ class DependencyBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
-    tools_path = os.path.dirname(__file__)
-    data_path = os.path.join(os.path.dirname(tools_path), u'data')
-
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
-        dependency_definition, self._build_target, data_path)
+        dependency_definition, self._build_target, self._data_path)
     if not build_helper_object:
       return False
 
@@ -219,11 +218,8 @@ class DependencyBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
-    tools_path = os.path.dirname(__file__)
-    data_path = os.path.join(os.path.dirname(tools_path), u'data')
-
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
-        dependency_definition, self._build_target, data_path)
+        dependency_definition, self._build_target, self._data_path)
     if not build_helper_object:
       return False
 
@@ -328,7 +324,7 @@ class DependencyBuilder(object):
 
 def Main():
   build_targets = frozenset([
-      u'download', u'dpkg', u'dpkg-source', u'msi', u'pkg', u'rpm'])
+      u'download', u'dpkg', u'dpkg-source', u'msi', u'osc', u'pkg', u'rpm'])
 
   argument_parser = argparse.ArgumentParser(description=(
       u'Downloads and builds the latest versions of projects.'))
@@ -453,6 +449,8 @@ def Main():
     print(u'Failed buiding:')
     for failed_build in failed_builds:
       print(u'\t{0:s}'.format(failed_build))
+
+  # TODO: print warning if project names do not exist.
 
   return not failed_builds
 

@@ -22,17 +22,16 @@ class BuildHelper(object):
 
   LOG_FILENAME = u'build.log'
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(BuildHelper, self).__init__()
-    self._data_path = data_path
+    self._data_path = os.path.join(l2tdevtools_path, u'data')
     self._dependency_definition = dependency_definition
 
   def CheckBuildDependencies(self):
@@ -76,16 +75,16 @@ class DpkgBuildHelper(BuildHelper):
       u'zlib': u'zlib1g-dev'
   }
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(DpkgBuildHelper, self).__init__(dependency_definition, data_path)
+    super(DpkgBuildHelper, self).__init__(
+        dependency_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg.sh'
     self._post_script = u'post-dpkg.sh'
 
@@ -110,8 +109,8 @@ class DpkgBuildHelper(BuildHelper):
       command = u'sh ../{0:s} {1:s} {2!s} {3:s} {4:s} {5:s}'.format(
           self._prep_script, project_name, project_version, version_suffix,
           distribution, architecture)
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
@@ -140,8 +139,8 @@ class DpkgBuildHelper(BuildHelper):
       command = u'sh ../{0:s} {1:s} {2!s} {3:s} {4:s} {5:s}'.format(
           self._post_script, project_name, project_version, version_suffix,
           distribution, architecture)
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
@@ -192,17 +191,16 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(ConfigureMakeDpkgBuildHelper, self).__init__(
-        dependency_definition, data_path)
+        dependency_definition, l2tdevtools_path)
     self.architecture = platform.machine()
     self.distribution = u''
     self.version_suffix = u''
@@ -281,8 +279,8 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
 
     command = u'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
         os.path.join(u'..', self.LOG_FILENAME))
-    exit_code = subprocess.call(
-        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
@@ -359,17 +357,16 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(ConfigureMakeSourceDpkgBuildHelper, self).__init__(
-        dependency_definition, data_path)
+        dependency_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg-source.sh'
     self._post_script = u'post-dpkg-source.sh'
     self.architecture = u'source'
@@ -445,8 +442,8 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 
     command = u'debuild -S -sa > {0:s} 2>&1'.format(
         os.path.join(u'..', self.LOG_FILENAME))
-    exit_code = subprocess.call(
-        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
@@ -522,17 +519,16 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 class SetupPyDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(SetupPyDpkgBuildHelper, self).__init__(
-        dependency_definition, data_path)
+        dependency_definition, l2tdevtools_path)
     self.architecture = platform.machine()
     self.distribution = u''
     self.version_suffix = u''
@@ -620,8 +616,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
 
     command = u'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
         os.path.join(u'..', self.LOG_FILENAME))
-    exit_code = subprocess.call(
-        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
@@ -703,17 +699,16 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
 class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building source dpkg packages (.deb)."""
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(SetupPySourceDpkgBuildHelper, self).__init__(
-        dependency_definition, data_path)
+        dependency_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg-source.sh'
     self._post_script = u'post-dpkg-source.sh'
     self.architecture = u'source'
@@ -796,8 +791,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
 
     command = u'debuild -S -sa > {0:s} 2>&1'.format(
         os.path.join(u'..', self.LOG_FILENAME))
-    exit_code = subprocess.call(
-        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
@@ -882,16 +877,16 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
 class MsiBuildHelper(BuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(MsiBuildHelper, self).__init__(dependency_definition, data_path)
+    super(MsiBuildHelper, self).__init__(
+        dependency_definition, l2tdevtools_path)
     self.architecture = platform.machine()
 
     if self.architecture == u'x86':
@@ -903,23 +898,20 @@ class MsiBuildHelper(BuildHelper):
 class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
-  def __init__(self, dependency_definition, data_path, tools_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
-      tools_path: the path to the tools directory which contains the
-                  msvscpp-convert.py script.
+      l2tdevtools_path: the path to the l2tdevtools directory.
 
     Raises:
       RuntimeError: if the Visual Studio version could be determined or
                     msvscpp-convert.py could not be found.
     """
     super(ConfigureMakeMsiBuildHelper, self).__init__(
-        dependency_definition, data_path)
+        dependency_definition, l2tdevtools_path)
 
     if u'VS140COMNTOOLS' in os.environ:
       self.version = u'2015'
@@ -942,7 +934,8 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       raise RuntimeError(u'Unable to determine Visual Studio version.')
 
     if self.version != u'2008':
-      self._msvscpp_convert = os.path.join(tools_path, u'msvscpp-convert.py')
+      self._msvscpp_convert = os.path.join(
+          l2tdevtools_path, u'tools', u'msvscpp-convert.py')
 
       if not os.path.exists(self._msvscpp_convert):
         raise RuntimeError(u'Unable to find msvscpp-convert.py')
@@ -1499,8 +1492,8 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 
     command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
         sys.executable, os.path.join(u'..', self.LOG_FILENAME))
-    exit_code = subprocess.call(
-        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
@@ -1593,16 +1586,16 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 class PkgBuildHelper(BuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(PkgBuildHelper, self).__init__(dependency_definition, data_path)
+    super(PkgBuildHelper, self).__init__(
+        dependency_definition, l2tdevtools_path)
     self._pkgbuild = os.path.join(u'/', u'usr', u'bin', u'pkgbuild')
 
   def _BuildDmg(self, pkg_filename, dmg_filename):
@@ -1766,23 +1759,23 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
             u'./configure --prefix={0:s} --enable-python --with-pyprefix '
             u'> {1:s} 2>&1').format(prefix, log_filename)
 
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
       command = u'make >> {0:s} 2>&1'.format(log_filename)
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
       command = u'make install DESTDIR={0:s}/tmp >> {1:s} 2>&1'.format(
           os.path.abspath(source_directory), log_filename)
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
@@ -1845,8 +1838,8 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
 
     if not os.path.exists(pkg_filename):
       command = u'python setup.py build > {0:s} 2>&1'.format(log_filename)
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
@@ -1855,8 +1848,8 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
           u'python setup.py install --root={0:s}/tmp '
           u'--install-data=/usr/local > {1:s} 2>&1').format(
               os.path.abspath(source_directory), log_filename)
-      exit_code = subprocess.call(
-          u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          source_directory, command), shell=True)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
@@ -1870,9 +1863,8 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
         command = (
             u'find ./tmp -type d -name \\*.egg-info -exec cp {0:s} {{}} '
             u'\\;').format(license_file)
-        exit_code = subprocess.call(
-            u'(cd {0:s} && {1:s})'.format(source_directory, command),
-            shell=True)
+        exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+            source_directory, command), shell=True)
         if exit_code != 0:
           logging.error(u'Running: "{0:s}" failed.'.format(command))
           return False
@@ -1921,16 +1913,16 @@ class RpmBuildHelper(BuildHelper):
       u'zlib': u'zlib-devel'
   }
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(RpmBuildHelper, self).__init__(dependency_definition, data_path)
+    super(RpmBuildHelper, self).__init__(
+        dependency_definition, l2tdevtools_path)
     self.architecture = platform.machine()
 
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
@@ -2209,17 +2201,16 @@ class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
 class SetupPyRpmBuildHelper(RpmBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
-  def __init__(self, dependency_definition, data_path):
+  def __init__(self, dependency_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(SetupPyRpmBuildHelper, self).__init__(
-        dependency_definition, data_path)
+        dependency_definition, l2tdevtools_path)
     if not dependency_definition.architecture_dependent:
       self.architecture = u'noarch'
 
@@ -2248,8 +2239,8 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
 
     command = u'python setup.py bdist_rpm > {0:s} 2>&1'.format(
         os.path.join(u'..', self.LOG_FILENAME))
-    exit_code = subprocess.call(
-        u'(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
@@ -2263,7 +2254,7 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
             project_name, project_version, self.architecture)))
     for filename in filenames:
       logging.info(u'Moving: {0:s}'.format(filename))
-      shutil.move(filename, '.')
+      shutil.move(filename, u'.')
 
     return True
 
@@ -2296,13 +2287,160 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
         os.remove(filename)
 
 
+class OSCBuildHelper(RpmBuildHelper):
+  """Class that helps in building with osc for the openSUSE build service."""
+
+  _OSC_PROJECT = u'home:joachimmetz:testing'
+
+  _OSC_PACKAGE_METADATA = (
+      u'<package name="{name:s}" project="{project:s}">\n'
+      u'  <title>{title:s}</title>\n'
+      u'  <description>{description:s}</description>\n'
+      u'</package>\n')
+
+  def Build(self, source_helper_object):
+    """Builds the rpms.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if the build was successful, False otherwise.
+    """
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    logging.info(u'Preparing osc build of: {0:s}'.format(source_filename))
+
+    # Checkout the project if it does not exist otherwise make sure
+    # the project files are up to date.
+    if not os.path.exists(self._OSC_PROJECT):
+      command = u'osc checkout {0:s}'.format(self._OSC_PROJECT)
+      exit_code = subprocess.call(command, shell=True)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+    else:
+      command = u'osc update'
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          self._OSC_PROJECT, command), shell=True)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+    # Create a package of the project if it does not exist.
+    osc_package_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name)
+    if not os.path.exists(osc_package_path):
+      template_values = {
+          u'description': source_helper_object.project_name,
+          u'name': source_helper_object.project_name,
+          u'project': self._OSC_PROJECT,
+          u'title': source_helper_object.project_name}
+
+      package_metadata = self._OSC_PACKAGE_METADATA.format(**template_values)
+
+      command = u'osc meta pkg -F - {0:s} {1:s} << EOI\n{2:s}\nEOI\n'.format(
+          self._OSC_PROJECT, source_helper_object.project_name,
+          package_metadata)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          self._OSC_PROJECT, command), shell=True)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+      # Make sure the project files are up to date.
+      command = u'osc update'
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          self._OSC_PROJECT, command), shell=True)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+    # osc wants the project filename without the status indication.
+    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version)
+
+    # Copy the source package to the package directory.
+    osc_source_path = os.path.join(osc_package_path, osc_source_filename)
+    shutil.copy(source_filename, osc_source_path)
+
+    # Extract the build files from the source package into the package
+    # directory.
+    command = u'tar xfO {0:s} {1:s}-{2!s}/{1:s}.spec > {1:s}.spec'.format(
+        osc_source_filename, source_helper_object.project_name,
+        source_helper_object.project_version)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        osc_package_path, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    # Add the new files to the project.
+    command = u'osc add {0:s} {1:s}.spec'.format(
+        osc_source_filename, source_helper_object.project_name)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        osc_package_path, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    # Commit the project changes.
+    command = u'osc commit -n'
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        self._OSC_PROJECT, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def Clean(self, source_helper_object):
+    """Cleans the build and dist directory.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+    """
+    osc_package_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name)
+    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version)
+
+    filenames_to_ignore = re.compile(u'^{0:s}'.format(
+        os.path.join(osc_package_path, osc_source_filename)))
+
+    # Remove files of previous versions in the format:
+    # project-version.tar.gz
+    osc_source_filename_glob = u'{0:s}-*.tar.gz'.format(
+        source_helper_object.project_name)
+    filenames = glob.glob(os.path.join(
+        osc_package_path, osc_source_filename_glob))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+
+        command = u'osc remove {0:s}'.format(os.path.basename(filename))
+        exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+            osc_package_path, command), shell=True)
+        if exit_code != 0:
+          logging.error(u'Running: "{0:s}" failed.'.format(command))
+
+
 class BuildHelperFactory(object):
   """Factory class for build helpers."""
 
   _CONFIGURE_MAKE_BUILD_HELPER_CLASSES = {
       u'dpkg': ConfigureMakeDpkgBuildHelper,
       u'dpkg-source': ConfigureMakeSourceDpkgBuildHelper,
-      u'msi': ConfigureMakeSourceDpkgBuildHelper,
+      u'msi': ConfigureMakeMsiBuildHelper,
+      u'osc': OSCBuildHelper,
       u'pkg': ConfigureMakePkgBuildHelper,
       u'rpm': ConfigureMakeRpmBuildHelper,
   }
@@ -2311,20 +2449,21 @@ class BuildHelperFactory(object):
       u'dpkg': SetupPyDpkgBuildHelper,
       u'dpkg-source': SetupPySourceDpkgBuildHelper,
       u'msi': SetupPyMsiBuildHelper,
+      u'osc': OSCBuildHelper,
       u'pkg': SetupPyPkgBuildHelper,
       u'rpm': SetupPyRpmBuildHelper,
   }
 
   @classmethod
-  def NewBuildHelper(cls, dependency_definition, build_target, data_path):
+  def NewBuildHelper(
+      cls, dependency_definition, build_target, l2tdevtools_path):
     """Creates a new build helper object.
 
     Args:
       dependency_definition: the dependency definition object (instance of
                              DependencyDefinition).
       build_target: a string containing the build target.
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
+      l2tdevtools_path: the path to the l2tdevtools directory.
 
     Returns:
       A build helper object (instance of BuildHelper) or None.
@@ -2343,4 +2482,4 @@ class BuildHelperFactory(object):
     if not build_helper_class:
       return
 
-    return build_helper_class(dependency_definition, data_path)
+    return build_helper_class(dependency_definition, l2tdevtools_path)

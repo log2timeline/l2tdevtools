@@ -82,26 +82,6 @@ class OpenSuseBuildServiceManager(object):
   # http://download.opensuse.org/repositories/home:/joachimmetz:/testing/
   # Fedora_22/src/
 
-  # TODO: update
-  # ocs checkout home:joachimmetz:testing
-  # cd home:joachimmetz:testing
-  #
-  # osc meta pkg -F - home:joachimmetz:testing libevt << EOT
-  # <package name="libevt" project="home:joachimmetz:testing">
-  #   <title>{title:s}</title>
-  #   <description>{description:s}</description>
-  # </package>
-  # EOT
-  #
-  # osc up
-  #
-  # cp libevt-alpha-20151206.tar.gz libevt/libevt-20151206.tar.gz
-  # tar xfO libevt/libevt-20151206.tar.gz libevt-20151206/libevt.spec
-  # > libevt/libevt.spec
-  #
-  # osc add libevt/libevt*
-  # osc commit -n
-
 
 class BinariesManager(object):
   """Defines the binaries manager."""
@@ -187,7 +167,7 @@ class BinariesManager(object):
 def Main():
   actions = frozenset([
       u'launchpad-diff-dev', u'launchpad-diff-stable',
-      u'launchpad-diff-testing', u'osb-update-testing'])
+      u'launchpad-diff-testing'])
 
   argument_parser = argparse.ArgumentParser(description=(
       u'Manages the GIFT launchpad PPA and l2tbinaries.'))
