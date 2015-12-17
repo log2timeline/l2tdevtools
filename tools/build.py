@@ -55,8 +55,7 @@ class DependencyBuilder(object):
     """
     super(DependencyBuilder, self).__init__()
     self._build_target = build_target
-    self._tools_path = os.path.dirname(__file__)
-    self._data_path = os.path.join(os.path.dirname(self._tools_path), u'data')
+    self._l2tdevtools_path = os.path.dirname(os.path.dirname(__file__))
 
   def _BuildDependency(self, download_helper_object, dependency_definition):
     """Builds a dependency.
@@ -128,7 +127,7 @@ class DependencyBuilder(object):
       True if the build is successful or False on error.
     """
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
-        dependency_definition, self._build_target, self._data_path)
+        dependency_definition, self._build_target, self._l2tdevtools_path)
     if not build_helper_object:
       return False
 
@@ -219,7 +218,7 @@ class DependencyBuilder(object):
       True if the build is successful or False on error.
     """
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
-        dependency_definition, self._build_target, self._data_path)
+        dependency_definition, self._build_target, self._l2tdevtools_path)
     if not build_helper_object:
       return False
 
