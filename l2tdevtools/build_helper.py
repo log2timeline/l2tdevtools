@@ -895,7 +895,7 @@ class MsiBuildHelper(BuildHelper):
     elif self.architecture == u'AMD64':
       self.architecture = u'win-amd64'
 
-  def _ApplyPatches(self, source_directory, patches):
+  def _ApplyPatches(self, patches):
     """Applies patches.
 
     Args:
@@ -920,8 +920,7 @@ class MsiBuildHelper(BuildHelper):
         continue
 
       command = u'{0:s} --batch --binary --input {1:s}'.format(patch, filename)
-      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-          source_directory, command), shell=False)
+      exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
@@ -1370,12 +1369,14 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
         source_filename, self.version))
 
-    if self._dependency_definition.patches:
-      if not self._ApplyPatches(
-          source_directory, self._dependency_definition.patches):
-        return False
-
     result = False
+    if self._dependency_definition.patches:
+      os.chdir(source_directory)
+      result = self._ApplyPatches(self._dependency_definition.patches)
+      os.chdir(u'..')
+
+    if not result:
+      return result
 
     setup_py_path = os.path.join(source_directory, u'setup.py')
     if not os.path.exists(setup_py_path):
@@ -1494,10 +1495,11 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 
     logging.info(u'Building msi of: {0:s}'.format(source_filename))
 
+    result = False
     if self._dependency_definition.patches:
-      if not self._ApplyPatches(
-          source_directory, self._dependency_definition.patches):
-        return False
+      os.chdir(source_directory)
+      result = self._ApplyPatches(self._dependency_definition.patches):
+      os.chdir(u'..')
 
     command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
         sys.executable, os.path.join(u'..', self.LOG_FILENAME))
