@@ -73,6 +73,9 @@ class DependencyBuilder(object):
 
     source_helper_object.Clean()
 
+    # TODO: add a step to make sure build environment is sane
+    # e.g. _CheckStatusIsClean()
+
     # Unify http:// and https:// URLs for the download helper check.
     download_url = dependency_definition.download_url
     if download_url.startswith(u'https://'):

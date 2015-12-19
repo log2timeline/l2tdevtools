@@ -895,6 +895,39 @@ class MsiBuildHelper(BuildHelper):
     elif self.architecture == u'AMD64':
       self.architecture = u'win-amd64'
 
+  def _ApplyPatches(self, source_directory, patches):
+    """Applies patches.
+
+    Args:
+      source_directory: the name of the source directory.
+      patches: list of patch file names.
+
+    Returns:
+      A boolean value indicating if applying the patches was successful.
+    """
+    # Search common locations for patch.exe
+    patch = u'{0:s}:{1:s}{2:s}'.format(
+        u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe'))
+
+    if not os.path.exists(patch):
+      logging.error(u'Unable to find patch.exe')
+      return False
+
+    for patch_filename in patches:
+      filename = os.path.join(self._data_path, u'patches', patch_filename)
+      if not os.path.exists(filename):
+        logging.warning(u'Missing patch file: {0:s}'.format(filename))
+        continue
+
+      command = u'{0:s} --batch --binary --input {1:s}'.format(patch, filename)
+      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+          source_directory, command), shell=False)
+      if exit_code != 0:
+        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        return False
+
+    return True
+
 
 class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
@@ -940,38 +973,6 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
       if not os.path.exists(self._msvscpp_convert):
         raise RuntimeError(u'Unable to find msvscpp-convert.py')
-
-  def _ApplyPatches(self, patches):
-    """Applies patches.
-
-    Args:
-      patches: list of patch file names.
-
-    Returns:
-      A boolean value indicating if applying the patches was successful.
-    """
-    # Search common locations for patch.exe
-    patch = u'{0:s}:{1:s}{2:s}'.format(
-        u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe'))
-
-    if not os.path.exists(patch):
-      logging.error(u'Unable to find patch.exe')
-      return False
-
-    for patch_filename in patches:
-      filename = os.path.join(self._data_path, u'patches', patch_filename)
-      if not os.path.exists(filename):
-        logging.warning(u'Missing patch file: {0:s}'.format(filename))
-        continue
-
-      # TODO: apply patch make sure to use non-interactive mode.
-      command = u'{0:s} {1:s}'.format(patch, filename)
-      exit_code = subprocess.call(command, shell=False)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
-
-    return True
 
   def _BuildMSBuild(self, source_helper_object, source_directory):
     """Builds using Visual Studio and MSBuild.
@@ -1054,9 +1055,6 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     # solution and project files need to be converted to the newer version.
     if self.version in [u'2010', u'2012', u'2013', u'2015']:
       self._ConvertSolutionFiles(source_directory)
-
-    if self._dependency_definition.patches:
-      self._ApplyPatches(self._dependency_definition.patches)
 
     # Detect architecture based on Visual Studion Platform environment
     self._BuildPrepare(source_helper_object, source_directory)
@@ -1372,6 +1370,11 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
         source_filename, self.version))
 
+    if self._dependency_definition.patches:
+      if not self._ApplyPatches(
+          source_directory, self._dependency_definition.patches):
+        return False
+
     result = False
 
     setup_py_path = os.path.join(source_directory, u'setup.py')
@@ -1491,6 +1494,11 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 
     logging.info(u'Building msi of: {0:s}'.format(source_filename))
 
+    if self._dependency_definition.patches:
+      if not self._ApplyPatches(
+          source_directory, self._dependency_definition.patches):
+        return False
+
     command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
         sys.executable, os.path.join(u'..', self.LOG_FILENAME))
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
@@ -1608,9 +1616,6 @@ class OscBuildHelper(BuildHelper):
         return
 
     else:
-      if not self._CheckStatusIsClean():
-        return False
-
       if not self._OscUpdate():
         return False
 
@@ -1634,9 +1639,8 @@ class OscBuildHelper(BuildHelper):
     Returns:
       True if successful, False otherwise.
     """
-    command = u'osc status'
-    arguments = shlex.split(u'(cd {0:s} && {1:s})'.format(
-        self._OSC_PROJECT, command))
+    command = u'osc status {0:s}'.format(self._OSC_PROJECT)
+    arguments = shlex.split(command)
     process = subprocess.Popen(
         arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if not process:
@@ -1649,7 +1653,11 @@ class OscBuildHelper(BuildHelper):
           command, error))
       return False
 
-    return len(output) == 0
+    if len(output):
+      logging.error(u'Unable to continue with pending changes.')
+      return False
+
+    return True
 
   def _OscAdd(self, path):
     """Runs osc add to add a new file.
