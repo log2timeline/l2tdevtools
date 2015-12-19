@@ -432,9 +432,14 @@ def Main():
   os.chdir(options.build_directory)
 
   failed_builds = []
+  undefined_packages = list(projects)
   for dependency_definition in builds:
     if projects and dependency_definition.name not in projects:
       continue
+
+    if undefined_packages:
+      project_index = undefined_packages.index(dependency_definition.name)
+      del(undefined_packages[project_index])
 
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
 
@@ -446,13 +451,17 @@ def Main():
 
   os.chdir(current_working_directory)
 
+  if undefined_packages:
+    print(u'')
+    print(u'Undefined packages:')
+    for undefined_package in undefined_packages:
+      print(u'\t{0:s}'.format(undefined_package))
+
   if failed_builds:
     print(u'')
     print(u'Failed buiding:')
     for failed_build in failed_builds:
       print(u'\t{0:s}'.format(failed_build))
-
-  # TODO: print warning if project names do not exist.
 
   return not failed_builds
 
