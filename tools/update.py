@@ -248,7 +248,7 @@ class DependencyUpdater(object):
   def __init__(
       self, download_directory=u'build', exclude_packages=False,
       force_install=False, msi_targetdir=None, preferred_machine_type=None,
-      preferred_operating_system=None):
+      preferred_operating_system=None, verbose_output=False):
     """Initializes the dependency updater.
 
     Args:
@@ -266,6 +266,8 @@ class DependencyUpdater(object):
       preferred_operating_system: optional preferred operating system. The
                                   default is None, which will auto-detect
                                   the current operating system.
+      verbose_output: optional boolean value indication if more verbose output
+                      should be provided.
     """
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
@@ -273,6 +275,7 @@ class DependencyUpdater(object):
     self._exclude_packages = exclude_packages
     self._force_install = force_install
     self._msi_targetdir = msi_targetdir
+    self._verbose_output = verbose_output
 
     if preferred_operating_system:
       self._operating_system = preferred_operating_system
@@ -530,9 +533,10 @@ class DependencyUpdater(object):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         result = False
 
-        with open(log_file, 'r') as file_object:
-          log_file_contents = file_object.read()
-          print(log_file_contents)
+        if self._verbose_output:
+          with open(log_file, 'r') as file_object:
+            log_file_contents = file_object.read()
+            print(log_file_contents.decode(u'utf-16-le'))
 
     return result
 
@@ -866,6 +870,10 @@ def Main():
           u'is not recommended unless want to force the installation of the '
           u'MSIs into different directory than the system default.'))
 
+  argument_parser.add_argument(
+      '-v', '--verbose', dest='verbose', action='store_true', default=False,
+      help=u'have more verbose output.')
+
   options = argument_parser.parse_args()
 
   logging.basicConfig(
@@ -876,7 +884,8 @@ def Main():
       exclude_packages=options.exclude_packages,
       force_install=options.force_install,
       msi_targetdir=options.msi_targetdir,
-      preferred_machine_type=options.machine_type)
+      preferred_machine_type=options.machine_type,
+      verbose_output=options.verbose)
 
   return dependency_updater.UpdatePackages(options.package_names)
 

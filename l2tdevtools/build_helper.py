@@ -8,6 +8,7 @@ import logging
 import os
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -217,7 +218,7 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -380,7 +381,7 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -547,7 +548,7 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -722,7 +723,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -980,7 +981,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       source_directory: the name of the source directory.
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     # Search common locations for MSBuild.exe
     if self.version == u'2008':
@@ -1173,7 +1174,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     directory.
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     # Setup.py uses VS90COMNTOOLS which is vs2008 specific
     # so we need to set it for the other Visual Studio versions.
@@ -1261,7 +1262,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """Sets up the dokan build dependency.
 
     Returns:
-      A boolean value indicating if the build dependency was set up correctly.
+      True if successful, False otherwise.
     """
     # TODO: implement.
     return False
@@ -1270,7 +1271,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """Sets up the sqlite build dependency.
 
     Returns:
-      A boolean value indicating if the build dependency was set up correctly.
+      True if successful, False otherwise.
     """
     # TODO: download and build sqlite3 from source
     # http://www.sqlite.org/download.html
@@ -1289,7 +1290,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """Sets up the zeromq build dependency.
 
     Returns:
-      A boolean value indicating if the build dependency was set up correctly.
+      True if successful, False otherwise.
     """
     # TODO: implement.
     return False
@@ -1298,7 +1299,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     """Sets up the zlib build dependency.
 
     Returns:
-      A boolean value indicating if the build dependency was set up correctly.
+      True if successful, False otherwise.
     """
     download_helper_object = download_helper.SourceForgeDownloadHelper()
     source_helper_object = source_helper.SourcePackageHelper(
@@ -1354,7 +1355,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -1474,7 +1475,7 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -1583,6 +1584,317 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
         project_name, project_version, self.architecture, suffix)
 
 
+class OscBuildHelper(BuildHelper):
+  """Class that helps in building with osc for the openSUSE build service."""
+
+  _OSC_PROJECT = u'home:joachimmetz:testing'
+
+  _OSC_PACKAGE_METADATA = (
+      u'<package name="{name:s}" project="{project:s}">\n'
+      u'  <title>{title:s}</title>\n'
+      u'  <description>{description:s}</description>\n'
+      u'</package>\n')
+
+  def _BuildPrepare(self, source_helper_object):
+    """Prepares the source for building with osc.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+    """
+    # Checkout the project if it does not exist otherwise make sure
+    # the project files are up to date.
+    if not os.path.exists(self._OSC_PROJECT):
+      if not self._OscCheckout():
+        return
+
+    else:
+      if not self._CheckStatusIsClean():
+        return False
+
+      if not self._OscUpdate():
+        return False
+
+    # Create a package of the project if it does not exist.
+    osc_package_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name)
+    if os.path.exists(osc_package_path):
+      return True
+
+    if not self._OscCreatePackage(source_helper_object):
+      return False
+
+    if not self._OscUpdate():
+      return False
+
+    return True
+
+  def _CheckStatusIsClean(self):
+    """Runs osc status to check if the status is clean.
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    command = u'osc status'
+    arguments = shlex.split(u'(cd {0:s} && {1:s})'.format(
+        self._OSC_PROJECT, command))
+    process = subprocess.Popen(
+        arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    if not process:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    output, error = process.communicate()
+    if process.returncode != 0:
+      logging.error(u'Running: "{0:s}" failed with error: {1:s}.'.format(
+          command, error))
+      return False
+
+    return len(output) == 0
+
+  def _OscAdd(self, path):
+    """Runs osc add to add a new file.
+
+    Args:
+      path: string containing the path of the file to add, relative to
+            the osc project directory.
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    command = u'osc -q add {0:s}'.format(path)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        self._OSC_PROJECT, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def _OscCheckout(self):
+    """Runs osc checkout.
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    command = u'osc -q checkout {0:s}'.format(self._OSC_PROJECT)
+    exit_code = subprocess.call(command, shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def _OscCommit(self):
+    """Runs osc commit.
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    command = u'osc -q commit -n'
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        self._OSC_PROJECT, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def _OscCreatePackage(self, source_helper_object):
+    """Runs osc meta pkg to create a new package.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    template_values = {
+        u'description': source_helper_object.project_name,
+        u'name': source_helper_object.project_name,
+        u'project': self._OSC_PROJECT,
+        u'title': source_helper_object.project_name}
+
+    package_metadata = self._OSC_PACKAGE_METADATA.format(**template_values)
+
+    command = (
+        u'osc -q meta pkg -F - {0:s} {1:s} << EOI\n{2:s}\nEOI\n').format(
+            self._OSC_PROJECT, source_helper_object.project_name,
+            package_metadata)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        self._OSC_PROJECT, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def _OscUpdate(self):
+    """Runs osc update.
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    command = u'osc -q update'
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        self._OSC_PROJECT, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def CheckBuildDependencies(self):
+    """Checks if the build dependencies are met.
+
+    Returns:
+      A list of build dependency names that are not met or an empty list.
+    """
+    return []
+
+
+class ConfigureMakeOscBuildHelper(OscBuildHelper):
+  """Class that helps in building with osc for the openSUSE build service."""
+
+  def Build(self, source_helper_object):
+    """Builds the osc package.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    logging.info(u'Preparing osc build of: {0:s}'.format(source_filename))
+
+    if not self._BuildPrepare(source_helper_object):
+      return False
+
+    osc_package_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name)
+
+    # osc wants the project filename without the status indication.
+    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version)
+
+    # Copy the source package to the package directory.
+    osc_source_path = os.path.join(osc_package_path, osc_source_filename)
+    shutil.copy(source_filename, osc_source_path)
+
+    osc_source_path = os.path.join(
+        source_helper_object.project_name, osc_source_filename)
+    if not self._OscAdd(osc_source_path):
+      return False
+
+    # Extract the build files from the source package into the package
+    # directory.
+    osc_spec_filename = u'{0:s}.spec'.format(
+        source_helper_object.project_name)
+
+    osc_source_path = os.path.join(osc_package_path, osc_spec_filename)
+    spec_file_exists = os.path.exists(osc_source_path)
+
+    command = u'tar xfO {0:s} {1:s}-{2!s}/{3:s} > {3:s}'.format(
+        osc_source_filename, source_helper_object.project_name,
+        source_helper_object.project_version, osc_spec_filename)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        osc_package_path, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    if not spec_file_exists:
+      osc_source_path = os.path.join(
+          source_helper_object.project_name, osc_spec_filename)
+      if not self._OscAdd(osc_source_path):
+        return False
+
+    return self._OscCommit()
+
+  def Clean(self, source_helper_object):
+    """Cleans the build and dist directory.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+    """
+    osc_package_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name)
+    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version)
+
+    filenames_to_ignore = re.compile(u'^{0:s}'.format(
+        os.path.join(osc_package_path, osc_source_filename)))
+
+    # Remove files of previous versions in the format:
+    # project-version.tar.gz
+    osc_source_filename_glob = u'{0:s}-*.tar.gz'.format(
+        source_helper_object.project_name)
+    filenames = glob.glob(os.path.join(
+        osc_package_path, osc_source_filename_glob))
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+
+        command = u'osc -q remove {0:s}'.format(os.path.basename(filename))
+        exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+            osc_package_path, command), shell=True)
+        if exit_code != 0:
+          logging.error(u'Running: "{0:s}" failed.'.format(command))
+
+  def GetOutputFilename(self, source_helper_object):
+    """Retrieves the filename of one of the resulting files.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      A filename of one of the resulting osc packaging files.
+    """
+    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version)
+
+    return os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name,
+        osc_source_filename)
+
+
+class SetupPyOscBuildHelper(OscBuildHelper):
+  """Class that helps in building with osc for the openSUSE build service."""
+
+  def Build(self, source_helper_object):
+    """Builds the osc package.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    logging.info(u'Preparing osc build of: {0:s}'.format(source_filename))
+
+    if not self._BuildPrepare(source_helper_object):
+      return False
+
+    # TODO: implement.
+
+    return self._OscCommit()
+
+
 class PkgBuildHelper(BuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
@@ -1607,7 +1919,7 @@ class PkgBuildHelper(BuildHelper):
       dmg_filename: the name of the dmg file.
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     command = (
         u'hdiutil create {0:s} -srcfolder {1:s} -fs HFS+').format(
@@ -1632,7 +1944,7 @@ class PkgBuildHelper(BuildHelper):
                     a directory).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     command = (
         u'{0:s} --root {1:s}/tmp/ --identifier {2:s} '
@@ -1708,7 +2020,7 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -1814,7 +2126,7 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -1941,7 +2253,7 @@ class RpmBuildHelper(BuildHelper):
                      SPECS sub directory.
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     current_path = os.getcwd()
     os.chdir(self.rpmbuild_path)
@@ -1965,7 +2277,7 @@ class RpmBuildHelper(BuildHelper):
       source_filename: the name of the source package file.
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     command = u'rpmbuild -ta {0:s} > {1:s} 2>&1'.format(
         source_filename, self.LOG_FILENAME)
@@ -2155,7 +2467,7 @@ class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -2221,7 +2533,7 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
 
     Returns:
-      True if the build was successful, False otherwise.
+      True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -2287,152 +2599,6 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
         os.remove(filename)
 
 
-class OSCBuildHelper(RpmBuildHelper):
-  """Class that helps in building with osc for the openSUSE build service."""
-
-  _OSC_PROJECT = u'home:joachimmetz:testing'
-
-  _OSC_PACKAGE_METADATA = (
-      u'<package name="{name:s}" project="{project:s}">\n'
-      u'  <title>{title:s}</title>\n'
-      u'  <description>{description:s}</description>\n'
-      u'</package>\n')
-
-  def Build(self, source_helper_object):
-    """Builds the rpms.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      True if the build was successful, False otherwise.
-    """
-    source_filename = source_helper_object.Download()
-    if not source_filename:
-      logging.info(u'Download of: {0:s} failed'.format(
-          source_helper_object.project_name))
-      return False
-
-    logging.info(u'Preparing osc build of: {0:s}'.format(source_filename))
-
-    # Checkout the project if it does not exist otherwise make sure
-    # the project files are up to date.
-    if not os.path.exists(self._OSC_PROJECT):
-      command = u'osc checkout {0:s}'.format(self._OSC_PROJECT)
-      exit_code = subprocess.call(command, shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
-
-    else:
-      command = u'osc update'
-      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-          self._OSC_PROJECT, command), shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
-
-    # Create a package of the project if it does not exist.
-    osc_package_path = os.path.join(
-        self._OSC_PROJECT, source_helper_object.project_name)
-    if not os.path.exists(osc_package_path):
-      template_values = {
-          u'description': source_helper_object.project_name,
-          u'name': source_helper_object.project_name,
-          u'project': self._OSC_PROJECT,
-          u'title': source_helper_object.project_name}
-
-      package_metadata = self._OSC_PACKAGE_METADATA.format(**template_values)
-
-      command = u'osc meta pkg -F - {0:s} {1:s} << EOI\n{2:s}\nEOI\n'.format(
-          self._OSC_PROJECT, source_helper_object.project_name,
-          package_metadata)
-      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-          self._OSC_PROJECT, command), shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
-
-      # Make sure the project files are up to date.
-      command = u'osc update'
-      exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-          self._OSC_PROJECT, command), shell=True)
-      if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
-        return False
-
-    # osc wants the project filename without the status indication.
-    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
-
-    # Copy the source package to the package directory.
-    osc_source_path = os.path.join(osc_package_path, osc_source_filename)
-    shutil.copy(source_filename, osc_source_path)
-
-    # Extract the build files from the source package into the package
-    # directory.
-    command = u'tar xfO {0:s} {1:s}-{2!s}/{1:s}.spec > {1:s}.spec'.format(
-        osc_source_filename, source_helper_object.project_name,
-        source_helper_object.project_version)
-    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-        osc_package_path, command), shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      return False
-
-    # Add the new files to the project.
-    command = u'osc add {0:s} {1:s}.spec'.format(
-        osc_source_filename, source_helper_object.project_name)
-    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-        osc_package_path, command), shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      return False
-
-    # Commit the project changes.
-    command = u'osc commit -n'
-    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-        self._OSC_PROJECT, command), shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      return False
-
-    return True
-
-  def Clean(self, source_helper_object):
-    """Cleans the build and dist directory.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-    """
-    osc_package_path = os.path.join(
-        self._OSC_PROJECT, source_helper_object.project_name)
-    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
-
-    filenames_to_ignore = re.compile(u'^{0:s}'.format(
-        os.path.join(osc_package_path, osc_source_filename)))
-
-    # Remove files of previous versions in the format:
-    # project-version.tar.gz
-    osc_source_filename_glob = u'{0:s}-*.tar.gz'.format(
-        source_helper_object.project_name)
-    filenames = glob.glob(os.path.join(
-        osc_package_path, osc_source_filename_glob))
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-
-        command = u'osc remove {0:s}'.format(os.path.basename(filename))
-        exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-            osc_package_path, command), shell=True)
-        if exit_code != 0:
-          logging.error(u'Running: "{0:s}" failed.'.format(command))
-
-
 class BuildHelperFactory(object):
   """Factory class for build helpers."""
 
@@ -2440,7 +2606,7 @@ class BuildHelperFactory(object):
       u'dpkg': ConfigureMakeDpkgBuildHelper,
       u'dpkg-source': ConfigureMakeSourceDpkgBuildHelper,
       u'msi': ConfigureMakeMsiBuildHelper,
-      u'osc': OSCBuildHelper,
+      u'osc': ConfigureMakeOscBuildHelper,
       u'pkg': ConfigureMakePkgBuildHelper,
       u'rpm': ConfigureMakeRpmBuildHelper,
   }
@@ -2449,7 +2615,7 @@ class BuildHelperFactory(object):
       u'dpkg': SetupPyDpkgBuildHelper,
       u'dpkg-source': SetupPySourceDpkgBuildHelper,
       u'msi': SetupPyMsiBuildHelper,
-      u'osc': OSCBuildHelper,
+      u'osc': SetupPyOscBuildHelper,
       u'pkg': SetupPyPkgBuildHelper,
       u'rpm': SetupPyRpmBuildHelper,
   }
