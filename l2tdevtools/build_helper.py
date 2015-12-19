@@ -1376,7 +1376,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       os.chdir(u'..')
 
     if not result:
-      return result
+      return False
 
     setup_py_path = os.path.join(source_directory, u'setup.py')
     if not os.path.exists(setup_py_path):
@@ -1501,6 +1501,9 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
       result = self._ApplyPatches(self._dependency_definition.patches)
       os.chdir(u'..')
 
+    if not result:
+      return False
+
     command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
         sys.executable, os.path.join(u'..', self.LOG_FILENAME))
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
@@ -1554,6 +1557,16 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     if u'.' not in project_version:
       project_version = u'{0!s}.1'.format(project_version)
 
+    # MSI does not support a 4 digit version, e.g. '1.2.3.4' there we remove
+    # the last digit.
+    elif len(project_version.split(u'.')) == 4:
+      project_version, _, _ = project_version.rpartition(u'.')
+
+    # MSI does not support a version containing a '-', e.g. '1.2.3-4' there
+    # we remove the digit after the '-'.
+    elif u'-' in project_version:
+      project_version, _, _ = project_version.rpartition(u'-')
+
     filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}.{2:s}{3:s}.msi'.format(
         project_name, project_version, self.architecture, suffix))
 
@@ -1589,6 +1602,16 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     # MSI does not support a single number version therefore we add '.1'.
     if u'.' not in project_version:
       project_version = u'{0!s}.1'.format(project_version)
+
+    # MSI does not support a 4 digit version, e.g. '1.2.3.4' therefore
+    # we remove the last digit.
+    elif len(project_version.split(u'.')) == 4:
+      project_version, _, _ = project_version.rpartition(u'.')
+
+    # MSI does not support a version containing a '-', e.g. '1.2.3-4'
+    # therefore we remove the digit after the '-'.
+    elif u'-' in project_version:
+      project_version, _, _ = project_version.rpartition(u'-')
 
     return u'{0:s}-{1:s}.{2:s}{3:s}.msi'.format(
         project_name, project_version, self.architecture, suffix)
