@@ -246,14 +246,17 @@ class DependencyUpdater(object):
   """Class that helps in updating dependencies."""
 
   def __init__(
-      self, download_directory=u'build', exclude_packages=False,
-      force_install=False, msi_targetdir=None, preferred_machine_type=None,
-      preferred_operating_system=None, verbose_output=False):
+      self, download_directory=u'build', download_only=False,
+      exclude_packages=False, force_install=False, msi_targetdir=None,
+      preferred_machine_type=None, preferred_operating_system=None,
+      verbose_output=False):
     """Initializes the dependency updater.
 
     Args:
       download_directory: optional download directory. The default is 'build'
                           to match the build directory of the build script.
+      download_only: optional boolean value to indicate the dependency packages
+                     should only be downloaded.
       exclude_packages: optional boolean value to indicate pacakge names
                         should be excluded instead of included.
       force_install: optional boolean value to indicate installation (update)
@@ -272,6 +275,7 @@ class DependencyUpdater(object):
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
     self._download_helper = GithubRepoDownloadHelper()
+    self._download_only = download_only
     self._exclude_packages = exclude_packages
     self._force_install = force_install
     self._msi_targetdir = msi_targetdir
@@ -823,6 +827,9 @@ class DependencyUpdater(object):
       logging.error(u'No packages found.')
       return False
 
+    if self._download_only:
+      return True
+
     if not self._UninstallPackages(package_versions):
       logging.error(u'Unable to uninstall packages.')
       return False
@@ -859,6 +866,12 @@ def Main():
           u'install a dependency if not or an older version is installed.'))
 
   argument_parser.add_argument(
+      '--download-only', u'--download_only', action='store_true',
+      dest='download_only', default=False, help=(
+          u'Only download the dependencies. The default behavior is to '
+          u'download and update the dependencies.'))
+
+  argument_parser.add_argument(
       '--machine-type', '--machine_type', action=u'store', metavar=u'TYPE',
       dest=u'machine_type', type=str, default=None, help=(
           u'Manually sets the machine type instead of using the value returned '
@@ -884,6 +897,7 @@ def Main():
 
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
+      download_only=options.download_only,
       exclude_packages=options.exclude_packages,
       force_install=options.force_install,
       msi_targetdir=options.msi_targetdir,
