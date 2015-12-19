@@ -1370,13 +1370,14 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
         source_filename, self.version))
 
     result = False
+
     if self._dependency_definition.patches:
       os.chdir(source_directory)
       result = self._ApplyPatches(self._dependency_definition.patches)
       os.chdir(u'..')
 
-    if not result:
-      return False
+      if not result:
+        return False
 
     setup_py_path = os.path.join(source_directory, u'setup.py')
     if not os.path.exists(setup_py_path):
@@ -1495,14 +1496,13 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 
     logging.info(u'Building msi of: {0:s}'.format(source_filename))
 
-    result = False
     if self._dependency_definition.patches:
       os.chdir(source_directory)
       result = self._ApplyPatches(self._dependency_definition.patches)
       os.chdir(u'..')
 
-    if not result:
-      return False
+      if not result:
+        return False
 
     command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
         sys.executable, os.path.join(u'..', self.LOG_FILENAME))
