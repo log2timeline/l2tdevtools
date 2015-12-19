@@ -1782,6 +1782,7 @@ class OscBuildHelper(BuildHelper):
     Returns:
       A list of build dependency names that are not met or an empty list.
     """
+    # Dependencies are handled by the openSUSE build service.
     return []
 
 

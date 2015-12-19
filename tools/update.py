@@ -329,7 +329,7 @@ class DependencyUpdater(object):
         # Ignore all other file exensions.
         continue
 
-      if package_name.startswith(u'pytsk3'):
+      if package_name.startswith(u'pefile') or package_name.startswith(u'pytsk3'):
         # We need to use the most left '-' character as the separator of the
         # name and the version, since version can contain the '-' character.
         name, _, version = package_name.partition(u'-')
@@ -341,7 +341,7 @@ class DependencyUpdater(object):
       package_prefix = name
 
       version = version.split(u'.')
-      if name == u'pytsk3':
+      if name in (u'pefile', u'pytsk3'):
         last_part = version.pop()
         version.extend(last_part.split(u'-'))
 
@@ -693,8 +693,9 @@ class DependencyUpdater(object):
             # be updated, so just uninstall and update it any way.
             compare_result = -1
           else:
+            version_tuple = version.split(u'.')
             compare_result = CompareVersions(
-                version.split(u'.'), package_versions[name])
+                version_tuple, package_versions[name])
             if compare_result >= 0:
               # The latest or newer version is already installed.
               del package_versions[name]
@@ -776,7 +777,7 @@ class DependencyUpdater(object):
 
         found_package = name in package_versions
 
-        version = version.split(u'.')
+        version_tuple = version.split(u'.')
         if self._force_install:
           compare_result = -1
         elif not found_package:
@@ -786,7 +787,8 @@ class DependencyUpdater(object):
           # be updated, so just uninstall and update it any way.
           compare_result = -1
         else:
-          compare_result = CompareVersions(version, package_versions[name])
+          compare_result = CompareVersions(
+              version_tuple, package_versions[name])
           if compare_result >= 0:
             # The latest or newer version is already installed.
             del package_versions[name]
@@ -798,8 +800,7 @@ class DependencyUpdater(object):
             compare_result = -1
 
         if compare_result < 0:
-          logging.info(u'Removing: {0:s} {1:s}'.format(
-              name, u'.'.join(version)))
+          logging.info(u'Removing: {0:s} {1:s}'.format(name, version))
           product.Uninstall()
 
     return True
