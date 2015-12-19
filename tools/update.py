@@ -536,7 +536,8 @@ class DependencyUpdater(object):
         if self._verbose_output:
           with open(log_file, 'r') as file_object:
             log_file_contents = file_object.read()
-            print(log_file_contents.decode(u'utf-16-le'))
+            log_file_contents = log_file_contents.decode(u'utf-16-le')
+            print(log_file_contents.encode(u'ascii', errors=u'replace'))
 
     return result
 
