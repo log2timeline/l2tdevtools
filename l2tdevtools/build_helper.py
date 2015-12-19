@@ -919,7 +919,7 @@ class MsiBuildHelper(BuildHelper):
         logging.warning(u'Missing patch file: {0:s}'.format(filename))
         continue
 
-      command = u'{0:s} --batch --binary --input {1:s}'.format(patch, filename)
+      command = u'{0:s} --force --binary --input {1:s}'.format(patch, filename)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -1498,7 +1498,7 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     result = False
     if self._dependency_definition.patches:
       os.chdir(source_directory)
-      result = self._ApplyPatches(self._dependency_definition.patches):
+      result = self._ApplyPatches(self._dependency_definition.patches)
       os.chdir(u'..')
 
     command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
