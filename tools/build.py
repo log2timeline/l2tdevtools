@@ -439,7 +439,7 @@ def Main():
 
     if undefined_packages:
       project_index = undefined_packages.index(dependency_definition.name)
-      del(undefined_packages[project_index])
+      del undefined_packages[project_index]
 
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
 
