@@ -43,6 +43,17 @@ class BuildHelper(object):
     """
     return list(self._dependency_definition.build_dependencies)
 
+  def CheckBuildRequired(self, unused_source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    return True
+
 
 class DpkgBuildHelper(BuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
@@ -294,6 +305,21 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
 
     return True
 
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    deb_filename = u'{0:s}_{1!s}-1_{2:s}.deb'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version, self.architecture)
+
+    return not os.path.exists(deb_filename)
+
   def Clean(self, source_helper_object):
     """Cleans the dpkg packages in the current directory.
 
@@ -338,19 +364,6 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting dpkg packages.
-    """
-    return u'{0:s}_{1!s}-1_{2:s}.deb'.format(
-        source_helper_object.project_name, source_helper_object.project_version,
-        self.architecture)
 
 
 class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
@@ -457,6 +470,21 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 
     return True
 
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
+        source_helper_object.project_name, source_helper_object.project_version,
+        self.version_suffix, self.distribution, self.architecture)
+
+    return not os.path.exists(changes_filename)
+
   def Clean(self, source_helper_object):
     """Cleans the dpkg packages in the current directory.
 
@@ -502,19 +530,6 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting dpkg packages.
-    """
-    return u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
-        source_helper_object.project_name, source_helper_object.project_version,
-        self.version_suffix, self.distribution, self.architecture)
 
 
 class SetupPyDpkgBuildHelper(DpkgBuildHelper):
@@ -630,6 +645,27 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
 
     return True
 
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    if self._dependency_definition.dpkg_name:
+      project_name = self._dependency_definition.dpkg_name
+    else:
+      project_name = source_helper_object.project_name
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
+
+    deb_filename = u'{0:s}_{1!s}-1_{2:s}.deb'.format(
+        project_name, source_helper_object.project_version, self.architecture)
+
+    return not os.path.exists(deb_filename)
+
   def Clean(self, source_helper_object):
     """Cleans the dpkg packages in the current directory.
 
@@ -676,25 +712,6 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting dpkg packages.
-    """
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
-    else:
-      project_name = source_helper_object.project_name
-      if not project_name.startswith(u'python-'):
-        project_name = u'python-{0:s}'.format(project_name)
-
-    return u'{0:s}_{1!s}-1_{2:s}.deb'.format(
-        project_name, source_helper_object.project_version, self.architecture)
 
 
 class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
@@ -805,6 +822,28 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
 
     return True
 
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    if self._dependency_definition.dpkg_name:
+      project_name = self._dependency_definition.dpkg_name
+    else:
+      project_name = source_helper_object.project_name
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
+
+    changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
+        project_name, source_helper_object.project_version,
+        self.version_suffix, self.distribution, self.architecture)
+
+    return not os.path.exists(changes_filename)
+
   def Clean(self, source_helper_object):
     """Cleans the dpkg packages in the current directory.
 
@@ -853,26 +892,6 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting dpkg packages.
-    """
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
-    else:
-      project_name = source_helper_object.project_name
-      if not project_name.startswith(u'python-'):
-        project_name = u'python-{0:s}'.format(project_name)
-
-    return u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
-        project_name, source_helper_object.project_version,
-        self.version_suffix, self.distribution, self.architecture)
 
 
 class MsiBuildHelper(BuildHelper):
@@ -1400,6 +1419,21 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     return result
 
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    msi_filename = u'{0:s}-python-{1!s}.1.{2:s}-py2.7.msi'.format(
+        source_helper_object.project_name, source_helper_object.project_version,
+        self.architecture)
+
+    return not os.path.exists(msi_filename)
+
   def Clean(self, source_helper_object):
     """Cleans the build and dist directory.
 
@@ -1434,19 +1468,6 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting MSIs.
-    """
-    return u'{0:s}-python-{1!s}.1.{2:s}-py2.7.msi'.format(
-        source_helper_object.project_name, source_helper_object.project_version,
-        self.architecture)
 
 
 class SetupPyMsiBuildHelper(MsiBuildHelper):
@@ -1532,6 +1553,45 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 
     return True
 
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
+
+    # TODO: it looks like coverage is no architecture dependent on Windows.
+    # Check if it is architecture dependent on other platforms.
+    if (self._dependency_definition.architecture_dependent and
+        project_name != u'coverage'):
+      suffix = u'-py2.7'
+    else:
+      suffix = u''
+
+    # MSI does not support a single number version therefore we add '.1'.
+    if u'.' not in project_version:
+      project_version = u'{0!s}.1'.format(project_version)
+
+    # MSI does not support a 4 digit version, e.g. '1.2.3.4' therefore
+    # we remove the last digit.
+    elif len(project_version.split(u'.')) == 4:
+      project_version, _, _ = project_version.rpartition(u'.')
+
+    # MSI does not support a version containing a '-', e.g. '1.2.3-4'
+    # therefore we remove the digit after the '-'.
+    elif u'-' in project_version:
+      project_version, _, _ = project_version.rpartition(u'-')
+
+    msi_filename = u'{0:s}-{1:s}.{2:s}{3:s}.msi'.format(
+        project_name, project_version, self.architecture, suffix)
+
+    return not os.path.exists(msi_filename)
+
   def Clean(self, source_helper_object):
     """Cleans the build and dist directory.
 
@@ -1578,43 +1638,6 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting MSIs.
-    """
-    project_name, project_version = self._GetFilenameSafeProjectInformation(
-        source_helper_object)
-
-    # TODO: it looks like coverage is no architecture dependent on Windows.
-    # Check if it is architecture dependent on other platforms.
-    if (self._dependency_definition.architecture_dependent and
-        project_name != u'coverage'):
-      suffix = u'-py2.7'
-    else:
-      suffix = u''
-
-    # MSI does not support a single number version therefore we add '.1'.
-    if u'.' not in project_version:
-      project_version = u'{0!s}.1'.format(project_version)
-
-    # MSI does not support a 4 digit version, e.g. '1.2.3.4' therefore
-    # we remove the last digit.
-    elif len(project_version.split(u'.')) == 4:
-      project_version, _, _ = project_version.rpartition(u'.')
-
-    # MSI does not support a version containing a '-', e.g. '1.2.3-4'
-    # therefore we remove the digit after the '-'.
-    elif u'-' in project_version:
-      project_version, _, _ = project_version.rpartition(u'-')
-
-    return u'{0:s}-{1:s}.{2:s}{3:s}.msi'.format(
-        project_name, project_version, self.architecture, suffix)
 
 
 class OscBuildHelper(BuildHelper):
@@ -1828,15 +1851,14 @@ class ConfigureMakeOscBuildHelper(OscBuildHelper):
 
     # Extract the build files from the source package into the package
     # directory.
-    osc_spec_filename = u'{0:s}.spec'.format(
-        source_helper_object.project_name)
+    spec_filename = u'{0:s}.spec'.format(source_helper_object.project_name)
 
-    osc_source_path = os.path.join(osc_package_path, osc_spec_filename)
-    spec_file_exists = os.path.exists(osc_source_path)
+    osc_spec_file_path = os.path.join(osc_package_path, spec_filename)
+    spec_file_exists = os.path.exists(osc_spec_file_path)
 
     command = u'tar xfO {0:s} {1:s}-{2!s}/{3:s} > {3:s}'.format(
         osc_source_filename, source_helper_object.project_name,
-        source_helper_object.project_version, osc_spec_filename)
+        source_helper_object.project_version, spec_filename)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         osc_package_path, command), shell=True)
     if exit_code != 0:
@@ -1844,12 +1866,31 @@ class ConfigureMakeOscBuildHelper(OscBuildHelper):
       return False
 
     if not spec_file_exists:
-      osc_source_path = os.path.join(
-          source_helper_object.project_name, osc_spec_filename)
-      if not self._OscAdd(osc_source_path):
+      osc_spec_file_path = os.path.join(
+          source_helper_object.project_name, spec_filename)
+      if not self._OscAdd(osc_spec_file_path):
         return False
 
     return self._OscCommit()
+
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version)
+
+    osc_source_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name,
+        osc_source_filename)
+
+    return not os.path.exists(osc_source_path)
 
   def Clean(self, source_helper_object):
     """Cleans the build and dist directory.
@@ -1883,23 +1924,6 @@ class ConfigureMakeOscBuildHelper(OscBuildHelper):
         if exit_code != 0:
           logging.error(u'Running: "{0:s}" failed.'.format(command))
 
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting osc packaging files.
-    """
-    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
-
-    return os.path.join(
-        self._OSC_PROJECT, source_helper_object.project_name,
-        osc_source_filename)
-
 
 class SetupPyOscBuildHelper(OscBuildHelper):
   """Class that helps in building with osc for the openSUSE build service."""
@@ -1924,9 +1948,100 @@ class SetupPyOscBuildHelper(OscBuildHelper):
     if not self._BuildPrepare(source_helper_object):
       return False
 
-    # TODO: implement.
+    osc_package_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name)
+
+    # Copy the source package to the package directory.
+    osc_source_path = os.path.join(osc_package_path, source_filename)
+    shutil.copy(source_filename, osc_source_path)
+
+    osc_source_path = os.path.join(
+        source_helper_object.project_name, source_filename)
+    if not self._OscAdd(osc_source_path):
+      return False
+
+    # Have setup.py generate the .spec file.
+    source_directory = source_helper_object.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(source_filename))
+      return False
+
+    command = u'{0:s} setup.py bdist_rpm --spec-only > {1:s} 2>&1'.format(
+        sys.executable, os.path.join(u'..', self.LOG_FILENAME))
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    spec_filename = u'{0:s}.spec'.format(source_helper_object.project_name)
+    spec_file_path = os.path.join(source_directory, u'dist', spec_filename)
+    osc_spec_file_path = os.path.join(osc_package_path, spec_filename)
+    spec_file_exists = os.path.exists(osc_spec_file_path)
+
+    # TODO: check if already prefixed with python-
+
+    output_file_object = open(osc_spec_file_path, 'wb')
+    description = b''
+    summary = b''
+    in_description = False
+    with open(spec_file_path, 'r+b') as file_object:
+      for line in file_object.readlines():
+        if line.startswith(b'Summary: '):
+          summary = line
+
+        elif line.startswith(b'%description'):
+          in_description = True
+
+        elif line.startswith(b'%files'):
+          line = b'%files -f INSTALLED_FILES -n python-%{name}\n'
+
+        elif line.startswith(b'%prep'):
+          in_description = False
+
+          output_file_object.write((
+              b'%package -n python-%{{name}}\n'
+              b'{0:s}'
+              b'\n'
+              b'%description -n python-%{{name}}\n'
+              b'{1:s}').format(summary, description))
+
+        elif in_description:
+          description = b''.join([description, line])
+
+        output_file_object.write(line)
+
+    output_file_object.close()
+
+    if not spec_file_exists:
+      osc_spec_file_path = os.path.join(
+          source_helper_object.project_name, spec_filename)
+      if not self._OscAdd(osc_spec_file_path):
+        return False
 
     return self._OscCommit()
+
+  def CheckBuildRequired(self, unused_source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    # TODO: implement.
+    return True
+
+  def Clean(self, unused_source_helper_object):
+    """Cleans the source.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+    """
+    # TODO: implement.
+    return
 
 
 class PkgBuildHelper(BuildHelper):
@@ -2001,6 +2116,20 @@ class PkgBuildHelper(BuildHelper):
     # TODO: implement build dependency check.
     return []
 
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    dmg_filename = u'{0:s}-{1!s}.dmg'.format(
+        source_helper_object.project_name, source_helper_object.project_version)
+
+    return not os.path.exists(dmg_filename)
+
   def Clean(self, source_helper_object):
     """Cleans the MacOS-X packages in the current directory.
 
@@ -2030,18 +2159,6 @@ class PkgBuildHelper(BuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting rpms.
-    """
-    return u'{0:s}-{1!s}.dmg'.format(
-        source_helper_object.project_name, source_helper_object.project_version)
 
 
 class ConfigureMakePkgBuildHelper(PkgBuildHelper):
@@ -2422,6 +2539,23 @@ class RpmBuildHelper(BuildHelper):
 
     return missing_packages
 
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if a build is required, False otherwise.
+    """
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
+
+    rpm_filename = u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
+        project_name, project_version, self.architecture)
+
+    return not os.path.exists(rpm_filename)
+
   def Clean(self, source_helper_object):
     """Cleans the rpmbuild directory.
 
@@ -2474,21 +2608,6 @@ class RpmBuildHelper(BuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def GetOutputFilename(self, source_helper_object):
-    """Retrieves the filename of one of the resulting files.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-
-    Returns:
-      A filename of one of the resulting rpms.
-    """
-    project_name, project_version = self._GetFilenameSafeProjectInformation(
-        source_helper_object)
-
-    return u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture)
 
 
 class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
@@ -2633,6 +2752,101 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
         os.remove(filename)
 
 
+class SourceBuildHelper(BuildHelper):
+  """Class that helps in building source."""
+
+
+class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
+  """Class that helps in building source."""
+
+  def Build(self, source_helper_object):
+    """Builds the source.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    source_directory = source_helper_object.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(source_filename))
+      return False
+
+    logging.info(u'Building source of: {0:s}'.format(source_filename))
+
+    log_filename = os.path.join(u'..', self.LOG_FILENAME)
+
+    command = u'./configure > {0:s} 2>&1'.format(log_filename)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    command = u'make >> {0:s} 2>&1'.format(log_filename)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+  def Clean(self, unused_source_helper_object):
+    """Cleans the source.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+    """
+    # TODO: implement.
+    return
+
+
+class SetupPySourceBuildHelper(SourceBuildHelper):
+  """Class that helps in building source."""
+
+  def Build(self, source_helper_object):
+    """Builds the source.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+
+    Returns:
+      True if successful, False otherwise.
+    """
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    source_directory = source_helper_object.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(source_filename))
+      return False
+
+    logging.info(u'Building source of: {0:s}'.format(source_filename))
+
+    command = u'{0:s} setup.py build > {1:s} 2>&1'.format(
+        sys.executable, os.path.join(u'..', self.LOG_FILENAME))
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return True
+
+
 class BuildHelperFactory(object):
   """Factory class for build helpers."""
 
@@ -2643,6 +2857,7 @@ class BuildHelperFactory(object):
       u'osc': ConfigureMakeOscBuildHelper,
       u'pkg': ConfigureMakePkgBuildHelper,
       u'rpm': ConfigureMakeRpmBuildHelper,
+      u'source': ConfigureMakeSourceBuildHelper,
   }
 
   _SETUP_PY_BUILD_HELPER_CLASSES = {
@@ -2652,6 +2867,7 @@ class BuildHelperFactory(object):
       u'osc': SetupPyOscBuildHelper,
       u'pkg': SetupPyPkgBuildHelper,
       u'rpm': SetupPyRpmBuildHelper,
+      u'source': SetupPySourceBuildHelper,
   }
 
   @classmethod
