@@ -23,12 +23,8 @@ class GithubRepoManager(object):
   _GITHUB_REPO_URL = (
       u'https://github.com/log2timeline/l2tbinaries')
 
-  def __init__(self, name):
-    """Initializes the Launchpad PPA manager object.
-
-    Args:
-      name: a string containing the name of the PPA.
-    """
+  def __init__(self):
+    """Initializes the github reposistory manager object."""
     super(GithubRepoManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper()
 
@@ -123,10 +119,10 @@ class GithubRepoManager(object):
       if not filename:
         continue
 
-      if not filename.endswith(u'.dmg'):
+      if filename.endswith(u'.dmg'):
         filename, _, _ = filename.rpartition(u'.dmg')
 
-      elif not filename.endswith(u'.msi'):
+      elif filename.endswith(u'.msi'):
         if sub_directory == u'win32':
           filename, _, _ = filename.rpartition(u'.win32')
         elif sub_directory == u'win64':
