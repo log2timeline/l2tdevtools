@@ -23,6 +23,15 @@ class GithubRepoManager(object):
   _GITHUB_REPO_URL = (
       u'https://github.com/log2timeline/l2tbinaries')
 
+  def __init__(self, name):
+    """Initializes the Launchpad PPA manager object.
+
+    Args:
+      name: a string containing the name of the PPA.
+    """
+    super(GithubRepoManager, self).__init__()
+    self._download_helper = download_helper.DownloadHelper()
+
   def _GetDownloadUrl(self, sub_directory, use_api=False):
     """Retrieves the download URL.
 
@@ -68,7 +77,7 @@ class GithubRepoManager(object):
       logging.info(u'Missing download URL.')
       return
 
-    page_content = self.DownloadPageContent(download_url)
+    page_content = self._download_helper.DownloadPageContent(download_url)
     if not page_content:
       return
 
@@ -126,7 +135,7 @@ class GithubRepoManager(object):
       else:
         continue
 
-      project, _, version = filename.rpartion(u'-')
+      project, _, version = filename.rpartition(u'-')
       projects[project] = version
 
     return projects
@@ -266,7 +275,7 @@ class BinariesManager(object):
       else:
         continue
 
-      name, _, version = directory_entry.rpartion(u'-')
+      name, _, version = directory_entry.rpartition(u'-')
       reference_packages[name] = version
 
     packages = self._github_repo_manager.GetPackages(sub_directory)
