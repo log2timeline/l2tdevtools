@@ -131,7 +131,11 @@ class GithubRepoManager(object):
       else:
         continue
 
-      project, _, version = filename.rpartition(u'-')
+      if filename.startswith(u'pefile') or filename.startswith(u'pystsk'):
+        project, _, version = filename.partition(u'-')
+      else:
+        project, _, version = filename.rpartition(u'-')
+
       projects[project] = version
 
     return projects
@@ -271,7 +275,12 @@ class BinariesManager(object):
       else:
         continue
 
-      name, _, version = directory_entry.rpartition(u'-')
+      if (directory_entry.startswith(u'pefile') or
+          directory_entry.startswith(u'pystsk')):
+        name, _, version = directory_entry.partition(u'-')
+      else:
+        name, _, version = directory_entry.rpartition(u'-')
+
       reference_packages[name] = version
 
     packages = self._github_repo_manager.GetPackages(sub_directory)
