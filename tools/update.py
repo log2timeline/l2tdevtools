@@ -193,6 +193,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
     if not page_content:
       return
 
+    # TODO: skip SHA256SUMS
+
     download_urls = []
     if use_api:
       # The page content consist of JSON data that contains a list of dicts.
@@ -233,10 +235,10 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       matches = re.findall(expression_string, page_content)
 
       for match in matches:
-        _, _, download_url = match.rpartition(u'/')
+        _, _, filename = match.rpartition(u'/')
         download_url = (
             u'https://github.com/log2timeline/l2tbinaries/raw/master/{0:s}/'
-            u'{1:s}').format(sub_directory, download_url)
+            u'{1:s}').format(sub_directory, filename)
         download_urls.append(download_url)
 
     return download_urls
