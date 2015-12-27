@@ -28,7 +28,7 @@ class DependencyDefinitionReaderTest(unittest.TestCase):
     dependency_definition = dependency_definitions[u'artifacts']
 
     self.assertEqual(dependency_definition.name, u'artifacts')
-    self.assertNotEqual(dependency_definition.version, None)
+    self.assertIsNotNone(dependency_definition.version)
 
     self.assertEqual(
         dependency_definition.version.version_string, u'>=20150409')
