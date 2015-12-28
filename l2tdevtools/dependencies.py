@@ -34,6 +34,7 @@ class DependencyDefinition(object):
     name: string of the name of the dependency.
     setup_name: string of the name used in setup.py.
     patches: list of patch file names.
+    pkg_configure_flags: list of the configure flags when building a pkg.
     version: the version requirements (instance of DependencyVersion).
   """
 
@@ -59,8 +60,9 @@ class DependencyDefinition(object):
     self.homepage_url = None
     self.maintainer = None
     self.name = name
-    self.setup_name = None
     self.patches = None
+    self.pkg_configure_flags = None
+    self.setup_name = None
     self.version = None
 
 
@@ -179,6 +181,8 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'maintainer')
       dependency_definition.patches = self._GetConfigValue(
           config_parser, section_name, u'patches')
+      dependency_definition.pkg_configure_flags = self._GetConfigValue(
+          config_parser, section_name, u'pkg_configure_flags')
       dependency_definition.setup_name = self._GetConfigValue(
           config_parser, section_name, u'setup_name')
       dependency_definition.version = self._GetConfigValue(
@@ -215,6 +219,13 @@ class DependencyDefinitionReader(object):
       elif isinstance(dependency_definition.patches, basestring):
         dependency_definition.patches = dependency_definition.patches.split(
             u',')
+
+      if dependency_definition.pkg_configure_flags is None:
+        dependency_definition.pkg_configure_flags = []
+      elif isinstance(
+          dependency_definition.pkg_configure_flags, basestring):
+        dependency_definition.pkg_configure_flags = (
+            dependency_definition.pkg_configure_flags.split(u','))
 
       # Need at minimum a name and a download URL.
       if dependency_definition.name and dependency_definition.download_url:
