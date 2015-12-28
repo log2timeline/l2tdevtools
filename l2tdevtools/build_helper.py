@@ -1388,8 +1388,6 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
         source_filename, self.version))
 
-    result = False
-
     if self._dependency_definition.patches:
       os.chdir(source_directory)
       result = self._ApplyPatches(self._dependency_definition.patches)
@@ -1397,6 +1395,8 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
       if not result:
         return False
+
+    result = False
 
     setup_py_path = os.path.join(source_directory, u'setup.py')
     if not os.path.exists(setup_py_path):
@@ -2164,6 +2164,19 @@ class PkgBuildHelper(BuildHelper):
 class ConfigureMakePkgBuildHelper(PkgBuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
+  _DOC_FILENAMES = frozenset([
+      u'AUTHORS',
+      u'AUTHORS.txt',
+      u'COPYING',
+      u'COPYING.txt',
+      u'LICENSE',
+      u'LICENSE.txt',
+      u'NEWS',
+      u'NEWS.txt',
+      u'README',
+      u'README.md',
+      u'README.txt'])
+
   def Build(self, source_helper_object):
     """Builds the pkg package and distributable disk image (.dmg).
 
@@ -2186,6 +2199,10 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
       return False
 
     logging.info(u'Building pkg of: {0:s}'.format(source_filename))
+
+    if self._dependency_definition.patches:
+      # TODO: add self._ApplyPatches
+      pass
 
     dmg_filename = u'{0:s}-{1!s}.dmg'.format(
         source_helper_object.project_name, source_helper_object.project_version)
@@ -2255,10 +2272,15 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
       if not os.path.exists(share_doc_path):
         os.makedirs(share_doc_path)
 
-      shutil.copy(os.path.join(source_directory, u'AUTHORS'), share_doc_path)
-      shutil.copy(os.path.join(source_directory, u'COPYING'), share_doc_path)
-      shutil.copy(os.path.join(source_directory, u'NEWS'), share_doc_path)
-      shutil.copy(os.path.join(source_directory, u'README'), share_doc_path)
+      for doc_filename in self._DOC_FILENAMES:
+        doc_path = os.path.join(source_directory, doc_filename)
+        if os.path.exists(doc_path):
+          shutil.copy(doc_path, share_doc_path)
+
+      licenses_directory = os.path.join(source_directory, u'licenses')
+      if os.path.isdir(licenses_directory):
+        for doc_path in glob.glob(os.path.join(licenses_directory, u'*')):
+          shutil.copy(doc_path, share_doc_path)
 
       project_identifier = u'com.github.libyal.{0:s}'.format(
           source_helper_object.project_name)
@@ -2298,6 +2320,10 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
       return False
 
     logging.info(u'Building pkg of: {0:s}'.format(source_filename))
+
+    if self._dependency_definition.patches:
+      # TODO: add self._ApplyPatches
+      pass
 
     dmg_filename = u'{0:s}-{1!s}.dmg'.format(
         source_helper_object.project_name, source_helper_object.project_version)
@@ -2788,6 +2814,10 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
 
     logging.info(u'Building source of: {0:s}'.format(source_filename))
 
+    if self._dependency_definition.patches:
+      # TODO: add self._ApplyPatches
+      pass
+
     log_filename = os.path.join(u'..', self.LOG_FILENAME)
 
     command = u'./configure > {0:s} 2>&1'.format(log_filename)
@@ -2841,6 +2871,10 @@ class SetupPySourceBuildHelper(SourceBuildHelper):
       return False
 
     logging.info(u'Building source of: {0:s}'.format(source_filename))
+
+    if self._dependency_definition.patches:
+      # TODO: add self._ApplyPatches
+      pass
 
     command = u'{0:s} setup.py build > {1:s} 2>&1'.format(
         sys.executable, os.path.join(u'..', self.LOG_FILENAME))
