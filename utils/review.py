@@ -22,8 +22,6 @@ sys.path.insert(0, u'.')
 import utils.upload
 
 
-# pylint: disable=redefined-variable-type
-
 class CLIHelper(object):
   """Class that defines CLI helper functions."""
 
@@ -1462,7 +1460,7 @@ class ReviewHelper(object):
 
     self._github_helper = GitHubHelper(u'log2timeline', self._project_name)
 
-    if self._command in (u'merge', u'update'):
+    if self._command in (u'create', u'merge', u'update'):
       email_address = self._git_helper.GetEmailAddress()
       self._codereview_helper = CodeReviewHelper(
           email_address, no_browser=self._no_browser)
