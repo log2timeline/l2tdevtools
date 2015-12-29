@@ -4,7 +4,9 @@
 
 from __future__ import print_function
 import argparse
+import glob
 import logging
+import os
 import sys
 
 from l2tdevtools import dependencies
@@ -16,7 +18,7 @@ def Main():
       u'Generates dpkg packaging files for a project.'))
 
   argument_parser.add_argument(
-      u'project_name', action=u'store', metavar=u'NAME', type=unicode, help=(
+      u'project_name', action=u'store', metavar=u'NAME', type=str, help=(
           u'Project name for which the dpkg packaging files should be '
           u'generated.'))
 
@@ -24,6 +26,11 @@ def Main():
       u'-c', u'--config', dest=u'config_file', action=u'store',
       metavar=u'CONFIG_FILE', default=None,
       help=u'path of the build configuration file.')
+
+  argument_parser.add_argument(
+      u'--source-directory', u'--source_directory', action=u'store',
+      metavar=u'DIRECTORY', dest=u'source_directory', type=str,
+      default=None, help=u'The location of the the source directory.')
 
   options = argument_parser.parse_args()
 
@@ -53,10 +60,52 @@ def Main():
     print(u'')
     return False
 
+  source_path = options.source_directory
+  if not source_path:
+    globbed_paths = []
+    for path in glob.glob(u'{0:s}*'.format(options.project_name)):
+      if not os.path.isdir(path):
+        continue
+      globbed_paths.append(path)
+
+    if not len(globbed_paths) == 1:
+      print(u'Unable to determine source directory.')
+      print(u'')
+      return False
+
+    source_path = globbed_paths[0]
+
+  if not os.path.exists(source_path):
+    print(u'No such source directory: {0:s}.'.format(source_path))
+    print(u'')
+    return False
+
+  project_version = os.path.basename(os.path.abspath(source_path))
+  if not project_version.startswith(u'{0:s}-'.format(options.project_name)):
+    print(u'Unable to determine project version based on source directory.')
+    print(u'')
+    return False
+
+  _, _, project_version = project_version.partition(u'-')
+
+  dpkg_path = os.path.join(source_path, u'dpkg')
+  if os.path.exists(dpkg_path):
+    print(u'Destination dpkg directory: {0:s} already exists.'.format(
+        dpkg_path))
+    print(u'')
+    return False
+
+  tools_path = os.path.dirname(__file__)
+  data_path = os.path.join(os.path.dirname(tools_path), u'data')
+
   build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
-      options.project_name, source_helper.project_version,
-      dependency_definition_match)
-  build_files_generator.GenerateFiles(u'dpkg')
+      options.project_name, project_version,
+      dependency_definition_match, data_path)
+
+  print(u'Generating dpkg files for: {0:s} {1:s} in: {2:s}'.format(
+      options.project_name, project_version, dpkg_path))
+  build_files_generator.GenerateFiles(dpkg_path)
+  print(u'')
 
   return True
 

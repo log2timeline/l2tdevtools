@@ -169,7 +169,7 @@ def Main():
 
   argument_parser.add_argument(
       u'--build-directory', u'--build_directory', action=u'store',
-      metavar=u'DIRECTORY', dest=u'build_directory', type=unicode,
+      metavar=u'DIRECTORY', dest=u'build_directory', type=str,
       default=u'build', help=u'The location of the the build directory.')
 
   options = argument_parser.parse_args()
