@@ -52,12 +52,13 @@ class CLIHelper(object):
 class CodeReviewHelper(CLIHelper):
   """Class that defines codereview helper functions."""
 
-  _REVIEW_MAILING_LIST = u'log2timeline-dev@googlegroups.com'
-
   _REVIEWERS = frozenset([
-      u'kiddi@kiddaland.net',
       u'joachim.metz@gmail.com',
       u'onager@deerpie.com'])
+
+  _REVIEWERS_CC = frozenset([
+      u'kiddi@kiddaland.net',
+      u'log2timeline-dev@googlegroups.com'])
 
   def __init__(self, email_address, no_browser=False):
     """Initializes a codereview helper object.
@@ -193,6 +194,7 @@ class CodeReviewHelper(CLIHelper):
       pass
 
     reviewers = u','.join(self._REVIEWERS)
+    reviewers_cc = u','.join(self._REVIEWERS_CC)
 
     command = u'{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
@@ -203,8 +205,7 @@ class CodeReviewHelper(CLIHelper):
     command = (
         u'{0:s} --send_mail -r {1:s} --cc {2:s} -t "{3:s}" -y -- '
         u'{4:s}').format(
-            command, reviewers, self._REVIEW_MAILING_LIST, description,
-            diffbase)
+            command, reviewers, reviewers_cc, description, diffbase)
 
     if self._no_browser:
       print(
