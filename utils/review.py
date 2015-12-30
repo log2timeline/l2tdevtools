@@ -1278,7 +1278,7 @@ class ReviewHelper(object):
     """Checks the state of the local git repository.
 
     Returns:
-      A boolean value to inidicate if the state is sane.
+      A boolean value to indicate if the state is sane.
     """
     if self._command in (u'close', u'create', u'lint', u'update'):
       if not self._git_helper.CheckHasProjectUpstream():
@@ -1323,7 +1323,7 @@ class ReviewHelper(object):
     """Checks the state of the remote git repository.
 
     Returns:
-      A boolean value to inidicate if the state is sane.
+      A boolean value to indicate if the state is sane.
     """
     if self._command in (u'create', u'close', u'update'):
       if not self._git_helper.CheckSynchronizedWithUpstream():
@@ -1359,7 +1359,7 @@ class ReviewHelper(object):
     """Closes a review.
 
     Returns:
-      A boolean value to inidicate if the close was successful.
+      A boolean value to indicate if the close was successful.
     """
     if not self._git_helper.CheckHasBranch(self._feature_branch):
       print(u'No such feature branch: {0:s}'.format(self._feature_branch))
@@ -1384,7 +1384,7 @@ class ReviewHelper(object):
     """Creates a review.
 
     Returns:
-      A boolean value to inidicate if the create was successful.
+      A boolean value to indicate if the create was successful.
     """
     git_origin = self._git_helper.GetRemoteOrigin()
     if not git_origin.startswith(u'https://github.com/'):
@@ -1444,7 +1444,7 @@ class ReviewHelper(object):
     """Initializes the helper objects.
 
     Returns:
-      A boolean value to inidicate if the helper initialization was successful.
+      A boolean value to indicate if the helper initialization was successful.
     """
     self._project_helper = ProjectHelper()
 
@@ -1480,7 +1480,7 @@ class ReviewHelper(object):
     """Lints a review.
 
     Returns:
-      A boolean value to inidicate if the lint was successful.
+      A boolean value to indicate if the lint was successful.
     """
     if self._command not in (u'create', u'merge', u'lint', u'update'):
       return True
@@ -1525,7 +1525,7 @@ class ReviewHelper(object):
                                issue number.
 
     Returns:
-      A boolean value to inidicate if the merge was successful.
+      A boolean value to indicate if the merge was successful.
     """
     if not self._project_helper.UpdateVersionFile():
       print(u'Unable to update version file.')
@@ -1573,7 +1573,7 @@ class ReviewHelper(object):
                                issue number.
 
     Returns:
-      A boolean value to inidicate if the open was successful.
+      A boolean value to indicate if the open was successful.
     """
     # TODO: implement.
     # * check if feature branch exists
@@ -1593,7 +1593,7 @@ class ReviewHelper(object):
                                issue number.
 
     Returns:
-      A boolean value to inidicate if the prepare were successful.
+      A boolean value to indicate if the prepare were successful.
     """
     codereview_information = self._codereview_helper.QueryIssue(
         codereview_issue_number)
@@ -1652,7 +1652,7 @@ class ReviewHelper(object):
     """Tests a review.
 
     Returns:
-      A boolean value to inidicate if the test was successful.
+      A boolean value to indicate if the test was successful.
     """
     if self._command not in (u'create', u'merge', u'test', u'update'):
       return True
@@ -1675,7 +1675,7 @@ class ReviewHelper(object):
     """Updates a review.
 
     Returns:
-      A boolean value to inidicate if the update was successful.
+      A boolean value to indicate if the update was successful.
     """
     review_file = ReviewFile(self._active_branch)
     codereview_issue_number = review_file.GetCodeReviewIssueNumber()
