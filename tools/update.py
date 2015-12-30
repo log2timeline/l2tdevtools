@@ -853,7 +853,7 @@ def Main():
   argument_parser.add_argument(
       u'--download-directory', u'--download_directory', action=u'store',
       metavar=u'DIRECTORY', dest=u'download_directory', type=str,
-      default=u'build', help=u'The location of the the download directory.')
+      default=u'build', help=u'The location of the download directory.')
 
   argument_parser.add_argument(
       '-e', '--exclude', action='store_true', dest='exclude_packages',

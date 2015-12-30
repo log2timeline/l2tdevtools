@@ -220,7 +220,7 @@ def Main():
   argument_parser.add_argument(
       u'--build-directory', u'--build_directory', action=u'store',
       metavar=u'DIRECTORY', dest=u'build_directory', type=str,
-      default=u'build', help=u'The location of the the build directory.')
+      default=u'build', help=u'The location of the build directory.')
 
   argument_parser.add_argument(
       u'-c', u'--config', dest=u'config_file', action=u'store',
