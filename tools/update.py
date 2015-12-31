@@ -821,14 +821,14 @@ def Main():
 
   argument_parser.add_argument(
       u'package_names', nargs=u'*', action=u'store', metavar=u'NAME',
-      type=unicode, help=(
+      type=str, help=(
           u'Optional package names which should be updated if an update is '
           u'available. If no value is provided all available packages are '
           u'updated.'))
 
   argument_parser.add_argument(
       u'--download-directory', u'--download_directory', action=u'store',
-      metavar=u'DIRECTORY', dest=u'download_directory', type=unicode,
+      metavar=u'DIRECTORY', dest=u'download_directory', type=str,
       default=u'build', help=u'The location of the the download directory.')
 
   argument_parser.add_argument(
@@ -840,7 +840,7 @@ def Main():
 
   argument_parser.add_argument(
       '--machine-type', '--machine_type', action=u'store', metavar=u'TYPE',
-      dest=u'machine_type', type=unicode, default=None, help=(
+      dest=u'machine_type', type=str, default=None, help=(
           u'Manually sets the machine type instead of using the value returned '
           u'by platform.machine(). Usage of this argument is not recommended '
           u'unless want to force the installation of one machine type e.g. '
@@ -848,7 +848,7 @@ def Main():
 
   argument_parser.add_argument(
       '--msi-targetdir', '--msi_targetdir', action=u'store', metavar=u'TYPE',
-      dest=u'msi_targetdir', type=unicode, default=None, help=(
+      dest=u'msi_targetdir', type=str, default=None, help=(
           u'Manually sets the MSI TARGETDIR property. Usage of this argument '
           u'is not recommended unless want to force the installation of the '
           u'MSIs into different directory than the system default.'))

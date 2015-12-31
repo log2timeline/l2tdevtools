@@ -494,7 +494,7 @@ class GitHelper(CLIHelper):
     Returns:
       A boolean indicating the changes were committed to the git repo.
     """
-    command = u'git commit -a --author={0:s} -m {1:s}'.format(
+    command = u'git commit -a --author="{0:s}" -m "{1:s}"'.format(
         author, description)
     exit_code, _, _ = self.RunCommand(command)
     if exit_code != 0:
@@ -858,11 +858,13 @@ class ProjectHelper(object):
       return
 
     try:
-      version_file_contents = version_file_contents.decode('utf-8')
+      version_file_contents = version_file_contents.decode(u'utf-8')
     except UnicodeDecodeError as exception:
       logging.error(
           u'Unable to read version file with error: {0:s}'.format(exception))
       return
+
+    return version_file_contents
 
   def GetName(self):
     """Retrieves the project name from the path of the script.
@@ -966,11 +968,11 @@ class ProjectHelper(object):
     for line_index, line in enumerate(lines):
       if project_name == u'plaso' and line.startswith(u'VERSION_DATE = '):
         version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
-        line[line_index] = version_string
+        lines[line_index] = version_string
 
       elif project_name != u'plaso' and line.startswith(u'__version__ = '):
         version_string = u'__version__ = \'{0:s}\''.format(date_version)
-        line[line_index] = version_string
+        lines[line_index] = version_string
 
     try:
       version_file_contents = version_file_contents.encode(u'utf-8')
