@@ -303,7 +303,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
   """Tests for the Source Forge download helper."""
 
   _PROJECT_NAME = u'pyparsing'
-  _PROJECT_VERSION = u'2.0.6'
+  _PROJECT_VERSION = u'2.0.7'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
