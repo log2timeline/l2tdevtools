@@ -35,9 +35,9 @@ class DependencyUpdaterTest(unittest.TestCase):
         dependency_updater._GetPackageFilenamesAndVersions())
 
     self.assertEqual(
-        package_filenames.get(u'dfvfs', None), u'dfvfs-20151125.1.win32.msi')
+        package_filenames.get(u'dfvfs', None), u'dfvfs-20151227.1.win32.msi')
 
-    self.assertEqual(package_versions.get(u'dfvfs', None), [u'20151125', u'1'])
+    self.assertEqual(package_versions.get(u'dfvfs', None), [u'20151227', u'1'])
 
 
 if __name__ == '__main__':
