@@ -494,7 +494,7 @@ class GitHelper(CLIHelper):
     Returns:
       A boolean indicating the changes were committed to the git repo.
     """
-    command = u'git commit -a --author={0:s} -m {1:s}'.format(
+    command = u'git commit -a --author="{0:s}" -m "{1:s}"'.format(
         author, description)
     exit_code, _, _ = self.RunCommand(command)
     if exit_code != 0:
