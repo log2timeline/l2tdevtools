@@ -968,11 +968,11 @@ class ProjectHelper(object):
     for line_index, line in enumerate(lines):
       if project_name == u'plaso' and line.startswith(u'VERSION_DATE = '):
         version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
-        line[line_index] = version_string
+        lines[line_index] = version_string
 
       elif project_name != u'plaso' and line.startswith(u'__version__ = '):
         version_string = u'__version__ = \'{0:s}\''.format(date_version)
-        line[line_index] = version_string
+        lines[line_index] = version_string
 
     try:
       version_file_contents = version_file_contents.encode(u'utf-8')
