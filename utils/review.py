@@ -858,11 +858,13 @@ class ProjectHelper(object):
       return
 
     try:
-      version_file_contents = version_file_contents.decode('utf-8')
+      version_file_contents = version_file_contents.decode(u'utf-8')
     except UnicodeDecodeError as exception:
       logging.error(
           u'Unable to read version file with error: {0:s}'.format(exception))
       return
+
+    return version_file_contents
 
   def GetName(self):
     """Retrieves the project name from the path of the script.
