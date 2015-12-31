@@ -2229,21 +2229,24 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
 
     if not os.path.exists(pkg_filename):
       prefix = u'/usr/local'
-      if self._dependency_definition.pkg_configure_flags:
-        configure_flags = u' '.join(
-            self._dependency_definition.pkg_configure_flags)
-      else:
-        configure_flags = u''
+      configure_options = u''
+      if self._dependency_definition.pkg_configure_options:
+        configure_options = u' '.join(
+            self._dependency_definition.pkg_configure_options)
+
+      elif self._dependency_definition.configure_options:
+        configure_options = u' '.join(
+            self._dependency_definition.configure_options)
 
       if cflags and ldflags:
         command = (
             u'{0:s} {1:s} ./configure --prefix={2:s} {3:s} '
             u'--disable-dependency-tracking > {4:s} 2>&1').format(
-                cflags, ldflags, prefix, configure_flags, log_filename)
+                cflags, ldflags, prefix, configure_options, log_filename)
       else:
         command = (
             u'./configure --prefix={0:s} {1:s} > {2:s} 2>&1').format(
-                prefix, configure_flags, log_filename)
+                prefix, configure_options, log_filename)
 
       exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
           source_directory, command), shell=True)

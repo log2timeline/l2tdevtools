@@ -1,0 +1,36 @@
+Source: {package_name:s}
+Section: {section:s}
+Priority: extra
+Maintainer: {upstream_maintainer:s}
+Build-Depends: debhelper (>= 7){build_depends:s}
+Standards-Version: 3.9.5
+Homepage: {upstream_homepage:s}
+
+Package: libtsk
+Architecture: any
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
+Description: Library to support analyzing disk images
+ Library to support analyzing disk images
+
+Package: libtsk-dbg
+Architecture: any
+Section: debug
+Depends: libtsk (= ${{binary:Version}}), ${{misc:Depends}}
+Description: Debugging symbols for libtsk
+ Debugging symbols for libtsk
+
+Package: libtsk-dev
+Architecture: any
+Section: libdevel
+Depends: libtsk (= ${{binary:Version}}), ${{misc:Depends}}
+Description: Header files and libraries for developing applications for libtsk
+ Header files and libraries for developing applications for libtsk
+
+Package: sleuthkit
+Architecture: any
+Section: tools
+Depends: libtsk (= ${{binary:Version}}), ${{shlibs:Depends}}, ${{misc:Depends}}
+Description: library and tools to analyze volume and file system data
+ The Sleuth Kit (TSK) is a library and collection of command
+ line digital forensics tools that allow you to investigate volume and file
+ system data.

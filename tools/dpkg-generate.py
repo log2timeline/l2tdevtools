@@ -80,9 +80,12 @@ def Main():
     print(u'')
     return False
 
-  project_version = os.path.basename(os.path.abspath(source_path))
+  source_path = os.path.abspath(source_path)
+  project_version = os.path.basename(source_path)
   if not project_version.startswith(u'{0:s}-'.format(options.project_name)):
-    print(u'Unable to determine project version based on source directory.')
+    print((
+        u'Unable to determine project version based on source '
+        u'directory: {0:s}.').format(source_path))
     print(u'')
     return False
 
