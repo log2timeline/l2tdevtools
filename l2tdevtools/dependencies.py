@@ -37,6 +37,7 @@ class DependencyDefinition(object):
     maintainer: string of the name and email address of the maintainer.
     name: string of the name of the dependency.
     setup_name: string of the name used in setup.py.
+    osc_build_dependencies: list of osc build dependencies.
     patches: list of patch file names.
     pkg_configure_options: list of the configure options when building a pkg.
     version: the version requirements (instance of DependencyVersion).
@@ -68,6 +69,7 @@ class DependencyDefinition(object):
     self.homepage_url = None
     self.maintainer = None
     self.name = name
+    self.osc_build_dependencies = None
     self.patches = None
     self.pkg_configure_options = None
     self.setup_name = None
@@ -195,6 +197,8 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'homepage_url')
       dependency_definition.maintainer = self._GetConfigValue(
           config_parser, section_name, u'maintainer')
+      dependency_definition.osc_build_dependencies = self._GetConfigValue(
+          config_parser, section_name, u'osc_build_dependencies')
       dependency_definition.patches = self._GetConfigValue(
           config_parser, section_name, u'patches')
       dependency_definition.pkg_configure_options = self._GetConfigValue(
@@ -243,6 +247,13 @@ class DependencyDefinitionReader(object):
       elif isinstance(dependency_definition.dpkg_dependencies, basestring):
         dependency_definition.dpkg_dependencies = (
             dependency_definition.dpkg_dependencies.split(u','))
+
+      if dependency_definition.osc_build_dependencies is None:
+        dependency_definition.osc_build_dependencies = []
+      elif isinstance(
+          dependency_definition.osc_build_dependencies, basestring):
+        dependency_definition.osc_build_dependencies = (
+            dependency_definition.osc_build_dependencies.split(u','))
 
       if dependency_definition.patches is None:
         dependency_definition.patches = []

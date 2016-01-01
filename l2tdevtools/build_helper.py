@@ -289,8 +289,9 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
         self.distribution, self.architecture):
       return False
 
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
     command = u'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
-        os.path.join(u'..', self.LOG_FILENAME))
+        log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -454,8 +455,8 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
         self.distribution, self.architecture):
       return False
 
-    command = u'debuild -S -sa > {0:s} 2>&1'.format(
-        os.path.join(u'..', self.LOG_FILENAME))
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
+    command = u'debuild -S -sa > {0:s} 2>&1'.format(log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -630,8 +631,9 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
         self.version_suffix, self.distribution, self.architecture):
       return False
 
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
     command = u'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
-        os.path.join(u'..', self.LOG_FILENAME))
+        log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -807,8 +809,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
         self.version_suffix, self.distribution, self.architecture):
       return False
 
-    command = u'debuild -S -sa > {0:s} 2>&1'.format(
-        os.path.join(u'..', self.LOG_FILENAME))
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
+    command = u'debuild -S -sa > {0:s} 2>&1'.format(log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -1011,7 +1013,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     # Note that MSBuild in .NET 3.5 does not support vs2010 solution files
     # and MSBuild in .NET 4.0 is needed instead.
-    elif self.version in [u'2010', u'2012', u'2013', u'2015']:
+    elif self.version in (u'2010', u'2012', u'2013', u'2015'):
       msbuild = u'{0:s}:{1:s}{2:s}'.format(
           u'C', os.sep, os.path.join(
               u'Windows', u'Microsoft.NET', u'Framework', u'v4.0.30319',
@@ -1071,7 +1073,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
-    if self.version in [u'2010', u'2012', u'2013', u'2015']:
+    if self.version in (u'2010', u'2012', u'2013', u'2015'):
       self._ConvertSolutionFiles(source_directory)
 
     # Detect architecture based on Visual Studion Platform environment
@@ -1085,7 +1087,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     if not msvscpp_platform or msvscpp_platform == u'x86':
       msvscpp_platform = u'Win32'
 
-    if msvscpp_platform not in [u'Win32', u'x64']:
+    if msvscpp_platform not in (u'Win32', u'x64'):
       logging.error(u'Unsupported build platform: {0:s}'.format(
           msvscpp_platform))
       return False
@@ -1525,8 +1527,9 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
       if not result:
         return False
 
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
     command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
-        sys.executable, os.path.join(u'..', self.LOG_FILENAME))
+        sys.executable, log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -1599,7 +1602,7 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
     """
     # Remove previous versions build directories.
-    for filename in [u'build', u'dist']:
+    for filename in (u'build', u'dist'):
       if os.path.exists(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         shutil.rmtree(filename, True)
@@ -1717,7 +1720,8 @@ class OscBuildHelper(BuildHelper):
     Returns:
       True if successful, False otherwise.
     """
-    command = u'osc -q add {0:s}'.format(path)
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
+    command = u'osc -q add {0:s} >> {1:s} 2>&1'.format(path, log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         self._OSC_PROJECT, command), shell=True)
     if exit_code != 0:
@@ -1732,7 +1736,8 @@ class OscBuildHelper(BuildHelper):
     Returns:
       True if successful, False otherwise.
     """
-    command = u'osc -q checkout {0:s}'.format(self._OSC_PROJECT)
+    command = u'osc -q checkout {0:s} >> {1:s} 2>&1 '.format(
+        self._OSC_PROJECT, self.LOG_FILENAME)
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -1740,15 +1745,21 @@ class OscBuildHelper(BuildHelper):
 
     return True
 
-  def _OscCommit(self):
+  def _OscCommit(self, package_name):
     """Runs osc commit.
+
+    Args:
+      package_name: a string containing the name of the package.
 
     Returns:
       True if successful, False otherwise.
     """
-    command = u'osc -q commit -n'
+    # Running osc commit from the package sub directory is more efficient.
+    osc_project_path = os.path.join(self._OSC_PROJECT, package_name)
+    log_file_path = os.path.join(u'..', u'..', self.LOG_FILENAME)
+    command = u'osc -q commit -n >> {0:s} 2>&1'.format(log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-        self._OSC_PROJECT, command), shell=True)
+        osc_project_path, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
@@ -1786,11 +1797,11 @@ class OscBuildHelper(BuildHelper):
 
   def _OscUpdate(self):
     """Runs osc update.
-
     Returns:
       True if successful, False otherwise.
     """
-    command = u'osc -q update'
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
+    command = u'osc -q update >> {0:s} 2>&1'.format(log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         self._OSC_PROJECT, command), shell=True)
     if exit_code != 0:
@@ -1871,7 +1882,7 @@ class ConfigureMakeOscBuildHelper(OscBuildHelper):
       if not self._OscAdd(osc_spec_file_path):
         return False
 
-    return self._OscCommit()
+    return self._OscCommit(source_helper_object.project_name)
 
   def CheckBuildRequired(self, source_helper_object):
     """Checks if a build is required.
@@ -1967,16 +1978,29 @@ class SetupPyOscBuildHelper(OscBuildHelper):
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
-    command = u'{0:s} setup.py bdist_rpm --spec-only > {1:s} 2>&1'.format(
-        sys.executable, os.path.join(u'..', self.LOG_FILENAME))
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
+    command = u'{0:s} setup.py bdist_rpm --spec-only >> {1:s} 2>&1'.format(
+        sys.executable, log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
 
-    spec_filename = u'{0:s}.spec'.format(source_helper_object.project_name)
-    spec_file_path = os.path.join(source_directory, u'dist', spec_filename)
+    project_name = source_helper_object.project_name
+    if project_name.startswith(u'python-') and project_name != u'python-gflags':
+      project_name = project_name[7:]
+
+    # TODO: move this to configuration.
+    if project_name == u'dateutil':
+      project_prefix = u'python-'
+    else:
+      project_prefix = u''
+
+    spec_filename = u'{0:s}.spec'.format(project_name)
+    spec_file_path = os.path.join(
+        source_directory, u'dist', u'{0:s}{1:s}'.format(
+            project_prefix, spec_filename))
     osc_spec_file_path = os.path.join(osc_package_path, spec_filename)
     spec_file_exists = os.path.exists(osc_spec_file_path)
 
@@ -1986,28 +2010,57 @@ class SetupPyOscBuildHelper(OscBuildHelper):
     description = b''
     summary = b''
     in_description = False
+    has_build_requires = False
     with open(spec_file_path, 'r+b') as file_object:
       for line in file_object.readlines():
-        if line.startswith(b'Summary: '):
+        if line.startswith(b'%define name '):
+          # Need to override the project name for projects that prefix
+          # their name with "python-" in setup.py but do not use it
+          # for their source package name.
+          line = b'%define name {0:s}\n'.format(project_name)
+
+        elif line.startswith(b'Summary: '):
           summary = line
+
+        elif line.startswith(b'BuildRequires: '):
+          has_build_requires = True
+          if self._dependency_definition.osc_build_dependencies:
+            line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
+                self._dependency_definition.osc_build_dependencies))
+
+        elif line == '\n' and summary and not has_build_requires:
+          has_build_requires = True
+          line = (
+              b'BuildRequires: python-setuptools\n'
+              b'{0:s}').format(line)
+
+          if self._dependency_definition.osc_build_dependencies:
+            line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
+                self._dependency_definition.osc_build_dependencies))
 
         elif line.startswith(b'%description'):
           in_description = True
 
         elif line.startswith(b'%files'):
-          line = b'%files -f INSTALLED_FILES -n python-%{name}\n'
+          if not project_name.startswith(u'python-'):
+            line = b'%files -f INSTALLED_FILES -n python-%{name}\n'
 
         elif line.startswith(b'%prep'):
           in_description = False
 
-          output_file_object.write((
-              b'%package -n python-%{{name}}\n'
-              b'{0:s}'
-              b'\n'
-              b'%description -n python-%{{name}}\n'
-              b'{1:s}').format(summary, description))
+          if not project_name.startswith(u'python-'):
+            output_file_object.write((
+                b'%package -n python-%{{name}}\n'
+                b'{0:s}'
+                b'\n'
+                b'%description -n python-%{{name}}\n'
+                b'{1:s}').format(summary, description))
 
         elif in_description:
+          # Ignore leading white lines in the description.
+          if not description and line == b'\n':
+            continue
+
           description = b''.join([description, line])
 
         output_file_object.write(line)
@@ -2020,9 +2073,9 @@ class SetupPyOscBuildHelper(OscBuildHelper):
       if not self._OscAdd(osc_spec_file_path):
         return False
 
-    return self._OscCommit()
+    return self._OscCommit(source_helper_object.project_name)
 
-  def CheckBuildRequired(self, unused_source_helper_object):
+  def CheckBuildRequired(self, source_helper_object):
     """Checks if a build is required.
 
     Args:
@@ -2031,8 +2084,15 @@ class SetupPyOscBuildHelper(OscBuildHelper):
     Returns:
       True if a build is required, False otherwise.
     """
-    # TODO: implement.
-    return True
+    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version)
+
+    osc_source_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name,
+        osc_source_filename)
+
+    return not os.path.exists(osc_source_path)
 
   def Clean(self, unused_source_helper_object):
     """Cleans the source.
@@ -2208,7 +2268,7 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
         source_helper_object.project_name, source_helper_object.project_version)
     pkg_filename = u'{0:s}-{1!s}.pkg'.format(
         source_helper_object.project_name, source_helper_object.project_version)
-    log_filename = os.path.join(u'..', self.LOG_FILENAME)
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
 
     sdks_path = os.path.join(
         u'/', u'Applications', u'Xcode.app', u'Contents', u'Developer',
@@ -2242,11 +2302,11 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
         command = (
             u'{0:s} {1:s} ./configure --prefix={2:s} {3:s} '
             u'--disable-dependency-tracking > {4:s} 2>&1').format(
-                cflags, ldflags, prefix, configure_options, log_filename)
+                cflags, ldflags, prefix, configure_options, log_file_path)
       else:
         command = (
             u'./configure --prefix={0:s} {1:s} > {2:s} 2>&1').format(
-                prefix, configure_options, log_filename)
+                prefix, configure_options, log_file_path)
 
       exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
           source_directory, command), shell=True)
@@ -2254,7 +2314,7 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         return False
 
-      command = u'make >> {0:s} 2>&1'.format(log_filename)
+      command = u'make >> {0:s} 2>&1'.format(log_file_path)
       exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
           source_directory, command), shell=True)
       if exit_code != 0:
@@ -2262,7 +2322,7 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
         return False
 
       command = u'make install DESTDIR={0:s}/tmp >> {1:s} 2>&1'.format(
-          os.path.abspath(source_directory), log_filename)
+          os.path.abspath(source_directory), log_file_path)
       exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
           source_directory, command), shell=True)
       if exit_code != 0:
@@ -2332,10 +2392,10 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
         source_helper_object.project_name, source_helper_object.project_version)
     pkg_filename = u'{0:s}-{1!s}.pkg'.format(
         source_helper_object.project_name, source_helper_object.project_version)
-    log_filename = os.path.join(u'..', self.LOG_FILENAME)
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
 
     if not os.path.exists(pkg_filename):
-      command = u'python setup.py build > {0:s} 2>&1'.format(log_filename)
+      command = u'python setup.py build > {0:s} 2>&1'.format(log_file_path)
       exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
           source_directory, command), shell=True)
       if exit_code != 0:
@@ -2345,7 +2405,7 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
       command = (
           u'python setup.py install --root={0:s}/tmp '
           u'--install-data=/usr/local > {1:s} 2>&1').format(
-              os.path.abspath(source_directory), log_filename)
+              os.path.abspath(source_directory), log_file_path)
       exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
           source_directory, command), shell=True)
       if exit_code != 0:
@@ -2353,8 +2413,8 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
         return False
 
       # Copy the license file to the egg-info sub directory.
-      for license_file in [
-          u'COPYING', u'LICENSE', u'LICENSE.TXT', u'LICENSE.txt']:
+      for license_file in (
+          u'COPYING', u'LICENSE', u'LICENSE.TXT', u'LICENSE.txt'):
         if not os.path.exists(os.path.join(source_directory, license_file)):
           continue
 
@@ -2765,7 +2825,7 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
     """
     # Remove previous versions build directories.
-    for filename in [u'build', u'dist']:
+    for filename in (u'build', u'dist'):
       if os.path.exists(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         shutil.rmtree(filename, True)
@@ -2821,16 +2881,15 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
       # TODO: add self._ApplyPatches
       pass
 
-    log_filename = os.path.join(u'..', self.LOG_FILENAME)
-
-    command = u'./configure > {0:s} 2>&1'.format(log_filename)
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
+    command = u'./configure > {0:s} 2>&1'.format(log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
       return False
 
-    command = u'make >> {0:s} 2>&1'.format(log_filename)
+    command = u'make >> {0:s} 2>&1'.format(log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -2879,8 +2938,9 @@ class SetupPySourceBuildHelper(SourceBuildHelper):
       # TODO: add self._ApplyPatches
       pass
 
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
     command = u'{0:s} setup.py build > {1:s} 2>&1'.format(
-        sys.executable, os.path.join(u'..', self.LOG_FILENAME))
+        sys.executable, log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
