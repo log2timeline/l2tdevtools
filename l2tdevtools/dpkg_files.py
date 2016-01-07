@@ -19,8 +19,7 @@ class DpkgBuildFilesGenerator(object):
       u'README', u'README.txt', u'README.TXT']
 
   _CHANGELOG_TEMPLATE = u'\n'.join([
-      (u'{project_prefix:s}{project_name:s} ({project_version!s}-1) unstable; '
-       u'urgency=low'),
+      u'{project_name:s} ({project_version!s}-1) unstable; urgency=low',
       u'',
       u'  * Auto-generated',
       u'',
@@ -29,9 +28,9 @@ class DpkgBuildFilesGenerator(object):
   _COMPAT_TEMPLATE = u'\n'.join([
       u'7'])
 
-  _CONTROL_TEMPLATE = u'\n'.join([
+  _CONTROL_TEMPLATE_CONFIGURE_MAKE = u'\n'.join([
       u'Source: {package_name:s}',
-      u'Section: {section:s}',
+      u'Section: libs',
       u'Priority: extra',
       u'Maintainer: {upstream_maintainer:s}',
       (u'Build-Depends: debhelper (>= 7){build_depends:s}'),
@@ -46,7 +45,7 @@ class DpkgBuildFilesGenerator(object):
       u''])
 
   _CONTROL_TEMPLATE_SETUP_PY = u'\n'.join([
-      u'Source: {package_name:s}',
+      u'Source: {project_name:s}',
       u'Section: python',
       u'Priority: extra',
       u'Maintainer: {upstream_maintainer:s}',
@@ -58,13 +57,13 @@ class DpkgBuildFilesGenerator(object):
       u'',
       u'Package: python-{package_name:s}',
       u'Architecture: {architecture:s}',
-      u'Depends: {python_depends:s}'
+      u'Depends: {python_depends:s}',
       u'Description: {description_short:s}',
       u' {description_long:s}',
       u'',
       u'Package: python3-{package_name:s}',
       u'Architecture: {architecture:s}',
-      u'Depends: {python3_depends:s}'
+      u'Depends: {python3_depends:s}',
       u'Description: {description_short:s}',
       u' {description_long:s}',
       u''])
@@ -166,78 +165,14 @@ class DpkgBuildFilesGenerator(object):
       u'',
       u'',
       u'%:',
-      u'\tdh  $@ --buildsystem=python_distutils --with=python2 {with_quilt:s}',
-      u'',
-      u'.PHONY: override_dh_auto_test',
-      u'override_dh_auto_test:',
-      u'',
-      u'.PHONY: override_dh_installmenu',
-      u'override_dh_installmenu:',
-      u'',
-      u'.PHONY: override_dh_installmime',
-      u'override_dh_installmime:',
-      u'',
-      u'.PHONY: override_dh_installmodules',
-      u'override_dh_installmodules:',
-      u'',
-      u'.PHONY: override_dh_installlogcheck',
-      u'override_dh_installlogcheck:',
-      u'',
-      u'.PHONY: override_dh_installlogrotate',
-      u'override_dh_installlogrotate:',
-      u'',
-      u'.PHONY: override_dh_installpam',
-      u'override_dh_installpam:',
-      u'',
-      u'.PHONY: override_dh_installppp',
-      u'override_dh_installppp:',
-      u'',
-      u'.PHONY: override_dh_installudev',
-      u'override_dh_installudev:',
-      u'',
-      u'.PHONY: override_dh_installwm',
-      u'override_dh_installwm:',
-      u'',
-      u'.PHONY: override_dh_installxfonts',
-      u'override_dh_installxfonts:',
-      u'',
-      u'.PHONY: override_dh_gconf',
-      u'override_dh_gconf:',
-      u'',
-      u'.PHONY: override_dh_icons',
-      u'override_dh_icons:',
-      u'',
-      u'.PHONY: override_dh_perl',
-      u'override_dh_perl:',
-      u'',
-      u'.PHONY: override_dh_pysupport',
-      u'override_dh_pysupport:',
-      u'',
-      u'.PHONY: override_dh_python2',
-      u'override_dh_python2:',
-      u'\tdh_python2 -V 2.7 setup.py',
-      u''])
-
-  _RULES_TEMPLATE_SETUP_PY_PYTHON3 = u'\n'.join([
-      u'#!/usr/bin/make -f',
-      u'# debian/rules that uses debhelper >= 7.',
-      u'',
-      u'# Uncomment this to turn on verbose mode.',
-      u'#export DH_VERBOSE=1',
-      u'',
-      u'# This has to be exported to make some magic below work.',
-      u'export DH_OPTIONS',
-      u'',
-      u'',
-      u'%:',
       (u'\tdh  $@ --buildsystem=python_distutils --with=python2,python3 '
        u'{with_quilt:s}'),
       u'',
       u'.PHONY: override_dh_auto_clean',
       u'override_dh_auto_clean:',
       u'\tdh_auto_clean',
-      (u'\trm -rf build {package_name:s}.egg-info/SOURCES.txt '
-       u'{package_name:s}.egg-info/PKG-INFO'),
+      (u'\trm -rf build {project_name:s}.egg-info/SOURCES.txt '
+       u'{project_name:s}.egg-info/PKG-INFO'),
       u'',
       u'.PHONY: override_dh_auto_build',
       u'override_dh_auto_build:',
@@ -296,13 +231,6 @@ class DpkgBuildFilesGenerator(object):
       u'',
       u'.PHONY: override_dh_perl',
       u'override_dh_perl:',
-      u'',
-      u'.PHONY: override_dh_pysupport',
-      u'override_dh_pysupport:',
-      u'',
-      u'.PHONY: override_dh_python2',
-      u'override_dh_python2:',
-      u'\tdh_python2 -V 2.7 setup.py',
       u''])
 
   _SOURCE_FORMAT_TEMPLATE = u'\n'.join([
@@ -347,21 +275,8 @@ class DpkgBuildFilesGenerator(object):
     date_time_string = u'{0:s} {1:s}'.format(
         time.strftime(u'%a, %d %b %Y %H:%M:%S'), timezone_string)
 
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
-    else:
-      project_name = self._project_name
-
-    if (not self._dependency_definition.dpkg_name and
-        self._dependency_definition.build_system == u'setup_py' and
-        not project_name.startswith(u'python-')):
-      project_prefix = u'python-'
-    else:
-      project_prefix = u''
-
     template_values = {
-        u'project_name': project_name,
-        u'project_prefix': project_prefix,
+        u'project_name': self._project_name,
         u'project_version': self._project_version,
         u'maintainer_email_address': self._EMAIL_ADDRESS,
         u'date_time': date_time_string}
@@ -389,26 +304,12 @@ class DpkgBuildFilesGenerator(object):
       dpkg_path: the path to the dpkg files.
     """
     if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
+      package_name = self._dependency_definition.dpkg_name
     else:
-      project_name = self._project_name
+      package_name = self._project_name
 
-    if self._dependency_definition.build_system == u'configure_make':
-      package_name = project_name
-      section = u'libs'
-
-    elif self._dependency_definition.build_system == u'setup_py':
-      if self._dependency_definition.dpkg_name:
-        package_name = self._dependency_definition.dpkg_name
-      else:
-        if not project_name.startswith(u'python-'):
-          project_prefix = u'python-'
-        else:
-          project_prefix = u''
-
-        package_name = u'{0:s}{1:s}'.format(project_prefix, project_name)
-
-      section = u'python'
+    if package_name.startswith(u'python-'):
+      package_name = package_name[7:]
 
     if not self._dependency_definition.architecture_dependent:
       architecture = u'all'
@@ -422,15 +323,13 @@ class DpkgBuildFilesGenerator(object):
     if self._dependency_definition.build_system == u'configure_make':
       build_depends.append(u'autotools-dev')
 
-    else:
+    elif self._dependency_definition.build_system == u'setup_py':
       build_depends.append(u'python-all (>= 2.7~)')
       build_depends.append(u'python-setuptools')
 
       if self._dependency_definition.architecture_dependent:
         build_depends.append(u'python-dev')
 
-    # TODO: testing.
-    if project_name in (u'construct',):
       build_depends.append(u'python3-all (>= 3.4~)')
       build_depends.append(u'python3-setuptools')
 
@@ -476,10 +375,6 @@ class DpkgBuildFilesGenerator(object):
     python3_depends.append(u'${misc:Depends}')
     python3_depends = u', '.join(python3_depends)
 
-    # TODO: testing.
-    if project_name in (u'construct',):
-      package_name = project_name
-
     template_values = {
         u'architecture': architecture,
         u'build_depends': build_depends,
@@ -487,18 +382,16 @@ class DpkgBuildFilesGenerator(object):
         u'description_long': description_long,
         u'description_short': description_short,
         u'package_name': package_name,
+        u'project_name': self._project_name,
         u'python_depends': python_depends,
         u'python3_depends': python3_depends,
-        u'section': section,
         u'upstream_homepage': self._dependency_definition.homepage_url,
         u'upstream_maintainer': self._dependency_definition.maintainer}
 
-    # TODO: replace the following if with:
-    # if self._dependency_definition.build_system == u'setup_py':
-    if project_name in (u'construct',):
+    if self._dependency_definition.build_system == u'setup_py':
       control_template = self._CONTROL_TEMPLATE_SETUP_PY
     else:
-      control_template = self._CONTROL_TEMPLATE
+      control_template = self._CONTROL_TEMPLATE_CONFIGURE_MAKE
 
     if self._dependency_definition.dpkg_template_control:
       template_file_path = os.path.join(
@@ -542,12 +435,12 @@ class DpkgBuildFilesGenerator(object):
       dpkg_path: the path to the dpkg files.
     """
     if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
+      package_name = self._dependency_definition.dpkg_name
     else:
-      project_name = self._project_name
+      package_name = self._project_name
 
-    if project_name.startswith(u'python-'):
-      project_name = project_name[7:]
+    if package_name.startswith(u'python-'):
+      package_name = package_name[7:]
 
     # Determine the available doc files.
     doc_files = []
@@ -557,10 +450,10 @@ class DpkgBuildFilesGenerator(object):
 
     package_doc_files = []
     if self._dependency_definition.build_system == u'setup_py':
-      package_doc_files.append(u'python-{0:s}.docs'.format(project_name))
-      package_doc_files.append(u'python3-{0:s}.docs'.format(project_name))
+      package_doc_files.append(u'python-{0:s}.docs'.format(package_name))
+      package_doc_files.append(u'python3-{0:s}.docs'.format(package_name))
     else:
-      package_doc_files.append(u'{0:s}.docs'.format(project_name))
+      package_doc_files.append(u'{0:s}.docs'.format(package_name))
 
     for package_doc_file in package_doc_files:
       path = os.path.join(dpkg_path, package_doc_file)
@@ -648,39 +541,26 @@ class DpkgBuildFilesGenerator(object):
       dpkg_path: the path to the dpkg files.
     """
     if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
       package_name = self._dependency_definition.dpkg_name
     else:
-      project_name = self._project_name
-      if not project_name.startswith(u'python-'):
-        project_prefix = u'python-'
-      else:
-        project_prefix = u''
+      package_name = self._project_name
 
-      package_name = u'{0:s}{1:s}'.format(project_prefix, project_name)
+    if package_name.startswith(u'python-'):
+      package_name = package_name[7:]
 
     if self._dependency_definition.patches:
       with_quilt = u'--with quilt'
     else:
       with_quilt = u''
 
-    # TODO: testing.
-    if project_name in (u'construct',):
-      package_name = project_name
-
     template_values = {
         u'package_name': package_name,
+        u'project_name': self._project_name,
         u'with_quilt': with_quilt}
-
-    # TODO: testing.
-    if project_name in (u'construct',):
-      rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON3
-    else:
-      rules_template = self._RULES_TEMPLATE_SETUP_PY
 
     filename = os.path.join(dpkg_path, u'rules')
     with open(filename, 'wb') as file_object:
-      data = rules_template.format(**template_values)
+      data = self._RULES_TEMPLATE_SETUP.format(**template_values)
       file_object.write(data.encode(u'utf-8'))
 
   def _GenerateSourceFormatFile(self, dpkg_path):
