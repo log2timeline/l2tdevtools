@@ -535,8 +535,8 @@ class DpkgBuildFilesGenerator(object):
       with open(filename, 'wb') as file_object:
         file_object.write(u'\n')
 
-  def _GenerateDocsFile(self, dpkg_path):
-    """Generate the dpkg build .docs file.
+  def _GenerateDocsFiles(self, dpkg_path):
+    """Generate the dpkg build .docs files.
 
     Args:
       dpkg_path: the path to the dpkg files.
@@ -546,12 +546,8 @@ class DpkgBuildFilesGenerator(object):
     else:
       project_name = self._project_name
 
-    if (not self._dependency_definition.dpkg_name and
-        self._dependency_definition.build_system == u'setup_py' and
-        not project_name.startswith(u'python-')):
-      project_prefix = u'python-'
-    else:
-      project_prefix = u''
+    if project_name.startswith(u'python-'):
+      project_name = project_name[7:]
 
     # Determine the available doc files.
     doc_files = []
@@ -559,11 +555,17 @@ class DpkgBuildFilesGenerator(object):
       if os.path.exists(filename):
         doc_files.append(filename)
 
-    # TODO: for every package create a docs file.
-    filename = os.path.join(
-        dpkg_path, u'{0:s}{1:s}.docs'.format(project_prefix, project_name))
-    with open(filename, 'wb') as file_object:
-      file_object.write(u'\n'.join(doc_files))
+    package_doc_files = []
+    if self._dependency_definition.build_system == u'setup_py':
+      package_doc_files.append(u'python-{0:s}.docs'.format(project_name))
+      package_doc_files.append(u'python3-{0:s}.docs'.format(project_name))
+    else:
+      package_doc_files.append(u'{0:s}.docs'.format(project_name))
+
+    for package_doc_file in package_doc_files:
+      path = os.path.join(dpkg_path, package_doc_file)
+      with open(path, 'wb') as file_object:
+        file_object.write(u'\n'.join(doc_files))
 
   def _GenerateRulesFile(self, dpkg_path):
     """Generate the dpkg build rules file.
@@ -697,7 +699,7 @@ class DpkgBuildFilesGenerator(object):
     self._GenerateCompatFile(dpkg_path)
     self._GenerateControlFile(dpkg_path)
     self._GenerateCopyrightFile(dpkg_path)
-    self._GenerateDocsFile(dpkg_path)
+    self._GenerateDocsFiles(dpkg_path)
     self._GenerateRulesFile(dpkg_path)
 
     os.mkdir(os.path.join(dpkg_path, u'source'))
