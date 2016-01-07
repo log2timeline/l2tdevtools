@@ -45,6 +45,30 @@ class DpkgBuildFilesGenerator(object):
       u' {description_long:s}',
       u''])
 
+  _CONTROL_TEMPLATE_SETUP_PY = u'\n'.join([
+      u'Source: {package_name:s}',
+      u'Section: python',
+      u'Priority: extra',
+      u'Maintainer: {upstream_maintainer:s}',
+      (u'Build-Depends: debhelper (>= 7){build_depends:s}'),
+      u'Standards-Version: 3.9.5',
+      u'X-Python-Version: >= 2.7',
+      u'X-Python3-Version: >= 3.4',
+      u'Homepage: {upstream_homepage:s}',
+      u'',
+      u'Package: python-{package_name:s}',
+      u'Architecture: {architecture:s}',
+      u'Depends: {python_depends:s}'
+      u'Description: {description_short:s}',
+      u' {description_long:s}',
+      u'',
+      u'Package: python3-{package_name:s}',
+      u'Architecture: {architecture:s}',
+      u'Depends: {python3_depends:s}'
+      u'Description: {description_short:s}',
+      u' {description_long:s}',
+      u''])
+
   _COPYRIGHT_TEMPLATE = u'\n'.join([
       u''])
 
@@ -312,11 +336,19 @@ class DpkgBuildFilesGenerator(object):
       build_depends.append(u'autotools-dev')
 
     else:
-      build_depends.append(u'python')
+      build_depends.append(u'python-all (>= 2.7~)')
       build_depends.append(u'python-setuptools')
 
       if self._dependency_definition.architecture_dependent:
         build_depends.append(u'python-dev')
+
+    # TODO: testing.
+    if project_name in (u'construct',):
+      build_depends.append(u'python3-all (>= 3.4~)')
+      build_depends.append(u'python3-setuptools')
+
+      if self._dependency_definition.architecture_dependent:
+        build_depends.append(u'python3-dev')
 
     build_depends.extend(self._dependency_definition.dpkg_build_dependencies)
 
@@ -335,10 +367,27 @@ class DpkgBuildFilesGenerator(object):
     description_long = u'\n '.join(description_long.split(u'\n'))
 
     depends = []
-    depends.extend(self._dependency_definition.dpkg_dependencies)
+    python_depends = []
+    python3_depends = []
+
+    for dependency in self._dependency_definition.dpkg_dependencies:
+      if dependency.startswith(u'python-'):
+        python_depends.append(dependency)
+        python3_depends.append(u'python-{0:s}'.format(dependency[6:]))
+      else:
+        depends.append(dependency)
+
     depends.append(u'${shlibs:Depends}')
     depends.append(u'${misc:Depends}')
     depends = u', '.join(depends)
+
+    python_depends.append(u'${python:Depends}')
+    python_depends.append(u'${misc:Depends}')
+    python_depends = u', '.join(python_depends)
+
+    python3_depends.append(u'${python3:Depends}')
+    python3_depends.append(u'${misc:Depends}')
+    python3_depends = u', '.join(python3_depends)
 
     template_values = {
         u'architecture': architecture,
@@ -347,11 +396,20 @@ class DpkgBuildFilesGenerator(object):
         u'description_long': description_long,
         u'description_short': description_short,
         u'package_name': package_name,
+        u'python_depends': python_depends,
+        u'python3_depends': python3_depends,
         u'section': section,
         u'upstream_homepage': self._dependency_definition.homepage_url,
         u'upstream_maintainer': self._dependency_definition.maintainer}
 
-    control_template = self._CONTROL_TEMPLATE
+    # TODO: replace the following if with:
+    # if self._dependency_definition.build_system == u'setup_py':
+    if project_name in (u'construct',):
+      control_template = self._CONTROL_TEMPLATE_SETUP_PY
+      package_name = project_name
+    else:
+      control_template = self._CONTROL_TEMPLATE
+
     if self._dependency_definition.dpkg_template_control:
       template_file_path = os.path.join(
           self._data_path, u'dpkg_templates',
