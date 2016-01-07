@@ -26,8 +26,6 @@ class DependencyDefinition(object):
     dpkg_build_dependencies: list of dpkg build dependencies.
     dpkg_configure_options: list of the configure options when building a deb.
     dpkg_dependencies: list of dpkg dependencies.
-    dpkg_manual_install: boolean value to indicate if a dh_auto_install
-                         override should be used.
     dpkg_name: string of the dpkg package name.
     dpkg_template_control: string of the name of the dpkg control template file.
     dpkg_template_rules: string of the name of the dpkg rules template file.
@@ -60,7 +58,6 @@ class DependencyDefinition(object):
     self.dpkg_build_dependencies = None
     self.dpkg_configure_options = None
     self.dpkg_dependencies = None
-    self.dpkg_manual_install = False
     self.dpkg_name = None
     self.dpkg_template_control = None
     self.dpkg_template_rules = None
@@ -181,8 +178,6 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'dpkg_configure_options')
       dependency_definition.dpkg_dependencies = self._GetConfigValue(
           config_parser, section_name, u'dpkg_dependencies')
-      dependency_definition.dpkg_manual_install = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_manual_install')
       dependency_definition.dpkg_name = self._GetConfigValue(
           config_parser, section_name, u'dpkg_name')
       dependency_definition.dpkg_template_control = self._GetConfigValue(

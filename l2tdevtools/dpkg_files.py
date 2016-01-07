@@ -167,7 +167,94 @@ class DpkgBuildFilesGenerator(object):
       u'',
       u'%:',
       u'\tdh  $@ --buildsystem=python_distutils --with=python2 {with_quilt:s}',
-      u'{dh_auto_install_override:s}',
+      u'',
+      u'.PHONY: override_dh_auto_test',
+      u'override_dh_auto_test:',
+      u'',
+      u'.PHONY: override_dh_installmenu',
+      u'override_dh_installmenu:',
+      u'',
+      u'.PHONY: override_dh_installmime',
+      u'override_dh_installmime:',
+      u'',
+      u'.PHONY: override_dh_installmodules',
+      u'override_dh_installmodules:',
+      u'',
+      u'.PHONY: override_dh_installlogcheck',
+      u'override_dh_installlogcheck:',
+      u'',
+      u'.PHONY: override_dh_installlogrotate',
+      u'override_dh_installlogrotate:',
+      u'',
+      u'.PHONY: override_dh_installpam',
+      u'override_dh_installpam:',
+      u'',
+      u'.PHONY: override_dh_installppp',
+      u'override_dh_installppp:',
+      u'',
+      u'.PHONY: override_dh_installudev',
+      u'override_dh_installudev:',
+      u'',
+      u'.PHONY: override_dh_installwm',
+      u'override_dh_installwm:',
+      u'',
+      u'.PHONY: override_dh_installxfonts',
+      u'override_dh_installxfonts:',
+      u'',
+      u'.PHONY: override_dh_gconf',
+      u'override_dh_gconf:',
+      u'',
+      u'.PHONY: override_dh_icons',
+      u'override_dh_icons:',
+      u'',
+      u'.PHONY: override_dh_perl',
+      u'override_dh_perl:',
+      u'',
+      u'.PHONY: override_dh_pysupport',
+      u'override_dh_pysupport:',
+      u'',
+      u'.PHONY: override_dh_python2',
+      u'override_dh_python2:',
+      u'\tdh_python2 -V 2.7 setup.py',
+      u''])
+
+  _RULES_TEMPLATE_SETUP_PY_PYTHON3 = u'\n'.join([
+      u'#!/usr/bin/make -f',
+      u'# debian/rules that uses debhelper >= 7.',
+      u'',
+      u'# Uncomment this to turn on verbose mode.',
+      u'#export DH_VERBOSE=1',
+      u'',
+      u'# This has to be exported to make some magic below work.',
+      u'export DH_OPTIONS',
+      u'',
+      u'',
+      u'%:',
+      (u'\tdh  $@ --buildsystem=python_distutils --with=python2,python3 '
+       u'{with_quilt:s}'),
+      u'',
+      u'.PHONY: override_dh_auto_clean',
+      u'override_dh_auto_clean:',
+      u'\tdh_auto_clean',
+      (u'\trm -rf build {package_name:s}.egg-info/SOURCES.txt '
+       u'{package_name:s}.egg-info/PKG-INFO'),
+      u'',
+      u'.PHONY: override_dh_auto_build',
+      u'override_dh_auto_build:',
+      u'\tdh_auto_build',
+      u'\tset -ex; for python in $(shell py3versions -r); do \\',
+      u'\t\t$$python setup.py build; \\',
+      u'\tdone;',
+      u'',
+      u'.PHONY: override_dh_auto_install',
+      u'override_dh_auto_install:',
+      u'\tdh_auto_install --destdir $(CURDIR)/debian/python-{package_name:s}',
+      u'\tset -ex; for python in $(shell py3versions -r); do \\',
+      (u'\t\t$$python setup.py install '
+       u'--root=$(CURDIR)/debian/python3-{package_name:s} '
+       u'--install-layout=deb; \\'),
+      u'\tdone;',
+      u'',
       u'.PHONY: override_dh_auto_test',
       u'override_dh_auto_test:',
       u'',
@@ -389,6 +476,10 @@ class DpkgBuildFilesGenerator(object):
     python3_depends.append(u'${misc:Depends}')
     python3_depends = u', '.join(python3_depends)
 
+    # TODO: testing.
+    if project_name in (u'construct',):
+      package_name = project_name
+
     template_values = {
         u'architecture': architecture,
         u'build_depends': build_depends,
@@ -406,7 +497,6 @@ class DpkgBuildFilesGenerator(object):
     # if self._dependency_definition.build_system == u'setup_py':
     if project_name in (u'construct',):
       control_template = self._CONTROL_TEMPLATE_SETUP_PY
-      package_name = project_name
     else:
       control_template = self._CONTROL_TEMPLATE
 
@@ -572,36 +662,12 @@ class DpkgBuildFilesGenerator(object):
     else:
       with_quilt = u''
 
-    if not self._dependency_definition.dpkg_manual_install:
-      dh_auto_install_override = u''
-    else:
-      dh_auto_install_override = u'\n'.join([
-          u'.PHONY: override_dh_auto_install',
-          u'override_dh_auto_install:',
-          u'\t# Manually install the Python module files.',
-          (u'\tmkdir -p debian/{package_name:s}/usr/lib/python2.7/'
-           u'site-packages'),
-          (u'\tPYTHONPATH=debian/{package_name:s}/usr/lib/python2.7/'
-           u'site-packages python ./setup.py install --prefix debian/'
-           u'{package_name:s}}/usr'),
-          (u'\tmv debian/{{package_name:s}/usr/lib/python2.7/site-packages '
-           u'debian/{package_name:s}/usr/lib/python2.7/dist-packages'),
-          u'\t# Remove overrides of existing files.',
-          (u'\trm -f debian/{package_name:s}/usr/lib/python2.7/dist-packages/'
-           u'easy-install.*'),
-          (u'\trm -f debian/{package_name:s}/usr/lib/python2.7/dist-packages/'
-           u'site.*'),
-          u'\t# Move the Python module files out of the .egg directory.',
-          (u'\tmv debian/{package_name:s}/usr/lib/python2.7/dist-packages/'
-           u'*.egg/{project_name:s} debian/{package_name:s}/usr/lib/python2.7/'
-           u'dist-packages'),
-          u'',
-          u'']).format({
-              u'package_name': package_name,
-              u'project_name': project_name})
+    # TODO: testing.
+    if project_name in (u'construct',):
+      package_name = project_name
 
     template_values = {
-        u'dh_auto_install_override': dh_auto_install_override,
+        u'package_name': package_name,
         u'with_quilt': with_quilt}
 
     filename = os.path.join(dpkg_path, u'rules')
