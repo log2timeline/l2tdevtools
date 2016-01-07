@@ -460,7 +460,7 @@ class DpkgBuildFilesGenerator(object):
     for dependency in self._dependency_definition.dpkg_dependencies:
       if dependency.startswith(u'python-'):
         python_depends.append(dependency)
-        python3_depends.append(u'python-{0:s}'.format(dependency[6:]))
+        python3_depends.append(u'python3-{0:s}'.format(dependency[7:]))
       else:
         depends.append(dependency)
 
@@ -672,9 +672,15 @@ class DpkgBuildFilesGenerator(object):
         u'package_name': package_name,
         u'with_quilt': with_quilt}
 
+    # TODO: testing.
+    if project_name in (u'construct',):
+      rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON3
+    else:
+      rules_template = self._RULES_TEMPLATE_SETUP_PY
+
     filename = os.path.join(dpkg_path, u'rules')
     with open(filename, 'wb') as file_object:
-      data = self._RULES_TEMPLATE_SETUP_PY.format(**template_values)
+      data = rules_template.format(**template_values)
       file_object.write(data.encode(u'utf-8'))
 
   def _GenerateSourceFormatFile(self, dpkg_path):
