@@ -76,10 +76,10 @@ class DpkgBuildHelper(BuildHelper):
       u'quilt',
       u'python-all',
       u'python-dev',
-      u'python-setuptools'
+      u'python-setuptools',
       u'python3-all',
       u'python3-dev',
-      u'python3-setuptools'
+      u'python3-setuptools',
   ])
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
@@ -2463,7 +2463,7 @@ class RpmBuildHelper(BuildHelper):
       u'python-devel',
       u'python-dateutil',
       u'python-setuptools',
-      u'python-test'
+      u'python-test',
       u'python3-devel',
       u'python3-setuptools',
   ])

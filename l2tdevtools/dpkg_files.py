@@ -560,7 +560,7 @@ class DpkgBuildFilesGenerator(object):
 
     filename = os.path.join(dpkg_path, u'rules')
     with open(filename, 'wb') as file_object:
-      data = self._RULES_TEMPLATE_SETUP.format(**template_values)
+      data = self._RULES_TEMPLATE_SETUP_PY.format(**template_values)
       file_object.write(data.encode(u'utf-8'))
 
   def _GenerateSourceFormatFile(self, dpkg_path):
