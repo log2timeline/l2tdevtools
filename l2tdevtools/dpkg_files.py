@@ -19,7 +19,7 @@ class DpkgBuildFilesGenerator(object):
       u'README', u'README.txt', u'README.TXT']
 
   _CHANGELOG_TEMPLATE = u'\n'.join([
-      u'{project_name:s} ({project_version!s}-1) unstable; urgency=low',
+      u'{package_name:s} ({project_version!s}-1) unstable; urgency=low',
       u'',
       u'  * Auto-generated',
       u'',
@@ -45,14 +45,14 @@ class DpkgBuildFilesGenerator(object):
       u''])
 
   _CONTROL_TEMPLATE_SETUP_PY = u'\n'.join([
-      u'Source: {project_name:s}',
+      u'Source: {package_name:s}',
       u'Section: python',
       u'Priority: extra',
       u'Maintainer: {upstream_maintainer:s}',
       (u'Build-Depends: debhelper (>= 7){build_depends:s}'),
       u'Standards-Version: 3.9.5',
       u'X-Python-Version: >= 2.7',
-      u'X-Python3-Version: >= 3.4',
+      u'X-Python3-Version: >= 3.2',
       u'Homepage: {upstream_homepage:s}',
       u'',
       u'Package: python-{package_name:s}',
@@ -260,6 +260,11 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
+    if self._dependency_definition.dpkg_name:
+      package_name = self._dependency_definition.dpkg_name
+    else:
+      package_name = self._project_name
+
     timezone_minutes, _ = divmod(time.timezone, 60)
     timezone_hours, timezone_minutes = divmod(timezone_minutes, 60)
 
@@ -276,7 +281,7 @@ class DpkgBuildFilesGenerator(object):
         time.strftime(u'%a, %d %b %Y %H:%M:%S'), timezone_string)
 
     template_values = {
-        u'project_name': self._project_name,
+        u'package_name': package_name,
         u'project_version': self._project_version,
         u'maintainer_email_address': self._EMAIL_ADDRESS,
         u'date_time': date_time_string}
@@ -330,7 +335,7 @@ class DpkgBuildFilesGenerator(object):
       if self._dependency_definition.architecture_dependent:
         build_depends.append(u'python-dev')
 
-      build_depends.append(u'python3-all (>= 3.4~)')
+      build_depends.append(u'python3-all (>= 3.2~)')
       build_depends.append(u'python3-setuptools')
 
       if self._dependency_definition.architecture_dependent:
@@ -382,7 +387,6 @@ class DpkgBuildFilesGenerator(object):
         u'description_long': description_long,
         u'description_short': description_short,
         u'package_name': package_name,
-        u'project_name': self._project_name,
         u'python_depends': python_depends,
         u'python3_depends': python3_depends,
         u'upstream_homepage': self._dependency_definition.homepage_url,
