@@ -265,6 +265,9 @@ class DpkgBuildFilesGenerator(object):
     else:
       package_name = self._project_name
 
+    if package_name.startswith(u'python-'):
+      package_name = package_name[7:]
+
     timezone_minutes, _ = divmod(time.timezone, 60)
     timezone_hours, timezone_minutes = divmod(timezone_minutes, 60)
 
@@ -490,6 +493,9 @@ class DpkgBuildFilesGenerator(object):
       package_name = self._dependency_definition.dpkg_name
     else:
       package_name = self._project_name
+
+    if package_name.startswith(u'python-'):
+      package_name = package_name[7:]
 
     build_system = u'--buildsystem=autoconf'
 
