@@ -838,14 +838,12 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       True if a build is required, False otherwise.
     """
     if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
+      package_name = self._dependency_definition.dpkg_name
     else:
-      project_name = source_helper_object.project_name
-      if not project_name.startswith(u'python-'):
-        project_name = u'python-{0:s}'.format(project_name)
+      package_name = self._project_name
 
     changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
-        project_name, source_helper_object.project_version,
+        package_name, source_helper_object.project_version,
         self.version_suffix, self.distribution, self.architecture)
 
     return not os.path.exists(changes_filename)
@@ -857,18 +855,16 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
     """
     if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
+      package_name = self._dependency_definition.dpkg_name
     else:
-      project_name = source_helper_object.project_name
-      if not project_name.startswith(u'python-'):
-        project_name = u'python-{0:s}'.format(project_name)
+      package_name = self._project_name
 
     filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, source_helper_object.project_version))
+        package_name, source_helper_object.project_version))
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames = glob.glob(u'{0:s}_*.orig.tar.gz'.format(project_name))
+    filenames = glob.glob(u'{0:s}_*.orig.tar.gz'.format(package_name))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -876,12 +872,12 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
     filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
-        project_name, source_helper_object.project_version))
+        package_name, source_helper_object.project_version))
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution_architecture.*
     filenames = glob.glob(u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
-        project_name, self.version_suffix, self.distribution,
+        package_name, self.version_suffix, self.distribution,
         self.architecture))
 
     for filename in filenames:
@@ -892,7 +888,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution.*
     filenames = glob.glob(u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
-        project_name, self.version_suffix, self.distribution))
+        package_name, self.version_suffix, self.distribution))
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
