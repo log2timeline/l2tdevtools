@@ -840,7 +840,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     if self._dependency_definition.dpkg_name:
       package_name = self._dependency_definition.dpkg_name
     else:
-      package_name = self._project_name
+      package_name = source_helper_object.project_name
 
     changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
         package_name, source_helper_object.project_version,
@@ -857,7 +857,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     if self._dependency_definition.dpkg_name:
       package_name = self._dependency_definition.dpkg_name
     else:
-      package_name = self._project_name
+      package_name = source_helper_object.project_name
 
     filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
         package_name, source_helper_object.project_version))
