@@ -1105,6 +1105,15 @@ class SphinxAPIDocHelper(CLIHelper):
 
   _MINIMUM_VERSION_TUPLE = (1, 2, 0)
 
+  def __init__(self, project):
+    """Initializes a sphinx-apidoc helper object.
+
+    Args:
+      project: string containing the github project name.
+    """
+    super(SphinxAPIDocHelper, self).__init__()
+    self._project = project
+
   def CheckUpToDateVersion(self):
     """Checks if the sphinx-apidoc version is up to date.
 
@@ -1488,7 +1497,8 @@ class ReviewHelper(object):
           email_address, no_browser=self._no_browser)
 
     if self._command == u'merge':
-      self._sphinxapidoc_helper = SphinxAPIDocHelper()
+      self._sphinxapidoc_helper = SphinxAPIDocHelper(
+          self._project_name)
       if not self._sphinxapidoc_helper.CheckUpToDateVersion():
         print((
             u'{0:s} aborted - sphinx-apidoc verion 1.2.0 or later '
@@ -1748,7 +1758,7 @@ def Main():
   # TODO: add option to directly pass code review issue number.
 
   argument_parser.add_argument(
-      u'--diffbase', dest=u'diffbase', action=u'store', type=unicode,
+      u'--diffbase', dest=u'diffbase', action=u'store', type=str,
       metavar=u'DIFFBASE', default=u'upstream/master', help=(
           u'The diffbase the default is upstream/master. This options is used '
           u'to indicate to what "base" the code changes are relative to and '
