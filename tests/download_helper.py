@@ -171,7 +171,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = u'libyal'
   _PROJECT_NAME = u'libevt'
   _PROJECT_STATUS = u'alpha'
-  _PROJECT_VERSION = u'20151206'
+  _PROJECT_VERSION = u'20160107'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -217,7 +217,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
-  _PROJECT_VERSION = u'20151227'
+  _PROJECT_VERSION = u'20160108'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""

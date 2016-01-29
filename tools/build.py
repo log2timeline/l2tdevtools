@@ -23,13 +23,13 @@ __file__ = os.path.abspath(__file__)
 
 # TODO: look into merging functionality with update dependencies script.
 
-
 class DependencyBuilder(object):
   """Class that helps in building dependencies."""
 
   # TODO: add phases for building sleuthkit/pytsk.
 
   # The distributions to build dpkg-source packages for.
+  # TODO: add u'xenial', u'y-series'
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
       u'precise', u'trusty', u'vivid', u'wily'])
 
@@ -43,6 +43,7 @@ class DependencyBuilder(object):
     """
     super(DependencyBuilder, self).__init__()
     self._build_target = build_target
+    self._l2tdevtools_path = os.path.dirname(os.path.dirname(__file__))
 
   def _BuildDependency(self, download_helper_object, dependency_definition):
     """Builds a dependency.
@@ -60,6 +61,9 @@ class DependencyBuilder(object):
 
     source_helper_object.Clean()
 
+    # TODO: add a step to make sure build environment is sane
+    # e.g. _CheckStatusIsClean()
+
     # Unify http:// and https:// URLs for the download helper check.
     download_url = dependency_definition.download_url
     if download_url.startswith(u'https://'):
@@ -76,63 +80,15 @@ class DependencyBuilder(object):
           logging.error(u'Running: "{0:s}" failed.'.format(command))
           return False
 
-    elif dependency_definition.build_system == u'configure_make':
-      if not self._BuildConfigureMake(
-          source_helper_object, dependency_definition):
-        return False
+      return True
 
-    elif dependency_definition.build_system == u'setup_py':
-      if not self._BuildSetupPy(
-          source_helper_object, dependency_definition):
-        return False
-
-    else:
+    build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
+        dependency_definition, self._build_target, self._l2tdevtools_path)
+    if not build_helper_object:
       logging.warning(u'Unable to determine how to build: {0:s}'.format(
           dependency_definition.name))
       return False
 
-    return True
-
-  def _BuildConfigureMake(self, source_helper_object, dependency_definition):
-    """Builds a Python module that comes with configure and make.
-
-    Args:
-      source_helper_object: the source helper (instance of SourceHelper).
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
-
-    Returns:
-      True if the build is successful or False on error.
-    """
-    tools_path = os.path.dirname(__file__)
-    data_path = os.path.join(os.path.dirname(tools_path), u'data')
-
-    build_helper_object = None
-    distributions = [None]
-    if self._build_target == u'dpkg':
-      build_helper_object = build_helper.ConfigureMakeDpkgBuildHelper(
-          dependency_definition, data_path)
-
-    elif self._build_target == u'dpkg-source':
-      build_helper_object = build_helper.ConfigureMakeSourceDpkgBuildHelper(
-          dependency_definition, data_path)
-      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
-
-    elif self._build_target == u'msi':
-      build_helper_object = build_helper.ConfigureMakeMsiBuildHelper(
-          dependency_definition, data_path, tools_path)
-
-    elif self._build_target == u'pkg':
-      build_helper_object = build_helper.ConfigureMakePkgBuildHelper(
-          dependency_definition, data_path)
-
-    elif self._build_target == u'rpm':
-      build_helper_object = build_helper.ConfigureMakeRpmBuildHelper(
-          dependency_definition, data_path)
-
-    if not build_helper_object:
-      return False
-
     build_dependencies = build_helper_object.CheckBuildDependencies()
     if build_dependencies:
       logging.warning(
@@ -140,128 +96,65 @@ class DependencyBuilder(object):
               u', '.join(build_dependencies)))
       return False
 
+    if self._build_target == u'dpkg-source':
+      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
+    else:
+      distributions = [None]
+
     for distribution in distributions:
-      if distribution:
-        build_helper_object.distribution = distribution
+      if not self._BuildDependencyForDistribution(
+          build_helper_object, source_helper_object, distribution):
+        return False
 
-      output_filename = build_helper_object.GetOutputFilename(
-          source_helper_object)
-
-      build_helper_object.Clean(source_helper_object)
-
-      if not os.path.exists(output_filename):
-        if not build_helper_object.Build(source_helper_object):
-          if not os.path.exists(build_helper_object.LOG_FILENAME):
-            logging.warning(u'Build of: {0:s} failed.'.format(
-                source_helper_object.project_name))
-          else:
-            log_filename = u'{0:s}_{1:s}'.format(
-                source_helper_object.project_name,
-                build_helper_object.LOG_FILENAME)
-
-            # Remove older logfiles if they exists otherwise the rename
-            # fails on Windows.
-            if os.path.exists(log_filename):
-              os.remove(log_filename)
-
-            os.rename(build_helper_object.LOG_FILENAME, log_filename)
-            logging.warning((
-                u'Build of: {0:s} failed, for more information check '
-                u'{1:s}').format(
-                    source_helper_object.project_name, log_filename))
-          return False
-
-      if os.path.exists(build_helper_object.LOG_FILENAME):
-        logging.info(u'Removing: {0:s}'.format(
-            build_helper_object.LOG_FILENAME))
-        os.remove(build_helper_object.LOG_FILENAME)
+    if os.path.exists(build_helper_object.LOG_FILENAME):
+      logging.info(u'Removing: {0:s}'.format(
+          build_helper_object.LOG_FILENAME))
+      os.remove(build_helper_object.LOG_FILENAME)
 
     return True
 
-  def _BuildSetupPy(self, source_helper_object, dependency_definition):
-    """Builds a Python module that comes with setup.py.
+  def _BuildDependencyForDistribution(
+      self, build_helper_object, source_helper_object, distribution):
+    """Builds a dependency for a specific distribution.
 
     Args:
+      build_helper_object: the build helper (instance of BuildHelper).
       source_helper_object: the source helper (instance of SourceHelper).
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      distribution: a string containing the name of the distribution.
 
     Returns:
       True if the build is successful or False on error.
     """
-    tools_path = os.path.dirname(__file__)
-    data_path = os.path.join(os.path.dirname(tools_path), u'data')
+    if distribution:
+      build_helper_object.distribution = distribution
 
-    build_helper_object = None
-    distributions = [None]
-    if self._build_target == u'dpkg':
-      build_helper_object = build_helper.SetupPyDpkgBuildHelper(
-          dependency_definition, data_path)
+    build_required = build_helper_object.CheckBuildRequired(
+        source_helper_object)
 
-    elif self._build_target == u'dpkg-source':
-      build_helper_object = build_helper.SetupPySourceDpkgBuildHelper(
-          dependency_definition, data_path)
-      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
+    build_helper_object.Clean(source_helper_object)
 
-    elif self._build_target == u'msi':
-      build_helper_object = build_helper.SetupPyMsiBuildHelper(
-          dependency_definition, data_path)
+    if not build_required or build_helper_object.Build(source_helper_object):
+      return True
 
-    elif self._build_target == u'pkg':
-      build_helper_object = build_helper.SetupPyPkgBuildHelper(
-          dependency_definition, data_path)
+    if not os.path.exists(build_helper_object.LOG_FILENAME):
+      logging.warning(u'Build of: {0:s} failed.'.format(
+          source_helper_object.project_name))
+    else:
+      log_filename = u'{0:s}_{1:s}'.format(
+          source_helper_object.project_name,
+          build_helper_object.LOG_FILENAME)
 
-    elif self._build_target == u'rpm':
-      build_helper_object = build_helper.SetupPyRpmBuildHelper(
-          dependency_definition, data_path)
+      # Remove older logfiles if they exists otherwise the rename
+      # fails on Windows.
+      if os.path.exists(log_filename):
+        os.remove(log_filename)
 
-    if not build_helper_object:
-      return False
-
-    build_dependencies = build_helper_object.CheckBuildDependencies()
-    if build_dependencies:
-      logging.warning(
-          u'Missing build dependencies: {0:s}.'.format(
-              u', '.join(build_dependencies)))
-      return False
-
-    for distribution in distributions:
-      if distribution:
-        build_helper_object.distribution = distribution
-
-      output_filename = build_helper_object.GetOutputFilename(
-          source_helper_object)
-
-      build_helper_object.Clean(source_helper_object)
-
-      if not os.path.exists(output_filename):
-        if not build_helper_object.Build(source_helper_object):
-          if not os.path.exists(build_helper_object.LOG_FILENAME):
-            logging.warning(u'Build of: {0:s} failed.'.format(
-                source_helper_object.project_name))
-          else:
-            log_filename = u'{0:s}_{1:s}'.format(
-                source_helper_object.project_name,
-                build_helper_object.LOG_FILENAME)
-
-            # Remove older logfiles if they exists otherwise the rename
-            # fails on Windows.
-            if os.path.exists(log_filename):
-              os.remove(log_filename)
-
-            os.rename(build_helper_object.LOG_FILENAME, log_filename)
-            logging.warning((
-                u'Build of: {0:s} failed, for more information check '
-                u'{1:s}').format(
-                    source_helper_object.project_name, log_filename))
-          return False
-
-      if os.path.exists(build_helper_object.LOG_FILENAME):
-        logging.info(u'Removing: {0:s}'.format(
-            build_helper_object.LOG_FILENAME))
-        os.remove(build_helper_object.LOG_FILENAME)
-
-    return True
+      os.rename(build_helper_object.LOG_FILENAME, log_filename)
+      logging.warning((
+          u'Build of: {0:s} failed, for more information check '
+          u'{1:s}').format(
+              source_helper_object.project_name, log_filename))
+    return False
 
   def Build(self, dependency_definition):
     """Builds a dependency.
@@ -283,6 +176,9 @@ class DependencyBuilder(object):
     # Unify http:// and https:// URLs for the download helper check.
     if download_url.startswith(u'https://'):
       download_url = u'http://{0:s}'.format(download_url[8:])
+
+    # Remove URL arguments.
+    download_url, _, _ = download_url.partition(u'?')
 
     if download_url.startswith(u'http://pypi.python.org/pypi/'):
       download_helper_object = download_helper.PyPiDownloadHelper()
@@ -311,7 +207,8 @@ class DependencyBuilder(object):
 
 def Main():
   build_targets = frozenset([
-      u'download', u'dpkg', u'dpkg-source', u'msi', u'pkg', u'rpm'])
+      u'download', u'dpkg', u'dpkg-source', u'msi', u'osc', u'pkg', u'rpm',
+      u'source'])
 
   argument_parser = argparse.ArgumentParser(description=(
       u'Downloads and builds the latest versions of projects.'))
@@ -323,7 +220,7 @@ def Main():
   argument_parser.add_argument(
       u'--build-directory', u'--build_directory', action=u'store',
       metavar=u'DIRECTORY', dest=u'build_directory', type=str,
-      default=u'build', help=u'The location of the the build directory.')
+      default=u'build', help=u'The location of the build directory.')
 
   argument_parser.add_argument(
       u'-c', u'--config', dest=u'config_file', action=u'store',
@@ -417,9 +314,14 @@ def Main():
   os.chdir(options.build_directory)
 
   failed_builds = []
+  undefined_packages = list(projects)
   for dependency_definition in builds:
     if projects and dependency_definition.name not in projects:
       continue
+
+    if undefined_packages:
+      project_index = undefined_packages.index(dependency_definition.name)
+      del undefined_packages[project_index]
 
     logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
 
@@ -430,6 +332,12 @@ def Main():
       failed_builds.append(dependency_definition.name)
 
   os.chdir(current_working_directory)
+
+  if undefined_packages:
+    print(u'')
+    print(u'Undefined packages:')
+    for undefined_package in undefined_packages:
+      print(u'\t{0:s}'.format(undefined_package))
 
   if failed_builds:
     print(u'')

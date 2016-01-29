@@ -155,7 +155,7 @@ class SphinxAPIDocHelperTest(unittest.TestCase):
 
   def setUp(self):
     """Sets up a test case."""
-    self._sphinxapidoc_helper = review.SphinxAPIDocHelper()
+    self._sphinxapidoc_helper = review.SphinxAPIDocHelper(u'plaso')
 
   def testCheckUpToDateVersion(self):
     """Tests the CheckUpToDateVersion function."""

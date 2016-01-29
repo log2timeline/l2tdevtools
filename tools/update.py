@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Script to update prebuilt versions of the projects."""
 
+from __future__ import print_function
 import argparse
 import glob
 import json
@@ -192,6 +193,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
     if not page_content:
       return
 
+    # TODO: skip SHA256SUMS
+
     download_urls = []
     if use_api:
       # The page content consist of JSON data that contains a list of dicts.
@@ -232,10 +235,10 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       matches = re.findall(expression_string, page_content)
 
       for match in matches:
-        _, _, download_url = match.rpartition(u'/')
+        _, _, filename = match.rpartition(u'/')
         download_url = (
             u'https://github.com/log2timeline/l2tbinaries/raw/master/{0:s}/'
-            u'{1:s}').format(sub_directory, download_url)
+            u'{1:s}').format(sub_directory, filename)
         download_urls.append(download_url)
 
     return download_urls
@@ -245,30 +248,40 @@ class DependencyUpdater(object):
   """Class that helps in updating dependencies."""
 
   def __init__(
-      self, download_directory=u'build', force_install=False,
-      msi_targetdir=None, preferred_machine_type=None,
-      preferred_operating_system=None):
+      self, download_directory=u'build', download_only=False,
+      exclude_packages=False, force_install=False, msi_targetdir=None,
+      preferred_machine_type=None, preferred_operating_system=None,
+      verbose_output=False):
     """Initializes the dependency updater.
 
     Args:
       download_directory: optional download directory. The default is 'build'
                           to match the build directory of the build script.
+      download_only: optional boolean value to indicate the dependency packages
+                     should only be downloaded.
+      exclude_packages: optional boolean value to indicate pacakge names
+                        should be excluded instead of included.
       force_install: optional boolean value to indicate installation (update)
-                     should be forced. The default is False.
+                     should be forced.
       msi_targetdir: optional string value containing the MSI TARGETDIR
-                     property. The default is None.
+                     property.
       preferred_machine_type: optional preferred machine type. The default
                               is None, which will auto-detect the current
                               machine type.
       preferred_operating_system: optional preferred operating system. The
                                   default is None, which will auto-detect
                                   the current operating system.
+      verbose_output: optional boolean value indication if more verbose output
+                      should be provided.
     """
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
     self._download_helper = GithubRepoDownloadHelper()
+    self._download_only = download_only
+    self._exclude_packages = exclude_packages
     self._force_install = force_install
     self._msi_targetdir = msi_targetdir
+    self._verbose_output = verbose_output
 
     if preferred_operating_system:
       self._operating_system = preferred_operating_system
@@ -280,9 +293,13 @@ class DependencyUpdater(object):
     else:
       self._preferred_machine_type = None
 
-  def _GetPackageFilenamesAndVersions(self):
+  def _GetPackageFilenamesAndVersions(self, package_names):
     """Determines the package filenames and versions.
 
+    Args:
+      package_names: a list of package names that should be updated
+                     if an update is available. An empty list represents
+                     all available packages.
     Args:
       A tuple of two dictionaries one containing the package filenames
       another the package versions per package name.
@@ -318,7 +335,8 @@ class DependencyUpdater(object):
         # Ignore all other file exensions.
         continue
 
-      if package_name.startswith(u'pytsk3'):
+      if (package_name.startswith(u'pefile') or
+          package_name.startswith(u'pytsk3')):
         # We need to use the most left '-' character as the separator of the
         # name and the version, since version can contain the '-' character.
         name, _, version = package_name.partition(u'-')
@@ -330,9 +348,15 @@ class DependencyUpdater(object):
       package_prefix = name
 
       version = version.split(u'.')
-      if name == u'pytsk3':
+      if name in (u'pefile', u'pytsk3'):
         last_part = version.pop()
         version.extend(last_part.split(u'-'))
+
+      # Ignore package names if defined.
+      if package_names and (
+          (not self._exclude_packages and name not in package_names) or
+          (self._exclude_packages and name in package_names)):
+        continue
 
       if name not in package_versions:
         compare_result = 1
@@ -516,6 +540,12 @@ class DependencyUpdater(object):
         logging.error(u'Running: "{0:s}" failed.'.format(command))
         result = False
 
+        if self._verbose_output:
+          with open(log_file, 'r') as file_object:
+            log_file_contents = file_object.read()
+            log_file_contents = log_file_contents.decode(u'utf-16-le')
+            print(log_file_contents.encode(u'ascii', errors=u'replace'))
+
     return result
 
   def _UninstallPackages(self, package_versions):
@@ -661,7 +691,6 @@ class DependencyUpdater(object):
             elif attribute.startswith(u'volume: '):
               _, _, volume = attribute.rpartition(u'volume: ')
 
-          version = version.split(u'.')
           if self._force_install:
             compare_result = -1
           elif name not in package_versions:
@@ -671,7 +700,9 @@ class DependencyUpdater(object):
             # be updated, so just uninstall and update it any way.
             compare_result = -1
           else:
-            compare_result = CompareVersions(version, package_versions[name])
+            version_tuple = version.split(u'.')
+            compare_result = CompareVersions(
+                version_tuple, package_versions[name])
             if compare_result >= 0:
               # The latest or newer version is already installed.
               del package_versions[name]
@@ -753,7 +784,7 @@ class DependencyUpdater(object):
 
         found_package = name in package_versions
 
-        version = version.split(u'.')
+        version_tuple = version.split(u'.')
         if self._force_install:
           compare_result = -1
         elif not found_package:
@@ -763,7 +794,8 @@ class DependencyUpdater(object):
           # be updated, so just uninstall and update it any way.
           compare_result = -1
         else:
-          compare_result = CompareVersions(version, package_versions[name])
+          compare_result = CompareVersions(
+              version_tuple, package_versions[name])
           if compare_result >= 0:
             # The latest or newer version is already installed.
             del package_versions[name]
@@ -775,8 +807,7 @@ class DependencyUpdater(object):
             compare_result = -1
 
         if compare_result < 0:
-          logging.info(u'Removing: {0:s} {1:s}'.format(
-              name, u'.'.join(version)))
+          logging.info(u'Removing: {0:s} {1:s}'.format(name, version))
           product.Uninstall()
 
     return True
@@ -787,26 +818,19 @@ class DependencyUpdater(object):
     Args:
       package_names: a list of package names that should be updated
                      if an update is available. An empty list represents
-                     all available packges.
+                     all available packages.
 
     Returns:
       A boolean value indicating the update was successful.
     """
-    package_filenames, package_versions = self._GetPackageFilenamesAndVersions()
+    package_filenames, package_versions = self._GetPackageFilenamesAndVersions(
+        package_names)
     if not package_filenames:
       logging.error(u'No packages found.')
       return False
 
-    if package_names:
-      # Since the dictionary is going to change a list of the keys is needed.
-      for package_name in package_filenames.keys():
-        if package_name not in package_names:
-          del package_filenames[package_name]
-
-      # Since the dictionary is going to change a list of the keys is needed.
-      for package_name in package_versions.keys():
-        if package_name not in package_names:
-          del package_versions[package_name]
+    if self._download_only:
+      return True
 
     if not self._UninstallPackages(package_versions):
       logging.error(u'Unable to uninstall packages.')
@@ -829,7 +853,12 @@ def Main():
   argument_parser.add_argument(
       u'--download-directory', u'--download_directory', action=u'store',
       metavar=u'DIRECTORY', dest=u'download_directory', type=str,
-      default=u'build', help=u'The location of the the download directory.')
+      default=u'build', help=u'The location of the download directory.')
+
+  argument_parser.add_argument(
+      '-e', '--exclude', action='store_true', dest='exclude_packages',
+      default=False, help=(
+          u'Excludes the package names instead of including them.'))
 
   argument_parser.add_argument(
       '-f', '--force', action='store_true', dest='force_install',
@@ -837,6 +866,12 @@ def Main():
           u'Force installation. This option removes existing versions '
           u'of installed dependencies. The default behavior is to only'
           u'install a dependency if not or an older version is installed.'))
+
+  argument_parser.add_argument(
+      '--download-only', u'--download_only', action='store_true',
+      dest='download_only', default=False, help=(
+          u'Only download the dependencies. The default behavior is to '
+          u'download and update the dependencies.'))
 
   argument_parser.add_argument(
       '--machine-type', '--machine_type', action=u'store', metavar=u'TYPE',
@@ -853,6 +888,10 @@ def Main():
           u'is not recommended unless want to force the installation of the '
           u'MSIs into different directory than the system default.'))
 
+  argument_parser.add_argument(
+      '-v', '--verbose', dest='verbose', action='store_true', default=False,
+      help=u'have more verbose output.')
+
   options = argument_parser.parse_args()
 
   logging.basicConfig(
@@ -860,9 +899,12 @@ def Main():
 
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
+      download_only=options.download_only,
+      exclude_packages=options.exclude_packages,
       force_install=options.force_install,
       msi_targetdir=options.msi_targetdir,
-      preferred_machine_type=options.machine_type)
+      preferred_machine_type=options.machine_type,
+      verbose_output=options.verbose)
 
   return dependency_updater.UpdatePackages(options.package_names)
 

@@ -120,7 +120,7 @@ class CodeReviewHelper(CLIHelper):
               issue_number, exception))
       return False
 
-    if url_object.code != 200:
+    if url_object.code not in (200, 201):
       logging.error((
           u'Failed publish to codereview issue: {0!s} with status code: '
           u'{1:d}').format(issue_number, url_object.code))
@@ -185,16 +185,22 @@ class CodeReviewHelper(CLIHelper):
       An integer containing the code review number or None.
     """
     reviewers = list(self._REVIEWERS)
+    reviewers_cc = list(self._REVIEWERS_CC)
 
-    # Remove self from reviewers list.
     try:
-      list_index = reviewers.index(self._email_address)
-      reviewers.pop(list_index)
+      # Remove self from reviewers list.
+      reviewers.remove(self._email_address)
     except ValueError:
       pass
 
-    reviewers = u','.join(self._REVIEWERS)
-    reviewers_cc = u','.join(self._REVIEWERS_CC)
+    try:
+      # Remove self from reviewers CC list.
+      reviewers_cc.remove(self._email_address)
+    except ValueError:
+      pass
+
+    reviewers = u','.join(reviewers)
+    reviewers_cc = u','.join(reviewers_cc)
 
     command = u'{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
@@ -483,10 +489,13 @@ class GitHelper(CLIHelper):
         u'git log HEAD..upstream/master --oneline')
     return exit_code == 0 and not output
 
-  def CommitToOriginInNameOf(self, author, description):
+  def CommitToOriginInNameOf(
+      self, codereview_issue_number, author, description):
     """Commits changes in name of an author to the master branch of origin.
 
     Args:
+      codereview_issue_number: an integer or string containing the codereview
+                               issue number.
       author: string containing the full name and email address of the author.
               E.g. "Full Name <email.address@example.com>".
       description: string containing the description of the commit.
@@ -494,8 +503,10 @@ class GitHelper(CLIHelper):
     Returns:
       A boolean indicating the changes were committed to the git repo.
     """
-    command = u'git commit -a --author="{0:s}" -m "{1:s}"'.format(
-        author, description)
+    command = (
+        u'git commit -a --author="{0:s}" '
+        u'-m "Code review: {1:s}: {2:s}"').format(
+            author, codereview_issue_number, description)
     exit_code, _, _ = self.RunCommand(command)
     if exit_code != 0:
       return False
@@ -637,7 +648,6 @@ class GitHelper(CLIHelper):
     """Forces a push of the active branch of the git repo to origin.
 
     Args:
-    Args:
       branch: name of the feature branch.
       force: optional boolean value to indicate the push should be forced.
 
@@ -769,8 +779,7 @@ class GitHubHelper(object):
               codereview_issue_number, exception))
       return False
 
-    if url_object.code != 200:
-      # TODO: determine why this is failing while PR is created.
+    if url_object.code not in (200, 201):
       logging.error(
           u'Failed creating pull request: {0!s} with status code: {1:d}'.format(
               codereview_issue_number, url_object.code))
@@ -974,6 +983,8 @@ class ProjectHelper(object):
         version_string = u'__version__ = \'{0:s}\''.format(date_version)
         lines[line_index] = version_string
 
+    version_file_contents = u'\n'.join(lines)
+
     try:
       version_file_contents = version_file_contents.encode(u'utf-8')
     except UnicodeEncodeError as exception:
@@ -1065,7 +1076,7 @@ class ReadTheDocsHelper(object):
       A boolean indicating the build was triggered.
     """
     readthedocs_url = u'https://readthedocs.org/build/{0:s}'.format(
-        self._project_name)
+        self._project)
 
     request = urllib2.Request(readthedocs_url)
 
@@ -1094,6 +1105,15 @@ class SphinxAPIDocHelper(CLIHelper):
 
   _MINIMUM_VERSION_TUPLE = (1, 2, 0)
 
+  def __init__(self, project):
+    """Initializes a sphinx-apidoc helper object.
+
+    Args:
+      project: string containing the github project name.
+    """
+    super(SphinxAPIDocHelper, self).__init__()
+    self._project = project
+
   def CheckUpToDateVersion(self):
     """Checks if the sphinx-apidoc version is up to date.
 
@@ -1115,7 +1135,7 @@ class SphinxAPIDocHelper(CLIHelper):
 
   def UpdateAPIDocs(self):
     """Updates the API docs."""
-    command = u'sphinx-apidoc -f -o docs {0:s}'.format(self._project_name)
+    command = u'sphinx-apidoc -f -o docs {0:s}'.format(self._project)
     exit_code, output, _ = self.RunCommand(command)
     print(output)
 
@@ -1245,7 +1265,8 @@ class ReviewHelper(object):
   """Class that defines review helper functions."""
 
   def __init__(
-      self, command, github_origin, feature_branch, diffbase, no_browser=False):
+      self, command, github_origin, feature_branch, diffbase, no_browser=False,
+      no_confirm=False):
     """Initializes a revies helper object.
 
     Args:
@@ -1256,6 +1277,8 @@ class ReviewHelper(object):
       no_browser: optional boolean value to indicate if the functionality
                   to use the webbrowser to get the OAuth token should be
                   disabled.
+      no_confirm: optional boolean value to indicate if the defaults should
+                  be applied without confirmation.
     """
     super(ReviewHelper, self).__init__()
     self._active_branch = None
@@ -1272,6 +1295,7 @@ class ReviewHelper(object):
     self._merge_author = None
     self._merge_description = None
     self._no_browser = no_browser
+    self._no_confirm = no_confirm
     self._project_helper = None
     self._project_name = None
     self._sphinxapidoc_helper = None
@@ -1295,7 +1319,8 @@ class ReviewHelper(object):
             self._command.title()))
         return False
 
-    if self._command not in ('lint', 'test'):
+    if self._command not in (
+        u'lint', u'test', u'update-version', u'update_version'):
       if self._git_helper.CheckHasUncommittedChanges():
         print(u'{0:s} aborted - detected uncommitted changes.'.format(
             self._command.title()))
@@ -1327,7 +1352,14 @@ class ReviewHelper(object):
     Returns:
       A boolean value to indicate if the state is sane.
     """
-    if self._command in (u'create', u'close', u'update'):
+    if self._command == u'close':
+      if not self._git_helper.SynchronizeWithUpstream():
+        print((
+            u'{0:s} aborted - unable to synchronize with '
+            u'upstream/master.').format(self._command.title()))
+        return False
+
+    elif self._command in (u'create', u'update'):
       if not self._git_helper.CheckSynchronizedWithUpstream():
         if not self._git_helper.SynchronizeWithUpstream():
           print((
@@ -1410,10 +1442,13 @@ class ReviewHelper(object):
     print(last_commit_message)
     print(u'')
 
-    print(u'Enter a description for the code review or hit enter to use the')
-    print(u'automatic generated one:')
-    user_input = sys.stdin.readline()
-    user_input = user_input.strip()
+    if self._no_confirm:
+      user_input = None
+    else:
+      print(u'Enter a description for the code review or hit enter to use the')
+      print(u'automatic generated one:')
+      user_input = sys.stdin.readline()
+      user_input = user_input.strip()
 
     if not user_input:
       description = last_commit_message
@@ -1435,7 +1470,7 @@ class ReviewHelper(object):
 
     create_github_origin = u'{0:s}:{1:s}'.format(
         git_origin, self._active_branch)
-    if self._github_helper.CreatePullRequest(
+    if not self._github_helper.CreatePullRequest(
         github_access_token, codereview_issue_number, create_github_origin,
         description):
       print(u'Unable to create pull request.')
@@ -1463,13 +1498,14 @@ class ReviewHelper(object):
 
     self._github_helper = GitHubHelper(u'log2timeline', self._project_name)
 
-    if self._command in (u'create', u'merge', u'update'):
+    if self._command in (u'close', u'create', u'merge', u'update'):
       email_address = self._git_helper.GetEmailAddress()
       self._codereview_helper = CodeReviewHelper(
           email_address, no_browser=self._no_browser)
 
     if self._command == u'merge':
-      self._sphinxapidoc_helper = SphinxAPIDocHelper()
+      self._sphinxapidoc_helper = SphinxAPIDocHelper(
+          self._project_name)
       if not self._sphinxapidoc_helper.CheckUpToDateVersion():
         print((
             u'{0:s} aborted - sphinx-apidoc verion 1.2.0 or later '
@@ -1552,7 +1588,7 @@ class ReviewHelper(object):
       readthedocs_helper.TriggerBuild()
 
     if not self._git_helper.CommitToOriginInNameOf(
-        self._merge_author, self._merge_description):
+        codereview_issue_number, self._merge_author, self._merge_description):
       print(u'Unable to commit changes.')
       self._git_helper.DropUncommittedChanges()
       return False
@@ -1687,10 +1723,13 @@ class ReviewHelper(object):
     print(last_commit_message)
     print(u'')
 
-    print(u'Enter a description for the update or hit enter to use the')
-    print(u'automatic generated one:')
-    user_input = sys.stdin.readline()
-    user_input = user_input.strip()
+    if self._no_confirm:
+      user_input = None
+    else:
+      print(u'Enter a description for the update or hit enter to use the')
+      print(u'automatic generated one:')
+      user_input = sys.stdin.readline()
+      user_input = user_input.strip()
 
     if not user_input:
       description = last_commit_message
@@ -1705,6 +1744,22 @@ class ReviewHelper(object):
 
     return True
 
+  def UpdateVersion(self):
+    """Updates the version.
+
+    Returns:
+      A boolean value to indicate if the version update was successful.
+    """
+    if not self._project_helper.UpdateVersionFile():
+      print(u'Unable to update version file.')
+      return False
+
+    if not self._project_helper.UpdateDpkgChangelogFile():
+      print(u'Unable to update dpkg changelog file.')
+      return False
+
+    return False
+
 
 def Main():
   argument_parser = argparse.ArgumentParser(
@@ -1713,7 +1768,7 @@ def Main():
   # TODO: add option to directly pass code review issue number.
 
   argument_parser.add_argument(
-      u'--diffbase', dest=u'diffbase', action=u'store', type=unicode,
+      u'--diffbase', dest=u'diffbase', action=u'store', type=str,
       metavar=u'DIFFBASE', default=u'upstream/master', help=(
           u'The diffbase the default is upstream/master. This options is used '
           u'to indicate to what "base" the code changes are relative to and '
@@ -1724,6 +1779,12 @@ def Main():
       action=u'store_true', default=False, help=(
           u'disable the functionality to use the webbrowser to get the OAuth '
           u'token should be disabled.'))
+
+  argument_parser.add_argument(
+      u'--noconfirm', u'--no-confirm', u'--no_confirm', dest=u'no_confirm',
+      action=u'store_true', default=False, help=(
+          u'do not ask for confirmation apply defaults.\n'
+          u'WARNING: only use this when you are familiar with the defaults.'))
 
   commands_parser = argument_parser.add_subparsers(dest=u'command')
 
@@ -1774,6 +1835,9 @@ def Main():
 
   commands_parser.add_parser(u'update')
 
+  commands_parser.add_parser(u'update-version')
+  commands_parser.add_parser(u'update_version')
+
   options = argument_parser.parse_args()
 
   codereview_issue_number = None
@@ -1815,7 +1879,8 @@ def Main():
 
   review_helper = ReviewHelper(
       options.command, github_origin, feature_branch,
-      options.diffbase, no_browser=options.no_browser)
+      options.diffbase, no_browser=options.no_browser,
+      no_confirm=options.no_confirm)
 
   if not review_helper.InitializeHelpers():
     return False
@@ -1836,27 +1901,26 @@ def Main():
   if not review_helper.Test():
     return False
 
+  result = False
   if options.command == u'create':
-    if not review_helper.Create():
-      return False
+    result = review_helper.Create()
 
   elif options.command == u'close':
-    if not review_helper.Close():
-      return False
+    result = review_helper.Close()
 
   elif options.command == u'merge':
-    if not review_helper.Merge(codereview_issue_number):
-      return False
+    result = review_helper.Merge(codereview_issue_number)
 
   elif options.command == u'open':
-    if not review_helper.Open(codereview_issue_number):
-      return False
+    result = review_helper.Open(codereview_issue_number)
 
   elif options.command == u'update':
-    if not review_helper.Update():
-      return False
+    result = review_helper.Update()
 
-  return True
+  elif options.command in (u'update-version', u'update_version'):
+    result = review_helper.UpdateVersion()
+
+  return result
 
 
 if __name__ == u'__main__':
