@@ -19,7 +19,7 @@ class DpkgBuildFilesGenerator(object):
       u'README', u'README.txt', u'README.TXT']
 
   _CHANGELOG_TEMPLATE = u'\n'.join([
-      u'{package_name:s} ({project_version!s}-1) unstable; urgency=low',
+      u'{source_package_name:s} ({project_version!s}-1) unstable; urgency=low',
       u'',
       u'  * Auto-generated',
       u'',
@@ -29,7 +29,7 @@ class DpkgBuildFilesGenerator(object):
       u'7'])
 
   _CONTROL_TEMPLATE_CONFIGURE_MAKE = u'\n'.join([
-      u'Source: {package_name:s}',
+      u'Source: {source_package_name:s}',
       u'Section: libs',
       u'Priority: extra',
       u'Maintainer: {upstream_maintainer:s}',
@@ -45,7 +45,7 @@ class DpkgBuildFilesGenerator(object):
       u''])
 
   _CONTROL_TEMPLATE_SETUP_PY = u'\n'.join([
-      u'Source: {package_name:s}',
+      u'Source: {source_package_name:s}',
       u'Section: python',
       u'Priority: extra',
       u'Maintainer: {upstream_maintainer:s}',
@@ -261,12 +261,9 @@ class DpkgBuildFilesGenerator(object):
       dpkg_path: the path to the dpkg files.
     """
     if self._dependency_definition.dpkg_name:
-      package_name = self._dependency_definition.dpkg_name
+      source_package_name = self._dependency_definition.dpkg_source_name
     else:
-      package_name = self._project_name
-
-    if package_name.startswith(u'python-'):
-      package_name = package_name[7:]
+      source_package_name = self._project_name
 
     timezone_minutes, _ = divmod(time.timezone, 60)
     timezone_hours, timezone_minutes = divmod(timezone_minutes, 60)
@@ -284,10 +281,10 @@ class DpkgBuildFilesGenerator(object):
         time.strftime(u'%a, %d %b %Y %H:%M:%S'), timezone_string)
 
     template_values = {
-        u'package_name': package_name,
-        u'project_version': self._project_version,
+        u'date_time': date_time_string,
         u'maintainer_email_address': self._EMAIL_ADDRESS,
-        u'date_time': date_time_string}
+        u'project_version': self._project_version,
+        u'source_package_name': source_package_name}
 
     filename = os.path.join(dpkg_path, u'changelog')
     with open(filename, 'wb') as file_object:
@@ -311,6 +308,11 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
+    if self._dependency_definition.dpkg_name:
+      source_package_name = self._dependency_definition.dpkg_source_name
+    else:
+      source_package_name = self._project_name
+
     if self._dependency_definition.dpkg_name:
       package_name = self._dependency_definition.dpkg_name
     else:
@@ -392,6 +394,7 @@ class DpkgBuildFilesGenerator(object):
         u'package_name': package_name,
         u'python_depends': python_depends,
         u'python3_depends': python3_depends,
+        u'source_package_name': source_package_name,
         u'upstream_homepage': self._dependency_definition.homepage_url,
         u'upstream_maintainer': self._dependency_definition.maintainer}
 

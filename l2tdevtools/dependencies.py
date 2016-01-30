@@ -27,6 +27,7 @@ class DependencyDefinition(object):
     dpkg_configure_options: list of the configure options when building a deb.
     dpkg_dependencies: list of dpkg dependencies.
     dpkg_name: string of the dpkg package name.
+    dpkg_source_name: string of the dpkg source package name.
     dpkg_template_control: string of the name of the dpkg control template file.
     dpkg_template_rules: string of the name of the dpkg rules template file.
     download_url: string of the source package download URL.
@@ -59,6 +60,7 @@ class DependencyDefinition(object):
     self.dpkg_configure_options = None
     self.dpkg_dependencies = None
     self.dpkg_name = None
+    self.dpkg_source_name = None
     self.dpkg_template_control = None
     self.dpkg_template_rules = None
     self.download_url = None
@@ -180,6 +182,8 @@ class DependencyDefinitionReader(object):
           config_parser, section_name, u'dpkg_dependencies')
       dependency_definition.dpkg_name = self._GetConfigValue(
           config_parser, section_name, u'dpkg_name')
+      dependency_definition.dpkg_source_name = self._GetConfigValue(
+          config_parser, section_name, u'dpkg_source_name')
       dependency_definition.dpkg_template_control = self._GetConfigValue(
           config_parser, section_name, u'dpkg_template_control')
       dependency_definition.dpkg_template_rules = self._GetConfigValue(
