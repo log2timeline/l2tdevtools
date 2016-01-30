@@ -260,7 +260,7 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
-    if self._dependency_definition.dpkg_name:
+    if self._dependency_definition.dpkg_source_name:
       source_package_name = self._dependency_definition.dpkg_source_name
     else:
       source_package_name = self._project_name
@@ -308,7 +308,7 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
-    if self._dependency_definition.dpkg_name:
+    if self._dependency_definition.dpkg_source_name:
       source_package_name = self._dependency_definition.dpkg_source_name
     else:
       source_package_name = self._project_name
