@@ -224,18 +224,21 @@ class CodeReviewHelper(CLIHelper):
           u'\n')
       print(u'Enter access token:', end=u' ')
 
+      sys.stdout.flush()
+
     exit_code, output, _ = self.RunCommand(command)
     print(output)
 
     if exit_code != 0:
       return
 
-    issue_url_line_start = (
+    issue_url_line_start_re = (
         u'Issue created. URL: http://codereview.appspot.com/')
     for line in output.split(b'\n'):
-      if line.startswith(issue_url_line_start):
+      if issue_url_line_start in line:
+        _, _, issue_number = line.rpartition(issue_url_line_start)
         try:
-          return int(line[len(issue_url_line_start):], 10)
+          return int(issue_number, 10)
         except ValueError:
           pass
 
