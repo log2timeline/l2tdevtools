@@ -237,20 +237,20 @@ class DpkgBuildFilesGenerator(object):
       u'1.0'])
 
   def __init__(
-      self, project_name, project_version, dependency_definition, data_path):
+      self, project_name, project_version, project_definition, data_path):
     """Initializes the dpkg build files generator.
 
     Args:
       project_name: the name of the project.
       project_version: the version of the project.
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       data_path: the path to the data directory which contains the patches
                  sub directory.
     """
     super(DpkgBuildFilesGenerator, self).__init__()
     self._data_path = data_path
-    self._dependency_definition = dependency_definition
+    self._project_definition = project_definition
     self._project_name = project_name
     self._project_version = project_version
 
@@ -260,8 +260,8 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
-    if self._dependency_definition.dpkg_source_name:
-      source_package_name = self._dependency_definition.dpkg_source_name
+    if self._project_definition.dpkg_source_name:
+      source_package_name = self._project_definition.dpkg_source_name
     else:
       source_package_name = self._project_name
 
@@ -308,45 +308,45 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
-    if self._dependency_definition.dpkg_source_name:
-      source_package_name = self._dependency_definition.dpkg_source_name
+    if self._project_definition.dpkg_source_name:
+      source_package_name = self._project_definition.dpkg_source_name
     else:
       source_package_name = self._project_name
 
-    if self._dependency_definition.dpkg_name:
-      package_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      package_name = self._project_definition.dpkg_name
     else:
       package_name = self._project_name
 
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
-    if not self._dependency_definition.architecture_dependent:
+    if not self._project_definition.architecture_dependent:
       architecture = u'all'
     else:
       architecture = u'any'
 
     build_depends = []
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       build_depends.append(u'quilt')
 
-    if self._dependency_definition.build_system == u'configure_make':
+    if self._project_definition.build_system == u'configure_make':
       build_depends.append(u'autotools-dev')
 
-    elif self._dependency_definition.build_system == u'setup_py':
+    elif self._project_definition.build_system == u'setup_py':
       build_depends.append(u'python-all (>= 2.7~)')
       build_depends.append(u'python-setuptools')
 
-      if self._dependency_definition.architecture_dependent:
+      if self._project_definition.architecture_dependent:
         build_depends.append(u'python-dev')
 
       build_depends.append(u'python3-all (>= 3.2~)')
       build_depends.append(u'python3-setuptools')
 
-      if self._dependency_definition.architecture_dependent:
+      if self._project_definition.architecture_dependent:
         build_depends.append(u'python3-dev')
 
-    build_depends.extend(self._dependency_definition.dpkg_build_dependencies)
+    build_depends.extend(self._project_definition.dpkg_build_dependencies)
 
     if build_depends:
       build_depends = u', {0:s}'.format(u', '.join(build_depends))
@@ -354,19 +354,19 @@ class DpkgBuildFilesGenerator(object):
       build_depends = u''
 
     # description short needs to be a single line.
-    description_short = self._dependency_definition.description_short
+    description_short = self._project_definition.description_short
     description_short = u' '.join(description_short.split(u'\n'))
 
     # description long needs a space at the start of every line after
     # the first.
-    description_long = self._dependency_definition.description_long
+    description_long = self._project_definition.description_long
     description_long = u'\n '.join(description_long.split(u'\n'))
 
     depends = []
     python_depends = []
     python3_depends = []
 
-    for dependency in self._dependency_definition.dpkg_dependencies:
+    for dependency in self._project_definition.dpkg_dependencies:
       if dependency.startswith(u'python-'):
         python_depends.append(dependency)
         python3_depends.append(u'python3-{0:s}'.format(dependency[7:]))
@@ -395,18 +395,18 @@ class DpkgBuildFilesGenerator(object):
         u'python_depends': python_depends,
         u'python3_depends': python3_depends,
         u'source_package_name': source_package_name,
-        u'upstream_homepage': self._dependency_definition.homepage_url,
-        u'upstream_maintainer': self._dependency_definition.maintainer}
+        u'upstream_homepage': self._project_definition.homepage_url,
+        u'upstream_maintainer': self._project_definition.maintainer}
 
-    if self._dependency_definition.build_system == u'setup_py':
+    if self._project_definition.build_system == u'setup_py':
       control_template = self._CONTROL_TEMPLATE_SETUP_PY
     else:
       control_template = self._CONTROL_TEMPLATE_CONFIGURE_MAKE
 
-    if self._dependency_definition.dpkg_template_control:
+    if self._project_definition.dpkg_template_control:
       template_file_path = os.path.join(
           self._data_path, u'dpkg_templates',
-          self._dependency_definition.dpkg_template_control)
+          self._project_definition.dpkg_template_control)
       with open(template_file_path, 'rb') as file_object:
         control_template = file_object.read()
         control_template = control_template.decode(u'utf-8')
@@ -444,8 +444,8 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
-    if self._dependency_definition.dpkg_name:
-      package_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      package_name = self._project_definition.dpkg_name
     else:
       package_name = self._project_name
 
@@ -459,7 +459,7 @@ class DpkgBuildFilesGenerator(object):
         doc_files.append(filename)
 
     package_doc_files = []
-    if self._dependency_definition.build_system == u'setup_py':
+    if self._project_definition.build_system == u'setup_py':
       package_doc_files.append(u'python-{0:s}.docs'.format(package_name))
       package_doc_files.append(u'python3-{0:s}.docs'.format(package_name))
     else:
@@ -476,10 +476,10 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
-    if self._dependency_definition.build_system == u'configure_make':
+    if self._project_definition.build_system == u'configure_make':
       self._GenerateConfigureMakeRulesFile(dpkg_path)
 
-    elif self._dependency_definition.build_system == u'setup_py':
+    elif self._project_definition.build_system == u'setup_py':
       self._GenerateSetupPyRulesFile(dpkg_path)
 
     filename = os.path.join(dpkg_path, u'rules')
@@ -492,8 +492,8 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
-    if self._dependency_definition.dpkg_name:
-      package_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      package_name = self._project_definition.dpkg_name
     else:
       package_name = self._project_name
 
@@ -502,19 +502,19 @@ class DpkgBuildFilesGenerator(object):
 
     build_system = u'--buildsystem=autoconf'
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       with_quilt = u'--with quilt'
     else:
       with_quilt = u''
 
     configure_options = u''
-    if self._dependency_definition.dpkg_configure_options:
+    if self._project_definition.dpkg_configure_options:
       configure_options = u' '.join(
-          self._dependency_definition.dpkg_configure_options)
+          self._project_definition.dpkg_configure_options)
 
-    elif self._dependency_definition.configure_options:
+    elif self._project_definition.configure_options:
       configure_options = u' '.join(
-          self._dependency_definition.configure_options)
+          self._project_definition.configure_options)
 
     install_package = [
         u'debian/tmp/usr/lib/lib*.so.*.*.*']
@@ -534,10 +534,10 @@ class DpkgBuildFilesGenerator(object):
         u'with_quilt': with_quilt}
 
     rules_template = self._RULES_TEMPLATE_CONFIGURE_MAKE
-    if self._dependency_definition.dpkg_template_rules:
+    if self._project_definition.dpkg_template_rules:
       template_file_path = os.path.join(
           self._data_path, u'dpkg_templates',
-          self._dependency_definition.dpkg_template_rules)
+          self._project_definition.dpkg_template_rules)
       with open(template_file_path, 'rb') as file_object:
         rules_template = file_object.read()
         rules_template = rules_template.decode(u'utf-8')
@@ -553,15 +553,15 @@ class DpkgBuildFilesGenerator(object):
     Args:
       dpkg_path: the path to the dpkg files.
     """
-    if self._dependency_definition.dpkg_name:
-      package_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      package_name = self._project_definition.dpkg_name
     else:
       package_name = self._project_name
 
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       with_quilt = u'--with quilt'
     else:
       with_quilt = u''
@@ -604,7 +604,7 @@ class DpkgBuildFilesGenerator(object):
     os.mkdir(os.path.join(dpkg_path, u'source'))
     self._GenerateSourceFormatFile(dpkg_path)
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       patches_directory = os.path.join(dpkg_path, u'patches')
       os.mkdir(patches_directory)
 
@@ -612,7 +612,7 @@ class DpkgBuildFilesGenerator(object):
       os.chdir(patches_directory)
 
       patch_filenames = []
-      for patch_filename in self._dependency_definition.patches:
+      for patch_filename in self._project_definition.patches:
         filename = os.path.join(self._data_path, u'patches', patch_filename)
         if not os.path.exists(filename):
           logging.warning(u'Missing patch file: {0:s}'.format(filename))

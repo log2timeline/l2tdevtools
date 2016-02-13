@@ -232,7 +232,7 @@ class CodeReviewHelper(CLIHelper):
     if exit_code != 0:
       return
 
-    issue_url_line_start_re = (
+    issue_url_line_start = (
         u'Issue created. URL: http://codereview.appspot.com/')
     for line in output.split(b'\n'):
       if issue_url_line_start in line:

@@ -10,11 +10,11 @@ except ImportError:
   import configparser
 
 
-class DependencyDefinition(object):
-  """Class that implements a dependency definition.
+class ProjectDefinition(object):
+  """Class that implements a project definition.
 
   Attributes:
-    architecture_dependent: boolean value to indicate the dependency is
+    architecture_dependent: boolean value to indicate the project is
                             architecture dependent.
     build_dependencies: list of build dependencies.
     build_system: string containing the build system.
@@ -43,12 +43,12 @@ class DependencyDefinition(object):
   """
 
   def __init__(self, name):
-    """Initializes the dependency definition.
+    """Initializes the project definition.
 
     Args:
       name: the name of the dependency.
     """
-    super(DependencyDefinition, self).__init__()
+    super(ProjectDefinition, self).__init__()
     self.architecture_dependent = False
     self.build_dependencies = None
     self.build_system = None
@@ -76,13 +76,13 @@ class DependencyDefinition(object):
 
 
 class DependencyVersion(object):
-  """Class that implements a dependency version."""
+  """Class that implements a project version."""
 
   _VERSION_STRING_PART_RE = re.compile(
       r'^(<[=]?|>[=]?|==)([0-9]+)[.]?([0-9]+|)[.]?([0-9]+|)[.-]?([0-9]+|)$')
 
   def __init__(self, version_string):
-    """Initializes the dependency version.
+    """Initializes the project version.
 
     Args:
       version_string: the version string.
@@ -124,8 +124,8 @@ class DependencyVersion(object):
     return self._version_string
 
 
-class DependencyDefinitionReader(object):
-  """Class that implements a dependency definition reader."""
+class ProjectDefinitionReader(object):
+  """Class that implements a project definition reader."""
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
@@ -144,13 +144,13 @@ class DependencyDefinitionReader(object):
       return
 
   def Read(self, file_object):
-    """Reads dependency definitions.
+    """Reads project definitions.
 
     Args:
       file_object: the file-like object to read from.
 
     Yields:
-      Dependency definitions (instances of DependencyDefinition).
+      Dependency definitions (instances of ProjectDefinition).
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -158,118 +158,118 @@ class DependencyDefinitionReader(object):
     config_parser.readfp(file_object)
 
     for section_name in config_parser.sections():
-      dependency_definition = DependencyDefinition(section_name)
+      project_definition = ProjectDefinition(section_name)
 
-      dependency_definition.architecture_dependent = self._GetConfigValue(
+      project_definition.architecture_dependent = self._GetConfigValue(
           config_parser, section_name, u'architecture_dependent')
-      dependency_definition.build_dependencies = self._GetConfigValue(
+      project_definition.build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'build_dependencies')
-      dependency_definition.build_system = self._GetConfigValue(
+      project_definition.build_system = self._GetConfigValue(
           config_parser, section_name, u'build_system')
-      dependency_definition.configure_options = self._GetConfigValue(
+      project_definition.configure_options = self._GetConfigValue(
           config_parser, section_name, u'configure_options')
-      dependency_definition.description_long = self._GetConfigValue(
+      project_definition.description_long = self._GetConfigValue(
           config_parser, section_name, u'description_long')
-      dependency_definition.description_short = self._GetConfigValue(
+      project_definition.description_short = self._GetConfigValue(
           config_parser, section_name, u'description_short')
-      dependency_definition.disabled = self._GetConfigValue(
+      project_definition.disabled = self._GetConfigValue(
           config_parser, section_name, u'disabled')
-      dependency_definition.dpkg_build_dependencies = self._GetConfigValue(
+      project_definition.dpkg_build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'dpkg_build_dependencies')
-      dependency_definition.dpkg_configure_options = self._GetConfigValue(
+      project_definition.dpkg_configure_options = self._GetConfigValue(
           config_parser, section_name, u'dpkg_configure_options')
-      dependency_definition.dpkg_dependencies = self._GetConfigValue(
+      project_definition.dpkg_dependencies = self._GetConfigValue(
           config_parser, section_name, u'dpkg_dependencies')
-      dependency_definition.dpkg_name = self._GetConfigValue(
+      project_definition.dpkg_name = self._GetConfigValue(
           config_parser, section_name, u'dpkg_name')
-      dependency_definition.dpkg_source_name = self._GetConfigValue(
+      project_definition.dpkg_source_name = self._GetConfigValue(
           config_parser, section_name, u'dpkg_source_name')
-      dependency_definition.dpkg_template_control = self._GetConfigValue(
+      project_definition.dpkg_template_control = self._GetConfigValue(
           config_parser, section_name, u'dpkg_template_control')
-      dependency_definition.dpkg_template_rules = self._GetConfigValue(
+      project_definition.dpkg_template_rules = self._GetConfigValue(
           config_parser, section_name, u'dpkg_template_rules')
-      dependency_definition.download_url = self._GetConfigValue(
+      project_definition.download_url = self._GetConfigValue(
           config_parser, section_name, u'download_url')
-      dependency_definition.git_url = self._GetConfigValue(
+      project_definition.git_url = self._GetConfigValue(
           config_parser, section_name, u'git_url')
-      dependency_definition.homepage_url = self._GetConfigValue(
+      project_definition.homepage_url = self._GetConfigValue(
           config_parser, section_name, u'homepage_url')
-      dependency_definition.maintainer = self._GetConfigValue(
+      project_definition.maintainer = self._GetConfigValue(
           config_parser, section_name, u'maintainer')
-      dependency_definition.osc_build_dependencies = self._GetConfigValue(
+      project_definition.osc_build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'osc_build_dependencies')
-      dependency_definition.patches = self._GetConfigValue(
+      project_definition.patches = self._GetConfigValue(
           config_parser, section_name, u'patches')
-      dependency_definition.pkg_configure_options = self._GetConfigValue(
+      project_definition.pkg_configure_options = self._GetConfigValue(
           config_parser, section_name, u'pkg_configure_options')
-      dependency_definition.setup_name = self._GetConfigValue(
+      project_definition.setup_name = self._GetConfigValue(
           config_parser, section_name, u'setup_name')
-      dependency_definition.version = self._GetConfigValue(
+      project_definition.version = self._GetConfigValue(
           config_parser, section_name, u'version')
 
-      if dependency_definition.build_dependencies is None:
-        dependency_definition.build_dependencies = []
+      if project_definition.build_dependencies is None:
+        project_definition.build_dependencies = []
       elif isinstance(
-          dependency_definition.build_dependencies, basestring):
-        dependency_definition.build_dependencies = (
-            dependency_definition.build_dependencies.split(u','))
+          project_definition.build_dependencies, basestring):
+        project_definition.build_dependencies = (
+            project_definition.build_dependencies.split(u','))
 
-      if dependency_definition.configure_options is None:
-        dependency_definition.configure_options = []
+      if project_definition.configure_options is None:
+        project_definition.configure_options = []
       elif isinstance(
-          dependency_definition.configure_options, basestring):
-        dependency_definition.configure_options = (
-            dependency_definition.configure_options.split(u','))
+          project_definition.configure_options, basestring):
+        project_definition.configure_options = (
+            project_definition.configure_options.split(u','))
 
-      if dependency_definition.disabled is None:
-        dependency_definition.disabled = []
-      elif isinstance(dependency_definition.disabled, basestring):
-        dependency_definition.disabled = dependency_definition.disabled.split(
+      if project_definition.disabled is None:
+        project_definition.disabled = []
+      elif isinstance(project_definition.disabled, basestring):
+        project_definition.disabled = project_definition.disabled.split(
             u',')
 
-      if dependency_definition.dpkg_build_dependencies is None:
-        dependency_definition.dpkg_build_dependencies = []
+      if project_definition.dpkg_build_dependencies is None:
+        project_definition.dpkg_build_dependencies = []
       elif isinstance(
-          dependency_definition.dpkg_build_dependencies, basestring):
-        dependency_definition.dpkg_build_dependencies = (
-            dependency_definition.dpkg_build_dependencies.split(u','))
+          project_definition.dpkg_build_dependencies, basestring):
+        project_definition.dpkg_build_dependencies = (
+            project_definition.dpkg_build_dependencies.split(u','))
 
-      if dependency_definition.dpkg_configure_options is None:
-        dependency_definition.dpkg_configure_options = []
+      if project_definition.dpkg_configure_options is None:
+        project_definition.dpkg_configure_options = []
       elif isinstance(
-          dependency_definition.dpkg_configure_options, basestring):
-        dependency_definition.dpkg_configure_options = (
-            dependency_definition.dpkg_configure_options.split(u','))
+          project_definition.dpkg_configure_options, basestring):
+        project_definition.dpkg_configure_options = (
+            project_definition.dpkg_configure_options.split(u','))
 
-      if dependency_definition.dpkg_dependencies is None:
-        dependency_definition.dpkg_dependencies = []
-      elif isinstance(dependency_definition.dpkg_dependencies, basestring):
-        dependency_definition.dpkg_dependencies = (
-            dependency_definition.dpkg_dependencies.split(u','))
+      if project_definition.dpkg_dependencies is None:
+        project_definition.dpkg_dependencies = []
+      elif isinstance(project_definition.dpkg_dependencies, basestring):
+        project_definition.dpkg_dependencies = (
+            project_definition.dpkg_dependencies.split(u','))
 
-      if dependency_definition.osc_build_dependencies is None:
-        dependency_definition.osc_build_dependencies = []
+      if project_definition.osc_build_dependencies is None:
+        project_definition.osc_build_dependencies = []
       elif isinstance(
-          dependency_definition.osc_build_dependencies, basestring):
-        dependency_definition.osc_build_dependencies = (
-            dependency_definition.osc_build_dependencies.split(u','))
+          project_definition.osc_build_dependencies, basestring):
+        project_definition.osc_build_dependencies = (
+            project_definition.osc_build_dependencies.split(u','))
 
-      if dependency_definition.patches is None:
-        dependency_definition.patches = []
-      elif isinstance(dependency_definition.patches, basestring):
-        dependency_definition.patches = dependency_definition.patches.split(
+      if project_definition.patches is None:
+        project_definition.patches = []
+      elif isinstance(project_definition.patches, basestring):
+        project_definition.patches = project_definition.patches.split(
             u',')
 
-      if dependency_definition.pkg_configure_options is None:
-        dependency_definition.pkg_configure_options = []
+      if project_definition.pkg_configure_options is None:
+        project_definition.pkg_configure_options = []
       elif isinstance(
-          dependency_definition.pkg_configure_options, basestring):
-        dependency_definition.pkg_configure_options = (
-            dependency_definition.pkg_configure_options.split(u','))
+          project_definition.pkg_configure_options, basestring):
+        project_definition.pkg_configure_options = (
+            project_definition.pkg_configure_options.split(u','))
 
       # Need at minimum a name and a download URL.
-      if dependency_definition.name and dependency_definition.download_url:
-        yield dependency_definition
+      if project_definition.name and project_definition.download_url:
+        yield project_definition
 
-      dependency_definition.version = DependencyVersion(
-          dependency_definition.version)
+      project_definition.version = DependencyVersion(
+          project_definition.version)

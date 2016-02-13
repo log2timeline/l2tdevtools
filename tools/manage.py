@@ -250,7 +250,7 @@ class PyPIManager(object):
 
   def __init__(self):
     """Initializes the PyPI manager object."""
-    super(LaunchpadPPAManager, self).__init__()
+    super(PyPIManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper()
 
   def CopyPackages(self):
@@ -259,11 +259,8 @@ class PyPIManager(object):
     #              /+copy-packages
     return
 
-  def GetPackages(self, track):
-    """Retrieves a list of packages of a specific PPA track.
-
-    Args:
-      track: a string containing the PPA track name.
+  def GetPackages(self):
+    """Retrieves a list of packages.
 
     Returns:
       A dictionary object containing the project names as keys and
@@ -274,18 +271,18 @@ class PyPIManager(object):
       kwargs = {u'package_name': package_name}
       download_url = self._PYPI_URL.format(**kwargs)
 
-      package_page = self._download_helper.DownloadPageContent(download_url)
-      if not package_page:
+      page_content = self._download_helper.DownloadPageContent(download_url)
+      if not page_content:
         logging.error(u'Unable to retrieve PyPI package: {0:s} page.'.format(
             package_name))
         return
 
       try:
-        package_page = package_page.decode(u'utf-8')
+        page_content = page_content.decode(u'utf-8')
       except UnicodeDecodeError as exception:
         logging.error((
             u'Unable to decode PyPI package: {0:s} page with error: '
-            u'{1:s}'.format(package_name, exception))
+            u'{1:s}').format(package_name, exception))
         return
 
       expression_string = u'<title>{0:s} ([^ ]*) : Python Package Index</title>'
@@ -296,7 +293,7 @@ class PyPIManager(object):
                 package_name))
         continue
 
-      projects[package_page] = matches
+      projects[package_name] = matches
 
     return projects
 

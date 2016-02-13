@@ -23,17 +23,17 @@ class BuildHelper(object):
 
   LOG_FILENAME = u'build.log'
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(BuildHelper, self).__init__()
     self._data_path = os.path.join(l2tdevtools_path, u'data')
-    self._dependency_definition = dependency_definition
+    self._project_definition = project_definition
 
   def CheckBuildDependencies(self):
     """Checks if the build dependencies are met.
@@ -41,7 +41,7 @@ class BuildHelper(object):
     Returns:
       A list of build dependency names that are not met or an empty list.
     """
-    return list(self._dependency_definition.build_dependencies)
+    return list(self._project_definition.build_dependencies)
 
   def CheckBuildRequired(self, unused_source_helper_object):
     """Checks if a build is required.
@@ -91,16 +91,15 @@ class DpkgBuildHelper(BuildHelper):
       u'zlib': u'zlib1g-dev'
   }
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(DpkgBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+    super(DpkgBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg.sh'
     self._post_script = u'post-dpkg.sh'
 
@@ -188,15 +187,15 @@ class DpkgBuildHelper(BuildHelper):
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
-    for package_name in self._dependency_definition.build_dependencies:
+    for package_name in self._project_definition.build_dependencies:
       package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
           package_name, package_name)
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
       if package_name not in (
-          self._dependency_definition.dpkg_build_dependencies):
-        self._dependency_definition.dpkg_build_dependencies.append(
+          self._project_definition.dpkg_build_dependencies):
+        self._project_definition.dpkg_build_dependencies.append(
             package_name)
 
     return missing_packages
@@ -207,16 +206,16 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(ConfigureMakeDpkgBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
     self.distribution = u''
     self.version_suffix = u''
@@ -265,7 +264,7 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
 
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           source_helper_object.project_name,
-          source_helper_object.project_version, self._dependency_definition,
+          source_helper_object.project_version, self._project_definition,
           self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -376,16 +375,16 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(ConfigureMakeSourceDpkgBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg-source.sh'
     self._post_script = u'post-dpkg-source.sh'
     self.architecture = u'source'
@@ -431,7 +430,7 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           source_helper_object.project_name,
-          source_helper_object.project_version, self._dependency_definition,
+          source_helper_object.project_version, self._project_definition,
           self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -540,21 +539,21 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
 class SetupPyDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(SetupPyDpkgBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
     self.distribution = u''
     self.version_suffix = u''
 
-    if not dependency_definition.architecture_dependent:
+    if not project_definition.architecture_dependent:
       self.architecture = u'all'
     elif self.architecture == u'i686':
       self.architecture = u'i386'
@@ -576,8 +575,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
           source_helper_object.project_name))
       return False
 
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      project_name = self._project_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
       if not project_name.startswith(u'python-'):
@@ -609,7 +608,7 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           source_helper_object.project_name,
           source_helper_object.project_version,
-          self._dependency_definition, self._data_path)
+          self._project_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
       os.chdir(u'..')
@@ -660,8 +659,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
     Returns:
       True if a build is required, False otherwise.
     """
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      project_name = self._project_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
       if not project_name.startswith(u'python-'):
@@ -678,8 +677,8 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
     Args:
       source_helper_object: the source helper object (instance of SourceHelper).
     """
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      project_name = self._project_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
       if not project_name.startswith(u'python-'):
@@ -723,16 +722,16 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
 class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
   """Class that helps in building source dpkg packages (.deb)."""
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(SetupPySourceDpkgBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg-source.sh'
     self._post_script = u'post-dpkg-source.sh'
     self.architecture = u'source'
@@ -754,8 +753,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
           source_helper_object.project_name))
       return False
 
-    if self._dependency_definition.dpkg_name:
-      project_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      project_name = self._project_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
       if not project_name.startswith(u'python-'):
@@ -787,7 +786,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
           source_helper_object.project_name,
           source_helper_object.project_version,
-          self._dependency_definition, self._data_path)
+          self._project_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
       os.chdir(u'..')
@@ -837,8 +836,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     Returns:
       True if a build is required, False otherwise.
     """
-    if self._dependency_definition.dpkg_name:
-      package_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      package_name = self._project_definition.dpkg_name
     else:
       package_name = source_helper_object.project_name
 
@@ -854,8 +853,8 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
     Args:
       source_helper_object: the source helper object (instance of SourceHelper).
     """
-    if self._dependency_definition.dpkg_name:
-      package_name = self._dependency_definition.dpkg_name
+    if self._project_definition.dpkg_name:
+      package_name = self._project_definition.dpkg_name
     else:
       package_name = source_helper_object.project_name
 
@@ -899,16 +898,15 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
 class MsiBuildHelper(BuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(MsiBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+    super(MsiBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
 
     if self.architecture == u'x86':
@@ -952,12 +950,12 @@ class MsiBuildHelper(BuildHelper):
 class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
 
     Raises:
@@ -965,7 +963,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
                     msvscpp-convert.py could not be found.
     """
     super(ConfigureMakeMsiBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path)
 
     if u'VS140COMNTOOLS' in os.environ:
       self.version = u'2015'
@@ -1348,7 +1346,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       A list of build dependency names that are not met or an empty list.
     """
     missing_packages = []
-    for package_name in self._dependency_definition.build_dependencies:
+    for package_name in self._project_definition.build_dependencies:
       if package_name == u'fuse':
         self._SetupBuildDependencyDokan()
 
@@ -1390,9 +1388,9 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
     logging.info(u'Building: {0:s} with Visual Studio {1:s}'.format(
         source_filename, self.version))
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       os.chdir(source_directory)
-      result = self._ApplyPatches(self._dependency_definition.patches)
+      result = self._ApplyPatches(self._project_definition.patches)
       os.chdir(u'..')
 
       if not result:
@@ -1484,8 +1482,8 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     Returns:
       A tuple containing the filename safe project name and version.
     """
-    if self._dependency_definition.setup_name:
-      project_name = self._dependency_definition.setup_name
+    if self._project_definition.setup_name:
+      project_name = self._project_definition.setup_name
     else:
       project_name = source_helper_object.project_name
 
@@ -1519,9 +1517,9 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 
     logging.info(u'Building msi of: {0:s}'.format(source_filename))
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       os.chdir(source_directory)
-      result = self._ApplyPatches(self._dependency_definition.patches)
+      result = self._ApplyPatches(self._project_definition.patches)
       os.chdir(u'..')
 
       if not result:
@@ -1570,7 +1568,7 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
 
     # TODO: it looks like coverage is no architecture dependent on Windows.
     # Check if it is architecture dependent on other platforms.
-    if (self._dependency_definition.architecture_dependent and
+    if (self._project_definition.architecture_dependent and
         project_name != u'coverage'):
       suffix = u'-py2.7'
     else:
@@ -1611,7 +1609,7 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    if self._dependency_definition.architecture_dependent:
+    if self._project_definition.architecture_dependent:
       suffix = u'-py2.7'
     else:
       suffix = u''
@@ -2024,9 +2022,9 @@ class SetupPyOscBuildHelper(OscBuildHelper):
 
         elif line.startswith(b'BuildRequires: '):
           has_build_requires = True
-          if self._dependency_definition.osc_build_dependencies:
+          if self._project_definition.osc_build_dependencies:
             line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
-                self._dependency_definition.osc_build_dependencies))
+                self._project_definition.osc_build_dependencies))
 
         elif line == '\n' and summary and not has_build_requires:
           has_build_requires = True
@@ -2034,9 +2032,9 @@ class SetupPyOscBuildHelper(OscBuildHelper):
               b'BuildRequires: python-setuptools\n'
               b'{0:s}').format(line)
 
-          if self._dependency_definition.osc_build_dependencies:
+          if self._project_definition.osc_build_dependencies:
             line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
-                self._dependency_definition.osc_build_dependencies))
+                self._project_definition.osc_build_dependencies))
 
         elif line.startswith(b'%description'):
           in_description = True
@@ -2107,16 +2105,15 @@ class SetupPyOscBuildHelper(OscBuildHelper):
 class PkgBuildHelper(BuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(PkgBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+    super(PkgBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._pkgbuild = os.path.join(u'/', u'usr', u'bin', u'pkgbuild')
 
   def _BuildDmg(self, pkg_filename, dmg_filename):
@@ -2260,7 +2257,7 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
 
     logging.info(u'Building pkg of: {0:s}'.format(source_filename))
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       # TODO: add self._ApplyPatches
       pass
 
@@ -2290,13 +2287,13 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
     if not os.path.exists(pkg_filename):
       prefix = u'/usr/local'
       configure_options = u''
-      if self._dependency_definition.pkg_configure_options:
+      if self._project_definition.pkg_configure_options:
         configure_options = u' '.join(
-            self._dependency_definition.pkg_configure_options)
+            self._project_definition.pkg_configure_options)
 
-      elif self._dependency_definition.configure_options:
+      elif self._project_definition.configure_options:
         configure_options = u' '.join(
-            self._dependency_definition.configure_options)
+            self._project_definition.configure_options)
 
       if cflags and ldflags:
         command = (
@@ -2384,7 +2381,7 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
 
     logging.info(u'Building pkg of: {0:s}'.format(source_filename))
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       # TODO: add self._ApplyPatches
       pass
 
@@ -2473,16 +2470,15 @@ class RpmBuildHelper(BuildHelper):
       u'zlib': u'zlib-devel'
   }
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(RpmBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
+    super(RpmBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
 
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
@@ -2592,8 +2588,8 @@ class RpmBuildHelper(BuildHelper):
     Returns:
       A tuple containing the filename safe project name and version.
     """
-    if self._dependency_definition.setup_name:
-      project_name = self._dependency_definition.setup_name
+    if self._project_definition.setup_name:
+      project_name = self._project_definition.setup_name
     else:
       project_name = source_helper_object.project_name
 
@@ -2628,7 +2624,7 @@ class RpmBuildHelper(BuildHelper):
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
-    for package_name in self._dependency_definition.build_dependencies:
+    for package_name in self._project_definition.build_dependencies:
       package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
           package_name, package_name)
       if not self._CheckIsInstalled(package_name):
@@ -2763,17 +2759,17 @@ class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
 class SetupPyRpmBuildHelper(RpmBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
-  def __init__(self, dependency_definition, l2tdevtools_path):
+  def __init__(self, project_definition, l2tdevtools_path):
     """Initializes the build helper.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
     super(SetupPyRpmBuildHelper, self).__init__(
-        dependency_definition, l2tdevtools_path)
-    if not dependency_definition.architecture_dependent:
+        project_definition, l2tdevtools_path)
+    if not project_definition.architecture_dependent:
       self.architecture = u'noarch'
 
   def Build(self, source_helper_object):
@@ -2879,7 +2875,7 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
 
     logging.info(u'Building source of: {0:s}'.format(source_filename))
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       # TODO: add self._ApplyPatches
       pass
 
@@ -2936,7 +2932,7 @@ class SetupPySourceBuildHelper(SourceBuildHelper):
 
     logging.info(u'Building source of: {0:s}'.format(source_filename))
 
-    if self._dependency_definition.patches:
+    if self._project_definition.patches:
       # TODO: add self._ApplyPatches
       pass
 
@@ -2976,24 +2972,23 @@ class BuildHelperFactory(object):
   }
 
   @classmethod
-  def NewBuildHelper(
-      cls, dependency_definition, build_target, l2tdevtools_path):
+  def NewBuildHelper(cls, project_definition, build_target, l2tdevtools_path):
     """Creates a new build helper object.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
       build_target: a string containing the build target.
       l2tdevtools_path: the path to the l2tdevtools directory.
 
     Returns:
       A build helper object (instance of BuildHelper) or None.
     """
-    if dependency_definition.build_system == u'configure_make':
+    if project_definition.build_system == u'configure_make':
       build_helper_class = cls._CONFIGURE_MAKE_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
-    elif dependency_definition.build_system == u'setup_py':
+    elif project_definition.build_system == u'setup_py':
       build_helper_class = cls._SETUP_PY_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
@@ -3003,4 +2998,4 @@ class BuildHelperFactory(object):
     if not build_helper_class:
       return
 
-    return build_helper_class(dependency_definition, l2tdevtools_path)
+    return build_helper_class(project_definition, l2tdevtools_path)
