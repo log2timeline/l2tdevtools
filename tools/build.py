@@ -181,7 +181,7 @@ class DependencyBuilder(object):
     download_url, _, _ = download_url.partition(u'?')
 
     if download_url.startswith(u'http://pypi.python.org/pypi/'):
-      download_helper_object = download_helper.PyPiDownloadHelper()
+      download_helper_object = download_helper.PyPIDownloadHelper()
 
     elif (download_url.startswith(u'http://sourceforge.net/projects/') and
           download_url.endswith(u'/files')):
