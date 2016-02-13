@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """Preset object implementations."""
 
-import logging
-import re
-
 try:
   import ConfigParser as configparser
 except ImportError:
