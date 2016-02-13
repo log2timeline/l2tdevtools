@@ -545,8 +545,8 @@ class LibyalGoogleDriveDownloadHelper(GoogleDriveDownloadHelper):
     return u'com.github.libyal.{0:s}'.format(project_name)
 
 
-class PyPiDownloadHelper(ProjectDownloadHelper):
-  """Class that helps in downloading a pypi code project."""
+class PyPIDownloadHelper(ProjectDownloadHelper):
+  """Class that helps in downloading a PyPI code project."""
 
   _VERSION_EXPRESSIONS = [
       u'[0-9]+[.][0-9]+',
@@ -575,7 +575,7 @@ class PyPiDownloadHelper(ProjectDownloadHelper):
     matches = re.findall(expression_string, page_content)
 
     if matches:
-      # Some pypi pages are indexes of packages which contain links to
+      # Some PyPI pages are indexes of packages which contain links to
       # versioned sub pages in the form:
       # /pypi/{project name}/{version}
       expression_string = (

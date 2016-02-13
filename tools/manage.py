@@ -213,6 +213,94 @@ class OpenSuseBuildServiceManager(object):
   # Fedora_22/src/
 
 
+class PyPIManager(object):
+  """Defines a PyPI manager object."""
+
+  _PYPI_URL = u'https://pypi.python.org/pypi/{package_name:s}'
+
+  _PACKAGE_NAMES = [
+      u'artifacts',
+      u'dfvfs',
+      u'dfwinreg',
+      u'libbde-python',
+      u'libcaes-python',
+      u'libcreg-python',
+      u'libesedb-python',
+      u'libevt-python',
+      u'libevtx-python',
+      u'libewf-python',
+      u'libexe-python',
+      u'libfsntfs-python',
+      u'libfwps-python',
+      u'libfwsi-python',
+      u'liblnk-python',
+      u'libmsiecf-python',
+      u'libolecf-python',
+      u'libqcow-python',
+      u'libregf-python',
+      u'libscca-python',
+      u'libsigscan-python',
+      u'libsmdev-python',
+      u'libsmraw-python',
+      u'libvhdi-python',
+      u'libvmdk-python',
+      u'libvshadow-python',
+      u'libvslvm-python',
+      u'pytsk3']
+
+  def __init__(self):
+    """Initializes the PyPI manager object."""
+    super(LaunchpadPPAManager, self).__init__()
+    self._download_helper = download_helper.DownloadHelper()
+
+  def CopyPackages(self):
+    # TODO: implement:
+    # send post to https://launchpad.net/~gift/+archive/ubuntu/testing
+    #              /+copy-packages
+    return
+
+  def GetPackages(self, track):
+    """Retrieves a list of packages of a specific PPA track.
+
+    Args:
+      track: a string containing the PPA track name.
+
+    Returns:
+      A dictionary object containing the project names as keys and
+      versions as values or None if the projects cannot be determined.
+    """
+    projects = {}
+    for package_name in self._PACKAGE_NAMES:
+      kwargs = {u'package_name': package_name}
+      download_url = self._PYPI_URL.format(**kwargs)
+
+      package_page = self._download_helper.DownloadPageContent(download_url)
+      if not package_page:
+        logging.error(u'Unable to retrieve PyPI package: {0:s} page.'.format(
+            package_name))
+        return
+
+      try:
+        package_page = package_page.decode(u'utf-8')
+      except UnicodeDecodeError as exception:
+        logging.error((
+            u'Unable to decode PyPI package: {0:s} page with error: '
+            u'{1:s}'.format(package_name, exception))
+        return
+
+      expression_string = u'<title>{0:s} ([^ ]*) : Python Package Index</title>'
+      matches = re.findall(expression_string, page_content)
+      if not matches or len(matches) != 1:
+        logging.warning(
+            u'Unable to determine PyPI package: {0:s} information.'.format(
+                package_name))
+        continue
+
+      projects[package_page] = matches
+
+    return projects
+
+
 class BinariesManager(object):
   """Defines the binaries manager."""
 
@@ -334,6 +422,46 @@ class BinariesManager(object):
 
     return self._ComparePackages(reference_packages, packages)
 
+  def CompareDirectoryWithPyPI(self, reference_directory, sub_directory):
+    """Compares a directory containing .tar.gz packages with a github repo.
+
+    Args:
+      reference_directory: a string containing the path of the reference
+                           directory that contains msi or dmg packages.
+      sub_directory: a string containing the name of the machine type sub
+                     directory.
+
+    Returns:
+      A tuple containing a dictionary of the new packages, those packages that
+      are present in the reference directory but not in the track, and new
+      version, those packages that have a newer version in the reference
+      directory.
+    """
+    reference_packages = {}
+    for directory_entry in os.listdir(reference_directory):
+      if directory_entry.endswith(u'.dmg'):
+        directory_entry, _, _ = directory_entry.rpartition(u'.dmg')
+
+      elif directory_entry.endswith(u'.msi'):
+        if sub_directory == u'win32':
+          directory_entry, _, _ = directory_entry.rpartition(u'.win32')
+        elif sub_directory == u'win64':
+          directory_entry, _, _ = directory_entry.rpartition(u'.win-amd64')
+
+      else:
+        continue
+
+      if (directory_entry.startswith(u'pefile') or
+          directory_entry.startswith(u'pystsk')):
+        name, _, version = directory_entry.partition(u'-')
+      else:
+        name, _, version = directory_entry.rpartition(u'-')
+
+      reference_packages[name] = version
+
+    packages = self._github_repo_manager.GetPackages(sub_directory)
+    return self._ComparePackages(reference_packages, packages)
+
   def GetMachineTypeSubDirectory(
       self, preferred_machine_type=None, preferred_operating_system=None):
     """Retrieves the machine type sub directory.
@@ -408,7 +536,7 @@ class BinariesManager(object):
 def Main():
   actions = frozenset([
       u'l2tbinaries-diff', u'launchpad-diff-dev', u'launchpad-diff-stable',
-      u'launchpad-diff-testing'])
+      u'launchpad-diff-testing', u'pypi-diff'])
 
   argument_parser = argparse.ArgumentParser(description=(
       u'Manages the GIFT launchpad PPA and l2tbinaries.'))
@@ -489,7 +617,20 @@ def Main():
           u'Difference between release tracks: {0:s} and {1:s}'.format(
               reference_track, track))
 
-  # elif options.action.startswith(u'osb-diff-'):
+  # elif action_tuple[0] == u'osb' and action_tuple[1] == u'diff':
+
+  elif action_tuple[0] == u'pypi' and action_tuple[1] == u'diff':
+    sub_directory = binaries_manager.GetMachineTypeSubDirectory(
+        preferred_machine_type=options.machine_type)
+
+    reference_directory = options.build_directory
+
+    new_packages, new_versions = (
+        binaries_manager.CompareDirectoryWithPyPI(
+            reference_directory, sub_directory))
+
+    diff_header = (
+        u'Difference between: {0:s} and release'.format(reference_directory))
 
   if action_tuple[1] == u'diff':
     print(diff_header)
