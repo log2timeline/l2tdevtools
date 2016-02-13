@@ -55,7 +55,7 @@ class BuildHelper(object):
     return True
 
 
-class DpkgBuildHelper(BuildHelper):
+class DPKGBuildHelper(BuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
   _BUILD_DEPENDENCIES = frozenset([
@@ -99,7 +99,7 @@ class DpkgBuildHelper(BuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(DpkgBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    super(DPKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg.sh'
     self._post_script = u'post-dpkg.sh'
 
@@ -201,7 +201,7 @@ class DpkgBuildHelper(BuildHelper):
     return missing_packages
 
 
-class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
+class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
@@ -214,7 +214,7 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(ConfigureMakeDpkgBuildHelper, self).__init__(
+    super(ConfigureMakeDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
     self.distribution = u''
@@ -262,7 +262,7 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
-      build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
+      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
           source_helper_object.project_name,
           source_helper_object.project_version, self._project_definition,
           self._data_path)
@@ -370,7 +370,7 @@ class ConfigureMakeDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
 
-class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
+class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
   """Class that helps in building source dpkg packages (.deb)."""
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
@@ -383,7 +383,7 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(ConfigureMakeSourceDpkgBuildHelper, self).__init__(
+    super(ConfigureMakeSourceDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg-source.sh'
     self._post_script = u'post-dpkg-source.sh'
@@ -428,7 +428,7 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
       # Generate the dpkg build files if necessary.
       os.chdir(source_directory)
 
-      build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
+      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
           source_helper_object.project_name,
           source_helper_object.project_version, self._project_definition,
           self._data_path)
@@ -536,7 +536,7 @@ class ConfigureMakeSourceDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
 
-class SetupPyDpkgBuildHelper(DpkgBuildHelper):
+class SetupPyDPKGBuildHelper(DPKGBuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
@@ -547,7 +547,7 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(SetupPyDpkgBuildHelper, self).__init__(
+    super(SetupPyDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
     self.distribution = u''
@@ -605,7 +605,7 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
       os.chdir(source_directory)
 
       # Pass the project name without the python- prefix.
-      build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
+      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
           source_helper_object.project_name,
           source_helper_object.project_version,
           self._project_definition, self._data_path)
@@ -719,7 +719,7 @@ class SetupPyDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
 
-class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
+class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
   """Class that helps in building source dpkg packages (.deb)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
@@ -730,7 +730,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(SetupPySourceDpkgBuildHelper, self).__init__(
+    super(SetupPySourceDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg-source.sh'
     self._post_script = u'post-dpkg-source.sh'
@@ -783,7 +783,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
       os.chdir(source_directory)
 
       # Pass the project name without the python- prefix.
-      build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
+      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
           source_helper_object.project_name,
           source_helper_object.project_version,
           self._project_definition, self._data_path)
@@ -895,7 +895,7 @@ class SetupPySourceDpkgBuildHelper(DpkgBuildHelper):
         os.remove(filename)
 
 
-class MsiBuildHelper(BuildHelper):
+class MSIBuildHelper(BuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
@@ -906,7 +906,7 @@ class MsiBuildHelper(BuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(MsiBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    super(MSIBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
 
     if self.architecture == u'x86':
@@ -947,7 +947,7 @@ class MsiBuildHelper(BuildHelper):
     return True
 
 
-class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
+class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
@@ -962,7 +962,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
       RuntimeError: if the Visual Studio version could be determined or
                     msvscpp-convert.py could not be found.
     """
-    super(ConfigureMakeMsiBuildHelper, self).__init__(
+    super(ConfigureMakeMSIBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
 
     if u'VS140COMNTOOLS' in os.environ:
@@ -1127,7 +1127,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     result = self._BuildSetupPy()
     if result:
-      result = self._MoveMsi(python_module_name, build_directory)
+      result = self._MoveMSI(python_module_name, build_directory)
 
     os.chdir(build_directory)
 
@@ -1247,7 +1247,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
     os.chdir(u'..')
 
-  def _MoveMsi(self, python_module_name, build_directory):
+  def _MoveMSI(self, python_module_name, build_directory):
     """Moves the MSI from the dist sub directory into the build directory.
 
     Args:
@@ -1413,7 +1413,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
 
         result = self._BuildSetupPy()
         if result:
-          result = self._MoveMsi(python_module_name, build_directory)
+          result = self._MoveMSI(python_module_name, build_directory)
 
         os.chdir(build_directory)
 
@@ -1470,7 +1470,7 @@ class ConfigureMakeMsiBuildHelper(MsiBuildHelper):
         os.remove(filename)
 
 
-class SetupPyMsiBuildHelper(MsiBuildHelper):
+class SetupPyMSIBuildHelper(MSIBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
   def _GetFilenameSafeProjectInformation(self, source_helper_object):
@@ -1641,7 +1641,7 @@ class SetupPyMsiBuildHelper(MsiBuildHelper):
         os.remove(filename)
 
 
-class OscBuildHelper(BuildHelper):
+class OSCBuildHelper(BuildHelper):
   """Class that helps in building with osc for the openSUSE build service."""
 
   _OSC_PROJECT = u'home:joachimmetz:testing'
@@ -1661,11 +1661,11 @@ class OscBuildHelper(BuildHelper):
     # Checkout the project if it does not exist otherwise make sure
     # the project files are up to date.
     if not os.path.exists(self._OSC_PROJECT):
-      if not self._OscCheckout():
+      if not self._OSCCheckout():
         return
 
     else:
-      if not self._OscUpdate():
+      if not self._OSCUpdate():
         return False
 
     # Create a package of the project if it does not exist.
@@ -1674,10 +1674,10 @@ class OscBuildHelper(BuildHelper):
     if os.path.exists(osc_package_path):
       return True
 
-    if not self._OscCreatePackage(source_helper_object):
+    if not self._OSCCreatePackage(source_helper_object):
       return False
 
-    if not self._OscUpdate():
+    if not self._OSCUpdate():
       return False
 
     return True
@@ -1708,7 +1708,7 @@ class OscBuildHelper(BuildHelper):
 
     return True
 
-  def _OscAdd(self, path):
+  def _OSCAdd(self, path):
     """Runs osc add to add a new file.
 
     Args:
@@ -1728,7 +1728,7 @@ class OscBuildHelper(BuildHelper):
 
     return True
 
-  def _OscCheckout(self):
+  def _OSCCheckout(self):
     """Runs osc checkout.
 
     Returns:
@@ -1743,7 +1743,7 @@ class OscBuildHelper(BuildHelper):
 
     return True
 
-  def _OscCommit(self, package_name):
+  def _OSCCommit(self, package_name):
     """Runs osc commit.
 
     Args:
@@ -1764,7 +1764,7 @@ class OscBuildHelper(BuildHelper):
 
     return True
 
-  def _OscCreatePackage(self, source_helper_object):
+  def _OSCCreatePackage(self, source_helper_object):
     """Runs osc meta pkg to create a new package.
 
     Args:
@@ -1793,7 +1793,7 @@ class OscBuildHelper(BuildHelper):
 
     return True
 
-  def _OscUpdate(self):
+  def _OSCUpdate(self):
     """Runs osc update.
     Returns:
       True if successful, False otherwise.
@@ -1818,7 +1818,7 @@ class OscBuildHelper(BuildHelper):
     return []
 
 
-class ConfigureMakeOscBuildHelper(OscBuildHelper):
+class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
   """Class that helps in building with osc for the openSUSE build service."""
 
   def Build(self, source_helper_object):
@@ -1855,7 +1855,7 @@ class ConfigureMakeOscBuildHelper(OscBuildHelper):
 
     osc_source_path = os.path.join(
         source_helper_object.project_name, osc_source_filename)
-    if not self._OscAdd(osc_source_path):
+    if not self._OSCAdd(osc_source_path):
       return False
 
     # Extract the build files from the source package into the package
@@ -1877,10 +1877,10 @@ class ConfigureMakeOscBuildHelper(OscBuildHelper):
     if not spec_file_exists:
       osc_spec_file_path = os.path.join(
           source_helper_object.project_name, spec_filename)
-      if not self._OscAdd(osc_spec_file_path):
+      if not self._OSCAdd(osc_spec_file_path):
         return False
 
-    return self._OscCommit(source_helper_object.project_name)
+    return self._OSCCommit(source_helper_object.project_name)
 
   def CheckBuildRequired(self, source_helper_object):
     """Checks if a build is required.
@@ -1934,7 +1934,7 @@ class ConfigureMakeOscBuildHelper(OscBuildHelper):
           logging.error(u'Running: "{0:s}" failed.'.format(command))
 
 
-class SetupPyOscBuildHelper(OscBuildHelper):
+class SetupPyOSCBuildHelper(OSCBuildHelper):
   """Class that helps in building with osc for the openSUSE build service."""
 
   def Build(self, source_helper_object):
@@ -1966,7 +1966,7 @@ class SetupPyOscBuildHelper(OscBuildHelper):
 
     osc_source_path = os.path.join(
         source_helper_object.project_name, source_filename)
-    if not self._OscAdd(osc_source_path):
+    if not self._OSCAdd(osc_source_path):
       return False
 
     # Have setup.py generate the .spec file.
@@ -2068,10 +2068,10 @@ class SetupPyOscBuildHelper(OscBuildHelper):
     if not spec_file_exists:
       osc_spec_file_path = os.path.join(
           source_helper_object.project_name, spec_filename)
-      if not self._OscAdd(osc_spec_file_path):
+      if not self._OSCAdd(osc_spec_file_path):
         return False
 
-    return self._OscCommit(source_helper_object.project_name)
+    return self._OSCCommit(source_helper_object.project_name)
 
   def CheckBuildRequired(self, source_helper_object):
     """Checks if a build is required.
@@ -2102,7 +2102,7 @@ class SetupPyOscBuildHelper(OscBuildHelper):
     return
 
 
-class PkgBuildHelper(BuildHelper):
+class PKGBuildHelper(BuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
@@ -2113,7 +2113,7 @@ class PkgBuildHelper(BuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(PkgBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    super(PKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._pkgbuild = os.path.join(u'/', u'usr', u'bin', u'pkgbuild')
 
   def _BuildDmg(self, pkg_filename, dmg_filename):
@@ -2137,7 +2137,7 @@ class PkgBuildHelper(BuildHelper):
 
     return True
 
-  def _BuildPkg(
+  def _BuildPKG(
       self, source_directory, project_identifier, project_version,
       pkg_filename):
     """Builds the distributable disk image (.dmg) from the pkg.
@@ -2218,7 +2218,7 @@ class PkgBuildHelper(BuildHelper):
         os.remove(filename)
 
 
-class ConfigureMakePkgBuildHelper(PkgBuildHelper):
+class ConfigureMakePKGBuildHelper(PKGBuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
   _DOC_FILENAMES = frozenset([
@@ -2344,7 +2344,7 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
 
       project_identifier = u'com.github.libyal.{0:s}'.format(
           source_helper_object.project_name)
-      if not self._BuildPkg(
+      if not self._BuildPKG(
           source_directory, project_identifier,
           source_helper_object.project_version, pkg_filename):
         return False
@@ -2355,7 +2355,7 @@ class ConfigureMakePkgBuildHelper(PkgBuildHelper):
     return True
 
 
-class SetupPyPkgBuildHelper(PkgBuildHelper):
+class SetupPyPKGBuildHelper(PKGBuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
   def Build(self, source_helper_object):
@@ -2425,7 +2425,7 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
           return False
 
       project_identifier = source_helper_object.GetProjectIdentifier()
-      if not self._BuildPkg(
+      if not self._BuildPKG(
           source_directory, project_identifier,
           source_helper_object.project_version, pkg_filename):
         return False
@@ -2436,7 +2436,7 @@ class SetupPyPkgBuildHelper(PkgBuildHelper):
     return True
 
 
-class RpmBuildHelper(BuildHelper):
+class RPMBuildHelper(BuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
   _BUILD_DEPENDENCIES = frozenset([
@@ -2478,7 +2478,7 @@ class RpmBuildHelper(BuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(RpmBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    super(RPMBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
 
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
@@ -2546,7 +2546,7 @@ class RpmBuildHelper(BuildHelper):
     exit_code = subprocess.call(command, shell=True)
     return exit_code == 0
 
-  def _CreateRpmbuildDirectories(self):
+  def _CreateRPMbuildDirectories(self):
     """Creates the rpmbuild and sub directories."""
     if not os.path.exists(self.rpmbuild_path):
       os.mkdir(self.rpmbuild_path)
@@ -2599,7 +2599,7 @@ class RpmBuildHelper(BuildHelper):
 
     return project_name, project_version
 
-  def _MoveRpms(self, project_name, project_version):
+  def _MoveRPMs(self, project_name, project_version):
     """Moves the rpms from the rpmbuild directory into the current directory.
 
     Args:
@@ -2703,7 +2703,7 @@ class RpmBuildHelper(BuildHelper):
         os.remove(filename)
 
 
-class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
+class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
   def Build(self, source_helper_object):
@@ -2734,7 +2734,7 @@ class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
     build_successful = self._BuildFromSourcePackage(rpm_source_filename)
 
     if build_successful:
-      self._MoveRpms(project_name, project_version)
+      self._MoveRPMs(project_name, project_version)
 
       # Remove BUILD directory.
       filename = os.path.join(
@@ -2756,7 +2756,7 @@ class ConfigureMakeRpmBuildHelper(RpmBuildHelper):
     return build_successful
 
 
-class SetupPyRpmBuildHelper(RpmBuildHelper):
+class SetupPyRPMBuildHelper(RPMBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
@@ -2767,7 +2767,7 @@ class SetupPyRpmBuildHelper(RpmBuildHelper):
                           ProjectDefinition).
       l2tdevtools_path: the path to the l2tdevtools directory.
     """
-    super(SetupPyRpmBuildHelper, self).__init__(
+    super(SetupPyRPMBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
     if not project_definition.architecture_dependent:
       self.architecture = u'noarch'
@@ -2952,22 +2952,22 @@ class BuildHelperFactory(object):
   """Factory class for build helpers."""
 
   _CONFIGURE_MAKE_BUILD_HELPER_CLASSES = {
-      u'dpkg': ConfigureMakeDpkgBuildHelper,
-      u'dpkg-source': ConfigureMakeSourceDpkgBuildHelper,
-      u'msi': ConfigureMakeMsiBuildHelper,
-      u'osc': ConfigureMakeOscBuildHelper,
-      u'pkg': ConfigureMakePkgBuildHelper,
-      u'rpm': ConfigureMakeRpmBuildHelper,
+      u'dpkg': ConfigureMakeDPKGBuildHelper,
+      u'dpkg-source': ConfigureMakeSourceDPKGBuildHelper,
+      u'msi': ConfigureMakeMSIBuildHelper,
+      u'osc': ConfigureMakeOSCBuildHelper,
+      u'pkg': ConfigureMakePKGBuildHelper,
+      u'rpm': ConfigureMakeRPMBuildHelper,
       u'source': ConfigureMakeSourceBuildHelper,
   }
 
   _SETUP_PY_BUILD_HELPER_CLASSES = {
-      u'dpkg': SetupPyDpkgBuildHelper,
-      u'dpkg-source': SetupPySourceDpkgBuildHelper,
-      u'msi': SetupPyMsiBuildHelper,
-      u'osc': SetupPyOscBuildHelper,
-      u'pkg': SetupPyPkgBuildHelper,
-      u'rpm': SetupPyRpmBuildHelper,
+      u'dpkg': SetupPyDPKGBuildHelper,
+      u'dpkg-source': SetupPySourceDPKGBuildHelper,
+      u'msi': SetupPyMSIBuildHelper,
+      u'osc': SetupPyOSCBuildHelper,
+      u'pkg': SetupPyPKGBuildHelper,
+      u'rpm': SetupPyRPMBuildHelper,
       u'source': SetupPySourceBuildHelper,
   }
 

@@ -101,7 +101,7 @@ def Main():
   tools_path = os.path.dirname(__file__)
   data_path = os.path.join(os.path.dirname(tools_path), u'data')
 
-  build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
+  build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
       options.project_name, project_version,
       project_definition_match, data_path)
 

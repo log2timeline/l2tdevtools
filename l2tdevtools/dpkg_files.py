@@ -8,7 +8,7 @@ import stat
 import time
 
 
-class DpkgBuildFilesGenerator(object):
+class DPKGBuildFilesGenerator(object):
   """Class that helps in generating dpkg build files."""
 
   _EMAIL_ADDRESS = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
@@ -248,7 +248,7 @@ class DpkgBuildFilesGenerator(object):
       data_path: the path to the data directory which contains the patches
                  sub directory.
     """
-    super(DpkgBuildFilesGenerator, self).__init__()
+    super(DPKGBuildFilesGenerator, self).__init__()
     self._data_path = data_path
     self._project_definition = project_definition
     self._project_name = project_name
