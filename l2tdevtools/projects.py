@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Dependency object implementations."""
+"""Project object implementations."""
 
 import logging
 import re
@@ -39,14 +39,14 @@ class ProjectDefinition(object):
     osc_build_dependencies: list of osc build dependencies.
     patches: list of patch file names.
     pkg_configure_options: list of the configure options when building a pkg.
-    version: the version requirements (instance of DependencyVersion).
+    version: the version requirements (instance of ProjectVersion).
   """
 
   def __init__(self, name):
     """Initializes the project definition.
 
     Args:
-      name: the name of the dependency.
+      name: the name of the preset.
     """
     super(ProjectDefinition, self).__init__()
     self.architecture_dependent = False
@@ -75,7 +75,7 @@ class ProjectDefinition(object):
     self.version = None
 
 
-class DependencyVersion(object):
+class ProjectVersion(object):
   """Class that implements a project version."""
 
   _VERSION_STRING_PART_RE = re.compile(
@@ -87,7 +87,7 @@ class DependencyVersion(object):
     Args:
       version_string: the version string.
     """
-    super(DependencyVersion, self).__init__()
+    super(ProjectVersion, self).__init__()
     self._version_string_parts = []
 
     if not version_string:
@@ -150,7 +150,7 @@ class ProjectDefinitionReader(object):
       file_object: the file-like object to read from.
 
     Yields:
-      Dependency definitions (instances of ProjectDefinition).
+      A project definition (instance of ProjectDefinition).
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -271,5 +271,5 @@ class ProjectDefinitionReader(object):
       if project_definition.name and project_definition.download_url:
         yield project_definition
 
-      project_definition.version = DependencyVersion(
+      project_definition.version = ProjectVersion(
           project_definition.version)

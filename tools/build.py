@@ -11,6 +11,7 @@ import sys
 
 from l2tdevtools import build_helper
 from l2tdevtools import download_helper
+from l2tdevtools import presets
 from l2tdevtools import projects
 from l2tdevtools import source_helper
 
@@ -301,9 +302,17 @@ def Main():
 
   project_names = []
   if options.preset:
-    # TODO: read presets
-    # TODO: fill project_names based on preset
-    pass
+    with open(presets_file) as file_object:
+      preset_definition_reader = presets.PresetDefinitionReader()
+      for preset_definition in preset_definition_reader.Read(file_object):
+        if preset_definition.name == options.preset:
+          project_names = preset_definition.project_names
+          break
+
+    if not project_names:
+      print(u'Undefined preset: {0:s}'.format(options.preset))
+      print(u'')
+      return False
 
   elif options.projects:
     project_names = options.projects.split(u',')
