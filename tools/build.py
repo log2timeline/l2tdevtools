@@ -10,8 +10,9 @@ import subprocess
 import sys
 
 from l2tdevtools import build_helper
-from l2tdevtools import dependencies
 from l2tdevtools import download_helper
+from l2tdevtools import presets
+from l2tdevtools import projects
 from l2tdevtools import source_helper
 
 
@@ -21,10 +22,10 @@ from l2tdevtools import source_helper
 __file__ = os.path.abspath(__file__)
 
 
-# TODO: look into merging functionality with update dependencies script.
+# TODO: look into merging functionality with update script.
 
-class DependencyBuilder(object):
-  """Class that helps in building dependencies."""
+class ProjectBuilder(object):
+  """Class that helps in building projects."""
 
   # TODO: add phases for building sleuthkit/pytsk.
 
@@ -36,28 +37,28 @@ class DependencyBuilder(object):
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
 
   def __init__(self, build_target):
-    """Initializes the dependency builder.
+    """Initializes the project builder.
 
     Args:
       build_target: the build target.
     """
-    super(DependencyBuilder, self).__init__()
+    super(ProjectBuilder, self).__init__()
     self._build_target = build_target
     self._l2tdevtools_path = os.path.dirname(os.path.dirname(__file__))
 
-  def _BuildDependency(self, download_helper_object, dependency_definition):
-    """Builds a dependency.
+  def _BuildProject(self, download_helper_object, project_definition):
+    """Builds a project.
 
     Args:
       download_helper_object: the download helper (instance of DownloadHelper).
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
 
     Returns:
       True if the build is successful or False on error.
     """
     source_helper_object = source_helper.SourcePackageHelper(
-        dependency_definition.name, download_helper_object)
+        project_definition.name, download_helper_object)
 
     source_helper_object.Clean()
 
@@ -65,7 +66,7 @@ class DependencyBuilder(object):
     # e.g. _CheckStatusIsClean()
 
     # Unify http:// and https:// URLs for the download helper check.
-    download_url = dependency_definition.download_url
+    download_url = project_definition.download_url
     if download_url.startswith(u'https://'):
       download_url = u'http://{0:s}'.format(download_url[8:])
 
@@ -83,10 +84,10 @@ class DependencyBuilder(object):
       return True
 
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
-        dependency_definition, self._build_target, self._l2tdevtools_path)
+        project_definition, self._build_target, self._l2tdevtools_path)
     if not build_helper_object:
       logging.warning(u'Unable to determine how to build: {0:s}'.format(
-          dependency_definition.name))
+          project_definition.name))
       return False
 
     build_dependencies = build_helper_object.CheckBuildDependencies()
@@ -102,7 +103,7 @@ class DependencyBuilder(object):
       distributions = [None]
 
     for distribution in distributions:
-      if not self._BuildDependencyForDistribution(
+      if not self._BuildProjectForDistribution(
           build_helper_object, source_helper_object, distribution):
         return False
 
@@ -113,9 +114,9 @@ class DependencyBuilder(object):
 
     return True
 
-  def _BuildDependencyForDistribution(
+  def _BuildProjectForDistribution(
       self, build_helper_object, source_helper_object, distribution):
-    """Builds a dependency for a specific distribution.
+    """Builds a project for a specific distribution.
 
     Args:
       build_helper_object: the build helper (instance of BuildHelper).
@@ -156,12 +157,12 @@ class DependencyBuilder(object):
               source_helper_object.project_name, log_filename))
     return False
 
-  def Build(self, dependency_definition):
-    """Builds a dependency.
+  def Build(self, project_definition):
+    """Builds a project.
 
     Args:
-      dependency_definition: the dependency definition object (instance of
-                             DependencyDefinition).
+      project_definition: the project definition object (instance of
+                          ProjectDefinition).
 
     Returns:
       True if the build is successful or False on error.
@@ -169,7 +170,7 @@ class DependencyBuilder(object):
     Raises:
       ValueError: if the project type is unsupported.
     """
-    download_url = dependency_definition.download_url
+    download_url = project_definition.download_url
     if download_url.endswith(u'/'):
       download_url = download_url[:-1]
 
@@ -181,7 +182,7 @@ class DependencyBuilder(object):
     download_url, _, _ = download_url.partition(u'?')
 
     if download_url.startswith(u'http://pypi.python.org/pypi/'):
-      download_helper_object = download_helper.PyPiDownloadHelper()
+      download_helper_object = download_helper.PyPIDownloadHelper()
 
     elif (download_url.startswith(u'http://sourceforge.net/projects/') and
           download_url.endswith(u'/files')):
@@ -202,7 +203,7 @@ class DependencyBuilder(object):
     else:
       raise ValueError(u'Unsupported download URL: {0:s}.'.format(download_url))
 
-    return self._BuildDependency(download_helper_object, dependency_definition)
+    return self._BuildProject(download_helper_object, project_definition)
 
 
 def Main():
@@ -223,17 +224,24 @@ def Main():
       default=u'build', help=u'The location of the build directory.')
 
   argument_parser.add_argument(
-      u'-c', u'--config', dest=u'config_file', action=u'store',
-      metavar=u'CONFIG_FILE', default=None,
-      help=u'path of the build configuration file.')
+      u'-c', u'--config', dest=u'config_path', action=u'store',
+      metavar=u'CONFIG_PATH', default=None, help=(
+          u'path of the directory containing the build configuration '
+          u'files e.g. projects.ini.'))
+
+  argument_parser.add_argument(
+      u'--preset', dest=u'preset', action=u'store',
+      metavar=u'PRESET_NAME', default=None, help=(
+          u'name of the preset of project names to build. The default is to '
+          u'build all project defined in the projects.ini configuration file. '
+          u'The presets are defined in the preset.ini configuration file.'))
 
   argument_parser.add_argument(
       u'--projects', dest=u'projects', action=u'store',
-      metavar=u'PROJECT_NAME(S)', default=None,
-      help=(
+      metavar=u'PROJECT_NAME(S)', default=None, help=(
           u'comma separated list of specific project names to build. The '
-          u'default is to build all project defined in the configuration '
-          u'file.'))
+          u'default is to build all project defined in the projects.ini '
+          u'configuration file.'))
 
   options = argument_parser.parse_args()
 
@@ -251,26 +259,33 @@ def Main():
     print(u'')
     return False
 
-  if not options.config_file:
-    options.config_file = os.path.dirname(__file__)
-    options.config_file = os.path.dirname(options.config_file)
-    options.config_file = os.path.join(
-        options.config_file, u'data', u'projects.ini')
+  config_path = options.config_path
+  if not config_path:
+    config_path = os.path.dirname(__file__)
+    config_path = os.path.dirname(config_path)
+    config_path = os.path.join(config_path, u'data')
 
-  if not os.path.exists(options.config_file):
-    print(u'No such config file: {0:s}.'.format(options.config_file))
+  projects_file = os.path.join(config_path, u'projects.ini')
+  if not os.path.exists(projects_file):
+    print(u'No such config file: {0:s}.'.format(projects_file))
+    print(u'')
+    return False
+
+  presets_file = os.path.join(config_path, u'presets.ini')
+  if options.preset and not os.path.exists(presets_file):
+    print(u'No such config file: {0:s}.'.format(presets_file))
     print(u'')
     return False
 
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
-  dependency_builder = DependencyBuilder(options.build_target)
+  project_builder = ProjectBuilder(options.build_target)
 
   # TODO: package ipython.
 
   # TODO:
-  # (u'protobuf', DependencyBuilder.PROJECT_TYPE_GOOGLE_CODE_WIKI),
+  # (u'protobuf', ProjectBuilder.PROJECT_TYPE_GOOGLE_CODE_WIKI),
   # ./configure
   # make
   # cd python
@@ -283,29 +298,41 @@ def Main():
   # Solution: use protobuf-python.spec to build
 
   # TODO: rpm build of psutil is broken, fix upstream or add patching.
-  # (u'psutil', DependencyBuilder.PROJECT_TYPE_PYPI),
+  # (u'psutil', ProjectBuilder.PROJECT_TYPE_PYPI),
 
-  if options.projects:
-    projects = options.projects.split(u',')
-  else:
-    projects = []
+  project_names = []
+  if options.preset:
+    with open(presets_file) as file_object:
+      preset_definition_reader = presets.PresetDefinitionReader()
+      for preset_definition in preset_definition_reader.Read(file_object):
+        if preset_definition.name == options.preset:
+          project_names = preset_definition.project_names
+          break
+
+    if not project_names:
+      print(u'Undefined preset: {0:s}'.format(options.preset))
+      print(u'')
+      return False
+
+  elif options.projects:
+    project_names = options.projects.split(u',')
 
   builds = []
-  with open(options.config_file) as file_object:
-    dependency_definition_reader = dependencies.DependencyDefinitionReader()
-    for dependency_definition in dependency_definition_reader.Read(file_object):
+  with open(projects_file) as file_object:
+    project_definition_reader = projects.ProjectDefinitionReader()
+    for project_definition in project_definition_reader.Read(file_object):
       is_disabled = False
-      if (options.build_target in dependency_definition.disabled or
-          u'all' in dependency_definition.disabled):
-        if dependency_definition.name not in projects:
+      if (options.build_target in project_definition.disabled or
+          u'all' in project_definition.disabled):
+        if project_definition.name not in project_names:
           is_disabled = True
         else:
           # If a project is manually specified ignore the disabled status.
           logging.info(u'Ignoring disabled status for: {0:s}'.format(
-              dependency_definition.name))
+              project_definition.name))
 
       if not is_disabled:
-        builds.append(dependency_definition)
+        builds.append(project_definition)
 
   if not os.path.exists(options.build_directory):
     os.mkdir(options.build_directory)
@@ -314,22 +341,22 @@ def Main():
   os.chdir(options.build_directory)
 
   failed_builds = []
-  undefined_packages = list(projects)
-  for dependency_definition in builds:
-    if projects and dependency_definition.name not in projects:
+  undefined_packages = list(project_names)
+  for project_definition in builds:
+    if project_names and project_definition.name not in project_names:
       continue
 
     if undefined_packages:
-      project_index = undefined_packages.index(dependency_definition.name)
+      project_index = undefined_packages.index(project_definition.name)
       del undefined_packages[project_index]
 
-    logging.info(u'Processing: {0:s}'.format(dependency_definition.name))
+    logging.info(u'Processing: {0:s}'.format(project_definition.name))
 
     # TODO: add support for dokan, bzip2
     # TODO: setup sqlite in build directory.
-    if not dependency_builder.Build(dependency_definition):
-      print(u'Failed building: {0:s}'.format(dependency_definition.name))
-      failed_builds.append(dependency_definition.name)
+    if not project_builder.Build(project_definition):
+      print(u'Failed building: {0:s}'.format(project_definition.name))
+      failed_builds.append(project_definition.name)
 
   os.chdir(current_working_directory)
 

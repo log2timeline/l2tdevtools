@@ -224,6 +224,8 @@ class CodeReviewHelper(CLIHelper):
           u'\n')
       print(u'Enter access token:', end=u' ')
 
+      sys.stdout.flush()
+
     exit_code, output, _ = self.RunCommand(command)
     print(output)
 
@@ -233,9 +235,10 @@ class CodeReviewHelper(CLIHelper):
     issue_url_line_start = (
         u'Issue created. URL: http://codereview.appspot.com/')
     for line in output.split(b'\n'):
-      if line.startswith(issue_url_line_start):
+      if issue_url_line_start in line:
+        _, _, issue_number = line.rpartition(issue_url_line_start)
         try:
-          return int(line[len(issue_url_line_start):], 10)
+          return int(issue_number, 10)
         except ValueError:
           pass
 
@@ -934,7 +937,7 @@ class ProjectHelper(object):
     dpkg_maintainter = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
     dpkg_date = time.strftime(u'%a, %d %b %Y %H:%M:%S %z')
     dpkg_changelog_content = u'\n'.join([
-        u'python-{0:s} ({1:s}-1) unstable; urgency=low'.format(
+        u'{0:s} ({1:s}-1) unstable; urgency=low'.format(
             project_name, project_version),
         u'',
         u'  * Auto-generated',

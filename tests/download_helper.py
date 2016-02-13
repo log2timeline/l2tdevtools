@@ -217,7 +217,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
-  _PROJECT_VERSION = u'20160108'
+  _PROJECT_VERSION = u'20160203'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -258,7 +258,7 @@ class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
-class PyPiDownloadHelperTest(unittest.TestCase):
+class PyPIDownloadHelperTest(unittest.TestCase):
   """Tests for the PyPi download helper."""
 
   _PROJECT_NAME = u'construct'
@@ -266,7 +266,7 @@ class PyPiDownloadHelperTest(unittest.TestCase):
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.PyPiDownloadHelper()
+    download_helper_object = download_helper.PyPIDownloadHelper()
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
@@ -274,7 +274,7 @@ class PyPiDownloadHelperTest(unittest.TestCase):
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
-    download_helper_object = download_helper.PyPiDownloadHelper()
+    download_helper_object = download_helper.PyPIDownloadHelper()
 
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
@@ -288,7 +288,7 @@ class PyPiDownloadHelperTest(unittest.TestCase):
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.PyPiDownloadHelper()
+    download_helper_object = download_helper.PyPIDownloadHelper()
 
     project_identifier = download_helper_object.GetProjectIdentifier(
         self._PROJECT_NAME)
@@ -303,7 +303,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
   """Tests for the Source Forge download helper."""
 
   _PROJECT_NAME = u'pyparsing'
-  _PROJECT_VERSION = u'2.0.7'
+  _PROJECT_VERSION = u'2.1.0'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""

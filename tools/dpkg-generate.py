@@ -9,8 +9,8 @@ import logging
 import os
 import sys
 
-from l2tdevtools import dependencies
 from l2tdevtools import dpkg_files
+from l2tdevtools import projects
 
 
 def Main():
@@ -48,14 +48,14 @@ def Main():
     print(u'')
     return False
 
-  dependency_definition_match = None
+  project_definition_match = None
   with open(options.config_file) as file_object:
-    dependency_definition_reader = dependencies.DependencyDefinitionReader()
-    for dependency_definition in dependency_definition_reader.Read(file_object):
-      if options.project_name == dependency_definition.name:
-        dependency_definition_match = dependency_definition
+    project_definition_reader = projects.ProjectDefinitionReader()
+    for project_definition in project_definition_reader.Read(file_object):
+      if options.project_name == project_definition.name:
+        project_definition_match = project_definition
 
-  if not dependency_definition_match:
+  if not project_definition_match:
     print(u'No such package name: {0:s}.'.format(options.project_name))
     print(u'')
     return False
@@ -101,9 +101,9 @@ def Main():
   tools_path = os.path.dirname(__file__)
   data_path = os.path.join(os.path.dirname(tools_path), u'data')
 
-  build_files_generator = dpkg_files.DpkgBuildFilesGenerator(
+  build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
       options.project_name, project_version,
-      dependency_definition_match, data_path)
+      project_definition_match, data_path)
 
   print(u'Generating dpkg files for: {0:s} {1:s} in: {2:s}'.format(
       options.project_name, project_version, dpkg_path))
