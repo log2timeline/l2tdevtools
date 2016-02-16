@@ -11,10 +11,18 @@ import shlex
 import subprocess
 import sys
 import time
-import urllib
-# Use urllib2 here since this code should be able to be used by a default
-# Python set up. Otherwise usage of requests is preferred.
-import urllib2
+
+# pylint: disable=no-name-in-module
+if sys.version_info[0] < 3:
+  import urllib
+
+  # Use urllib2 here since this code should be able to be used by a default
+  # Python set up. Otherwise usage of requests is preferred.
+  import urllib2 as urllib_error
+  import urllib2 as urllib_request
+else:
+  import urllib.error as urllib_error
+  import urllib.request as urllib_request
 
 # Change PYTHONPATH to include utils.
 sys.path.insert(0, u'.')
@@ -103,7 +111,7 @@ class CodeReviewHelper(CLIHelper):
         u'send_mail': 'True',
         u'xsrf_token': xsrf_token})
 
-    request = urllib2.Request(codereview_url)
+    request = urllib_request.Request(codereview_url)
 
     # Add header: Authorization: OAuth <codereview access token>
     request.add_header(
@@ -113,8 +121,8 @@ class CodeReviewHelper(CLIHelper):
     request.add_data(post_data)
 
     try:
-      url_object = urllib2.urlopen(request)
-    except urllib2.HTTPError as exception:
+      url_object = urllib_request.urlopen(request)
+    except urllib_error.HTTPError as exception:
       logging.error(
           u'Failed publish to codereview issue: {0!s} with error: {1:s}'.format(
               issue_number, exception))
@@ -149,7 +157,7 @@ class CodeReviewHelper(CLIHelper):
     post_data = urllib.urlencode({
         u'xsrf_token': xsrf_token})
 
-    request = urllib2.Request(codereview_url)
+    request = urllib_request.Request(codereview_url)
 
     # Add header: Authorization: OAuth <codereview access token>
     request.add_header(
@@ -159,8 +167,8 @@ class CodeReviewHelper(CLIHelper):
     request.add_data(post_data)
 
     try:
-      url_object = urllib2.urlopen(request)
-    except urllib2.HTTPError as exception:
+      url_object = urllib_request.urlopen(request)
+    except urllib_error.HTTPError as exception:
       logging.error(
           u'Failed closing codereview issue: {0!s} with error: {1:s}'.format(
               issue_number, exception))
@@ -270,7 +278,7 @@ class CodeReviewHelper(CLIHelper):
 
       codereview_url = b'https://codereview.appspot.com/xsrf_token'
 
-      request = urllib2.Request(codereview_url)
+      request = urllib_request.Request(codereview_url)
 
       # Add header: Authorization: OAuth <codereview access token>
       request.add_header(
@@ -278,8 +286,8 @@ class CodeReviewHelper(CLIHelper):
       request.add_header(u'X-Requesting-XSRF-Token', u'1')
 
       try:
-        url_object = urllib2.urlopen(request)
-      except urllib2.HTTPError as exception:
+        url_object = urllib_request.urlopen(request)
+      except urllib_error.HTTPError as exception:
         logging.error(
             u'Failed retrieving codereview XSRF token with error: {0:s}'.format(
                 exception))
@@ -329,11 +337,11 @@ class CodeReviewHelper(CLIHelper):
     codereview_url = b'https://codereview.appspot.com/api/{0!s}'.format(
         issue_number)
 
-    request = urllib2.Request(codereview_url)
+    request = urllib_request.Request(codereview_url)
 
     try:
-      url_object = urllib2.urlopen(request)
-    except urllib2.HTTPError as exception:
+      url_object = urllib_request.urlopen(request)
+    except urllib_error.HTTPError as exception:
       logging.error(
           u'Failed querying codereview issue: {0!s} with error: {1:s}'.format(
               issue_number, exception))
@@ -769,14 +777,14 @@ class GitHubHelper(object):
         u'access_token={2:s}').format(
             self._organization, self._project, access_token)
 
-    request = urllib2.Request(github_url)
+    request = urllib_request.Request(github_url)
 
     # This will change the request into a POST.
     request.add_data(post_data)
 
     try:
-      url_object = urllib2.urlopen(request)
-    except urllib2.HTTPError as exception:
+      url_object = urllib_request.urlopen(request)
+    except urllib_error.HTTPError as exception:
       logging.error(
           u'Failed creating pull request: {0!s} with error: {1:s}'.format(
               codereview_issue_number, exception))
@@ -812,11 +820,11 @@ class GitHubHelper(object):
     """
     github_url = b'https://api.github.com/users/{0:s}'.format(username)
 
-    request = urllib2.Request(github_url)
+    request = urllib_request.Request(github_url)
 
     try:
-      url_object = urllib2.urlopen(request)
-    except urllib2.HTTPError as exception:
+      url_object = urllib_request.urlopen(request)
+    except urllib_error.HTTPError as exception:
       logging.error(
           u'Failed querying github user: {0:s} with error: {1:s}'.format(
               username, exception))
@@ -836,7 +844,7 @@ class ProjectHelper(object):
   """Class that defines project helper functions."""
 
   _SUPPORTED_PROJECTS = frozenset([
-      u'dfvfs', u'dfwinreg', u'l2tdevtools', u'plaso'])
+      u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs', u'plaso'])
 
   def __init__(self):
     """Initializes a project helper object."""
@@ -1081,14 +1089,14 @@ class ReadTheDocsHelper(object):
     readthedocs_url = u'https://readthedocs.org/build/{0:s}'.format(
         self._project)
 
-    request = urllib2.Request(readthedocs_url)
+    request = urllib_request.Request(readthedocs_url)
 
     # This will change the request into a POST.
     request.add_data(b'')
 
     try:
-      url_object = urllib2.urlopen(request)
-    except urllib2.HTTPError as exception:
+      url_object = urllib_request.urlopen(request)
+    except urllib_error.HTTPError as exception:
       logging.error(
           u'Failed triggering build with error: {0:s}'.format(
               exception))
@@ -1523,6 +1531,9 @@ class ReviewHelper(object):
     Returns:
       A boolean value to indicate if the lint was successful.
     """
+    if self._project_name == u'l2tdocs':
+      return True
+
     if self._command not in (u'create', u'merge', u'lint', u'update'):
       return True
 
@@ -1695,6 +1706,9 @@ class ReviewHelper(object):
     Returns:
       A boolean value to indicate if the test was successful.
     """
+    if self._project_name == u'l2tdocs':
+      return True
+
     if self._command not in (u'create', u'merge', u'test', u'update'):
       return True
 
@@ -1753,6 +1767,9 @@ class ReviewHelper(object):
     Returns:
       A boolean value to indicate if the version update was successful.
     """
+    if self._project_name == u'l2tdocs':
+      return True
+
     if not self._project_helper.UpdateVersionFile():
       print(u'Unable to update version file.')
       return False
