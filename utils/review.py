@@ -14,14 +14,14 @@ import time
 
 # pylint: disable=no-name-in-module
 if sys.version_info[0] < 3:
-  import urllib
-
   # Use urllib2 here since this code should be able to be used by a default
   # Python set up. Otherwise usage of requests is preferred.
+  import urllib as  urllib_parse
   import urllib2 as urllib_error
   import urllib2 as urllib_request
 else:
   import urllib.error as urllib_error
+  import urllib.parse as urllib_parse
   import urllib.request as urllib_request
 
 # Change PYTHONPATH to include utils.
@@ -103,7 +103,7 @@ class CodeReviewHelper(CLIHelper):
     codereview_url = b'https://codereview.appspot.com/{0!s}/publish'.format(
         issue_number)
 
-    post_data = urllib.urlencode({
+    post_data = urllib_parse.urlencode({
         u'add_as_reviewer': u'False',
         u'message': message,
         u'message_only': u'True',
@@ -154,7 +154,7 @@ class CodeReviewHelper(CLIHelper):
     codereview_url = b'https://codereview.appspot.com/{0!s}/close'.format(
         issue_number)
 
-    post_data = urllib.urlencode({
+    post_data = urllib_parse.urlencode({
         u'xsrf_token': xsrf_token})
 
     request = urllib_request.Request(codereview_url)
