@@ -1,10 +1,10 @@
-Source: {package_name:s}
+Source: sleuthkit
 Section: libs
 Priority: extra
 Maintainer: {upstream_maintainer:s}
 Build-Depends: debhelper (>= 7){build_depends:s}
 Standards-Version: 3.9.5
-Homepage: {upstream_homepage:s}
+Homepage: http://www.sleuthkit.org
 
 Package: libtsk
 Architecture: any
