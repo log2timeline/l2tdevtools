@@ -212,11 +212,12 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
-class Log2TimelineGithubReleasesDownloadHelperTest(unittest.TestCase):
-  """Tests for the log2timeline github releases download helper."""
+class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
+  """Tests for the log2timeline GitHub releases download helper."""
 
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
+  # Hard-coded version to check parsing of GitHub page.
   _PROJECT_VERSION = u'20160203'
 
   def testGetLatestVersion(self):
@@ -303,6 +304,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
   """Tests for the Source Forge download helper."""
 
   _PROJECT_NAME = u'pyparsing'
+  # Hard-coded version to check parsing of SourceForge page.
   _PROJECT_VERSION = u'2.1.0'
 
   def testGetLatestVersion(self):

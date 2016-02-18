@@ -124,8 +124,16 @@ class ProjectHelper(unittest.TestCase):
     """Tests the GetName function."""
     project_helper = review.ProjectHelper()
 
-    project_name = project_helper.GetName()
+    fake_path = u'/Users/l2tdevtools/l2tdevtools/utils/review.py'
+    project_name = project_helper.GetName(path=fake_path)
     self.assertEqual(project_name, u'l2tdevtools')
+
+    # Create a new helper, as the project name is cached.
+    project_helper = review.ProjectHelper()
+
+    fake_path = u'/Users/l2tdevtools/plaso_master/utils/review.py'
+    project_name = project_helper.GetName(path=fake_path)
+    self.assertEqual(project_name, u'plaso')
 
 
 class PylintHelperTest(unittest.TestCase):

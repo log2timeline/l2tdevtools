@@ -1,5 +1,5 @@
 Source: {package_name:s}
-Section: {section:s}
+Section: libs
 Priority: extra
 Maintainer: {upstream_maintainer:s}
 Build-Depends: debhelper (>= 7){build_depends:s}

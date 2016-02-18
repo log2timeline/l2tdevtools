@@ -7,6 +7,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -84,15 +85,18 @@ class CodeReviewHelper(CLIHelper):
     self._upload_py_path = os.path.join(u'utils', u'upload.py')
     self._xsrf_token = None
 
-  def AddCommitMessage(self, issue_number, message):
-    """Adds a commit message to the code review message.
+  def AddMergeMessage(self, issue_number, message):
+    """Adds a merge message to the code review issue.
+
+    Where the merge is a commit to the main project git repository.
 
     Args:
       issue_number: an integer or string containing the codereview
                     issue number.
+      message: a string containing the message to add to the code review issue.
 
     Returns:
-      A boolean indicating the commit message was added to
+      A boolean indicating the merge message was added to
       the code review issue.
     """
     codereview_access_token = self.GetAccessToken()
@@ -843,7 +847,7 @@ class GitHubHelper(object):
 class ProjectHelper(object):
   """Class that defines project helper functions."""
 
-  _SUPPORTED_PROJECTS = frozenset([
+  SUPPORTED_PROJECTS = frozenset([
       u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs', u'plaso'])
 
   def __init__(self):
@@ -886,26 +890,33 @@ class ProjectHelper(object):
 
     return version_file_contents
 
-  def GetName(self):
+  def GetName(self, path=None):
     """Retrieves the project name from the path of the script.
+
+    Args:
+      path: optional path to the script. If None, __file__ will be used instead.
 
     Returns:
       A string containing the project name or None.
     """
-    if not self._project_name:
-      project_name = os.path.abspath(__file__)
-      project_name = os.path.dirname(project_name)
-      project_name = os.path.dirname(project_name)
-      project_name = os.path.basename(project_name)
+    if self._project_name:
+      return self._project_name
 
-      if project_name not in self._SUPPORTED_PROJECTS:
-        logging.error(
-            u'Unsupported project name: {0:s}.'.format(project_name))
-        return
+    if not path:
+      path = os.path.abspath(__file__)
+    project_name = path
+    project_name = os.path.dirname(project_name)
+    project_name = os.path.dirname(project_name)
+    project_name = os.path.basename(project_name)
 
-      self._project_name = project_name
+    for supported_project_name in self.SUPPORTED_PROJECTS:
+      if supported_project_name in project_name:
+        self._project_name = supported_project_name
+        return self._project_name
 
-    return self._project_name
+    logging.error(
+        u'Unsupported project name: {0:s}.'.format(project_name))
+    return
 
   def GetVersion(self):
     """Retrieves the project version from the version file.
@@ -1240,6 +1251,8 @@ class ReviewFile(object):
   def Create(self, codereview_issue_number):
     """Creates a new review file.
 
+    If the .review directory does not exist, it will be created.
+
     Args:
       codereview_issue_number: an integer or string containing the codereview
                                issue number.
@@ -1247,6 +1260,8 @@ class ReviewFile(object):
     Returns:
       A boolean indicating the review file was created.
     """
+    if not os.path.exists(u'.review'):
+      os.mkdir(u'.review')
     with open(self._path, 'w') as file_object:
       file_object.write(u'{0!s}'.format(codereview_issue_number))
 
@@ -1275,10 +1290,13 @@ class ReviewFile(object):
 class ReviewHelper(object):
   """Class that defines review helper functions."""
 
+  _PROJECT_NAME_REGEX = re.compile(
+      r'\[({0:s})\] '.format(u'|'.join(ProjectHelper.SUPPORTED_PROJECTS)))
+
   def __init__(
       self, command, github_origin, feature_branch, diffbase, no_browser=False,
       no_confirm=False):
-    """Initializes a revies helper object.
+    """Initializes a review helper object.
 
     Args:
       command: string containing the command.
@@ -1466,6 +1484,8 @@ class ReviewHelper(object):
     else:
       description = user_input
 
+    description = u'[{0:s}] {1:s}'.format(self._project_name, description)
+
     codereview_issue_number = self._codereview_helper.CreateIssue(
         self._diffbase, description)
     if not codereview_issue_number:
@@ -1612,12 +1632,12 @@ class ReviewHelper(object):
         u'To close the review and clean up the feature branch you can run: '
         u'python ./utils/review.py close {0:s}').format(
             self._fork_feature_branch)
-    self._codereview_helper.AddCommitMessage(
+    self._codereview_helper.AddMergeMessage(
         codereview_issue_number, commit_message)
 
     return True
 
-  def Opens(self, codereview_issue_number):
+  def Open(self, codereview_issue_number):
     """Opens a review.
 
     Args:
@@ -1663,6 +1683,11 @@ class ReviewHelper(object):
           u'{1!s}.').format(
               self._command.title(), codereview_issue_number))
       return False
+
+    # For merging, remove the project name ("[project]") from the code review
+    # description.
+    self._merge_description = self._PROJECT_NAME_REGEX.sub(
+        u'', self._merge_description)
 
     merge_email_address = codereview_information.get(u'owner_email', None)
     if not merge_email_address:
