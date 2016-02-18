@@ -18,7 +18,7 @@
 /.review
 
 # Pycharm files
- /.idea
+/.idea
 
 # Test coverage files
 .coverage
