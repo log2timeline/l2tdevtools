@@ -9,7 +9,7 @@ Homepage: https://github.com/peterjc/backports.lzma
 
 Package: python-backports.lzma
 Architecture: all
-Depends: ${python:Depends}, ${misc:Depends}
+Depends: ${{python:Depends}}, ${{misc:Depends}}
 Description: Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
  This is a backport of the ‘lzma’ module included in Python 3.3 or later by
  Nadeem Vawda and Per Oyvind Karlsen, which provides a Python wrapper for
