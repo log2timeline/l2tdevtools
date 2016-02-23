@@ -442,6 +442,29 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     super(LibyalGitHubDownloadHelper, self).__init__()
     self._download_helper = None
 
+  def GetProjectConfigurationSourcePackageUrl(self, project_name):
+    """Retrieves the source package URL from the libyal project configuration.
+
+    Args:
+      project_name: the name of the project.
+
+    Returns:
+      The source package URL or None on error.
+    """
+    download_url = (
+        u'https://raw.githubusercontent.com/libyal/{0:s}/master/'
+        u'{0:s}.ini').format(project_name)
+
+    page_content = self.DownloadPageContent(download_url)
+    if not page_content:
+      return
+
+    config_parser = configparser.RawConfigParser()
+    config_parser.readfp(io.BytesIO(page_content))
+
+    return json.loads(config_parser.get(u'source_package', u'url'))
+
+  # TODO: remove when libyal-wiki.ini has been deprecated.
   def GetWikiConfigurationSourcePackageUrl(self, project_name):
     """Retrieves the source package URL from the libyal wiki configuration.
 
@@ -476,6 +499,9 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     if not self._download_helper:
       download_url = self.GetWikiConfigurationSourcePackageUrl(project_name)
       if not download_url:
+        download_url = self.GetProjectConfigurationSourcePackageUrl(project_name)
+
+      if not download_url:
         return 0
 
       if download_url.startswith(u'https://github.com'):
@@ -498,6 +524,9 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     """
     if not self._download_helper:
       download_url = self.GetWikiConfigurationSourcePackageUrl(project_name)
+      if not download_url:
+        download_url = self.GetProjectConfigurationSourcePackageUrl(project_name)
+
       if not download_url:
         return 0
 
