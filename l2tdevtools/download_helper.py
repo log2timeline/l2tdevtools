@@ -462,7 +462,7 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     config_parser = configparser.RawConfigParser()
     config_parser.readfp(io.BytesIO(page_content))
 
-    return json.loads(config_parser.get(u'source_package', u'url'))
+    return json.loads(config_parser.get(u'project', u'download_url'))
 
   # TODO: remove when libyal-wiki.ini has been deprecated.
   def GetWikiConfigurationSourcePackageUrl(self, project_name):
