@@ -499,7 +499,8 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     if not self._download_helper:
       download_url = self.GetWikiConfigurationSourcePackageUrl(project_name)
       if not download_url:
-        download_url = self.GetProjectConfigurationSourcePackageUrl(project_name)
+        download_url = self.GetProjectConfigurationSourcePackageUrl(
+            project_name)
 
       if not download_url:
         return 0
@@ -525,7 +526,8 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     if not self._download_helper:
       download_url = self.GetWikiConfigurationSourcePackageUrl(project_name)
       if not download_url:
-        download_url = self.GetProjectConfigurationSourcePackageUrl(project_name)
+        download_url = self.GetProjectConfigurationSourcePackageUrl(
+            project_name)
 
       if not download_url:
         return 0
