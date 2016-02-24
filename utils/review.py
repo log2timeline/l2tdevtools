@@ -1290,7 +1290,7 @@ class ReviewFile(object):
 class ReviewHelper(object):
   """Class that defines review helper functions."""
 
-  _PROJECT_NAME_REGEX = re.compile(
+  _PROJECT_NAME_PREFIX_REGEX = re.compile(
       r'\[({0:s})\] '.format(u'|'.join(ProjectHelper.SUPPORTED_PROJECTS)))
 
   def __init__(
@@ -1484,10 +1484,13 @@ class ReviewHelper(object):
     else:
       description = user_input
 
-    description = u'[{0:s}] {1:s}'.format(self._project_name, description)
+    # Prefix the description with the project name for code review to make it
+    # easier to distinguish between projects.
+    code_review_description = u'[{0:s}] {1:s}'.format(
+        self._project_name, description)
 
     codereview_issue_number = self._codereview_helper.CreateIssue(
-        self._diffbase, description)
+        self._diffbase, code_review_description)
     if not codereview_issue_number:
       print(u'{0:s} aborted - unable to create codereview issue.'.format(
           self._command.title()))
@@ -1684,9 +1687,9 @@ class ReviewHelper(object):
               self._command.title(), codereview_issue_number))
       return False
 
-    # For merging, remove the project name ("[project]") from the code review
-    # description.
-    self._merge_description = self._PROJECT_NAME_REGEX.sub(
+    # When merging remove the project name ("[project]") prefix from
+    # the code review description.
+    self._merge_description = self._PROJECT_NAME_PREFIX_REGEX.sub(
         u'', self._merge_description)
 
     merge_email_address = codereview_information.get(u'owner_email', None)
