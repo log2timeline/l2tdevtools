@@ -57,8 +57,13 @@ class ProjectBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
+    if project_definition.download_name:
+      project_name = project_definition.download_name
+    else:
+      project_name = project_definition.name
+
     source_helper_object = source_helper.SourcePackageHelper(
-        project_definition.name, download_helper_object)
+        project_name, download_helper_object)
 
     source_helper_object.Clean()
 

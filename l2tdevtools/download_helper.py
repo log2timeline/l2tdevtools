@@ -195,6 +195,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     # /{organization}/{project name}/releases/download/{git tag}/
     # {project name}{status-}{version}.tar.gz
     # Note that the status is optional and will be: beta, alpha or experimental.
+    # E.g. used by libyal.
     expression_string = (
         u'/{0:s}/{1:s}/releases/download/[^/]*/{1:s}-[a-z-]*({2:s})'
         u'[.]tar[.]gz').format(
@@ -580,6 +581,7 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
   """Class that helps in downloading a PyPI code project."""
 
   _VERSION_EXPRESSIONS = [
+      u'[0-9]+',
       u'[0-9]+[.][0-9]+',
       u'[0-9]+[.][0-9]+a[0-9]',
       u'[0-9]+[.][0-9]+[.][0-9]+',

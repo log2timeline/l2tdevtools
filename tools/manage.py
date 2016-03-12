@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import sys
+import zlib
 
 from l2tdevtools import download_helper
 
@@ -131,7 +132,7 @@ class GithubRepoManager(object):
       else:
         continue
 
-      if filename.startswith(u'pefile') or filename.startswith(u'pystsk'):
+      if filename.startswith(u'pefile'):
         project, _, version = filename.partition(u'-')
       else:
         project, _, version = filename.rpartition(u'-')
@@ -146,7 +147,7 @@ class LaunchpadPPAManager(object):
 
   _LAUNCHPAD_URL = (
       u'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
-      u'/trusty/main/source/Sources')
+      u'/trusty/main/source/Sources.gz')
 
   def __init__(self, name):
     """Initializes the Launchpad PPA manager object.
@@ -184,6 +185,8 @@ class LaunchpadPPAManager(object):
     if not ppa_sources:
       logging.error(u'Unable to retrieve PPA sources list.')
       return
+
+    ppa_sources = zlib.decompress(ppa_sources, 16 + zlib.MAX_WBITS)
 
     try:
       ppa_sources = ppa_sources.decode(u'utf-8')
@@ -362,8 +365,7 @@ class BinariesManager(object):
       else:
         continue
 
-      if (directory_entry.startswith(u'pefile') or
-          directory_entry.startswith(u'pystsk')):
+      if directory_entry.startswith(u'pefile'):
         name, _, version = directory_entry.partition(u'-')
       else:
         name, _, version = directory_entry.rpartition(u'-')
@@ -450,8 +452,7 @@ class BinariesManager(object):
       else:
         continue
 
-      if (directory_entry.startswith(u'pefile') or
-          directory_entry.startswith(u'pystsk')):
+      if directory_entry.startswith(u'pefile'):
         name, _, version = directory_entry.partition(u'-')
       else:
         name, _, version = directory_entry.rpartition(u'-')
