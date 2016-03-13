@@ -855,7 +855,8 @@ class ProjectHelper(object):
   """Class that defines project helper functions."""
 
   SUPPORTED_PROJECTS = frozenset([
-      u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs', u'plaso'])
+      u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs',
+      u'plaso'])
 
   def __init__(self):
     """Initializes a project helper object."""
