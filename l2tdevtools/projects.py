@@ -7,7 +7,7 @@ import re
 try:
   import ConfigParser as configparser
 except ImportError:
-  import configparser
+  import configparser  # pylint: disable=import-error
 
 
 class ProjectDefinition(object):
