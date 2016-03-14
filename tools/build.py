@@ -207,6 +207,11 @@ class ProjectBuilder(object):
 
 
 def Main():
+  """The main program function.
+
+  Returns:
+    A boolean containing True if successful or False if not.
+  """
   build_targets = frozenset([
       u'download', u'dpkg', u'dpkg-source', u'msi', u'osc', u'pkg', u'rpm',
       u'source'])

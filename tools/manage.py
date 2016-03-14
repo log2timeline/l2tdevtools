@@ -159,6 +159,7 @@ class LaunchpadPPAManager(object):
     self._name = name
 
   def CopyPackages(self):
+    """Copies packages."""
     # TODO: implement:
     # send post to https://launchpad.net/~gift/+archive/ubuntu/testing
     #              /+copy-packages
@@ -254,6 +255,7 @@ class PyPIManager(object):
     self._download_helper = download_helper.DownloadHelper()
 
   def CopyPackages(self):
+    """Copies packages."""
     # TODO: implement:
     # send post to https://launchpad.net/~gift/+archive/ubuntu/testing
     #              /+copy-packages
@@ -531,6 +533,11 @@ class BinariesManager(object):
 
 
 def Main():
+  """The main program function.
+
+  Returns:
+    A boolean containing True if successful or False if not.
+  """
   actions = frozenset([
       u'l2tbinaries-diff', u'launchpad-diff-dev', u'launchpad-diff-stable',
       u'launchpad-diff-testing', u'pypi-diff'])

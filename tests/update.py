@@ -38,6 +38,7 @@ class DependencyUpdaterTest(unittest.TestCase):
     dependency_updater = update.DependencyUpdater(
         preferred_machine_type=u'x86', preferred_operating_system=u'Windows')
 
+    # pylint: disable=protected-access
     package_filenames, package_versions = (
         dependency_updater._GetPackageFilenamesAndVersions([]))
 

@@ -12,7 +12,7 @@ import urllib2
 try:
   import ConfigParser as configparser
 except ImportError:
-  import configparser
+  import configparser  # pylint: disable=import-error
 
 
 class DownloadHelper(object):

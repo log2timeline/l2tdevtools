@@ -17,7 +17,7 @@ from l2tdevtools import download_helper
 
 
 if platform.system() == u'Windows':
-  import wmi
+  import wmi  # pylint: disable=import-error
 
 
 def CompareVersions(first_version_list, second_version_list):
@@ -840,6 +840,11 @@ class DependencyUpdater(object):
 
 
 def Main():
+  """The main program function.
+
+  Returns:
+    A boolean containing True if successful or False if not.
+  """
   argument_parser = argparse.ArgumentParser(description=(
       u'Installs the latest versions of project dependencies.'))
 
