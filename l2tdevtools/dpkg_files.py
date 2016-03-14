@@ -11,7 +11,8 @@ import time
 class DPKGBuildFilesGenerator(object):
   """Class that helps in generating dpkg build files."""
 
-  _EMAIL_ADDRESS = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
+  _EMAIL_ADDRESS = (
+      u'log2timeline development team <log2timeline-dev@googlegroups.com>')
 
   _DOCS_FILENAMES = [
       u'CHANGES', u'CHANGES.txt', u'CHANGES.TXT',
@@ -40,6 +41,23 @@ class DPKGBuildFilesGenerator(object):
       u'Package: {package_name:s}',
       u'Architecture: {architecture:s}',
       u'Depends: {depends:s}',
+      u'Description: {description_short:s}',
+      u' {description_long:s}',
+      u''])
+
+  _CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY = u'\n'.join([
+      u'Source: {source_package_name:s}',
+      u'Section: python',
+      u'Priority: extra',
+      u'Maintainer: {upstream_maintainer:s}',
+      (u'Build-Depends: debhelper (>= 7){build_depends:s}'),
+      u'Standards-Version: 3.9.5',
+      u'X-Python-Version: >= 2.7',
+      u'Homepage: {upstream_homepage:s}',
+      u'',
+      u'Package: python-{package_name:s}',
+      u'Architecture: {architecture:s}',
+      u'Depends: {python_depends:s}',
       u'Description: {description_short:s}',
       u' {description_long:s}',
       u''])
@@ -165,7 +183,7 @@ class DPKGBuildFilesGenerator(object):
       u'',
       u'',
       u'%:',
-      (u'\tdh  $@ --buildsystem=python_distutils --with=python2,python3 '
+      (u'\tdh  $@ --buildsystem=python_distutils --with={with_python:s} '
        u'{with_quilt:s}'),
       u'',
       u'.PHONY: override_dh_auto_clean',
@@ -340,11 +358,12 @@ class DPKGBuildFilesGenerator(object):
       if self._project_definition.architecture_dependent:
         build_depends.append(u'python-dev')
 
-      build_depends.append(u'python3-all (>= 3.2~)')
-      build_depends.append(u'python3-setuptools')
+      if u'python2_only' not in self._project_definition.build_options:
+        build_depends.append(u'python3-all (>= 3.2~)')
+        build_depends.append(u'python3-setuptools')
 
-      if self._project_definition.architecture_dependent:
-        build_depends.append(u'python3-dev')
+        if self._project_definition.architecture_dependent:
+          build_depends.append(u'python3-dev')
 
     build_depends.extend(self._project_definition.dpkg_build_dependencies)
 
@@ -398,10 +417,14 @@ class DPKGBuildFilesGenerator(object):
         u'upstream_homepage': self._project_definition.homepage_url,
         u'upstream_maintainer': self._project_definition.maintainer}
 
-    if self._project_definition.build_system == u'setup_py':
-      control_template = self._CONTROL_TEMPLATE_SETUP_PY
-    else:
+    if self._project_definition.build_system == u'configure_make':
       control_template = self._CONTROL_TEMPLATE_CONFIGURE_MAKE
+
+    elif self._project_definition.build_system == u'setup_py':
+      if u'python2_only' in self._project_definition.build_options:
+        control_template = self._CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY
+      else:
+        control_template = self._CONTROL_TEMPLATE_SETUP_PY
 
     if self._project_definition.dpkg_template_control:
       template_file_path = os.path.join(
@@ -459,11 +482,13 @@ class DPKGBuildFilesGenerator(object):
         doc_files.append(filename)
 
     package_doc_files = []
-    if self._project_definition.build_system == u'setup_py':
-      package_doc_files.append(u'python-{0:s}.docs'.format(package_name))
-      package_doc_files.append(u'python3-{0:s}.docs'.format(package_name))
-    else:
+    if self._project_definition.build_system == u'configure_make':
       package_doc_files.append(u'{0:s}.docs'.format(package_name))
+
+    elif self._project_definition.build_system == u'setup_py':
+      package_doc_files.append(u'python-{0:s}.docs'.format(package_name))
+      if u'python2_only' not in self._project_definition.build_options:
+        package_doc_files.append(u'python3-{0:s}.docs'.format(package_name))
 
     for package_doc_file in package_doc_files:
       path = os.path.join(dpkg_path, package_doc_file)
@@ -561,6 +586,11 @@ class DPKGBuildFilesGenerator(object):
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
+    if u'python2_only' in self._project_definition.build_options:
+      with_python = u'python2'
+    else:
+      with_python = u'python2,python3'
+
     if self._project_definition.patches:
       with_quilt = u'--with quilt'
     else:
@@ -569,6 +599,7 @@ class DPKGBuildFilesGenerator(object):
     template_values = {
         u'package_name': package_name,
         u'project_name': self._project_name,
+        u'with_python': with_python,
         u'with_quilt': with_quilt}
 
     filename = os.path.join(dpkg_path, u'rules')

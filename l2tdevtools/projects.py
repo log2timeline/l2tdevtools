@@ -14,43 +14,57 @@ class ProjectDefinition(object):
   """Class that implements a project definition.
 
   Attributes:
-    architecture_dependent: boolean value to indicate the project is
+    architecture_dependent: a boolean value to indicate the project is
                             architecture dependent.
-    build_dependencies: list of build dependencies.
-    build_system: string containing the build system.
-    configure_options: list of the configure options.
-    description_long: string of the long description of the dependency.
-    description_short: string of the short description of the dependency.
-    disabled: list containing the names of the build targets that are disabled
-              for this dependency.
-    dpkg_build_dependencies: list of dpkg build dependencies.
-    dpkg_configure_options: list of the configure options when building a deb.
-    dpkg_dependencies: list of dpkg dependencies.
-    dpkg_name: string of the dpkg package name.
-    dpkg_source_name: string of the dpkg source package name.
-    dpkg_template_control: string of the name of the dpkg control template file.
-    dpkg_template_rules: string of the name of the dpkg rules template file.
-    download_url: string of the source package download URL.
-    git_url: string of the git repository URL.
-    homepage_url: string of the project homepage URL.
-    maintainer: string of the name and email address of the maintainer.
-    name: string of the name of the dependency.
-    setup_name: string of the name used in setup.py.
-    osc_build_dependencies: list of osc build dependencies.
-    patches: list of patch file names.
-    pkg_configure_options: list of the configure options when building a pkg.
-    version: the version requirements (instance of ProjectVersion).
+    build_dependencies: a list of strings containing the build dependencies.
+    build_options: a list of strings containing the build options. Current
+                   supported build options are: python2_only (to only build
+                   for Python version 2).
+    build_system: a string containing the build system.
+    configure_options: a list of strings containing the the configure options.
+    description_long: a string containing the long description of
+                      the dependency.
+    description_short: a string containing the short description of
+                       the dependency.
+    disabled: a list containing the names of the build targets that are
+              disabled for this dependency.
+    dpkg_build_dependencies: a list of strings containing the dpkg build
+                             dependencies.
+    dpkg_configure_options: a list of strings containing the the configure
+                            options when building a deb.
+    dpkg_dependencies: a list of strings containing the dpkg dependencies.
+    dpkg_name: a string containing the dpkg package name.
+    dpkg_source_name: a string containing the dpkg source package name.
+    dpkg_template_control: a string containing the name of the dpkg control
+                           template file.
+    dpkg_template_rules: a string containing the name of the dpkg rules
+                         template file.
+    download_name: a string containing the source package download name.
+    download_url: a string containing the source package download URL.
+    git_url: a string containing the git repository URL.
+    homepage_url: a string containing the project homepage URL.
+    maintainer: a string containing the name and email address of
+                the maintainer.
+    name: a string containing the name of the dependency.
+    setup_name: a string containing the name used in setup.py.
+    osc_build_dependencies: a list of strings containing the osc build
+                            dependencies.
+    patches: a list of strings containing the patch file names.
+    pkg_configure_options: a list of strings containing the the configure
+                           options when building a pkg.
+    version: a the version requirements (instance of ProjectVersion).
   """
 
   def __init__(self, name):
     """Initializes the project definition.
 
     Args:
-      name: the name of the preset.
+      name: the name of the project.
     """
     super(ProjectDefinition, self).__init__()
     self.architecture_dependent = False
     self.build_dependencies = None
+    self.build_options = None
     self.build_system = None
     self.configure_options = None
     self.description_long = None
@@ -63,6 +77,8 @@ class ProjectDefinition(object):
     self.dpkg_source_name = None
     self.dpkg_template_control = None
     self.dpkg_template_rules = None
+    # TODO: deprecate download_name, detect this from download_url instead.
+    self.download_name = None
     self.download_url = None
     self.git_url = None
     self.homepage_url = None
@@ -164,6 +180,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'architecture_dependent')
       project_definition.build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'build_dependencies')
+      project_definition.build_options = self._GetConfigValue(
+          config_parser, section_name, u'build_options')
       project_definition.build_system = self._GetConfigValue(
           config_parser, section_name, u'build_system')
       project_definition.configure_options = self._GetConfigValue(
@@ -188,6 +206,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'dpkg_template_control')
       project_definition.dpkg_template_rules = self._GetConfigValue(
           config_parser, section_name, u'dpkg_template_rules')
+      project_definition.download_name = self._GetConfigValue(
+          config_parser, section_name, u'download_name')
       project_definition.download_url = self._GetConfigValue(
           config_parser, section_name, u'download_url')
       project_definition.git_url = self._GetConfigValue(
@@ -213,6 +233,13 @@ class ProjectDefinitionReader(object):
           project_definition.build_dependencies, basestring):
         project_definition.build_dependencies = (
             project_definition.build_dependencies.split(u','))
+
+      if project_definition.build_options is None:
+        project_definition.build_options = []
+      elif isinstance(
+          project_definition.build_options, basestring):
+        project_definition.build_options = (
+            project_definition.build_options.split(u','))
 
       if project_definition.configure_options is None:
         project_definition.configure_options = []
