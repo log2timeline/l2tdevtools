@@ -247,6 +247,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 class DependencyUpdater(object):
   """Class that helps in updating dependencies."""
 
+  _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
+
   def __init__(
       self, download_directory=u'build', download_only=False,
       exclude_packages=False, force_install=False, msi_targetdir=None,
@@ -276,7 +278,7 @@ class DependencyUpdater(object):
     """
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
-    self._download_helper = GithubRepoDownloadHelper()
+    self._download_helper = GithubRepoDownloadHelper(self._DOWNLOAD_URL)
     self._download_only = download_only
     self._exclude_packages = exclude_packages
     self._force_install = force_install

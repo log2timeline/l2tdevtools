@@ -39,7 +39,6 @@ class ProjectDefinition(object):
                            template file.
     dpkg_template_rules: a string containing the name of the dpkg rules
                          template file.
-    download_name: a string containing the source package download name.
     download_url: a string containing the source package download URL.
     git_url: a string containing the git repository URL.
     homepage_url: a string containing the project homepage URL.
@@ -77,8 +76,6 @@ class ProjectDefinition(object):
     self.dpkg_source_name = None
     self.dpkg_template_control = None
     self.dpkg_template_rules = None
-    # TODO: deprecate download_name, detect this from download_url instead.
-    self.download_name = None
     self.download_url = None
     self.git_url = None
     self.homepage_url = None
@@ -206,8 +203,6 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'dpkg_template_control')
       project_definition.dpkg_template_rules = self._GetConfigValue(
           config_parser, section_name, u'dpkg_template_rules')
-      project_definition.download_name = self._GetConfigValue(
-          config_parser, section_name, u'download_name')
       project_definition.download_url = self._GetConfigValue(
           config_parser, section_name, u'download_url')
       project_definition.git_url = self._GetConfigValue(

@@ -27,12 +27,9 @@ __file__ = os.path.abspath(__file__)
 class ProjectBuilder(object):
   """Class that helps in building projects."""
 
-  # TODO: add phases for building sleuthkit/pytsk.
-
   # The distributions to build dpkg-source packages for.
-  # TODO: add u'xenial', u'y-series'
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
-      u'precise', u'trusty', u'vivid', u'wily'])
+      u'trusty', u'wily', u'xenial'])
 
   _LIBYAL_LIBRARIES = frozenset([u'libewf'])
 
@@ -57,10 +54,7 @@ class ProjectBuilder(object):
     Returns:
       True if the build is successful or False on error.
     """
-    if project_definition.download_name:
-      project_name = project_definition.download_name
-    else:
-      project_name = project_definition.name
+    project_name = project_definition.name
 
     source_helper_object = source_helper.SourcePackageHelper(
         project_name, download_helper_object)
@@ -175,38 +169,13 @@ class ProjectBuilder(object):
     Raises:
       ValueError: if the project type is unsupported.
     """
-    download_url = project_definition.download_url
-    if download_url.endswith(u'/'):
-      download_url = download_url[:-1]
+    download_helper_object = (
+        download_helper.DownloadHelperFactory.NewDownloadHelper(
+            project_definition.download_url))
 
-    # Unify http:// and https:// URLs for the download helper check.
-    if download_url.startswith(u'https://'):
-      download_url = u'http://{0:s}'.format(download_url[8:])
-
-    # Remove URL arguments.
-    download_url, _, _ = download_url.partition(u'?')
-
-    if download_url.startswith(u'http://pypi.python.org/pypi/'):
-      download_helper_object = download_helper.PyPIDownloadHelper()
-
-    elif (download_url.startswith(u'http://sourceforge.net/projects/') and
-          download_url.endswith(u'/files')):
-      download_helper_object = download_helper.SourceForgeDownloadHelper()
-
-    # TODO: make this a more generic github download helper when
-    # when Google Drive support is no longer needed.
-    elif (download_url.startswith(u'http://github.com/libyal/') or
-          download_url.startswith(u'http://googledrive.com/host/')):
-      download_helper_object = download_helper.LibyalGitHubDownloadHelper()
-
-    elif (download_url.startswith(u'http://github.com/') and
-          download_url.endswith(u'/releases')):
-      organization, _, _ = download_url[18:-9].rpartition(u'/')
-      download_helper_object = (
-          download_helper.GithubReleasesDownloadHelper(organization))
-
-    else:
-      raise ValueError(u'Unsupported download URL: {0:s}.'.format(download_url))
+    if not download_helper_object:
+      raise ValueError(u'Unsupported download URL: {0:s}.'.format(
+          project_definition.download_url))
 
     return self._BuildProject(download_helper_object, project_definition)
 

@@ -10,12 +10,14 @@ from tools import update
 class GithubRepoDownloadHelperTest(unittest.TestCase):
   """Tests for the github repo download helper class."""
 
+  _DOWNLOAD_URL = u'https://github.com/ForensicArtifacts/artifacts/releases'
+
   _PROJECT_NAME = u'artifacts'
   _PROJECT_VERSION = u'20160114'
 
   def testGetPackageDownloadURLs(self):
     """Tests the GetPackageDownloadURLs function."""
-    download_helper = update.GithubRepoDownloadHelper()
+    download_helper = update.GithubRepoDownloadHelper(self._DOWNLOAD_URL)
 
     package_download_urls = download_helper.GetPackageDownloadURLs(
         preferred_machine_type=u'x86', preferred_operating_system=u'Windows')
