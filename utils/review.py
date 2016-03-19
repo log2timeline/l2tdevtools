@@ -854,80 +854,93 @@ class GitHubHelper(object):
 
 
 class ProjectHelper(object):
-  """Class that defines project helper functions."""
+  """Class that defines project helper functions.
+
+  Attributes:
+    project_name: a string containing the name of the project.
+  """
 
   SUPPORTED_PROJECTS = frozenset([
       u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs',
       u'plaso'])
 
-  def __init__(self):
-    """Initializes a project helper object."""
-    super(ProjectHelper, self).__init__()
-    self._project_name = None
-    self._version_file_path = None
-
-  def _ReadVersionFile(self):
-    """Reads the contents of the version file.
-
-    Returns:
-      A string containing the version file content or None.
-    """
-    project_name = self.GetName()
-    if not project_name:
-      logging.error(u'Missing project name.')
-      return
-
-    self._version_file_path = os.path.join(project_name, u'__init__.py')
-    if not os.path.exists(self._version_file_path):
-      logging.error(
-          u'Missing version file: {0:s}'.format(self._version_file_path))
-      return
-
-    try:
-      with open(self._version_file_path, u'rb') as file_object:
-        version_file_contents = file_object.read()
-
-    except IOError as exception:
-      logging.error(
-          u'Unable to read version file with error: {0:s}'.format(exception))
-      return
-
-    try:
-      version_file_contents = version_file_contents.decode(u'utf-8')
-    except UnicodeDecodeError as exception:
-      logging.error(
-          u'Unable to read version file with error: {0:s}'.format(exception))
-      return
-
-    return version_file_contents
-
-  def GetName(self, path=None):
-    """Retrieves the project name from the path of the script.
+  def __init__(self, script_path):
+    """Initializes a project helper object.
 
     Args:
-      path: optional path to the script. If None, __file__ will be used instead.
+      script_path: a string containing the path to the script.
+
+    Raises:
+      ValueError: if the project name is not supported.
+    """
+    super(ProjectHelper, self).__init__()
+    self.project_name = self._GetProjectName(script_path)
+
+  @property
+  def tox_configuration_file_path(self):
+    """String containing the path of the tox configuration file."""
+    return u'tox.ini'
+
+  @property
+  def version_file_path(self):
+    """String containing the path of the version file."""
+    return os.path.join(self.project_name, u'__init__.py')
+
+  def _GetProjectName(self, script_path):
+    """Retrieves the project name from the script path.
+
+    Args:
+      script_path: a string containing the path to the script.
 
     Returns:
-      A string containing the project name or None.
-    """
-    if self._project_name:
-      return self._project_name
+      A string containing the project name.
 
-    if not path:
-      path = os.path.abspath(__file__)
-    project_name = path
+    Raises:
+      ValueError: if the project name is not supported.
+    """
+    project_name = os.path.abspath(script_path)
     project_name = os.path.dirname(project_name)
     project_name = os.path.dirname(project_name)
     project_name = os.path.basename(project_name)
 
     for supported_project_name in self.SUPPORTED_PROJECTS:
       if supported_project_name in project_name:
-        self._project_name = supported_project_name
-        return self._project_name
+        return supported_project_name
 
-    logging.error(
+    raise ValueError(
         u'Unsupported project name: {0:s}.'.format(project_name))
-    return
+
+  def _ReadFileContents(self, path):
+    """Reads the contents of a file.
+
+    Args:
+      filename: a string containing the path of the file.
+
+    Returns:
+      A string containing the file content or None.
+    """
+    if not os.path.exists(path):
+      logging.error(
+          u'Missing file: {0:s}'.format(path))
+      return
+
+    try:
+      with open(path, u'rb') as file_object:
+        file_contents = file_object.read()
+
+    except IOError as exception:
+      logging.error(
+          u'Unable to read file with error: {0:s}'.format(exception))
+      return
+
+    try:
+      file_contents = file_contents.decode(u'utf-8')
+    except UnicodeDecodeError as exception:
+      logging.error(
+          u'Unable to read file with error: {0:s}'.format(exception))
+      return
+
+    return file_contents
 
   def GetVersion(self):
     """Retrieves the project version from the version file.
@@ -935,7 +948,7 @@ class ProjectHelper(object):
     Returns:
       A string containing the project version or None.
     """
-    version_file_contents = self._ReadVersionFile()
+    version_file_contents = self._ReadFileContents(self.version_file_path)
     if not version_file_contents:
       return
 
@@ -957,7 +970,6 @@ class ProjectHelper(object):
       A boolean indicating the dpkg changelog file was updated. This function
       will return True if the dpkg changelog file does not exists.
     """
-    project_name = self.GetName()
     project_version = self.GetVersion()
 
     dpkg_changelog_path = os.path.join(u'config', u'dpkg', u'changelog')
@@ -968,7 +980,7 @@ class ProjectHelper(object):
     dpkg_date = time.strftime(u'%a, %d %b %Y %H:%M:%S %z')
     dpkg_changelog_content = u'\n'.join([
         u'{0:s} ({1:s}-1) unstable; urgency=low'.format(
-            project_name, project_version),
+            self.project_name, project_version),
         u'',
         u'  * Auto-generated',
         u'',
@@ -993,26 +1005,37 @@ class ProjectHelper(object):
 
     return True
 
+  def UpdateToxConfigurationFile(self):
+    """Updates the tox configuration file.
+
+    Returns:
+      A boolean indicating the file was updated.
+    """
+    # TODO: implement.
+    # * check if dependencies.py is available
+    # * write tox.ini
+
   def UpdateVersionFile(self):
     """Updates the version file.
 
     Returns:
-      A boolean indicating the version file was updated.
+      A boolean indicating the file was updated.
     """
-    version_file_contents = self._ReadVersionFile()
+    version_file_contents = self._ReadFileContents(self.version_file_path)
     if not version_file_contents:
       logging.error(u'Unable to read version file.')
       return False
 
     date_version = time.strftime(u'%Y%m%d')
-    project_name = self.GetName()
     lines = version_file_contents.split(u'\n')
     for line_index, line in enumerate(lines):
-      if project_name == u'plaso' and line.startswith(u'VERSION_DATE = '):
+      if (self.project_name == u'plaso' and
+          line.startswith(u'VERSION_DATE = ')):
         version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
         lines[line_index] = version_string
 
-      elif project_name != u'plaso' and line.startswith(u'__version__ = '):
+      elif (self.project_name != u'plaso' and
+            line.startswith(u'__version__ = ')):
         version_string = u'__version__ = \'{0:s}\''.format(date_version)
         lines[line_index] = version_string
 
@@ -1026,7 +1049,7 @@ class ProjectHelper(object):
       return False
 
     try:
-      with open(self._version_file_path, u'wb') as file_object:
+      with open(self.version_file_path, u'wb') as file_object:
         file_object.write(version_file_contents)
 
     except IOError as exception:
@@ -1531,9 +1554,11 @@ class ReviewHelper(object):
     Returns:
       A boolean value to indicate if the helper initialization was successful.
     """
-    self._project_helper = ProjectHelper()
+    script_path = os.path.abspath(__file__)
 
-    self._project_name = self._project_helper.GetName()
+    self._project_helper = ProjectHelper(script_path)
+
+    self._project_name = self._project_helper.project_name
     if not self._project_name:
       print(u'{0:s} aborted - unable to determine project name.'.format(
           self._command.title()))

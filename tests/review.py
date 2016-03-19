@@ -120,20 +120,18 @@ class GitHubHelperTest(unittest.TestCase):
 class ProjectHelper(unittest.TestCase):
   """Tests for the project helper class."""
 
-  def testGetName(self):
-    """Tests the GetName function."""
-    project_helper = review.ProjectHelper()
+  def testProjectName(self):
+    """Tests the project_name attribute."""
+    test_path = u'/Users/l2tdevtools/l2tdevtools/utils/review.py'
+    project_helper = review.ProjectHelper(test_path)
 
-    fake_path = u'/Users/l2tdevtools/l2tdevtools/utils/review.py'
-    project_name = project_helper.GetName(path=fake_path)
-    self.assertEqual(project_name, u'l2tdevtools')
+    self.assertEqual(project_helper.project_name, u'l2tdevtools')
 
     # Create a new helper, as the project name is cached.
-    project_helper = review.ProjectHelper()
+    test_path = u'/Users/l2tdevtools/plaso_master/utils/review.py'
+    project_helper = review.ProjectHelper(test_path)
 
-    fake_path = u'/Users/l2tdevtools/plaso_master/utils/review.py'
-    project_name = project_helper.GetName(path=fake_path)
-    self.assertEqual(project_name, u'plaso')
+    self.assertEqual(project_helper.project_name, u'plaso')
 
 
 class PylintHelperTest(unittest.TestCase):

@@ -522,7 +522,7 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
         return 0
 
       if download_url.startswith(u'https://github.com'):
-        self._download_helper = GithubReleasesDownloadHelper(u'libyal')
+        self._download_helper = GithubReleasesDownloadHelper(download_url)
 
       elif download_url.startswith(u'https://googledrive.com'):
         self._download_helper = LibyalGoogleDriveDownloadHelper(download_url)
@@ -549,7 +549,7 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
         return 0
 
       if download_url.startswith(u'https://github.com'):
-        self._download_helper = GithubReleasesDownloadHelper(u'libyal')
+        self._download_helper = GithubReleasesDownloadHelper(download_url)
 
       elif download_url.startswith(u'https://googledrive.com'):
         self._download_helper = LibyalGoogleDriveDownloadHelper(download_url)
