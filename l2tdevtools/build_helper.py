@@ -338,7 +338,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
     filenames_glob = u'{0:s}_{1:s}.orig.tar.gz'.format(
-        source_helper_object.project_name, self._VERSION_GLOB))
+        source_helper_object.project_name, self._VERSION_GLOB)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -895,7 +895,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     # project[-_]*version-1suffix~distribution_architecture.*
     filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
         package_name, self.version_suffix, self.distribution,
-        self.architecture))
+        self.architecture)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -906,7 +906,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution.*
     filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
-        package_name, self.version_suffix, self.distribution))
+        package_name, self.version_suffix, self.distribution)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
