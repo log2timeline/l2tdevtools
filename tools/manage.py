@@ -27,7 +27,7 @@ class GithubRepoManager(object):
   def __init__(self):
     """Initializes the github reposistory manager object."""
     super(GithubRepoManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper()
+    self._download_helper = download_helper.DownloadHelper(u'')
 
   def _GetDownloadUrl(self, sub_directory, use_api=False):
     """Retrieves the download URL.
@@ -156,7 +156,7 @@ class LaunchpadPPAManager(object):
       name: a string containing the name of the PPA.
     """
     super(LaunchpadPPAManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper()
+    self._download_helper = download_helper.DownloadHelper(u'')
     self._name = name
 
   def CopyPackages(self):
@@ -255,7 +255,7 @@ class PyPIManager(object):
   def __init__(self):
     """Initializes the PyPI manager object."""
     super(PyPIManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper()
+    self._download_helper = download_helper.DownloadHelper(u'')
 
   def CopyPackages(self):
     """Copies packages."""
