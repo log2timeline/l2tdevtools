@@ -249,6 +249,14 @@ class DependencyUpdater(object):
 
   _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
 
+  _DEVELOPMENT_PACKAGES = frozenset([
+    u'astroid',
+    u'lazy-object-proxy',
+    u'logilab-common',
+    u'mock',
+    u'pylint',
+    u'wrapt'])
+
   def __init__(
       self, download_directory=u'build', download_only=False,
       exclude_packages=False, force_install=False, msi_targetdir=None,
@@ -358,6 +366,10 @@ class DependencyUpdater(object):
       if package_names and (
           (not self._exclude_packages and name not in package_names) or
           (self._exclude_packages and name in package_names)):
+        continue
+
+      # Ignore development packages for now.
+      if name in self._DEVELOPMENT_PACKAGES:
         continue
 
       if name not in package_versions:
