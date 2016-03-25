@@ -236,8 +236,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
           u'<a href="([^"]*)" class="(js-directory-link|js-navigation-open)')
       matches = re.findall(expression_string, page_content)
 
-      for match in matches:
-        _, _, filename = match.rpartition(u'/')
+      for match_tuple in matches:
+        _, _, filename = match_tuple[0].rpartition(u'/')
         download_url = (
             u'https://github.com/log2timeline/l2tbinaries/raw/master/{0:s}/'
             u'{1:s}').format(sub_directory, filename)
