@@ -40,9 +40,16 @@ def CompareVersions(first_version_list, second_version_list):
     if index >= second_version_list_length:
       return 1
 
-    if first_version_list[index] > second_version_list[index]:
+    try:
+      first_version_part = int(first_version_list[index], 10)
+      second_version_part = int(second_version_list[index], 10)
+    except ValueError:
+      first_version_part = first_version_list[index]
+      second_version_part = second_version_list[index]
+
+    if first_version_part > second_version_part:
       return 1
-    elif first_version_list[index] < second_version_list[index]:
+    elif first_version_part < second_version_part:
       return -1
 
   if first_version_list_length < second_version_list_length:
@@ -347,8 +354,7 @@ class DependencyUpdater(object):
         # Ignore all other file exensions.
         continue
 
-      if (package_name.startswith(u'pefile') or
-          package_name.startswith(u'pytsk3')):
+      if package_name.startswith(u'pefile'):
         # We need to use the most left '-' character as the separator of the
         # name and the version, since version can contain the '-' character.
         name, _, version = package_name.partition(u'-')
@@ -360,7 +366,7 @@ class DependencyUpdater(object):
       package_prefix = name
 
       version = version.split(u'.')
-      if name in (u'pefile', u'pytsk3'):
+      if name == u'pefile':
         last_part = version.pop()
         version.extend(last_part.split(u'-'))
 
@@ -805,10 +811,6 @@ class DependencyUpdater(object):
           compare_result = -1
         elif not found_package:
           compare_result = 1
-        elif name in [u'pytsk', u'pytsk3']:
-          # We cannot really tell by the version number that pytsk3 needs to
-          # be updated, so just uninstall and update it any way.
-          compare_result = -1
         else:
           compare_result = CompareVersions(
               version_tuple, package_versions[name])
