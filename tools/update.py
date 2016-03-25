@@ -231,7 +231,9 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       # The format of the download URL is:
       # <a href="{path}" class="js-directory-link"
       # <a href="{path}" class="js-directory-link js-navigation-open"
-      expression_string = u'<a href="([^"]*)" class="js-directory-link'
+      # <a href="{path}" class="js-navigation-open"
+      expression_string = (
+          u'<a href="([^"]*)" class="(js-directory-link|js-navigation-open)')
       matches = re.findall(expression_string, page_content)
 
       for match in matches:
@@ -450,7 +452,7 @@ class DependencyUpdater(object):
         u'PyYAML',
         u'protobuf-python']
 
-    command = u'sudo yum install {0:s}'.format(u' '.join(dependencies))
+    command = u'sudo dnf install {0:s}'.format(u' '.join(dependencies))
     logging.info(u'Running: "{0:s}"'.format(command))
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
