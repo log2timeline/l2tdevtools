@@ -353,21 +353,11 @@ class DependencyUpdater(object):
         # Ignore all other file exensions.
         continue
 
-      if package_name.startswith(u'pefile'):
-        # We need to use the most left '-' character as the separator of the
-        # name and the version, since version can contain the '-' character.
-        name, _, version = package_name.partition(u'-')
-      else:
-        # We need to use the most right '-' character as the separator of the
-        # name and the version, since name can contain the '-' character.
-        name, _, version = package_name.rpartition(u'-')
-
+      # We need to use the most right '-' character as the separator of the
+      # name and the version, since name can contain the '-' character.
+      name, _, version = package_name.rpartition(u'-')
       package_prefix = name
-
       version = version.split(u'.')
-      if name == u'pefile':
-        last_part = version.pop()
-        version.extend(last_part.split(u'-'))
 
       # Ignore package names if defined.
       if package_names and (
