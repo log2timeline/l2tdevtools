@@ -31,8 +31,6 @@ class ProjectBuilder(object):
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
       u'trusty', u'wily', u'xenial'])
 
-  _LIBYAL_LIBRARIES = frozenset([u'libewf'])
-
   def __init__(self, build_target):
     """Initializes the project builder.
 
