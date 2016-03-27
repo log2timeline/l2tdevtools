@@ -221,10 +221,20 @@ class PyPIManager(object):
   # TODO: move to projects.ini configuration.
   _PYPI_PACKAGE_NAMES = {
       u'artifacts': u'artifacts',
+      u'astroid': u'astroid',
+      u'bencode': u'bencode',
+      u'binplist': u'binplist',
+      u'construct': u'construct',
       u'dfdatetime': u'dfdatetime',
       u'dfvfs': u'dfvfs',
       u'dfwinreg': u'dfwinreg',
+      u'dpkt': u'dpkt',
       u'efilter': u'efilter',
+      u'google-apputils': u'google-apputils',
+      u'hachoir-core': u'hachoir-core',
+      u'hachoir-metadata': u'hachoir-metadata',
+      u'hachoir-parser': u'hachoir-parser',
+      u'lazy-object-proxy': u'lazy-object-proxy',
       u'libbde-python': u'libbde',
       u'libcaes-python': u'libcaes',
       u'libcreg-python': u'libcreg',
@@ -249,7 +259,21 @@ class PyPIManager(object):
       u'libvmdk-python': u'libvmdk',
       u'libvshadow-python': u'libvshadow',
       u'libvslvm-python': u'libvslvm',
-      u'pytsk3': u'pytsk3'}
+      u'logilab-common': u'logilab-common',
+      u'pefile': u'pefile',
+      u'pycrypto': u'pycrypto',
+      u'pylint': u'pylint',
+      u'pyparsing': u'pyparsing',
+      u'pysqlite': u'pysqlite',
+      u'python-dateutil': u'dateutil',
+      u'python-gflags': u'python-gflags',
+      u'pytsk3': u'pytsk3',
+      u'pytz': u'pytz',
+      u'PyYAML': u'PyYAML',
+      u'requests': u'requests',
+      u'six': u'six',
+      u'wrapt': u'wrapt',
+      u'XlsxWriter': u'XlsxWriter'}
 
   def __init__(self):
     """Initializes the PyPI manager object."""
@@ -279,7 +303,7 @@ class PyPIManager(object):
       if not page_content:
         logging.error(u'Unable to retrieve PyPI package: {0:s} page.'.format(
             package_name))
-        return
+        continue
 
       try:
         page_content = page_content.decode(u'utf-8')
@@ -287,7 +311,7 @@ class PyPIManager(object):
         logging.error((
             u'Unable to decode PyPI package: {0:s} page with error: '
             u'{1:s}').format(package_name, exception))
-        return
+        continue
 
       expression_string = (
           u'<title>{0:s} ([^ ]*) : Python Package Index</title>'.format(
