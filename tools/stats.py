@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Script to retrieve project statistics."""
+"""Script to retrieve github project statistics."""
 
 from __future__ import print_function
 import argparse
@@ -21,17 +21,8 @@ else:
   from urllib.request import urlopen
 
 
-class GithubContributionsHelper(object):
-  """Class that defines a github contributions helper."""
-
-  def __init__(self, organization):
-    """Initialize the contributions helper object.
-
-    Args:
-      organization: a string containing the name of the organization.
-    """
-    super(GithubContributionsHelper, self).__init__()
-    self._organization = organization
+class DownloadHelper(object):
+  """Class that defines a download helper."""
 
   def _DownloadPageContent(self, download_url):
     """Downloads the page content from the URL.
@@ -59,16 +50,22 @@ class GithubContributionsHelper(object):
 
     return url_object.read(), url_object.info()
 
-  def _ListContributionsForProject(self, project_name, output_writer):
-    """Lists the contributionss of a specific project.
+
+class GithubContributionsHelper(DownloadHelper):
+  """Class that defines a github contributions helper."""
+
+  def _ListContributionsForProject(
+      self, organization, project_name, output_writer):
+    """Lists the contributions of a specific project.
 
     Args:
+      organization: a string containing the name of the organization.
       project_name: a string containing the name of the project.
       output_writer: an output writer object (instance of OutputWriter).
     """
     download_url = (
         u'https://api.github.com/repos/{0:s}/{1:s}/stats/contributors').format(
-            self._organization, project_name)
+            organization, project_name)
 
     contributions_data, response = self._DownloadPageContent(download_url)
     if not contributions_data:
@@ -84,7 +81,7 @@ class GithubContributionsHelper(object):
 
     Args:
       project_name: a string containing the name of the project.
-      contributions_json: a JSON contributions object (instance of TODO).
+      contributions_json: a list of JSON formatted contributions objects.
       output_writer: an output writer object (instance of OutputWriter).
     """
     # https://developer.github.com/v3/repos/statistics/
@@ -118,6 +115,8 @@ class GithubContributionsHelper(object):
         logging.error(u'Missing login name JSON value.')
         continue
 
+      # TODO: map login name to username
+
       for week_json in weeks_json:
         number_of_lines_added = week_json.get(u'a', 0)
         number_of_contributions = week_json.get(u'c', 0)
@@ -143,17 +142,21 @@ class GithubContributionsHelper(object):
             number_of_contributions, number_of_lines_added,
             number_of_lines_deleted)
 
-        output_line = u'{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n'.format(
-            year, week_number, login_name, project_name, number_of_contributions,
-            number_of_lines_added, number_of_lines_deleted)
+        output_line = (
+            u'{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n').format(
+                year, week_number, login_name, project_name,
+                number_of_contributions, number_of_lines_added,
+                number_of_lines_deleted)
 
         output_writer.Write(output_line.decode(u'utf-8'))
 
-  def ListContributions(self, project_names, output_writer):
+  def ListContributions(self, projects_per_organization, output_writer):
     """Lists the contributions of projects.
 
     Args:
-      project_names: a list of strings containing the names of the projects.
+      projects_per_organization: a dictionary containing the github
+                                 organization name as a key and a list of
+                                 projects names as the value.
       output_writer: an output writer object (instance of OutputWriter).
     """
     output_line = (
@@ -161,8 +164,85 @@ class GithubContributionsHelper(object):
         u'number lines added\tnumber lines deleted\n')
     output_writer.Write(output_line.decode(u'utf-8'))
 
-    for project_name in project_names:
-      self._ListContributionsForProject(project_name, output_writer)
+    for organization, projects in iter(projects_per_organization.items()):
+      for project_name in projects:
+        self._ListContributionsForProject(
+            organization, project_name, output_writer)
+
+
+class RietveldReviewsHleper(DownloadHelper):
+  """Class that defines a rietveld reviews helper."""
+
+  def _ListReviewsForEmailAddress(self, email_address, output_writer):
+    """Lists the contributions of a specific project.
+
+    Args:
+      email_address: a string containing the email address of the reviewer.
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    download_url = (
+        u'https://codereview.appspot.com/search?reviewer={0:s}'
+        u'&format=json&keys_only=False&with_messages=True').format(
+            email_address)
+
+    reviews_data, response = self._DownloadPageContent(download_url)
+    if not reviews_data:
+      return
+
+    reviews_json = json.loads(reviews_data)
+    self._WriteReviews(email_address, reviews_json, output_writer)
+
+    # TODO: check if response is not None
+
+  def _WriteReviews(self, email_address, reviews_json, output_writer):
+    """Writes the reviews to the output writer.
+
+    Args:
+      email_address: a string containing the email address of the reviewer.
+      reviews_json: a dictionary containing the JSON reviews object.
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    reviews_list_json = reviews_json.get("reviews", None)
+    if not reviews_list_json:
+      logging.error(u'Missing reviews JSON list.')
+      return
+
+    for review_json in reviews_list_json:
+      messages_list_json = review_json.get("reviews", None)
+      if not messages_list_json:
+        logging.error(u'Missing messages JSON list.')
+        continue
+
+      for message_json in messages_list_json:
+        sender_value = message_json.get("sender", None)
+        if not sender_value:
+          logging.error(u'Missing sender JSON value.')
+          continue
+
+    # TODO: based on the messages determine if the reviewer commented
+    # on the CL.
+
+    # "closed": false,
+    # "issue": 294010043
+
+    # TODO: map email address to username
+
+    # TODO: get project from: "subject" e.g. "[plaso] ..."
+
+  def ListReviews(self, email_addresses, output_writer):
+    """Lists the reviews of users.
+
+    Args:
+      email_addresses: a list of strings of email addresses of the reviewers.
+      output_writer: an output writer object (instance of OutputWriter).
+    """
+    # TODO: determine what to print as a header
+    output_line = u'email address\t\n'
+    output_writer.Write(output_line.decode(u'utf-8'))
+
+    for email_address in email_addresses:
+      self._ListReviewsForEmailAddress(email_address, output_writer)
+
 
 
 class StdoutWriter(object):
@@ -200,8 +280,7 @@ def Main():
     A boolean containing True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
-      u'Generates an overview of project statistics of the log2timeline '
-      u'projects.'))
+      u'Generates an overview of project statistics of github projects.'))
 
   options = argument_parser.parse_args()
 
@@ -212,14 +291,20 @@ def Main():
     print(u'')
     return False
 
-  organization = u'log2timeline'
-  project_names = [u'dfdatetime', u'dfvfs', u'dfwinreg', u'plaso']
+  projects_per_organization = {
+      u'dfirlabs': [u'focalpoint'],
+      u'google': [u'dotty', u'rekall', u'timesketch'],
+      u'log2timeline': [
+          u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'plaso'],
+  }
 
-  contributions_helper = GithubContributionsHelper(organization)
-  contributions_helper.ListContributions(project_names, output_writer)
+  contributions_helper = GithubContributionsHelper()
+  contributions_helper.ListContributions(
+      projects_per_organization, output_writer)
 
-  # TODO: add support for: timesketch, turbinia, efilter, rekall
-  # dfir labs
+  # TODO: add support for code reviews
+  # TODO: add support for pull requests
+  # TODO: add support for more granular CL information
 
   return True
 
