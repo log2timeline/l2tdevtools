@@ -14,6 +14,7 @@ import subprocess
 import sys
 
 from l2tdevtools import download_helper
+from l2tdevtools import presets
 
 
 if platform.system() == u'Windows':
@@ -856,11 +857,10 @@ def Main():
       u'Installs the latest versions of project dependencies.'))
 
   argument_parser.add_argument(
-      u'package_names', nargs=u'*', action=u'store', metavar=u'NAME',
-      type=str, help=(
-          u'Optional package names which should be updated if an update is '
-          u'available. If no value is provided all available packages are '
-          u'updated.'))
+      u'-c', u'--config', dest=u'config_path', action=u'store',
+      metavar=u'CONFIG_PATH', default=None, help=(
+          u'path of the directory containing the build configuration '
+          u'files e.g. projects.ini.'))
 
   argument_parser.add_argument(
       u'--download-directory', u'--download_directory', action=u'store',
@@ -901,13 +901,56 @@ def Main():
           u'MSIs into different directory than the system default.'))
 
   argument_parser.add_argument(
+      u'--preset', dest=u'preset', action=u'store',
+      metavar=u'PRESET_NAME', default=None, help=(
+          u'name of the preset of project names to update. The default is to '
+          u'build all project defined in the projects.ini configuration file. '
+          u'The presets are defined in the preset.ini configuration file.'))
+
+  argument_parser.add_argument(
       '-v', '--verbose', dest='verbose', action='store_true', default=False,
       help=u'have more verbose output.')
 
+  argument_parser.add_argument(
+      u'package_names', nargs=u'*', action=u'store', metavar=u'NAME',
+      type=str, help=(
+          u'Optional package names which should be updated if an update is '
+          u'available. If no value is provided all available packages are '
+          u'updated.'))
+
   options = argument_parser.parse_args()
+
+  config_path = options.config_path
+  if not config_path:
+    config_path = os.path.dirname(__file__)
+    config_path = os.path.dirname(config_path)
+    config_path = os.path.join(config_path, u'data')
+
+  presets_file = os.path.join(config_path, u'presets.ini')
+  if options.preset and not os.path.exists(presets_file):
+    print(u'No such config file: {0:s}.'.format(presets_file))
+    print(u'')
+    return False
 
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
+
+  package_names = []
+  if options.preset:
+    with open(presets_file) as file_object:
+      preset_definition_reader = presets.PresetDefinitionReader()
+      for preset_definition in preset_definition_reader.Read(file_object):
+        if preset_definition.name == options.preset:
+          package_names = preset_definition.project_names
+          break
+
+    if not package_names:
+      print(u'Undefined preset: {0:s}'.format(options.preset))
+      print(u'')
+      return False
+
+  elif options.package_names:
+    package_names = options.package_names
 
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
@@ -918,7 +961,7 @@ def Main():
       preferred_machine_type=options.machine_type,
       verbose_output=options.verbose)
 
-  return dependency_updater.UpdatePackages(options.package_names)
+  return dependency_updater.UpdatePackages(package_names)
 
 
 if __name__ == '__main__':
