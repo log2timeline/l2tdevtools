@@ -279,10 +279,24 @@ def Main():
   Returns:
     A boolean containing True if successful or False if not.
   """
+  statistics_types = frozenset([
+      u'codereviews', u'contributions'])
+
   argument_parser = argparse.ArgumentParser(description=(
       u'Generates an overview of project statistics of github projects.'))
 
+  argument_parser.add_argument(
+      u'statistics_type', choices=sorted(statistics_types), action=u'store',
+      metavar=u'TYPE', default=None, help=u'The statistics type.')
+
   options = argument_parser.parse_args()
+
+  if not options.statistics_type:
+    print(u'Statistics type missing.')
+    print(u'')
+    argument_parser.print_help()
+    print(u'')
+    return False
 
   output_writer = StdoutWriter()
 
@@ -298,9 +312,14 @@ def Main():
           u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'plaso'],
   }
 
-  contributions_helper = GithubContributionsHelper()
-  contributions_helper.ListContributions(
-      projects_per_organization, output_writer)
+  if options.statistics_type == u'codereviews':
+    codereviews_helper = CodeReviewIssuesHelper()
+    codereviews_helper.ListCodeReviews(usernames, output_writer)
+
+  elif options.statistics_type == u'contributions':
+    contributions_helper = GithubContributionsHelper()
+    contributions_helper.ListContributions(
+        projects_per_organization, output_writer)
 
   # TODO: add support for code reviews
   # TODO: add support for pull requests
