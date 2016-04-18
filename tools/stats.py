@@ -6,8 +6,14 @@ from __future__ import print_function
 import argparse
 import json
 import logging
+import os
 import sys
 import time
+
+try:
+  import ConfigParser as configparser
+except ImportError:
+  import configparser  # pylint: disable=import-error
 
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
@@ -19,6 +25,79 @@ if sys.version_info[0] < 3:
 else:
   import urllib.error as urllib_error
   from urllib.request import urlopen
+
+
+class StatsDefinitionReader(object):
+  """Class that implements a stats definition reader."""
+
+  def _GetConfigValue(self, config_parser, section_name, value_name):
+    """Retrieves a value from the config parser.
+
+    Args:
+      config_parser: the configuration parser (instance of ConfigParser).
+      section_name: the name of the section that contains the value.
+      value_name: the name of the value.
+
+    Returns:
+      An object containing the value or None if the value does not exists.
+    """
+    try:
+      return config_parser.get(section_name, value_name).decode('utf-8')
+    except configparser.NoOptionError:
+      return
+
+  def ReadProjectsPerOrganization(self, file_object):
+    """Reads the projects per organization.
+
+    Args:
+      file_object: the file-like object to read from.
+
+    Returns:
+      A dictionary object containing the organization name as the key
+      and a list of corresponding project names as the value.
+    """
+    # TODO: replace by:
+    # config_parser = configparser. ConfigParser(interpolation=None)
+    config_parser = configparser.RawConfigParser()
+    config_parser.readfp(file_object)
+
+    projects_per_organization = {}
+    for option_name in config_parser.options(u'organizations'):
+      project_names = self._GetConfigValue(
+          config_parser, u'organizations', option_name)
+
+      if project_names is None:
+        project_names = []
+      elif isinstance(project_names, basestring):
+        project_names = project_names.split(u',')
+
+      projects_per_organization[option_name] = project_names
+
+    return projects_per_organization
+
+  def ReadUsernames(self, file_object):
+    """Reads the usernames.
+
+    Args:
+      file_object: the file-like object to read from.
+
+    Returns:
+      A dictionary object containing the user name as the key
+      and the corresponding email address as the value.
+    """
+    # TODO: replace by:
+    # config_parser = configparser. ConfigParser(interpolation=None)
+    config_parser = configparser.RawConfigParser()
+    config_parser.readfp(file_object)
+
+    usernames = {}
+    for option_name in config_parser.options(u'usernames'):
+      email_address = self._GetConfigValue(
+          config_parser, u'usernames', option_name)
+
+      usernames[option_name] = email_address
+
+    return usernames
 
 
 class DownloadHelper(object):
@@ -286,6 +365,12 @@ def Main():
       u'Generates an overview of project statistics of github projects.'))
 
   argument_parser.add_argument(
+      u'-c', u'--config', dest=u'config_path', action=u'store',
+      metavar=u'CONFIG_PATH', default=None, help=(
+          u'path of the directory containing the statistics configuration '
+          u'files e.g. stats.ini.'))
+
+  argument_parser.add_argument(
       u'statistics_type', choices=sorted(statistics_types), action=u'store',
       metavar=u'TYPE', default=None, help=u'The statistics type.')
 
@@ -298,6 +383,18 @@ def Main():
     print(u'')
     return False
 
+  config_path = options.config_path
+  if not config_path:
+    config_path = os.path.dirname(__file__)
+    config_path = os.path.dirname(config_path)
+    config_path = os.path.join(config_path, u'data')
+
+  stats_file = os.path.join(config_path, u'stats.ini')
+  if not os.path.exists(stats_file):
+    print(u'No such config file: {0:s}.'.format(stats_file))
+    print(u'')
+    return False
+
   output_writer = StdoutWriter()
 
   if not output_writer.Open():
@@ -305,18 +402,22 @@ def Main():
     print(u'')
     return False
 
-  projects_per_organization = {
-      u'dfirlabs': [u'focalpoint'],
-      u'google': [u'dotty', u'rekall', u'timesketch'],
-      u'log2timeline': [
-          u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'plaso'],
-  }
-
   if options.statistics_type == u'codereviews':
+    usernames = {}
+    with open(stats_file) as file_object:
+      stats_definition_reader = StatsDefinitionReader()
+      usernames = stats_definition_reader.ReadUsernames(file_object)
+
     codereviews_helper = CodeReviewIssuesHelper()
     codereviews_helper.ListCodeReviews(usernames, output_writer)
 
   elif options.statistics_type == u'contributions':
+    projects_per_organization = {}
+    with open(stats_file) as file_object:
+      stats_definition_reader = StatsDefinitionReader()
+      projects_per_organization = (
+          stats_definition_reader.ReadProjectsPerOrganization(file_object))
+
     contributions_helper = GithubContributionsHelper()
     contributions_helper.ListContributions(
         projects_per_organization, output_writer)
