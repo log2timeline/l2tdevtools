@@ -76,51 +76,6 @@ class DownloadHelperTest(unittest.TestCase):
     self.assertEqual(page_content, expected_page_content)
 
 
-class LibyalGoogleDriveDownloadHelperTest(unittest.TestCase):
-  """Tests for the libyal Google drive download helper."""
-
-  _DOWNLOAD_URL = u'https://googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg'
-
-  _PROJECT_NAME = u'libewf'
-  _PROJECT_VERSION = 20140608
-
-  def testGetLatestVersion(self):
-    """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.LibyalGoogleDriveDownloadHelper(
-        self._DOWNLOAD_URL)
-
-    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
-
-    self.assertEqual(latest_version, self._PROJECT_VERSION)
-
-  def testGetDownloadUrl(self):
-    """Tests the GetDownloadUrl functions."""
-    download_helper_object = download_helper.LibyalGoogleDriveDownloadHelper(
-        self._DOWNLOAD_URL)
-
-    download_url = download_helper_object.GetDownloadUrl(
-        self._PROJECT_NAME, self._PROJECT_VERSION)
-
-    expected_download_url = (
-        u'{0:s}/{1:s}-{2:d}.tar.gz').format(
-            self._DOWNLOAD_URL, self._PROJECT_NAME, self._PROJECT_VERSION)
-
-    self.assertEqual(download_url, expected_download_url)
-
-  def testGetProjectIdentifier(self):
-    """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.LibyalGoogleDriveDownloadHelper(
-        self._DOWNLOAD_URL)
-
-    project_identifier = download_helper_object.GetProjectIdentifier(
-        self._PROJECT_NAME)
-
-    expected_project_identifier = u'com.github.libyal.{0:s}'.format(
-        self._PROJECT_NAME)
-
-    self.assertEqual(project_identifier, expected_project_identifier)
-
-
 class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the docopt github releases download helper."""
 
@@ -225,7 +180,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = u'20160306'
+  _PROJECT_VERSION = u'20160330'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -319,7 +274,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_NAME = u'pyparsing'
   # Hard-coded version to check parsing of SourceForge page.
-  _PROJECT_VERSION = u'2.1.0'
+  _PROJECT_VERSION = u'2.1.1'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
