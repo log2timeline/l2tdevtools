@@ -2848,7 +2848,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    filenames = os.path.join(
+    filenames_glob = os.path.join(
         source_directory, u'dist', u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
             project_name, project_version, self.architecture))
     filenames = glob.glob(filenames_glob)
