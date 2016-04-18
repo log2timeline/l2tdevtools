@@ -260,11 +260,11 @@ class DependencyUpdater(object):
   _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
 
   _DEVELOPER_PACKAGES = frozenset([
-    u'astroid',
-    u'lazy-object-proxy',
-    u'logilab-common',
-    u'pylint',
-    u'wrapt'])
+      u'astroid',
+      u'lazy-object-proxy',
+      u'logilab-common',
+      u'pylint',
+      u'wrapt'])
 
   def __init__(
       self, download_directory=u'build', download_only=False,
