@@ -480,13 +480,11 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
 
     else:
       # The format of the project download URL is:
-      # https://pypi.python.org/packages/source/{first letter project name}/
-      # {project name}/{project name}-{version}.tar.gz
+      # https://pypi.python.org/packages/.*/{project name}-{version}.tar.gz
       expression_string = (
-          u'https://pypi.python.org/packages/source/{0:s}/{1:s}/'
-          u'{1:s}-({2:s})[.]tar[.]gz').format(
-              project_name[0], project_name,
-              u'|'.join(self._VERSION_EXPRESSIONS))
+          u'https://pypi.python.org/packages/.*/'
+          u'{0:s}-({1:s})[.]tar[.]gz').format(
+              project_name, u'|'.join(self._VERSION_EXPRESSIONS))
       matches = re.findall(expression_string, page_content)
 
     if not matches:
