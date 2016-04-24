@@ -2,6 +2,7 @@
 """Build helper object implementations."""
 
 from __future__ import print_function
+import datetime
 import fileinput
 import glob
 import logging
@@ -1993,8 +1994,8 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
     osc_source_path = os.path.join(
         source_helper_object.project_name, source_filename)
-    if not self._OSCAdd(osc_source_path):
-      return False
+    # if not self._OSCAdd(osc_source_path):
+    #   return False
 
     # Have setup.py generate the .spec file.
     source_directory = source_helper_object.Create()
@@ -2034,15 +2035,24 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     output_file_object = open(osc_spec_file_path, 'wb')
     description = b''
     summary = b''
+    version = b''
     in_description = False
     has_build_requires = False
+    has_python_package = False
+    has_python3_package = False
     with open(spec_file_path, 'r+b') as file_object:
       for line in file_object.readlines():
+        if line.startswith(b'%') and in_description:
+          in_description = False
+
         if line.startswith(b'%define name '):
           # Need to override the project name for projects that prefix
           # their name with "python-" in setup.py but do not use it
           # for their source package name.
           line = b'%define name {0:s}\n'.format(project_name)
+
+        elif line.startswith(b'%define version '):
+          version = line[16:-1]
 
         elif line.startswith(b'Summary: '):
           summary = line
@@ -2056,30 +2066,57 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
         elif line == '\n' and summary and not has_build_requires:
           has_build_requires = True
           line = (
-              b'BuildRequires: python-setuptools\n'
+              b'BuildRequires: python-setuptools, python3-setuptools\n'
               b'{0:s}').format(line)
 
           if self._project_definition.osc_build_dependencies:
             line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
                 self._project_definition.osc_build_dependencies))
 
-        elif line.startswith(b'%description'):
+        elif line.startswith(b'%description') and not description:
           in_description = True
 
-        elif line.startswith(b'%files'):
-          if not project_name.startswith(u'python-'):
-            line = b'%files -f INSTALLED_FILES -n python-%{name}\n'
+        elif line.startswith(b'%package -n python-'):
+          has_python_package = True
+
+        elif line.startswith(b'%package -n python3-'):
+          has_python3_package = True
 
         elif line.startswith(b'%prep'):
-          in_description = False
-
-          if not project_name.startswith(u'python-'):
+          if not has_python_package:
             output_file_object.write((
                 b'%package -n python-%{{name}}\n'
                 b'{0:s}'
                 b'\n'
                 b'%description -n python-%{{name}}\n'
                 b'{1:s}').format(summary, description))
+
+          if not has_python3_package:
+            output_file_object.write((
+                b'%package -n python3-%{{name}}\n'
+                b'{0:s}'
+                b'\n'
+                b'%description -n python3-%{{name}}\n'
+                b'{1:s}').format(summary, description))
+
+        elif line == b'%setup -n %{name}-%{unmangled_version}':
+          line = b'%autosetup -n %{name}-%{unmangled_version}\n'
+
+        elif line.startswith(b'python setup.py build'):
+          line = (
+              b'%py2_build\n'
+              b'%py3_build\n')
+
+        elif line.startswith(b'python setup.py install'):
+          line = (
+              b'%py2_install\n'
+              b'%py3_install\n')
+
+        elif line == b'rm -rf $RPM_BUILD_ROOT':
+          line = b'rm -rf %{buildroot}\n'
+
+        elif line.startswith(b'%files'):
+          break
 
         elif in_description:
           # Ignore leading white lines in the description.
@@ -2089,6 +2126,28 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           description = b''.join([description, line])
 
         output_file_object.write(line)
+
+    output_file_object.write((
+        b'%files -n python-%{name}\n'
+        b'%license LICENSE\n'
+        b'%doc ACKNOWLEDGEMENTS AUTHORS README\n'
+        b'%{python2_sitelib}/*\n'
+        b'\n'
+        b'%files -n python3-%{name}\n'
+        b'%license LICENSE\n'
+        b'%doc ACKNOWLEDGEMENTS AUTHORS README\n'
+        b'%{python3_sitelib}/*\n'))
+
+      # TODO: add bindir support.
+
+    date_time = datetime.datetime.now()
+    date_time_string = date_time.strftime(u'%a %b %e %Y')
+
+    output_file_object.write((
+        b'\n'
+        b'%changelog\n'
+        b'* {0:s} Joachim Metz <joachim.metz@gmail.com> {1:s}-1\n'
+        b'- Auto-generated\n').format(date_time_string, version))
 
     output_file_object.close()
 
