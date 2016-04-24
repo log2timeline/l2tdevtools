@@ -2060,17 +2060,17 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
         elif line.startswith(b'BuildRequires: '):
           has_build_requires = True
           if self._project_definition.osc_build_dependencies:
-            line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
+            line = b'{0:s} {1:s}\n'.format(line[:-1], b' '.join(
                 self._project_definition.osc_build_dependencies))
 
-        elif line == '\n' and summary and not has_build_requires:
+        elif line == b'\n' and summary and not has_build_requires:
           has_build_requires = True
           line = (
               b'BuildRequires: python-setuptools, python3-setuptools\n'
               b'{0:s}').format(line)
 
           if self._project_definition.osc_build_dependencies:
-            line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
+            line = b'{0:s} {1:s}\n'.format(line[:-1], b' '.join(
                 self._project_definition.osc_build_dependencies))
 
         elif line.startswith(b'%description') and not description:
@@ -2099,20 +2099,21 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
                 b'%description -n python3-%{{name}}\n'
                 b'{1:s}').format(summary, description))
 
-        elif line == b'%setup -n %{name}-%{unmangled_version}':
+        elif line == b'%setup -n %{name}-%{unmangled_version}\n':
           line = b'%autosetup -n %{name}-%{unmangled_version}\n'
 
         elif line.startswith(b'python setup.py build'):
           line = (
-              b'%py2_build\n'
-              b'%py3_build\n')
+              b'python2 setup.py build\n'
+              b'python3 setup.py build\n')
 
         elif line.startswith(b'python setup.py install'):
           line = (
-              b'%py2_install\n'
-              b'%py3_install\n')
+              b'python2 setup.py install -O1 --root=%{buildroot}\n'
+              b'python3 setup.py install -O1 --root=%{buildroot}\n'
+              b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
 
-        elif line == b'rm -rf $RPM_BUILD_ROOT':
+        elif line == b'rm -rf $RPM_BUILD_ROOT\n':
           line = b'rm -rf %{buildroot}\n'
 
         elif line.startswith(b'%files'):
@@ -2131,12 +2132,12 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
         b'%files -n python-%{name}\n'
         b'%license LICENSE\n'
         b'%doc ACKNOWLEDGEMENTS AUTHORS README\n'
-        b'%{python2_sitelib}/*\n'
+        b'%{_exec_prefix}/lib/python2*/*\n'
         b'\n'
         b'%files -n python3-%{name}\n'
         b'%license LICENSE\n'
         b'%doc ACKNOWLEDGEMENTS AUTHORS README\n'
-        b'%{python3_sitelib}/*\n'))
+        b'%{_exec_prefix}/lib/python3*/*\n'))
 
       # TODO: add bindir support.
 
