@@ -249,51 +249,94 @@ class GithubContributionsHelper(DownloadHelper):
             organization, project_name, output_writer)
 
 
-class RietveldReviewsHleper(DownloadHelper):
-  """Class that defines a rietveld reviews helper."""
+class CodeReviewIssuesHelper(DownloadHelper):
+  """Class that defines a Rietveld code review issues helper."""
 
   def _ListReviewsForEmailAddress(self, email_address, output_writer):
-    """Lists the contributions of a specific project.
+    """Lists the reviews of a specific email address.
 
     Args:
       email_address: a string containing the email address of the reviewer.
       output_writer: an output writer object (instance of OutputWriter).
     """
-    download_url = (
-        u'https://codereview.appspot.com/search?reviewer={0:s}'
-        u'&format=json&keys_only=False&with_messages=True').format(
-            email_address)
+    issue_numbers = set()
 
-    reviews_data, response = self._DownloadPageContent(download_url)
-    if not reviews_data:
-      return
+    cursor = None
+    while True:
+      download_url = (
+          u'https://codereview.appspot.com/search?reviewer={0:s}'
+          u'&format=json&keys_only=False&with_messages=True').format(
+              email_address)
 
-    reviews_json = json.loads(reviews_data)
-    self._WriteReviews(email_address, reviews_json, output_writer)
+      # TODO: for now only search open issues.
+      # 1 => Unknown
+      # 2 => Yes
+      # 3 => No
+      download_url = u'{0:s}&closed=3'.format(download_url)
 
-    # TODO: check if response is not None
+      if cursor:
+        download_url = u'{0:s}&cursor={1:s}'.format(download_url, cursor)
 
-  def _WriteReviews(self, email_address, reviews_json, output_writer):
-    """Writes the reviews to the output writer.
+      reviews_data, response = self._DownloadPageContent(download_url)
+      if not reviews_data:
+        break
+
+      # TODO: check if response is not None
+
+      reviews_json = json.loads(reviews_data)
+
+      for review_values in self._ParserReviewsJSON(reviews_json):
+        if review_values[0] in issue_numbers:
+          return
+
+        issue_numbers.add(review_values[0])
+
+        if review_values[2]:
+          continue
+
+      cursor = reviews_json.get(u'cursor', None)
+
+  def _ParserReviewsJSON(self, reviews_json):
+    """Parser the reviews JSON data.
 
     Args:
-      email_address: a string containing the email address of the reviewer.
       reviews_json: a dictionary containing the JSON reviews object.
-      output_writer: an output writer object (instance of OutputWriter).
+
+    Yield:
+      A tuple of issue number, subject, is closed.
     """
-    reviews_list_json = reviews_json.get("reviews", None)
-    if not reviews_list_json:
-      logging.error(u'Missing reviews JSON list.')
+    results_list_json = reviews_json.get(u'results', None)
+    if results_list_json is None:
+      logging.error(u'Missing results JSON list.')
       return
 
-    for review_json in reviews_list_json:
-      messages_list_json = review_json.get("reviews", None)
+    for review_json in results_list_json:
+      issue_number = review_json.get(u'issue', None)
+      if issue_number is None:
+        logging.error(u'Missing issue number.')
+        continue
+
+      subject = review_json.get(u'subject', None)
+      if subject is None:
+        logging.error(u'Missing subject.')
+        continue
+
+      is_closed = review_json.get(u'closed', False)
+
+      yield issue_number, subject, is_closed
+
+      reviewers_list_json = review_json.get(u'reviewers', None)
+      if not reviewers_list_json:
+        logging.error(u'Missing reviewers JSON list.')
+        continue
+
+      messages_list_json = review_json.get(u'messages', None)
       if not messages_list_json:
         logging.error(u'Missing messages JSON list.')
         continue
 
       for message_json in messages_list_json:
-        sender_value = message_json.get("sender", None)
+        sender_value = message_json.get(u'sender', None)
         if not sender_value:
           logging.error(u'Missing sender JSON value.')
           continue
@@ -308,20 +351,20 @@ class RietveldReviewsHleper(DownloadHelper):
 
     # TODO: get project from: "subject" e.g. "[plaso] ..."
 
-  def ListReviews(self, email_addresses, output_writer):
-    """Lists the reviews of users.
+  def ListIssues(self, usernames, output_writer):
+    """Lists the code review issues of users.
 
     Args:
-      email_addresses: a list of strings of email addresses of the reviewers.
+      usernames: a dictionary where the key contains the usernames and
+                 the value the email addresses of the reviewers.
       output_writer: an output writer object (instance of OutputWriter).
     """
     # TODO: determine what to print as a header
     output_line = u'email address\t\n'
     output_writer.Write(output_line.decode(u'utf-8'))
 
-    for email_address in email_addresses:
+    for email_address in iter(usernames.values()):
       self._ListReviewsForEmailAddress(email_address, output_writer)
-
 
 
 class StdoutWriter(object):
@@ -409,7 +452,7 @@ def Main():
       usernames = stats_definition_reader.ReadUsernames(file_object)
 
     codereviews_helper = CodeReviewIssuesHelper()
-    codereviews_helper.ListCodeReviews(usernames, output_writer)
+    codereviews_helper.ListIssues(usernames, output_writer)
 
   elif options.statistics_type == u'contributions':
     projects_per_organization = {}
