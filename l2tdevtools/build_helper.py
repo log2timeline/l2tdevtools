@@ -1994,8 +1994,8 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
     osc_source_path = os.path.join(
         source_helper_object.project_name, source_filename)
-    # if not self._OSCAdd(osc_source_path):
-    #   return False
+    if not self._OSCAdd(osc_source_path):
+      return False
 
     # Have setup.py generate the .spec file.
     source_directory = source_helper_object.Create()
@@ -2034,6 +2034,7 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
     output_file_object = open(osc_spec_file_path, 'wb')
     description = b''
+    requires = b''
     summary = b''
     version = b''
     in_description = False
@@ -2054,8 +2055,13 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
         elif line.startswith(b'%define version '):
           version = line[16:-1]
 
-        elif line.startswith(b'Summary: '):
+        elif not summary and line.startswith(b'Summary: '):
           summary = line
+
+        elif (not description and not requires and
+              line.startswith(b'Requires: ')):
+          requires = line
+          continue
 
         elif line.startswith(b'BuildRequires: '):
           has_build_requires = True
@@ -2084,20 +2090,27 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
         elif line.startswith(b'%prep'):
           if not has_python_package:
+            python_requires = requires
+
             output_file_object.write((
                 b'%package -n python-%{{name}}\n'
                 b'{0:s}'
+                b'{1:s}'
                 b'\n'
                 b'%description -n python-%{{name}}\n'
-                b'{1:s}').format(summary, description))
+                b'{2:s}').format(summary, python_requires, description))
 
           if not has_python3_package:
+            # TODO: convert python 2 package names to python 3
+            python3_requires = requires
+
             output_file_object.write((
                 b'%package -n python3-%{{name}}\n'
                 b'{0:s}'
+                b'{1:s}'
                 b'\n'
                 b'%description -n python3-%{{name}}\n'
-                b'{1:s}').format(summary, description))
+                b'{2:s}').format(summary, python3_requires, description))
 
         elif line == b'%setup -n %{name}-%{unmangled_version}\n':
           line = b'%autosetup -n %{name}-%{unmangled_version}\n'
