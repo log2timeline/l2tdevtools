@@ -2,6 +2,7 @@
 """Build helper object implementations."""
 
 from __future__ import print_function
+import datetime
 import fileinput
 import glob
 import logging
@@ -75,10 +76,10 @@ class DPKGBuildHelper(BuildHelper):
       u'fakeroot',
       u'quilt',
       u'python-all',
-      u'python-dev',
+      u'python-all-dev',
       u'python-setuptools',
       u'python3-all',
-      u'python3-dev',
+      u'python3-all-dev',
       u'python3-setuptools',
   ])
 
@@ -330,29 +331,33 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object: the source helper object (instance of SourceHelper).
     """
-    filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
+    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
         source_helper_object.project_name,
-        source_helper_object.project_version))
+        source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames = glob.glob(u'{0:s}_{1:s}.orig.tar.gz'.format(
-        source_helper_object.project_name, self._VERSION_GLOB))
+    filenames_glob = u'{0:s}_{1:s}.orig.tar.gz'.format(
+        source_helper_object.project_name, self._VERSION_GLOB)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
         source_helper_object.project_name,
-        source_helper_object.project_version))
+        source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project[-_]version-1_architecture.*
-    filenames = glob.glob(u'{0:s}[-_]*{1:s}-1_{2:s}.*'.format(
+    filenames_glob = u'{0:s}[-_]*{1:s}-1_{2:s}.*'.format(
         source_helper_object.project_name, self._VERSION_GLOB,
-        self.architecture))
+        self.architecture)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -361,8 +366,9 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1.*
-    filenames = glob.glob(u'{0:s}[-_]*{1:s}-1.*'.format(
-        source_helper_object.project_name, self._VERSION_GLOB))
+    filenames_glob = u'{0:s}[-_]*{1:s}-1.*'.format(
+        source_helper_object.project_name, self._VERSION_GLOB)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -495,29 +501,33 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object: the source helper object (instance of SourceHelper).
     """
-    filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
+    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
         source_helper_object.project_name,
-        source_helper_object.project_version))
+        source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames = glob.glob(u'{0:s}_{1:s}.orig.tar.gz'.format(
-        source_helper_object.project_name, self._VERSION_GLOB))
+    filenames_glob = u'{0:s}_{1:s}.orig.tar.gz'.format(
+        source_helper_object.project_name, self._VERSION_GLOB)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
         source_helper_object.project_name,
-        source_helper_object.project_version))
+        source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project[-_]version-1suffix~distribution_architecture.*
-    filenames = glob.glob((u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}_{4:s}.*').format(
+    filenames_glob = u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}_{4:s}.*'.format(
         source_helper_object.project_name, self._VERSION_GLOB,
-        self.version_suffix, self.distribution, self.architecture))
+        self.version_suffix, self.distribution, self.architecture)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -526,9 +536,10 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution.*
-    filenames = glob.glob((u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}.*').format(
+    filenames_glob = u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}.*'.format(
         source_helper_object.project_name, self._VERSION_GLOB,
-        self.version_suffix, self.distribution))
+        self.version_suffix, self.distribution)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -684,25 +695,29 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
-    filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, source_helper_object.project_version))
+    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
+        project_name, source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames = glob.glob(u'{0:s}_*.orig.tar.gz'.format(project_name))
+    filenames_glob = u'{0:s}_*.orig.tar.gz'.format(project_name)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
-        project_name, source_helper_object.project_version))
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+        project_name, source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1_architecture.*
-    filenames = glob.glob(u'{0:s}[-_]*-1_{1:s}.*'.format(
-        project_name, self.architecture))
+    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
+        project_name, self.architecture)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -711,7 +726,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1.*
-    filenames = glob.glob(u'{0:s}[-_]*-1.*'.format(project_name))
+    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -858,26 +874,30 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     else:
       package_name = source_helper_object.project_name
 
-    filenames_to_ignore = re.compile(u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        package_name, source_helper_object.project_version))
+    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
+        package_name, source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames = glob.glob(u'{0:s}_*.orig.tar.gz'.format(package_name))
+    filenames_glob = u'{0:s}_*.orig.tar.gz'.format(package_name)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(u'^{0:s}[-_].*{1!s}'.format(
-        package_name, source_helper_object.project_version))
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+        package_name, source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution_architecture.*
-    filenames = glob.glob(u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
+    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
         package_name, self.version_suffix, self.distribution,
-        self.architecture))
+        self.architecture)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -886,8 +906,9 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution.*
-    filenames = glob.glob(u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
-        package_name, self.version_suffix, self.distribution))
+    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
+        package_name, self.version_suffix, self.distribution)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -1094,8 +1115,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       logging.error(u'Unsupported 64-build platform for vs2008.')
       return False
 
-    solution_filenames = glob.glob(os.path.join(
-        source_directory, u'msvscpp', u'*.sln'))
+    filenames_glob = os.path.join(source_directory, u'msvscpp', u'*.sln')
+    solution_filenames = glob.glob(filenames_glob)
+
     if len(solution_filenames) != 1:
       logging.error(u'Unable to find Visual Studio solution file')
       return False
@@ -1223,7 +1245,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     logging.info(u'Converting Visual Studio solution and project files.')
     os.chdir(source_directory)
 
-    solution_filenames = glob.glob(os.path.join(u'msvscpp', u'*.sln'))
+    filenames_glob = os.path.join(u'msvscpp', u'*.sln')
+    solution_filenames = glob.glob(filenames_glob)
+
     if len(solution_filenames) != 1:
       logging.error(u'Unable to find Visual Studio solution file')
       return False
@@ -1257,20 +1281,21 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     Returns:
       True if the move was successful, False otherwise.
     """
-    msi_filename = os.path.join(
+    filenames_glob = os.path.join(
         u'dist', u'{0:s}-*.msi'.format(python_module_name))
-    msi_glob = glob.glob(msi_filename)
-    if len(msi_glob) != 1:
+    filenames = glob.glob(filenames_glob)
+
+    if len(filenames) != 1:
       logging.error(u'Unable to find MSI file.')
       return False
 
-    _, _, msi_filename = msi_glob[0].rpartition(os.path.sep)
+    _, _, msi_filename = filenames[0].rpartition(os.path.sep)
     msi_filename = os.path.join(build_directory, msi_filename)
     if os.path.exists(msi_filename):
       logging.warning(u'MSI file already exists.')
     else:
-      logging.info(u'Moving: {0:s}'.format(msi_glob[0]))
-      shutil.move(msi_glob[0], build_directory)
+      logging.info(u'Moving: {0:s}'.format(filenames[0]))
+      shutil.move(filenames[0], build_directory)
 
     return True
 
@@ -1317,7 +1342,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     Returns:
       True if successful, False otherwise.
     """
-    download_helper_object = download_helper.SourceForgeDownloadHelper()
+    download_helper_object = download_helper.SourceForgeDownloadHelper(u'')
     source_helper_object = source_helper.SourcePackageHelper(
         u'zlib', download_helper_object)
 
@@ -1441,29 +1466,29 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       source_helper_object: the source helper object (instance of SourceHelper).
     """
     # Remove previous versions of MSIs.
-    filenames_to_ignore = re.compile(
-        u'py{0:s}-.*{1!s}.1.{2:s}-py2.7.msi'.format(
-            source_helper_object.project_name[3:],
-            source_helper_object.project_version, self.architecture))
+    filenames_to_ignore = u'py{0:s}-.*{1!s}.1.{2:s}-py2.7.msi'.format(
+        source_helper_object.project_name[3:],
+        source_helper_object.project_version, self.architecture)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    msi_filenames_glob = u'py{0:s}-*.1.{1:s}-py2.7.msi'.format(
+    filenames_glob = u'py{0:s}-*.1.{1:s}-py2.7.msi'.format(
         source_helper_object.project_name[3:], self.architecture)
+    filenames = glob.glob(filenames_glob)
 
-    filenames = glob.glob(msi_filenames_glob)
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = re.compile(
-        u'{0:s}-python-.*{1!s}.1.{2:s}-py2.7.msi'.format(
-            source_helper_object.project_name,
-            source_helper_object.project_version, self.architecture))
+    filenames_to_ignore = u'{0:s}-python-.*{1!s}.1.{2:s}-py2.7.msi'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version, self.architecture)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    msi_filenames_glob = u'{0:s}-python-*.1.{1:s}-py2.7.msi'.format(
+    filenames_glob = u'{0:s}-python-*.1.{1:s}-py2.7.msi'.format(
         source_helper_object.project_name, self.architecture)
+    filenames = glob.glob(filenames_glob)
 
-    filenames = glob.glob(msi_filenames_glob)
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
@@ -1538,19 +1563,20 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     project_name, _ = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    msi_filename = os.path.join(
+    filenames_glob = os.path.join(
         source_directory, u'dist', u'{0:s}-*.msi'.format(project_name))
-    msi_glob = glob.glob(msi_filename)
-    if len(msi_glob) != 1:
+    filenames = glob.glob(filenames_glob)
+
+    if len(filenames) != 1:
       logging.error(u'Unable to find MSI file.')
       return False
 
-    _, _, msi_filename = msi_glob[0].rpartition(os.path.sep)
+    _, _, msi_filename = filenames[0].rpartition(os.path.sep)
     if os.path.exists(msi_filename):
       logging.warning(u'MSI file already exists.')
     else:
-      logging.info(u'Moving: {0:s}'.format(msi_glob[0]))
-      shutil.move(msi_glob[0], u'.')
+      logging.info(u'Moving: {0:s}'.format(filenames[0]))
+      shutil.move(filenames[0], u'.')
 
     return True
 
@@ -1628,13 +1654,14 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     elif u'-' in project_version:
       project_version, _, _ = project_version.rpartition(u'-')
 
-    filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}.{2:s}{3:s}.msi'.format(
-        project_name, project_version, self.architecture, suffix))
+    filenames_to_ignore = u'{0:s}-.*{1!s}.{2:s}{3:s}.msi'.format(
+        project_name, project_version, self.architecture, suffix)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    msi_filenames_glob = u'{0:s}-*.{1:s}{2:s}.msi'.format(
+    filenames_glob = u'{0:s}-*.{1:s}{2:s}.msi'.format(
         project_name, self.architecture, suffix)
+    filenames = glob.glob(filenames_glob)
 
-    filenames = glob.glob(msi_filenames_glob)
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
@@ -1913,15 +1940,16 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
         source_helper_object.project_name,
         source_helper_object.project_version)
 
-    filenames_to_ignore = re.compile(u'^{0:s}'.format(
-        os.path.join(osc_package_path, osc_source_filename)))
+    filenames_to_ignore = u'^{0:s}'.format(
+        os.path.join(osc_package_path, osc_source_filename))
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project-version.tar.gz
     osc_source_filename_glob = u'{0:s}-*.tar.gz'.format(
         source_helper_object.project_name)
-    filenames = glob.glob(os.path.join(
-        osc_package_path, osc_source_filename_glob))
+    filenames_glob = os.path.join(osc_package_path, osc_source_filename_glob)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -2006,53 +2034,103 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
     output_file_object = open(osc_spec_file_path, 'wb')
     description = b''
+    requires = b''
     summary = b''
+    version = b''
     in_description = False
     has_build_requires = False
+    has_python_package = False
+    has_python3_package = False
     with open(spec_file_path, 'r+b') as file_object:
       for line in file_object.readlines():
+        if line.startswith(b'%') and in_description:
+          in_description = False
+
         if line.startswith(b'%define name '):
           # Need to override the project name for projects that prefix
           # their name with "python-" in setup.py but do not use it
           # for their source package name.
           line = b'%define name {0:s}\n'.format(project_name)
 
-        elif line.startswith(b'Summary: '):
+        elif line.startswith(b'%define version '):
+          version = line[16:-1]
+
+        elif not summary and line.startswith(b'Summary: '):
           summary = line
+
+        elif (not description and not requires and
+              line.startswith(b'Requires: ')):
+          requires = line
+          continue
 
         elif line.startswith(b'BuildRequires: '):
           has_build_requires = True
           if self._project_definition.osc_build_dependencies:
-            line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
+            line = b'{0:s} {1:s}\n'.format(line[:-1], b' '.join(
                 self._project_definition.osc_build_dependencies))
 
-        elif line == '\n' and summary and not has_build_requires:
+        elif line == b'\n' and summary and not has_build_requires:
           has_build_requires = True
           line = (
-              b'BuildRequires: python-setuptools\n'
+              b'BuildRequires: python-setuptools, python3-setuptools\n'
               b'{0:s}').format(line)
 
           if self._project_definition.osc_build_dependencies:
-            line = '{0:s} {1:s}\n'.format(line[:-1], u' '.join(
+            line = b'{0:s} {1:s}\n'.format(line[:-1], b' '.join(
                 self._project_definition.osc_build_dependencies))
 
-        elif line.startswith(b'%description'):
+        elif line.startswith(b'%description') and not description:
           in_description = True
 
-        elif line.startswith(b'%files'):
-          if not project_name.startswith(u'python-'):
-            line = b'%files -f INSTALLED_FILES -n python-%{name}\n'
+        elif line.startswith(b'%package -n python-'):
+          has_python_package = True
+
+        elif line.startswith(b'%package -n python3-'):
+          has_python3_package = True
 
         elif line.startswith(b'%prep'):
-          in_description = False
+          if not has_python_package:
+            python_requires = requires
 
-          if not project_name.startswith(u'python-'):
             output_file_object.write((
                 b'%package -n python-%{{name}}\n'
                 b'{0:s}'
+                b'{1:s}'
                 b'\n'
                 b'%description -n python-%{{name}}\n'
-                b'{1:s}').format(summary, description))
+                b'{2:s}').format(summary, python_requires, description))
+
+          if not has_python3_package:
+            # TODO: convert python 2 package names to python 3
+            python3_requires = requires
+
+            output_file_object.write((
+                b'%package -n python3-%{{name}}\n'
+                b'{0:s}'
+                b'{1:s}'
+                b'\n'
+                b'%description -n python3-%{{name}}\n'
+                b'{2:s}').format(summary, python3_requires, description))
+
+        elif line == b'%setup -n %{name}-%{unmangled_version}\n':
+          line = b'%autosetup -n %{name}-%{unmangled_version}\n'
+
+        elif line.startswith(b'python setup.py build'):
+          line = (
+              b'python2 setup.py build\n'
+              b'python3 setup.py build\n')
+
+        elif line.startswith(b'python setup.py install'):
+          line = (
+              b'python2 setup.py install -O1 --root=%{buildroot}\n'
+              b'python3 setup.py install -O1 --root=%{buildroot}\n'
+              b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
+
+        elif line == b'rm -rf $RPM_BUILD_ROOT\n':
+          line = b'rm -rf %{buildroot}\n'
+
+        elif line.startswith(b'%files'):
+          break
 
         elif in_description:
           # Ignore leading white lines in the description.
@@ -2062,6 +2140,28 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           description = b''.join([description, line])
 
         output_file_object.write(line)
+
+    output_file_object.write((
+        b'%files -n python-%{name}\n'
+        b'%license LICENSE\n'
+        b'%doc ACKNOWLEDGEMENTS AUTHORS README\n'
+        b'%{_exec_prefix}/lib/python2*/*\n'
+        b'\n'
+        b'%files -n python3-%{name}\n'
+        b'%license LICENSE\n'
+        b'%doc ACKNOWLEDGEMENTS AUTHORS README\n'
+        b'%{_exec_prefix}/lib/python3*/*\n'))
+
+      # TODO: add bindir support.
+
+    date_time = datetime.datetime.now()
+    date_time_string = date_time.strftime(u'%a %b %e %Y')
+
+    output_file_object.write((
+        b'\n'
+        b'%changelog\n'
+        b'* {0:s} Joachim Metz <joachim.metz@gmail.com> {1:s}-1\n'
+        b'- Auto-generated\n').format(date_time_string, version))
 
     output_file_object.close()
 
@@ -2193,14 +2293,15 @@ class PKGBuildHelper(BuildHelper):
     Args:
       source_helper_object: the source helper object (instance of SourceHelper).
     """
-    filenames_to_ignore = re.compile(u'^{0:s}-.*{1!s}'.format(
+    filenames_to_ignore = u'^{0:s}-.*{1!s}'.format(
         source_helper_object.project_name,
-        source_helper_object.project_version))
+        source_helper_object.project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project-*version.dmg
-    filenames = glob.glob(u'{0:s}-*.dmg'.format(
-        source_helper_object.project_name))
+    filenames_glob = u'{0:s}-*.dmg'.format(source_helper_object.project_name)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -2209,8 +2310,8 @@ class PKGBuildHelper(BuildHelper):
 
     # Remove files of previous versions in the format:
     # project-*version.pkg
-    filenames = glob.glob(u'{0:s}-*.pkg'.format(
-        source_helper_object.project_name))
+    filenames_glob = u'{0:s}-*.pkg'.format(source_helper_object.project_name)
+    filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
@@ -2339,7 +2440,10 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
 
       licenses_directory = os.path.join(source_directory, u'licenses')
       if os.path.isdir(licenses_directory):
-        for doc_path in glob.glob(os.path.join(licenses_directory, u'*')):
+        filenames_glob = os.path.join(licenses_directory, u'*')
+        filenames = glob.glob(filenames_glob)
+
+        for doc_path in filenames:
           shutil.copy(doc_path, share_doc_path)
 
       project_identifier = u'com.github.libyal.{0:s}'.format(
@@ -2606,9 +2710,11 @@ class RPMBuildHelper(BuildHelper):
       project_name: the name of the project.
       project_version: the version of the project.
     """
-    filenames = glob.glob(os.path.join(
+    filenames_glob = os.path.join(
         self._rpmbuild_rpms_path, u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-            project_name, project_version, self.architecture)))
+            project_name, project_version, self.architecture))
+    filenames = glob.glob(filenames_glob)
+
     for filename in filenames:
       logging.info(u'Moving: {0:s}'.format(filename))
       shutil.move(filename, u'.')
@@ -2659,44 +2765,52 @@ class RPMBuildHelper(BuildHelper):
         source_helper_object)
 
     # Remove previous versions build directories.
-    filenames_to_ignore = re.compile(u'{0:s}-{1!s}'.format(
-        project_name, project_version))
+    filenames_to_ignore = u'{0:s}-{1!s}'.format(
+        project_name, project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    filenames = glob.glob(os.path.join(
-        self.rpmbuild_path, u'BUILD', u'{0:s}-*'.format(project_name)))
+    filenames_glob = os.path.join(
+        self.rpmbuild_path, u'BUILD', u'{0:s}-*'.format(project_name))
+    filenames = glob.glob(filenames_glob)
+
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         shutil.rmtree(filename)
 
     # Remove previous versions of rpms.
-    filenames_to_ignore = re.compile(
-        u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
-            project_name, project_version, self.architecture))
+    filenames_to_ignore = u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
+        project_name, project_version, self.architecture)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
     rpm_filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
         project_name, self.architecture)
-
     filenames = glob.glob(rpm_filenames_glob)
+
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames = glob.glob(os.path.join(
-        self.rpmbuild_path, u'RPMS', self.architecture, rpm_filenames_glob))
+    filenames_glob = os.path.join(
+        self.rpmbuild_path, u'RPMS', self.architecture, rpm_filenames_glob)
+    filenames = glob.glob(filenames_glob)
+
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
     # Remove previous versions of source rpms.
-    filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}-1.src.rpm'.format(
-        project_name, project_version))
+    filenames_to_ignore = u'{0:s}-.*{1!s}-1.src.rpm'.format(
+        project_name, project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    filenames = glob.glob(os.path.join(
+    filenames_glob = os.path.join(
         self.rpmbuild_path, u'SRPMS',
-        u'{0:s}-*-1.src.rpm'.format(project_name)))
+        u'{0:s}-*-1.src.rpm'.format(project_name))
+    filenames = glob.glob(filenames_glob)
+
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
@@ -2807,9 +2921,11 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    filenames = glob.glob(os.path.join(
+    filenames_glob = os.path.join(
         source_directory, u'dist', u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
-            project_name, project_version, self.architecture)))
+            project_name, project_version, self.architecture))
+    filenames = glob.glob(filenames_glob)
+
     for filename in filenames:
       logging.info(u'Moving: {0:s}'.format(filename))
       shutil.move(filename, u'.')
@@ -2832,13 +2948,14 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    filenames_to_ignore = re.compile(u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture))
+    filenames_to_ignore = u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
+        project_name, project_version, self.architecture)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    rpm_filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
+    filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
         project_name, self.architecture)
+    filenames = glob.glob(filenames_glob)
 
-    filenames = glob.glob(rpm_filenames_glob)
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))

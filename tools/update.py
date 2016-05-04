@@ -14,6 +14,7 @@ import subprocess
 import sys
 
 from l2tdevtools import download_helper
+from l2tdevtools import presets
 
 
 if platform.system() == u'Windows':
@@ -40,9 +41,16 @@ def CompareVersions(first_version_list, second_version_list):
     if index >= second_version_list_length:
       return 1
 
-    if first_version_list[index] > second_version_list[index]:
+    try:
+      first_version_part = int(first_version_list[index], 10)
+      second_version_part = int(second_version_list[index], 10)
+    except ValueError:
+      first_version_part = first_version_list[index]
+      second_version_part = second_version_list[index]
+
+    if first_version_part > second_version_part:
       return 1
-    elif first_version_list[index] < second_version_list[index]:
+    elif first_version_part < second_version_part:
       return -1
 
   if first_version_list_length < second_version_list_length:
@@ -231,11 +239,13 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       # The format of the download URL is:
       # <a href="{path}" class="js-directory-link"
       # <a href="{path}" class="js-directory-link js-navigation-open"
-      expression_string = u'<a href="([^"]*)" class="js-directory-link'
+      # <a href="{path}" class="js-navigation-open"
+      expression_string = (
+          u'<a href="([^"]*)" class="(js-directory-link|js-navigation-open)')
       matches = re.findall(expression_string, page_content)
 
-      for match in matches:
-        _, _, filename = match.rpartition(u'/')
+      for match_tuple in matches:
+        _, _, filename = match_tuple[0].rpartition(u'/')
         download_url = (
             u'https://github.com/log2timeline/l2tbinaries/raw/master/{0:s}/'
             u'{1:s}').format(sub_directory, filename)
@@ -246,6 +256,15 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
 class DependencyUpdater(object):
   """Class that helps in updating dependencies."""
+
+  _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
+
+  _DEVELOPER_PACKAGES = frozenset([
+      u'astroid',
+      u'lazy-object-proxy',
+      u'logilab-common',
+      u'pylint',
+      u'wrapt'])
 
   def __init__(
       self, download_directory=u'build', download_only=False,
@@ -276,7 +295,7 @@ class DependencyUpdater(object):
     """
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
-    self._download_helper = GithubRepoDownloadHelper()
+    self._download_helper = GithubRepoDownloadHelper(self._DOWNLOAD_URL)
     self._download_only = download_only
     self._exclude_packages = exclude_packages
     self._force_install = force_install
@@ -335,27 +354,20 @@ class DependencyUpdater(object):
         # Ignore all other file exensions.
         continue
 
-      if (package_name.startswith(u'pefile') or
-          package_name.startswith(u'pytsk3')):
-        # We need to use the most left '-' character as the separator of the
-        # name and the version, since version can contain the '-' character.
-        name, _, version = package_name.partition(u'-')
-      else:
-        # We need to use the most right '-' character as the separator of the
-        # name and the version, since name can contain the '-' character.
-        name, _, version = package_name.rpartition(u'-')
-
+      # We need to use the most right '-' character as the separator of the
+      # name and the version, since name can contain the '-' character.
+      name, _, version = package_name.rpartition(u'-')
       package_prefix = name
-
       version = version.split(u'.')
-      if name in (u'pefile', u'pytsk3'):
-        last_part = version.pop()
-        version.extend(last_part.split(u'-'))
 
       # Ignore package names if defined.
       if package_names and (
           (not self._exclude_packages and name not in package_names) or
           (self._exclude_packages and name in package_names)):
+        continue
+
+      # Ignore development packages for now.
+      if name in self._DEVELOPER_PACKAGES:
         continue
 
       if name not in package_versions:
@@ -436,7 +448,7 @@ class DependencyUpdater(object):
         u'PyYAML',
         u'protobuf-python']
 
-    command = u'sudo yum install {0:s}'.format(u' '.join(dependencies))
+    command = u'sudo dnf install {0:s}'.format(u' '.join(dependencies))
     logging.info(u'Running: "{0:s}"'.format(command))
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
@@ -789,10 +801,6 @@ class DependencyUpdater(object):
           compare_result = -1
         elif not found_package:
           compare_result = 1
-        elif name in [u'pytsk', u'pytsk3']:
-          # We cannot really tell by the version number that pytsk3 needs to
-          # be updated, so just uninstall and update it any way.
-          compare_result = -1
         else:
           compare_result = CompareVersions(
               version_tuple, package_versions[name])
@@ -849,11 +857,10 @@ def Main():
       u'Installs the latest versions of project dependencies.'))
 
   argument_parser.add_argument(
-      u'package_names', nargs=u'*', action=u'store', metavar=u'NAME',
-      type=str, help=(
-          u'Optional package names which should be updated if an update is '
-          u'available. If no value is provided all available packages are '
-          u'updated.'))
+      u'-c', u'--config', dest=u'config_path', action=u'store',
+      metavar=u'CONFIG_PATH', default=None, help=(
+          u'path of the directory containing the build configuration '
+          u'files e.g. projects.ini.'))
 
   argument_parser.add_argument(
       u'--download-directory', u'--download_directory', action=u'store',
@@ -894,13 +901,56 @@ def Main():
           u'MSIs into different directory than the system default.'))
 
   argument_parser.add_argument(
+      u'--preset', dest=u'preset', action=u'store',
+      metavar=u'PRESET_NAME', default=None, help=(
+          u'name of the preset of project names to update. The default is to '
+          u'build all project defined in the projects.ini configuration file. '
+          u'The presets are defined in the preset.ini configuration file.'))
+
+  argument_parser.add_argument(
       '-v', '--verbose', dest='verbose', action='store_true', default=False,
       help=u'have more verbose output.')
 
+  argument_parser.add_argument(
+      u'package_names', nargs=u'*', action=u'store', metavar=u'NAME',
+      type=str, help=(
+          u'Optional package names which should be updated if an update is '
+          u'available. If no value is provided all available packages are '
+          u'updated.'))
+
   options = argument_parser.parse_args()
+
+  config_path = options.config_path
+  if not config_path:
+    config_path = os.path.dirname(__file__)
+    config_path = os.path.dirname(config_path)
+    config_path = os.path.join(config_path, u'data')
+
+  presets_file = os.path.join(config_path, u'presets.ini')
+  if options.preset and not os.path.exists(presets_file):
+    print(u'No such config file: {0:s}.'.format(presets_file))
+    print(u'')
+    return False
 
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
+
+  package_names = []
+  if options.preset:
+    with open(presets_file) as file_object:
+      preset_definition_reader = presets.PresetDefinitionReader()
+      for preset_definition in preset_definition_reader.Read(file_object):
+        if preset_definition.name == options.preset:
+          package_names = preset_definition.project_names
+          break
+
+    if not package_names:
+      print(u'Undefined preset: {0:s}'.format(options.preset))
+      print(u'')
+      return False
+
+  elif options.package_names:
+    package_names = options.package_names
 
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
@@ -911,7 +961,7 @@ def Main():
       preferred_machine_type=options.machine_type,
       verbose_output=options.verbose)
 
-  return dependency_updater.UpdatePackages(options.package_names)
+  return dependency_updater.UpdatePackages(package_names)
 
 
 if __name__ == '__main__':

@@ -41,7 +41,7 @@ class DownloadHelperTest(unittest.TestCase):
 
   def testDownloadPageContent(self):
     """Tests the DownloadPageContent functions."""
-    download_helper_object = download_helper.DownloadHelper()
+    download_helper_object = download_helper.DownloadHelper(u'')
 
     page_content = download_helper_object.DownloadPageContent(
         self._download_url)
@@ -54,7 +54,8 @@ class DownloadHelperTest(unittest.TestCase):
 
   def testDownloadFile(self):
     """Tests the DownloadFile functions."""
-    download_helper_object = download_helper.DownloadHelper()
+    download_helper_object = download_helper.DownloadHelper(
+        self._download_url)
 
     current_working_directory = os.getcwd()
 
@@ -75,53 +76,10 @@ class DownloadHelperTest(unittest.TestCase):
     self.assertEqual(page_content, expected_page_content)
 
 
-class LibyalGoogleDriveDownloadHelperTest(unittest.TestCase):
-  """Tests for the libyal Google drive download helper."""
-
-  _PROJECT_NAME = u'libewf'
-  _PROJECT_VERSION = 20140608
-  _DRIVE_URL = (
-      u'https://googledrive.com/host/0B3fBvzttpiiSMTdoaVExWWNsRjg')
-
-  def testGetLatestVersion(self):
-    """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.LibyalGoogleDriveDownloadHelper(
-        self._DRIVE_URL)
-
-    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
-
-    self.assertEqual(latest_version, self._PROJECT_VERSION)
-
-  def testGetDownloadUrl(self):
-    """Tests the GetDownloadUrl functions."""
-    download_helper_object = download_helper.LibyalGoogleDriveDownloadHelper(
-        self._DRIVE_URL)
-
-    download_url = download_helper_object.GetDownloadUrl(
-        self._PROJECT_NAME, self._PROJECT_VERSION)
-
-    expected_download_url = (
-        u'{0:s}/{1:s}-{2:d}.tar.gz').format(
-            self._DRIVE_URL, self._PROJECT_NAME, self._PROJECT_VERSION)
-
-    self.assertEqual(download_url, expected_download_url)
-
-  def testGetProjectIdentifier(self):
-    """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.LibyalGoogleDriveDownloadHelper(
-        self._DRIVE_URL)
-
-    project_identifier = download_helper_object.GetProjectIdentifier(
-        self._PROJECT_NAME)
-
-    expected_project_identifier = u'com.github.libyal.{0:s}'.format(
-        self._PROJECT_NAME)
-
-    self.assertEqual(project_identifier, expected_project_identifier)
-
-
 class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the docopt github releases download helper."""
+
+  _DOWNLOAD_URL = u'https://github.com/docopt/docopt/releases'
 
   _PROJECT_ORGANIZATION = u'docopt'
   _PROJECT_NAME = u'docopt'
@@ -130,7 +88,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'docopt')
+        self._DOWNLOAD_URL)
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
@@ -139,7 +97,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'docopt')
+        self._DOWNLOAD_URL)
 
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
@@ -154,7 +112,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'docopt')
+        self._DOWNLOAD_URL)
 
     project_identifier = download_helper_object.GetProjectIdentifier(
         self._PROJECT_NAME)
@@ -168,15 +126,17 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
 class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the libyal github releases download helper."""
 
+  _DOWNLOAD_URL = u'https://github.com/libyal/libevt/releases'
+
   _PROJECT_ORGANIZATION = u'libyal'
   _PROJECT_NAME = u'libevt'
   _PROJECT_STATUS = u'alpha'
-  _PROJECT_VERSION = u'20160107'
+  _PROJECT_VERSION = u'20160421'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'libyal')
+        self._DOWNLOAD_URL)
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
@@ -185,7 +145,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'libyal')
+        self._DOWNLOAD_URL)
 
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
@@ -201,7 +161,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'libyal')
+        self._DOWNLOAD_URL)
 
     project_identifier = download_helper_object.GetProjectIdentifier(
         self._PROJECT_NAME)
@@ -215,15 +175,17 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
 class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the log2timeline GitHub releases download helper."""
 
+  _DOWNLOAD_URL = u'https://github.com/log2timeline/dfvfs/releases'
+
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = u'20160306'
+  _PROJECT_VERSION = u'20160428'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'log2timeline')
+        self._DOWNLOAD_URL)
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
@@ -232,7 +194,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'log2timeline')
+        self._DOWNLOAD_URL)
 
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
@@ -248,7 +210,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
-        u'log2timeline')
+        self._DOWNLOAD_URL)
 
     project_identifier = download_helper_object.GetProjectIdentifier(
         self._PROJECT_NAME)
@@ -262,12 +224,15 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
 class PyPIDownloadHelperTest(unittest.TestCase):
   """Tests for the PyPi download helper."""
 
+  _DOWNLOAD_URL = u'https://pypi.python.org/pypi/construct'
+
   _PROJECT_NAME = u'construct'
   _PROJECT_VERSION = u'2.5.2'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.PyPIDownloadHelper()
+    download_helper_object = download_helper.PyPIDownloadHelper(
+        self._DOWNLOAD_URL)
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
@@ -275,7 +240,8 @@ class PyPIDownloadHelperTest(unittest.TestCase):
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
-    download_helper_object = download_helper.PyPIDownloadHelper()
+    download_helper_object = download_helper.PyPIDownloadHelper(
+        self._DOWNLOAD_URL)
 
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
@@ -289,7 +255,8 @@ class PyPIDownloadHelperTest(unittest.TestCase):
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.PyPIDownloadHelper()
+    download_helper_object = download_helper.PyPIDownloadHelper(
+        self._DOWNLOAD_URL)
 
     project_identifier = download_helper_object.GetProjectIdentifier(
         self._PROJECT_NAME)
@@ -303,13 +270,16 @@ class PyPIDownloadHelperTest(unittest.TestCase):
 class SourceForgeDownloadHelperTest(unittest.TestCase):
   """Tests for the Source Forge download helper."""
 
+  _DOWNLOAD_URL = u'https://sourceforge.net/projects/pyparsing/files'
+
   _PROJECT_NAME = u'pyparsing'
   # Hard-coded version to check parsing of SourceForge page.
-  _PROJECT_VERSION = u'2.1.0'
+  _PROJECT_VERSION = u'2.1.1'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.SourceForgeDownloadHelper()
+    download_helper_object = download_helper.SourceForgeDownloadHelper(
+        self._DOWNLOAD_URL)
 
     latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
 
@@ -317,7 +287,8 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
   def testGetDownloadUrl(self):
     """Tests the GetDownloadUrl functions."""
-    download_helper_object = download_helper.SourceForgeDownloadHelper()
+    download_helper_object = download_helper.SourceForgeDownloadHelper(
+        self._DOWNLOAD_URL)
 
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
@@ -331,7 +302,8 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.SourceForgeDownloadHelper()
+    download_helper_object = download_helper.SourceForgeDownloadHelper(
+        self._DOWNLOAD_URL)
 
     project_identifier = download_helper_object.GetProjectIdentifier(
         self._PROJECT_NAME)

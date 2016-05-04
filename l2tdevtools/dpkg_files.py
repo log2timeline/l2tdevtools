@@ -70,7 +70,7 @@ class DPKGBuildFilesGenerator(object):
       (u'Build-Depends: debhelper (>= 7){build_depends:s}'),
       u'Standards-Version: 3.9.5',
       u'X-Python-Version: >= 2.7',
-      u'X-Python3-Version: >= 3.2',
+      u'X-Python3-Version: >= 3.4',
       u'Homepage: {upstream_homepage:s}',
       u'',
       u'Package: python-{package_name:s}',
@@ -255,7 +255,8 @@ class DPKGBuildFilesGenerator(object):
       u'1.0'])
 
   def __init__(
-      self, project_name, project_version, project_definition, data_path):
+      self, project_name, project_version, project_definition, data_path,
+      distribution=u'unstable'):
     """Initializes the dpkg build files generator.
 
     Args:
@@ -265,9 +266,11 @@ class DPKGBuildFilesGenerator(object):
                           ProjectDefinition).
       data_path: the path to the data directory which contains the patches
                  sub directory.
+      distribution: optional string containing the name of the distribution.
     """
     super(DPKGBuildFilesGenerator, self).__init__()
     self._data_path = data_path
+    self._distribution = distribution
     self._project_definition = project_definition
     self._project_name = project_name
     self._project_version = project_version
@@ -344,6 +347,8 @@ class DPKGBuildFilesGenerator(object):
     else:
       architecture = u'any'
 
+    python2_only = self._IsPython2Only()
+
     build_depends = []
     if self._project_definition.patches:
       build_depends.append(u'quilt')
@@ -356,14 +361,14 @@ class DPKGBuildFilesGenerator(object):
       build_depends.append(u'python-setuptools')
 
       if self._project_definition.architecture_dependent:
-        build_depends.append(u'python-dev')
+        build_depends.append(u'python-all-dev')
 
-      if u'python2_only' not in self._project_definition.build_options:
-        build_depends.append(u'python3-all (>= 3.2~)')
+      if not python2_only:
+        build_depends.append(u'python3-all (>= 3.4~)')
         build_depends.append(u'python3-setuptools')
 
         if self._project_definition.architecture_dependent:
-          build_depends.append(u'python3-dev')
+          build_depends.append(u'python3-all-dev')
 
     build_depends.extend(self._project_definition.dpkg_build_dependencies)
 
@@ -421,7 +426,7 @@ class DPKGBuildFilesGenerator(object):
       control_template = self._CONTROL_TEMPLATE_CONFIGURE_MAKE
 
     elif self._project_definition.build_system == u'setup_py':
-      if u'python2_only' in self._project_definition.build_options:
+      if python2_only:
         control_template = self._CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY
       else:
         control_template = self._CONTROL_TEMPLATE_SETUP_PY
@@ -487,7 +492,7 @@ class DPKGBuildFilesGenerator(object):
 
     elif self._project_definition.build_system == u'setup_py':
       package_doc_files.append(u'python-{0:s}.docs'.format(package_name))
-      if u'python2_only' not in self._project_definition.build_options:
+      if not self._IsPython2Only():
         package_doc_files.append(u'python3-{0:s}.docs'.format(package_name))
 
     for package_doc_file in package_doc_files:
@@ -586,7 +591,7 @@ class DPKGBuildFilesGenerator(object):
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
-    if u'python2_only' in self._project_definition.build_options:
+    if self._IsPython2Only():
       with_python = u'python2'
     else:
       with_python = u'python2,python3'
@@ -617,6 +622,18 @@ class DPKGBuildFilesGenerator(object):
     with open(filename, 'wb') as file_object:
       data = self._SOURCE_FORMAT_TEMPLATE
       file_object.write(data.encode(u'utf-8'))
+
+  def _IsPython2Only(self):
+    """Determines if the project only supports Python version 2.
+
+    Note that Python 3 is supported as of 3.4 any earlier version is not
+    seen as compatible.
+
+    Returns:
+      A boolean value to indicate the project only support Python version 2.
+    """
+    return (u'python2_only' in self._project_definition.build_options or
+            self._distribution == u'precise')
 
   def GenerateFiles(self, dpkg_path):
     """Generate the dpkg build files.

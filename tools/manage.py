@@ -27,7 +27,7 @@ class GithubRepoManager(object):
   def __init__(self):
     """Initializes the github reposistory manager object."""
     super(GithubRepoManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper()
+    self._download_helper = download_helper.DownloadHelper(u'')
 
   def _GetDownloadUrl(self, sub_directory, use_api=False):
     """Retrieves the download URL.
@@ -132,11 +132,7 @@ class GithubRepoManager(object):
       else:
         continue
 
-      if filename.startswith(u'pefile'):
-        project, _, version = filename.partition(u'-')
-      else:
-        project, _, version = filename.rpartition(u'-')
-
+      project, _, version = filename.rpartition(u'-')
       projects[project] = version
 
     return projects
@@ -156,7 +152,7 @@ class LaunchpadPPAManager(object):
       name: a string containing the name of the PPA.
     """
     super(LaunchpadPPAManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper()
+    self._download_helper = download_helper.DownloadHelper(u'')
     self._name = name
 
   def CopyPackages(self):
@@ -222,40 +218,67 @@ class PyPIManager(object):
 
   _PYPI_URL = u'https://pypi.python.org/pypi/{package_name:s}'
 
-  _PACKAGE_NAMES = [
-      u'artifacts',
-      u'dfvfs',
-      u'dfwinreg',
-      u'libbde-python',
-      u'libcaes-python',
-      u'libcreg-python',
-      u'libesedb-python',
-      u'libevt-python',
-      u'libevtx-python',
-      u'libewf-python',
-      u'libexe-python',
-      u'libfsntfs-python',
-      u'libfwps-python',
-      u'libfwsi-python',
-      u'liblnk-python',
-      u'libmsiecf-python',
-      u'libolecf-python',
-      u'libqcow-python',
-      u'libregf-python',
-      u'libscca-python',
-      u'libsigscan-python',
-      u'libsmdev-python',
-      u'libsmraw-python',
-      u'libvhdi-python',
-      u'libvmdk-python',
-      u'libvshadow-python',
-      u'libvslvm-python',
-      u'pytsk3']
+  # TODO: move to projects.ini configuration.
+  _PYPI_PACKAGE_NAMES = {
+      u'artifacts': u'artifacts',
+      u'astroid': u'astroid',
+      u'bencode': u'bencode',
+      u'binplist': u'binplist',
+      u'construct': u'construct',
+      u'dfdatetime': u'dfdatetime',
+      u'dfvfs': u'dfvfs',
+      u'dfwinreg': u'dfwinreg',
+      u'dpkt': u'dpkt',
+      u'efilter': u'efilter',
+      u'google-apputils': u'google-apputils',
+      u'hachoir-core': u'hachoir-core',
+      u'hachoir-metadata': u'hachoir-metadata',
+      u'hachoir-parser': u'hachoir-parser',
+      u'lazy-object-proxy': u'lazy-object-proxy',
+      u'libbde-python': u'libbde',
+      u'libcaes-python': u'libcaes',
+      u'libcreg-python': u'libcreg',
+      u'libesedb-python': u'libesedb',
+      u'libevt-python': u'libevt',
+      u'libevtx-python': u'libevtx',
+      u'libewf-python': u'libewf',
+      u'libexe-python': u'libexe',
+      u'libfsntfs-python': u'libfsntfs',
+      u'libfwps-python': u'libfwps',
+      u'libfwsi-python': u'libfwsi',
+      u'liblnk-python': u'liblnk',
+      u'libmsiecf-python': u'libmsiecf',
+      u'libolecf-python': u'libolecf',
+      u'libqcow-python': u'libqcow',
+      u'libregf-python': u'libregf',
+      u'libscca-python': u'libscca',
+      u'libsigscan-python': u'libsigscan',
+      u'libsmdev-python': u'libsmdev',
+      u'libsmraw-python': u'libsmraw',
+      u'libvhdi-python': u'libvhdi',
+      u'libvmdk-python': u'libvmdk',
+      u'libvshadow-python': u'libvshadow',
+      u'libvslvm-python': u'libvslvm',
+      u'logilab-common': u'logilab-common',
+      u'pefile': u'pefile',
+      u'pycrypto': u'pycrypto',
+      u'pylint': u'pylint',
+      u'pyparsing': u'pyparsing',
+      u'pysqlite': u'pysqlite',
+      u'python-dateutil': u'dateutil',
+      u'python-gflags': u'python-gflags',
+      u'pytsk3': u'pytsk3',
+      u'pytz': u'pytz',
+      u'PyYAML': u'PyYAML',
+      u'requests': u'requests',
+      u'six': u'six',
+      u'wrapt': u'wrapt',
+      u'XlsxWriter': u'XlsxWriter'}
 
   def __init__(self):
     """Initializes the PyPI manager object."""
     super(PyPIManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper()
+    self._download_helper = download_helper.DownloadHelper(u'')
 
   def CopyPackages(self):
     """Copies packages."""
@@ -272,7 +295,7 @@ class PyPIManager(object):
       versions as values or None if the projects cannot be determined.
     """
     projects = {}
-    for package_name in self._PACKAGE_NAMES:
+    for package_name in iter(self._PYPI_PACKAGE_NAMES.keys()):
       kwargs = {u'package_name': package_name}
       download_url = self._PYPI_URL.format(**kwargs)
 
@@ -280,7 +303,7 @@ class PyPIManager(object):
       if not page_content:
         logging.error(u'Unable to retrieve PyPI package: {0:s} page.'.format(
             package_name))
-        return
+        continue
 
       try:
         page_content = page_content.decode(u'utf-8')
@@ -288,9 +311,11 @@ class PyPIManager(object):
         logging.error((
             u'Unable to decode PyPI package: {0:s} page with error: '
             u'{1:s}').format(package_name, exception))
-        return
+        continue
 
-      expression_string = u'<title>{0:s} ([^ ]*) : Python Package Index</title>'
+      expression_string = (
+          u'<title>{0:s} ([^ ]*) : Python Package Index</title>'.format(
+              package_name))
       matches = re.findall(expression_string, page_content)
       if not matches or len(matches) != 1:
         logging.warning(
@@ -298,6 +323,7 @@ class PyPIManager(object):
                 package_name))
         continue
 
+      package_name = self._PYPI_PACKAGE_NAMES[package_name]
       projects[package_name] = matches
 
     return projects
@@ -311,6 +337,7 @@ class BinariesManager(object):
     super(BinariesManager, self).__init__()
     self._github_repo_manager = GithubRepoManager()
     self._launchpad_ppa_manager = LaunchpadPPAManager(u'gift')
+    self._pypi_manager = PyPIManager()
 
   def _ComparePackages(self, reference_packages, packages):
     """Compares the packages.
@@ -365,11 +392,7 @@ class BinariesManager(object):
       else:
         continue
 
-      if directory_entry.startswith(u'pefile'):
-        name, _, version = directory_entry.partition(u'-')
-      else:
-        name, _, version = directory_entry.rpartition(u'-')
-
+      name, _, version = directory_entry.rpartition(u'-')
       reference_packages[name] = version
 
     packages = self._github_repo_manager.GetPackages(sub_directory)
@@ -423,14 +446,12 @@ class BinariesManager(object):
 
     return self._ComparePackages(reference_packages, packages)
 
-  def CompareDirectoryWithPyPI(self, reference_directory, sub_directory):
-    """Compares a directory containing .tar.gz packages with a github repo.
+  def CompareDirectoryWithPyPI(self, reference_directory):
+    """Compares a directory containing .tar.gz packages with PyPI.
 
     Args:
       reference_directory: a string containing the path of the reference
                            directory that contains msi or dmg packages.
-      sub_directory: a string containing the name of the machine type sub
-                     directory.
 
     Returns:
       A tuple containing a dictionary of the new packages, those packages that
@@ -440,26 +461,19 @@ class BinariesManager(object):
     """
     reference_packages = {}
     for directory_entry in os.listdir(reference_directory):
-      if directory_entry.endswith(u'.dmg'):
-        directory_entry, _, _ = directory_entry.rpartition(u'.dmg')
-
-      elif directory_entry.endswith(u'.msi'):
-        if sub_directory == u'win32':
-          directory_entry, _, _ = directory_entry.rpartition(u'.win32')
-        elif sub_directory == u'win64':
-          directory_entry, _, _ = directory_entry.rpartition(u'.win-amd64')
-
-      else:
+      if not directory_entry.endswith(u'.tar.gz'):
         continue
 
-      if directory_entry.startswith(u'pefile'):
-        name, _, version = directory_entry.partition(u'-')
-      else:
-        name, _, version = directory_entry.rpartition(u'-')
+      directory_entry, _, _ = directory_entry.rpartition(u'.tar.gz')
+      name, _, version = directory_entry.rpartition(u'-')
+
+      if (name.endswith(u'-alpha') or name.endswith(u'-beta') or
+          name.endswith(u'-experimental')):
+        name, _, _ = name.rpartition(u'-')
 
       reference_packages[name] = version
 
-    packages = self._github_repo_manager.GetPackages(sub_directory)
+    packages = self._pypi_manager.GetPackages()
     return self._ComparePackages(reference_packages, packages)
 
   def GetMachineTypeSubDirectory(
@@ -625,14 +639,10 @@ def Main():
   # elif action_tuple[0] == u'osb' and action_tuple[1] == u'diff':
 
   elif action_tuple[0] == u'pypi' and action_tuple[1] == u'diff':
-    sub_directory = binaries_manager.GetMachineTypeSubDirectory(
-        preferred_machine_type=options.machine_type)
-
     reference_directory = options.build_directory
 
     new_packages, new_versions = (
-        binaries_manager.CompareDirectoryWithPyPI(
-            reference_directory, sub_directory))
+        binaries_manager.CompareDirectoryWithPyPI(reference_directory))
 
     diff_header = (
         u'Difference between: {0:s} and release'.format(reference_directory))
