@@ -15,6 +15,7 @@ import sys
 
 from l2tdevtools import download_helper
 from l2tdevtools import presets
+from l2tdevtools import projects
 
 
 if platform.system() == u'Windows':
@@ -255,7 +256,12 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
 
 class DependencyUpdater(object):
-  """Class that helps in updating dependencies."""
+  """Class that helps in updating dependencies.
+
+  Attributes:
+    operating_system: a string containing the operation system on which to
+                      uddate the dependencies on.
+  """
 
   _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
 
@@ -303,9 +309,9 @@ class DependencyUpdater(object):
     self._verbose_output = verbose_output
 
     if preferred_operating_system:
-      self._operating_system = preferred_operating_system
+      self.operating_system = preferred_operating_system
     else:
-      self._operating_system = platform.system()
+      self.operating_system = platform.system()
 
     if preferred_machine_type:
       self._preferred_machine_type = preferred_machine_type.lower()
@@ -326,7 +332,7 @@ class DependencyUpdater(object):
     # The API is rate limited, so we scrape the web page instead.
     package_urls = self._download_helper.GetPackageDownloadURLs(
         preferred_machine_type=self._preferred_machine_type,
-        preferred_operating_system=self._operating_system)
+        preferred_operating_system=self.operating_system)
     if not package_urls:
       logging.error(u'Unable to determine package download URLs.')
       return None, None
@@ -408,17 +414,17 @@ class DependencyUpdater(object):
     Returns:
       A boolean value indicating the install was successful.
     """
-    if self._operating_system == u'Darwin':
+    if self.operating_system == u'Darwin':
       return self._InstallPackagesMacOSX(
           package_filenames, package_versions)
 
-    elif self._operating_system == u'Linux':
+    elif self.operating_system == u'Linux':
       linux_name, _, _ = platform.linux_distribution()
       if linux_name == u'Fedora':
         return self._InstallPackagesFedoraLinux(
             package_filenames, package_versions)
 
-    elif self._operating_system == u'Windows':
+    elif self.operating_system == u'Windows':
       return self._InstallPackagesWindows(
           package_filenames, package_versions)
 
@@ -573,10 +579,10 @@ class DependencyUpdater(object):
     Returns:
       A boolean value indicating the uninstall was successful.
     """
-    if self._operating_system == u'Darwin':
+    if self.operating_system == u'Darwin':
       return self._UninstallPackagesMacOSX(package_versions)
 
-    elif self._operating_system == u'Windows':
+    elif self.operating_system == u'Windows':
       return self._UninstallPackagesWindows(package_versions)
 
     return True
@@ -868,6 +874,12 @@ def Main():
       default=u'build', help=u'The location of the download directory.')
 
   argument_parser.add_argument(
+      '--download-only', u'--download_only', action='store_true',
+      dest='download_only', default=False, help=(
+          u'Only download the dependencies. The default behavior is to '
+          u'download and update the dependencies.'))
+
+  argument_parser.add_argument(
       '-e', '--exclude', action='store_true', dest='exclude_packages',
       default=False, help=(
           u'Excludes the package names instead of including them.'))
@@ -878,12 +890,6 @@ def Main():
           u'Force installation. This option removes existing versions '
           u'of installed dependencies. The default behavior is to only'
           u'install a dependency if not or an older version is installed.'))
-
-  argument_parser.add_argument(
-      '--download-only', u'--download_only', action='store_true',
-      dest='download_only', default=False, help=(
-          u'Only download the dependencies. The default behavior is to '
-          u'download and update the dependencies.'))
 
   argument_parser.add_argument(
       '--machine-type', '--machine_type', action=u'store', metavar=u'TYPE',
@@ -912,11 +918,12 @@ def Main():
       help=u'have more verbose output.')
 
   argument_parser.add_argument(
-      u'package_names', nargs=u'*', action=u'store', metavar=u'NAME',
+      u'project_names', nargs=u'*', action=u'store', metavar=u'NAME',
       type=str, help=(
-          u'Optional package names which should be updated if an update is '
-          u'available. If no value is provided all available packages are '
-          u'updated.'))
+          u'Optional project names which should be updated if an update is '
+          u'available. The corresponding package names are derived from '
+          u'the projects.ini configuration file. If no value is provided '
+          u'all available packages are updated.'))
 
   options = argument_parser.parse_args()
 
@@ -932,25 +939,31 @@ def Main():
     print(u'')
     return False
 
+  projects_file = os.path.join(config_path, u'projects.ini')
+  if not os.path.exists(projects_file):
+    print(u'No such config file: {0:s}.'.format(projects_file))
+    print(u'')
+    return False
+
   logging.basicConfig(
       level=logging.INFO, format=u'[%(levelname)s] %(message)s')
 
-  package_names = []
+  project_names = []
   if options.preset:
     with open(presets_file) as file_object:
       preset_definition_reader = presets.PresetDefinitionReader()
       for preset_definition in preset_definition_reader.Read(file_object):
         if preset_definition.name == options.preset:
-          package_names = preset_definition.project_names
+          project_names = preset_definition.project_names
           break
 
-    if not package_names:
+    if not project_names:
       print(u'Undefined preset: {0:s}'.format(options.preset))
       print(u'')
       return False
 
-  elif options.package_names:
-    package_names = options.package_names
+  elif options.project_names:
+    project_names = options.project_names
 
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
@@ -960,6 +973,25 @@ def Main():
       msi_targetdir=options.msi_targetdir,
       preferred_machine_type=options.machine_type,
       verbose_output=options.verbose)
+
+  project_definitions = {}
+  with open(projects_file) as file_object:
+    project_definition_reader = projects.ProjectDefinitionReader()
+    for project_definition in project_definition_reader.Read(file_object):
+      project_definitions[project_definition.name] = project_definition
+
+  package_names = []
+  for project_name in project_names:
+    project_definition = project_definitions.get(project_name, None)
+    if not project_definition:
+      continue
+
+    package_name = project_name
+    if (dependency_updater.operating_system == u'Windows' and
+        project_definition.msi_name):
+      package_name = project_definition.msi_name
+
+    package_names.append(package_name)
 
   return dependency_updater.UpdatePackages(package_names)
 

@@ -242,15 +242,15 @@ def Main():
     config_path = os.path.dirname(config_path)
     config_path = os.path.join(config_path, u'data')
 
-  projects_file = os.path.join(config_path, u'projects.ini')
-  if not os.path.exists(projects_file):
-    print(u'No such config file: {0:s}.'.format(projects_file))
-    print(u'')
-    return False
-
   presets_file = os.path.join(config_path, u'presets.ini')
   if options.preset and not os.path.exists(presets_file):
     print(u'No such config file: {0:s}.'.format(presets_file))
+    print(u'')
+    return False
+
+  projects_file = os.path.join(config_path, u'projects.ini')
+  if not os.path.exists(projects_file):
+    print(u'No such config file: {0:s}.'.format(projects_file))
     print(u'')
     return False
 
