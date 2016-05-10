@@ -259,8 +259,8 @@ class DependencyUpdater(object):
   """Class that helps in updating dependencies.
 
   Attributes:
-    operating_system: a string containing the operation system on which to
-                      uddate the dependencies on.
+    operating_system: a string containing the operating system on which to
+                      update dependencies and remove previous versions.
   """
 
   _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
