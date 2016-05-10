@@ -44,6 +44,7 @@ class ProjectDefinition(object):
     homepage_url: a string containing the project homepage URL.
     maintainer: a string containing the name and email address of
                 the maintainer.
+    msi_name: a string containing the MSI package name.
     name: a string containing the name of the dependency.
     setup_name: a string containing the name used in setup.py.
     osc_build_dependencies: a list of strings containing the osc build
@@ -80,6 +81,7 @@ class ProjectDefinition(object):
     self.git_url = None
     self.homepage_url = None
     self.maintainer = None
+    self.msi_name = None
     self.name = name
     self.osc_build_dependencies = None
     self.patches = None
@@ -211,6 +213,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'homepage_url')
       project_definition.maintainer = self._GetConfigValue(
           config_parser, section_name, u'maintainer')
+      project_definition.msi_name = self._GetConfigValue(
+          config_parser, section_name, u'msi_name')
       project_definition.osc_build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'osc_build_dependencies')
       project_definition.patches = self._GetConfigValue(
