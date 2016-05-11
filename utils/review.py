@@ -1221,13 +1221,17 @@ class NetRCFile(object):
     if not self._contents:
       return
 
+    # According to GNU's manual on .netrc file, the credential tokens "may be
+    # separated by spaces, tabs, or new-lines".
     if not self._values:
-      for line in self._contents.split(b'\n'):
-        if line.startswith(b'machine github.com '):
-          self._values = line.split(b' ')
-          break
+      self._values = re.findall(r'[^ \t\n]+', self._contents)
 
-    return self._values[2:]
+    for value_index, value in enumerate(self._values):
+      if value == u'github.com':
+        if self._values[value_index-1] == u'machine':
+          return self._values[value_index+1:]
+
+    return None
 
   def GetGitHubAccessToken(self):
     """Retrieves the github access token.
@@ -1254,8 +1258,13 @@ class NetRCFile(object):
       return
 
     for value_index, value in enumerate(values):
-      if value == u'username':
-        return values[value_index + 1]
+      if value == u'login':
+        github_login = values[value_index + 1]
+        if github_login == u'password':
+          # We assume the login field is empty.
+          return None
+        else:
+          return values[value_index + 1]
 
 
 class ReviewFile(object):
