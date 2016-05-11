@@ -64,7 +64,8 @@ class CodeReviewHelper(CLIHelper):
 
   _REVIEWERS = frozenset([
       u'joachim.metz@gmail.com',
-      u'onager@deerpie.com'])
+      u'onager@deerpie.com',
+      u'romaing@google.com'])
 
   _REVIEWERS_CC = frozenset([
       u'kiddi@kiddaland.net',
