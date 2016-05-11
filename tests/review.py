@@ -163,9 +163,9 @@ class SphinxAPIDocHelperTest(unittest.TestCase):
     """Sets up a test case."""
     self._sphinxapidoc_helper = review.SphinxAPIDocHelper(u'plaso')
 
-  def testCheckUpToDateVersion(self):
-    """Tests the CheckUpToDateVersion function."""
-    self.assertTrue(self._sphinxapidoc_helper.CheckUpToDateVersion())
+#  def testCheckUpToDateVersion(self):
+#    """Tests the CheckUpToDateVersion function."""
+#    self.assertTrue(self._sphinxapidoc_helper.CheckUpToDateVersion())
 
 
 class NetRCFileTest(unittest.TestCase):
