@@ -1231,7 +1231,7 @@ class NetRCFile(object):
     for value_index, value in enumerate(self._values):
       if value == u'github.com':
         if self._values[value_index - 1] == u'machine':
-          return self._values[(value_index + 1):]
+          return self._values[value_index + 1:]
 
   def GetGitHubAccessToken(self):
     """Retrieves the github access token.
