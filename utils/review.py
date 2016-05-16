@@ -64,7 +64,8 @@ class CodeReviewHelper(CLIHelper):
 
   _REVIEWERS = frozenset([
       u'joachim.metz@gmail.com',
-      u'onager@deerpie.com'])
+      u'onager@deerpie.com',
+      u'romaing@google.com'])
 
   _REVIEWERS_CC = frozenset([
       u'kiddi@kiddaland.net',
@@ -1579,11 +1580,14 @@ class ReviewHelper(object):
     if self._command == u'merge':
       self._sphinxapidoc_helper = SphinxAPIDocHelper(
           self._project_name)
-      if not self._sphinxapidoc_helper.CheckUpToDateVersion():
-        print((
-            u'{0:s} aborted - sphinx-apidoc verion 1.2.0 or later '
-            u'required.').format(self._command.title()))
-        return False
+      # TODO: disable the version check for now since sphinx-apidoc 1.2.2
+      # on Unbuntu 14.04 does not have the --version option. Re-enable when
+      # sphinx-apidoc 1.2.3 or later is introduced.
+      # if not self._sphinxapidoc_helper.CheckUpToDateVersion():
+      #   print((
+      #       u'{0:s} aborted - sphinx-apidoc verion 1.2.0 or later '
+      #       u'required.').format(self._command.title()))
+      #   return False
 
     return True
 
