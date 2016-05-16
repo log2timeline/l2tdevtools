@@ -1202,6 +1202,8 @@ class SphinxAPIDocHelper(CLIHelper):
 class NetRCFile(object):
   """Class that defines a .netrc file."""
 
+  _NETRC_SEPARATOR_RE = re.compile(r'[^ \t\n]+')
+
   def __init__(self):
     """Initializes a .netrc file object."""
     super(NetRCFile, self).__init__()
@@ -1221,13 +1223,14 @@ class NetRCFile(object):
     if not self._contents:
       return
 
+    # Note that according to GNU's manual on .netrc file, the credential
+    # tokens "may be separated by spaces, tabs, or new-lines".
     if not self._values:
-      for line in self._contents.split(b'\n'):
-        if line.startswith(b'machine github.com '):
-          self._values = line.split(b' ')
-          break
+      self._values = self._NETRC_SEPARATOR_RE.findall(self._contents)
 
-    return self._values[2:]
+    for value_index, value in enumerate(self._values):
+      if value == u'github.com' and self._values[value_index - 1] == u'machine':
+        return self._values[value_index + 1:]
 
   def GetGitHubAccessToken(self):
     """Retrieves the github access token.
@@ -1253,9 +1256,14 @@ class NetRCFile(object):
     if not values:
       return
 
+    login_value = None
     for value_index, value in enumerate(values):
-      if value == u'username':
-        return values[value_index + 1]
+      if value == u'login':
+        login_value = values[value_index + 1]
+
+      # If the next field is 'password' we assume the login field is empty.
+      if login_value != u'password':
+        return login_value
 
 
 class ReviewFile(object):
