@@ -246,12 +246,10 @@ class PyPIDownloadHelperTest(unittest.TestCase):
     download_url = download_helper_object.GetDownloadUrl(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
-    expected_download_url = (
-        u'https://pypi.python.org/packages/source/{0:s}/{1:s}/'
-        u'{1:s}-{2:s}.tar.gz').format(
-            self._PROJECT_NAME[0], self._PROJECT_NAME, self._PROJECT_VERSION)
+    test_regexp = (
+        r'/packages\/\w{2}\/\w{2}\/\w+\/construct-2.5.2\.tar\.gz')
 
-    self.assertEqual(download_url, expected_download_url)
+    self.assertRegexpMatches(download_url, test_regexp)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
@@ -274,7 +272,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_NAME = u'pyparsing'
   # Hard-coded version to check parsing of SourceForge page.
-  _PROJECT_VERSION = u'2.1.4'
+  _PROJECT_VERSION = u'2.1.5'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
