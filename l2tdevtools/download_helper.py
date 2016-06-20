@@ -2,7 +2,6 @@
 """Download helper object implementations."""
 
 import abc
-import collections
 import io
 import json
 import logging
@@ -460,7 +459,7 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     if not page_content:
       return
 
-    versions_by_epoch = collections.defaultdict(list)
+    versions = {}
     expression_string = (
         r'../../packages/.*/{0:s}-(?P<version>[\d\.\!]*)\.tar\.gz#'.format(
             project_name))
@@ -477,17 +476,16 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
           epoch = 0
         else:
           epoch = int(epoch, 10)
-        version = pkg_resources.parse_version(epoch_version_string)
-        version_tuple = (version, version_string)
-        versions_by_epoch[epoch].append(version_tuple)
+        version = list(pkg_resources.parse_version(epoch_version_string))
+        # Add the epoch to the version string for comparison.
+        version.insert(0, epoch)
+        version_tuple = (tuple(version), version_string)
+        versions[version_tuple] = version_string
 
-    epochs = versions_by_epoch.keys()
-    epochs.sort(reverse=True)
-    for epoch in epochs:
-      maximum_version_tuple = max(versions_by_epoch[epoch])
-      if maximum_version_tuple:
-        # Return the original string that defined the version
-        return maximum_version_tuple[1]
+    latest_version = max(versions.keys())
+    if latest_version:
+      # Return the original string that defined the version
+      return versions[latest_version]
 
   def GetDownloadUrl(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
@@ -504,10 +502,14 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return
-    expression_string = (
+    download_regexp = re.compile(
         r'\.\./\.\./(packages/.*/{0:s}-{1:s}\.tar\.gz(?=#))'.format(
             project_name, project_version))
-    match = re.search(expression_string, page_content)
+    #expression_string = (
+    #    r'\.\./\.\./(packages/.*/{0:s}-{1:s}\.tar\.gz(?=#))'.format(
+    #        project_name, project_version))
+    #match = re.search(expression_string, page_content)
+    match = download_regexp.search(page_content)
     download_string = match.group(1)
     return u'https://pypi.python.org/{0:s}'.format(download_string)
 
