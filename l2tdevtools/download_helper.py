@@ -5,6 +5,7 @@ import abc
 import io
 import json
 import logging
+import pkg_resources
 import os
 import re
 import urllib2
@@ -167,6 +168,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       u'[0-9]+[.][0-9]+',
       u'[0-9]+[.][0-9]+[.][0-9]+',
       u'release-[0-9]+[.][0-9]+[.][0-9]+',
+      u'v[0-9]+[.][0-9]',
       u'v[0-9]+[.][0-9]+[.][0-9]+',
       u'[0-9]+[.][0-9]+[.][0-9]+[-][0-9]+']
 
@@ -442,15 +444,6 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
 class PyPIDownloadHelper(ProjectDownloadHelper):
   """Class that helps in downloading a PyPI code project."""
 
-  _VERSION_EXPRESSIONS = [
-      u'[0-9]+',
-      u'[0-9]+[.][0-9]+',
-      u'[0-9]+[.][0-9]+a[0-9]',
-      u'[0-9]+[.][0-9]+[.][0-9]+',
-      u'[0-9]+[.][0-9]+rc[0-9]+',
-      u'[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+',
-      u'[0-9]+[.][0-9]+[.][0-9]+rc[0-9]+']
-
   def GetLatestVersion(self, project_name):
     """Retrieves the latest version number for a given project name.
 
@@ -460,52 +453,39 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     Returns:
       The a string containing the latest version number or None on error.
     """
-    download_url = u'https://pypi.python.org/pypi/{0:s}'.format(project_name)
+    download_url = u'https://pypi.python.org/simple/{0:s}'.format(project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return
 
-    expression_string = u'<h1>Index of Packages</h1>'
-    matches = re.findall(expression_string, page_content)
+    versions = {}
+    expression_string = (
+        r'../../packages/.*/{0:s}-(?P<version>[\d\.\!]*)\.tar\.gz#'.format(
+            project_name))
+    for match in re.finditer(expression_string, page_content):
+      version_string = match.group(u'version')
+      if version_string:
+        # We need to support PEP440 epoch versioning, which only newly versions
+        # of setuptools support. So this is a bit of hack to handle epochs
+        # but still use setuptools to handle most of the version matching.
+        epoch, _, epoch_version_string = version_string.partition(u'!')
+        if not epoch_version_string:
+          # Per PEP440, if there's no epoch specified, the epoch is 0.
+          epoch_version_string = epoch
+          epoch = 0
+        else:
+          epoch = int(epoch, 10)
+        version = list(pkg_resources.parse_version(epoch_version_string))
+        # Add the epoch to the version string for comparison.
+        version.insert(0, epoch)
+        version_tuple = (tuple(version), version_string)
+        versions[version_tuple] = version_string
 
-    if matches:
-      # Some PyPI pages are indexes of packages which contain links to
-      # versioned sub pages in the form:
-      # /pypi/{project name}/{version}
-      expression_string = (
-          u'<a href="/pypi/{0:s}/({1:s})">').format(
-              project_name, u'|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content)
-
-    else:
-      # The format of the project download URL is:
-      # https://pypi.python.org/packages/.*/{project name}-{version}.tar.gz
-      expression_string = (
-          u'https://pypi.python.org/packages/.*/'
-          u'{0:s}-({1:s})[.]tar[.]gz').format(
-              project_name, u'|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content)
-
-    if not matches:
-      return
-
-    # The letter a is used in some versions to denote an alpha release.
-    # The suffix rc# is used in some versions to denote a release candidate.
-    numeric_matches = [match for match in matches if match.isdigit()]
-
-    # If there are stable releases prefer those:
-    if numeric_matches:
-      # Split the version string and convert every digit into an integer.
-      # A string compare of both version strings will yield an incorrect result.
-      numeric_matches = [
-          map(int, match.split(u'.')) for match in numeric_matches]
-
-      # Find the latest version number and transform it back into a string.
-      return u'.'.join([
-          u'{0:d}'.format(digit) for digit in max(numeric_matches)])
-
-    return sorted(matches)[-1]
+    latest_version = max(versions.keys())
+    if latest_version:
+      # Return the original string that defined the version
+      return versions[latest_version]
 
   def GetDownloadUrl(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
@@ -517,10 +497,21 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     Returns:
       The download URL of the project or None on error.
     """
-    return (
-        u'https://pypi.python.org/packages/source/{0:s}/{1:s}/'
-        u'{1:s}-{2:s}.tar.gz').format(
-            project_name[0], project_name, project_version)
+    download_url = u'https://pypi.python.org/simple/{0:s}'.format(project_name)
+
+    page_content = self.DownloadPageContent(download_url)
+    if not page_content:
+      return
+    download_regexp = re.compile(
+        r'\.\./\.\./(packages/.*/{0:s}-{1:s}\.tar\.gz(?=#))'.format(
+            project_name, project_version))
+    #expression_string = (
+    #    r'\.\./\.\./(packages/.*/{0:s}-{1:s}\.tar\.gz(?=#))'.format(
+    #        project_name, project_version))
+    #match = re.search(expression_string, page_content)
+    match = download_regexp.search(page_content)
+    download_string = match.group(1)
+    return u'https://pypi.python.org/{0:s}'.format(download_string)
 
   def GetProjectIdentifier(self, project_name):
     """Retrieves the project identifier for a given project name.
