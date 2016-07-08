@@ -593,10 +593,15 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
+    project_version = source_helper_object.project_version
+    if project_version.startswith(u'1!'):
+      # Remove setuptools epoch.
+      project_version = project_version[2:]
+
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, source_helper_object.project_version)
+        project_name, project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
     source_directory = source_helper_object.Create()
@@ -617,8 +622,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
       # Pass the project name without the python- prefix.
       build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name,
-          source_helper_object.project_version,
+          source_helper_object.project_name, project_version,
           self._project_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -641,8 +645,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     shutil.copytree(dpkg_directory, debian_directory)
 
     if not self._BuildPrepare(
-        source_directory, project_name, source_helper_object.project_version,
-        self.version_suffix, self.distribution, self.architecture):
+        source_directory, project_name, project_version, self.version_suffix,
+        self.distribution, self.architecture):
       return False
 
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
@@ -655,8 +659,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       return False
 
     if not self._BuildFinalize(
-        source_directory, project_name, source_helper_object.project_version,
-        self.version_suffix, self.distribution, self.architecture):
+        source_directory, project_name, project_version, self.version_suffix,
+        self.distribution, self.architecture):
       return False
 
     return True
@@ -677,8 +681,13 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
+    project_version = source_helper_object.project_version
+    if project_version.startswith(u'1!'):
+      # Remove setuptools epoch.
+      project_version = project_version[2:]
+
     deb_filename = u'{0:s}_{1!s}-1_{2:s}.deb'.format(
-        project_name, source_helper_object.project_version, self.architecture)
+        project_name, project_version, self.architecture)
 
     return not os.path.exists(deb_filename)
 
@@ -695,8 +704,13 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
+    project_version = source_helper_object.project_version
+    if project_version.startswith(u'1!'):
+      # Remove setuptools epoch.
+      project_version = project_version[2:]
+
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, source_helper_object.project_version)
+        project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
@@ -710,7 +724,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
         os.remove(filename)
 
     filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        project_name, source_helper_object.project_version)
+        project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
@@ -776,10 +790,15 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
+    project_version = source_helper_object.project_version
+    if project_version.startswith(u'1!'):
+      # Remove setuptools epoch.
+      project_version = project_version[2:]
+
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, source_helper_object.project_version)
+        project_name, project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
     source_directory = source_helper_object.Create()
@@ -800,8 +819,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
 
       # Pass the project name without the python- prefix.
       build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name,
-          source_helper_object.project_version,
+          source_helper_object.project_name, project_version,
           self._project_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
@@ -824,8 +842,8 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     shutil.copytree(dpkg_directory, debian_directory)
 
     if not self._BuildPrepare(
-        source_directory, project_name, source_helper_object.project_version,
-        self.version_suffix, self.distribution, self.architecture):
+        source_directory, project_name, project_version, self.version_suffix,
+        self.distribution, self.architecture):
       return False
 
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
@@ -837,8 +855,8 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
       return False
 
     if not self._BuildFinalize(
-        source_directory, project_name, source_helper_object.project_version,
-        self.version_suffix, self.distribution, self.architecture):
+        source_directory, project_name, project_version, self.version_suffix,
+        self.distribution, self.architecture):
       return False
 
     return True
@@ -874,8 +892,13 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     else:
       package_name = source_helper_object.project_name
 
+    project_version = source_helper_object.project_version
+    if project_version.startswith(u'1!'):
+      # Remove setuptools epoch.
+      project_version = project_version[2:]
+
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        package_name, source_helper_object.project_version)
+        package_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
@@ -889,7 +912,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
         os.remove(filename)
 
     filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        package_name, source_helper_object.project_version)
+        package_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
