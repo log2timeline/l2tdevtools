@@ -171,6 +171,78 @@ class DPKGBuildFilesGenerator(object):
 
   # Force the build system to setup.py here in case the package ships
   # a Makefile or equivalent.
+  _RULES_TEMPLATE_SETUP_PY_PYTHON2_ONLY = u'\n'.join([
+      u'#!/usr/bin/make -f',
+      u'# debian/rules that uses debhelper >= 7.',
+      u'',
+      u'# Uncomment this to turn on verbose mode.',
+      u'#export DH_VERBOSE=1',
+      u'',
+      u'# This has to be exported to make some magic below work.',
+      u'export DH_OPTIONS',
+      u'',
+      u'',
+      u'%:',
+      (u'\tdh  $@ --buildsystem=python_distutils --with={with_python:s} '
+       u'{with_quilt:s}'),
+      u'',
+      u'.PHONY: override_dh_auto_clean',
+      u'override_dh_auto_clean:',
+      u'\tdh_auto_clean',
+      (u'\trm -rf build {project_name:s}.egg-info/SOURCES.txt '
+       u'{project_name:s}.egg-info/PKG-INFO'),
+      u'',
+      u'.PHONY: override_dh_auto_build',
+      u'override_dh_auto_build:',
+      u'\tdh_auto_build',
+      u'',
+      u'.PHONY: override_dh_auto_install',
+      u'override_dh_auto_install:',
+      u'\tdh_auto_install --destdir $(CURDIR)/debian/python-{package_name:s}',
+      u'',
+      u'.PHONY: override_dh_auto_test',
+      u'override_dh_auto_test:',
+      u'',
+      u'.PHONY: override_dh_installmenu',
+      u'override_dh_installmenu:',
+      u'',
+      u'.PHONY: override_dh_installmime',
+      u'override_dh_installmime:',
+      u'',
+      u'.PHONY: override_dh_installmodules',
+      u'override_dh_installmodules:',
+      u'',
+      u'.PHONY: override_dh_installlogcheck',
+      u'override_dh_installlogcheck:',
+      u'',
+      u'.PHONY: override_dh_installlogrotate',
+      u'override_dh_installlogrotate:',
+      u'',
+      u'.PHONY: override_dh_installpam',
+      u'override_dh_installpam:',
+      u'',
+      u'.PHONY: override_dh_installppp',
+      u'override_dh_installppp:',
+      u'',
+      u'.PHONY: override_dh_installudev',
+      u'override_dh_installudev:',
+      u'',
+      u'.PHONY: override_dh_installwm',
+      u'override_dh_installwm:',
+      u'',
+      u'.PHONY: override_dh_installxfonts',
+      u'override_dh_installxfonts:',
+      u'',
+      u'.PHONY: override_dh_gconf',
+      u'override_dh_gconf:',
+      u'',
+      u'.PHONY: override_dh_icons',
+      u'override_dh_icons:',
+      u'',
+      u'.PHONY: override_dh_perl',
+      u'override_dh_perl:',
+      u''])
+
   _RULES_TEMPLATE_SETUP_PY = u'\n'.join([
       u'#!/usr/bin/make -f',
       u'# debian/rules that uses debhelper >= 7.',
@@ -591,7 +663,9 @@ class DPKGBuildFilesGenerator(object):
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
-    if self._IsPython2Only():
+    python2_only = self._IsPython2Only()
+
+    if python2_only:
       with_python = u'python2'
     else:
       with_python = u'python2,python3'
@@ -607,9 +681,14 @@ class DPKGBuildFilesGenerator(object):
         u'with_python': with_python,
         u'with_quilt': with_quilt}
 
+    if python2_only:
+      rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON2_ONLY
+    else:
+      rules_template = self._RULES_TEMPLATE_SETUP_PY
+
     filename = os.path.join(dpkg_path, u'rules')
     with open(filename, 'wb') as file_object:
-      data = self._RULES_TEMPLATE_SETUP_PY.format(**template_values)
+      data = rules_template.format(**template_values)
       file_object.write(data.encode(u'utf-8'))
 
   def _GenerateSourceFormatFile(self, dpkg_path):
