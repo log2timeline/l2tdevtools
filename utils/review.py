@@ -63,6 +63,7 @@ class CodeReviewHelper(CLIHelper):
   """Class that defines codereview helper functions."""
 
   _REVIEWERS = frozenset([
+      u'jberggren@gmail.com',
       u'joachim.metz@gmail.com',
       u'onager@deerpie.com',
       u'romaing@google.com'])
