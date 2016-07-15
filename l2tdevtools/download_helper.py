@@ -5,7 +5,6 @@ import abc
 import io
 import json
 import logging
-import pkg_resources
 import os
 import re
 import urllib2
@@ -15,6 +14,8 @@ try:
 except ImportError:
   import configparser  # pylint: disable=import-error
 
+import pkg_resources
+
 
 class DownloadHelper(object):
   """Class that helps in downloading files and web content."""
@@ -23,7 +24,7 @@ class DownloadHelper(object):
     """Initializes the download helper.
 
     Args:
-      download_url: a string containing the download URL.
+      download_url (str): download URL.
     """
     super(DownloadHelper, self).__init__()
     self._cached_url = u''
@@ -33,14 +34,14 @@ class DownloadHelper(object):
   def DownloadFile(self, download_url):
     """Downloads a file from the URL and returns the filename.
 
-       The filename is extracted from the last part of the URL.
+    The filename is extracted from the last part of the URL.
 
     Args:
-      download_url: the URL where to download the file.
+      download_url (str): URL where to download the file.
 
     Returns:
-      The filename if successful also if the file was already downloaded
-      or None on error.
+      str: filename if successful also if the file was already downloaded
+          or None on error.
     """
     _, _, filename = download_url.rpartition(u'/')
 
@@ -68,10 +69,10 @@ class DownloadHelper(object):
     """Downloads the page content from the URL and caches it.
 
     Args:
-      download_url: the URL where to download the page content.
+      download_url (str): URL where to download the page content.
 
     Returns:
-      The page content if successful, None otherwise.
+      str: page content if successful, None otherwise.
     """
     if not download_url:
       return
@@ -97,16 +98,25 @@ class DownloadHelper(object):
 class ProjectDownloadHelper(DownloadHelper):
   """Class that helps in downloading a project."""
 
+  def __init__(self, download_url):
+    """Initializes the download helper.
+
+    Args:
+      download_url (str): download URL.
+    """
+    super(ProjectDownloadHelper, self).__init__(download_url)
+    self._project_name = None
+
   def Download(self, project_name, project_version):
     """Downloads the project for a given project name and version.
 
     Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
 
     Returns:
-      The filename if successful also if the file was already downloaded
-      or None on error.
+      str: filename if successful also if the file was already downloaded
+          or None on error.
     """
     download_url = self.GetDownloadUrl(project_name, project_version)
     if not download_url:
@@ -141,22 +151,19 @@ class ProjectDownloadHelper(DownloadHelper):
     """Retrieves the download URL for a given project name and version.
 
     Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
 
     Returns:
-      The download URL of the project or None on error.
+      str: download URL of the project or None on error.
     """
 
   @abc.abstractmethod
-  def GetProjectIdentifier(self, project_name):
+  def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
 
-    Args:
-      project_name: the name of the project.
-
     Returns:
-      The project identifier or None on error.
+      str: project identifier.
     """
 
 
@@ -176,26 +183,31 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     """Initializes the download helper.
 
     Args:
-      download_url: a string containing the download URL.
+      download_url (str): download URL.
+
+    Raises:
+      ValueError: if download URL is not supported.
     """
     url_segments = download_url.split(u'/')
+    if url_segments[2] != u'github.com':
+      raise ValueError(u'Unsupported download URL.')
 
     super(GithubReleasesDownloadHelper, self).__init__(download_url)
-    self.organization = url_segments[3]
-    self.repository = url_segments[4]
+    self._organization = url_segments[3]
+    self._repository = url_segments[4]
 
   def GetLatestVersion(self, project_name):
     """Retrieves the latest version number for a given project name.
 
     Args:
-      project_name: the name of the project.
+      project_name (str): name of the project.
 
     Returns:
       The latest version number or 0 on error.
     """
     # TODO: add support for URL arguments u'?after=release-2.2.0'
     download_url = u'https://github.com/{0:s}/{1:s}/releases'.format(
-        self.organization, self.repository)
+        self._organization, self._repository)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -209,7 +221,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     expression_string = (
         u'/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*({3:s})'
         u'[.]tar[.]gz').format(
-            self.organization, self.repository, project_name,
+            self._organization, self._repository, project_name,
             u'|'.join(self._VERSION_EXPRESSIONS))
     matches = re.findall(expression_string, page_content)
 
@@ -218,7 +230,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # /{organization}/{repository}/archive/{version}.tar.gz
       expression_string = (
           u'/{0:s}/{1:s}/archive/({2:s})[.]tar[.]gz').format(
-              self.organization, self.repository,
+              self._organization, self._repository,
               u'|'.join(self._VERSION_EXPRESSIONS))
       matches = re.findall(expression_string, page_content)
 
@@ -227,7 +239,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # /{organization}/{repository}/archive/{project name}-{version}.tar.gz
       expression_string = (
           u'/{0:s}/{1:s}/archive/{2:s}[-]({3:s})[.]tar[.]gz').format(
-              self.organization, self.repository, project_name,
+              self._organization, self._repository, project_name,
               u'|'.join(self._VERSION_EXPRESSIONS))
       matches = re.findall(expression_string, page_content)
 
@@ -267,15 +279,15 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     """Retrieves the download URL for a given project name and version.
 
     Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
 
     Returns:
-      The download URL of the project or None on error.
+      str: download URL of the project or None on error.
     """
     # TODO: add support for URL arguments u'?after=release-2.2.0'
     download_url = u'https://github.com/{0:s}/{1:s}/releases'.format(
-        self.organization, self.repository)
+        self._organization, self._repository)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -288,7 +300,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     expression_string = (
         u'/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*{3!s}'
         u'[.]tar[.]gz').format(
-            self.organization, self.repository, project_name, project_version)
+            self._organization, self._repository, project_name, project_version)
     matches = re.findall(expression_string, page_content)
 
     if len(matches) != 1:
@@ -297,7 +309,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       expression_string = (
           u'/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-*{3!s}'
           u'[.]tar[.]gz').format(
-              self.organization, self.repository, project_name,
+              self._organization, self._repository, project_name,
               project_version)
       matches = re.findall(expression_string, page_content)
 
@@ -311,7 +323,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     # /{organization}/{repository}/archive/{version}.tar.gz
     expression_string = (
         u'/{0:s}/{1:s}/archive/{2!s}[.]tar[.]gz').format(
-            self.organization, self.repository, project_version)
+            self._organization, self._repository, project_version)
     matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
@@ -322,7 +334,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # /{organization}/{repository}/archive/release-{version}.tar.gz
       expression_string = (
           u'/{0:s}/{1:s}/archive/release-{2!s}[.]tar[.]gz').format(
-              self.organization, self.repository, project_version)
+              self._organization, self._repository, project_version)
       matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
@@ -333,7 +345,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # /{organization}/{repository}/archive/v{version}.tar.gz
       expression_string = (
           u'/{0:s}/{1:s}/archive/v{2!s}[.]tar[.]gz').format(
-              self.organization, self.repository, project_version)
+              self._organization, self._repository, project_version)
       matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
@@ -344,7 +356,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # /{organization}/{repository}/archive/{project name}-{version}.tar.gz
       expression_string = (
           u'/{0:s}/{1:s}/archive/{2:s}[-]{3!s}[.]tar[.]gz').format(
-              self.organization, self.repository, project_name,
+              self._organization, self._repository, project_name,
               project_version)
       matches = re.findall(expression_string, page_content)
 
@@ -353,16 +365,14 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
 
     return
 
-  def GetProjectIdentifier(self, unused_project_name):
+  def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
 
-    Args:
-      project_name: the name of the project.
-
     Returns:
-      The project identifier or None on error.
+      str: project identifier.
     """
-    return u'com.github.{0:s}.{1:s}'.format(self.organization, self.repository)
+    return u'com.github.{0:s}.{1:s}'.format(
+        self._organization, self._repository)
 
 
 # TODO: Merge with GithubReleasesDownloadHelper.
@@ -374,7 +384,7 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     """Initializes the download helper.
 
     Args:
-      download_url: a string containing the download URL.
+      download_url (str): download URL.
     """
     super(LibyalGitHubDownloadHelper, self).__init__(download_url)
     self._download_helper = None
@@ -383,10 +393,10 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     """Retrieves the source package URL from the libyal project configuration.
 
     Args:
-      project_name: the name of the project.
+      project_name (str): name of the project.
 
     Returns:
-      The source package URL or None on error.
+      str: source package URL or None on error.
     """
     download_url = (
         u'https://raw.githubusercontent.com/libyal/{0:s}/master/'
@@ -405,10 +415,10 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     """Retrieves the latest version number for a given project name.
 
     Args:
-      project_name: the name of the project.
+      project_name (str): name of the project.
 
     Returns:
-      The latest version number or 0 on error.
+      int: latest version number or 0 on error.
     """
     if not self._download_helper:
       download_url = self.GetProjectConfigurationSourcePackageUrl(project_name)
@@ -423,11 +433,11 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
     """Retrieves the download URL for a given project name and version.
 
     Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
 
     Returns:
-      The download URL of the project or None on error.
+      str: download URL of the project or None on error.
     """
     if not self._download_helper:
       download_url = self.GetProjectConfigurationSourcePackageUrl(
@@ -444,16 +454,33 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
 class PyPIDownloadHelper(ProjectDownloadHelper):
   """Class that helps in downloading a PyPI code project."""
 
-  def GetLatestVersion(self, project_name):
+  def __init__(self, download_url):
+    """Initializes the download helper.
+
+    Args:
+      download_url (str): download URL.
+
+    Raises:
+      ValueError: if download URL is not supported.
+    """
+    url_segments = download_url.split(u'/')
+    if url_segments[2] != u'pypi.python.org' and url_segments[3] != u'pypi':
+      raise ValueError(u'Unsupported download URL.')
+
+    super(PyPIDownloadHelper, self).__init__(download_url)
+    self._project_name = url_segments[4]
+
+  def GetLatestVersion(self, unused_project_name):
     """Retrieves the latest version number for a given project name.
 
     Args:
-      project_name: the name of the project.
+      project_name (str): name of the project.
 
     Returns:
-      The a string containing the latest version number or None on error.
+      str: latest version number or None on error.
     """
-    download_url = u'https://pypi.python.org/simple/{0:s}'.format(project_name)
+    download_url = u'https://pypi.python.org/simple/{0:s}'.format(
+        self._project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -462,7 +489,7 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     versions = {}
     expression_string = (
         r'../../packages/.*/{0:s}-(?P<version>[\d\.\!]*)'
-        r'\.(tar\.gz|zip)#').format(project_name)
+        r'\.(tar\.gz|zip)#').format(self._project_name)
     for match in re.finditer(expression_string, page_content):
       version_string = match.group(u'version')
       if version_string:
@@ -487,20 +514,19 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
       # Return the original string that defined the version
       return versions[latest_version]
 
-  def GetDownloadUrl(self, project_name, project_version):
+  def GetDownloadUrl(self, unused_project_name, project_version):
     """Retrieves the download URL for a given project name and version.
 
     Args:
-      project_name: a string containing the name of the project.
-      project_version: an integer or  string containing the version
-                       of the project.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
 
     Returns:
-      The download URL of the project or None on error.
+      str: download URL of the project or None on error.
     """
     download_url = (
         u'https://pypi.python.org/pypi/{0:s}/{1!s}').format(
-            project_name, project_version)
+            self._project_name, project_version)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -511,79 +537,79 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     expression_string = (
         u'(https://pypi.python.org/packages/.*/'
         u'{0:s}-{1!s}[.](tar[.]gz|zip))').format(
-            project_name, project_version)
+            self._project_name, project_version)
     matches = re.findall(expression_string, page_content)
 
     if matches:
-      return matches[0]
+      return matches[0][0]
 
     return (
         u'https://pypi.python.org/packages/source/{0:s}/{1:s}/'
         u'{1:s}-{2:s}.tar.gz').format(
-            project_name[0], project_name, project_version)
+            self._project_name[0], self._project_name, project_version)
 
-  def GetProjectIdentifier(self, project_name):
+  def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
 
-    Args:
-      project_name: the name of the project.
-
     Returns:
-      The project identifier or None on error.
+      str: project identifier.
     """
-    return u'org.python.pypi.{0:s}'.format(project_name)
+    return u'org.python.pypi.{0:s}'.format(self._project_name)
 
 
 class SourceForgeDownloadHelper(ProjectDownloadHelper):
   """Class that helps in downloading a Source Forge project."""
 
-  def GetLatestVersion(self, project_name):
+  def __init__(self, download_url):
+    """Initializes the download helper.
+
+    Args:
+      download_url (str): download URL.
+
+    Raises:
+      ValueError: if download URL is not supported.
+    """
+    url_segments = download_url.split(u'/')
+    if (url_segments[2] != u'sourceforge.net' or
+        url_segments[3] != u'projects' or url_segments[5] != u'files'):
+      raise ValueError(u'Unsupported download URL.')
+
+    super(SourceForgeDownloadHelper, self).__init__(download_url)
+    self._project_name = url_segments[4]
+
+  def GetLatestVersion(self, unused_project_name):
     """Retrieves the latest version number for a given project name.
 
     Args:
-      project_name: the name of the project.
+      project_name (str): name of the project.
 
     Returns:
-      The a string containing the latest version number or 0 on error.
+      str: latest version number or 0 on error.
     """
-    if project_name == u'zlib':
-      main_project_name = u'libpng'
-    else:
-      main_project_name = project_name
-
     # TODO: make this more robust to detect different naming schemes.
     download_url = (
         u'https://sourceforge.net/projects/{0:s}/files/{1:s}/').format(
-            main_project_name, project_name)
+            self._project_name, self._project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return 0
 
-    if project_name == u'pyparsing':
+    if self._project_name == u'pyparsing':
       # The format of the project download URL is:
       # /projects/{project name}/files/{project name}/{project name}-{version}/
       expression_string = (
           u'<a href="/projects/{0:s}/files/{1:s}/'
           u'{1:s}-([0-9]+[.][0-9]+[.][0-9]+)/"').format(
-              main_project_name, project_name)
+              self._project_name, self._project_name)
       matches = re.findall(expression_string, page_content)
 
-    elif project_name == u'pywin32':
+    elif self._project_name == u'pywin32':
       # The format of the project download URL is:
       # /projects/{project name}/files/{project name}/Build%20{version}/
       expression_string = (
           u'<a href="/projects/{0:s}/files/{1:s}/Build%20([0-9]+)/"').format(
-              main_project_name, project_name)
-      matches = re.findall(expression_string, page_content)
-
-    elif project_name in [u'sleuthkit', u'zlib']:
-      # The format of the project download URL is:
-      # /projects/{project name}/files/{project name}/{version}/
-      expression_string = (
-          u'<a href="/projects/{0:s}/files/{1:s}/'
-          u'([0-9]+[.][0-9]+[.][0-9]+)/"').format(
-              main_project_name, project_name)
+              self._project_name, self._project_name)
       matches = re.findall(expression_string, page_content)
 
     if not matches:
@@ -592,85 +618,63 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
     numeric_matches = [u''.join(match.split(u'.')) for match in matches]
     return matches[numeric_matches.index(max(numeric_matches))]
 
-  def GetDownloadUrl(self, project_name, project_version):
+  def GetDownloadUrl(self, unused_project_name, project_version):
     """Retrieves the download URL for a given project name and version.
 
     Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
 
     Returns:
       The download URL of the project or None on error.
     """
-    if project_name == u'zlib':
-      main_project_name = u'libpng'
-    else:
-      main_project_name = project_name
-
     # TODO: make this more robust to detect different naming schemes.
     download_url = (
         u'https://sourceforge.net/projects/{0:s}/files/{1:s}/').format(
-            main_project_name, project_name)
+            self._project_name, self._project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return
 
     download_url = None
-    if project_name == u'pyparsing':
+    if self._project_name == u'pyparsing':
       # The format of the project download URL is:
       # /projects/{project name}/files/{project name}/{project name}-{version}/
       expression_string = (
           u'<a href="/projects/{0:s}/files/{1:s}/{1:s}-({2:s})/"').format(
-              main_project_name, project_name, project_version)
+              self._project_name, self._project_name, project_version)
       matches = re.findall(expression_string, page_content)
 
       if matches:
         download_url = (
             u'https://downloads.sourceforge.net/project/{0:s}/{1:s}/{1:s}-{2:s}'
             u'/{1:s}-{2:s}.tar.gz').format(
-                main_project_name, project_name, project_version)
+                self._project_name, self._project_name, project_version)
 
-    elif project_name == u'pywin32':
+    elif self._project_name == u'pywin32':
       # The format of the project download URL is:
       # /projects/{project name}/files/{project name}/Build%20{version}/
       expression_string = (
           u'<a href="/projects/{0:s}/files/{1:s}/Build%20({2:s})/"').format(
-              main_project_name, project_name, project_version)
+              self._project_name, self._project_name, project_version)
       matches = re.findall(expression_string, page_content)
 
       if matches:
         download_url = (
             u'https://downloads.sourceforge.net/project/{0:s}/{1:s}'
             u'/Build%20{2:s}/{1:s}-{2:s}.zip').format(
-                main_project_name, project_name, project_version)
-
-    elif project_name in [u'sleuthkit', u'zlib']:
-      # The format of the project download URL is:
-      # /projects/{project name}/files/{project name}/{version}/
-      expression_string = (
-          u'<a href="/projects/{0:s}/files/{1:s}/({2:s})/"').format(
-              main_project_name, project_name, project_version)
-      matches = re.findall(expression_string, page_content)
-
-      if matches:
-        download_url = (
-            u'https://downloads.sourceforge.net/project/{0:s}/{1:s}/{2:s}'
-            u'/{1:s}-{2:s}.tar.gz').format(
-                main_project_name, project_name, project_version)
+                self._project_name, self._project_name, project_version)
 
     return download_url
 
-  def GetProjectIdentifier(self, project_name):
+  def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
 
-    Args:
-      project_name: the name of the project.
-
     Returns:
-      The project identifier or None on error.
+      str: project identifier.
     """
-    return u'net.sourceforge.projects.{0:s}'.format(project_name)
+    return u'net.sourceforge.projects.{0:s}'.format(self._project_name)
 
 
 class DownloadHelperFactory(object):
@@ -678,13 +682,13 @@ class DownloadHelperFactory(object):
 
   @classmethod
   def NewDownloadHelper(cls, download_url):
-    """Creates a new download helper object.
+    """Creates a new download helper.
 
     Args:
-      download_url: a string containing the download URL.
+      download_url (str): download URL.
 
     Returns:
-      A download helper object (instance of DownloadHelper) or None.
+      DownloadHelper: download helper or None.
     """
     if download_url.endswith(u'/'):
       download_url = download_url[:-1]

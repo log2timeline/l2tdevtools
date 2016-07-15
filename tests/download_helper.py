@@ -114,8 +114,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    project_identifier = download_helper_object.GetProjectIdentifier(
-        self._PROJECT_NAME)
+    project_identifier = download_helper_object.GetProjectIdentifier()
 
     expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
@@ -163,8 +162,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    project_identifier = download_helper_object.GetProjectIdentifier(
-        self._PROJECT_NAME)
+    project_identifier = download_helper_object.GetProjectIdentifier()
 
     expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
@@ -212,8 +210,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    project_identifier = download_helper_object.GetProjectIdentifier(
-        self._PROJECT_NAME)
+    project_identifier = download_helper_object.GetProjectIdentifier()
 
     expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
@@ -256,8 +253,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.PyPIDownloadHelper(
         self._DOWNLOAD_URL)
 
-    project_identifier = download_helper_object.GetProjectIdentifier(
-        self._PROJECT_NAME)
+    project_identifier = download_helper_object.GetProjectIdentifier()
 
     expected_project_identifier = u'org.python.pypi.{0:s}'.format(
         self._PROJECT_NAME)
@@ -303,8 +299,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.SourceForgeDownloadHelper(
         self._DOWNLOAD_URL)
 
-    project_identifier = download_helper_object.GetProjectIdentifier(
-        self._PROJECT_NAME)
+    project_identifier = download_helper_object.GetProjectIdentifier()
 
     expected_project_identifier = u'net.sourceforge.projects.{0:s}'.format(
         self._PROJECT_NAME)

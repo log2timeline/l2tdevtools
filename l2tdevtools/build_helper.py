@@ -973,6 +973,10 @@ class MSIBuildHelper(BuildHelper):
         u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe'))
 
     if not os.path.exists(patch):
+      patch = u'{0:s}:{1:s}{2:s}'.format(
+          u'C', os.sep, os.path.join(u'GnuWin32', u'bin', u'patch.exe'))
+
+    if not os.path.exists(patch):
       logging.error(u'Unable to find patch.exe')
       return False
 
