@@ -491,27 +491,36 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     """Retrieves the download URL for a given project name and version.
 
     Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
+      project_name: a string containing the name of the project.
+      project_version: an integer or  string containing the version
+                       of the project.
 
     Returns:
       The download URL of the project or None on error.
     """
-    download_url = u'https://pypi.python.org/simple/{0:s}'.format(project_name)
+    download_url = (
+        u'https://pypi.python.org/pypi/{0:s}/{1!s}').format(
+            project_name, project_version)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return
-    download_regexp = re.compile(
-        r'\.\./\.\./(packages/.*/{0:s}-{1:s}\.tar\.gz(?=#))'.format(
-            project_name, project_version))
-    #expression_string = (
-    #    r'\.\./\.\./(packages/.*/{0:s}-{1:s}\.tar\.gz(?=#))'.format(
-    #        project_name, project_version))
-    #match = re.search(expression_string, page_content)
-    match = download_regexp.search(page_content)
-    download_string = match.group(1)
-    return u'https://pypi.python.org/{0:s}'.format(download_string)
+
+    # The format of the project download URL is:
+    # https://pypi.python.org/packages/.*/{project name}-{version}.tar.gz
+    expression_string = (
+        u'(https://pypi.python.org/packages/.*/'
+        u'{0:s}-{1!s}[.]tar[.]gz)').format(
+            project_name, project_version)
+    matches = re.findall(expression_string, page_content)
+
+    if matches:
+      return matches[0]
+
+    return (
+        u'https://pypi.python.org/packages/source/{0:s}/{1:s}/'
+        u'{1:s}-{2:s}.tar.gz').format(
+            project_name[0], project_name, project_version)
 
   def GetProjectIdentifier(self, project_name):
     """Retrieves the project identifier for a given project name.

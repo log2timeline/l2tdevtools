@@ -183,7 +183,7 @@ class DPKGBuildFilesGenerator(object):
       u'',
       u'',
       u'%:',
-      (u'\tdh  $@ --buildsystem=python_distutils --with={with_python:s} '
+      (u'\tdh  $@ --buildsystem=python_distutils --with=python2 '
        u'{with_quilt:s}'),
       u'',
       u'.PHONY: override_dh_auto_clean',
@@ -191,10 +191,6 @@ class DPKGBuildFilesGenerator(object):
       u'\tdh_auto_clean',
       (u'\trm -rf build {project_name:s}.egg-info/SOURCES.txt '
        u'{project_name:s}.egg-info/PKG-INFO'),
-      u'',
-      u'.PHONY: override_dh_auto_build',
-      u'override_dh_auto_build:',
-      u'\tdh_auto_build',
       u'',
       u'.PHONY: override_dh_auto_install',
       u'override_dh_auto_install:',
@@ -255,7 +251,7 @@ class DPKGBuildFilesGenerator(object):
       u'',
       u'',
       u'%:',
-      (u'\tdh  $@ --buildsystem=python_distutils --with={with_python:s} '
+      (u'\tdh  $@ --buildsystem=python_distutils --with=python2,python3 '
        u'{with_quilt:s}'),
       u'',
       u'.PHONY: override_dh_auto_clean',
@@ -663,13 +659,6 @@ class DPKGBuildFilesGenerator(object):
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
-    python2_only = self._IsPython2Only()
-
-    if python2_only:
-      with_python = u'python2'
-    else:
-      with_python = u'python2,python3'
-
     if self._project_definition.patches:
       with_quilt = u'--with quilt'
     else:
@@ -678,10 +667,9 @@ class DPKGBuildFilesGenerator(object):
     template_values = {
         u'package_name': package_name,
         u'project_name': self._project_name,
-        u'with_python': with_python,
         u'with_quilt': with_quilt}
 
-    if python2_only:
+    if self._IsPython2Only():
       rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON2_ONLY
     else:
       rules_template = self._RULES_TEMPLATE_SETUP_PY

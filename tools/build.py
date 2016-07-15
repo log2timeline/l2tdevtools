@@ -152,6 +152,7 @@ class ProjectBuilder(object):
           u'Build of: {0:s} failed, for more information check '
           u'{1:s}').format(
               source_helper_object.project_name, log_filename))
+
     return False
 
   def Build(self, project_definition):
