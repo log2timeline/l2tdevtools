@@ -461,8 +461,8 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
 
     versions = {}
     expression_string = (
-        r'../../packages/.*/{0:s}-(?P<version>[\d\.\!]*)\.tar\.gz#'.format(
-            project_name))
+        r'../../packages/.*/{0:s}-(?P<version>[\d\.\!]*)'
+        r'\.(tar\.gz|zip)#').format(project_name)
     for match in re.finditer(expression_string, page_content):
       version_string = match.group(u'version')
       if version_string:
@@ -510,7 +510,7 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     # https://pypi.python.org/packages/.*/{project name}-{version}.tar.gz
     expression_string = (
         u'(https://pypi.python.org/packages/.*/'
-        u'{0:s}-{1!s}[.]tar[.]gz)').format(
+        u'{0:s}-{1!s}[.](tar[.]gz|zip))').format(
             project_name, project_version)
     matches = re.findall(expression_string, page_content)
 
