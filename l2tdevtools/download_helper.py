@@ -189,7 +189,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       ValueError: if download URL is not supported.
     """
     url_segments = download_url.split(u'/')
-    if url_segments[2] != u'github.com':
+    if len(url_segments) < 5 or url_segments[2] != u'github.com':
       raise ValueError(u'Unsupported download URL.')
 
     super(GithubReleasesDownloadHelper, self).__init__(download_url)
@@ -464,7 +464,8 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
       ValueError: if download URL is not supported.
     """
     url_segments = download_url.split(u'/')
-    if url_segments[2] != u'pypi.python.org' and url_segments[3] != u'pypi':
+    if (len(url_segments) < 5 or url_segments[2] != u'pypi.python.org' or
+        url_segments[3] != u'pypi'):
       raise ValueError(u'Unsupported download URL.')
 
     super(PyPIDownloadHelper, self).__init__(download_url)
@@ -570,7 +571,7 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
       ValueError: if download URL is not supported.
     """
     url_segments = download_url.split(u'/')
-    if (url_segments[2] != u'sourceforge.net' or
+    if (len(url_segments) < 5 or url_segments[2] != u'sourceforge.net' or
         url_segments[3] != u'projects' or url_segments[5] != u'files'):
       raise ValueError(u'Unsupported download URL.')
 
