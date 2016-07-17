@@ -94,12 +94,12 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
-  def testGetDownloadUrl(self):
-    """Tests the GetDownloadUrl functions."""
+  def testGetDownloadURL(self):
+    """Tests the GetDownloadURL functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    download_url = download_helper_object.GetDownloadUrl(
+    download_url = download_helper_object.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
@@ -141,12 +141,12 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
-  def testGetDownloadUrl(self):
-    """Tests the GetDownloadUrl functions."""
+  def testGetDownloadURL(self):
+    """Tests the GetDownloadURL functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    download_url = download_helper_object.GetDownloadUrl(
+    download_url = download_helper_object.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
@@ -189,12 +189,12 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
-  def testGetDownloadUrl(self):
-    """Tests the GetDownloadUrl functions."""
+  def testGetDownloadURL(self):
+    """Tests the GetDownloadURL functions."""
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    download_url = download_helper_object.GetDownloadUrl(
+    download_url = download_helper_object.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
@@ -235,12 +235,12 @@ class PyPIDownloadHelperTest(unittest.TestCase):
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
-  def testGetDownloadUrl(self):
-    """Tests the GetDownloadUrl functions."""
+  def testGetDownloadURL(self):
+    """Tests the GetDownloadURL functions."""
     download_helper_object = download_helper.PyPIDownloadHelper(
         self._DOWNLOAD_URL)
 
-    download_url = download_helper_object.GetDownloadUrl(
+    download_url = download_helper_object.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     test_regexp = (
@@ -279,12 +279,12 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
-  def testGetDownloadUrl(self):
-    """Tests the GetDownloadUrl functions."""
+  def testGetDownloadURL(self):
+    """Tests the GetDownloadURL functions."""
     download_helper_object = download_helper.SourceForgeDownloadHelper(
         self._DOWNLOAD_URL)
 
-    download_url = download_helper_object.GetDownloadUrl(
+    download_url = download_helper_object.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
