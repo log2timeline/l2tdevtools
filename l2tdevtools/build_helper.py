@@ -571,6 +571,38 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     elif self.architecture == u'x86_64':
       self.architecture = u'amd64'
 
+  def _CleanDPKGPackages(self, project_name, project_version):
+    """Cleans the dpkg packages in the current directory.
+
+    Args:
+      project_name (str): project name.
+      project_version (str): project version.
+    """
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+        project_name, project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
+
+    # Remove files of previous versions in the format:
+    # project[-_]*version-1_architecture.*
+    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
+        project_name, self.architecture)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # project[-_]*version-1.*
+    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
   def Build(self, source_helper_object):
     """Builds the dpkg packages.
 
@@ -695,7 +727,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     """Cleans the dpkg packages in the current directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     if self._project_definition.dpkg_name:
       project_name = self._project_definition.dpkg_name
@@ -723,30 +755,12 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    self._CleanDPKGPackages(project_name, project_version)
 
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1_architecture.*
-    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
-        project_name, self.architecture)
-    filenames = glob.glob(filenames_glob)
+    if project_name.startswith(u'python-'):
+      project_name = u'python3-{0:s}'.format(project_name[7])
 
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1.*
-    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
+      self._CleanDPKGPackages(project_name, project_version)
 
 
 class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
