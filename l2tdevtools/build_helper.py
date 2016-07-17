@@ -1383,7 +1383,8 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     Returns:
       True if successful, False otherwise.
     """
-    download_helper_object = download_helper.SourceForgeDownloadHelper(u'')
+    download_helper_object = download_helper.ZlibDownloadHelper(
+        u'http://www.zlib.net')
     source_helper_object = source_helper.SourcePackageHelper(
         u'zlib', download_helper_object)
 

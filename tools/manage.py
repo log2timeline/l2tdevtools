@@ -29,7 +29,7 @@ class GithubRepoManager(object):
     super(GithubRepoManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper(u'')
 
-  def _GetDownloadUrl(self, sub_directory, use_api=False):
+  def _GetDownloadURL(self, sub_directory, use_api=False):
     """Retrieves the download URL.
 
     Args:
@@ -69,7 +69,7 @@ class GithubRepoManager(object):
       logging.info(u'Missing machine type sub directory.')
       return
 
-    download_url = self._GetDownloadUrl(sub_directory, use_api=use_api)
+    download_url = self._GetDownloadURL(sub_directory, use_api=use_api)
     if not download_url:
       logging.info(u'Missing download URL.')
       return
