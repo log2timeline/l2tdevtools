@@ -571,6 +571,38 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     elif self.architecture == u'x86_64':
       self.architecture = u'amd64'
 
+  def _CleanDPKGPackages(self, project_name, project_version):
+    """Cleans the dpkg packages in the current directory.
+
+    Args:
+      project_name (str): project name.
+      project_version (str): project version.
+    """
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+        project_name, project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
+
+    # Remove files of previous versions in the format:
+    # project[-_]*version-1_architecture.*
+    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
+        project_name, self.architecture)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # project[-_]*version-1.*
+    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
   def Build(self, source_helper_object):
     """Builds the dpkg packages.
 
@@ -695,7 +727,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     """Cleans the dpkg packages in the current directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     if self._project_definition.dpkg_name:
       project_name = self._project_definition.dpkg_name
@@ -723,30 +755,12 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    self._CleanDPKGPackages(project_name, project_version)
 
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1_architecture.*
-    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
-        project_name, self.architecture)
-    filenames = glob.glob(filenames_glob)
+    if project_name.startswith(u'python-'):
+      project_name = u'python3-{0:s}'.format(project_name[7])
 
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1.*
-    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
+      self._CleanDPKGPackages(project_name, project_version)
 
 
 class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
@@ -971,6 +985,10 @@ class MSIBuildHelper(BuildHelper):
     # Search common locations for patch.exe
     patch = u'{0:s}:{1:s}{2:s}'.format(
         u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe'))
+
+    if not os.path.exists(patch):
+      patch = u'{0:s}:{1:s}{2:s}'.format(
+          u'C', os.sep, os.path.join(u'GnuWin32', u'bin', u'patch.exe'))
 
     if not os.path.exists(patch):
       logging.error(u'Unable to find patch.exe')
@@ -1365,7 +1383,8 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     Returns:
       True if successful, False otherwise.
     """
-    download_helper_object = download_helper.SourceForgeDownloadHelper(u'')
+    download_helper_object = download_helper.ZlibDownloadHelper(
+        u'http://www.zlib.net')
     source_helper_object = source_helper.SourcePackageHelper(
         u'zlib', download_helper_object)
 
@@ -1867,6 +1886,39 @@ class OSCBuildHelper(BuildHelper):
     # Dependencies are handled by the openSUSE build service.
     return []
 
+  def Clean(self, source_helper_object):
+    """Cleans the build and dist directory.
+
+    Args:
+      source_helper_object: the source helper object (instance of SourceHelper).
+    """
+    osc_package_path = os.path.join(
+        self._OSC_PROJECT, source_helper_object.project_name)
+    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        source_helper_object.project_name,
+        source_helper_object.project_version)
+
+    filenames_to_ignore = u'^{0:s}'.format(
+        os.path.join(osc_package_path, osc_source_filename))
+    filenames_to_ignore = re.compile(filenames_to_ignore)
+
+    # Remove files of previous versions in the format:
+    # project-version.tar.gz
+    osc_source_filename_glob = u'{0:s}-*.tar.gz'.format(
+        source_helper_object.project_name)
+    filenames_glob = os.path.join(osc_package_path, osc_source_filename_glob)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+
+        command = u'osc -q remove {0:s}'.format(os.path.basename(filename))
+        exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+            osc_package_path, command), shell=True)
+        if exit_code != 0:
+          logging.error(u'Running: "{0:s}" failed.'.format(command))
+
 
 class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
   """Class that helps in building with osc for the openSUSE build service."""
@@ -1950,39 +2002,6 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
         osc_source_filename)
 
     return not os.path.exists(osc_source_path)
-
-  def Clean(self, source_helper_object):
-    """Cleans the build and dist directory.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-    """
-    osc_package_path = os.path.join(
-        self._OSC_PROJECT, source_helper_object.project_name)
-    osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
-
-    filenames_to_ignore = u'^{0:s}'.format(
-        os.path.join(osc_package_path, osc_source_filename))
-    filenames_to_ignore = re.compile(filenames_to_ignore)
-
-    # Remove files of previous versions in the format:
-    # project-version.tar.gz
-    osc_source_filename_glob = u'{0:s}-*.tar.gz'.format(
-        source_helper_object.project_name)
-    filenames_glob = os.path.join(osc_package_path, osc_source_filename_glob)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-
-        command = u'osc -q remove {0:s}'.format(os.path.basename(filename))
-        exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-            osc_package_path, command), shell=True)
-        if exit_code != 0:
-          logging.error(u'Running: "{0:s}" failed.'.format(command))
 
 
 class SetupPyOSCBuildHelper(OSCBuildHelper):
@@ -2214,15 +2233,6 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
         osc_source_filename)
 
     return not os.path.exists(osc_source_path)
-
-  def Clean(self, unused_source_helper_object):
-    """Cleans the source.
-
-    Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-    """
-    # TODO: implement.
-    return
 
 
 class PKGBuildHelper(BuildHelper):

@@ -37,7 +37,7 @@ class SourceHelper(object):
     """Retrieves the project identifier for a given project name.
 
     Returns:
-      The project identifier or None on error.
+      str: project identifier or None on error.
     """
 
 
@@ -82,7 +82,7 @@ class GitRepositorySourceHelper(SourceHelper):
     """Retrieves the project identifier for a given project name.
 
     Returns:
-      The project identifier or None on error.
+      str: project identifier or None on error.
     """
     # TODO: determine project identifier based on git url.
     return
@@ -334,6 +334,6 @@ class SourcePackageHelper(SourceHelper):
     """Retrieves the project identifier for a given project name.
 
     Returns:
-      The project identifier or None on error.
+      str: project identifier or None on error.
     """
-    return self._download_helper.GetProjectIdentifier(self.project_name)
+    return self._download_helper.GetProjectIdentifier()
