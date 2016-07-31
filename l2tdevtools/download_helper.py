@@ -142,7 +142,7 @@ class ProjectDownloadHelper(DownloadHelper):
           project_name, project_version)
 
       if os.path.exists(package_filename):
-        os.remove(filename)
+        os.remove(package_filename)
 
       os.rename(filename, package_filename)
       filename = package_filename
