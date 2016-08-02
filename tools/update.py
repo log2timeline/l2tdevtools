@@ -28,12 +28,12 @@ def CompareVersions(first_version_list, second_version_list):
   Note that the version parts can contain alpha numeric characters.
 
   Args:
-    first_version_list: the first list of version parts.
-    second_version_list: the second list of version parts.
+    first_version_list (list[str]): first version parts.
+    second_version_list (list[str]): second version parts.
 
   Returns:
-    1 if the first is larger than the second, -1 if the first is smaller than
-    the second, or 0 if the first and second are equal.
+    int: 1 if the first is larger than the second, -1 if the first is smaller
+        than the second, or 0 if the first and second are equal.
   """
   first_version_list_length = len(first_version_list)
   second_version_list_length = len(second_version_list)
@@ -74,15 +74,13 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
     """Retrieves the machine type sub directory.
 
     Args:
-      preferred_machine_type: optional preferred machine type. The default
-                              is None, which will auto-detect the current
-                              machine type.
-      preferred_operating_system: optional preferred operating system. The
-                                  default is None, which will auto-detect
-                                  the current operating system.
+      preferred_machine_type (Optional[str]): preferred machine type, where
+          None, which will auto-detect the current machine type.
+      preferred_operating_system (Optional[str]): preferred operating system,
+          where None, which will auto-detect the current operating system.
 
     Returns:
-      The machine type sub directory or None.
+      str: machine type sub directory or None.
     """
     if preferred_operating_system:
       operating_system = preferred_operating_system
@@ -139,23 +137,21 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
     return sub_directory
 
-  def _GetDownloadUrl(
+  def _GetDownloadURL(
       self, preferred_machine_type=None, preferred_operating_system=None,
       use_api=False):
     """Retrieves the download URL.
 
     Args:
-      preferred_machine_type: optional preferred machine type. The default
-                              is None, which will auto-detect the current
-                              machine type.
-      preferred_operating_system: optional preferred operating system. The
-                                  default is None, which will auto-detect
-                                  the current operating system.
-      use_api: optional boolean value to indicate if the API should be used.
-               The default is False.
+      preferred_machine_type (Optional[str]): preferred machine type, where
+          None, which will auto-detect the current machine type.
+      preferred_operating_system (Optional[str]): preferred operating system,
+          where None, which will auto-detect the current operating system.
+      use_api (Optional[bool]): True if the github API should be used to
+          determine the download URL.
 
     Returns:
-      The download URL or None.
+      str: download URL or None.
     """
     sub_directory = self._GetMachineTypeSubDirectory(
         preferred_machine_type=preferred_machine_type,
@@ -179,19 +175,17 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
     """Retrieves the package downloads URL for a given URL.
 
     Args:
-      preferred_machine_type: optional preferred machine type. The default
-                              is None, which will auto-detect the current
-                              machine type.
-      preferred_operating_system: optional preferred operating system. The
-                                  default is None, which will auto-detect
-                                  the current operating system.
-      use_api: optional boolean value to indicate if the API should be used.
-               The default is False.
+      preferred_machine_type (Optional[str]): preferred machine type, where
+          None, which will auto-detect the current machine type.
+      preferred_operating_system (Optional[str]): preferred operating system,
+          where None, which will auto-detect the current operating system.
+      use_api (Optional[bool]): True if the github API should be used to
+          determine the download URL.
 
     Returns:
-      A list of package download URLs or None.
+      list[str]: list of package download URLs or None.
     """
-    download_url = self._GetDownloadUrl(
+    download_url = self._GetDownloadURL(
         preferred_machine_type=preferred_machine_type,
         preferred_operating_system=preferred_operating_system, use_api=use_api)
     if not download_url:
@@ -259,8 +253,8 @@ class DependencyUpdater(object):
   """Class that helps in updating dependencies.
 
   Attributes:
-    operating_system: a string containing the operating system on which to
-                      update dependencies and remove previous versions.
+    operating_system (str): the operating system on which to update
+        dependencies and remove previous versions.
   """
 
   _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
@@ -280,24 +274,20 @@ class DependencyUpdater(object):
     """Initializes the dependency updater.
 
     Args:
-      download_directory: optional download directory. The default is 'build'
-                          to match the build directory of the build script.
-      download_only: optional boolean value to indicate the dependency packages
-                     should only be downloaded.
-      exclude_packages: optional boolean value to indicate pacakge names
-                        should be excluded instead of included.
-      force_install: optional boolean value to indicate installation (update)
-                     should be forced.
-      msi_targetdir: optional string value containing the MSI TARGETDIR
-                     property.
-      preferred_machine_type: optional preferred machine type. The default
-                              is None, which will auto-detect the current
-                              machine type.
-      preferred_operating_system: optional preferred operating system. The
-                                  default is None, which will auto-detect
-                                  the current operating system.
-      verbose_output: optional boolean value indication if more verbose output
-                      should be provided.
+      download_directory (Optional[str]): path of the download directory.
+      download_only (Optional[bool]): True if the dependency packages should
+          only be downloaded.
+      exclude_packages (Optional[bool]): True if packages should be excluded
+          instead of included.
+      force_install (Optional[bool]): True if the installation (update) should
+          be forced.
+      msi_targetdir (Optional[str]): MSI TARGETDIR property.
+      preferred_machine_type (Optional[str]): preferred machine type, where
+          None, which will auto-detect the current machine type.
+      preferred_operating_system (Optional[str]): preferred operating system,
+          where None, which will auto-detect the current operating system.
+      verbose_output (Optional[bool]): True more verbose output should be
+          provided.
     """
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
@@ -360,11 +350,21 @@ class DependencyUpdater(object):
         # Ignore all other file exensions.
         continue
 
-      # We need to use the most right '-' character as the separator of the
-      # name and the version, since name can contain the '-' character.
-      name, _, version = package_name.rpartition(u'-')
+      if package_name.startswith(u'pefile-1.'):
+        # We need to use the most left '-' character as the separator of the
+        # name and the version, since version can contain the '-' character.
+        name, _, version = package_name.partition(u'-')
+      else:
+        # We need to use the most right '-' character as the separator of the
+        # name and the version, since name can contain the '-' character.
+        name, _, version = package_name.rpartition(u'-')
+
       package_prefix = name
       version = version.split(u'.')
+
+      if package_name.startswith(u'pefile-1.'):
+        last_part = version.pop()
+        version.extend(last_part.split(u'-'))
 
       # Ignore package names if defined.
       if package_names and (
@@ -857,7 +857,7 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
       u'Installs the latest versions of project dependencies.'))

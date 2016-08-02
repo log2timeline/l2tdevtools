@@ -141,6 +141,9 @@ class ProjectDownloadHelper(DownloadHelper):
       package_filename = u'{0:s}-{1:s}.tar.gz'.format(
           project_name, project_version)
 
+      if os.path.exists(package_filename):
+        os.remove(package_filename)
+
       os.rename(filename, package_filename)
       filename = package_filename
 
