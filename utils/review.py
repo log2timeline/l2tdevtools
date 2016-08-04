@@ -1279,18 +1279,15 @@ class ReviewFile(object):
     """Initializes a review file object.
 
     Args:
-      branch_name: string containing the name of the feature branch of
-                   the review.
+      branch_name (str): name of the feature branch of the review.
     """
     super(ReviewFile, self).__init__()
     self._contents = None
-
     self._path = os.path.join(u'.review', branch_name)
-    if not os.path.exists(self._path):
-      return
 
-    with open(self._path, 'r') as file_object:
-      self._contents = file_object.read()
+    if os.path.exists(self._path):
+      with open(self._path, 'r') as file_object:
+        self._contents = file_object.read()
 
   def Create(self, codereview_issue_number):
     """Creates a new review file.
@@ -1298,16 +1295,23 @@ class ReviewFile(object):
     If the .review directory does not exist, it will be created.
 
     Args:
-      codereview_issue_number: an integer or string containing the codereview
-                               issue number.
+      codereview_issue_number (int|str): codereview issue number.
 
     Returns:
-      A boolean indicating the review file was created.
+      bool: True if the review file was created.
     """
     if not os.path.exists(u'.review'):
       os.mkdir(u'.review')
     with open(self._path, 'w') as file_object:
       file_object.write(u'{0!s}'.format(codereview_issue_number))
+
+  def Exists(self):
+    """Determines if the review file exists.
+
+    Returns:
+      bool: True if review file exists.
+    """
+    return os.path.exists(self._path)
 
   def GetCodeReviewIssueNumber(self):
     """Retrieves the codereview issue number.
@@ -1817,6 +1821,11 @@ class ReviewHelper(object):
       A boolean value to indicate if the update was successful.
     """
     review_file = ReviewFile(self._active_branch)
+    if not review_file.Exists():
+      print(u'Review file missing for branch: {0:s}'.format(
+          self._active_branch))
+      return False
+
     codereview_issue_number = review_file.GetCodeReviewIssueNumber()
 
     last_commit_message = self._git_helper.GetLastCommitMessage()
