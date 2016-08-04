@@ -319,6 +319,12 @@ class DPKGBuildFilesGenerator(object):
       u'override_dh_perl:',
       u''])
 
+  _RULES_SETUP_PY_PYTHON2_OVERRIDE = u'\n'.join([
+      u'.PHONY: override_dh_python2',
+      u'override_dh_python2:',
+      u'\tdh_python2 -V 2.7 setup.py',
+      u''])
+
   _SOURCE_FORMAT_TEMPLATE = u'\n'.join([
       u'1.0'])
 
@@ -678,6 +684,10 @@ class DPKGBuildFilesGenerator(object):
     with open(filename, 'wb') as file_object:
       data = rules_template.format(**template_values)
       file_object.write(data.encode(u'utf-8'))
+
+      if package_name == u'astroid':
+        data = self._RULES_SETUP_PY_PYTHON2_OVERRIDE
+        file_object.write(data.encode(u'utf-8'))
 
   def _GenerateSourceFormatFile(self, dpkg_path):
     """Generate the dpkg build source/format file.
