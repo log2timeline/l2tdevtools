@@ -685,7 +685,7 @@ class DPKGBuildFilesGenerator(object):
       data = rules_template.format(**template_values)
       file_object.write(data.encode(u'utf-8'))
 
-      if package_name == u'astroid':
+      if package_name in (u'astroid', u'pylint'):
         data = self._RULES_SETUP_PY_PYTHON2_OVERRIDE
         file_object.write(data.encode(u'utf-8'))
 
