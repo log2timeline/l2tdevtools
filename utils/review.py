@@ -856,7 +856,7 @@ class GitHubHelper(object):
     return json.loads(response_data)
 
 
-class ProjectHelper(object):
+class ProjectHelper(CLIHelper):
   """Class that defines project helper functions.
 
   Attributes:
