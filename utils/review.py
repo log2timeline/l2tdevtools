@@ -863,7 +863,7 @@ class ProjectHelper(CLIHelper):
     project_name (str): name of the project.
   """
 
-  _AUTHORS_FILE_HEADER = u'\n'.join([
+  _AUTHORS_FILE_HEADER = [
       u'# Names should be added to this file with this pattern:',
       u'#',
       u'# For individuals:',
@@ -874,7 +874,7 @@ class ProjectHelper(CLIHelper):
       u'#',
       u'# See python fnmatch module documentation for more information.',
       u'',
-      u'Google Inc. (*@google.com)'])
+      u'Google Inc. (*@google.com)']
 
   SUPPORTED_PROJECTS = frozenset([
       u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs',
