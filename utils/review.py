@@ -863,6 +863,19 @@ class ProjectHelper(object):
     project_name (str): name of the project.
   """
 
+  _AUTHORS_FILE_HEADER = u'\n'.join([
+      u'# Names should be added to this file with this pattern:',
+      u'#',
+      u'# For individuals:',
+      u'#   Name (email address)',
+      u'#',
+      u'# For organizations:',
+      u'#   Organization (fnmatch pattern)',
+      u'#',
+      u'# See python fnmatch module documentation for more information.',
+      u'',
+      u'Google Inc. (*@google.com)'])
+
   SUPPORTED_PROJECTS = frozenset([
       u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs',
       u'plaso'])
@@ -1000,6 +1013,44 @@ class ProjectHelper(object):
       return False
 
     return True
+
+  def UpdateAuthorsFile(self):
+    """Updates the AUTHORS file.
+
+    Returns:
+      bool: True if the AUTHORS file update was successful.
+    """
+    exit_code, output, _ = self.RunCommand(u'log --format="%aN (%aE)"')
+    if exit_code != 0:
+      return False
+
+    lines = output.split(b'\n')
+
+    # Reverse the lines since we want the oldest commits first.
+    lines.reverse()
+
+    authors_by_commit = []
+    authors = {}
+    for author in lines:
+      name, _, email_address = author[:-1].rpartition(u'(')
+      if email_address in authors:
+        if name != authors[email_address]
+          logging.warning(u'Detected name mismatch for author: {0:d}.'.format(
+              email_address))
+        continue
+
+      authors[email_address] = name
+      authors_by_commit.append(author)
+
+    file_content = []
+    file_content.extend(self._AUTHORS_FILE_HEADER)
+    file_content.extend(authors_by_commit)
+
+    file_content = u'\n'.join(file_content)
+    file_content = file_content.encode(u'utf-8')
+
+    with open(self._PATH, 'wb') as file_object:
+      file_object.write(file_content)
 
   def UpdateVersionFile(self):
     """Updates the version file.
@@ -1853,6 +1904,21 @@ class ReviewHelper(object):
 
     return True
 
+  def UpdateAuthors(self):
+    """Updates the authors.
+
+    Returns:
+      bool: True if the authors update was successful.
+    """
+    if self._project_name == u'l2tdocs':
+      return True
+
+    if not self._project_helper.UpdateAuthorsFile():
+      print(u'Unable to update authors file.')
+      return False
+
+    return True
+
   def UpdateVersion(self):
     """Updates the version.
 
@@ -1870,7 +1936,7 @@ class ReviewHelper(object):
       print(u'Unable to update dpkg changelog file.')
       return False
 
-    return False
+    return True
 
 
 def Main():
@@ -1962,6 +2028,9 @@ def Main():
   # useful to test pending CLs.
 
   commands_parser.add_parser(u'update')
+
+  commands_parser.add_parser(u'update-authors')
+  commands_parser.add_parser(u'update_authors')
 
   commands_parser.add_parser(u'update-version')
   commands_parser.add_parser(u'update_version')
@@ -2055,6 +2124,9 @@ def Main():
 
   elif options.command == u'update':
     result = review_helper.Update()
+
+  elif options.command in (u'update-authors', u'update_authors'):
+    result = review_helper.UpdateAuthors()
 
   elif options.command in (u'update-version', u'update_version'):
     result = review_helper.UpdateVersion()
