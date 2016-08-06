@@ -1466,13 +1466,19 @@ class ReviewHelper(object):
     Returns:
       bool: True if the close was successful.
     """
+    review_file = ReviewFile(self._feature_branch)
+    if not review_file.Exists():
+      print(u'Review file missing for branch: {0:s}'.format(
+          self._feature_branch))
+      return False
+
     if not self._git_helper.CheckHasBranch(self._feature_branch):
       print(u'No such feature branch: {0:s}'.format(self._feature_branch))
     else:
       self._git_helper.RemoveFeatureBranch(self._feature_branch)
 
-    review_file = ReviewFile(self._feature_branch)
     codereview_issue_number = review_file.GetCodeReviewIssueNumber()
+
     review_file.Remove()
 
     if codereview_issue_number:
@@ -1972,6 +1978,10 @@ def Main():
     if not feature_branch:
       print(u'Feature branch value is missing.')
       print_help_on_error = True
+
+      # Support "username:branch" notation.
+      if u':' in feature_branch:
+        _, _, feature_branch = feature_branch.rpartition(u':')
 
   if options.command in (u'merge', u'open'):
     codereview_issue_number = getattr(
