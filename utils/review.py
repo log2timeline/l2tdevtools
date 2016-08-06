@@ -1052,6 +1052,8 @@ class ProjectHelper(CLIHelper):
     with open(u'AUTHORS', 'wb') as file_object:
       file_object.write(file_content)
 
+    return True
+
   def UpdateVersionFile(self):
     """Updates the version file.
 
