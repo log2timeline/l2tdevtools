@@ -385,6 +385,19 @@ class CodeReviewHelper(CLIHelper):
         u'{0:s} -i {1!s} -m "Code updated." -t "{2:s}" -y -- '
         u'{3:s}').format(command, issue_number, description, diffbase)
 
+    if self._no_browser:
+      print(
+          u'Upload server: codereview.appspot.com (change with -s/--server)\n'
+          u'Go to the following link in your browser:\n'
+          u'\n'
+          u'    https://codereview.appspot.com/get-access-token\n'
+          u'\n'
+          u'and copy the access token.\n'
+          u'\n')
+      print(u'Enter access token:', end=u' ')
+
+      sys.stdout.flush()
+
     exit_code, output, _ = self.RunCommand(command)
     print(output)
 
