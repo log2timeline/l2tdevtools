@@ -1020,7 +1020,7 @@ class ProjectHelper(CLIHelper):
     Returns:
       bool: True if the AUTHORS file update was successful.
     """
-    exit_code, output, _ = self.RunCommand(u'log --format="%aN (%aE)"')
+    exit_code, output, _ = self.RunCommand(u'git log --format="%aN (%aE)"')
     if exit_code != 0:
       return False
 
