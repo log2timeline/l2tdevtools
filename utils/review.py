@@ -2001,8 +2001,7 @@ def Main():
   review_helper = ReviewHelper(
       options.command, github_origin, feature_branch,
       options.diffbase, all_files=options.all_files,
-      no_browser=options.no_browser, no_confirm=options.no_confirm,
-      offline=options.offline)
+      no_browser=options.no_browser, no_confirm=options.no_confirm)
 
   if not review_helper.InitializeHelpers():
     return False
