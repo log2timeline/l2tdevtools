@@ -1491,6 +1491,12 @@ class ReviewHelper(object):
     Returns:
       bool: True if the create was successful.
     """
+    review_file = ReviewFile(self._active_branch)
+    if review_file.Exists():
+      print(u'Review file already exists for branch: {0:s}'.format(
+          self._active_branch))
+      return False
+
     git_origin = self._git_helper.GetRemoteOrigin()
     if not git_origin.startswith(u'https://github.com/'):
       print(u'{0:s} aborted - unsupported git remote origin: {1:s}'.format(
@@ -1541,7 +1547,6 @@ class ReviewHelper(object):
     if not os.path.isdir(u'.review'):
       os.mkdir(u'.review')
 
-    review_file = ReviewFile(self._active_branch)
     review_file.Create(codereview_issue_number)
 
     create_github_origin = u'{0:s}:{1:s}'.format(
