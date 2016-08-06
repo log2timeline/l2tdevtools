@@ -1049,7 +1049,7 @@ class ProjectHelper(CLIHelper):
     file_content = u'\n'.join(file_content)
     file_content = file_content.encode(u'utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(u'AUTHORS', 'wb') as file_object:
       file_object.write(file_content)
 
   def UpdateVersionFile(self):
