@@ -662,7 +662,7 @@ class GitHelper(CLIHelper):
     """Pulls changes from a feature branch on a fork.
 
     Args:
-      git_repo_url (str): git repostory URL of the fork.
+      git_repo_url (str): git repository URL of the fork.
       branch (str): name of the feature branch of the fork.
 
     Returns:
@@ -856,12 +856,25 @@ class GitHubHelper(object):
     return json.loads(response_data)
 
 
-class ProjectHelper(object):
+class ProjectHelper(CLIHelper):
   """Class that defines project helper functions.
 
   Attributes:
     project_name (str): name of the project.
   """
+
+  _AUTHORS_FILE_HEADER = [
+      u'# Names should be added to this file with this pattern:',
+      u'#',
+      u'# For individuals:',
+      u'#   Name (email address)',
+      u'#',
+      u'# For organizations:',
+      u'#   Organization (fnmatch pattern)',
+      u'#',
+      u'# See python fnmatch module documentation for more information.',
+      u'',
+      u'Google Inc. (*@google.com)']
 
   SUPPORTED_PROJECTS = frozenset([
       u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs',
@@ -998,6 +1011,46 @@ class ProjectHelper(object):
           u'Unable to write dpkg changelog file with error: {0:s}'.format(
               exception))
       return False
+
+    return True
+
+  def UpdateAuthorsFile(self):
+    """Updates the AUTHORS file.
+
+    Returns:
+      bool: True if the AUTHORS file update was successful.
+    """
+    exit_code, output, _ = self.RunCommand(u'git log --format="%aN (%aE)"')
+    if exit_code != 0:
+      return False
+
+    lines = output.split(b'\n')
+
+    # Reverse the lines since we want the oldest commits first.
+    lines.reverse()
+
+    authors_by_commit = []
+    authors = {}
+    for author in lines:
+      name, _, email_address = author[:-1].rpartition(u'(')
+      if email_address in authors:
+        if name != authors[email_address]:
+          logging.warning(u'Detected name mismatch for author: {0:d}.'.format(
+              email_address))
+        continue
+
+      authors[email_address] = name
+      authors_by_commit.append(author)
+
+    file_content = []
+    file_content.extend(self._AUTHORS_FILE_HEADER)
+    file_content.extend(authors_by_commit)
+
+    file_content = u'\n'.join(file_content)
+    file_content = file_content.encode(u'utf-8')
+
+    with open(u'AUTHORS', 'wb') as file_object:
+      file_object.write(file_content)
 
     return True
 
@@ -1466,13 +1519,19 @@ class ReviewHelper(object):
     Returns:
       bool: True if the close was successful.
     """
+    review_file = ReviewFile(self._feature_branch)
+    if not review_file.Exists():
+      print(u'Review file missing for branch: {0:s}'.format(
+          self._feature_branch))
+      return False
+
     if not self._git_helper.CheckHasBranch(self._feature_branch):
       print(u'No such feature branch: {0:s}'.format(self._feature_branch))
     else:
       self._git_helper.RemoveFeatureBranch(self._feature_branch)
 
-    review_file = ReviewFile(self._feature_branch)
     codereview_issue_number = review_file.GetCodeReviewIssueNumber()
+
     review_file.Remove()
 
     if codereview_issue_number:
@@ -1491,6 +1550,12 @@ class ReviewHelper(object):
     Returns:
       bool: True if the create was successful.
     """
+    review_file = ReviewFile(self._active_branch)
+    if review_file.Exists():
+      print(u'Review file already exists for branch: {0:s}'.format(
+          self._active_branch))
+      return False
+
     git_origin = self._git_helper.GetRemoteOrigin()
     if not git_origin.startswith(u'https://github.com/'):
       print(u'{0:s} aborted - unsupported git remote origin: {1:s}'.format(
@@ -1541,7 +1606,6 @@ class ReviewHelper(object):
     if not os.path.isdir(u'.review'):
       os.mkdir(u'.review')
 
-    review_file = ReviewFile(self._active_branch)
     review_file.Create(codereview_issue_number)
 
     create_github_origin = u'{0:s}:{1:s}'.format(
@@ -1842,6 +1906,21 @@ class ReviewHelper(object):
 
     return True
 
+  def UpdateAuthors(self):
+    """Updates the authors.
+
+    Returns:
+      bool: True if the authors update was successful.
+    """
+    if self._project_name == u'l2tdocs':
+      return True
+
+    if not self._project_helper.UpdateAuthorsFile():
+      print(u'Unable to update authors file.')
+      return False
+
+    return True
+
   def UpdateVersion(self):
     """Updates the version.
 
@@ -1859,7 +1938,7 @@ class ReviewHelper(object):
       print(u'Unable to update dpkg changelog file.')
       return False
 
-    return False
+    return True
 
 
 def Main():
@@ -1952,6 +2031,9 @@ def Main():
 
   commands_parser.add_parser(u'update')
 
+  commands_parser.add_parser(u'update-authors')
+  commands_parser.add_parser(u'update_authors')
+
   commands_parser.add_parser(u'update-version')
   commands_parser.add_parser(u'update_version')
 
@@ -1967,6 +2049,10 @@ def Main():
     if not feature_branch:
       print(u'Feature branch value is missing.')
       print_help_on_error = True
+
+      # Support "username:branch" notation.
+      if u':' in feature_branch:
+        _, _, feature_branch = feature_branch.rpartition(u':')
 
   if options.command in (u'merge', u'open'):
     codereview_issue_number = getattr(
@@ -2040,6 +2126,9 @@ def Main():
 
   elif options.command == u'update':
     result = review_helper.Update()
+
+  elif options.command in (u'update-authors', u'update_authors'):
+    result = review_helper.UpdateAuthors()
 
   elif options.command in (u'update-version', u'update_version'):
     result = review_helper.UpdateVersion()
