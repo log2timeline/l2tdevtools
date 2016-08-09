@@ -268,7 +268,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_NAME = u'pyparsing'
   # Hard-coded version to check parsing of SourceForge page.
-  _PROJECT_VERSION = u'2.1.5'
+  _PROJECT_VERSION = u'2.1.6'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
