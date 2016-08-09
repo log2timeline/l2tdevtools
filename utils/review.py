@@ -662,7 +662,7 @@ class GitHelper(CLIHelper):
     """Pulls changes from a feature branch on a fork.
 
     Args:
-      git_repo_url (str): git repostory URL of the fork.
+      git_repo_url (str): git repository URL of the fork.
       branch (str): name of the feature branch of the fork.
 
     Returns:
