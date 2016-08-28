@@ -2007,14 +2007,32 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
 class SetupPyOSCBuildHelper(OSCBuildHelper):
   """Class that helps in building with osc for the openSUSE build service."""
 
+  _DOC_FILENAMES = [
+      u'CHANGES', u'CHANGES.txt', u'CHANGES.TXT',
+      u'README', u'README.txt', u'README.TXT']
+
+  _LICENSE_FILENAMES = [
+      u'LICENSE', u'LICENSE.txt', u'LICENSE.TXT']
+
+  def _IsPython2Only(self):
+    """Determines if the project only supports Python version 2.
+
+    Note that Python 3 is supported as of 3.4 any earlier version is not
+    seen as compatible.
+
+    Returns:
+      bool: True if the project only support Python version 2.
+    """
+    return u'python2_only' in self._project_definition.build_options
+
   def Build(self, source_helper_object):
     """Builds the osc package.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -2030,14 +2048,15 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     osc_package_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name)
 
-    # Copy the source package to the package directory.
     osc_source_path = os.path.join(osc_package_path, source_filename)
-    shutil.copy(source_filename, osc_source_path)
+    if not os.path.exists(osc_source_path):
+      # Copy the source package to the package directory if needed.
+      shutil.copy(source_filename, osc_source_path)
 
-    osc_source_path = os.path.join(
-        source_helper_object.project_name, source_filename)
-    if not self._OSCAdd(osc_source_path):
-      return False
+      osc_source_path = os.path.join(
+          source_helper_object.project_name, source_filename)
+      if not self._OSCAdd(osc_source_path):
+        return False
 
     # Have setup.py generate the .spec file.
     source_directory = source_helper_object.Create()
@@ -2072,6 +2091,21 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     osc_spec_file_path = os.path.join(osc_package_path, spec_filename)
     spec_file_exists = os.path.exists(osc_spec_file_path)
 
+    python2_only = self._IsPython2Only()
+
+    osc_build_dependencies = [u'python-setuptools']
+    if self._project_definition.architecture_dependent:
+      osc_build_dependencies.append(u'python-devel')
+
+    if not python2_only:
+      osc_build_dependencies.append(u'python3-setuptools')
+      if self._project_definition.architecture_dependent:
+        osc_build_dependencies.append(u'python3-devel')
+
+    if self._project_definition.osc_build_dependencies:
+      osc_build_dependencies.extend(
+          self._project_definition.osc_build_dependencies)
+
     # TODO: check if already prefixed with python-
 
     output_file_object = open(osc_spec_file_path, 'wb')
@@ -2087,6 +2121,12 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
       for line in file_object.readlines():
         if line.startswith(b'%') and in_description:
           in_description = False
+
+          if self._project_definition.description_long:
+            description = u'{0:s}\n\n'.format(
+                self._project_definition.description_long)
+
+          output_file_object.write(description)
 
         if line.startswith(b'%define name '):
           # Need to override the project name for projects that prefix
@@ -2105,21 +2145,19 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           requires = line
           continue
 
+        elif line.startswith(b'BuildArch: noarch'):
+          if self._project_definition.architecture_dependent:
+            continue
+
         elif line.startswith(b'BuildRequires: '):
           has_build_requires = True
-          if self._project_definition.osc_build_dependencies:
-            line = b'{0:s} {1:s}\n'.format(line[:-1], b' '.join(
-                self._project_definition.osc_build_dependencies))
+          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
+              osc_build_dependencies))
 
         elif line == b'\n' and summary and not has_build_requires:
           has_build_requires = True
-          line = (
-              b'BuildRequires: python-setuptools, python3-setuptools\n'
-              b'{0:s}').format(line)
-
-          if self._project_definition.osc_build_dependencies:
-            line = b'{0:s} {1:s}\n'.format(line[:-1], b' '.join(
-                self._project_definition.osc_build_dependencies))
+          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
+              osc_build_dependencies))
 
         elif line.startswith(b'%description') and not description:
           in_description = True
@@ -2142,7 +2180,7 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
                 b'%description -n python-%{{name}}\n'
                 b'{2:s}').format(summary, python_requires, description))
 
-          if not has_python3_package:
+          if not python2_only and not has_python3_package:
             # TODO: convert python 2 package names to python 3
             python3_requires = requires
 
@@ -2158,15 +2196,23 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           line = b'%autosetup -n %{name}-%{unmangled_version}\n'
 
         elif line.startswith(b'python setup.py build'):
-          line = (
-              b'python2 setup.py build\n'
-              b'python3 setup.py build\n')
+          if python2_only:
+            line = b'python2 setup.py build\n'
+          else:
+            line = (
+                b'python2 setup.py build\n'
+                b'python3 setup.py build\n')
 
         elif line.startswith(b'python setup.py install'):
-          line = (
-              b'python2 setup.py install -O1 --root=%{buildroot}\n'
-              b'python3 setup.py install -O1 --root=%{buildroot}\n'
-              b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
+          if python2_only:
+            line = (
+                b'python2 setup.py install -O1 --root=%{buildroot}\n'
+                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
+          else:
+            line = (
+                b'python2 setup.py install -O1 --root=%{buildroot}\n'
+                b'python3 setup.py install -O1 --root=%{buildroot}\n'
+                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
 
         elif line == b'rm -rf $RPM_BUILD_ROOT\n':
           line = b'rm -rf %{buildroot}\n'
@@ -2180,21 +2226,44 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
             continue
 
           description = b''.join([description, line])
+          continue
 
         output_file_object.write(line)
 
-    output_file_object.write((
-        b'%files -n python-%{name}\n'
-        b'%license LICENSE\n'
-        b'%doc ACKNOWLEDGEMENTS AUTHORS README\n'
-        b'%{_exec_prefix}/lib/python2*/*\n'
-        b'\n'
-        b'%files -n python3-%{name}\n'
-        b'%license LICENSE\n'
-        b'%doc ACKNOWLEDGEMENTS AUTHORS README\n'
-        b'%{_exec_prefix}/lib/python3*/*\n'))
+    license = b''
+    for license_file in self._LICENSE_FILENAMES:
+      license_file_path = os.path.join(source_directory, license_file)
+      if os.path.exists(license_file_path):
+        license = b'%license {0:s}\n'.format(license_file)
+        break
 
-      # TODO: add bindir support.
+    doc_files = []
+    for doc_file in self._DOC_FILENAMES:
+      doc_file_path = os.path.join(source_directory, doc_file)
+      if os.path.exists(doc_file_path):
+        doc_files.append(doc_file)
+
+    doc = b''
+    if doc_files:
+      doc = b'%doc {0:s}\n'.format(b' '.join(doc_files))
+
+    output_file_object.write((
+        b'%files -n python-%{{name}}\n'
+        b'{0:s}'
+        b'{1:s}'
+        b'%{{_exec_prefix}}/lib/python2*/*\n').format(
+            license, doc))
+
+    if not python2_only:
+      output_file_object.write((
+          b'\n'
+          b'%files -n python3-%{{name}}\n'
+          b'{0:s}'
+          b'{1:s}'
+          b'%{{_exec_prefix}}/lib/python3*/*\n').format(
+              license, doc))
+
+    # TODO: add bindir support.
 
     date_time = datetime.datetime.now()
     date_time_string = date_time.strftime(u'%a %b %e %Y')
@@ -2219,10 +2288,10 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
         source_helper_object.project_name,
