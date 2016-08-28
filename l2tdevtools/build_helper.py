@@ -2264,6 +2264,11 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
               license, doc))
 
     # TODO: add bindir support.
+    output_file_object.write((
+        b'\n'
+        b'%exclude %{_bindir}/*\n'))
+
+    # TODO: add shared data support.
 
     date_time = datetime.datetime.now()
     date_time_string = date_time.strftime(u'%a %b %e %Y')
