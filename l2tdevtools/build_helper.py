@@ -2230,11 +2230,11 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
         output_file_object.write(line)
 
-    license = b''
+    license_line = b''
     for license_file in self._LICENSE_FILENAMES:
       license_file_path = os.path.join(source_directory, license_file)
       if os.path.exists(license_file_path):
-        license = b'%license {0:s}\n'.format(license_file)
+        license_line = b'%license {0:s}\n'.format(license_file)
         break
 
     doc_files = []
@@ -2243,16 +2243,16 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
       if os.path.exists(doc_file_path):
         doc_files.append(doc_file)
 
-    doc = b''
+    doc_line = b''
     if doc_files:
-      doc = b'%doc {0:s}\n'.format(b' '.join(doc_files))
+      doc_line = b'%doc {0:s}\n'.format(b' '.join(doc_files))
 
     output_file_object.write((
         b'%files -n python-%{{name}}\n'
         b'{0:s}'
         b'{1:s}'
         b'%{{_exec_prefix}}/lib/python2*/*\n').format(
-            license, doc))
+            license_line, doc_line))
 
     if not python2_only:
       output_file_object.write((
@@ -2261,7 +2261,7 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           b'{0:s}'
           b'{1:s}'
           b'%{{_exec_prefix}}/lib/python3*/*\n').format(
-              license, doc))
+              license_line, doc_line))
 
     # TODO: add bindir support.
     output_file_object.write((
