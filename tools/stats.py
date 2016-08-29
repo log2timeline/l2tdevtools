@@ -34,12 +34,12 @@ class StatsDefinitionReader(object):
     """Retrieves a value from the config parser.
 
     Args:
-      config_parser: the configuration parser (instance of ConfigParser).
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (str): name of the value.
 
     Returns:
-      An object containing the value or None if the value does not exists.
+      object: value or None if the value does not exists.
     """
     try:
       return config_parser.get(section_name, value_name).decode('utf-8')
@@ -50,11 +50,10 @@ class StatsDefinitionReader(object):
     """Reads the projects per organization.
 
     Args:
-      file_object: the file-like object to read from.
+      file_object (file): file-like object to read from.
 
     Returns:
-      A dictionary object containing the organization name as the key
-      and a list of corresponding project names as the value.
+      dict[str, list[str]]: organization names with corresponding project names.
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -82,8 +81,7 @@ class StatsDefinitionReader(object):
       file_object: the file-like object to read from.
 
     Returns:
-      A dictionary object containing the user name as the key
-      and the corresponding email address as the value.
+      dict[str, str]: user names with corresponding email address.
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -107,11 +105,11 @@ class DownloadHelper(object):
     """Downloads the page content from the URL.
 
     Args:
-      download_url: the URL where to download the page content.
+      download_url (str): URL where to download the page content.
 
     Returns:
-      A tuple of a binary string containing the page content and
-      TODO conaining the response headers if successful, None otherwise.
+      tuple[bytes, TODO]: page content and response headers if successful or
+          None otherwise.
     """
     if not download_url:
       return None, None
@@ -138,9 +136,9 @@ class GithubContributionsHelper(DownloadHelper):
     """Lists the contributions of a specific project.
 
     Args:
-      organization: a string containing the name of the organization.
-      project_name: a string containing the name of the project.
-      output_writer: an output writer object (instance of OutputWriter).
+      organization (str): name of the organization.
+      project_name (str): name of the project.
+      output_writer (OutputWriter): output writer.
     """
     download_url = (
         u'https://api.github.com/repos/{0:s}/{1:s}/stats/contributors').format(
@@ -159,9 +157,9 @@ class GithubContributionsHelper(DownloadHelper):
     """Writes the contributions to the output writer.
 
     Args:
-      project_name: a string containing the name of the project.
-      contributions_json: a list of JSON formatted contributions objects.
-      output_writer: an output writer object (instance of OutputWriter).
+      project_name (str): name of the project.
+      contributions_json (list[object]): JSON formatted contributions objects.
+      output_writer (OutputWriter): output writer.
     """
     # https://developer.github.com/v3/repos/statistics/
     # [{
@@ -233,10 +231,9 @@ class GithubContributionsHelper(DownloadHelper):
     """Lists the contributions of projects.
 
     Args:
-      projects_per_organization: a dictionary containing the github
-                                 organization name as a key and a list of
-                                 projects names as the value.
-      output_writer: an output writer object (instance of OutputWriter).
+      projects_per_organization (dict[str, list[str]]): organization names
+          with corresponding projects names.
+      output_writer (OutputWriter): output writer.
     """
     output_line = (
         u'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
@@ -256,8 +253,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
     """Lists the reviews of a specific email address.
 
     Args:
-      email_address: a string containing the email address of the reviewer.
-      output_writer: an output writer object (instance of OutputWriter).
+      email_address (str): email address of the reviewer.
+      output_writer (OutputWriter): output writer.
     """
     issue_numbers = set()
 
@@ -300,10 +297,10 @@ class CodeReviewIssuesHelper(DownloadHelper):
     """Parser the reviews JSON data.
 
     Args:
-      reviews_json: a dictionary containing the JSON reviews object.
+      reviews_json (dict[str, object]): JSON reviews object.
 
     Yield:
-      A tuple of issue number, subject, is closed.
+      tuple[str, str, str]: issue number, subject, is closed.
     """
     results_list_json = reviews_json.get(u'results', None)
     if results_list_json is None:
@@ -355,9 +352,9 @@ class CodeReviewIssuesHelper(DownloadHelper):
     """Lists the code review issues of users.
 
     Args:
-      usernames: a dictionary where the key contains the usernames and
-                 the value the email addresses of the reviewers.
-      output_writer: an output writer object (instance of OutputWriter).
+      usernames (dict[str, str]): usernames with corresponding email addresses
+          of the reviewers.
+      output_writer (OutputWriter): output writer.
     """
     # TODO: determine what to print as a header
     output_line = u'email address\t\n'
@@ -378,7 +375,7 @@ class StdoutWriter(object):
     """Opens the output writer object.
 
     Returns:
-      A boolean containing True if successful or False if not.
+      bool: True if successful or False if not.
     """
     return True
 
@@ -390,7 +387,7 @@ class StdoutWriter(object):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
-      data: the data to write.
+      data (bytes): data to write.
     """
     print(data, end=u'')
 
@@ -399,7 +396,7 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   statistics_types = frozenset([
       u'codereviews', u'contributions'])
