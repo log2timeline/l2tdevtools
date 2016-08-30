@@ -225,7 +225,7 @@ class GithubContributionsHelper(DownloadHelper):
                 number_of_contributions, number_of_lines_added,
                 number_of_lines_deleted)
 
-        output_writer.Write(output_line.decode(u'utf-8'))
+        output_writer.Write(output_line.encode(u'utf-8'))
 
   def ListContributions(self, projects_per_organization, output_writer):
     """Lists the contributions of projects.
@@ -238,7 +238,7 @@ class GithubContributionsHelper(DownloadHelper):
     output_line = (
         u'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
         u'number lines added\tnumber lines deleted\n')
-    output_writer.Write(output_line.decode(u'utf-8'))
+    output_writer.Write(output_line.encode(u'utf-8'))
 
     for organization, projects in iter(projects_per_organization.items()):
       for project_name in projects:
@@ -311,7 +311,7 @@ class CodeReviewIssuesHelper(DownloadHelper):
         output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
             review_values[0], review_values[1], review_values[2],
             review_values[3], reviewers, status)
-        output_writer.Write(output_line.decode(u'utf-8'))
+        output_writer.Write(output_line.encode(u'utf-8'))
 
       cursor = reviews_json.get(u'cursor', None)
 
@@ -341,6 +341,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
         logging.error(u'Missing subject.')
         continue
 
+      subject = subject.strip()
+
       creation_time = review_json.get(u'created', None)
       owner_email = review_json.get(u'owner_email', None)
       is_closed = review_json.get(u'closed', False)
@@ -369,12 +371,6 @@ class CodeReviewIssuesHelper(DownloadHelper):
           creation_time, owner_email, issue_number, subject, reviewers,
           is_closed)
 
-    # TODO: based on the messages determine if the reviewer commented
-    # on the CL.
-
-    # "closed": false,
-    # "issue": 294010043
-
     # TODO: map email address to username
 
     # TODO: get project from: "subject" e.g. "[plaso] ..."
@@ -387,11 +383,10 @@ class CodeReviewIssuesHelper(DownloadHelper):
           of the reviewers.
       output_writer (OutputWriter): output writer.
     """
-    # TODO: determine what to print as a header
     output_line = (
         u'creation time\tcreated by\tissue number\tdescription\treviewers\t'
         u'status\n')
-    output_writer.Write(output_line.decode(u'utf-8'))
+    output_writer.Write(output_line.encode(u'utf-8'))
 
     for email_address in iter(usernames.values()):
       self._ListReviewsForEmailAddress(email_address, output_writer)
