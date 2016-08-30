@@ -184,10 +184,11 @@ class GithubContributionsHelper(DownloadHelper):
     if not contributions_data:
       return
 
+    # TODO: check if response is not None
+    _ = response
+
     contributions_json = json.loads(contributions_data)
     self._WriteContribution(project_name, contributions_json, output_writer)
-
-    # TODO: check if response is not None
 
   def _WriteContribution(self, project_name, contributions_json, output_writer):
     """Writes the contributions to the output writer.
@@ -274,11 +275,12 @@ class GithubContributionsHelper(DownloadHelper):
           date_time_string = date_time.isoformat()
 
           output_line = (
-              u'{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ number_of_cls:{3:d} '
-              u'~ delta_added:{4:d} ~ delta_deleted:{5:d} ~ py:{4:d} ~ file_type:py '
-              u'~\n').format(
-                  date_time_string, username, project_name, number_of_contributions,
-                  number_of_lines_added, number_of_lines_deleted)
+              u'{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
+              u'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
+              u'~ py:{4:d} ~ file_type:py ~\n').format(
+                  date_time_string, username, project_name,
+                  number_of_contributions, number_of_lines_added,
+                  number_of_lines_deleted)
 
         output_writer.Write(output_line.encode(u'utf-8'))
 
@@ -346,6 +348,7 @@ class CodeReviewIssuesHelper(DownloadHelper):
         break
 
       # TODO: check if response is not None
+      _ = response
 
       reviews_json = json.loads(reviews_data)
 
