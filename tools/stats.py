@@ -277,7 +277,7 @@ class GithubContributionsHelper(DownloadHelper):
           output_line = (
               u'{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
               u'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
-              u'~ py:{4:d} ~ file_type:py ~\n').format(
+              u'~ py:{4:d} ~ file_type:py ~ op_type:ADD ~\n').format(
                   date_time_string, username, project_name,
                   number_of_contributions, number_of_lines_added,
                   number_of_lines_deleted)
