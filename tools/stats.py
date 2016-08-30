@@ -284,12 +284,15 @@ class CodeReviewIssuesHelper(DownloadHelper):
 
       for review_values in self._ParserReviewsJSON(reviews_json):
         if review_values[0] in issue_numbers:
+          # Skip issues numbers we've already processed.
           return
 
         issue_numbers.add(review_values[0])
 
-        if review_values[2]:
-          continue
+        output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4!s}\n'.format(
+            review_values[0], review_values[1], review_values[2],
+            review_values[3], review_values[4])
+        output_writer.Write(output_line.decode(u'utf-8'))
 
       cursor = reviews_json.get(u'cursor', None)
 
@@ -300,7 +303,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
       reviews_json (dict[str, object]): JSON reviews object.
 
     Yield:
-      tuple[str, str, str]: issue number, subject, is closed.
+      tuple[str, str, int, str, bool]: creation time, owner email address,
+          issue number, is closed.
     """
     results_list_json = reviews_json.get(u'results', None)
     if results_list_json is None:
@@ -318,9 +322,11 @@ class CodeReviewIssuesHelper(DownloadHelper):
         logging.error(u'Missing subject.')
         continue
 
+      creation_time = review_json.get(u'created', None)
+      owner_email = review_json.get(u'owner_email', None)
       is_closed = review_json.get(u'closed', False)
 
-      yield issue_number, subject, is_closed
+      yield creation_time, owner_email, issue_number, subject, is_closed
 
       reviewers_list_json = review_json.get(u'reviewers', None)
       if not reviewers_list_json:
@@ -329,14 +335,19 @@ class CodeReviewIssuesHelper(DownloadHelper):
 
       messages_list_json = review_json.get(u'messages', None)
       if not messages_list_json:
-        logging.error(u'Missing messages JSON list.')
+        # CL has not yet been reviewed.
         continue
 
+      senders = set()
       for message_json in messages_list_json:
         sender_value = message_json.get(u'sender', None)
         if not sender_value:
           logging.error(u'Missing sender JSON value.')
           continue
+
+        senders.add(sender_value)
+
+      # print("S", senders)
 
     # TODO: based on the messages determine if the reviewer commented
     # on the CL.
@@ -357,7 +368,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
       output_writer (OutputWriter): output writer.
     """
     # TODO: determine what to print as a header
-    output_line = u'email address\t\n'
+    output_line = (
+        u'creation time\tcreated by\tissue number\tdescription\tis closed\n')
     output_writer.Write(output_line.decode(u'utf-8'))
 
     for email_address in iter(usernames.values()):
