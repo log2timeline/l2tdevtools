@@ -307,11 +307,20 @@ class CodeReviewIssuesHelper(DownloadHelper):
         else:
           status = u'new'
 
-        reviewers = u', '.join(review_values[4])
-        output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
-            review_values[0], review_values[1], review_values[2],
-            review_values[3], reviewers, status)
-        output_writer.Write(output_line.encode(u'utf-8'))
+        if not self._include_closed:
+          reviewers = u', '.join(review_values[4])
+          output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
+              review_values[0], review_values[1], review_values[2],
+              review_values[3], reviewers, status)
+          output_writer.Write(output_line.encode(u'utf-8'))
+
+        else:
+          # Create a row per reviewer.
+          for reviewer in reviewers:
+            output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
+                review_values[0], review_values[1], review_values[2],
+                review_values[3], reviewer, status)
+            output_writer.Write(output_line.encode(u'utf-8'))
 
       cursor = reviews_json.get(u'cursor', None)
 
