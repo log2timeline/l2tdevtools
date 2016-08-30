@@ -249,6 +249,15 @@ class GithubContributionsHelper(DownloadHelper):
 class CodeReviewIssuesHelper(DownloadHelper):
   """Class that defines a Rietveld code review issues helper."""
 
+  def __init__(self, include_closed=False):
+    """Initializes a code review issue helper.
+
+    Args:
+      include_closed (bool): True if closed code reviews should be included.
+    """
+    super(CodeReviewIssuesHelper, self).__init__()
+    self._include_closed = include_closed
+
   def _ListReviewsForEmailAddress(self, email_address, output_writer):
     """Lists the reviews of a specific email address.
 
@@ -269,7 +278,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
       # 1 => Unknown
       # 2 => Yes
       # 3 => No
-      download_url = u'{0:s}&closed=3'.format(download_url)
+      if not self._include_closed:
+        download_url = u'{0:s}&closed=3'.format(download_url)
 
       if cursor:
         download_url = u'{0:s}&cursor={1:s}'.format(download_url, cursor)
@@ -289,9 +299,18 @@ class CodeReviewIssuesHelper(DownloadHelper):
 
         issue_numbers.add(review_values[0])
 
-        output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4!s}\n'.format(
+        # TODO: add in review status.
+        if review_values[5]:
+          status = u'closed'
+        elif review_values[4]:
+          status = u'in review'
+        else:
+          status = u'new'
+
+        reviewers = u', '.join(review_values[4])
+        output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
             review_values[0], review_values[1], review_values[2],
-            review_values[3], review_values[4])
+            review_values[3], reviewers, status)
         output_writer.Write(output_line.decode(u'utf-8'))
 
       cursor = reviews_json.get(u'cursor', None)
@@ -303,8 +322,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
       reviews_json (dict[str, object]): JSON reviews object.
 
     Yield:
-      tuple[str, str, int, str, bool]: creation time, owner email address,
-          issue number, is closed.
+      tuple[str, str, int, str, set[str], bool]: creation time, owner email
+          address, issue number, reviewers, is closed.
     """
     results_list_json = reviews_json.get(u'results', None)
     if results_list_json is None:
@@ -326,28 +345,29 @@ class CodeReviewIssuesHelper(DownloadHelper):
       owner_email = review_json.get(u'owner_email', None)
       is_closed = review_json.get(u'closed', False)
 
-      yield creation_time, owner_email, issue_number, subject, is_closed
-
       reviewers_list_json = review_json.get(u'reviewers', None)
       if not reviewers_list_json:
         logging.error(u'Missing reviewers JSON list.')
         continue
 
+      reviewers = set()
       messages_list_json = review_json.get(u'messages', None)
-      if not messages_list_json:
-        # CL has not yet been reviewed.
-        continue
+      # Note that the messages_list_json will be absent if the CL has not
+      # yet been reviewed.
+      if messages_list_json:
+        for message_json in messages_list_json:
+          sender_value = message_json.get(u'sender', None)
+          if not sender_value:
+            logging.error(u'Missing sender JSON value.')
+            continue
 
-      senders = set()
-      for message_json in messages_list_json:
-        sender_value = message_json.get(u'sender', None)
-        if not sender_value:
-          logging.error(u'Missing sender JSON value.')
-          continue
+          reviewers.add(sender_value)
 
-        senders.add(sender_value)
+      reviewers.discard(owner_email)
 
-      # print("S", senders)
+      yield (
+          creation_time, owner_email, issue_number, subject, reviewers,
+          is_closed)
 
     # TODO: based on the messages determine if the reviewer commented
     # on the CL.
@@ -369,7 +389,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
     """
     # TODO: determine what to print as a header
     output_line = (
-        u'creation time\tcreated by\tissue number\tdescription\tis closed\n')
+        u'creation time\tcreated by\tissue number\tdescription\treviewers\t'
+        u'status\n')
     output_writer.Write(output_line.decode(u'utf-8'))
 
     for email_address in iter(usernames.values()):
@@ -411,7 +432,7 @@ def Main():
     bool: True if successful or False if not.
   """
   statistics_types = frozenset([
-      u'codereviews', u'contributions'])
+      u'codereviews', u'codereviews-history', u'contributions'])
 
   argument_parser = argparse.ArgumentParser(description=(
       u'Generates an overview of project statistics of github projects.'))
@@ -454,13 +475,17 @@ def Main():
     print(u'')
     return False
 
-  if options.statistics_type == u'codereviews':
+  if options.statistics_type.startswith(u'codereviews'):
     usernames = {}
     with open(stats_file) as file_object:
       stats_definition_reader = StatsDefinitionReader()
       usernames = stats_definition_reader.ReadUsernames(file_object)
 
-    codereviews_helper = CodeReviewIssuesHelper()
+    include_closed = False
+    if options.statistics_type == u'codereviews-history':
+      include_closed = True
+
+    codereviews_helper = CodeReviewIssuesHelper(include_closed=include_closed)
     codereviews_helper.ListIssues(usernames, output_writer)
 
   elif options.statistics_type == u'contributions':
@@ -474,7 +499,6 @@ def Main():
     contributions_helper.ListContributions(
         projects_per_organization, output_writer)
 
-  # TODO: add support for code reviews
   # TODO: add support for pull requests
   # TODO: add support for more granular CL information
 
