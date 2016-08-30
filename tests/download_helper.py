@@ -224,7 +224,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
   _DOWNLOAD_URL = u'https://pypi.python.org/pypi/construct'
 
   _PROJECT_NAME = u'construct'
-  _PROJECT_VERSION = u'2.5.2'
+  _PROJECT_VERSION = u'2.5.3'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -244,7 +244,8 @@ class PyPIDownloadHelperTest(unittest.TestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     test_regexp = (
-        r'/packages\/\w{2}\/\w{2}\/\w+\/construct-2.5.2\.tar\.gz')
+        r'/packages\/\w{{2}}\/\w{{2}}\/\w+\/{0:s}-{1:s}\.tar\.gz').format(
+            self._PROJECT_NAME, self._PROJECT_VERSION)
 
     self.assertRegexpMatches(download_url, test_regexp)
 
@@ -268,7 +269,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_NAME = u'pyparsing'
   # Hard-coded version to check parsing of SourceForge page.
-  _PROJECT_VERSION = u'2.1.6'
+  _PROJECT_VERSION = u'2.1.8'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
