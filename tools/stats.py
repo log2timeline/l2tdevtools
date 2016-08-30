@@ -4,6 +4,7 @@
 
 from __future__ import print_function
 import argparse
+import datetime
 import json
 import logging
 import os
@@ -74,11 +75,35 @@ class StatsDefinitionReader(object):
 
     return projects_per_organization
 
+  def ReadUserMappings(self, file_object):
+    """Reads the username mappings.
+
+    Args:
+      file_object (file): file-like object to read from.
+
+    Returns:
+      dict[str, str]: user names with corresponding email address.
+    """
+    # TODO: replace by:
+    # config_parser = configparser. ConfigParser(interpolation=None)
+    config_parser = configparser.RawConfigParser()
+    config_parser.readfp(file_object)
+
+    user_mappings = {}
+    for option_name in config_parser.options(u'user_mappings'):
+      user_mapping = self._GetConfigValue(
+          config_parser, u'user_mappings', option_name)
+
+      option_name = option_name.lower()
+      user_mappings[option_name] = user_mapping.lower()
+
+    return user_mappings
+
   def ReadUsernames(self, file_object):
     """Reads the usernames.
 
     Args:
-      file_object: the file-like object to read from.
+      file_object (file): file-like object to read from.
 
     Returns:
       dict[str, str]: user names with corresponding email address.
@@ -130,6 +155,17 @@ class DownloadHelper(object):
 
 class GithubContributionsHelper(DownloadHelper):
   """Class that defines a github contributions helper."""
+
+  def __init__(self, user_mappings):
+    """Initializes a github contributions helper.
+
+    Args:
+      user_mappings (dict[str, str]): mapping between github username and
+          another username.
+    """
+    super(GithubContributionsHelper, self).__init__()
+    self._alternate_output_format = False
+    self._user_mappings = user_mappings
 
   def _ListContributionsForProject(
       self, organization, project_name, output_writer):
@@ -219,11 +255,30 @@ class GithubContributionsHelper(DownloadHelper):
             number_of_contributions, number_of_lines_added,
             number_of_lines_deleted)
 
-        output_line = (
-            u'{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n').format(
-                year, week_number, login_name, project_name,
-                number_of_contributions, number_of_lines_added,
-                number_of_lines_deleted)
+        if not self._alternate_output_format:
+          output_line = (
+              u'{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n').format(
+                  year, week_number, login_name, project_name,
+                  number_of_contributions, number_of_lines_added,
+                  number_of_lines_deleted)
+
+        else:
+          username = login_name.lower()
+          username = self._user_mappings.get(username, None)
+          if not username:
+            # Skip login names without a username mapping.
+            continue
+
+          date_time_string = u'{0:s}-W{1:s}-0'.format(year, week_number)
+          date_time = datetime.datetime.strptime(date_time_string, u'%Y-W%W-%w')
+          date_time_string = date_time.isoformat()
+
+          output_line = (
+              u'{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ number_of_cls:{3:d} '
+              u'~ delta_added:{4:d} ~ delta_deleted:{5:d} ~ py:{4:d} ~ file_type:py '
+              u'~\n').format(
+                  date_time_string, username, project_name, number_of_contributions,
+                  number_of_lines_added, number_of_lines_deleted)
 
         output_writer.Write(output_line.encode(u'utf-8'))
 
@@ -235,10 +290,12 @@ class GithubContributionsHelper(DownloadHelper):
           with corresponding projects names.
       output_writer (OutputWriter): output writer.
     """
-    output_line = (
-        u'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
-        u'number lines added\tnumber lines deleted\n')
-    output_writer.Write(output_line.encode(u'utf-8'))
+    if not self._alternate_output_format:
+      output_line = (
+          u'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
+          u'number lines added\tnumber lines deleted\n')
+
+      output_writer.Write(output_line.encode(u'utf-8'))
 
     for organization, projects in iter(projects_per_organization.items()):
       for project_name in projects:
@@ -316,7 +373,7 @@ class CodeReviewIssuesHelper(DownloadHelper):
 
         else:
           # Create a row per reviewer.
-          for reviewer in reviewers:
+          for reviewer in review_values[4]:
             output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
                 review_values[0], review_values[1], review_values[2],
                 review_values[3], reviewer, status)
@@ -499,7 +556,12 @@ def Main():
       projects_per_organization = (
           stats_definition_reader.ReadProjectsPerOrganization(file_object))
 
-    contributions_helper = GithubContributionsHelper()
+    user_mappings = {}
+    with open(stats_file) as file_object:
+      stats_definition_reader = StatsDefinitionReader()
+      user_mappings = stats_definition_reader.ReadUserMappings(file_object)
+
+    contributions_helper = GithubContributionsHelper(user_mappings)
     contributions_helper.ListContributions(
         projects_per_organization, output_writer)
 
