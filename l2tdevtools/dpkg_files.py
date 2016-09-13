@@ -707,7 +707,7 @@ class DPKGBuildFilesGenerator(object):
     seen as compatible.
 
     Returns:
-      A boolean value to indicate the project only support Python version 2.
+      bool: True if the project only support Python version 2.
     """
     return (u'python2_only' in self._project_definition.build_options or
             self._distribution == u'precise')
