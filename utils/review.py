@@ -877,8 +877,8 @@ class ProjectHelper(CLIHelper):
       u'Google Inc. (*@google.com)']
 
   SUPPORTED_PROJECTS = frozenset([
-      u'dfdatetime', u'dfvfs', u'dfwinreg', u'l2tdevtools', u'l2tdocs',
-      u'plaso'])
+      u'dfdatetime', u'dfvfs', u'dfwinreg', u'dftimewolf', u'eccemotus',
+      u'l2tdevtools', u'l2tdocs', u'plaso'])
 
   def __init__(self, script_path):
     """Initializes a project helper object.
