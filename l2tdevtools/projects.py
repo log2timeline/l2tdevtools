@@ -14,45 +14,36 @@ class ProjectDefinition(object):
   """Class that implements a project definition.
 
   Attributes:
-    architecture_dependent: a boolean value to indicate the project is
-                            architecture dependent.
-    build_dependencies: a list of strings containing the build dependencies.
-    build_options: a list of strings containing the build options. Current
-                   supported build options are: python2_only (to only build
-                   for Python version 2).
-    build_system: a string containing the build system.
-    configure_options: a list of strings containing the the configure options.
-    description_long: a string containing the long description of
-                      the dependency.
-    description_short: a string containing the short description of
-                       the dependency.
-    disabled: a list containing the names of the build targets that are
-              disabled for this dependency.
-    dpkg_build_dependencies: a list of strings containing the dpkg build
-                             dependencies.
-    dpkg_configure_options: a list of strings containing the the configure
-                            options when building a deb.
-    dpkg_dependencies: a list of strings containing the dpkg dependencies.
-    dpkg_name: a string containing the dpkg package name.
-    dpkg_source_name: a string containing the dpkg source package name.
-    dpkg_template_control: a string containing the name of the dpkg control
-                           template file.
-    dpkg_template_rules: a string containing the name of the dpkg rules
-                         template file.
-    download_url: a string containing the source package download URL.
-    git_url: a string containing the git repository URL.
-    homepage_url: a string containing the project homepage URL.
-    maintainer: a string containing the name and email address of
-                the maintainer.
-    msi_name: a string containing the MSI package name.
-    name: a string containing the name of the dependency.
-    setup_name: a string containing the name used in setup.py.
-    osc_build_dependencies: a list of strings containing the osc build
-                            dependencies.
-    patches: a list of strings containing the patch file names.
-    pkg_configure_options: a list of strings containing the the configure
-                           options when building a pkg.
-    version: a the version requirements (instance of ProjectVersion).
+    architecture_dependent (bool): True if the project is architecture
+        dependent.
+    build_dependencies (list[str]): build dependencies.
+    build_options (list[str]): build options. Current supported build options
+        are: python2_only (to only build for Python version 2).
+    build_system (str): build system.
+    configure_options (list[str]): configure options.
+    description_long (str): long description of the project.
+    description_short (str): short description of the project.
+    disabled (list[str]): names of the build targets that are disabled for
+        this project.
+    dpkg_build_dependencies (list[str]): dpkg build dependencies.
+    dpkg_configure_options (list[str]): configure options when building a deb.
+    dpkg_dependencies (list[str]): dpkg dependencies.
+    dpkg_name (str): dpkg package name.
+    dpkg_source_name (str): dpkg source package name.
+    dpkg_template_control (str): name of the dpkg control template file.
+    dpkg_template_rules (str): name of the dpkg rules template file.
+    download_url (str): source package download URL.
+    git_url (str): git repository URL.
+    homepage_url (str): project homepage URL.
+    maintainer (str): name and email address of the maintainer.
+    msi_name (str): MSI package name.
+    name (str): name of the project.
+    setup_name (str): project name used in setup.py.
+    osc_build_dependencies (list[str]): osc build dependencies.
+    rpm_build_dependencies (list[str]): rpm build dependencies.
+    patches (list[str]): patch file names.
+    pkg_configure_options (list[str]): configure options when building a pkg.
+    version (ProjectVersion): version requirements.
   """
 
   def __init__(self, name):
@@ -84,6 +75,7 @@ class ProjectDefinition(object):
     self.msi_name = None
     self.name = name
     self.osc_build_dependencies = None
+    self.rpm_build_dependencies = None
     self.patches = None
     self.pkg_configure_options = None
     self.setup_name = None
@@ -217,6 +209,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'msi_name')
       project_definition.osc_build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'osc_build_dependencies')
+      project_definition.rpm_build_dependencies = self._GetConfigValue(
+          config_parser, section_name, u'rpm_build_dependencies')
       project_definition.patches = self._GetConfigValue(
           config_parser, section_name, u'patches')
       project_definition.pkg_configure_options = self._GetConfigValue(
@@ -279,6 +273,13 @@ class ProjectDefinitionReader(object):
           project_definition.osc_build_dependencies, basestring):
         project_definition.osc_build_dependencies = (
             project_definition.osc_build_dependencies.split(u','))
+
+      if project_definition.rpm_build_dependencies is None:
+        project_definition.rpm_build_dependencies = []
+      elif isinstance(
+          project_definition.rpm_build_dependencies, basestring):
+        project_definition.rpm_build_dependencies = (
+            project_definition.rpm_build_dependencies.split(u','))
 
       if project_definition.patches is None:
         project_definition.patches = []

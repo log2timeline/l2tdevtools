@@ -25,12 +25,11 @@ class BuildHelper(object):
   LOG_FILENAME = u'build.log'
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(BuildHelper, self).__init__()
     self._data_path = os.path.join(l2tdevtools_path, u'data')
@@ -40,7 +39,7 @@ class BuildHelper(object):
     """Checks if the build dependencies are met.
 
     Returns:
-      A list of build dependency names that are not met or an empty list.
+      list[str]: build dependency names that are not met or an empty list.
     """
     return list(self._project_definition.build_dependencies)
 
@@ -48,10 +47,10 @@ class BuildHelper(object):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     return True
 
@@ -93,12 +92,11 @@ class DPKGBuildHelper(BuildHelper):
   }
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(DPKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg.sh'
@@ -110,15 +108,15 @@ class DPKGBuildHelper(BuildHelper):
     """Make the necessary preparations before building the dpkg packages.
 
     Args:
-      source_directory: the name of the source directory.
-      project_name: the name of the project.
-      project_version: the version of the project.
-      version_suffix: the version suffix.
-      distribution: the distribution.
-      architecture: the architecture.
+      source_directory (str): name of the source directory.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+      version_suffix (str): version suffix.
+      distribution (str): distribution.
+      architecture (str): architecture.
 
     Returns:
-      True if the preparations were successful, False otherwise.
+      bool: True if the preparations were successful, False otherwise.
     """
     # Script to run before building, e.g. to change the dpkg packaging files.
     if os.path.exists(self._prep_script):
@@ -139,15 +137,15 @@ class DPKGBuildHelper(BuildHelper):
     """Make the necessary finalizations after building the dpkg packages.
 
     Args:
-      source_directory: the name of the source directory.
-      project_name: the name of the project.
-      project_version: the version of the project.
-      version_suffix: the version suffix.
-      distribution: the distribution.
-      architecture: the architecture.
+      source_directory (str): name of the source directory.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+      version_suffix (str): version suffix.
+      distribution (str): distribution.
+      architecture (str): architecture.
 
     Returns:
-      True if the finalizations were successful, False otherwise.
+      bool: True if the finalizations were successful, False otherwise.
     """
     # Script to run after building, e.g. to automatically upload the dpkg
     # package files to an apt repository.
@@ -167,11 +165,10 @@ class DPKGBuildHelper(BuildHelper):
     """Checks if a package is installed.
 
     Args:
-      package_name: the name of the package.
+      package_name (str): name of the package.
 
     Returns:
-      A boolean value containing true if the package is installed
-      false otherwise.
+      bool: True if the package is installed, False otherwise.
     """
     command = u'dpkg-query -s {0:s} >/dev/null 2>&1'.format(package_name)
     exit_code = subprocess.call(command, shell=True)
@@ -181,7 +178,7 @@ class DPKGBuildHelper(BuildHelper):
     """Checks if the build dependencies are met.
 
     Returns:
-      A list of build dependency names that are not met or an empty list.
+      list[str]: build dependency names that are not met or an empty list.
     """
     missing_packages = []
     for package_name in self._BUILD_DEPENDENCIES:
@@ -208,12 +205,11 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(ConfigureMakeDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
@@ -230,10 +226,10 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     """Builds the dpkg packages.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -314,10 +310,10 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     deb_filename = u'{0:s}_{1!s}-1_{2:s}.deb'.format(
         source_helper_object.project_name,
@@ -329,7 +325,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     """Cleans the dpkg packages in the current directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
         source_helper_object.project_name,
@@ -382,12 +378,11 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(ConfigureMakeSourceDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
@@ -401,10 +396,10 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     """Builds the dpkg packages.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -484,10 +479,10 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
         source_helper_object.project_name, source_helper_object.project_version,
@@ -499,7 +494,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     """Cleans the dpkg packages in the current directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
         source_helper_object.project_name,
@@ -551,12 +546,11 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
   """Class that helps in building dpkg packages (.deb)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(SetupPyDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
@@ -607,10 +601,10 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     """Builds the dpkg packages.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -701,10 +695,10 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     if self._project_definition.dpkg_name:
       project_name = self._project_definition.dpkg_name
@@ -767,12 +761,11 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
   """Class that helps in building source dpkg packages (.deb)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(SetupPySourceDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
@@ -786,10 +779,10 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     """Builds the dpkg packages.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -879,10 +872,10 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     if self._project_definition.dpkg_name:
       package_name = self._project_definition.dpkg_name
@@ -899,7 +892,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     """Cleans the dpkg packages in the current directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     if self._project_definition.dpkg_name:
       package_name = self._project_definition.dpkg_name
@@ -957,12 +950,11 @@ class MSIBuildHelper(BuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(MSIBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
@@ -976,11 +968,11 @@ class MSIBuildHelper(BuildHelper):
     """Applies patches.
 
     Args:
-      source_directory: the name of the source directory.
-      patches: list of patch file names.
+      source_directory (str): name of the source directory.
+      patches (list[str]): patch file names.
 
     Returns:
-      A boolean value indicating if applying the patches was successful.
+      bool: True if applying the patches was successful.
     """
     # Search common locations for patch.exe
     patch = u'{0:s}:{1:s}{2:s}'.format(
@@ -1013,12 +1005,11 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
   """Class that helps in building Microsoft Installer packages (.msi)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
 
     Raises:
       RuntimeError: if the Visual Studio version could be determined or
@@ -1058,11 +1049,11 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Builds using Visual Studio and MSBuild.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-      source_directory: the name of the source directory.
+      source_helper_object (SourceHelper): source helper.
+      source_directory (str): name of the source directory.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     # Search common locations for MSBuild.exe
     if self.version == u'2008':
@@ -1200,8 +1191,8 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Prepares the source for building with Visual Studio.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
-      source_directory: the name of the source directory.
+      source_helper_object (SourceHelper): source helper.
+      source_directory (str): name of the source directory.
     """
     # For the vs2008 build make sure the binary is XP compatible,
     # by setting WINVER to 0x0501. For the vs2010 build WINVER is
@@ -1253,7 +1244,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     directory.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     # Setup.py uses VS90COMNTOOLS which is vs2008 specific
     # so we need to set it for the other Visual Studio versions.
@@ -1281,7 +1272,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Converts the Visual Studio solution and project files.
 
     Args:
-      source_directory: the name of the source directory.
+      source_directory (str): name of the source directory.
     """
     logging.info(u'Converting Visual Studio solution and project files.')
     os.chdir(source_directory)
@@ -1316,11 +1307,11 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Moves the MSI from the dist sub directory into the build directory.
 
     Args:
-      python_module_name: the Python module name.
-      build_directory: the build directory.
+      python_module_name (str): Python module name.
+      build_directory (str): build directory.
 
     Returns:
-      True if the move was successful, False otherwise.
+      bool: True if the move was successful, False otherwise.
     """
     filenames_glob = os.path.join(
         u'dist', u'{0:s}-*.msi'.format(python_module_name))
@@ -1344,7 +1335,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Sets up the dokan build dependency.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     # TODO: implement.
     return False
@@ -1353,7 +1344,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Sets up the sqlite build dependency.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     # TODO: download and build sqlite3 from source
     # http://www.sqlite.org/download.html
@@ -1372,7 +1363,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Sets up the zeromq build dependency.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     # TODO: implement.
     return False
@@ -1381,7 +1372,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Sets up the zlib build dependency.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     download_helper_object = download_helper.ZlibDownloadHelper(
         u'http://www.zlib.net')
@@ -1410,7 +1401,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Checks if the build dependencies are met.
 
     Returns:
-      A list of build dependency names that are not met or an empty list.
+      list[str]: build dependency names that are not met or an empty list.
     """
     missing_packages = []
     for package_name in self._project_definition.build_dependencies:
@@ -1435,10 +1426,10 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Builds using Visual Studio.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -1490,10 +1481,10 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     msi_filename = u'{0:s}-python-{1!s}.1.{2:s}-py2.7.msi'.format(
         source_helper_object.project_name, source_helper_object.project_version,
@@ -1505,7 +1496,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """Cleans the build and dist directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     # Remove previous versions of MSIs.
     filenames_to_ignore = u'py{0:s}-.*{1!s}.1.{2:s}-py2.7.msi'.format(
@@ -1544,10 +1535,13 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     """Determines the filename safe project name and version.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      A tuple containing the filename safe project name and version.
+      tuple: contains:
+
+        * str: filename safe project name.
+        * str: version.
     """
     if self._project_definition.setup_name:
       project_name = self._project_definition.setup_name
@@ -1565,10 +1559,10 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     """Builds the msi.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -1626,10 +1620,10 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
@@ -1665,7 +1659,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     """Cleans the build and dist directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     # Remove previous versions build directories.
     for filename in (u'build', u'dist'):
@@ -1725,7 +1719,7 @@ class OSCBuildHelper(BuildHelper):
     """Prepares the source for building with osc.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     # Checkout the project if it does not exist otherwise make sure
     # the project files are up to date.
@@ -1755,7 +1749,7 @@ class OSCBuildHelper(BuildHelper):
     """Runs osc status to check if the status is clean.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     command = u'osc status {0:s}'.format(self._OSC_PROJECT)
     arguments = shlex.split(command)
@@ -1781,11 +1775,11 @@ class OSCBuildHelper(BuildHelper):
     """Runs osc add to add a new file.
 
     Args:
-      path: string containing the path of the file to add, relative to
-            the osc project directory.
+      path (str): path of the file to add, relative to the osc project
+          directory.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
     command = u'osc -q add {0:s} >> {1:s} 2>&1'.format(path, log_file_path)
@@ -1801,7 +1795,7 @@ class OSCBuildHelper(BuildHelper):
     """Runs osc checkout.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     command = u'osc -q checkout {0:s} >> {1:s} 2>&1 '.format(
         self._OSC_PROJECT, self.LOG_FILENAME)
@@ -1816,10 +1810,10 @@ class OSCBuildHelper(BuildHelper):
     """Runs osc commit.
 
     Args:
-      package_name: a string containing the name of the package.
+      package_name (str): name of the package.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     # Running osc commit from the package sub directory is more efficient.
     osc_project_path = os.path.join(self._OSC_PROJECT, package_name)
@@ -1837,10 +1831,10 @@ class OSCBuildHelper(BuildHelper):
     """Runs osc meta pkg to create a new package.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     template_values = {
         u'description': source_helper_object.project_name,
@@ -1864,8 +1858,9 @@ class OSCBuildHelper(BuildHelper):
 
   def _OSCUpdate(self):
     """Runs osc update.
+
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
     command = u'osc -q update >> {0:s} 2>&1'.format(log_file_path)
@@ -1881,7 +1876,7 @@ class OSCBuildHelper(BuildHelper):
     """Checks if the build dependencies are met.
 
     Returns:
-      A list of build dependency names that are not met or an empty list.
+      list[str]: build dependency names that are not met or an empty list.
     """
     # Dependencies are handled by the openSUSE build service.
     return []
@@ -1890,7 +1885,7 @@ class OSCBuildHelper(BuildHelper):
     """Cleans the build and dist directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     osc_package_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name)
@@ -1927,10 +1922,10 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
     """Builds the osc package.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -1988,10 +1983,10 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
         source_helper_object.project_name,
@@ -2247,6 +2242,8 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     if doc_files:
       doc_line = b'%doc {0:s}\n'.format(b' '.join(doc_files))
 
+    # Add _libdir support for arch dependent.
+
     output_file_object.write((
         b'%files -n python-%{{name}}\n'
         b'{0:s}'
@@ -2313,12 +2310,11 @@ class PKGBuildHelper(BuildHelper):
   """Class that helps in building MacOS-X packages (.pkg)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(PKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._pkgbuild = os.path.join(u'/', u'usr', u'bin', u'pkgbuild')
@@ -2327,12 +2323,12 @@ class PKGBuildHelper(BuildHelper):
     """Builds the distributable disk image (.dmg) from the pkg.
 
     Args:
-      pkg_filename: the name of the pkg file (which is technically
-                    a directory).
-      dmg_filename: the name of the dmg file.
+      pkg_filename (str): name of the pkg file (which is technically
+          a directory).
+      dmg_filename (str): name of the dmg file.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     command = (
         u'hdiutil create {0:s} -srcfolder {1:s} -fs HFS+').format(
@@ -2350,14 +2346,14 @@ class PKGBuildHelper(BuildHelper):
     """Builds the distributable disk image (.dmg) from the pkg.
 
     Args:
-      source_directory: the name of the source directory.
-      project_identifier: the project identifier.
-      project_version: the version of the project.
-      pkg_filename: the name of the pkg file (which is technically
-                    a directory).
+      source_directory (str): name of the source directory.
+      project_identifier (str): project identifier.
+      project_version (str): version of the project.
+      pkg_filename (str): name of the pkg file (which is technically
+          a directory).
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     command = (
         u'{0:s} --root {1:s}/tmp/ --identifier {2:s} '
@@ -2375,7 +2371,7 @@ class PKGBuildHelper(BuildHelper):
     """Checks if the build dependencies are met.
 
     Returns:
-      A list of build dependency names that are not met or an empty list.
+      list[str]: build dependency names that are not met or an empty list.
     """
     # TODO: implement build dependency check.
     return []
@@ -2384,10 +2380,10 @@ class PKGBuildHelper(BuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     dmg_filename = u'{0:s}-{1!s}.dmg'.format(
         source_helper_object.project_name, source_helper_object.project_version)
@@ -2398,7 +2394,7 @@ class PKGBuildHelper(BuildHelper):
     """Cleans the MacOS-X packages in the current directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     filenames_to_ignore = u'^{0:s}-.*{1!s}'.format(
         source_helper_object.project_name,
@@ -2448,10 +2444,10 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
     """Builds the pkg package and distributable disk image (.dmg).
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -2576,10 +2572,10 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
     """Builds the pkg package and distributable disk image (.dmg).
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -2668,9 +2664,10 @@ class RPMBuildHelper(BuildHelper):
       u'byacc',
       u'rpm-build',
       u'python-devel',
-      u'python-dateutil',
-      u'python-setuptools',
       u'python-test',
+      u'python2-dateutil',
+      u'python2-setuptools',
+      u'python3-dateutil',
       u'python3-devel',
       u'python3-setuptools',
   ])
@@ -2685,12 +2682,11 @@ class RPMBuildHelper(BuildHelper):
   }
 
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(RPMBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
@@ -2698,8 +2694,7 @@ class RPMBuildHelper(BuildHelper):
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
     self.rpmbuild_path = os.path.expanduser(self.rpmbuild_path)
 
-    self._rpmbuild_rpms_path = os.path.join(
-        self.rpmbuild_path, u'RPMS', self.architecture)
+    self._rpmbuild_rpms_path = os.path.join(self.rpmbuild_path, u'RPMS')
     self._rpmbuild_sources_path = os.path.join(self.rpmbuild_path, u'SOURCES')
     self._rpmbuild_specs_path = os.path.join(self.rpmbuild_path, u'SPECS')
 
@@ -2707,11 +2702,11 @@ class RPMBuildHelper(BuildHelper):
     """Builds the rpms directly from a spec file.
 
     Args:
-      spec_filename: the name of the spec file as stored in the rpmbuild
-                     SPECS sub directory.
+      spec_filename (str): name of the spec file as stored in the rpmbuild
+          SPECS sub directory.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     current_path = os.getcwd()
     os.chdir(self.rpmbuild_path)
@@ -2732,10 +2727,10 @@ class RPMBuildHelper(BuildHelper):
     For this to work the source package needs to contain a valid rpm .spec file.
 
     Args:
-      source_filename: the name of the source package file.
+      source_filename (str): name of the source package file.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     command = u'rpmbuild -ta {0:s} > {1:s} 2>&1'.format(
         source_filename, self.LOG_FILENAME)
@@ -2750,11 +2745,10 @@ class RPMBuildHelper(BuildHelper):
     """Checks if a package is installed.
 
     Args:
-      package_name: the name of the package.
+      package_name (str): name of the package.
 
     Returns:
-      A boolean value containing true if the package is installed
-      false otherwise.
+      bool: True if the package is installed, False otherwise.
     """
     command = u'rpm -qi {0:s} >/dev/null 2>&1'.format(package_name)
     exit_code = subprocess.call(command, shell=True)
@@ -2775,8 +2769,8 @@ class RPMBuildHelper(BuildHelper):
     """Creates a spec file in the rpmbuild directory.
 
     Args:
-      project_name: the name of the project.
-      spec_file_data: the spec file data.
+      project_name (str): name of the project.
+      spec_file_data (str): spec file data.
     """
     spec_filename = os.path.join(
         self._rpmbuild_specs_path, u'{0:s}.spec'.format(project_name))
@@ -2789,7 +2783,7 @@ class RPMBuildHelper(BuildHelper):
     """Copies the source file to the rpmbuild directory.
 
     Args:
-      source_filename: the name of the source package file.
+      source_filename (str): name of the source package file.
     """
     shutil.copy(source_filename, self._rpmbuild_sources_path)
 
@@ -2797,10 +2791,13 @@ class RPMBuildHelper(BuildHelper):
     """Determines the filename safe project name and version.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      A tuple containing the filename safe project name and version.
+      tuple: contains:
+
+        * str: filename safe project name.
+        * str: version.
     """
     if self._project_definition.setup_name:
       project_name = self._project_definition.setup_name
@@ -2813,27 +2810,11 @@ class RPMBuildHelper(BuildHelper):
 
     return project_name, project_version
 
-  def _MoveRPMs(self, project_name, project_version):
-    """Moves the rpms from the rpmbuild directory into the current directory.
-
-    Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
-    """
-    filenames_glob = os.path.join(
-        self._rpmbuild_rpms_path, u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-            project_name, project_version, self.architecture))
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      logging.info(u'Moving: {0:s}'.format(filename))
-      shutil.move(filename, u'.')
-
   def CheckBuildDependencies(self):
     """Checks if the build dependencies are met.
 
     Returns:
-      A list of build dependency names that are not met or an empty list.
+      list[str]: build dependency names that are not met or an empty list.
     """
     missing_packages = []
     for package_name in self._BUILD_DEPENDENCIES:
@@ -2852,10 +2833,10 @@ class RPMBuildHelper(BuildHelper):
     """Checks if a build is required.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if a build is required, False otherwise.
+      bool: True if a build is required, False otherwise.
     """
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
@@ -2869,7 +2850,7 @@ class RPMBuildHelper(BuildHelper):
     """Cleans the rpmbuild directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
@@ -2911,6 +2892,29 @@ class RPMBuildHelper(BuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
+    # Remove previous versions of python rpms.
+    filenames_to_ignore = u'python*-{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
+        project_name, project_version, self.architecture)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
+
+    rpm_filenames_glob = u'python*-{0:s}-*-1.{1:s}.rpm'.format(
+        project_name, self.architecture)
+    filenames = glob.glob(rpm_filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    filenames_glob = os.path.join(
+        self.rpmbuild_path, u'RPMS', self.architecture, rpm_filenames_glob)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
     # Remove previous versions of source rpms.
     filenames_to_ignore = u'{0:s}-.*{1!s}-1.src.rpm'.format(
         project_name, project_version)
@@ -2930,14 +2934,31 @@ class RPMBuildHelper(BuildHelper):
 class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
+  def _MoveRPMs(self, project_name, project_version):
+    """Moves the rpms from the rpmbuild directory into the current directory.
+
+    Args:
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+    """
+    filenames_glob = os.path.join(
+        self._rpmbuild_rpms_path, self.architecture,
+        u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
+            project_name, project_version, self.architecture))
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      logging.info(u'Moving: {0:s}'.format(filename))
+      shutil.move(filename, u'.')
+
   def Build(self, source_helper_object):
     """Builds the rpms.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -2983,27 +3004,309 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
 class SetupPyRPMBuildHelper(RPMBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
 
+  _DOC_FILENAMES = [
+      u'CHANGES', u'CHANGES.txt', u'CHANGES.TXT',
+      u'README', u'README.txt', u'README.TXT']
+
+  _LICENSE_FILENAMES = [
+      u'LICENSE', u'LICENSE.txt', u'LICENSE.TXT']
+
   def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes the build helper.
+    """Initializes a build helper.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(SetupPyRPMBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
     if not project_definition.architecture_dependent:
       self.architecture = u'noarch'
 
+  def _IsPython2Only(self):
+    """Determines if the project only supports Python version 2.
+
+    Note that Python 3 is supported as of 3.4 any earlier version is not
+    seen as compatible.
+
+    Returns:
+      bool: True if the project only support Python version 2.
+    """
+    return u'python2_only' in self._project_definition.build_options
+
+  def _GenerateSpecFile(self, source_helper_object):
+    """Generates the rpm spec file.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      str: path of the generated rpm spec file or None.
+    """
+    # Have setup.py generate the .spec file.
+    source_directory = source_helper_object.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(source_filename))
+      return
+
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
+    command = u'{0:s} setup.py bdist_rpm --spec-only >> {1:s} 2>&1'.format(
+        sys.executable, log_file_path)
+    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      return
+
+    project_name = source_helper_object.project_name
+    if project_name.startswith(u'python-'):
+      project_name = project_name[7:]
+
+    # TODO: move this to configuration.
+    if project_name == u'dateutil':
+      project_prefix = u'python-'
+    else:
+      project_prefix = u''
+
+    spec_filename = u'{0:s}.spec'.format(project_name)
+    spec_file_path = os.path.join(
+        source_directory, u'dist', u'{0:s}{1:s}'.format(
+            project_prefix, spec_filename))
+    rpm_spec_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
+
+    python2_only = self._IsPython2Only()
+
+    rpm_build_dependencies = [u'python2-setuptools']
+    if self._project_definition.architecture_dependent:
+      rpm_build_dependencies.append(u'python-devel')
+
+    if not python2_only:
+      rpm_build_dependencies.append(u'python3-setuptools')
+      if self._project_definition.architecture_dependent:
+        rpm_build_dependencies.append(u'python3-devel')
+
+    if self._project_definition.rpm_build_dependencies:
+      rpm_build_dependencies.extend(
+          self._project_definition.rpm_build_dependencies)
+
+    # TODO: check if already prefixed with python-
+
+    output_file_object = open(rpm_spec_file_path, 'wb')
+    description = b''
+    requires = b''
+    summary = b''
+    version = b''
+    in_description = False
+    has_build_requires = False
+    has_python_package = False
+    has_python3_package = False
+    with open(spec_file_path, 'r+b') as file_object:
+      for line in file_object.readlines():
+        if line.startswith(b'%') and in_description:
+          in_description = False
+
+          if self._project_definition.description_long:
+            description = u'{0:s}\n\n'.format(
+                self._project_definition.description_long)
+
+          output_file_object.write(description)
+
+        if line.startswith(b'%define name '):
+          # Need to override the project name for projects that prefix
+          # their name with "python-" in setup.py but do not use it
+          # for their source package name.
+          line = b'%define name {0:s}\n'.format(project_name)
+
+        elif line.startswith(b'%define version '):
+          version = line[16:-1]
+
+        elif not summary and line.startswith(b'Summary: '):
+          summary = line
+
+        elif (not description and not requires and
+              line.startswith(b'Requires: ')):
+          requires = line
+          continue
+
+        elif line.startswith(b'BuildArch: noarch'):
+          if self._project_definition.architecture_dependent:
+            continue
+
+        elif line.startswith(b'BuildRequires: '):
+          has_build_requires = True
+          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
+              rpm_build_dependencies))
+
+        elif line == b'\n' and summary and not has_build_requires:
+          has_build_requires = True
+          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
+              rpm_build_dependencies))
+
+        elif line.startswith(b'%description') and not description:
+          in_description = True
+
+        elif line.startswith(b'%package -n python-'):
+          has_python_package = True
+
+        elif line.startswith(b'%package -n python3-'):
+          has_python3_package = True
+
+        elif line.startswith(b'%prep'):
+          if not has_python_package:
+            python_requires = requires
+
+            output_file_object.write((
+                b'%package -n python-%{{name}}\n'
+                b'{0:s}'
+                b'{1:s}'
+                b'\n'
+                b'%description -n python-%{{name}}\n'
+                b'{2:s}').format(summary, python_requires, description))
+
+          if not python2_only and not has_python3_package:
+            # TODO: convert python 2 package names to python 3
+            python3_requires = requires
+
+            output_file_object.write((
+                b'%package -n python3-%{{name}}\n'
+                b'{0:s}'
+                b'{1:s}'
+                b'\n'
+                b'%description -n python3-%{{name}}\n'
+                b'{2:s}').format(summary, python3_requires, description))
+
+        elif line == b'%setup -n %{name}-%{unmangled_version}\n':
+          line = b'%autosetup -n %{name}-%{unmangled_version}\n'
+
+        elif line.startswith(b'python setup.py build'):
+          if python2_only:
+            line = b'python2 setup.py build\n'
+          else:
+            line = (
+                b'python2 setup.py build\n'
+                b'python3 setup.py build\n')
+
+        elif line.startswith(b'python setup.py install'):
+          if python2_only:
+            line = (
+                b'python2 setup.py install -O1 --root=%{buildroot}\n'
+                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
+          else:
+            line = (
+                b'python2 setup.py install -O1 --root=%{buildroot}\n'
+                b'python3 setup.py install -O1 --root=%{buildroot}\n'
+                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
+
+        elif line == b'rm -rf $RPM_BUILD_ROOT\n':
+          line = b'rm -rf %{buildroot}\n'
+
+        elif line.startswith(b'%files'):
+          break
+
+        elif in_description:
+          # Ignore leading white lines in the description.
+          if not description and line == b'\n':
+            continue
+
+          description = b''.join([description, line])
+          continue
+
+        output_file_object.write(line)
+
+    license_line = b''
+    for license_file in self._LICENSE_FILENAMES:
+      license_file_path = os.path.join(source_directory, license_file)
+      if os.path.exists(license_file_path):
+        license_line = b'%license {0:s}\n'.format(license_file)
+        break
+
+    doc_files = []
+    for doc_file in self._DOC_FILENAMES:
+      doc_file_path = os.path.join(source_directory, doc_file)
+      if os.path.exists(doc_file_path):
+        doc_files.append(doc_file)
+
+    doc_line = b''
+    if doc_files:
+      doc_line = b'%doc {0:s}\n'.format(b' '.join(doc_files))
+
+    if not self._project_definition.architecture_dependent:
+      lib_dir = '%{_exec_prefix}/lib'
+    else:
+      lib_dir = '%{_libdir}'
+
+    output_file_object.write((
+        b'%files -n python-%{{name}}\n'
+        b'{0:s}'
+        b'{1:s}'
+        b'{2:s}/python2*/*\n').format(
+            license_line, doc_line, lib_dir))
+
+    if not python2_only:
+      output_file_object.write((
+          b'\n'
+          b'%files -n python3-%{{name}}\n'
+          b'{0:s}'
+          b'{1:s}'
+          b'{2:s}/python3*/*\n').format(
+              license_line, doc_line, lib_dir))
+
+    # TODO: add bindir support.
+    output_file_object.write((
+        b'\n'
+        b'%exclude %{_bindir}/*\n'))
+
+    # TODO: add shared data support.
+
+    date_time = datetime.datetime.now()
+    date_time_string = date_time.strftime(u'%a %b %e %Y')
+
+    output_file_object.write((
+        b'\n'
+        b'%changelog\n'
+        b'* {0:s} Joachim Metz <joachim.metz@gmail.com> {1:s}-1\n'
+        b'- Auto-generated\n').format(date_time_string, version))
+
+    output_file_object.close()
+
+    return rpm_spec_file_path
+
+  def _MoveRPMs(self, project_name, project_version):
+    """Moves the rpms from the rpmbuild directory into the current directory.
+
+    Args:
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+    """
+    filenames_glob = os.path.join(
+        self._rpmbuild_rpms_path, self.architecture,
+        u'python*-{0:s}-*{1!s}-1.{2:s}.rpm'.format(
+            project_name, project_version, self.architecture))
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      logging.info(u'Moving: {0:s}'.format(filename))
+      shutil.move(filename, u'.')
+
+    filenames_glob = os.path.join(
+        self._rpmbuild_rpms_path, self.architecture,
+        u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
+            project_name, project_version, self.architecture))
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      logging.info(u'Moving: {0:s}'.format(filename))
+      shutil.move(filename, u'.')
+
   def Build(self, source_helper_object):
     """Builds the rpms.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -3013,40 +3316,46 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
 
     logging.info(u'Building rpm of: {0:s}'.format(source_filename))
 
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          u'Extraction of source package: {0:s} failed'.format(source_filename))
-      return False
-
-    command = u'python setup.py bdist_rpm > {0:s} 2>&1'.format(
-        os.path.join(u'..', self.LOG_FILENAME))
-    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      return False
-
-    # Move the rpms to the build directory.
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    filenames_glob = os.path.join(
-        source_directory, u'dist', u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
-            project_name, project_version, self.architecture))
-    filenames = glob.glob(filenames_glob)
+    rpm_source_path = os.path.join(
+        self._rpmbuild_sources_path, source_filename)
+    if not os.path.exists(rpm_source_path):
+      # Copy the source package to the package directory if needed.
+      shutil.copy(source_filename, rpm_source_path)
 
-    for filename in filenames:
-      logging.info(u'Moving: {0:s}'.format(filename))
-      shutil.move(filename, u'.')
+    rpm_spec_file_path = self._GenerateSpecFile(source_helper_object)
+    if not rpm_spec_file_path:
+      logging.error(u'Unable to generate rpm spec file.')
+      return False
 
-    return True
+    build_successful = self._BuildFromSpecFile(rpm_spec_file_path)
+
+    if build_successful:
+      self._MoveRPMs(project_name, project_version)
+
+      # Remove BUILD directory.
+      filename = os.path.join(
+          self.rpmbuild_path, u'BUILD', u'{0:s}-{1!s}'.format(
+              project_name, project_version))
+      logging.info(u'Removing: {0:s}'.format(filename))
+      shutil.rmtree(filename)
+
+      # Remove SRPMS file.
+      filename = os.path.join(
+          self.rpmbuild_path, u'SRPMS', u'{0:s}-{1!s}-1.src.rpm'.format(
+              project_name, project_version))
+      logging.info(u'Removing: {0:s}'.format(filename))
+      os.remove(filename)
+
+    return build_successful
 
   def Clean(self, source_helper_object):
     """Cleans the build and dist directory.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     # Remove previous versions build directories.
     for filename in (u'build', u'dist'):
@@ -3083,10 +3392,10 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
     """Builds the source.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -3127,7 +3436,7 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
     """Cleans the source.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
     """
     # TODO: implement.
     return
@@ -3140,10 +3449,10 @@ class SetupPySourceBuildHelper(SourceBuildHelper):
     """Builds the source.
 
     Args:
-      source_helper_object: the source helper object (instance of SourceHelper).
+      source_helper_object (SourceHelper): source helper.
 
     Returns:
-      True if successful, False otherwise.
+      bool: True if successful, False otherwise.
     """
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -3203,13 +3512,12 @@ class BuildHelperFactory(object):
     """Creates a new build helper object.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      build_target: a string containing the build target.
-      l2tdevtools_path: the path to the l2tdevtools directory.
+      project_definition (ProjectDefinition): project definition.
+      build_target (str): build target.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
 
     Returns:
-      A build helper object (instance of BuildHelper) or None.
+      BuildHelper: build helper or None.
     """
     if project_definition.build_system == u'configure_make':
       build_helper_class = cls._CONFIGURE_MAKE_BUILD_HELPER_CLASSES.get(
