@@ -224,7 +224,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
   _DOWNLOAD_URL = u'https://pypi.python.org/pypi/construct'
 
   _PROJECT_NAME = u'construct'
-  _PROJECT_VERSION = u'2.8.3'
+  _PROJECT_VERSION = u'2.8.5'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
