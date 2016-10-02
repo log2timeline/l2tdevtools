@@ -210,9 +210,10 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     Returns:
       str: latest version number or None on error.
     """
-    earliest_version = version_definition.GetEarliestVersion()
-    if earliest_version and earliest_version[0] == u'==':
-      return u'.'.join(earliest_version[1:])
+    if version_definition:
+      earliest_version = version_definition.GetEarliestVersion()
+      if earliest_version and earliest_version[0] == u'==':
+        return u'.'.join(earliest_version[1:])
 
     download_url = u'https://github.com/{0:s}/{1:s}/releases'.format(
         self._organization, self._repository)
@@ -501,9 +502,10 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     Returns:
       str: latest version number or None on error.
     """
-    earliest_version = version_definition.GetEarliestVersion()
-    if earliest_version and earliest_version[0] == u'==':
-      return u'.'.join(earliest_version[1:])
+    if version_definition:
+      earliest_version = version_definition.GetEarliestVersion()
+      if earliest_version and earliest_version[0] == u'==':
+        return u'.'.join(earliest_version[1:])
 
     download_url = u'https://pypi.python.org/simple/{0:s}'.format(
         self._project_name)
@@ -614,9 +616,10 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
     Returns:
       str: latest version number or None on error.
     """
-    earliest_version = version_definition.GetEarliestVersion()
-    if earliest_version and earliest_version[0] == u'==':
-      return u'.'.join(earliest_version[1:])
+    if version_definition:
+      earliest_version = version_definition.GetEarliestVersion()
+      if earliest_version and earliest_version[0] == u'==':
+        return u'.'.join(earliest_version[1:])
 
     # TODO: make this more robust to detect different naming schemes.
     download_url = (
