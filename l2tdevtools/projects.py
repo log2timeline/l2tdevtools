@@ -43,7 +43,7 @@ class ProjectDefinition(object):
     rpm_build_dependencies (list[str]): rpm build dependencies.
     patches (list[str]): patch file names.
     pkg_configure_options (list[str]): configure options when building a pkg.
-    version (ProjectVersion): version requirements.
+    version (ProjectVersionDefinition): version requirements.
   """
 
   def __init__(self, name):
@@ -82,19 +82,19 @@ class ProjectDefinition(object):
     self.version = None
 
 
-class ProjectVersion(object):
-  """Class that implements a project version."""
+class ProjectVersionDefinition(object):
+  """Class that implements a project version definition."""
 
   _VERSION_STRING_PART_RE = re.compile(
       r'^(<[=]?|>[=]?|==)([0-9]+)[.]?([0-9]+|)[.]?([0-9]+|)[.-]?([0-9]+|)$')
 
   def __init__(self, version_string):
-    """Initializes the project version.
+    """Initializes a project version definition.
 
     Args:
-      version_string: the version string.
+      version_string (str): version string.
     """
-    super(ProjectVersion, self).__init__()
+    super(ProjectVersionDefinition, self).__init__()
     self._version_string_parts = []
 
     if not version_string:
@@ -127,8 +127,19 @@ class ProjectVersion(object):
 
   @property
   def version_string(self):
-    """Determines the string representation of the object."""
+    """str: string representation of the object."""
     return self._version_string
+
+  def GetEarliestVersion(self):
+    """Retrieves the earliest version.
+
+    Returns:
+      str: earliest version or None.
+    """
+    if not self._version_string_parts:
+      return
+
+    return self._version_string_parts[0]
 
 
 class ProjectDefinitionReader(object):
@@ -138,12 +149,12 @@ class ProjectDefinitionReader(object):
     """Retrieves a value from the config parser.
 
     Args:
-      config_parser: the configuration parser (instance of ConfigParser).
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (str): name of the value.
 
     Returns:
-      An object containing the value or None if the value does not exists.
+      object: value or None if the value does not exists.
     """
     try:
       return config_parser.get(section_name, value_name).decode('utf-8')
@@ -154,10 +165,10 @@ class ProjectDefinitionReader(object):
     """Reads project definitions.
 
     Args:
-      file_object: the file-like object to read from.
+      file_object (file): file-like object to read from.
 
     Yields:
-      A project definition (instance of ProjectDefinition).
+      ProjectDefinition: project definition.
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
@@ -298,5 +309,5 @@ class ProjectDefinitionReader(object):
       if project_definition.name and project_definition.download_url:
         yield project_definition
 
-      project_definition.version = ProjectVersion(
+      project_definition.version = ProjectVersionDefinition(
           project_definition.version)

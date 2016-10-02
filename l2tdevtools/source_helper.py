@@ -15,13 +15,15 @@ import zipfile
 class SourceHelper(object):
   """Base class that helps in managing the source code."""
 
-  def __init__(self, project_name):
-    """Initializes the source helper.
+  def __init__(self, project_name, project_definition):
+    """Initializes a source helper.
 
     Args:
       project_name: the name of the project.
+      project_definition (ProjectDefinition): project definition.
     """
     super(SourceHelper, self).__init__()
+    self._project_definition = project_definition
     self.project_name = project_name
 
   @abc.abstractmethod
@@ -29,7 +31,7 @@ class SourceHelper(object):
     """Creates the source directory.
 
     Returns:
-      The name of the source directory if successful or None on error.
+      str: name of the source directory or None on error.
     """
 
   @abc.abstractmethod
@@ -44,15 +46,16 @@ class SourceHelper(object):
 class GitRepositorySourceHelper(SourceHelper):
   """Class that manages the source code from a git repository."""
 
-  def __init__(self, project_name, git_url):
-    """Initializes the source helper.
+  def __init__(self, project_name, project_definition):
+    """Initializes a source helper.
 
     Args:
-       project_name: the name of the project.
-       git_url: the URL of the git repository.
+      project_name: the name of the project.
+      project_definition (ProjectDefinition): project definition.
     """
-    super(GitRepositorySourceHelper, self).__init__(project_name)
-    self._git_url = git_url
+    super(GitRepositorySourceHelper, self).__init__(
+        project_name, project_definition)
+    self._git_url = project_definition.git_url
 
   def Clean(self):
     """Removes a previous version of the source directory."""
@@ -64,7 +67,7 @@ class GitRepositorySourceHelper(SourceHelper):
     """Creates the source directory from the git repository.
 
     Returns:
-      The name of the source directory if successful or None on error.
+      str: name of the source directory or None on error.
     """
     if not self.project_name or not self._git_url:
       return
@@ -95,7 +98,7 @@ class LibyalGitRepositorySourceHelper(GitRepositorySourceHelper):
     """Creates the source directory from the git repository.
 
     Returns:
-      The name of the source directory if successful or None on error.
+      str: name of the source directory or None on error.
     """
     if not self.project_name or not self._git_url:
       return
@@ -138,34 +141,28 @@ class SourcePackageHelper(SourceHelper):
 
   ENCODING = 'utf-8'
 
-  def __init__(self, project_name, download_helper_object,):
-    """Initializes the source package helper.
+  def __init__(self, project_name, project_definition, download_helper_object):
+    """Initializes a source package helper.
 
     Args:
-      project_name: the name of the project.
-      download_helper_object: the download helper (instance of DownloadHelper).
+      project_name (str): name of the project.
+      project_definition (ProjectDefinition): project definition.
+      download_helper_object (DownloadHelper): download helper.
     """
-    super(SourcePackageHelper, self).__init__(project_name)
+    super(SourcePackageHelper, self).__init__(project_name, project_definition)
     self._download_helper = download_helper_object
     self._project_version = None
     self._source_filename = None
-
-  @property
-  def project_version(self):
-    """The project version."""
-    if not self._project_version:
-      self._project_version = self._download_helper.GetLatestVersion(
-          self.project_name)
-    return self._project_version
 
   def _CreateFromTarGz(self, source_filename):
     """Creates the source directory from a .tar.gz source package.
 
     Args:
-      source_filename: the filename of the source package.
+      source_filename (str): filename of the source package.
 
     Returns:
-      The name of the source directory if successful or None on error.
+      str: name of the source directory or None if no files can be extracted
+          from the .tar.gz source package.
     """
     archive = tarfile.open(source_filename, 'r:gz', encoding='utf-8')
     directory_name = ''
@@ -213,10 +210,11 @@ class SourcePackageHelper(SourceHelper):
     """Creates the source directory from a .zip source package.
 
     Args:
-      source_filename: the filename of the source package.
+      source_filename (str): filename of the source package.
 
     Returns:
-      The name of the source directory if successful or None on error.
+      str: name of the source directory or None if no files can be extracted
+          from the .zip source package.
     """
     archive = zipfile.ZipFile(source_filename, 'r')
     directory_name = ''
@@ -254,11 +252,12 @@ class SourcePackageHelper(SourceHelper):
 
   def Clean(self):
     """Removes previous versions of source packages and directories."""
-    if not self.project_version:
+    project_version = self.GetProjectVersion()
+    if not project_version:
       return
 
     filenames_to_ignore = re.compile(
-        u'^{0:s}-.*{1!s}'.format(self.project_name, self.project_version))
+        u'^{0:s}-.*{1!s}'.format(self.project_name, project_version))
 
     # Remove previous versions of source packages in the format:
     # project-*.tar.gz
@@ -296,7 +295,7 @@ class SourcePackageHelper(SourceHelper):
     """Creates the source directory from the source package.
 
     Returns:
-      The name of the source directory if successful or None on error.
+      str: name of the source directory or None on error.
     """
     if not self._source_filename:
       _ = self.Download()
@@ -318,15 +317,16 @@ class SourcePackageHelper(SourceHelper):
     """Downloads the source package.
 
     Returns:
-      The filename of the source package if successful also if the file was
-      already downloaded or None on error.
+      str: filename of the source package if the download was successful or
+          if the file was already downloaded or None on error.
     """
     if not self._source_filename:
-      if not self.project_version:
+      project_version = self.GetProjectVersion()
+      if not project_version:
         return
 
       self._source_filename = self._download_helper.Download(
-          self.project_name, self.project_version)
+          self.project_name, project_version)
 
     return self._source_filename
 
@@ -337,3 +337,15 @@ class SourcePackageHelper(SourceHelper):
       str: project identifier or None on error.
     """
     return self._download_helper.GetProjectIdentifier()
+
+  def GetProjectVersion(self):
+    """Retrieves the version number for a given project name.
+
+    Returns:
+      str: version number or None on error.
+    """
+    if not self._project_version:
+      self._project_version = self._download_helper.GetLatestVersion(
+          self.project_name, self._project_definition.version)
+
+    return self._project_version

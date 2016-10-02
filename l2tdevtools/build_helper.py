@@ -237,10 +237,12 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
           source_helper_object.project_name))
       return False
 
+    project_version = source_helper_object.GetProjectVersion()
+
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        source_helper_object.project_name, source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
     source_directory = source_helper_object.Create()
@@ -260,9 +262,8 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
       os.chdir(source_directory)
 
       build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name,
-          source_helper_object.project_version, self._project_definition,
-          self._data_path)
+          source_helper_object.project_name, project_version,
+          self._project_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
       os.chdir(u'..')
@@ -284,9 +285,8 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     shutil.copytree(dpkg_directory, debian_directory)
 
     if not self._BuildPrepare(
-        source_directory, source_helper_object.project_name,
-        source_helper_object.project_version, self.version_suffix,
-        self.distribution, self.architecture):
+        source_directory, source_helper_object.project_name, project_version,
+        self.version_suffix, self.distribution, self.architecture):
       return False
 
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
@@ -299,9 +299,8 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
       return False
 
     if not self._BuildFinalize(
-        source_directory, source_helper_object.project_name,
-        source_helper_object.project_version, self.version_suffix,
-        self.distribution, self.architecture):
+        source_directory, source_helper_object.project_name, project_version,
+        self.version_suffix, self.distribution, self.architecture):
       return False
 
     return True
@@ -315,9 +314,10 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     deb_filename = u'{0:s}_{1!s}-1_{2:s}.deb'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version, self.architecture)
+        source_helper_object.project_name, project_version, self.architecture)
 
     return not os.path.exists(deb_filename)
 
@@ -327,9 +327,10 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
@@ -344,8 +345,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
         os.remove(filename)
 
     filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
@@ -407,10 +407,12 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
           source_helper_object.project_name))
       return False
 
+    project_version = source_helper_object.GetProjectVersion()
+
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        source_helper_object.project_name, source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
     source_directory = source_helper_object.Create()
@@ -430,9 +432,8 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
       os.chdir(source_directory)
 
       build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name,
-          source_helper_object.project_version, self._project_definition,
-          self._data_path)
+          source_helper_object.project_name, project_version,
+          self._project_definition, self._data_path)
       build_files_generator.GenerateFiles(u'dpkg')
 
       os.chdir(u'..')
@@ -454,9 +455,8 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     shutil.copytree(dpkg_directory, debian_directory)
 
     if not self._BuildPrepare(
-        source_directory, source_helper_object.project_name,
-        source_helper_object.project_version, self.version_suffix,
-        self.distribution, self.architecture):
+        source_directory, source_helper_object.project_name, project_version,
+        self.version_suffix, self.distribution, self.architecture):
       return False
 
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
@@ -468,9 +468,8 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
       return False
 
     if not self._BuildFinalize(
-        source_directory, source_helper_object.project_name,
-        source_helper_object.project_version, self.version_suffix,
-        self.distribution, self.architecture):
+        source_directory, source_helper_object.project_name, project_version,
+        self.version_suffix, self.distribution, self.architecture):
       return False
 
     return True
@@ -484,8 +483,10 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
-        source_helper_object.project_name, source_helper_object.project_version,
+        source_helper_object.project_name, project_version,
         self.version_suffix, self.distribution, self.architecture)
 
     return not os.path.exists(changes_filename)
@@ -496,9 +497,10 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
@@ -513,8 +515,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
         os.remove(filename)
 
     filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
@@ -619,7 +620,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
-    project_version = source_helper_object.project_version
+    project_version = source_helper_object.GetProjectVersion()
     if project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
@@ -707,7 +708,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
-    project_version = source_helper_object.project_version
+    project_version = source_helper_object.GetProjectVersion()
     if project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
@@ -730,7 +731,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
-    project_version = source_helper_object.project_version
+    project_version = source_helper_object.GetProjectVersion()
     if project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
@@ -797,7 +798,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
       if not project_name.startswith(u'python-'):
         project_name = u'python-{0:s}'.format(project_name)
 
-    project_version = source_helper_object.project_version
+    project_version = source_helper_object.GetProjectVersion()
     if project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
@@ -882,9 +883,11 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     else:
       package_name = source_helper_object.project_name
 
+    project_version = source_helper_object.GetProjectVersion()
+
     changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
-        package_name, source_helper_object.project_version,
-        self.version_suffix, self.distribution, self.architecture)
+        package_name, project_version, self.version_suffix, self.distribution,
+        self.architecture)
 
     return not os.path.exists(changes_filename)
 
@@ -899,7 +902,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     else:
       package_name = source_helper_object.project_name
 
-    project_version = source_helper_object.project_version
+    project_version = source_helper_object.GetProjectVersion()
     if project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
@@ -1377,7 +1380,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     download_helper_object = download_helper.ZlibDownloadHelper(
         u'http://www.zlib.net')
     source_helper_object = source_helper.SourcePackageHelper(
-        u'zlib', download_helper_object)
+        u'zlib', None, download_helper_object)
 
     source_filename = source_helper_object.Download()
     if not source_filename:
@@ -1486,9 +1489,10 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     msi_filename = u'{0:s}-python-{1!s}.1.{2:s}-py2.7.msi'.format(
-        source_helper_object.project_name, source_helper_object.project_version,
-        self.architecture)
+        source_helper_object.project_name, project_version, self.architecture)
 
     return not os.path.exists(msi_filename)
 
@@ -1498,10 +1502,12 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     # Remove previous versions of MSIs.
     filenames_to_ignore = u'py{0:s}-.*{1!s}.1.{2:s}-py2.7.msi'.format(
-        source_helper_object.project_name[3:],
-        source_helper_object.project_version, self.architecture)
+        source_helper_object.project_name[3:], project_version,
+        self.architecture)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     filenames_glob = u'py{0:s}-*.1.{1:s}-py2.7.msi'.format(
@@ -1514,8 +1520,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
         os.remove(filename)
 
     filenames_to_ignore = u'{0:s}-python-.*{1!s}.1.{2:s}-py2.7.msi'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version, self.architecture)
+        source_helper_object.project_name, project_version, self.architecture)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     filenames_glob = u'{0:s}-python-*.1.{1:s}-py2.7.msi'.format(
@@ -1548,10 +1553,12 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     else:
       project_name = source_helper_object.project_name
 
+    project_version = source_helper_object.GetProjectVersion()
+
     if source_helper_object.project_name == u'dfvfs':
-      project_version = u'{0!s}.1'.format(source_helper_object.project_version)
+      project_version = u'{0!s}.1'.format(project_version)
     else:
-      project_version = u'{0!s}'.format(source_helper_object.project_version)
+      project_version = u'{0!s}'.format(project_version)
 
     return project_name, project_version
 
@@ -1887,11 +1894,12 @@ class OSCBuildHelper(BuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     osc_package_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name)
     osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
 
     filenames_to_ignore = u'^{0:s}'.format(
         os.path.join(osc_package_path, osc_source_filename))
@@ -1933,6 +1941,8 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
           source_helper_object.project_name))
       return False
 
+    project_version = source_helper_object.GetProjectVersion()
+
     logging.info(u'Preparing osc build of: {0:s}'.format(source_filename))
 
     if not self._BuildPrepare(source_helper_object):
@@ -1943,8 +1953,7 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
 
     # osc wants the project filename without the status indication.
     osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
 
     # Copy the source package to the package directory.
     osc_source_path = os.path.join(osc_package_path, osc_source_filename)
@@ -1964,7 +1973,7 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
 
     command = u'tar xfO {0:s} {1:s}-{2!s}/{3:s} > {3:s}'.format(
         osc_source_filename, source_helper_object.project_name,
-        source_helper_object.project_version, spec_filename)
+        project_version, spec_filename)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         osc_package_path, command), shell=True)
     if exit_code != 0:
@@ -1988,9 +1997,10 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
 
     osc_source_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name,
@@ -2295,9 +2305,10 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     osc_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
 
     osc_source_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name,
@@ -2385,8 +2396,10 @@ class PKGBuildHelper(BuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     dmg_filename = u'{0:s}-{1!s}.dmg'.format(
-        source_helper_object.project_name, source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
 
     return not os.path.exists(dmg_filename)
 
@@ -2396,9 +2409,10 @@ class PKGBuildHelper(BuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
+    project_version = source_helper_object.GetProjectVersion()
+
     filenames_to_ignore = u'^{0:s}-.*{1!s}'.format(
-        source_helper_object.project_name,
-        source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
@@ -2461,6 +2475,8 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
+    project_version = source_helper_object.GetProjectVersion()
+
     logging.info(u'Building pkg of: {0:s}'.format(source_filename))
 
     if self._project_definition.patches:
@@ -2468,9 +2484,9 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
       pass
 
     dmg_filename = u'{0:s}-{1!s}.dmg'.format(
-        source_helper_object.project_name, source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     pkg_filename = u'{0:s}-{1!s}.pkg'.format(
-        source_helper_object.project_name, source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
 
     sdks_path = os.path.join(
@@ -2555,8 +2571,7 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
       project_identifier = u'com.github.libyal.{0:s}'.format(
           source_helper_object.project_name)
       if not self._BuildPKG(
-          source_directory, project_identifier,
-          source_helper_object.project_version, pkg_filename):
+          source_directory, project_identifier, project_version, pkg_filename):
         return False
 
     if not self._BuildDmg(pkg_filename, dmg_filename):
@@ -2589,6 +2604,8 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
+    project_version = source_helper_object.GetProjectVersion()
+
     logging.info(u'Building pkg of: {0:s}'.format(source_filename))
 
     if self._project_definition.patches:
@@ -2596,9 +2613,9 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
       pass
 
     dmg_filename = u'{0:s}-{1!s}.dmg'.format(
-        source_helper_object.project_name, source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     pkg_filename = u'{0:s}-{1!s}.pkg'.format(
-        source_helper_object.project_name, source_helper_object.project_version)
+        source_helper_object.project_name, project_version)
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
 
     if not os.path.exists(pkg_filename):
@@ -2636,8 +2653,7 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
 
       project_identifier = source_helper_object.GetProjectIdentifier()
       if not self._BuildPKG(
-          source_directory, project_identifier,
-          source_helper_object.project_version, pkg_filename):
+          source_directory, project_identifier, project_version, pkg_filename):
         return False
 
     if not self._BuildDmg(pkg_filename, dmg_filename):
@@ -2804,7 +2820,7 @@ class RPMBuildHelper(BuildHelper):
     else:
       project_name = source_helper_object.project_name
 
-    project_version = source_helper_object.project_version
+    project_version = source_helper_object.GetProjectVersion()
     if isinstance(project_version, basestring):
       project_version = project_version.replace(u'-', u'_')
 
@@ -3034,10 +3050,11 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     """
     return u'python2_only' in self._project_definition.build_options
 
-  def _GenerateSpecFile(self, source_helper_object):
+  def _GenerateSpecFile(self, source_filename, source_helper_object):
     """Generates the rpm spec file.
 
     Args:
+      source_filename (str): name of the source package file.
       source_helper_object (SourceHelper): source helper.
 
     Returns:
@@ -3325,7 +3342,8 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       # Copy the source package to the package directory if needed.
       shutil.copy(source_filename, rpm_source_path)
 
-    rpm_spec_file_path = self._GenerateSpecFile(source_helper_object)
+    rpm_spec_file_path = self._GenerateSpecFile(
+        source_filename, source_helper_object)
     if not rpm_spec_file_path:
       logging.error(u'Unable to generate rpm spec file.')
       return False
