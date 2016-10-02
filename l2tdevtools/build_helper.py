@@ -2826,6 +2826,22 @@ class RPMBuildHelper(BuildHelper):
 
     return project_name, project_version
 
+  def _MoveFilesToCurrentDirectory(self, filenames_glob):
+    """Moves files into the current directory.
+
+    Args:
+      filenames_glob (str): glob of the filenames to move.
+    """
+    filenames = glob.glob(filenames_glob)
+    for filename in filenames:
+      logging.info(u'Moving: {0:s}'.format(filename))
+
+      local_filename = os.path.basename(filename)
+      if os.path.exists(local_filename):
+        os.remove(local_filename)
+
+      shutil.move(filename, u'.')
+
   def CheckBuildDependencies(self):
     """Checks if the build dependencies are met.
 
@@ -2957,15 +2973,12 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
+    filenames_glob = u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
+        project_name, project_version, self.architecture)
     filenames_glob = os.path.join(
-        self._rpmbuild_rpms_path, self.architecture,
-        u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-            project_name, project_version, self.architecture))
-    filenames = glob.glob(filenames_glob)
+        self._rpmbuild_rpms_path, self.architecture, filenames_glob)
 
-    for filename in filenames:
-      logging.info(u'Moving: {0:s}'.format(filename))
-      shutil.move(filename, u'.')
+    self._MoveFilesToCurrentDirectory(filenames_glob)
 
   def Build(self, source_helper_object):
     """Builds the rpms.
@@ -3296,25 +3309,19 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
+    filenames_glob = u'python*-{0:s}-*{1!s}-1.{2:s}.rpm'.format(
+        project_name, project_version, self.architecture)
     filenames_glob = os.path.join(
-        self._rpmbuild_rpms_path, self.architecture,
-        u'python*-{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-            project_name, project_version, self.architecture))
-    filenames = glob.glob(filenames_glob)
+        self._rpmbuild_rpms_path, self.architecture, filenames_glob)
 
-    for filename in filenames:
-      logging.info(u'Moving: {0:s}'.format(filename))
-      shutil.move(filename, u'.')
+    self._MoveFilesToCurrentDirectory(filenames_glob)
 
+    filenames_glob = u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
+        project_name, project_version, self.architecture)
     filenames_glob = os.path.join(
-        self._rpmbuild_rpms_path, self.architecture,
-        u'{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-            project_name, project_version, self.architecture))
-    filenames = glob.glob(filenames_glob)
+        self._rpmbuild_rpms_path, self.architecture, filenames_glob)
 
-    for filename in filenames:
-      logging.info(u'Moving: {0:s}'.format(filename))
-      shutil.move(filename, u'.')
+    self._MoveFilesToCurrentDirectory(filenames_glob)
 
   def Build(self, source_helper_object):
     """Builds the rpms.
