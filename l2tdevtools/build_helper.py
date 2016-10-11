@@ -2442,6 +2442,8 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
       u'README.md',
       u'README.txt'])
 
+  _SDK_VERSIONS = (u'10.7', u'10.8', '10.9', '10.10', '10.11', '10.12')
+
   def Build(self, source_helper_object):
     """Builds the pkg package and distributable disk image (.dmg).
 
@@ -2479,10 +2481,11 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
         u'/', u'Applications', u'Xcode.app', u'Contents', u'Developer',
         u'Platforms', u'MacOSX.platform', u'Developer', u'SDKs')
 
-    for sdk_version in (u'10.7', u'10.8', '10.9', '10.10', '10.11'):
+    sdk_path = None
+    for sdk_version in self._SDK_VERSIONS:
       sdk_sub_path = u'MacOSX{0:s}.sdk'.format(sdk_version)
-      sdk_path = os.path.join(sdks_path, sdk_sub_path)
       if os.path.isdir(sdk_sub_path):
+        sdk_path = os.path.join(sdks_path, sdk_sub_path)
         break
 
     if sdk_path:
