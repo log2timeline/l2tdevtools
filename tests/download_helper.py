@@ -90,7 +90,8 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
+    latest_version = download_helper_object.GetLatestVersion(
+        self._PROJECT_NAME, None)
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
@@ -137,7 +138,8 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
+    latest_version = download_helper_object.GetLatestVersion(
+        self._PROJECT_NAME, None)
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
@@ -185,7 +187,8 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.GithubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
-    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
+    latest_version = download_helper_object.GetLatestVersion(
+        self._PROJECT_NAME, None)
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
@@ -231,7 +234,8 @@ class PyPIDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.PyPIDownloadHelper(
         self._DOWNLOAD_URL)
 
-    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
+    latest_version = download_helper_object.GetLatestVersion(
+        self._PROJECT_NAME, None)
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 
@@ -276,7 +280,8 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
     download_helper_object = download_helper.SourceForgeDownloadHelper(
         self._DOWNLOAD_URL)
 
-    latest_version = download_helper_object.GetLatestVersion(self._PROJECT_NAME)
+    latest_version = download_helper_object.GetLatestVersion(
+        self._PROJECT_NAME, None)
 
     self.assertEqual(latest_version, self._PROJECT_VERSION)
 

@@ -55,7 +55,7 @@ class ProjectBuilder(object):
     project_name = project_definition.name
 
     source_helper_object = source_helper.SourcePackageHelper(
-        project_name, download_helper_object)
+        project_name, project_definition, download_helper_object)
 
     source_helper_object.Clean()
 

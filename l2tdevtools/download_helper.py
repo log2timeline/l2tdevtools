@@ -199,22 +199,33 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     self._organization = url_segments[3]
     self._repository = url_segments[4]
 
-  def GetLatestVersion(self, project_name):
+  def GetLatestVersion(self, project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
     Args:
       project_name (str): name of the project.
+      version_definition (ProjectVersionDefinition): project version definition
+          or None.
 
     Returns:
-      The latest version number or 0 on error.
+      str: latest version number or None on error.
     """
-    # TODO: add support for URL arguments u'?after=release-2.2.0'
+    if version_definition:
+      earliest_version = version_definition.GetEarliestVersion()
+      if earliest_version and earliest_version[0] == u'==':
+        return u'.'.join(earliest_version[1:])
+
     download_url = u'https://github.com/{0:s}/{1:s}/releases'.format(
         self._organization, self._repository)
 
+    # TODO: add support for URL arguments u'?after=release-2.2.0'
+    # if earliest_version:
+    #   download_url = u'{0:s}?after={1:s}'.format(
+    #       download_url, earliest_version)
+
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return 0
+      return
 
     # The format of the project download URL is:
     # /{organization}/{repository}/releases/download/{git tag}/
@@ -250,7 +261,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # Make checks case insenstive.
 
     if not matches:
-      return 0
+      return
 
     # Split the version string and convert every digit into an integer.
     # A string compare of both version strings will yield an incorrect result.
@@ -417,23 +428,26 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
 
     return json.loads(config_parser.get(u'project', u'download_url'))
 
-  def GetLatestVersion(self, project_name):
+  def GetLatestVersion(self, project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
     Args:
       project_name (str): name of the project.
+      version_definition (ProjectVersionDefinition): project version definition
+          or None.
 
     Returns:
-      int: latest version number or 0 on error.
+      str: latest version number or None on error.
     """
     if not self._download_helper:
       download_url = self.GetProjectConfigurationSourcePackageURL(project_name)
       if not download_url:
-        return 0
+        return
 
       self._download_helper = GithubReleasesDownloadHelper(download_url)
 
-    return self._download_helper.GetLatestVersion(project_name)
+    return self._download_helper.GetLatestVersion(
+        project_name, version_definition)
 
   def GetDownloadURL(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
@@ -477,15 +491,22 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
     super(PyPIDownloadHelper, self).__init__(download_url)
     self._project_name = url_segments[4]
 
-  def GetLatestVersion(self, unused_project_name):
+  def GetLatestVersion(self, unused_project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
     Args:
       project_name (str): name of the project.
+      version_definition (ProjectVersionDefinition): project version definition
+          or None.
 
     Returns:
       str: latest version number or None on error.
     """
+    if version_definition:
+      earliest_version = version_definition.GetEarliestVersion()
+      if earliest_version and earliest_version[0] == u'==':
+        return u'.'.join(earliest_version[1:])
+
     download_url = u'https://pypi.python.org/simple/{0:s}'.format(
         self._project_name)
 
@@ -584,15 +605,22 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
     super(SourceForgeDownloadHelper, self).__init__(download_url)
     self._project_name = url_segments[4]
 
-  def GetLatestVersion(self, unused_project_name):
+  def GetLatestVersion(self, unused_project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
     Args:
       project_name (str): name of the project.
+      version_definition (ProjectVersionDefinition): project version definition
+          or None.
 
     Returns:
-      str: latest version number or 0 on error.
+      str: latest version number or None on error.
     """
+    if version_definition:
+      earliest_version = version_definition.GetEarliestVersion()
+      if earliest_version and earliest_version[0] == u'==':
+        return u'.'.join(earliest_version[1:])
+
     # TODO: make this more robust to detect different naming schemes.
     download_url = (
         u'https://sourceforge.net/projects/{0:s}/files/{0:s}/').format(
@@ -600,7 +628,7 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return 0
+      return
 
     if self._project_name == u'pyparsing':
       # The format of the project download URL is:
@@ -620,7 +648,7 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
       matches = re.findall(expression_string, page_content)
 
     if not matches:
-      return 0
+      return
 
     numeric_matches = [u''.join(match.split(u'.')) for match in matches]
     return matches[numeric_matches.index(max(numeric_matches))]
@@ -703,20 +731,22 @@ class ZlibDownloadHelper(ProjectDownloadHelper):
     super(ZlibDownloadHelper, self).__init__(download_url)
     self._project_name = u'zlib'
 
-  def GetLatestVersion(self, unused_project_name):
+  def GetLatestVersion(self, unused_project_name, unused_version_definition):
     """Retrieves the latest version number for a given project name.
 
     Args:
       project_name (str): name of the project.
+      version_definition (ProjectVersionDefinition): project version definition
+          or None.
 
     Returns:
-      str: latest version number or 0 on error.
+      str: latest version number or None on error.
     """
     download_url = u'http://www.zlib.net'
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return 0
+      return
 
     # The format of the project download URL is:
     # http://zlib.net/{project name}-{version}.tar.gz
@@ -726,7 +756,7 @@ class ZlibDownloadHelper(ProjectDownloadHelper):
     matches = re.findall(expression_string, page_content)
 
     if not matches:
-      return 0
+      return
 
     numeric_matches = [u''.join(match.split(u'.')) for match in matches]
     return matches[numeric_matches.index(max(numeric_matches))]
