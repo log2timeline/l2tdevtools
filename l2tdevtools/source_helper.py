@@ -345,7 +345,8 @@ class SourcePackageHelper(SourceHelper):
       str: version number or None on error.
     """
     if not self._project_version:
+      version_definition = getattr(self._project_definition, u'version', None)
       self._project_version = self._download_helper.GetLatestVersion(
-          self.project_name, self._project_definition.version)
+          self.project_name, version_definition)
 
     return self._project_version
