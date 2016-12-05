@@ -90,8 +90,8 @@ class ProjectBuilder(object):
     build_dependencies = build_helper_object.CheckBuildDependencies()
     if build_dependencies:
       logging.warning(
-          u'Missing build dependencies: {0:s}.'.format(
-              u', '.join(build_dependencies)))
+          u'Missing build dependencies: {0:s}'.format(
+              u' '.join(build_dependencies)))
       return False
 
     if self._build_target == u'dpkg-source':

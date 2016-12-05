@@ -602,6 +602,7 @@ class GitHelper(CLIHelper):
       if (not changed_file.endswith(u'.py') or
           changed_file.endswith(u'_pb2.py') or
           not os.path.exists(changed_file) or
+          changed_file.startswith(u'data') or
           changed_file.startswith(u'docs') or
           changed_file.startswith(u'test_data') or
           changed_file in (u'setup.py', upload_path)):
