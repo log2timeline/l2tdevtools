@@ -29,7 +29,7 @@ class ProjectBuilder(object):
 
   # The distributions to build dpkg-source packages for.
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
-      u'trusty', u'wily', u'xenial'])
+      u'trusty', u'xenial'])
 
   def __init__(self, build_target):
     """Initializes the project builder.
