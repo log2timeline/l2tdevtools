@@ -1520,28 +1520,28 @@ class ReviewHelper(object):
     Returns:
       bool: True if the close was successful.
     """
-    review_file = ReviewFile(self._feature_branch)
-    if not review_file.Exists():
-      print(u'Review file missing for branch: {0:s}'.format(
-          self._feature_branch))
-      return False
-
     if not self._git_helper.CheckHasBranch(self._feature_branch):
       print(u'No such feature branch: {0:s}'.format(self._feature_branch))
     else:
       self._git_helper.RemoveFeatureBranch(self._feature_branch)
 
-    codereview_issue_number = review_file.GetCodeReviewIssueNumber()
+    review_file = ReviewFile(self._feature_branch)
+    if not review_file.Exists():
+      print(u'Review file missing for branch: {0:s}'.format(
+          self._feature_branch))
 
-    review_file.Remove()
+    else:
+      codereview_issue_number = review_file.GetCodeReviewIssueNumber()
 
-    if codereview_issue_number:
-      if not self._codereview_helper.CloseIssue(codereview_issue_number):
-        print(u'Unable to close code review: {0!s}'.format(
-            codereview_issue_number))
-        print((
-            u'Close it manually on: https://codereview.appspot.com/'
-            u'{0!s}').format(codereview_issue_number))
+      review_file.Remove()
+
+      if codereview_issue_number:
+        if not self._codereview_helper.CloseIssue(codereview_issue_number):
+          print(u'Unable to close code review: {0!s}'.format(
+              codereview_issue_number))
+          print((
+              u'Close it manually on: https://codereview.appspot.com/'
+              u'{0!s}').format(codereview_issue_number))
 
     return True
 
