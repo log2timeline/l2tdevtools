@@ -1669,7 +1669,8 @@ class ReviewHelper(object):
     if self._project_name == u'l2tdocs':
       return True
 
-    if self._command not in (u'create', u'merge', u'lint', u'update'):
+    if self._command not in (
+        u'create', u'merge', u'lint', u'lint-test', u'lint_test', u'update'):
       return True
 
     pylint_helper = PylintHelper()
@@ -1677,16 +1678,6 @@ class ReviewHelper(object):
       print(u'{0:s} aborted - pylint verion 1.5.0 or later required.'.format(
           self._command.title()))
       return False
-
-    if self._command == u'merge':
-      fork_git_repo_url = self._github_helper.GetForkGitRepoUrl(
-          self._fork_username)
-
-      if not self._git_helper.PullFromFork(
-          fork_git_repo_url, self._fork_feature_branch):
-        print(u'{0:s} aborted - unable to pull changes from fork.'.format(
-            self._command.title()))
-        return False
 
     if self._all_files:
       diffbase = None
@@ -1841,6 +1832,23 @@ class ReviewHelper(object):
 
     return True
 
+  def PullChangesFromFork(self):
+    """Pulls changes from a feature branch on a fork.
+
+    Returns:
+      bool: True if the pull was successful.
+    """
+    fork_git_repo_url = self._github_helper.GetForkGitRepoUrl(
+        self._fork_username)
+
+    if not self._git_helper.PullFromFork(
+        fork_git_repo_url, self._fork_feature_branch):
+      print(u'{0:s} aborted - unable to pull changes from fork.'.format(
+          self._command.title()))
+      return False
+
+    return True
+
   def Test(self):
     """Tests a review.
 
@@ -1850,7 +1858,8 @@ class ReviewHelper(object):
     if self._project_name == u'l2tdocs':
       return True
 
-    if self._command not in (u'create', u'merge', u'test', u'update'):
+    if self._command not in (
+        u'create', u'lint-test', u'lint_test', u'merge', u'test', u'update'):
       return True
 
     # TODO: determine why this alters the behavior of argparse.
@@ -2008,7 +2017,26 @@ def Main():
       metavar=u'GITHUB_ORIGIN', default=None,
       help=u'the github origin to merged e.g. username:feature.')
 
+  merge_edit_command_parser = commands_parser.add_parser(u'merge-edit')
+
+  # TODO: add this to help output.
+  merge_edit_command_parser.add_argument(
+      u'github_origin', action=u'store',
+      metavar=u'GITHUB_ORIGIN', default=None,
+      help=u'the github origin to merged e.g. username:feature.')
+
+  merge_edit_command_parser = commands_parser.add_parser(u'merge_edit')
+
+  # TODO: add this to help output.
+  merge_edit_command_parser.add_argument(
+      u'github_origin', action=u'store',
+      metavar=u'GITHUB_ORIGIN', default=None,
+      help=u'the github origin to merged e.g. username:feature.')
+
   commands_parser.add_parser(u'lint')
+
+  commands_parser.add_parser(u'lint-test')
+  commands_parser.add_parser(u'lint_test')
 
   open_command_parser = commands_parser.add_parser(u'open')
 
@@ -2103,6 +2131,10 @@ def Main():
     if not review_helper.PrepareMerge(codereview_issue_number):
       return False
 
+  if self._command in (u'merge', u'merge-edit', u'merge_edit'):
+    if not review_helper.PullChangesFromFork():
+      return False
+
   if not review_helper.Lint():
     return False
 
@@ -2116,7 +2148,7 @@ def Main():
   elif options.command == u'close':
     result = review_helper.Close()
 
-  elif options.command in (u'lint', u'test'):
+  elif options.command in (u'lint', u'lint-test', u'lint_test', u'test'):
     result = True
 
   elif options.command == u'merge':
