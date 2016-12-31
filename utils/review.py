@@ -2131,7 +2131,7 @@ def Main():
     if not review_helper.PrepareMerge(codereview_issue_number):
       return False
 
-  if self._command in (u'merge', u'merge-edit', u'merge_edit'):
+  if options.command in (u'merge', u'merge-edit', u'merge_edit'):
     if not review_helper.PullChangesFromFork():
       return False
 
