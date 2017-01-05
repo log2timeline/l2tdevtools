@@ -76,7 +76,7 @@ class DownloadHelperTest(unittest.TestCase):
     self.assertEqual(page_content, expected_page_content)
 
 
-class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
+class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the docopt github releases download helper."""
 
   _DOWNLOAD_URL = u'https://github.com/docopt/docopt/releases'
@@ -87,7 +87,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     latest_version = download_helper_object.GetLatestVersion(
@@ -97,7 +97,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetDownloadURL(self):
     """Tests the GetDownloadURL functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     download_url = download_helper_object.GetDownloadURL(
@@ -112,7 +112,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     project_identifier = download_helper_object.GetProjectIdentifier()
@@ -123,7 +123,7 @@ class DocoptGithubReleasesDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
-class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
+class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the libyal github releases download helper."""
 
   _DOWNLOAD_URL = u'https://github.com/libyal/libevt/releases'
@@ -135,7 +135,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     latest_version = download_helper_object.GetLatestVersion(
@@ -145,7 +145,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetDownloadURL(self):
     """Tests the GetDownloadURL functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     download_url = download_helper_object.GetDownloadURL(
@@ -161,7 +161,7 @@ class LibyalGithubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     project_identifier = download_helper_object.GetProjectIdentifier()
@@ -184,7 +184,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     latest_version = download_helper_object.GetLatestVersion(
@@ -194,7 +194,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetDownloadURL(self):
     """Tests the GetDownloadURL functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     download_url = download_helper_object.GetDownloadURL(
@@ -210,7 +210,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper_object = download_helper.GithubReleasesDownloadHelper(
+    download_helper_object = download_helper.GitHubReleasesDownloadHelper(
         self._DOWNLOAD_URL)
 
     project_identifier = download_helper_object.GetProjectIdentifier()

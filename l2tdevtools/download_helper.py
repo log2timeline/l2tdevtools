@@ -170,7 +170,7 @@ class ProjectDownloadHelper(DownloadHelper):
     """
 
 
-class GithubReleasesDownloadHelper(ProjectDownloadHelper):
+class GitHubReleasesDownloadHelper(ProjectDownloadHelper):
   """Class that helps in downloading a project with GitHub releases."""
 
   _VERSION_EXPRESSIONS = [
@@ -195,7 +195,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     if len(url_segments) < 5 or url_segments[2] != u'github.com':
       raise ValueError(u'Unsupported download URL.')
 
-    super(GithubReleasesDownloadHelper, self).__init__(download_url)
+    super(GitHubReleasesDownloadHelper, self).__init__(download_url)
     self._organization = url_segments[3]
     self._repository = url_segments[4]
 
@@ -234,7 +234,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     # E.g. used by libyal.
     expression_string = (
         u'/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*({3:s})'
-        u'[.]tar[.]gz').format(
+        u'[.]tar[.]gz[^.]').format(
             self._organization, self._repository, project_name,
             u'|'.join(self._VERSION_EXPRESSIONS))
     matches = re.findall(expression_string, page_content)
@@ -243,7 +243,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # The format of the project archive download URL is:
       # /{organization}/{repository}/archive/{version}.tar.gz
       expression_string = (
-          u'/{0:s}/{1:s}/archive/({2:s})[.]tar[.]gz').format(
+          u'/{0:s}/{1:s}/archive/({2:s})[.]tar[.]gz[^.]').format(
               self._organization, self._repository,
               u'|'.join(self._VERSION_EXPRESSIONS))
       matches = re.findall(expression_string, page_content)
@@ -252,7 +252,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # The format of the project archive download URL is:
       # /{organization}/{repository}/archive/{project name}-{version}.tar.gz
       expression_string = (
-          u'/{0:s}/{1:s}/archive/{2:s}[-]({3:s})[.]tar[.]gz').format(
+          u'/{0:s}/{1:s}/archive/{2:s}[-]({3:s})[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               u'|'.join(self._VERSION_EXPRESSIONS))
       matches = re.findall(expression_string, page_content)
@@ -316,7 +316,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     # Note that the status is optional and will be: beta, alpha or experimental.
     expression_string = (
         u'/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*{3!s}'
-        u'[.]tar[.]gz').format(
+        u'[.]tar[.]gz[^.]').format(
             self._organization, self._repository, project_name, project_version)
     matches = re.findall(expression_string, page_content)
 
@@ -325,13 +325,13 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
       # multiple versions with a different status.
       expression_string = (
           u'/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-*{3!s}'
-          u'[.]tar[.]gz').format(
+          u'[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               project_version)
       matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
-      return u'https://github.com{0:s}'.format(matches[0])
+      return u'https://github.com{0:s}'.format(matches[0][:-1])
 
     if matches and len(matches) != 1:
       return
@@ -339,46 +339,46 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
     # The format of the project archive download URL is:
     # /{organization}/{repository}/archive/{version}.tar.gz
     expression_string = (
-        u'/{0:s}/{1:s}/archive/{2!s}[.]tar[.]gz').format(
+        u'/{0:s}/{1:s}/archive/{2!s}[.]tar[.]gz[^.]').format(
             self._organization, self._repository, project_version)
     matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
-      return u'https://github.com{0:s}'.format(matches[0])
+      return u'https://github.com{0:s}'.format(matches[0][:-1])
 
     if len(matches) != 1:
       # The format of the project archive download URL is:
       # /{organization}/{repository}/archive/release-{version}.tar.gz
       expression_string = (
-          u'/{0:s}/{1:s}/archive/release-{2!s}[.]tar[.]gz').format(
+          u'/{0:s}/{1:s}/archive/release-{2!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_version)
       matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
-      return u'https://github.com{0:s}'.format(matches[0])
+      return u'https://github.com{0:s}'.format(matches[0][:-1])
 
     if len(matches) != 1:
       # The format of the project archive download URL is:
       # /{organization}/{repository}/archive/v{version}.tar.gz
       expression_string = (
-          u'/{0:s}/{1:s}/archive/v{2!s}[.]tar[.]gz').format(
+          u'/{0:s}/{1:s}/archive/v{2!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_version)
       matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
-      return u'https://github.com{0:s}'.format(matches[0])
+      return u'https://github.com{0:s}'.format(matches[0][:-1])
 
     if len(matches) != 1:
       # The format of the project archive download URL is:
       # /{organization}/{repository}/archive/{project name}-{version}.tar.gz
       expression_string = (
-          u'/{0:s}/{1:s}/archive/{2:s}[-]{3!s}[.]tar[.]gz').format(
+          u'/{0:s}/{1:s}/archive/{2:s}[-]{3!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               project_version)
       matches = re.findall(expression_string, page_content)
 
     if matches and len(matches) == 1:
-      return u'https://github.com{0:s}'.format(matches[0])
+      return u'https://github.com{0:s}'.format(matches[0][:-1])
 
     return
 
@@ -392,7 +392,7 @@ class GithubReleasesDownloadHelper(ProjectDownloadHelper):
         self._organization, self._repository)
 
 
-# TODO: Merge with GithubReleasesDownloadHelper.
+# TODO: Merge with GitHubReleasesDownloadHelper.
 # pylint: disable=abstract-method
 class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
   """Class that helps in downloading a libyal GitHub project."""
@@ -444,7 +444,7 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
       if not download_url:
         return
 
-      self._download_helper = GithubReleasesDownloadHelper(download_url)
+      self._download_helper = GitHubReleasesDownloadHelper(download_url)
 
     return self._download_helper.GetLatestVersion(
         project_name, version_definition)
@@ -466,7 +466,7 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
       if not download_url:
         return 0
 
-      self._download_helper = GithubReleasesDownloadHelper(download_url)
+      self._download_helper = GitHubReleasesDownloadHelper(download_url)
 
     return self._download_helper.GetDownloadURL(project_name, project_version)
 
@@ -822,7 +822,7 @@ class DownloadHelperFactory(object):
 
     elif (download_url.startswith(u'http://github.com/') and
           download_url.endswith(u'/releases')):
-      download_helper_class = GithubReleasesDownloadHelper
+      download_helper_class = GitHubReleasesDownloadHelper
 
     else:
       download_helper_class = None
