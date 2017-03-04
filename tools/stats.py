@@ -179,7 +179,7 @@ class GithubContributionsHelper(DownloadHelper):
     contributors_json = json.loads(contributors_data)
     self._WriteContributions(project_name, contributors_json, output_writer)
 
-  def _ListPullRequestsForProject((
+  def _ListPullRequestsForProject(
       self, organization, project_name, output_writer):
     """Lists the pull requests of a specific project.
 
