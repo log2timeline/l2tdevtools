@@ -169,22 +169,45 @@ class GithubContributionsHelper(DownloadHelper):
         u'https://api.github.com/repos/{0:s}/{1:s}/stats/contributors').format(
             organization, project_name)
 
-    contributions_data, response = self._DownloadPageContent(download_url)
-    if not contributions_data:
+    contributors_data, response = self._DownloadPageContent(download_url)
+    if not contributors_data:
       return
 
     # TODO: check if response is not None
     _ = response
 
-    contributions_json = json.loads(contributions_data)
-    self._WriteContribution(project_name, contributions_json, output_writer)
+    contributors_json = json.loads(contributors_data)
+    self._WriteContributions(project_name, contributors_json, output_writer)
 
-  def _WriteContribution(self, project_name, contributions_json, output_writer):
+  def _ListPullRequestsForProject((
+      self, organization, project_name, output_writer):
+    """Lists the pull requests of a specific project.
+
+    Args:
+      organization (str): name of the organization.
+      project_name (str): name of the project.
+      output_writer (OutputWriter): output writer.
+    """
+    download_url = (
+        u'https://api.github.com/repos/{0:s}/{1:s}/pulls?state=all').format(
+            organization, project_name)
+
+    pulls_data, response = self._DownloadPageContent(download_url)
+    if not pulls_data:
+      return
+
+    # TODO: check if response is not None
+    _ = response
+
+    pulls_json = json.loads(pulls_data)
+    self._WritePullRequests(project_name, pulls_json, output_writer)
+
+  def _WriteContributions(self, project_name, contributors_json, output_writer):
     """Writes the contributions to the output writer.
 
     Args:
       project_name (str): name of the project.
-      contributions_json (list[object]): JSON formatted contributions objects.
+      contributors_json (list[object]): JSON formatted contributors objects.
       output_writer (OutputWriter): output writer.
     """
     # https://developer.github.com/v3/repos/statistics/
@@ -202,7 +225,7 @@ class GithubContributionsHelper(DownloadHelper):
     # }, ...]
 
     contributions_per_week = {}
-    for contributions_per_author_json in contributions_json:
+    for contributions_per_author_json in contributors_json:
       author_json = contributions_per_author_json.get("author", None)
       if not author_json:
         logging.error(u'Missing author JSON dictionary.')
@@ -250,6 +273,25 @@ class GithubContributionsHelper(DownloadHelper):
             number_of_contributions, number_of_lines_added,
             number_of_lines_deleted)
 
+  def _WritePullRequests(self, project_name, pulls_json, output_writer):
+    """Writes the pull requests to the output writer.
+
+    Args:
+      project_name (str): name of the project.
+      pulls_json (list[object]): JSON formatted pull objects.
+      output_writer (OutputWriter): output writer.
+    """
+    # https://developer.github.com/v3/pulls/#list-pull-requests
+    # [{
+    #  "created_at": creation date and time of the CL.
+    #  "state": state of the CL.
+    #  "title": string containing the CL description.
+    #  "user": {
+    #    "login": github username.
+    #   }, ...]
+    #  ...
+    # }, ...]
+
   def ListContributions(self, projects_per_organization, output_writer):
     """Lists the contributions of projects.
 
@@ -261,6 +303,19 @@ class GithubContributionsHelper(DownloadHelper):
     for organization, projects in iter(projects_per_organization.items()):
       for project_name in projects:
         self._ListContributionsForProject(
+            organization, project_name, output_writer)
+
+  def ListPullRequests(self, projects_per_organization, output_writer):
+    """Lists the pull requests of projects.
+
+    Args:
+      projects_per_organization (dict[str, list[str]]): organization names
+          with corresponding projects names.
+      output_writer (OutputWriter): output writer.
+    """
+    for organization, projects in iter(projects_per_organization.items()):
+      for project_name in projects:
+        self._ListPullRequestsForProject(
             organization, project_name, output_writer)
 
 
@@ -292,6 +347,7 @@ class CodeReviewIssuesHelper(DownloadHelper):
           u'&format=json&keys_only=False&with_messages=True').format(
               email_address)
 
+
       # TODO: for now only search open issues.
       # 1 => Unknown
       # 2 => Yes
@@ -309,7 +365,11 @@ class CodeReviewIssuesHelper(DownloadHelper):
       # TODO: check if response is not None
       _ = response
 
-      reviews_json = json.loads(reviews_data)
+      try:
+        reviews_json = json.loads(reviews_data)
+      except ValueError:
+        logging.error(u'Unable to decode JSON for: {0:s}'.format(email_address))
+        break
 
       for review_values in self._ParserReviewsJSON(reviews_json):
         if review_values[0] in issue_numbers:
@@ -328,18 +388,16 @@ class CodeReviewIssuesHelper(DownloadHelper):
 
         if not self._include_closed:
           reviewers = u', '.join(review_values[4])
-          output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
+          output_writer.WriteReview(
               review_values[0], review_values[1], review_values[2],
               review_values[3], reviewers, status)
-          output_writer.Write(output_line.encode(u'utf-8'))
 
         else:
           # Create a row per reviewer.
           for reviewer in review_values[4]:
-            output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
+            output_writer.WriteReview(
                 review_values[0], review_values[1], review_values[2],
                 review_values[3], reviewer, status)
-            output_writer.Write(output_line.encode(u'utf-8'))
 
       cursor = reviews_json.get(u'cursor', None)
 
@@ -411,11 +469,6 @@ class CodeReviewIssuesHelper(DownloadHelper):
           of the reviewers.
       output_writer (OutputWriter): output writer.
     """
-    output_line = (
-        u'creation time\tcreated by\tissue number\tdescription\treviewers\t'
-        u'status\n')
-    output_writer.Write(output_line.encode(u'utf-8'))
-
     for email_address in iter(usernames.values()):
       self._ListReviewsForEmailAddress(email_address, output_writer)
 
@@ -485,8 +538,8 @@ class StdoutWriter(object):
         output_line = (
             u'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
             u'number lines added\tnumber lines deleted\n')
-
         self.Write(output_line.encode(u'utf-8'))
+
         self._header_written = True
 
       output_line = (
@@ -500,6 +553,7 @@ class StdoutWriter(object):
       date_time = datetime.datetime.strptime(date_time_string, u'%Y-W%W-%w')
       date_time_string = date_time.isoformat()
 
+      # TODO: add description.
       output_line = (
           u'{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
           u'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
@@ -509,6 +563,33 @@ class StdoutWriter(object):
               number_of_lines_deleted)
 
     self.Write(output_line.encode(u'utf-8'))
+
+  def WriteReview(
+      self, creation_time, created_by, issue_number, description, reviewers,
+      status):
+    """Writes a review to stdout.
+
+    Args:
+      creation_time (str): creation date and time.
+      created_by (str): created by.
+      issue_number (int): code review issue number.
+      description (str): description.
+      reviewers (str): reviewers.
+      status (str): status.
+    """
+    if self._output_format == u'csv':
+      if not self._header_written:
+        output_line = (
+            u'creation time\tcreated by\tissue number\tdescription\treviewers\t'
+            u'status\n')
+        self.Write(output_line.encode(u'utf-8'))
+
+        self._header_written = True
+
+      output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
+          creation_time, created_by, issue_number, description, reviewers,
+          status)
+      self.Write(output_line.encode(u'utf-8'))
 
 
 def Main():
