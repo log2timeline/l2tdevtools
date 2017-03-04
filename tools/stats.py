@@ -156,17 +156,6 @@ class DownloadHelper(object):
 class GithubContributionsHelper(DownloadHelper):
   """Class that defines a github contributions helper."""
 
-  def __init__(self, user_mappings):
-    """Initializes a github contributions helper.
-
-    Args:
-      user_mappings (dict[str, str]): mapping between github username and
-          another username.
-    """
-    super(GithubContributionsHelper, self).__init__()
-    self._alternate_output_format = False
-    self._user_mappings = user_mappings
-
   def _ListContributionsForProject(
       self, organization, project_name, output_writer):
     """Lists the contributions of a specific project.
@@ -256,33 +245,10 @@ class GithubContributionsHelper(DownloadHelper):
             number_of_contributions, number_of_lines_added,
             number_of_lines_deleted)
 
-        if not self._alternate_output_format:
-          output_line = (
-              u'{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n').format(
-                  year, week_number, login_name, project_name,
-                  number_of_contributions, number_of_lines_added,
-                  number_of_lines_deleted)
-
-        else:
-          username = login_name.lower()
-          username = self._user_mappings.get(username, None)
-          if not username:
-            # Skip login names without a username mapping.
-            continue
-
-          date_time_string = u'{0:s}-W{1:s}-0'.format(year, week_number)
-          date_time = datetime.datetime.strptime(date_time_string, u'%Y-W%W-%w')
-          date_time_string = date_time.isoformat()
-
-          output_line = (
-              u'{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
-              u'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
-              u'~ py:{4:d} ~ file_type:py ~ op_type:ADD ~\n').format(
-                  date_time_string, username, project_name,
-                  number_of_contributions, number_of_lines_added,
-                  number_of_lines_deleted)
-
-        output_writer.Write(output_line.encode(u'utf-8'))
+        output_writer.WriteContribution(
+            year, week_number, login_name, project_name,
+            number_of_contributions, number_of_lines_added,
+            number_of_lines_deleted)
 
   def ListContributions(self, projects_per_organization, output_writer):
     """Lists the contributions of projects.
@@ -292,13 +258,6 @@ class GithubContributionsHelper(DownloadHelper):
           with corresponding projects names.
       output_writer (OutputWriter): output writer.
     """
-    if not self._alternate_output_format:
-      output_line = (
-          u'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
-          u'number lines added\tnumber lines deleted\n')
-
-      output_writer.Write(output_line.encode(u'utf-8'))
-
     for organization, projects in iter(projects_per_organization.items()):
       for project_name in projects:
         self._ListContributionsForProject(
@@ -464,9 +423,18 @@ class CodeReviewIssuesHelper(DownloadHelper):
 class StdoutWriter(object):
   """Class that defines a stdout output writer."""
 
-  def __init__(self):
-    """Initializes an output writer object."""
+  def __init__(self, user_mappings, output_format=u'csv'):
+    """Initializes a stdout output writer.
+
+    Args:
+      user_mappings (dict[str, str]): mapping between github username and
+          another username.
+      output_format (Optional[str]): output format.
+    """
     super(StdoutWriter, self).__init__()
+    self._header_written = False
+    self._output_format = output_format
+    self._user_mappings = user_mappings
 
   def Open(self):
     """Opens the output writer object.
@@ -488,6 +456,60 @@ class StdoutWriter(object):
     """
     print(data, end=u'')
 
+  def WriteContribution(
+      self, year, week_number, login_name, project_name,
+      number_of_contributions, number_of_lines_added, number_of_lines_deleted):
+    """Writes a contribution to stdout.
+
+    Args:
+      year (int): year of the contibution.
+      week_number (int): week number of the contibution.
+      login_name (str): log-in name.
+      project_name (str): project name.
+      number_of_contributions (int): number of contributed CLs.
+      number_of_lines_added (int): total number of lines added.
+      number_of_lines_deleted (int): total number of lines deleted.
+    """
+    username = login_name
+
+    if self._user_mappings:
+      username = username.lower()
+      username = self._user_mappings.get(username, None)
+      # TODO: add flag to control this behavior.
+      if not username:
+        # Skip login names without a username mapping.
+        return
+
+    if self._output_format == u'csv':
+      if not self._header_written:
+        output_line = (
+            u'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
+            u'number lines added\tnumber lines deleted\n')
+
+        self.Write(output_line.encode(u'utf-8'))
+        self._header_written = True
+
+      output_line = (
+          u'{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n').format(
+              year, week_number, username, project_name,
+              number_of_contributions, number_of_lines_added,
+              number_of_lines_deleted)
+
+    elif self._output_format == u'tilde':
+      date_time_string = u'{0:s}-W{1:s}-0'.format(year, week_number)
+      date_time = datetime.datetime.strptime(date_time_string, u'%Y-W%W-%w')
+      date_time_string = date_time.isoformat()
+
+      output_line = (
+          u'{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
+          u'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
+          u'~ py:{4:d} ~ file_type:py ~ op_type:ADD ~\n').format(
+              date_time_string, username, project_name,
+              number_of_contributions, number_of_lines_added,
+              number_of_lines_deleted)
+
+    self.Write(output_line.encode(u'utf-8'))
+
 
 def Main():
   """The main program function.
@@ -503,13 +525,19 @@ def Main():
 
   argument_parser.add_argument(
       u'-c', u'--config', dest=u'config_path', action=u'store',
-      metavar=u'CONFIG_PATH', default=None, help=(
+      metavar=u'PATH', default=None, help=(
           u'path of the directory containing the statistics configuration '
           u'files e.g. stats.ini.'))
 
   argument_parser.add_argument(
-      u'statistics_type', choices=sorted(statistics_types), action=u'store',
-      metavar=u'TYPE', default=None, help=u'The statistics type.')
+      u'-f', u'--format', dest=u'output_format', action=u'store',
+      metavar=u'FORMAT', choices=[u'csv', u'tilde'], default=u'csv',
+      help=u'output format.')
+
+  argument_parser.add_argument(
+      u'statistics_type', action=u'store', metavar=u'TYPE',
+      choices=sorted(statistics_types), default=None,
+      help=u'The statistics type.')
 
   options = argument_parser.parse_args()
 
@@ -532,7 +560,14 @@ def Main():
     print(u'')
     return False
 
-  output_writer = StdoutWriter()
+  stats_definition_reader = StatsDefinitionReader()
+
+  user_mappings = {}
+  with open(stats_file) as file_object:
+    user_mappings = stats_definition_reader.ReadUserMappings(file_object)
+
+  output_writer = StdoutWriter(
+      user_mappings, output_format=options.output_format)
 
   if not output_writer.Open():
     print(u'Unable to open output writer.')
@@ -559,12 +594,7 @@ def Main():
       projects_per_organization = (
           stats_definition_reader.ReadProjectsPerOrganization(file_object))
 
-    user_mappings = {}
-    with open(stats_file) as file_object:
-      stats_definition_reader = StatsDefinitionReader()
-      user_mappings = stats_definition_reader.ReadUserMappings(file_object)
-
-    contributions_helper = GithubContributionsHelper(user_mappings)
+    contributions_helper = GithubContributionsHelper()
     contributions_helper.ListContributions(
         projects_per_organization, output_writer)
 
