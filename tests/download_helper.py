@@ -131,7 +131,7 @@ class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = u'libyal'
   _PROJECT_NAME = u'libevt'
   _PROJECT_STATUS = u'alpha'
-  _PROJECT_VERSION = u'20160421'
+  _PROJECT_VERSION = u'20170120'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -180,7 +180,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = u'20160918'
+  _PROJECT_VERSION = u'20170116'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -227,7 +227,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
   _DOWNLOAD_URL = u'https://pypi.python.org/pypi/construct'
 
   _PROJECT_NAME = u'construct'
-  _PROJECT_VERSION = u'2.8.8'
+  _PROJECT_VERSION = u'2.8.10'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -273,7 +273,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
   _PROJECT_NAME = u'pyparsing'
   # Hard-coded version to check parsing of SourceForge page.
-  _PROJECT_VERSION = u'2.1.9'
+  _PROJECT_VERSION = u'2.2.0'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
