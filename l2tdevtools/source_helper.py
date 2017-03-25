@@ -305,7 +305,7 @@ class SourcePackageHelper(SourceHelper):
 
     directory_name = None
     if (self._source_filename.endswith(u'.tar.bz2') or
-    if (self._source_filename.endswith(u'.tar.gz') or
+        self._source_filename.endswith(u'.tar.gz') or
         self._source_filename.endswith(u'.tgz')):
       directory_name = self._CreateFromTar(self._source_filename)
 
