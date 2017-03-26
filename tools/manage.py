@@ -103,6 +103,10 @@ class COPRProjectManager(object):
         continue
 
       package_version, _, _ = package_version.rpartition(u'-')
+      # TODO: improve version check.
+      if package_name in packages and packages[package_name] > package_version:
+        continue
+
       packages[package_name] = package_version
 
     return packages
