@@ -15,8 +15,101 @@ import zlib
 from l2tdevtools import download_helper
 
 
+class COPRProjectManager(object):
+  """Defines a COPR project manager."""
+
+  _COPR_BASE_URL = u'https://copr.fedorainfracloud.org{0:s}'
+
+  _COPR_URL = (
+      u'https://copr.fedorainfracloud.org/api_2/projects?group={name:s}&'
+      u'name={project:s}')
+
+  def __init__(self, name):
+    """Initializes the COPR manager.
+
+    Args:
+      name (str): name of the group.
+    """
+    super(COPRProjectManager, self).__init__()
+    self._download_helper = download_helper.DownloadHelper(u'')
+    self._name = name
+
+  def GetPackages(self, project):
+    """Retrieves a list of packages of a specific project.
+
+    Args:
+      project (str): project name.
+
+    Returns:
+      dict[str, str]: package names and versions as values or None if
+          the packages cannot be determined.
+    """
+    kwargs = {
+        u'name': self._name,
+        u'project': project}
+    download_url = self._COPR_URL.format(**kwargs)
+
+    page_content = self._download_helper.DownloadPageContent(download_url)
+    if not page_content:
+      logging.error(u'Unable to retrieve project information page content.')
+      return
+
+    project_information = json.loads(page_content)
+    if not project_information:
+      logging.error(u'Unable to retrieve project information.')
+      return
+
+    projects = project_information.get(u'projects', None)
+    if len(projects) != 1:
+      return
+
+    links = projects[0].get(u'_links', None)
+    if not links:
+      return
+
+    builds = links.get(u'builds', None)
+    if not builds:
+      return
+
+    builds_href = builds.get(u'href', None)
+    if not builds_href:
+      return
+
+    download_url = self._COPR_BASE_URL.format(builds_href)
+
+    page_content = self._download_helper.DownloadPageContent(download_url)
+    if not page_content:
+      logging.error(u'Unable to retrieve builds information page content.')
+      return
+
+    builds_information = json.loads(page_content)
+    if not builds_information:
+      logging.error(u'Unable to retrieve builds information.')
+      return
+
+    builds = builds_information.get(u'builds', None)
+    if not builds:
+      return
+
+    packages = {}
+    for build_information in builds:
+      build = build_information.get(u'build', None)
+      if not build:
+        continue
+
+      package_name = build.get(u'package_name', None)
+      package_version = build.get(u'package_version', None)
+      if not package_name or not package_version:
+        continue
+
+      package_version, _, _ = package_version.rpartition(u'-')
+      packages[package_name] = package_version
+
+    return packages
+
+
 class GithubRepoManager(object):
-  """Defines a github reposistory manager object."""
+  """Defines a github reposistory manager."""
 
   _GITHUB_REPO_API_URL = (
       u'https://api.github.com/repos/log2timeline/l2tbinaries')
@@ -25,7 +118,7 @@ class GithubRepoManager(object):
       u'https://github.com/log2timeline/l2tbinaries')
 
   def __init__(self):
-    """Initializes the github reposistory manager object."""
+    """Initializes the github reposistory manager."""
     super(GithubRepoManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper(u'')
 
@@ -33,12 +126,11 @@ class GithubRepoManager(object):
     """Retrieves the download URL.
 
     Args:
-      sub_directory: a string containing the machine type sub directory.
-      use_api: optional boolean value to indicate if the API should be used.
-               The default is False.
+      sub_directory (str): machine type sub directory.
+      use_api (Optional[bool]): True if the API should be used.
 
     Returns:
-      The download URL or None.
+      str: download URL or None.
     """
     if not sub_directory:
       return
@@ -54,16 +146,15 @@ class GithubRepoManager(object):
     return download_url
 
   def GetPackages(self, sub_directory, use_api=False):
-    """Retrieves a list of packages of a specific PPA track.
+    """Retrieves a list of packages of a specific sub directory.
 
     Args:
-      sub_directory: a string containing the machine type sub directory.
-      use_api: optional boolean value to indicate if the API should be used.
-               The default is False.
+      sub_directory (str): machine type sub directory.
+      use_api (Optional[bool]): True if the API should be used.
 
     Returns:
-      A dictionary object containing the project names as keys and
-      versions as values or None if the projects cannot be determined.
+      dict[str, str]: package names and versions as values or None if
+          the packages cannot be determined.
     """
     if not sub_directory:
       logging.info(u'Missing machine type sub directory.')
@@ -115,7 +206,7 @@ class GithubRepoManager(object):
         _, _, filename = match.rpartition(u'/')
         filenames.append(filename)
 
-    projects = {}
+    packages = {}
     for filename in filenames:
       if not filename:
         continue
@@ -132,24 +223,24 @@ class GithubRepoManager(object):
       else:
         continue
 
-      project, _, version = filename.rpartition(u'-')
-      projects[project] = version
+      name, _, version = filename.rpartition(u'-')
+      packages[name] = version
 
-    return projects
+    return packages
 
 
 class LaunchpadPPAManager(object):
-  """Defines a Launchpad PPA manager object."""
+  """Defines a Launchpad PPA manager."""
 
   _LAUNCHPAD_URL = (
       u'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
       u'/trusty/main/source/Sources.gz')
 
   def __init__(self, name):
-    """Initializes the Launchpad PPA manager object.
+    """Initializes the Launchpad PPA manager.
 
     Args:
-      name: a string containing the name of the PPA.
+      name (str): name of the PPA.
     """
     super(LaunchpadPPAManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper(u'')
@@ -166,11 +257,11 @@ class LaunchpadPPAManager(object):
     """Retrieves a list of packages of a specific PPA track.
 
     Args:
-      track: a string containing the PPA track name.
+      track (str): PPA track name.
 
     Returns:
-      A dictionary object containing the project names as keys and
-      versions as values or None if the projects cannot be determined.
+      dict[str, str]: package names and versions as values or None if
+          the packages cannot be determined.
     """
     kwargs = {
         u'name': self._name,
@@ -192,18 +283,18 @@ class LaunchpadPPAManager(object):
               exception))
       return
 
-    projects = {}
+    packages = {}
     for line in ppa_sources.split(u'\n'):
       if line.startswith(u'Package: '):
-        _, _, project = line.rpartition(u'Package: ')
+        _, _, package = line.rpartition(u'Package: ')
 
       elif line.startswith(u'Version: '):
         _, _, version = line.rpartition(u'Version: ')
         version, _, _ = version.rpartition(u'-')
 
-        projects[project] = version
+        packages[package] = version
 
-    return projects
+    return packages
 
 
 class OpenSuseBuildServiceManager(object):
@@ -291,10 +382,10 @@ class PyPIManager(object):
     """Retrieves a list of packages.
 
     Returns:
-      A dictionary object containing the project names as keys and
-      versions as values or None if the projects cannot be determined.
+      dict[str, str]: package names and versions as values or None if
+          the packages cannot be determined.
     """
-    projects = {}
+    packages = {}
     for package_name in iter(self._PYPI_PACKAGE_NAMES.keys()):
       kwargs = {u'package_name': package_name}
       download_url = self._PYPI_URL.format(**kwargs)
@@ -324,9 +415,9 @@ class PyPIManager(object):
         continue
 
       package_name = self._PYPI_PACKAGE_NAMES[package_name]
-      projects[package_name] = matches
+      packages[package_name] = matches
 
-    return projects
+    return packages
 
 
 class BinariesManager(object):
@@ -335,6 +426,7 @@ class BinariesManager(object):
   def __init__(self):
     """Initializes the binaries manager object."""
     super(BinariesManager, self).__init__()
+    self._copr_project_manager = COPRProjectManager(u'gift')
     self._github_repo_manager = GithubRepoManager()
     self._launchpad_ppa_manager = LaunchpadPPAManager(u'gift')
     self._pypi_manager = PyPIManager()
@@ -343,15 +435,17 @@ class BinariesManager(object):
     """Compares the packages.
 
     Args:
-      reference_packages: a dictionary containing the reference package names
-                          and versions.
-      packages: a dictionary containing the package names and versions.
+      reference_packages (dict[str, str]): reference package names and versions.
+      packages (dict[str, str]): package names and versions.
 
     Returns:
-      A tuple containing a dictionary of the new packages, those packages that
-      are present in the reference packages but not in the packages, and new
-      version, those packages that have a newer version in the reference
-      packages.
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference packages but not in the packages.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference packages.
     """
     new_packages = {}
     new_versions = {}
@@ -363,20 +457,56 @@ class BinariesManager(object):
 
     return new_packages, new_versions
 
+  def CompareDirectoryWithCOPRProject(self, reference_directory, project):
+    """Compares a directory containing source rpm packages with a COPR project.
+
+    Args:
+      reference_directory (str): path of the reference directory that contains
+          dpkg source packages.
+      project (str): name of the COPR project.
+
+    Returns:
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference directory but not in the project.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference directory.
+    """
+    reference_packages = {}
+    for directory_entry in os.listdir(reference_directory):
+      # The directory contains various files and we are only interested
+      # in the source RPM packages that use the naming convention:
+      # package-version-#.src.rpm
+      if not directory_entry.endswith(u'.src.rpm'):
+        continue
+
+      name, _, _ = directory_entry.rpartition(u'-')
+      name, _, version = name.rpartition(u'-')
+
+      reference_packages[name] = version
+
+    packages = self._copr_project_manager.GetPackages(project)
+    return self._ComparePackages(reference_packages, packages)
+
   def CompareDirectoryWithGithubRepo(self, reference_directory, sub_directory):
     """Compares a directory containing msi or dmg packages with a github repo.
 
     Args:
-      reference_directory: a string containing the path of the reference
-                           directory that contains msi or dmg packages.
-      sub_directory: a string containing the name of the machine type sub
-                     directory.
+      reference_directory (str): path of the reference directory that contains
+          msi or dmg packages.
+      sub_directory (str): name of the machine type sub directory.
 
     Returns:
-      A tuple containing a dictionary of the new packages, those packages that
-      are present in the reference directory but not in the track, and new
-      version, those packages that have a newer version in the reference
-      directory.
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference directory but not in the sub
+            directory.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference directory.
     """
     reference_packages = {}
     for directory_entry in os.listdir(reference_directory):
@@ -398,24 +528,28 @@ class BinariesManager(object):
     packages = self._github_repo_manager.GetPackages(sub_directory)
     return self._ComparePackages(reference_packages, packages)
 
-  def CompareDirectoryWithPPAReleaseTrack(self, reference_directory, track):
-    """Compares a directory containing dpkg packages with a PPA release track.
+  def CompareDirectoryWithLaunchpadPPATrack(
+      self, reference_directory, track):
+    """Compares a directory containing dpkg packages with a Launchpad PPA track.
 
     Args:
-      reference_directory: a string containing the path of the reference
-                           directory that contains dpkg source packages.
-      track: a string containing the name of the track.
+      reference_directory (str): path of the reference directory that contains
+          dpkg source packages.
+      track (str): name of the track.
 
     Returns:
-      A tuple containing a dictionary of the new packages, those packages that
-      are present in the reference directory but not in the track, and new
-      version, those packages that have a newer version in the reference
-      directory.
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference directory but not in the track.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference directory.
     """
     reference_packages = {}
     for directory_entry in os.listdir(reference_directory):
       # The directory contains various files and we are only interested
-      # in the source dpkg packges that use the naming convention:
+      # in the source dpkg packages that use the naming convention:
       # package_version-#ppa1~trusty_source.changes
       if not directory_entry.endswith(u'ppa1~trusty_source.changes'):
         continue
@@ -428,17 +562,43 @@ class BinariesManager(object):
     packages = self._launchpad_ppa_manager.GetPackages(track)
     return self._ComparePackages(reference_packages, packages)
 
-  def ComparePPAReleaseTracks(self, reference_track, track):
-    """Compares two PPA release tracks.
+  def CompareCOPRProjects(self, reference_project, project):
+    """Compares two COPR projects.
 
     Args:
-      reference_track: a string containing the name of the reference track.
-      track: a string containing the name of the track.
+      reference_project (str): name of the reference project.
+      project (str): name of the project.
 
     Returns:
-      A tuple containing a dictionary of the new packages, those packages that
-      are present in the reference track but not in the track, and new
-      version, those packages that have a newer version in the reference track.
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference project but not in the project.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference project.
+    """
+    reference_packages = self._copr_project_manager.GetPackages(
+        reference_project)
+    packages = self._copr_project_manager.GetPackages(project)
+
+    return self._ComparePackages(reference_packages, packages)
+
+  def CompareLauchpadPPATracks(self, reference_track, track):
+    """Compares two Launchpad PPA tracks.
+
+    Args:
+      reference_track (str): name of the reference track.
+      track (str): name of the track.
+
+    Returns:
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference track but not in the track.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference track.
     """
     reference_packages = self._launchpad_ppa_manager.GetPackages(
         reference_track)
@@ -450,14 +610,17 @@ class BinariesManager(object):
     """Compares a directory containing .tar.gz packages with PyPI.
 
     Args:
-      reference_directory: a string containing the path of the reference
-                           directory that contains msi or dmg packages.
+      reference_directory (str): path of the reference directory that
+          contains msi or dmg packages.
 
     Returns:
-      A tuple containing a dictionary of the new packages, those packages that
-      are present in the reference directory but not in the track, and new
-      version, those packages that have a newer version in the reference
-      directory.
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference directory but not on PyPI.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference directory.
     """
     reference_packages = {}
     for directory_entry in os.listdir(reference_directory):
@@ -481,15 +644,13 @@ class BinariesManager(object):
     """Retrieves the machine type sub directory.
 
     Args:
-      preferred_machine_type: optional preferred machine type. The default
-                              is None, which will auto-detect the current
-                              machine type.
-      preferred_operating_system: optional preferred operating system. The
-                                  default is None, which will auto-detect
-                                  the current operating system.
+      preferred_machine_type (Optional[str]): preferred machine type, where
+          None, which will auto-detect the current machine type.
+      preferred_operating_system (Optional[str]): preferred operating system,
+          where None, which will auto-detect the current operating system.
 
     Returns:
-      The machine type sub directory or None.
+      str: machine type sub directory or None.
     """
     if preferred_operating_system:
       operating_system = preferred_operating_system
@@ -551,14 +712,15 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   actions = frozenset([
+      u'copr-diff-dev', u'copr-diff-stable', u'copr-diff-testing',
       u'l2tbinaries-diff', u'launchpad-diff-dev', u'launchpad-diff-stable',
       u'launchpad-diff-testing', u'pypi-diff'])
 
   argument_parser = argparse.ArgumentParser(description=(
-      u'Manages the GIFT launchpad PPA and l2tbinaries.'))
+      u'Manages the GIFT copr, launchpad PPA and l2tbinaries.'))
 
   argument_parser.add_argument(
       u'action', choices=sorted(actions), action=u'store',
@@ -595,7 +757,34 @@ def Main():
 
   action_tuple = options.action.split(u'-')
 
-  if action_tuple[0] == u'l2tbinaries' and action_tuple[1] == u'diff':
+  if action_tuple[0] == u'copr' and action_tuple[1] == u'diff':
+    track = action_tuple[2]
+
+    if track == u'testing':
+      reference_directory = options.build_directory
+
+      new_packages, new_versions = (
+          binaries_manager.CompareDirectoryWithCOPRProject(
+              reference_directory, track))
+
+      diff_header = (
+          u'Difference between: {0:s} and COPR project: {1:s}'.format(
+              reference_directory, track))
+
+    else:
+      if track == u'dev':
+        reference_track = u'testing'
+      else:
+        reference_track = u'dev'
+
+      new_packages, new_versions = binaries_manager.CompareCOPRProjects(
+          reference_track, track)
+
+      diff_header = (
+          u'Difference between COPR project: {0:s} and {1:s}'.format(
+              reference_track, track))
+
+  elif action_tuple[0] == u'l2tbinaries' and action_tuple[1] == u'diff':
     sub_directory = binaries_manager.GetMachineTypeSubDirectory(
         preferred_machine_type=options.machine_type)
 
@@ -616,11 +805,11 @@ def Main():
       reference_directory = options.build_directory
 
       new_packages, new_versions = (
-          binaries_manager.CompareDirectoryWithPPAReleaseTrack(
+          binaries_manager.CompareDirectoryWithLauchpadPPATrack(
               reference_directory, track))
 
       diff_header = (
-          u'Difference between: {0:s} and release track: {1:s}'.format(
+          u'Difference between: {0:s} and Launchpad track: {1:s}'.format(
               reference_directory, track))
 
     else:
@@ -629,11 +818,11 @@ def Main():
       else:
         reference_track = u'dev'
 
-      new_packages, new_versions = binaries_manager.ComparePPAReleaseTracks(
+      new_packages, new_versions = binaries_manager.CompareLauchpadPPATracks(
           reference_track, track)
 
       diff_header = (
-          u'Difference between release tracks: {0:s} and {1:s}'.format(
+          u'Difference between Launchpad tracks: {0:s} and {1:s}'.format(
               reference_track, track))
 
   # elif action_tuple[0] == u'osb' and action_tuple[1] == u'diff':
