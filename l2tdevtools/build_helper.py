@@ -2,7 +2,6 @@
 """Build helper object implementations."""
 
 from __future__ import print_function
-import datetime
 import fileinput
 import glob
 import logging
@@ -17,6 +16,7 @@ import sys
 from l2tdevtools import dpkg_files
 from l2tdevtools import download_helper
 from l2tdevtools import source_helper
+from l2tdevtools import spec_file
 
 
 class BuildHelper(object):
@@ -2063,20 +2063,17 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
       if not self._OSCAdd(osc_source_path):
         return False
 
-    # Have setup.py generate the .spec file.
     source_directory = source_helper_object.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
+    spec_file_generator = spec_file.RPMSpecFileGenerator()
+
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
-    command = u'{0:s} setup.py bdist_rpm --spec-only >> {1:s} 2>&1'.format(
-        sys.executable, log_file_path)
-    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
+    if not spec_file_generator.GenerateWithSetupPy(
+        source_directory, log_file_path):
       return False
 
     project_name = source_helper_object.project_name
@@ -2090,208 +2087,22 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
       project_prefix = u''
 
     spec_filename = u'{0:s}.spec'.format(project_name)
-    spec_file_path = os.path.join(
-        source_directory, u'dist', u'{0:s}{1:s}'.format(
-            project_prefix, spec_filename))
-    osc_spec_file_path = os.path.join(osc_package_path, spec_filename)
-    spec_file_exists = os.path.exists(osc_spec_file_path)
+    input_file_path = u'{0:s}{1:s}'.format(project_prefix, spec_filename)
+    input_file_path = os.path.join(source_directory, u'dist', input_file_path)
+    output_file_path = os.path.join(osc_package_path, spec_filename)
 
-    python2_only = self._IsPython2Only()
+    # Determine if the output file exists before it is generated.
+    output_file_exists = os.path.exists(output_file_path)
 
-    osc_build_dependencies = [u'python-setuptools']
-    if self._project_definition.architecture_dependent:
-      osc_build_dependencies.append(u'python-devel')
+    if not spec_file_generator.RewriteSetupPyGenerateFileForOSC(
+        self._project_definition, source_directory, project_name,
+        input_file_path, output_file_path):
+      return False
 
-    if not python2_only:
-      osc_build_dependencies.append(u'python3-setuptools')
-      if self._project_definition.architecture_dependent:
-        osc_build_dependencies.append(u'python3-devel')
-
-    if self._project_definition.osc_build_dependencies:
-      osc_build_dependencies.extend(
-          self._project_definition.osc_build_dependencies)
-
-    # TODO: check if already prefixed with python-
-
-    output_file_object = open(osc_spec_file_path, 'wb')
-    description = b''
-    requires = b''
-    summary = b''
-    version = b''
-    in_description = False
-    has_build_requires = False
-    has_python_package = False
-    has_python3_package = False
-    with open(spec_file_path, 'r+b') as file_object:
-      for line in file_object.readlines():
-        if line.startswith(b'%') and in_description:
-          in_description = False
-
-          if self._project_definition.description_long:
-            description = u'{0:s}\n\n'.format(
-                self._project_definition.description_long)
-
-          output_file_object.write(description)
-
-        if line.startswith(b'%define name '):
-          # Need to override the project name for projects that prefix
-          # their name with "python-" in setup.py but do not use it
-          # for their source package name.
-          line = b'%define name {0:s}\n'.format(project_name)
-
-        elif line.startswith(b'%define version '):
-          version = line[16:-1]
-
-        elif not summary and line.startswith(b'Summary: '):
-          summary = line
-
-        elif (not description and not requires and
-              line.startswith(b'Requires: ')):
-          requires = line
-          continue
-
-        elif line.startswith(b'BuildArch: noarch'):
-          if self._project_definition.architecture_dependent:
-            continue
-
-        elif line.startswith(b'BuildRequires: '):
-          has_build_requires = True
-          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
-              osc_build_dependencies))
-
-        elif line == b'\n' and summary and not has_build_requires:
-          has_build_requires = True
-          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
-              osc_build_dependencies))
-
-        elif line.startswith(b'%description') and not description:
-          in_description = True
-
-        elif line.startswith(b'%package -n python-'):
-          has_python_package = True
-
-        elif line.startswith(b'%package -n python3-'):
-          has_python3_package = True
-
-        elif line.startswith(b'%prep'):
-          if not has_python_package:
-            python_requires = requires
-
-            output_file_object.write((
-                b'%package -n python-%{{name}}\n'
-                b'{0:s}'
-                b'{1:s}'
-                b'\n'
-                b'%description -n python-%{{name}}\n'
-                b'{2:s}').format(summary, python_requires, description))
-
-          if not python2_only and not has_python3_package:
-            # TODO: convert python 2 package names to python 3
-            python3_requires = requires
-
-            output_file_object.write((
-                b'%package -n python3-%{{name}}\n'
-                b'{0:s}'
-                b'{1:s}'
-                b'\n'
-                b'%description -n python3-%{{name}}\n'
-                b'{2:s}').format(summary, python3_requires, description))
-
-        elif line == b'%setup -n %{name}-%{unmangled_version}\n':
-          line = b'%autosetup -n %{name}-%{unmangled_version}\n'
-
-        elif line.startswith(b'python setup.py build'):
-          if python2_only:
-            line = b'python2 setup.py build\n'
-          else:
-            line = (
-                b'python2 setup.py build\n'
-                b'python3 setup.py build\n')
-
-        elif line.startswith(b'python setup.py install'):
-          if python2_only:
-            line = (
-                b'python2 setup.py install -O1 --root=%{buildroot}\n'
-                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
-          else:
-            line = (
-                b'python2 setup.py install -O1 --root=%{buildroot}\n'
-                b'python3 setup.py install -O1 --root=%{buildroot}\n'
-                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
-
-        elif line == b'rm -rf $RPM_BUILD_ROOT\n':
-          line = b'rm -rf %{buildroot}\n'
-
-        elif line.startswith(b'%files'):
-          break
-
-        elif in_description:
-          # Ignore leading white lines in the description.
-          if not description and line == b'\n':
-            continue
-
-          description = b''.join([description, line])
-          continue
-
-        output_file_object.write(line)
-
-    license_line = b''
-    for license_file in self._LICENSE_FILENAMES:
-      license_file_path = os.path.join(source_directory, license_file)
-      if os.path.exists(license_file_path):
-        license_line = b'%license {0:s}\n'.format(license_file)
-        break
-
-    doc_files = []
-    for doc_file in self._DOC_FILENAMES:
-      doc_file_path = os.path.join(source_directory, doc_file)
-      if os.path.exists(doc_file_path):
-        doc_files.append(doc_file)
-
-    doc_line = b''
-    if doc_files:
-      doc_line = b'%doc {0:s}\n'.format(b' '.join(doc_files))
-
-    # Add _libdir support for arch dependent.
-
-    output_file_object.write((
-        b'%files -n python-%{{name}}\n'
-        b'{0:s}'
-        b'{1:s}'
-        b'%{{_exec_prefix}}/lib/python2*/*\n').format(
-            license_line, doc_line))
-
-    if not python2_only:
-      output_file_object.write((
-          b'\n'
-          b'%files -n python3-%{{name}}\n'
-          b'{0:s}'
-          b'{1:s}'
-          b'%{{_exec_prefix}}/lib/python3*/*\n').format(
-              license_line, doc_line))
-
-    # TODO: add bindir support.
-    output_file_object.write((
-        b'\n'
-        b'%exclude %{_bindir}/*\n'))
-
-    # TODO: add shared data support.
-
-    date_time = datetime.datetime.now()
-    date_time_string = date_time.strftime(u'%a %b %e %Y')
-
-    output_file_object.write((
-        b'\n'
-        b'%changelog\n'
-        b'* {0:s} Joachim Metz <joachim.metz@gmail.com> {1:s}-1\n'
-        b'- Auto-generated\n').format(date_time_string, version))
-
-    output_file_object.close()
-
-    if not spec_file_exists:
-      osc_spec_file_path = os.path.join(
+    if not output_file_exists:
+      output_file_path = os.path.join(
           source_helper_object.project_name, spec_filename)
-      if not self._OSCAdd(osc_spec_file_path):
+      if not self._OSCAdd(output_file_path):
         return False
 
     return self._OSCCommit(source_helper_object.project_name)
@@ -2662,8 +2473,8 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
     return True
 
 
-class RPMBuildHelper(BuildHelper):
-  """Class that helps in building rpm packages (.rpm)."""
+class BaseRPMBuildHelper(BuildHelper):
+  """Base class that helps in building rpm packages."""
 
   _BUILD_DEPENDENCIES = frozenset([
       u'git',
@@ -2704,7 +2515,8 @@ class RPMBuildHelper(BuildHelper):
       project_definition (ProjectDefinition): project definition.
       l2tdevtools_path (str): path to the l2tdevtools directory.
     """
-    super(RPMBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    super(BaseRPMBuildHelper, self).__init__(
+        project_definition, l2tdevtools_path)
     self.architecture = platform.machine()
 
     self.rpmbuild_path = os.path.join(u'~', u'rpmbuild')
@@ -2713,22 +2525,26 @@ class RPMBuildHelper(BuildHelper):
     self._rpmbuild_rpms_path = os.path.join(self.rpmbuild_path, u'RPMS')
     self._rpmbuild_sources_path = os.path.join(self.rpmbuild_path, u'SOURCES')
     self._rpmbuild_specs_path = os.path.join(self.rpmbuild_path, u'SPECS')
+    self._rpmbuild_srpms_path = os.path.join(self.rpmbuild_path, u'SRPMS')
 
-  def _BuildFromSpecFile(self, spec_filename):
+  def _BuildFromSpecFile(self, spec_filename, rpmbuild_flags=u'-ba'):
     """Builds the rpms directly from a spec file.
 
     Args:
       spec_filename (str): name of the spec file as stored in the rpmbuild
           SPECS sub directory.
+      rpmbuild_flags (Optional(str)): rpmbuild flags.
 
     Returns:
       bool: True if successful, False otherwise.
     """
+    spec_filename = os.path.join(u'SPECS', spec_filename)
+
     current_path = os.getcwd()
     os.chdir(self.rpmbuild_path)
 
-    command = u'rpmbuild -ba {0:s} > {1:s} 2>&1'.format(
-        os.path.join(u'SPECS', spec_filename), self.LOG_FILENAME)
+    command = u'rpmbuild {0:s} {1:s} > {2:s} 2>&1'.format(
+        rpmbuild_flags, spec_filename, self.LOG_FILENAME)
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -2737,19 +2553,21 @@ class RPMBuildHelper(BuildHelper):
 
     return exit_code == 0
 
-  def _BuildFromSourcePackage(self, source_filename):
+  def _BuildFromSourcePackage(
+      self, source_package_filename, rpmbuild_flags=u'-ta'):
     """Builds the rpms directly from the source package file.
 
     For this to work the source package needs to contain a valid rpm .spec file.
 
     Args:
-      source_filename (str): name of the source package file.
+      source_package_filename (str): name of the source package file.
+      rpmbuild_flags (Optional(str)): rpmbuild flags.
 
     Returns:
       bool: True if successful, False otherwise.
     """
-    command = u'rpmbuild -ta {0:s} > {1:s} 2>&1'.format(
-        source_filename, self.LOG_FILENAME)
+    command = u'rpmbuild {0:s} {1:s} > {2:s} 2>&1'.format(
+        rpmbuild_flags, source_package_filename, self.LOG_FILENAME)
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -2769,6 +2587,20 @@ class RPMBuildHelper(BuildHelper):
     command = u'rpm -qi {0:s} >/dev/null 2>&1'.format(package_name)
     exit_code = subprocess.call(command, shell=True)
     return exit_code == 0
+
+  def _CopySourcePackageToRPMBuildSources(self, source_package_filename):
+    """Copies the source package to the rpmbuild SOURCES directory.
+
+    Args:
+      source_package_filename (str): name of the source package file.
+    """
+    rpm_source_package_path = os.path.join(
+        self._rpmbuild_sources_path, source_package_filename)
+
+    if not os.path.exists(rpm_source_package_path):
+      self._CreateRPMbuildDirectories()
+
+      shutil.copy(source_package_filename, rpm_source_package_path)
 
   def _CreateRPMbuildDirectories(self):
     """Creates the rpmbuild and sub directories."""
@@ -2791,17 +2623,17 @@ class RPMBuildHelper(BuildHelper):
     spec_filename = os.path.join(
         self._rpmbuild_specs_path, u'{0:s}.spec'.format(project_name))
 
-    spec_file = open(spec_filename, 'w')
-    spec_file.write(spec_file_data)
-    spec_file.close()
+    rpm_spec_file = open(spec_filename, 'w')
+    rpm_spec_file.write(spec_file_data)
+    rpm_spec_file.close()
 
-  def _CopySourceFile(self, source_filename):
+  def _CopySourceFile(self, source_package_filename):
     """Copies the source file to the rpmbuild directory.
 
     Args:
-      source_filename (str): name of the source package file.
+      source_package_filename (str): name of the source package file.
     """
-    shutil.copy(source_filename, self._rpmbuild_sources_path)
+    shutil.copy(source_package_filename, self._rpmbuild_sources_path)
 
   def _GetFilenameSafeProjectInformation(self, source_helper_object):
     """Determines the filename safe project name and version.
@@ -2861,33 +2693,30 @@ class RPMBuildHelper(BuildHelper):
 
     return missing_packages
 
-  def CheckBuildRequired(self, source_helper_object):
-    """Checks if a build is required.
+
+class RPMBuildHelper(BaseRPMBuildHelper):
+  """Class that helps in building rpm packages (.rpm)."""
+
+  def _RemoveBuildDirectory(self, project_name, project_version):
+    """Removes build directory.
 
     Args:
-      source_helper_object (SourceHelper): source helper.
-
-    Returns:
-      bool: True if a build is required, False otherwise.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
     """
-    project_name, project_version = self._GetFilenameSafeProjectInformation(
-        source_helper_object)
+    filename = u'{0:s}-{1!s}'.format(project_name, project_version)
+    filename = os.path.join(self.rpmbuild_path, u'BUILD', filename)
 
-    rpm_filename = u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture)
+    logging.info(u'Removing: {0:s}'.format(filename))
+    shutil.rmtree(filename)
 
-    return not os.path.exists(rpm_filename)
-
-  def Clean(self, source_helper_object):
-    """Cleans the rpmbuild directory.
+  def _RemoveOlderBuildDirectory(self, project_name, project_version):
+    """Removes previous versions of build directories.
 
     Args:
-      source_helper_object (SourceHelper): source helper.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
     """
-    project_name, project_version = self._GetFilenameSafeProjectInformation(
-        source_helper_object)
-
-    # Remove previous versions build directories.
     filenames_to_ignore = u'{0:s}-{1!s}'.format(
         project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
@@ -2901,7 +2730,13 @@ class RPMBuildHelper(BuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         shutil.rmtree(filename)
 
-    # Remove previous versions of rpms.
+  def _RemoveOlderRPMs(self, project_name, project_version):
+    """Removes previous versions of .rpm files.
+
+    Args:
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+    """
     filenames_to_ignore = u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
         project_name, project_version, self.architecture)
     filenames_to_ignore = re.compile(filenames_to_ignore)
@@ -2924,43 +2759,22 @@ class RPMBuildHelper(BuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    # Remove previous versions of python rpms.
-    filenames_to_ignore = u'python*-{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      bool: True if a build is required, False otherwise.
+    """
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
+
+    rpm_filename = u'{0:s}-{1!s}-1.{2:s}.rpm'.format(
         project_name, project_version, self.architecture)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    rpm_filenames_glob = u'python*-{0:s}-*-1.{1:s}.rpm'.format(
-        project_name, self.architecture)
-    filenames = glob.glob(rpm_filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    filenames_glob = os.path.join(
-        self.rpmbuild_path, u'RPMS', self.architecture, rpm_filenames_glob)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove previous versions of source rpms.
-    filenames_to_ignore = u'{0:s}-.*{1!s}-1.src.rpm'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
-
-    filenames_glob = os.path.join(
-        self.rpmbuild_path, u'SRPMS',
-        u'{0:s}-*-1.src.rpm'.format(project_name))
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
+    return not os.path.exists(rpm_filename)
 
 
 class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
@@ -2989,56 +2803,49 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
-    if not source_filename:
+    source_package_filename = source_helper_object.Download()
+    if not source_package_filename:
       logging.info(u'Download of: {0:s} failed'.format(
           source_helper_object.project_name))
       return False
 
-    logging.info(u'Building rpm of: {0:s}'.format(source_filename))
+    logging.info(u'Building rpm of: {0:s}'.format(source_package_filename))
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    # rpmbuild wants the project filename without the status indication.
-    rpm_source_filename = u'{0:s}-{1!s}.tar.gz'.format(
+    # rpmbuild wants the source package filename without the status indication.
+    rpm_source_package_filename = u'{0:s}-{1!s}.tar.gz'.format(
         project_name, project_version)
-    os.rename(source_filename, rpm_source_filename)
+    os.rename(source_package_filename, rpm_source_package_filename)
 
-    build_successful = self._BuildFromSourcePackage(rpm_source_filename)
+    build_successful = self._BuildFromSourcePackage(
+        rpm_source_package_filename, rpmbuild_flags=u'-tb')
 
     if build_successful:
       self._MoveRPMs(project_name, project_version)
+      self._RemoveBuildDirectory(project_name, project_version)
 
-      # Remove BUILD directory.
-      filename = os.path.join(
-          self.rpmbuild_path, u'BUILD', u'{0:s}-{1!s}'.format(
-              project_name, project_version))
-      logging.info(u'Removing: {0:s}'.format(filename))
-      shutil.rmtree(filename)
-
-      # Remove SRPMS file.
-      filename = os.path.join(
-          self.rpmbuild_path, u'SRPMS', u'{0:s}-{1!s}-1.src.rpm'.format(
-              project_name, project_version))
-      logging.info(u'Removing: {0:s}'.format(filename))
-      os.remove(filename)
-
-    # Change the project filename back to the original.
-    os.rename(rpm_source_filename, source_filename)
+    # Change the source package filename back to the original.
+    os.rename(rpm_source_package_filename, source_package_filename)
 
     return build_successful
+
+  def Clean(self, source_helper_object):
+    """Cleans the rpmbuild directory.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+    """
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
+
+    self._RemoveOlderBuildDirectory(project_name, project_version)
+    self._RemoveOlderRPMs(project_name, project_version)
 
 
 class SetupPyRPMBuildHelper(RPMBuildHelper):
   """Class that helps in building rpm packages (.rpm)."""
-
-  _DOC_FILENAMES = [
-      u'CHANGES', u'CHANGES.txt', u'CHANGES.TXT',
-      u'README', u'README.txt', u'README.TXT']
-
-  _LICENSE_FILENAMES = [
-      u'LICENSE', u'LICENSE.txt', u'LICENSE.TXT']
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -3052,17 +2859,6 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     if not project_definition.architecture_dependent:
       self.architecture = u'noarch'
 
-  def _IsPython2Only(self):
-    """Determines if the project only supports Python version 2.
-
-    Note that Python 3 is supported as of 3.4 any earlier version is not
-    seen as compatible.
-
-    Returns:
-      bool: True if the project only support Python version 2.
-    """
-    return u'python2_only' in self._project_definition.build_options
-
   def _GenerateSpecFile(self, source_filename, source_helper_object):
     """Generates the rpm spec file.
 
@@ -3073,20 +2869,17 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     Returns:
       str: path of the generated rpm spec file or None.
     """
-    # Have setup.py generate the .spec file.
     source_directory = source_helper_object.Create()
     if not source_directory:
       logging.error(
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return
 
+    spec_file_generator = spec_file.RPMSpecFileGenerator()
+
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
-    command = u'{0:s} setup.py bdist_rpm --spec-only >> {1:s} 2>&1'.format(
-        sys.executable, log_file_path)
-    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
+    if not spec_file_generator.GenerateWithSetupPy(
+        source_directory, log_file_path):
       return
 
     project_name = source_helper_object.project_name
@@ -3100,207 +2893,16 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       project_prefix = u''
 
     spec_filename = u'{0:s}.spec'.format(project_name)
-    spec_file_path = os.path.join(
-        source_directory, u'dist', u'{0:s}{1:s}'.format(
-            project_prefix, spec_filename))
-    rpm_spec_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
+    input_file_path = u'{0:s}{1:s}'.format(project_prefix, spec_filename)
+    input_file_path = os.path.join(source_directory, u'dist', input_file_path)
+    output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
-    python2_only = self._IsPython2Only()
+    if not spec_file_generator.RewriteSetupPyGenerateFile(
+        self._project_definition, source_directory, project_name,
+        input_file_path, output_file_path):
+      return
 
-    rpm_build_dependencies = [u'python2-setuptools']
-    if self._project_definition.architecture_dependent:
-      rpm_build_dependencies.append(u'python-devel')
-
-    if not python2_only:
-      rpm_build_dependencies.append(u'python3-setuptools')
-      if self._project_definition.architecture_dependent:
-        rpm_build_dependencies.append(u'python3-devel')
-
-    if self._project_definition.rpm_build_dependencies:
-      rpm_build_dependencies.extend(
-          self._project_definition.rpm_build_dependencies)
-
-    # TODO: check if already prefixed with python-
-
-    output_file_object = open(rpm_spec_file_path, 'wb')
-    description = b''
-    requires = b''
-    summary = b''
-    version = b''
-    in_description = False
-    has_build_requires = False
-    has_python_package = False
-    has_python3_package = False
-    with open(spec_file_path, 'r+b') as file_object:
-      for line in file_object.readlines():
-        if line.startswith(b'%') and in_description:
-          in_description = False
-
-          if self._project_definition.description_long:
-            description = u'{0:s}\n\n'.format(
-                self._project_definition.description_long)
-
-          output_file_object.write(description)
-
-        if line.startswith(b'%define name '):
-          # Need to override the project name for projects that prefix
-          # their name with "python-" in setup.py but do not use it
-          # for their source package name.
-          line = b'%define name {0:s}\n'.format(project_name)
-
-        elif line.startswith(b'%define version '):
-          version = line[16:-1]
-
-        elif not summary and line.startswith(b'Summary: '):
-          summary = line
-
-        elif (not description and not requires and
-              line.startswith(b'Requires: ')):
-          requires = line
-          continue
-
-        elif line.startswith(b'BuildArch: noarch'):
-          if self._project_definition.architecture_dependent:
-            continue
-
-        elif line.startswith(b'BuildRequires: '):
-          has_build_requires = True
-          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
-              rpm_build_dependencies))
-
-        elif line == b'\n' and summary and not has_build_requires:
-          has_build_requires = True
-          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
-              rpm_build_dependencies))
-
-        elif line.startswith(b'%description') and not description:
-          in_description = True
-
-        elif line.startswith(b'%package -n python-'):
-          has_python_package = True
-
-        elif line.startswith(b'%package -n python3-'):
-          has_python3_package = True
-
-        elif line.startswith(b'%prep'):
-          if not has_python_package:
-            python_requires = requires
-
-            output_file_object.write((
-                b'%package -n python-%{{name}}\n'
-                b'{0:s}'
-                b'{1:s}'
-                b'\n'
-                b'%description -n python-%{{name}}\n'
-                b'{2:s}').format(summary, python_requires, description))
-
-          if not python2_only and not has_python3_package:
-            # TODO: convert python 2 package names to python 3
-            python3_requires = requires
-
-            output_file_object.write((
-                b'%package -n python3-%{{name}}\n'
-                b'{0:s}'
-                b'{1:s}'
-                b'\n'
-                b'%description -n python3-%{{name}}\n'
-                b'{2:s}').format(summary, python3_requires, description))
-
-        elif line == b'%setup -n %{name}-%{unmangled_version}\n':
-          line = b'%autosetup -n %{name}-%{unmangled_version}\n'
-
-        elif line.startswith(b'python setup.py build'):
-          if python2_only:
-            line = b'python2 setup.py build\n'
-          else:
-            line = (
-                b'python2 setup.py build\n'
-                b'python3 setup.py build\n')
-
-        elif line.startswith(b'python setup.py install'):
-          if python2_only:
-            line = (
-                b'python2 setup.py install -O1 --root=%{buildroot}\n'
-                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
-          else:
-            line = (
-                b'python2 setup.py install -O1 --root=%{buildroot}\n'
-                b'python3 setup.py install -O1 --root=%{buildroot}\n'
-                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
-
-        elif line == b'rm -rf $RPM_BUILD_ROOT\n':
-          line = b'rm -rf %{buildroot}\n'
-
-        elif line.startswith(b'%files'):
-          break
-
-        elif in_description:
-          # Ignore leading white lines in the description.
-          if not description and line == b'\n':
-            continue
-
-          description = b''.join([description, line])
-          continue
-
-        output_file_object.write(line)
-
-    license_line = b''
-    for license_file in self._LICENSE_FILENAMES:
-      license_file_path = os.path.join(source_directory, license_file)
-      if os.path.exists(license_file_path):
-        license_line = b'%license {0:s}\n'.format(license_file)
-        break
-
-    doc_files = []
-    for doc_file in self._DOC_FILENAMES:
-      doc_file_path = os.path.join(source_directory, doc_file)
-      if os.path.exists(doc_file_path):
-        doc_files.append(doc_file)
-
-    doc_line = b''
-    if doc_files:
-      doc_line = b'%doc {0:s}\n'.format(b' '.join(doc_files))
-
-    if not self._project_definition.architecture_dependent:
-      lib_dir = '%{_exec_prefix}/lib'
-    else:
-      lib_dir = '%{_libdir}'
-
-    output_file_object.write((
-        b'%files -n python-%{{name}}\n'
-        b'{0:s}'
-        b'{1:s}'
-        b'{2:s}/python2*/*\n').format(
-            license_line, doc_line, lib_dir))
-
-    if not python2_only:
-      output_file_object.write((
-          b'\n'
-          b'%files -n python3-%{{name}}\n'
-          b'{0:s}'
-          b'{1:s}'
-          b'{2:s}/python3*/*\n').format(
-              license_line, doc_line, lib_dir))
-
-    # TODO: add bindir support.
-    output_file_object.write((
-        b'\n'
-        b'%exclude %{_bindir}/*\n'))
-
-    # TODO: add shared data support.
-
-    date_time = datetime.datetime.now()
-    date_time_string = date_time.strftime(u'%a %b %e %Y')
-
-    output_file_object.write((
-        b'\n'
-        b'%changelog\n'
-        b'* {0:s} Joachim Metz <joachim.metz@gmail.com> {1:s}-1\n'
-        b'- Auto-generated\n').format(date_time_string, version))
-
-    output_file_object.close()
-
-    return rpm_spec_file_path
+    return output_file_path
 
   def _MoveRPMs(self, project_name, project_version):
     """Moves the rpms from the rpmbuild directory into the current directory.
@@ -3343,11 +2945,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    rpm_source_path = os.path.join(
-        self._rpmbuild_sources_path, source_filename)
-    if not os.path.exists(rpm_source_path):
-      # Copy the source package to the package directory if needed.
-      shutil.copy(source_filename, rpm_source_path)
+    self._CopySourcePackageToRPMBuildSources(source_filename)
 
     rpm_spec_file_path = self._GenerateSpecFile(
         source_filename, source_helper_object)
@@ -3355,24 +2953,12 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       logging.error(u'Unable to generate rpm spec file.')
       return False
 
-    build_successful = self._BuildFromSpecFile(rpm_spec_file_path)
+    build_successful = self._BuildFromSpecFile(
+        rpm_spec_file_path, rpmbuild_flags=u'-bb')
 
     if build_successful:
       self._MoveRPMs(project_name, project_version)
-
-      # Remove BUILD directory.
-      filename = os.path.join(
-          self.rpmbuild_path, u'BUILD', u'{0:s}-{1!s}'.format(
-              project_name, project_version))
-      logging.info(u'Removing: {0:s}'.format(filename))
-      shutil.rmtree(filename)
-
-      # Remove SRPMS file.
-      filename = os.path.join(
-          self.rpmbuild_path, u'SRPMS', u'{0:s}-{1!s}-1.src.rpm'.format(
-              project_name, project_version))
-      logging.info(u'Removing: {0:s}'.format(filename))
-      os.remove(filename)
+      self._RemoveBuildDirectory(project_name, project_version)
 
     return build_successful
 
@@ -3392,18 +2978,212 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    filenames_to_ignore = u'{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture)
+    self._RemoveOlderBuildDirectory(project_name, project_version)
+    self._RemoveOlderRPMs(project_name, project_version)
+
+
+class SRPMBuildHelper(BaseRPMBuildHelper):
+  """Class that helps in building source rpm packages (.src.rpm)."""
+
+  def _MoveRPMs(self, project_name, project_version):
+    """Moves the rpms from the rpmbuild directory into the current directory.
+
+    Args:
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+    """
+    filenames_glob = u'{0:s}-*{1!s}-1.src.rpm'.format(
+        project_name, project_version)
+    filenames_glob = os.path.join(self._rpmbuild_srpms_path, filenames_glob)
+
+    self._MoveFilesToCurrentDirectory(filenames_glob)
+
+  def _RemoveOlderSourceRPMs(self, project_name, project_version):
+    """Removes previous versions of .src.rpm files.
+
+    Args:
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+    """
+    filenames_to_ignore = u'{0:s}-.*{1!s}-1.src.rpm'.format(
+        project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    filenames_glob = u'{0:s}-*-1.{1:s}.rpm'.format(
-        project_name, self.architecture)
+    filenames_glob = os.path.join(
+        self.rpmbuild_path, u'SRPMS',
+        u'{0:s}-*-1.src.rpm'.format(project_name))
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
+
+  def CheckBuildRequired(self, source_helper_object):
+    """Checks if a build is required.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      bool: True if a build is required, False otherwise.
+    """
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
+
+    srpm_filename = u'{0:s}-{1!s}-1.src.rpm'.format(
+        project_name, project_version)
+
+    return not os.path.exists(srpm_filename)
+
+  def Clean(self, source_helper_object):
+    """Cleans the rpmbuild directory.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+    """
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
+
+    self._RemoveOlderSourceRPMs(project_name, project_version)
+
+
+class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
+  """Class that helps in building source rpm packages (.src.rpm)."""
+
+  def Build(self, source_helper_object):
+    """Builds the source rpm.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      bool: True if successful, False otherwise.
+    """
+    source_package_filename = source_helper_object.Download()
+    if not source_package_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    logging.info(u'Building source rpm of: {0:s}'.format(
+        source_package_filename))
+
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
+
+    # rpmbuild wants the source package filename without the status indication.
+    rpm_source_package_filename = u'{0:s}-{1!s}.tar.gz'.format(
+        project_name, project_version)
+    os.rename(source_package_filename, rpm_source_package_filename)
+
+    build_successful = self._BuildFromSourcePackage(
+        rpm_source_package_filename, rpmbuild_flags=u'-ts')
+
+    if build_successful:
+      self._MoveRPMs(project_name, project_version)
+
+    # Change the source package filename back to the original.
+    os.rename(rpm_source_package_filename, source_package_filename)
+
+    return build_successful
+
+
+class SetupPySRPMBuildHelper(SRPMBuildHelper):
+  """Class that helps in building source rpm packages (.src.rpm)."""
+
+  def __init__(self, project_definition, l2tdevtools_path):
+    """Initializes a build helper.
+
+    Args:
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
+    """
+    super(SetupPySRPMBuildHelper, self).__init__(
+        project_definition, l2tdevtools_path)
+    if not project_definition.architecture_dependent:
+      self.architecture = u'noarch'
+
+  def _GenerateSpecFile(self, source_filename, source_helper_object):
+    """Generates the rpm spec file.
+
+    Args:
+      source_filename (str): name of the source package file.
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      str: path of the generated rpm spec file or None.
+    """
+    source_directory = source_helper_object.Create()
+    if not source_directory:
+      logging.error(
+          u'Extraction of source package: {0:s} failed'.format(source_filename))
+      return
+
+    spec_file_generator = spec_file.RPMSpecFileGenerator()
+
+    log_file_path = os.path.join(u'..', self.LOG_FILENAME)
+    if not spec_file_generator.GenerateWithSetupPy(
+        source_directory, log_file_path):
+      return
+
+    project_name = source_helper_object.project_name
+    if project_name.startswith(u'python-'):
+      project_name = project_name[7:]
+
+    # TODO: move this to configuration.
+    if project_name == u'dateutil':
+      project_prefix = u'python-'
+    else:
+      project_prefix = u''
+
+    spec_filename = u'{0:s}.spec'.format(project_name)
+    input_file_path = u'{0:s}{1:s}'.format(project_prefix, spec_filename)
+    input_file_path = os.path.join(source_directory, u'dist', input_file_path)
+    output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
+
+    if not spec_file_generator.RewriteSetupPyGenerateFile(
+        self._project_definition, source_directory, project_name,
+        input_file_path, output_file_path):
+      return
+
+    return output_file_path
+
+  def Build(self, source_helper_object):
+    """Builds the source rpm.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      bool: True if successful, False otherwise.
+    """
+    source_filename = source_helper_object.Download()
+    if not source_filename:
+      logging.info(u'Download of: {0:s} failed'.format(
+          source_helper_object.project_name))
+      return False
+
+    logging.info(u'Building source rpm of: {0:s}'.format(source_filename))
+
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
+
+    self._CopySourcePackageToRPMBuildSources(source_filename)
+
+    rpm_spec_file_path = self._GenerateSpecFile(
+        source_filename, source_helper_object)
+    if not rpm_spec_file_path:
+      logging.error(u'Unable to generate rpm spec file.')
+      return False
+
+    build_successful = self._BuildFromSpecFile(
+        rpm_spec_file_path, rpmbuild_flags=u'-bs')
+
+    if build_successful:
+      self._MoveRPMs(project_name, project_version)
+
+    return build_successful
 
 
 class SourceBuildHelper(BuildHelper):
@@ -3520,6 +3300,7 @@ class BuildHelperFactory(object):
       u'pkg': ConfigureMakePKGBuildHelper,
       u'rpm': ConfigureMakeRPMBuildHelper,
       u'source': ConfigureMakeSourceBuildHelper,
+      u'srpm': ConfigureMakeSRPMBuildHelper,
   }
 
   _SETUP_PY_BUILD_HELPER_CLASSES = {
@@ -3530,6 +3311,7 @@ class BuildHelperFactory(object):
       u'pkg': SetupPyPKGBuildHelper,
       u'rpm': SetupPyRPMBuildHelper,
       u'source': SetupPySourceBuildHelper,
+      u'srpm': SetupPySRPMBuildHelper,
   }
 
   @classmethod

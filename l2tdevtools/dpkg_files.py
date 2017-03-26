@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Dpkg build files generator object implementations."""
+"""Dpkg build files generator."""
 
 import logging
 import os

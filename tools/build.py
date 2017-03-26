@@ -35,7 +35,7 @@ class ProjectBuilder(object):
     """Initializes the project builder.
 
     Args:
-      build_target: the build target.
+      build_target (str): build target.
     """
     super(ProjectBuilder, self).__init__()
     self._build_target = build_target
@@ -45,12 +45,11 @@ class ProjectBuilder(object):
     """Builds a project.
 
     Args:
-      download_helper_object: the download helper (instance of DownloadHelper).
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
+      download_helper_object (DownloadHelper): download helper.
+      project_definition (ProjectDefinition): project definition.
 
     Returns:
-      True if the build is successful or False on error.
+      bool: True if the build is successful or False on error.
     """
     project_name = project_definition.name
 
@@ -116,12 +115,12 @@ class ProjectBuilder(object):
     """Builds a project for a specific distribution.
 
     Args:
-      build_helper_object: the build helper (instance of BuildHelper).
-      source_helper_object: the source helper (instance of SourceHelper).
-      distribution: a string containing the name of the distribution.
+      build_helper_object (BuildHelper): build helper.
+      source_helper_object (SourceHelper): source helper.
+      distribution (str): name of the distribution.
 
     Returns:
-      True if the build is successful or False on error.
+      bool: True if the build is successful or False on error.
     """
     if distribution:
       build_helper_object.distribution = distribution
@@ -159,11 +158,10 @@ class ProjectBuilder(object):
     """Builds a project.
 
     Args:
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
+      project_definition (ProjectDefinition): project definition.
 
     Returns:
-      True if the build is successful or False on error.
+      bool: True if the build is successful or False on error.
 
     Raises:
       ValueError: if the project type is unsupported.
@@ -183,11 +181,11 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   build_targets = frozenset([
-      u'download', u'dpkg', u'dpkg-source', u'msi', u'osc', u'pkg', u'rpm',
-      u'source'])
+      u'download', u'dpkg', u'dpkg-source', u'msi', u'osc', u'pkg',
+      u'rpm', u'source', u'srpm'])
 
   argument_parser = argparse.ArgumentParser(description=(
       u'Downloads and builds the latest versions of projects.'))
