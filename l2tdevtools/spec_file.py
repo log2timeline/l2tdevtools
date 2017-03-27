@@ -18,6 +18,114 @@ class RPMSpecFileGenerator(object):
   _LICENSE_FILENAMES = [
       u'LICENSE', u'LICENSE.txt', u'LICENSE.TXT']
 
+  def _GetBuildDefinition(self, python2_only):
+    """Retrieves the build definition.
+
+    Args:
+      python2_only (bool): True if the spec file should build Python 2
+          packages only.
+
+    Returns:
+      str: build definition.
+    """
+    lines = [b'python2 setup.py build']
+    if not python2_only:
+      lines.append(b'python3 setup.py build')
+
+    return b'\n'.join(lines)
+
+  def _GetDocumentationFilesDefinition(self, source_directory):
+    """Retrieves the documentation files definition.
+
+    Args:
+      source_directory (str): path of the source directory.
+
+    Returns:
+      str: documentation files definition.
+    """
+    doc_files = []
+    for doc_file in self._DOC_FILENAMES:
+      doc_file_path = os.path.join(source_directory, doc_file)
+      if os.path.exists(doc_file_path):
+        doc_files.append(doc_file)
+
+    lines = b''
+    if doc_files:
+      lines = b'%doc {0:s}\n'.format(b' '.join(doc_files))
+
+    return lines
+
+  def _GetInstallDefinition(self, python2_only):
+    """Retrieves the install definition.
+
+    Args:
+      python2_only (bool): True if the spec file should build Python 2
+          packages only.
+
+    Returns:
+      str: install definition.
+    """
+    lines = [b'python2 setup.py install -O1 --root=%{buildroot}']
+    if not python2_only:
+      lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
+
+    lines.append(b'rm -rf %{buildroot}/usr/share/doc/%{name}/')
+    return b'\n'.join(lines)
+
+  def _GetLicenseFileDefinition(self, source_directory):
+    """Retrieves the license file definition.
+
+    Args:
+      source_directory (str): path of the source directory.
+
+    Returns:
+      str: license file definition.
+    """
+    lines = b''
+    for license_file in self._LICENSE_FILENAMES:
+      license_file_path = os.path.join(source_directory, license_file)
+      if os.path.exists(license_file_path):
+        lines = b'%license {0:s}\n'.format(license_file)
+        break
+
+    return lines
+
+  def _WritePythonPackageDefinition(
+      self, output_file_object, summary, requires, description):
+    """Writes the Python package definition.
+
+    Args:
+      output_file_object (file): output file-like object to write to.
+      summary (str): package summary.
+      requires (str): package requires definition.
+      description (str): package description.
+    """
+    output_file_object.write((
+        b'%package -n python-%{{name}}\n'
+        b'{0:s}'
+        b'{1:s}'
+        b'\n'
+        b'%description -n python-%{{name}}\n'
+        b'{2:s}').format(summary, requires, description))
+
+  def _WritePython3PackageDefinition(
+      self, output_file_object, summary, requires, description):
+    """Writes the Python 3 package definition.
+
+    Args:
+      output_file_object (file): output file-like object to write to.
+      summary (str): package summary.
+      requires (str): package requires definition.
+      description (str): package description.
+    """
+    output_file_object.write((
+        b'%package -n python3-%{{name}}\n'
+        b'{0:s}'
+        b'{1:s}'
+        b'\n'
+        b'%description -n python3-%{{name}}\n'
+        b'{2:s}').format(summary, requires, description))
+
   def GenerateWithSetupPy(self, source_directory, build_log_file):
     """Generates the RPM spec file with setup.py.
 
@@ -134,49 +242,22 @@ class RPMSpecFileGenerator(object):
 
         elif line.startswith(b'%prep'):
           if not has_python_package:
-            python_requires = requires
-
-            output_file_object.write((
-                b'%package -n python-%{{name}}\n'
-                b'{0:s}'
-                b'{1:s}'
-                b'\n'
-                b'%description -n python-%{{name}}\n'
-                b'{2:s}').format(summary, python_requires, description))
+            self._WritePythonPackageDefinition(
+                output_file_object, summary, requires, description)
 
           if not python2_only and not has_python3_package:
             # TODO: convert python 2 package names to python 3
-            python3_requires = requires
-
-            output_file_object.write((
-                b'%package -n python3-%{{name}}\n'
-                b'{0:s}'
-                b'{1:s}'
-                b'\n'
-                b'%description -n python3-%{{name}}\n'
-                b'{2:s}').format(summary, python3_requires, description))
+            self._WritePython3PackageDefinition(
+                output_file_object, summary, requires, description)
 
         elif line == b'%setup -n %{name}-%{unmangled_version}\n':
           line = b'%autosetup -n %{name}-%{unmangled_version}\n'
 
         elif line.startswith(b'python setup.py build'):
-          if python2_only:
-            line = b'python2 setup.py build\n'
-          else:
-            line = (
-                b'python2 setup.py build\n'
-                b'python3 setup.py build\n')
+          line = self._GetBuildDefinition(python2_only)
 
         elif line.startswith(b'python setup.py install'):
-          if python2_only:
-            line = (
-                b'python2 setup.py install -O1 --root=%{buildroot}\n'
-                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
-          else:
-            line = (
-                b'python2 setup.py install -O1 --root=%{buildroot}\n'
-                b'python3 setup.py install -O1 --root=%{buildroot}\n'
-                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
+          line = self._GetInstallDefinition(python2_only)
 
         elif line == b'rm -rf $RPM_BUILD_ROOT\n':
           line = b'rm -rf %{buildroot}\n'
@@ -194,22 +275,9 @@ class RPMSpecFileGenerator(object):
 
         output_file_object.write(line)
 
-    license_line = b''
-    for license_file in self._LICENSE_FILENAMES:
-      license_file_path = os.path.join(source_directory, license_file)
-      if os.path.exists(license_file_path):
-        license_line = b'%license {0:s}\n'.format(license_file)
-        break
+    license_line = self._GetLicenseFileDefinition(source_directory)
 
-    doc_files = []
-    for doc_file in self._DOC_FILENAMES:
-      doc_file_path = os.path.join(source_directory, doc_file)
-      if os.path.exists(doc_file_path):
-        doc_files.append(doc_file)
-
-    doc_line = b''
-    if doc_files:
-      doc_line = b'%doc {0:s}\n'.format(b' '.join(doc_files))
+    doc_line = self._GetDocumentationFilesDefinition(source_directory)
 
     if not project_definition.architecture_dependent:
       lib_dir = '%{_exec_prefix}/lib'
@@ -345,49 +413,22 @@ class RPMSpecFileGenerator(object):
 
         elif line.startswith(b'%prep'):
           if not has_python_package:
-            python_requires = requires
-
-            output_file_object.write((
-                b'%package -n python-%{{name}}\n'
-                b'{0:s}'
-                b'{1:s}'
-                b'\n'
-                b'%description -n python-%{{name}}\n'
-                b'{2:s}').format(summary, python_requires, description))
+            self._WritePythonPackageDefinition(
+                output_file_object, summary, requires, description)
 
           if not python2_only and not has_python3_package:
             # TODO: convert python 2 package names to python 3
-            python3_requires = requires
-
-            output_file_object.write((
-                b'%package -n python3-%{{name}}\n'
-                b'{0:s}'
-                b'{1:s}'
-                b'\n'
-                b'%description -n python3-%{{name}}\n'
-                b'{2:s}').format(summary, python3_requires, description))
+            self._WritePython3PackageDefinition(
+                output_file_object, summary, requires, description)
 
         elif line == b'%setup -n %{name}-%{unmangled_version}\n':
           line = b'%autosetup -n %{name}-%{unmangled_version}\n'
 
         elif line.startswith(b'python setup.py build'):
-          if python2_only:
-            line = b'python2 setup.py build\n'
-          else:
-            line = (
-                b'python2 setup.py build\n'
-                b'python3 setup.py build\n')
+          line = self._GetBuildDefinition(python2_only)
 
         elif line.startswith(b'python setup.py install'):
-          if python2_only:
-            line = (
-                b'python2 setup.py install -O1 --root=%{buildroot}\n'
-                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
-          else:
-            line = (
-                b'python2 setup.py install -O1 --root=%{buildroot}\n'
-                b'python3 setup.py install -O1 --root=%{buildroot}\n'
-                b'rm -rf %{buildroot}/usr/share/doc/%{name}/\n')
+          line = self._GetInstallDefinition(python2_only)
 
         elif line == b'rm -rf $RPM_BUILD_ROOT\n':
           line = b'rm -rf %{buildroot}\n'
@@ -405,22 +446,9 @@ class RPMSpecFileGenerator(object):
 
         output_file_object.write(line)
 
-    license_line = b''
-    for license_file in self._LICENSE_FILENAMES:
-      license_file_path = os.path.join(source_directory, license_file)
-      if os.path.exists(license_file_path):
-        license_line = b'%license {0:s}\n'.format(license_file)
-        break
+    license_line = self._GetLicenseFileDefinition(source_directory)
 
-    doc_files = []
-    for doc_file in self._DOC_FILENAMES:
-      doc_file_path = os.path.join(source_directory, doc_file)
-      if os.path.exists(doc_file_path):
-        doc_files.append(doc_file)
-
-    doc_line = b''
-    if doc_files:
-      doc_line = b'%doc {0:s}\n'.format(b' '.join(doc_files))
+    doc_line = self._GetDocumentationFilesDefinition(source_directory)
 
     # Add _libdir support for arch dependent.
 
