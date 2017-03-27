@@ -53,7 +53,7 @@ class CLIHelper(object):
 
     output, error = process.communicate()
     if process.returncode != 0:
-      logging.error(u'Running: "{0:s}" failed with error: {1:s}.'.format(
+      logging.error(u'Running: "{0:s}" failed with error: {1!s}.'.format(
           command, error))
 
     return process.returncode, output, error
@@ -128,7 +128,7 @@ class CodeReviewHelper(CLIHelper):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed publish to codereview issue: {0!s} with error: {1:s}'.format(
+          u'Failed publish to codereview issue: {0!s} with error: {1!s}'.format(
               issue_number, exception))
       return False
 
@@ -173,7 +173,7 @@ class CodeReviewHelper(CLIHelper):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed closing codereview issue: {0!s} with error: {1:s}'.format(
+          u'Failed closing codereview issue: {0!s} with error: {1!s}'.format(
               issue_number, exception))
       return False
 
@@ -291,7 +291,7 @@ class CodeReviewHelper(CLIHelper):
         url_object = urllib_request.urlopen(request)
       except urllib_error.HTTPError as exception:
         logging.error(
-            u'Failed retrieving codereview XSRF token with error: {0:s}'.format(
+            u'Failed retrieving codereview XSRF token with error: {0!s}'.format(
                 exception))
         return
 
@@ -344,7 +344,7 @@ class CodeReviewHelper(CLIHelper):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed querying codereview issue: {0!s} with error: {1:s}'.format(
+          u'Failed querying codereview issue: {0!s} with error: {1!s}'.format(
               issue_number, exception))
       return
 
@@ -803,7 +803,7 @@ class GitHubHelper(object):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed creating pull request: {0!s} with error: {1:s}'.format(
+          u'Failed creating pull request: {0!s} with error: {1!s}'.format(
               codereview_issue_number, exception))
       return False
 
@@ -843,7 +843,7 @@ class GitHubHelper(object):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed querying github user: {0:s} with error: {1:s}'.format(
+          u'Failed querying github user: {0:s} with error: {1!s}'.format(
               username, exception))
       return
 
@@ -940,14 +940,14 @@ class ProjectHelper(CLIHelper):
         file_contents = file_object.read()
 
     except IOError as exception:
-      logging.error(u'Unable to read file with error: {0:s}'.format(exception))
+      logging.error(u'Unable to read file with error: {0!s}'.format(exception))
       return
 
     try:
       file_contents = file_contents.decode(u'utf-8')
     except UnicodeDecodeError as exception:
       logging.error(
-          u'Unable to read file with error: {0:s}'.format(exception))
+          u'Unable to read file with error: {0!s}'.format(exception))
       return
 
     return file_contents
@@ -1000,7 +1000,7 @@ class ProjectHelper(CLIHelper):
       dpkg_changelog_content = dpkg_changelog_content.encode(u'utf-8')
     except UnicodeEncodeError as exception:
       logging.error(
-          u'Unable to write dpkg changelog file with error: {0:s}'.format(
+          u'Unable to write dpkg changelog file with error: {0!s}'.format(
               exception))
       return False
 
@@ -1009,7 +1009,7 @@ class ProjectHelper(CLIHelper):
         file_object.write(dpkg_changelog_content)
     except IOError as exception:
       logging.error(
-          u'Unable to write dpkg changelog file with error: {0:s}'.format(
+          u'Unable to write dpkg changelog file with error: {0!s}'.format(
               exception))
       return False
 
@@ -1085,7 +1085,7 @@ class ProjectHelper(CLIHelper):
       version_file_contents = version_file_contents.encode(u'utf-8')
     except UnicodeEncodeError as exception:
       logging.error(
-          u'Unable to write version file with error: {0:s}'.format(exception))
+          u'Unable to write version file with error: {0!s}'.format(exception))
       return False
 
     try:
@@ -1094,7 +1094,7 @@ class ProjectHelper(CLIHelper):
 
     except IOError as exception:
       logging.error(
-          u'Unable to write version file with error: {0:s}'.format(exception))
+          u'Unable to write version file with error: {0!s}'.format(exception))
       return False
 
     return True
@@ -1183,7 +1183,7 @@ class ReadTheDocsHelper(object):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed triggering build with error: {0:s}'.format(
+          u'Failed triggering build with error: {0!s}'.format(
               exception))
       return False
 
