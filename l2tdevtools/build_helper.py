@@ -3089,6 +3089,8 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
     build_successful = self._BuildFromSourcePackage(
         rpm_source_package_filename, rpmbuild_flags=u'-ts')
 
+    # TODO: test binary build of source package?
+
     if build_successful:
       self._MoveRPMs(project_name, project_version)
 
@@ -3188,6 +3190,8 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
 
     build_successful = self._BuildFromSpecFile(
         rpm_spec_file_path, rpmbuild_flags=u'-bs')
+
+    # TODO: test binary build of source package?
 
     if build_successful:
       self._MoveRPMs(project_name, project_version)
