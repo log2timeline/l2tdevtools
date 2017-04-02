@@ -73,6 +73,7 @@ class RPMSpecFileGenerator(object):
       lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
 
     lines.append(b'rm -rf %{buildroot}/usr/share/doc/%{name}/')
+    lines.append(b'')
     return b'\n'.join(lines)
 
   def _GetLicenseFileDefinition(self, source_directory):
@@ -314,6 +315,11 @@ class RPMSpecFileGenerator(object):
             # TODO: convert python 2 package names to python 3
             self._WritePython3PackageDefinition(
                 output_file_object, summary, requires, description)
+
+          if project_name == u'PyYAML':
+            output_file_object.write(
+                b'%global debug_package %{nil}\n'
+                b'\n')
 
         elif line.startswith(b'%setup -n %{name}-%{unmangled_version}'):
           if project_name == u'efilter':
