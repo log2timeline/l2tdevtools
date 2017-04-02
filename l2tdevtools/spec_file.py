@@ -49,11 +49,11 @@ class RPMSpecFileGenerator(object):
       if os.path.exists(doc_file_path):
         doc_files.append(doc_file)
 
-    lines = b''
+    doc_file_definition = b''
     if doc_files:
-      lines = b'%doc {0:s}\n'.format(b' '.join(doc_files))
+      doc_file_definition = b'%doc {0:s}\n'.format(b' '.join(doc_files))
 
-    return lines
+    return doc_file_definition
 
   def _GetInstallDefinition(self, python2_only):
     """Retrieves the install definition.
@@ -81,14 +81,14 @@ class RPMSpecFileGenerator(object):
     Returns:
       str: license file definition.
     """
-    lines = b''
+    license_file_definition = b''
     for license_file in self._LICENSE_FILENAMES:
       license_file_path = os.path.join(source_directory, license_file)
       if os.path.exists(license_file_path):
-        lines = b'%license {0:s}\n'.format(license_file)
+        license_file_definition = b'%license {0:s}\n'.format(license_file)
         break
 
-    return lines
+    return license_file_definition
 
   def _WritePythonPackageDefinition(
       self, output_file_object, summary, requires, description):
@@ -146,7 +146,7 @@ class RPMSpecFileGenerator(object):
 
     return True
 
-  def RewriteSetupPyGenerateFile(
+  def RewriteSetupPyGeneratedFile(
       self, project_definition, source_directory, project_name, input_file,
       output_file):
     """Rewrites the RPM spec file generated with setup.py.
@@ -320,7 +320,7 @@ class RPMSpecFileGenerator(object):
 
     return True
 
-  def RewriteSetupPyGenerateFileForOSC(
+  def RewriteSetupPyGeneratedFileForOSC(
       self, project_definition, source_directory, project_name, input_file,
       output_file):
     """Rewrites the RPM spec file generated with setup.py for OSC.

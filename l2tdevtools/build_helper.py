@@ -2094,7 +2094,7 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     # Determine if the output file exists before it is generated.
     output_file_exists = os.path.exists(output_file_path)
 
-    if not spec_file_generator.RewriteSetupPyGenerateFileForOSC(
+    if not spec_file_generator.RewriteSetupPyGeneratedFileForOSC(
         self._project_definition, source_directory, project_name,
         input_file_path, output_file_path):
       return False
@@ -2897,7 +2897,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     input_file_path = os.path.join(source_directory, u'dist', input_file_path)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
-    if not spec_file_generator.RewriteSetupPyGenerateFile(
+    if not spec_file_generator.RewriteSetupPyGeneratedFile(
         self._project_definition, source_directory, project_name,
         input_file_path, output_file_path):
       return
@@ -3142,7 +3142,7 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     input_file_path = os.path.join(source_directory, u'dist', input_file_path)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
-    if not spec_file_generator.RewriteSetupPyGenerateFile(
+    if not spec_file_generator.RewriteSetupPyGeneratedFile(
         self._project_definition, source_directory, project_name,
         input_file_path, output_file_path):
       return
