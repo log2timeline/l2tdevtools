@@ -249,6 +249,15 @@ class RPMSpecFileGenerator(object):
 
         elif line.startswith(b'%define version '):
           version = line[16:-1]
+          if version.startswith(u'1!'):
+            version = version[2:]
+
+          if project_name == u'efilter':
+            line = u'%define version {0:s}\n'.format(version)
+
+        elif line.startswith(b'%define unmangled_version '):
+          if project_name == u'efilter':
+            line = u'%define unmangled_version {0:s}\n'.format(version)
 
         elif not summary and line.startswith(b'Summary: '):
           summary = line
