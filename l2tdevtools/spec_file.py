@@ -272,6 +272,11 @@ class RPMSpecFileGenerator(object):
                 u'BuildRoot: %{_tmppath}/'
                 u'dotty-%{version}-%{release}-buildroot\n')
 
+          elif project_name == u'psutil':
+            line = (
+                u'BuildRoot: %{_tmppath}/'
+                u'%{name}-release-%{version}-%{release}-buildroot\n')
+
         elif (not description and not requires and
               line.startswith(b'Requires: ')):
           requires = line
@@ -310,9 +315,11 @@ class RPMSpecFileGenerator(object):
             self._WritePython3PackageDefinition(
                 output_file_object, summary, requires, description)
 
-        elif line == b'%setup -n %{name}-%{unmangled_version}\n':
+        elif line.startswith(b'%setup -n %{name}-%{unmangled_version}'):
           if project_name == u'efilter':
             line = b'%autosetup -n dotty-%{unmangled_version}\n'
+          elif project_name == u'psutil':
+            line = b'%autosetup -n %{name}-release-%{unmangled_version}\n'
           else:
             line = b'%autosetup -n %{name}-%{unmangled_version}\n'
 
@@ -426,15 +433,15 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    osc_build_dependencies = [u'python-devel', u'python-setuptools']
+    rpm_build_dependencies = [u'python-devel', u'python-setuptools']
 
     if not python2_only:
-      osc_build_dependencies.append(u'python3-devel')
-      osc_build_dependencies.append(u'python3-setuptools')
+      rpm_build_dependencies.append(u'python3-devel')
+      rpm_build_dependencies.append(u'python3-setuptools')
 
-    if project_definition.osc_build_dependencies:
-      osc_build_dependencies.extend(
-          project_definition.osc_build_dependencies)
+    if project_definition.rpm_build_dependencies:
+      rpm_build_dependencies.extend(
+          project_definition.rpm_build_dependencies)
 
     # TODO: check if already prefixed with python-
 
@@ -442,7 +449,7 @@ class RPMSpecFileGenerator(object):
 
     result = self._RewriteSetupPyGeneratedFile(
         project_definition, source_directory, source_filename, project_name,
-        osc_build_dependencies, input_file, output_file_object)
+        rpm_build_dependencies, input_file, output_file_object)
 
     output_file_object.close()
 

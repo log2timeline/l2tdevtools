@@ -39,7 +39,6 @@ class ProjectDefinition(object):
     msi_name (str): MSI package name.
     name (str): name of the project.
     setup_name (str): project name used in setup.py.
-    osc_build_dependencies (list[str]): osc build dependencies.
     rpm_build_dependencies (list[str]): rpm build dependencies.
     patches (list[str]): patch file names.
     pkg_configure_options (list[str]): configure options when building a pkg.
@@ -74,7 +73,6 @@ class ProjectDefinition(object):
     self.maintainer = None
     self.msi_name = None
     self.name = name
-    self.osc_build_dependencies = None
     self.rpm_build_dependencies = None
     self.patches = None
     self.pkg_configure_options = None
@@ -229,8 +227,6 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'maintainer')
       project_definition.msi_name = self._GetConfigValue(
           config_parser, section_name, u'msi_name')
-      project_definition.osc_build_dependencies = self._GetConfigValue(
-          config_parser, section_name, u'osc_build_dependencies')
       project_definition.rpm_build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'rpm_build_dependencies')
       project_definition.patches = self._GetConfigValue(
@@ -288,13 +284,6 @@ class ProjectDefinitionReader(object):
       elif isinstance(project_definition.dpkg_dependencies, basestring):
         project_definition.dpkg_dependencies = (
             project_definition.dpkg_dependencies.split(u','))
-
-      if project_definition.osc_build_dependencies is None:
-        project_definition.osc_build_dependencies = []
-      elif isinstance(
-          project_definition.osc_build_dependencies, basestring):
-        project_definition.osc_build_dependencies = (
-            project_definition.osc_build_dependencies.split(u','))
 
       if project_definition.rpm_build_dependencies is None:
         project_definition.rpm_build_dependencies = []
