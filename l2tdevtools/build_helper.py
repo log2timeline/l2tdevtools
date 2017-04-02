@@ -898,7 +898,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
         source_helper_object)
 
     changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
-        package_name, project_version, self.version_suffix, self.distribution,
+        project_name, project_version, self.version_suffix, self.distribution,
         self.architecture)
 
     return not os.path.exists(changes_filename)
@@ -913,12 +913,12 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
         source_helper_object)
 
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        package_name, project_version)
+        project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames_glob = u'{0:s}_*.orig.tar.gz'.format(package_name)
+    filenames_glob = u'{0:s}_*.orig.tar.gz'.format(project_name)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -927,13 +927,13 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
         os.remove(filename)
 
     filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        package_name, project_version)
+        project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution_architecture.*
     filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
-        package_name, self.version_suffix, self.distribution,
+        project_name, self.version_suffix, self.distribution,
         self.architecture)
     filenames = glob.glob(filenames_glob)
 
@@ -945,7 +945,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     # Remove files of previous versions in the format:
     # project[-_]*version-1suffix~distribution.*
     filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
-        package_name, self.version_suffix, self.distribution)
+        project_name, self.version_suffix, self.distribution)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:

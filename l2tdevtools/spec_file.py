@@ -254,8 +254,8 @@ class RPMSpecFileGenerator(object):
           summary = line
 
         elif line.startswith(b'Source0: '):
-           if source_filename.endswith(u'.zip'):
-             line = u'Source0: %{name}-%{unmangled_version}.zip\n'
+          if source_filename.endswith(u'.zip'):
+            line = u'Source0: %{name}-%{unmangled_version}.zip\n'
 
         elif line.startswith(b'BuildRoot: '):
           if project_name == u'efilter':
