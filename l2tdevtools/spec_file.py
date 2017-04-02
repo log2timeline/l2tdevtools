@@ -111,76 +111,80 @@ class RPMSpecFileGenerator(object):
         b'- Auto-generated\n').format(
             date_time_string, self._EMAIL_ADDRESS, version))
 
-  def _WritePythonPackageDefinition(
-      self, output_file_object, summary, requires, description):
-    """Writes the Python package definition.
+  def _WritePython2PackageDefinition(
+      self, output_file_object, name, summary, requires, description):
+    """Writes the Python 2 package definition.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      name (str): package name.
       summary (str): package summary.
       requires (str): package requires definition.
       description (str): package description.
     """
     output_file_object.write((
-        b'%package -n python-%{{name}}\n'
-        b'{0:s}'
+        b'%package -n {0:s}\n'
         b'{1:s}'
+        b'{2:s}'
         b'\n'
-        b'%description -n python-%{{name}}\n'
-        b'{2:s}').format(summary, requires, description))
+        b'%description -n {0:s}\n'
+        b'{3:s}').format(name, summary, requires, description))
 
-  def _WritePythonPackageFiles(
-      self, output_file_object, license_line, doc_line, lib_dir):
-    """Writes the Python package files.
+  def _WritePython2PackageFiles(
+      self, output_file_object, name, license_line, doc_line, lib_dir):
+    """Writes the Python 2 package files.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      name (str): package name.
       license_line (str): line containing the license file definition.
       doc_line (str): line containing the document files definition.
       lib_dir (str): path of the library directory.
     """
     output_file_object.write((
-        b'%files -n python-%{{name}}\n'
-        b'{0:s}'
+        b'%files -n {0:s}\n'
         b'{1:s}'
-        b'{2:s}/python2*/*\n').format(
-            license_line, doc_line, lib_dir))
+        b'{2:s}'
+        b'{3:s}/python2*/*\n').format(
+            name, license_line, doc_line, lib_dir))
 
   def _WritePython3PackageDefinition(
-      self, output_file_object, summary, requires, description):
+      self, output_file_object, name, summary, requires, description):
     """Writes the Python 3 package definition.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      name (str): package name.
       summary (str): package summary.
       requires (str): package requires definition.
       description (str): package description.
     """
     output_file_object.write((
-        b'%package -n python3-%{{name}}\n'
-        b'{0:s}'
+        b'%package -n {0:s}\n'
         b'{1:s}'
+        b'{2:s}'
         b'\n'
-        b'%description -n python3-%{{name}}\n'
-        b'{2:s}').format(summary, requires, description))
+        b'%description -n {0:s}\n'
+        b'{3:s}').format(name, summary, requires, description))
 
   def _WritePython3PackageFiles(
-      self, output_file_object, license_line, doc_line, lib_dir):
+      self, output_file_object, name, license_line, doc_line, lib_dir):
     """Writes the Python 3 package files.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      name (str): package name.
       license_line (str): line containing the license file definition.
       doc_line (str): line containing the document files definition.
       lib_dir (str): path of the library directory.
     """
     output_file_object.write((
         b'\n'
-        b'%files -n python3-%{{name}}\n'
-        b'{0:s}'
+        b'%files -n {0:s}\n'
         b'{1:s}'
-        b'{2:s}/python3*/*\n').format(
-            license_line, doc_line, lib_dir))
+        b'{2:s}'
+        b'{3:s}/python3*/*\n').format(
+            name, license_line, doc_line, lib_dir))
 
   def GenerateWithSetupPy(self, source_directory, build_log_file):
     """Generates the RPM spec file with setup.py.
@@ -204,7 +208,8 @@ class RPMSpecFileGenerator(object):
 
   def _RewriteSetupPyGeneratedFile(
       self, project_definition, source_directory, source_filename,
-      project_name, rpm_build_dependencies, input_file, output_file_object):
+      project_name, rpm_build_dependencies, input_file, output_file_object,
+      python2_package_prefix=u'python-'):
     """Rewrites the RPM spec file generated with setup.py.
 
     Args:
@@ -215,6 +220,7 @@ class RPMSpecFileGenerator(object):
       rpm_build_dependencies (list[str]): RPM build dependencies.
       input_file (str): path of the input RPM spec file.
       output_file_object (file): output file-like object to write to.
+      python2_package_prefix (Optional[str]): name prefix for Python 2 packages.
 
     Returns:
       bool: True if successful, False otherwise.
@@ -227,10 +233,18 @@ class RPMSpecFileGenerator(object):
     in_description = False
     in_python_package = False
     has_build_requires = False
-    has_python_package = False
+    has_python2_package = False
     has_python3_package = False
 
     python2_only = project_definition.IsPython2Only()
+
+    if project_definition.rpm_name:
+      package_name = project_definition.rpm_name
+    else:
+      package_name = project_name
+
+    if package_name.startswith(u'python-'):
+      package_name = package_name[7:]
 
     with open(input_file, 'r+b') as input_file_object:
       for line in input_file_object.readlines():
@@ -251,8 +265,8 @@ class RPMSpecFileGenerator(object):
 
         if line.startswith(b'%define name '):
           # Need to override the project name for projects that prefix
-          # their name with "python-" in setup.py but do not use it
-          # for their source package name.
+          # their name with "python-" (or equivalent) in setup.py but
+          # do not use it for their source package name.
           line = b'%define name {0:s}\n'.format(project_name)
 
         elif line.startswith(b'%define version '):
@@ -307,12 +321,13 @@ class RPMSpecFileGenerator(object):
         elif line.startswith(b'%description') and not description:
           in_description = True
 
-        elif line.startswith(b'%package -n python-'):
+        elif (line.startswith(b'%package -n python-') or
+              line.startswith(b'%package -n python2-')):
           if project_name == u'artifacts':
             in_python_package = True
             continue
 
-          has_python_package = True
+          has_python2_package = True
 
         elif line.startswith(b'%package -n python3-'):
           has_python3_package = True
@@ -321,14 +336,29 @@ class RPMSpecFileGenerator(object):
           if project_name == u'artifacts':
             requires = u'{0:s}, artifacts-data\n'.format(requires[:-1])
 
-          if not has_python_package:
-            self._WritePythonPackageDefinition(
-                output_file_object, summary, requires, description)
+          if not has_python2_package:
+            if project_name != package_name:
+              python_package_name = u'{0:s}{1:s}'.format(
+                  python2_package_prefix, package_name)
+            else:
+              python_package_name = u'{0:s}%{{name}}'.format(
+                  python2_package_prefix)
+
+            if python_package_name != u'%{name}':
+              self._WritePython2PackageDefinition(
+                  output_file_object, python_package_name, summary, requires,
+                  description)
 
           if not python2_only and not has_python3_package:
+            if project_name != package_name:
+              python_package_name = u'python3-{0:s}'.format(package_name)
+            else:
+              python_package_name = u'python3-%{name}'
+
             # TODO: convert python 2 package names to python 3
             self._WritePython3PackageDefinition(
-                output_file_object, summary, requires, description)
+                output_file_object, python_package_name, summary, requires,
+                description)
 
           if project_name == u'artifacts':
             output_file_object.write((
@@ -382,12 +412,25 @@ class RPMSpecFileGenerator(object):
     else:
       lib_dir = '%{_libdir}'
 
-    self._WritePythonPackageFiles(
-        output_file_object, license_line, doc_line, lib_dir)
+    if project_name != package_name:
+      python_package_name = u'{0:s}{1:s}'.format(
+          python2_package_prefix, package_name)
+    else:
+      python_package_name = u'{0:s}%{{name}}'.format(python2_package_prefix)
+
+    self._WritePython2PackageFiles(
+        output_file_object, python_package_name, license_line, doc_line,
+        lib_dir)
 
     if not python2_only:
+      if project_name != package_name:
+        python_package_name = u'python3-{0:s}'.format(package_name)
+      else:
+        python_package_name = u'python3-%{name}'
+
       self._WritePython3PackageFiles(
-          output_file_object, license_line, doc_line, lib_dir)
+          output_file_object, python_package_name, license_line, doc_line,
+          lib_dir)
 
     if project_name == u'artifacts':
       output_file_object.write(
@@ -425,6 +468,12 @@ class RPMSpecFileGenerator(object):
     Returns:
       bool: True if successful, False otherwise.
     """
+    if project_name == u'dateutil':
+      # TODO: work around for non-architecture dependent behavior.
+      project_definition.architecture_dependent = False
+    elif project_name == u'PyYAML':
+      project_definition.build_options.append(u'python2_only')
+
     python2_only = project_definition.IsPython2Only()
 
     rpm_build_dependencies = [u'python2-setuptools']
@@ -444,9 +493,17 @@ class RPMSpecFileGenerator(object):
 
     output_file_object = open(output_file, 'wb')
 
+    if project_name == u'PyYAML':
+      python2_package_prefix = u''
+    elif project_name in (u'pyzmq', u'yara-python'):
+      python2_package_prefix = u'python-'
+    else:
+      python2_package_prefix = u'python2-'
+
     result = self._RewriteSetupPyGeneratedFile(
         project_definition, source_directory, source_filename, project_name,
-        rpm_build_dependencies, input_file, output_file_object)
+        rpm_build_dependencies, input_file, output_file_object,
+        python2_package_prefix=python2_package_prefix)
 
     output_file_object.close()
 

@@ -40,6 +40,7 @@ class ProjectDefinition(object):
     name (str): name of the project.
     setup_name (str): project name used in setup.py.
     rpm_build_dependencies (list[str]): rpm build dependencies.
+    rpm_name (str): RPM package name.
     patches (list[str]): patch file names.
     pkg_configure_options (list[str]): configure options when building a pkg.
     version (ProjectVersionDefinition): version requirements.
@@ -74,6 +75,7 @@ class ProjectDefinition(object):
     self.msi_name = None
     self.name = name
     self.rpm_build_dependencies = None
+    self.rpm_name = None
     self.patches = None
     self.pkg_configure_options = None
     self.setup_name = None
@@ -229,6 +231,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'msi_name')
       project_definition.rpm_build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'rpm_build_dependencies')
+      project_definition.rpm_name = self._GetConfigValue(
+          config_parser, section_name, u'rpm_name')
       project_definition.patches = self._GetConfigValue(
           config_parser, section_name, u'patches')
       project_definition.pkg_configure_options = self._GetConfigValue(
