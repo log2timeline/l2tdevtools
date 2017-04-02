@@ -598,6 +598,32 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
+  def _GetFilenameSafeProjectInformation(self, source_helper_object):
+    """Determines the filename safe project name and version.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      tuple: contains:
+
+        * str: filename safe project name.
+        * str: version.
+    """
+    if self._project_definition.dpkg_name:
+      project_name = self._project_definition.dpkg_name
+    else:
+      project_name = source_helper_object.project_name
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
+
+    project_version = source_helper_object.GetProjectVersion()
+    if project_version.startswith(u'1!'):
+      # Remove setuptools epoch.
+      project_version = project_version[2:]
+
+    return project_name, project_version
+
   def Build(self, source_helper_object):
     """Builds the dpkg packages.
 
@@ -613,17 +639,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
           source_helper_object.project_name))
       return False
 
-    if self._project_definition.dpkg_name:
-      project_name = self._project_definition.dpkg_name
-    else:
-      project_name = source_helper_object.project_name
-      if not project_name.startswith(u'python-'):
-        project_name = u'python-{0:s}'.format(project_name)
-
-    project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
-      # Remove setuptools epoch.
-      project_version = project_version[2:]
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
@@ -701,17 +718,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
-    if self._project_definition.dpkg_name:
-      project_name = self._project_definition.dpkg_name
-    else:
-      project_name = source_helper_object.project_name
-      if not project_name.startswith(u'python-'):
-        project_name = u'python-{0:s}'.format(project_name)
-
-    project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
-      # Remove setuptools epoch.
-      project_version = project_version[2:]
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
 
     deb_filename = u'{0:s}_{1!s}-1_{2:s}.deb'.format(
         project_name, project_version, self.architecture)
@@ -724,17 +732,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
-    if self._project_definition.dpkg_name:
-      project_name = self._project_definition.dpkg_name
-    else:
-      project_name = source_helper_object.project_name
-      if not project_name.startswith(u'python-'):
-        project_name = u'python-{0:s}'.format(project_name)
-
-    project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
-      # Remove setuptools epoch.
-      project_version = project_version[2:]
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
 
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, project_version)
@@ -776,6 +775,32 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     self.distribution = u'trusty'
     self.version_suffix = u'ppa1'
 
+  def _GetFilenameSafeProjectInformation(self, source_helper_object):
+    """Determines the filename safe project name and version.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      tuple: contains:
+
+        * str: filename safe project name.
+        * str: version.
+    """
+    if self._project_definition.dpkg_name:
+      project_name = self._project_definition.dpkg_name
+    else:
+      project_name = source_helper_object.project_name
+      if not project_name.startswith(u'python-'):
+        project_name = u'python-{0:s}'.format(project_name)
+
+    project_version = source_helper_object.GetProjectVersion()
+    if project_version.startswith(u'1!'):
+      # Remove setuptools epoch.
+      project_version = project_version[2:]
+
+    return project_name, project_version
+
   def Build(self, source_helper_object):
     """Builds the dpkg packages.
 
@@ -791,17 +816,8 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
           source_helper_object.project_name))
       return False
 
-    if self._project_definition.dpkg_name:
-      project_name = self._project_definition.dpkg_name
-    else:
-      project_name = source_helper_object.project_name
-      if not project_name.startswith(u'python-'):
-        project_name = u'python-{0:s}'.format(project_name)
-
-    project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
-      # Remove setuptools epoch.
-      project_version = project_version[2:]
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
@@ -878,12 +894,8 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
-    if self._project_definition.dpkg_name:
-      package_name = self._project_definition.dpkg_name
-    else:
-      package_name = source_helper_object.project_name
-
-    project_version = source_helper_object.GetProjectVersion()
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
 
     changes_filename = u'{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
         package_name, project_version, self.version_suffix, self.distribution,
@@ -897,15 +909,8 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
-    if self._project_definition.dpkg_name:
-      package_name = self._project_definition.dpkg_name
-    else:
-      package_name = source_helper_object.project_name
-
-    project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
-      # Remove setuptools epoch.
-      project_version = project_version[2:]
+    project_name, project_version = self._GetFilenameSafeProjectInformation(
+        source_helper_object)
 
     filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
         package_name, project_version)
@@ -2095,8 +2100,8 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     output_file_exists = os.path.exists(output_file_path)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFileForOSC(
-        self._project_definition, source_directory, project_name,
-        input_file_path, output_file_path):
+        self._project_definition, source_directory, source_filename,
+        project_name, input_file_path, output_file_path):
       return False
 
     if not output_file_exists:
@@ -2653,6 +2658,10 @@ class BaseRPMBuildHelper(BuildHelper):
       project_name = source_helper_object.project_name
 
     project_version = source_helper_object.GetProjectVersion()
+    if project_version.startswith(u'1!'):
+      # Remove setuptools epoch.
+      project_version = project_version[2:]
+
     if isinstance(project_version, basestring):
       project_version = project_version.replace(u'-', u'_')
 
@@ -2898,8 +2907,8 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
-        self._project_definition, source_directory, project_name,
-        input_file_path, output_file_path):
+        self._project_definition, source_directory, source_filename,
+        project_name, input_file_path, output_file_path):
       return
 
     return output_file_path
@@ -3143,8 +3152,8 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
-        self._project_definition, source_directory, project_name,
-        input_file_path, output_file_path):
+        self._project_definition, source_directory, source_filename,
+        project_name, input_file_path, output_file_path):
       return
 
     return output_file_path
