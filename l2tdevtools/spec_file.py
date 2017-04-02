@@ -225,6 +225,7 @@ class RPMSpecFileGenerator(object):
     version = b''
 
     in_description = False
+    in_python_package = False
     has_build_requires = False
     has_python_package = False
     has_python3_package = False
@@ -241,6 +242,12 @@ class RPMSpecFileGenerator(object):
                 project_definition.description_long)
 
           output_file_object.write(description)
+
+        if line.startswith(b'%prep') and in_python_package:
+          in_python_package = False
+
+        if in_python_package:
+          continue
 
         if line.startswith(b'%define name '):
           # Need to override the project name for projects that prefix
@@ -301,12 +308,19 @@ class RPMSpecFileGenerator(object):
           in_description = True
 
         elif line.startswith(b'%package -n python-'):
+          if project_name == u'artifacts':
+            in_python_package = True
+            continue
+
           has_python_package = True
 
         elif line.startswith(b'%package -n python3-'):
           has_python3_package = True
 
         elif line.startswith(b'%prep'):
+          if project_name == u'artifacts':
+            requires = u'{0:s}, artifacts-data\n'.format(requires[:-1])
+
           if not has_python_package:
             self._WritePythonPackageDefinition(
                 output_file_object, summary, requires, description)
@@ -316,7 +330,15 @@ class RPMSpecFileGenerator(object):
             self._WritePython3PackageDefinition(
                 output_file_object, summary, requires, description)
 
-          if project_name == u'PyYAML':
+          if project_name == u'artifacts':
+            output_file_object.write((
+                b'%package -n %{{name}}-data\n'
+                b'{0:s}'
+                b'\n'
+                b'%description -n %{{name}}-data\n'
+                b'{1:s}').format(summary, description))
+
+          elif project_name == u'PyYAML':
             output_file_object.write(
                 b'%global debug_package %{nil}\n'
                 b'\n')
@@ -366,6 +388,12 @@ class RPMSpecFileGenerator(object):
     if not python2_only:
       self._WritePython3PackageFiles(
           output_file_object, license_line, doc_line, lib_dir)
+
+    if project_name == u'artifacts':
+      output_file_object.write(
+          b'\n'
+          b'%files -n %{name}-data\n'
+          b'%{_datadir}/%{name}/*\n')
 
     # TODO: add bindir support.
     output_file_object.write((
