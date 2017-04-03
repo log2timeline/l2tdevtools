@@ -334,13 +334,12 @@ class DPKGBuildFilesGenerator(object):
     """Initializes the dpkg build files generator.
 
     Args:
-      project_name: the name of the project.
-      project_version: the version of the project.
-      project_definition: the project definition object (instance of
-                          ProjectDefinition).
-      data_path: the path to the data directory which contains the patches
-                 sub directory.
-      distribution: optional string containing the name of the distribution.
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+      project_definition (ProjectDefinition): project definition.
+      data_path (str): path to the data directory which contains the patches
+          sub directory.
+      distribution (Optional[str]): name of the distribution.
     """
     super(DPKGBuildFilesGenerator, self).__init__()
     self._data_path = data_path
@@ -353,7 +352,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build changelog file.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     if self._project_definition.dpkg_source_name:
       source_package_name = self._project_definition.dpkg_source_name
@@ -390,7 +389,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build compat file.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     filename = os.path.join(dpkg_path, u'compat')
     with open(filename, 'wb') as file_object:
@@ -401,7 +400,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build control file.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     if self._project_definition.dpkg_source_name:
       source_package_name = self._project_definition.dpkg_source_name
@@ -522,7 +521,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build copyright file.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     license_file = os.path.dirname(__file__)
     license_file = os.path.dirname(license_file)
@@ -544,7 +543,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build .docs files.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     if self._project_definition.dpkg_name:
       package_name = self._project_definition.dpkg_name
@@ -578,7 +577,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build rules file.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     if self._project_definition.build_system == u'configure_make':
       self._GenerateConfigureMakeRulesFile(dpkg_path)
@@ -594,7 +593,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build rules file.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     if self._project_definition.dpkg_name:
       package_name = self._project_definition.dpkg_name
@@ -655,7 +654,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build rules file.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     if self._project_definition.dpkg_name:
       package_name = self._project_definition.dpkg_name
@@ -693,7 +692,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build source/format file.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     filename = os.path.join(dpkg_path, u'source', u'format')
     with open(filename, 'wb') as file_object:
@@ -716,7 +715,7 @@ class DPKGBuildFilesGenerator(object):
     """Generate the dpkg build files.
 
     Args:
-      dpkg_path: the path to the dpkg files.
+      dpkg_path (str): path to the dpkg files.
     """
     os.mkdir(dpkg_path)
     self._GenerateChangelogFile(dpkg_path)

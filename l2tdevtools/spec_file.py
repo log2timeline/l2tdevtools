@@ -11,6 +11,9 @@ import sys
 class RPMSpecFileGenerator(object):
   """Class that helps in generating RPM spec files."""
 
+  _EMAIL_ADDRESS = (
+      u'log2timeline development team <log2timeline-dev@googlegroups.com>')
+
   _DOC_FILENAMES = [
       u'CHANGES', u'CHANGES.txt', u'CHANGES.TXT',
       u'README', u'README.txt', u'README.TXT']
@@ -70,6 +73,7 @@ class RPMSpecFileGenerator(object):
       lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
 
     lines.append(b'rm -rf %{buildroot}/usr/share/doc/%{name}/')
+    lines.append(b'')
     return b'\n'.join(lines)
 
   def _GetLicenseFileDefinition(self, source_directory):
@@ -90,41 +94,97 @@ class RPMSpecFileGenerator(object):
 
     return license_file_definition
 
-  def _WritePythonPackageDefinition(
-      self, output_file_object, summary, requires, description):
-    """Writes the Python package definition.
+  def _WriteChangeLog(self, output_file_object, version):
+    """Writes the change log.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      version (str): version.
+    """
+    date_time = datetime.datetime.now()
+    date_time_string = date_time.strftime(u'%a %b %e %Y')
+
+    output_file_object.write((
+        b'\n'
+        b'%changelog\n'
+        b'* {0:s} {1:s} {2:s}-1\n'
+        b'- Auto-generated\n').format(
+            date_time_string, self._EMAIL_ADDRESS, version))
+
+  def _WritePython2PackageDefinition(
+      self, output_file_object, name, summary, requires, description):
+    """Writes the Python 2 package definition.
+
+    Args:
+      output_file_object (file): output file-like object to write to.
+      name (str): package name.
       summary (str): package summary.
       requires (str): package requires definition.
       description (str): package description.
     """
     output_file_object.write((
-        b'%package -n python-%{{name}}\n'
-        b'{0:s}'
+        b'%package -n {0:s}\n'
         b'{1:s}'
+        b'{2:s}'
         b'\n'
-        b'%description -n python-%{{name}}\n'
-        b'{2:s}').format(summary, requires, description))
+        b'%description -n {0:s}\n'
+        b'{3:s}').format(name, summary, requires, description))
+
+  def _WritePython2PackageFiles(
+      self, output_file_object, name, license_line, doc_line, lib_dir):
+    """Writes the Python 2 package files.
+
+    Args:
+      output_file_object (file): output file-like object to write to.
+      name (str): package name.
+      license_line (str): line containing the license file definition.
+      doc_line (str): line containing the document files definition.
+      lib_dir (str): path of the library directory.
+    """
+    output_file_object.write((
+        b'%files -n {0:s}\n'
+        b'{1:s}'
+        b'{2:s}'
+        b'{3:s}/python2*/*\n').format(
+            name, license_line, doc_line, lib_dir))
 
   def _WritePython3PackageDefinition(
-      self, output_file_object, summary, requires, description):
+      self, output_file_object, name, summary, requires, description):
     """Writes the Python 3 package definition.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      name (str): package name.
       summary (str): package summary.
       requires (str): package requires definition.
       description (str): package description.
     """
     output_file_object.write((
-        b'%package -n python3-%{{name}}\n'
-        b'{0:s}'
+        b'%package -n {0:s}\n'
         b'{1:s}'
+        b'{2:s}'
         b'\n'
-        b'%description -n python3-%{{name}}\n'
-        b'{2:s}').format(summary, requires, description))
+        b'%description -n {0:s}\n'
+        b'{3:s}').format(name, summary, requires, description))
+
+  def _WritePython3PackageFiles(
+      self, output_file_object, name, license_line, doc_line, lib_dir):
+    """Writes the Python 3 package files.
+
+    Args:
+      output_file_object (file): output file-like object to write to.
+      name (str): package name.
+      license_line (str): line containing the license file definition.
+      doc_line (str): line containing the document files definition.
+      lib_dir (str): path of the library directory.
+    """
+    output_file_object.write((
+        b'\n'
+        b'%files -n {0:s}\n'
+        b'{1:s}'
+        b'{2:s}'
+        b'{3:s}/python3*/*\n').format(
+            name, license_line, doc_line, lib_dir))
 
   def GenerateWithSetupPy(self, source_directory, build_log_file):
     """Generates the RPM spec file with setup.py.
@@ -146,48 +206,45 @@ class RPMSpecFileGenerator(object):
 
     return True
 
-  def RewriteSetupPyGeneratedFile(
-      self, project_definition, source_directory, project_name, input_file,
-      output_file):
+  def _RewriteSetupPyGeneratedFile(
+      self, project_definition, source_directory, source_filename,
+      project_name, rpm_build_dependencies, input_file, output_file_object,
+      python2_package_prefix=u'python-'):
     """Rewrites the RPM spec file generated with setup.py.
 
     Args:
       project_definition (ProjectDefinition): project definition.
       source_directory (str): path of the source directory.
+      source_filename (str): name of the source package.
       project_name (str): name of the project.
+      rpm_build_dependencies (list[str]): RPM build dependencies.
       input_file (str): path of the input RPM spec file.
-      output_file (str): path of the output RPM spec file.
+      output_file_object (file): output file-like object to write to.
+      python2_package_prefix (Optional[str]): name prefix for Python 2 packages.
 
     Returns:
       bool: True if successful, False otherwise.
     """
-    python2_only = project_definition.IsPython2Only()
-
-    rpm_build_dependencies = [u'python2-setuptools']
-    if project_definition.architecture_dependent:
-      rpm_build_dependencies.append(u'python-devel')
-
-    if not python2_only:
-      rpm_build_dependencies.append(u'python3-setuptools')
-      if project_definition.architecture_dependent:
-        rpm_build_dependencies.append(u'python3-devel')
-
-    if project_definition.rpm_build_dependencies:
-      rpm_build_dependencies.extend(
-          project_definition.rpm_build_dependencies)
-
-    # TODO: check if already prefixed with python-
-
-    output_file_object = open(output_file, 'wb')
-
     description = b''
     requires = b''
     summary = b''
     version = b''
+
     in_description = False
+    in_python_package = False
     has_build_requires = False
-    has_python_package = False
+    has_python2_package = False
     has_python3_package = False
+
+    python2_only = project_definition.IsPython2Only()
+
+    if project_definition.rpm_name:
+      package_name = project_definition.rpm_name
+    else:
+      package_name = project_name
+
+    if package_name.startswith(u'python-'):
+      package_name = package_name[7:]
 
     with open(input_file, 'r+b') as input_file_object:
       for line in input_file_object.readlines():
@@ -200,17 +257,47 @@ class RPMSpecFileGenerator(object):
 
           output_file_object.write(description)
 
+        if line.startswith(b'%prep') and in_python_package:
+          in_python_package = False
+
+        if in_python_package:
+          continue
+
         if line.startswith(b'%define name '):
           # Need to override the project name for projects that prefix
-          # their name with "python-" in setup.py but do not use it
-          # for their source package name.
+          # their name with "python-" (or equivalent) in setup.py but
+          # do not use it for their source package name.
           line = b'%define name {0:s}\n'.format(project_name)
 
         elif line.startswith(b'%define version '):
           version = line[16:-1]
+          if version.startswith(u'1!'):
+            version = version[2:]
+
+          if project_name == u'efilter':
+            line = u'%define version {0:s}\n'.format(version)
+
+        elif line.startswith(b'%define unmangled_version '):
+          if project_name == u'efilter':
+            line = u'%define unmangled_version {0:s}\n'.format(version)
 
         elif not summary and line.startswith(b'Summary: '):
           summary = line
+
+        elif line.startswith(b'Source0: '):
+          if source_filename.endswith(u'.zip'):
+            line = u'Source0: %{name}-%{unmangled_version}.zip\n'
+
+        elif line.startswith(b'BuildRoot: '):
+          if project_name == u'efilter':
+            line = (
+                u'BuildRoot: %{_tmppath}/'
+                u'dotty-%{version}-%{release}-buildroot\n')
+
+          elif project_name == u'psutil':
+            line = (
+                u'BuildRoot: %{_tmppath}/'
+                u'%{name}-release-%{version}-%{release}-buildroot\n')
 
         elif (not description and not requires and
               line.startswith(b'Requires: ')):
@@ -234,24 +321,65 @@ class RPMSpecFileGenerator(object):
         elif line.startswith(b'%description') and not description:
           in_description = True
 
-        elif line.startswith(b'%package -n python-'):
-          has_python_package = True
+        elif (line.startswith(b'%package -n python-') or
+              line.startswith(b'%package -n python2-')):
+          if project_name == u'artifacts':
+            in_python_package = True
+            continue
+
+          has_python2_package = True
 
         elif line.startswith(b'%package -n python3-'):
           has_python3_package = True
 
         elif line.startswith(b'%prep'):
-          if not has_python_package:
-            self._WritePythonPackageDefinition(
-                output_file_object, summary, requires, description)
+          if project_name == u'artifacts':
+            requires = u'{0:s}, artifacts-data\n'.format(requires[:-1])
+
+          if not has_python2_package:
+            if project_name != package_name:
+              python_package_name = u'{0:s}{1:s}'.format(
+                  python2_package_prefix, package_name)
+            else:
+              python_package_name = u'{0:s}%{{name}}'.format(
+                  python2_package_prefix)
+
+            if python_package_name != u'%{name}':
+              self._WritePython2PackageDefinition(
+                  output_file_object, python_package_name, summary, requires,
+                  description)
 
           if not python2_only and not has_python3_package:
+            if project_name != package_name:
+              python_package_name = u'python3-{0:s}'.format(package_name)
+            else:
+              python_package_name = u'python3-%{name}'
+
             # TODO: convert python 2 package names to python 3
             self._WritePython3PackageDefinition(
-                output_file_object, summary, requires, description)
+                output_file_object, python_package_name, summary, requires,
+                description)
 
-        elif line == b'%setup -n %{name}-%{unmangled_version}\n':
-          line = b'%autosetup -n %{name}-%{unmangled_version}\n'
+          if project_name == u'artifacts':
+            output_file_object.write((
+                b'%package -n %{{name}}-data\n'
+                b'{0:s}'
+                b'\n'
+                b'%description -n %{{name}}-data\n'
+                b'{1:s}').format(summary, description))
+
+          elif project_name == u'PyYAML':
+            output_file_object.write(
+                b'%global debug_package %{nil}\n'
+                b'\n')
+
+        elif line.startswith(b'%setup -n %{name}-%{unmangled_version}'):
+          if project_name == u'efilter':
+            line = b'%autosetup -n dotty-%{unmangled_version}\n'
+          elif project_name == u'psutil':
+            line = b'%autosetup -n %{name}-release-%{unmangled_version}\n'
+          else:
+            line = b'%autosetup -n %{name}-%{unmangled_version}\n'
 
         elif line.startswith(b'python setup.py build'):
           line = self._GetBuildDefinition(python2_only)
@@ -284,50 +412,112 @@ class RPMSpecFileGenerator(object):
     else:
       lib_dir = '%{_libdir}'
 
-    output_file_object.write((
-        b'%files -n python-%{{name}}\n'
-        b'{0:s}'
-        b'{1:s}'
-        b'{2:s}/python2*/*\n').format(
-            license_line, doc_line, lib_dir))
+    if project_name != package_name:
+      python_package_name = u'{0:s}{1:s}'.format(
+          python2_package_prefix, package_name)
+    else:
+      python_package_name = u'{0:s}%{{name}}'.format(python2_package_prefix)
+
+    self._WritePython2PackageFiles(
+        output_file_object, python_package_name, license_line, doc_line,
+        lib_dir)
 
     if not python2_only:
-      output_file_object.write((
+      if project_name != package_name:
+        python_package_name = u'python3-{0:s}'.format(package_name)
+      else:
+        python_package_name = u'python3-%{name}'
+
+      self._WritePython3PackageFiles(
+          output_file_object, python_package_name, license_line, doc_line,
+          lib_dir)
+
+    if project_name == u'artifacts':
+      output_file_object.write(
           b'\n'
-          b'%files -n python3-%{{name}}\n'
-          b'{0:s}'
-          b'{1:s}'
-          b'{2:s}/python3*/*\n').format(
-              license_line, doc_line, lib_dir))
+          b'%files -n %{name}-data\n'
+          b'%{_datadir}/%{name}/*\n')
 
     # TODO: add bindir support.
     output_file_object.write((
         b'\n'
         b'%exclude %{_bindir}/*\n'))
 
+    if project_name == u'pysqlite':
+      output_file_object.write(b'%exclude /usr/pysqlite2-doc/*\n')
+
     # TODO: add shared data support.
 
-    date_time = datetime.datetime.now()
-    date_time_string = date_time.strftime(u'%a %b %e %Y')
-
-    output_file_object.write((
-        b'\n'
-        b'%changelog\n'
-        b'* {0:s} Joachim Metz <joachim.metz@gmail.com> {1:s}-1\n'
-        b'- Auto-generated\n').format(date_time_string, version))
-
-    output_file_object.close()
+    self._WriteChangeLog(output_file_object, version)
 
     return True
 
+  def RewriteSetupPyGeneratedFile(
+      self, project_definition, source_directory, source_filename,
+      project_name, input_file, output_file):
+    """Rewrites the RPM spec file generated with setup.py.
+
+    Args:
+      project_definition (ProjectDefinition): project definition.
+      source_directory (str): path of the source directory.
+      source_filename (str): name of the source package.
+      project_name (str): name of the project.
+      input_file (str): path of the input RPM spec file.
+      output_file (str): path of the output RPM spec file.
+
+    Returns:
+      bool: True if successful, False otherwise.
+    """
+    if project_name == u'dateutil':
+      # TODO: work around for non-architecture dependent behavior.
+      project_definition.architecture_dependent = False
+    elif project_name == u'PyYAML':
+      project_definition.build_options.append(u'python2_only')
+
+    python2_only = project_definition.IsPython2Only()
+
+    rpm_build_dependencies = [u'python2-setuptools']
+    if project_definition.architecture_dependent:
+      rpm_build_dependencies.append(u'python-devel')
+
+    if not python2_only:
+      rpm_build_dependencies.append(u'python3-setuptools')
+      if project_definition.architecture_dependent:
+        rpm_build_dependencies.append(u'python3-devel')
+
+    if project_definition.rpm_build_dependencies:
+      rpm_build_dependencies.extend(
+          project_definition.rpm_build_dependencies)
+
+    # TODO: check if already prefixed with python-
+
+    output_file_object = open(output_file, 'wb')
+
+    if project_name == u'PyYAML':
+      python2_package_prefix = u''
+    elif project_name in (u'pyzmq', u'yara-python'):
+      python2_package_prefix = u'python-'
+    else:
+      python2_package_prefix = u'python2-'
+
+    result = self._RewriteSetupPyGeneratedFile(
+        project_definition, source_directory, source_filename, project_name,
+        rpm_build_dependencies, input_file, output_file_object,
+        python2_package_prefix=python2_package_prefix)
+
+    output_file_object.close()
+
+    return result
+
   def RewriteSetupPyGeneratedFileForOSC(
-      self, project_definition, source_directory, project_name, input_file,
-      output_file):
+      self, project_definition, source_directory, source_filename,
+      project_name, input_file, output_file):
     """Rewrites the RPM spec file generated with setup.py for OSC.
 
     Args:
       project_definition (ProjectDefinition): project definition.
       source_directory (str): path of the source directory.
+      source_filename (str): name of the source package.
       project_name (str): name of the project.
       input_file (str): path of the input RPM spec file.
       output_file (str): path of the output RPM spec file.
@@ -337,153 +527,24 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    osc_build_dependencies = [u'python-devel', u'python-setuptools']
+    rpm_build_dependencies = [u'python-devel', u'python-setuptools']
 
     if not python2_only:
-      osc_build_dependencies.append(u'python3-devel')
-      osc_build_dependencies.append(u'python3-setuptools')
+      rpm_build_dependencies.append(u'python3-devel')
+      rpm_build_dependencies.append(u'python3-setuptools')
 
-    if self._project_definition.osc_build_dependencies:
-      osc_build_dependencies.extend(
-          self._project_definition.osc_build_dependencies)
+    if project_definition.rpm_build_dependencies:
+      rpm_build_dependencies.extend(
+          project_definition.rpm_build_dependencies)
 
     # TODO: check if already prefixed with python-
 
     output_file_object = open(output_file, 'wb')
 
-    description = b''
-    requires = b''
-    summary = b''
-    version = b''
-    in_description = False
-    has_build_requires = False
-    has_python_package = False
-    has_python3_package = False
-
-    with open(input_file, 'r+b') as input_file_object:
-      for line in input_file_object.readlines():
-        if line.startswith(b'%') and in_description:
-          in_description = False
-
-          if self._project_definition.description_long:
-            description = u'{0:s}\n\n'.format(
-                self._project_definition.description_long)
-
-          output_file_object.write(description)
-
-        if line.startswith(b'%define name '):
-          # Need to override the project name for projects that prefix
-          # their name with "python-" in setup.py but do not use it
-          # for their source package name.
-          line = b'%define name {0:s}\n'.format(project_name)
-
-        elif line.startswith(b'%define version '):
-          version = line[16:-1]
-
-        elif not summary and line.startswith(b'Summary: '):
-          summary = line
-
-        elif (not description and not requires and
-              line.startswith(b'Requires: ')):
-          requires = line
-          continue
-
-        elif line.startswith(b'BuildArch: noarch'):
-          if self._project_definition.architecture_dependent:
-            continue
-
-        elif line.startswith(b'BuildRequires: '):
-          has_build_requires = True
-          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
-              osc_build_dependencies))
-
-        elif line == b'\n' and summary and not has_build_requires:
-          has_build_requires = True
-          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
-              osc_build_dependencies))
-
-        elif line.startswith(b'%description') and not description:
-          in_description = True
-
-        elif line.startswith(b'%package -n python-'):
-          has_python_package = True
-
-        elif line.startswith(b'%package -n python3-'):
-          has_python3_package = True
-
-        elif line.startswith(b'%prep'):
-          if not has_python_package:
-            self._WritePythonPackageDefinition(
-                output_file_object, summary, requires, description)
-
-          if not python2_only and not has_python3_package:
-            # TODO: convert python 2 package names to python 3
-            self._WritePython3PackageDefinition(
-                output_file_object, summary, requires, description)
-
-        elif line == b'%setup -n %{name}-%{unmangled_version}\n':
-          line = b'%autosetup -n %{name}-%{unmangled_version}\n'
-
-        elif line.startswith(b'python setup.py build'):
-          line = self._GetBuildDefinition(python2_only)
-
-        elif line.startswith(b'python setup.py install'):
-          line = self._GetInstallDefinition(python2_only)
-
-        elif line == b'rm -rf $RPM_BUILD_ROOT\n':
-          line = b'rm -rf %{buildroot}\n'
-
-        elif line.startswith(b'%files'):
-          break
-
-        elif in_description:
-          # Ignore leading white lines in the description.
-          if not description and line == b'\n':
-            continue
-
-          description = b''.join([description, line])
-          continue
-
-        output_file_object.write(line)
-
-    license_line = self._GetLicenseFileDefinition(source_directory)
-
-    doc_line = self._GetDocumentationFilesDefinition(source_directory)
-
-    # Add _libdir support for arch dependent.
-
-    output_file_object.write((
-        b'%files -n python-%{{name}}\n'
-        b'{0:s}'
-        b'{1:s}'
-        b'%{{_exec_prefix}}/lib/python2*/*\n').format(
-            license_line, doc_line))
-
-    if not python2_only:
-      output_file_object.write((
-          b'\n'
-          b'%files -n python3-%{{name}}\n'
-          b'{0:s}'
-          b'{1:s}'
-          b'%{{_exec_prefix}}/lib/python3*/*\n').format(
-              license_line, doc_line))
-
-    # TODO: add bindir support.
-    output_file_object.write((
-        b'\n'
-        b'%exclude %{_bindir}/*\n'))
-
-    # TODO: add shared data support.
-
-    date_time = datetime.datetime.now()
-    date_time_string = date_time.strftime(u'%a %b %e %Y')
-
-    output_file_object.write((
-        b'\n'
-        b'%changelog\n'
-        b'* {0:s} Joachim Metz <joachim.metz@gmail.com> {1:s}-1\n'
-        b'- Auto-generated\n').format(date_time_string, version))
+    result = self._RewriteSetupPyGeneratedFile(
+        project_definition, source_directory, source_filename, project_name,
+        rpm_build_dependencies, input_file, output_file_object)
 
     output_file_object.close()
 
-    return True
+    return result
