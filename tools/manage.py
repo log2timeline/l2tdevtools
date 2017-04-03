@@ -454,7 +454,7 @@ class BinariesManager(object):
     new_packages = {}
     new_versions = {}
     for name, version in iter(reference_packages.items()):
-      if name not in packages:
+      if not packages or name not in packages:
         new_packages[name] = version
       elif version != packages[name]:
         new_versions[name] = version
