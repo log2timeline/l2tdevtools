@@ -588,7 +588,7 @@ class BinariesManager(object):
 
     return self._ComparePackages(reference_packages, packages)
 
-  def CompareLauchpadPPATracks(self, reference_track, track):
+  def CompareLaunchpadPPATracks(self, reference_track, track):
     """Compares two Launchpad PPA tracks.
 
     Args:
@@ -809,7 +809,7 @@ def Main():
       reference_directory = options.build_directory
 
       new_packages, new_versions = (
-          binaries_manager.CompareDirectoryWithLauchpadPPATrack(
+          binaries_manager.CompareDirectoryWithLaunchpadPPATrack(
               reference_directory, track))
 
       diff_header = (
@@ -822,7 +822,7 @@ def Main():
       else:
         reference_track = u'dev'
 
-      new_packages, new_versions = binaries_manager.CompareLauchpadPPATracks(
+      new_packages, new_versions = binaries_manager.CompareLaunchpadPPATracks(
           reference_track, track)
 
       diff_header = (
