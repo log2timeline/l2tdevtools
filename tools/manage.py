@@ -454,7 +454,7 @@ class BinariesManager(object):
     new_packages = {}
     new_versions = {}
     for name, version in iter(reference_packages.items()):
-      if name not in packages:
+      if not packages or name not in packages:
         new_packages[name] = version
       elif version != packages[name]:
         new_versions[name] = version
@@ -588,7 +588,7 @@ class BinariesManager(object):
 
     return self._ComparePackages(reference_packages, packages)
 
-  def CompareLauchpadPPATracks(self, reference_track, track):
+  def CompareLaunchpadPPATracks(self, reference_track, track):
     """Compares two Launchpad PPA tracks.
 
     Args:
@@ -809,7 +809,7 @@ def Main():
       reference_directory = options.build_directory
 
       new_packages, new_versions = (
-          binaries_manager.CompareDirectoryWithLauchpadPPATrack(
+          binaries_manager.CompareDirectoryWithLaunchpadPPATrack(
               reference_directory, track))
 
       diff_header = (
@@ -822,7 +822,7 @@ def Main():
       else:
         reference_track = u'dev'
 
-      new_packages, new_versions = binaries_manager.CompareLauchpadPPATracks(
+      new_packages, new_versions = binaries_manager.CompareLaunchpadPPATracks(
           reference_track, track)
 
       diff_header = (
