@@ -180,7 +180,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = u'20170116'
+  _PROJECT_VERSION = u'20170406'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
