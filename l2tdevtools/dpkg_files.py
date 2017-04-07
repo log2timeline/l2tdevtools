@@ -429,6 +429,8 @@ class DPKGBuildFilesGenerator(object):
     python2_only = self._IsPython2Only()
 
     build_depends = []
+    python3_build_depends = []
+
     if self._project_definition.patches:
       build_depends.append(u'quilt')
 
@@ -442,14 +444,27 @@ class DPKGBuildFilesGenerator(object):
       if self._project_definition.architecture_dependent:
         build_depends.append(u'python-all-dev')
 
-      if not python2_only:
-        build_depends.append(u'python3-all (>= 3.4~)')
-        build_depends.append(u'python3-setuptools')
+      python3_build_depends.append(u'python3-all (>= 3.4~)')
+      python3_build_depends.append(u'python3-setuptools')
 
-        if self._project_definition.architecture_dependent:
-          build_depends.append(u'python3-all-dev')
+      if self._project_definition.architecture_dependent:
+        python3_build_depends.append(u'python3-all-dev')
 
-    build_depends.extend(self._project_definition.dpkg_build_dependencies)
+    for dependency in self._project_definition.dpkg_build_dependencies:
+      build_depends.append(dependency)
+
+      if self._project_definition.build_system == u'setup_py':
+        if dependency.startswith(u'python-'):
+          dependency = u'python3-{0:s}'.format(dependency[7:])
+          python3_build_depends.append(dependency)
+        else:
+          logging.warning(
+              u'Unable to determine Python 3 package name of: {0:s}'.format(
+                  dependency))
+
+    if (self._project_definition.build_system == u'setup_py' and
+        not python2_only):
+      build_depends.extend(python3_build_depends)
 
     if build_depends:
       build_depends = u', {0:s}'.format(u', '.join(build_depends))
