@@ -45,10 +45,13 @@ class CLIHelper(object):
       tuple[int, bytes, bytes]: exit code, stdout and stderr data.
     """
     arguments = shlex.split(command)
-    process = subprocess.Popen(
-        arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    if not process:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
+
+    try:
+      process = subprocess.Popen(
+          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    except OSError as exception:
+      logging.error(u'Running: "{0:s}" failed with error: {1:s}'.format(
+          command, exception))
       return 1, None, None
 
     output, error = process.communicate()
@@ -288,7 +291,7 @@ class CodeReviewHelper(CLIHelper):
       request.add_header(u'X-Requesting-XSRF-Token', u'1')
 
       try:
-        url_object = urllib_request.urlopen(request, timeout=3)
+        url_object = urllib_request.urlopen(request)
       except urllib_error.HTTPError as exception:
         logging.error(
             u'Failed retrieving codereview XSRF token with error: {0!s}'.format(

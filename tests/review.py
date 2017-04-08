@@ -82,6 +82,13 @@ class TestGitHelper(review.GitHelper):
       b'* feature\n'
       b'  master\n')
 
+  _GIT_LAST_LOG_DATA = (
+      b'commit 79a78f3f0044192a0354ad682733a7996c15e89c\n'
+      b'Author: User <username@example.com>\n'
+      b'Date:   Sat Apr 8 07:44:22 2017 +0200\n'
+      b'\n'
+      b'    Made changes\n')
+
   _GIT_REMOTE_DATA = (
       b'origin\thttps://github.com/username/l2tdevtools.git (fetch)\n'
       b'origin\thttps://github.com/username/l2tdevtools.git (push)\n'
@@ -99,6 +106,9 @@ class TestGitHelper(review.GitHelper):
     """
     if command == u'git branch':
       return 0, self._GIT_BRANCH_DATA, b''
+
+    if command == u'git log -1':
+      return 0, self._GIT_LAST_LOG_DATA, b''
 
     if command == u'git remote -v':
       return 0, self._GIT_REMOTE_DATA, b''
@@ -207,7 +217,10 @@ class GitHelperTest(unittest.TestCase):
 
   def testGetLastCommitMessage(self):
     """Tests the GetLastCommitMessage function."""
-    git_helper = review.GitHelper(self._GIT_REPO_URL)
+    if os.environ.get(u'TRAVIS_OS_NAME', u''):
+      git_helper = TestGitHelper(self._GIT_REPO_URL)
+    else:
+      git_helper = review.GitHelper(self._GIT_REPO_URL)
 
     last_commit_message = git_helper.GetLastCommitMessage()
     self.assertIsNotNone(last_commit_message)
