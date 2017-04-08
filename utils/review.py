@@ -1433,6 +1433,10 @@ class ReviewHelper(object):
     self._project_name = None
     self._sphinxapidoc_helper = None
 
+    if self._github_origin:
+      self._fork_username, _, self._fork_feature_branch = (
+          self._github_origin.partition(u':'))
+
   def CheckLocalGitState(self):
     """Checks the state of the local git repository.
 
@@ -1812,9 +1816,6 @@ class ReviewHelper(object):
               self._command.title(), codereview_issue_number))
       return False
 
-    self._fork_username, _, self._fork_feature_branch = (
-        self._github_origin.partition(u':'))
-
     github_user_information = self._github_helper.QueryUser(
         self._fork_username)
     if not github_user_information:
@@ -2098,7 +2099,7 @@ def Main():
       print(u'Codereview issue number value is missing.')
       print_help_on_error = True
 
-  if options.command == u'merge':
+  if options.command in (u'merge', u'merge-edit', u'merge_edit'):
     github_origin = getattr(options, u'github_origin', None)
     if not github_origin:
       print(u'Github origin value is missing.')
