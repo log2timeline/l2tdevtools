@@ -15,6 +15,7 @@ class DPKGBuildFilesGeneratorTest(unittest.TestCase):
     dpkg_files_generator = dpkg_files.DPKGBuildFilesGenerator(
         u'test', u'1.0', None, u'')
 
+    _ = dpkg_files_generator
     # TODO: implement tests.
 
   # TODO: test _GenerateCompatFile function.
