@@ -37,6 +37,17 @@ class ProjectVersionDefinitionTest(unittest.TestCase):
         u'>=1.0,<2.0')
     self.assertIsNotNone(project_version_definition)
 
+    project_version_definition = projects.ProjectVersionDefinition(
+        u'>=1.0,==2.0')
+    self.assertIsNotNone(project_version_definition)
+
+    project_version_definition = projects.ProjectVersionDefinition(
+        u'>=1.0,<2.0,>3.0')
+    self.assertIsNotNone(project_version_definition)
+
+    project_version_definition = projects.ProjectVersionDefinition(u'bogus')
+    self.assertIsNotNone(project_version_definition)
+
   def testVersionStringAttribute(self):
     """Tests the version_string attribute."""
     project_version_definition = projects.ProjectVersionDefinition(u'>1.0')
@@ -44,7 +55,13 @@ class ProjectVersionDefinitionTest(unittest.TestCase):
 
     self.assertEqual(project_version_definition.version_string, u'>1.0')
 
-  # TODO: test GetEarliestVersion function.
+  def testGetEarliestVersion(self):
+    """Tests the GetEarliestVersion function."""
+    project_version_definition = projects.ProjectVersionDefinition(u'>1.0')
+    self.assertIsNotNone(project_version_definition)
+
+    earliest_version = project_version_definition.GetEarliestVersion()
+    self.assertEqual(earliest_version, [u'>', u'1', u'0'])
 
 
 class ProjectDefinitionReaderTest(unittest.TestCase):
