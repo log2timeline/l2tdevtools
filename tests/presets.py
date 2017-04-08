@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the project preset definitions."""
 
-import os
 import unittest
 
 from l2tdevtools import presets

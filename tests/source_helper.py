@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the elper for managing project source code."""
 
-import os
 import unittest
 
 from l2tdevtools import source_helper
