@@ -8,22 +8,39 @@ import unittest
 from utils import review
 
 
+class CLIHelperTest(unittest.TestCase):
+  """Tests for the CLI helper functions."""
+
+  def testRunCommand(self):
+    """Tests the RunCommand function."""
+    cli_helper = review.CLIHelper()
+
+    exit_code, _, _ = cli_helper.RunCommand(u'echo')
+    self.assertEqual(exit_code, 0)
+
+
 class CodeReviewHelperTest(unittest.TestCase):
   """Tests for the codereview helper class."""
 
-  def setUp(self):
-    """Sets up a test case."""
-    self._codereview_helper = review.CodeReviewHelper(
-        u'test@example.com', no_browser=True)
+  # TODO: add AddMergeMessage test.
+  # TODO: add CloseIssue test.
+  # TODO: add CreateIssue test.
+  # TODO: add GetAccessToken test.
 
   def testGetXSRFToken(self):
     """Tests the GetXSRFToken function."""
+    codereview_helper = review.CodeReviewHelper(
+        u'test@example.com', no_browser=True)
+
     # Only test if the method completes without errors.
-    self._codereview_helper.GetXSRFToken()
+    codereview_helper.GetXSRFToken()
 
   def testQueryIssue(self):
     """Tests the QueryIssue function."""
-    codereview_information = self._codereview_helper.QueryIssue(269830043)
+    codereview_helper = review.CodeReviewHelper(
+        u'test@example.com', no_browser=True)
+
+    codereview_information = codereview_helper.QueryIssue(269830043)
     self.assertIsNotNone(codereview_information)
 
     expected_description = (
@@ -31,11 +48,13 @@ class CodeReviewHelperTest(unittest.TestCase):
     description = codereview_information.get(u'subject')
     self.assertEqual(description, expected_description)
 
-    codereview_information = self._codereview_helper.QueryIssue(0)
+    codereview_information = codereview_helper.QueryIssue(0)
     self.assertIsNone(codereview_information)
 
-    codereview_information = self._codereview_helper.QueryIssue(1)
+    codereview_information = codereview_helper.QueryIssue(1)
     self.assertIsNone(codereview_information)
+
+  # TODO: add UpdateIssue test.
 
 
 class GitHelperTest(unittest.TestCase):
@@ -46,6 +65,9 @@ class GitHelperTest(unittest.TestCase):
   def setUp(self):
     """Sets up a test case."""
     self._git_helper = review.GitHelper(self._GIT_REPO_URL)
+
+  # TODO: add _GetRemotes test.
+  # TODO: add AddPath test.
 
   def testCheckHasBranch(self):
     """Tests the CheckHasBranch function."""
@@ -72,6 +94,9 @@ class GitHelperTest(unittest.TestCase):
     # Only test if the method completes without errors.
     self._git_helper.CheckSynchronizedWithUpstream()
 
+  # TODO: add CommitToOriginInNameOf test.
+  # TODO: add DropUncommittedChanges test.
+
   def testGetActiveBranch(self):
     """Tests the GetActiveBranch function."""
     active_branch = self._git_helper.GetActiveBranch()
@@ -97,9 +122,20 @@ class GitHelperTest(unittest.TestCase):
     last_commit_message = self._git_helper.GetLastCommitMessage()
     self.assertIsNotNone(last_commit_message)
 
+  # TODO: add GetRemoteOrigin test.
+  # TODO: add PullFromFork test.
+  # TODO: add PushToOrigin test.
+  # TODO: add RemoveFeatureBranch test.
+  # TODO: add SynchronizeWithOrigin test.
+  # TODO: add SynchronizeWithUpstream test.
+  # TODO: add SwitchToMasterBranch test.
+
 
 class GitHubHelperTest(unittest.TestCase):
   """Tests for the github helper class."""
+
+  # TODO: add CreatePullRequest test.
+  # TODO: add GetForkGitRepoUrl test.
 
   def testQueryUser(self):
     """Tests the QueryUser function."""
@@ -133,6 +169,14 @@ class ProjectHelper(unittest.TestCase):
 
     self.assertEqual(project_helper.project_name, u'plaso')
 
+  # TODO: add version_file_path test.
+  # TODO: add _GetProjectName test.
+  # TODO: add _ReadFileContents test.
+  # TODO: add GetVersion test.
+  # TODO: add UpdateDpkgChangelogFile test.
+  # TODO: add UpdateAuthorsFile test.
+  # TODO: add UpdateVersionFile test.
+
 
 class PylintHelperTest(unittest.TestCase):
   """Tests for the pylint helper class."""
@@ -140,10 +184,6 @@ class PylintHelperTest(unittest.TestCase):
   def setUp(self):
     """Sets up a test case."""
     self._pylint_helper = review.PylintHelper()
-
-  def testCheckUpToDateVersion(self):
-    """Tests the CheckUpToDateVersion function."""
-    self.assertTrue(self._pylint_helper.CheckUpToDateVersion())
 
   def testCheckFiles(self):
     """Tests the CheckFiles function."""
@@ -154,6 +194,16 @@ class PylintHelperTest(unittest.TestCase):
     self.assertFalse(self._pylint_helper.CheckFiles([test_file]))
 
     # TODO: capture output and compare.
+
+  def testCheckUpToDateVersion(self):
+    """Tests the CheckUpToDateVersion function."""
+    self.assertTrue(self._pylint_helper.CheckUpToDateVersion())
+
+
+class ReadTheDocsHelperTest(unittest.TestCase):
+  """Tests for the readthedocs helper functions."""
+
+  # TODO: add TriggerBuild test.
 
 
 class SphinxAPIDocHelperTest(unittest.TestCase):
@@ -169,15 +219,21 @@ class SphinxAPIDocHelperTest(unittest.TestCase):
     """Tests the CheckUpToDateVersion function."""
     self.assertTrue(self._sphinxapidoc_helper.CheckUpToDateVersion())
 
+  # TODO: add UpdateAPIDocs test.
+
 
 class NetRCFileTest(unittest.TestCase):
   """Tests for the .netrc file class."""
+
+  # TODO: add _GetGitHubValues test.
 
   def testGetGitHubAccessToken(self):
     """Tests the GetGitHubAccessToken function."""
     # Only test if the method completes without errors.
     netrc_file = review.NetRCFile()
     netrc_file.GetGitHubAccessToken()
+
+  # TODO: add GetGitHubUsername test.
 
 
 class ReviewFileTest(unittest.TestCase):
@@ -201,6 +257,9 @@ class ReviewFileTest(unittest.TestCase):
     review_file = review.ReviewFile(u'bogus')
     review_file.Remove()
     self.assertFalse(os.path.exists(review_file_path))
+
+
+# TODO: add ReviewHelper test case.
 
 
 if __name__ == '__main__':

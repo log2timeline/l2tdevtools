@@ -42,7 +42,7 @@ class CLIHelper(object):
       command (str): command to run.
 
     Returns:
-      tuple[int,file,file]: exit code, stdout and stderr file-like objects.
+      tuple[int, file, file]: exit code, stdout and stderr file-like objects.
     """
     arguments = shlex.split(command)
     process = subprocess.Popen(
@@ -463,7 +463,12 @@ class GitHelper(CLIHelper):
       bool: True if the git repo has the project origin defined.
     """
     origin_git_repo_url = self.GetRemoteOrigin()
-    return origin_git_repo_url == self._git_repo_url
+
+    is_match = origin_git_repo_url == self._git_repo_url
+    if not is_match:
+      is_match = origin_git_repo_url == self._git_repo_url[:-4]
+
+    return is_match
 
   def CheckHasProjectUpstream(self):
     """Checks if the git repo has the project remote upstream defined.
