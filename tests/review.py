@@ -57,69 +57,155 @@ class CodeReviewHelperTest(unittest.TestCase):
   # TODO: add UpdateIssue test.
 
 
+class ErrorGitHelper(review.GitHelper):
+  """Git command helper for testing that will always error."""
+
+  def RunCommand(self, unused_command):
+    """Runs a command.
+
+    Args:
+      command (str): command to run.
+
+    Returns:
+      tuple[int, bytes, bytes]: exit code, stdout and stderr data.
+    """
+    return 1, b'', b''
+
+
+class TestGitHelper(review.GitHelper):
+  """Git command helper for testing."""
+
+  _GIT_BRANCH_DATA = (
+      b'  cleanup\n'
+      b'* feature\n'
+      b'  master\n')
+
+  _GIT_REMOTE_DATA = (
+      b'origin\thttps://github.com/username/l2tdevtools.git (fetch)\n'
+      b'origin\thttps://github.com/username/l2tdevtools.git (push)\n'
+      b'upstream\thttps://github.com/log2timeline/l2tdevtools.git (fetch)\n'
+      b'upstream\thttps://github.com/log2timeline/l2tdevtools.git (push)\n')
+
+  def RunCommand(self, command):
+    """Runs a command.
+
+    Args:
+      command (str): command to run.
+
+    Returns:
+      tuple[int, bytes, bytes]: exit code, stdout and stderr data.
+    """
+    if command == u'git branch':
+      return 0, self._GIT_BRANCH_DATA, b''
+
+    if command == u'git remote -v':
+      return 0, self._GIT_REMOTE_DATA, b''
+
+    if command.startswith(u'git add -A '):
+      return 0, b'', b''
+
+
 class GitHelperTest(unittest.TestCase):
   """Tests for the git helper class."""
 
   _GIT_REPO_URL = b'https://github.com/log2timeline/l2tdevtools.git'
 
-  def setUp(self):
-    """Sets up a test case."""
-    self._git_helper = review.GitHelper(self._GIT_REPO_URL)
+  def testGetRemotes(self):
+    """Tests the _GetRemotes function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
 
-  # TODO: add _GetRemotes test.
-  # TODO: add AddPath test.
+    remotes = git_helper._GetRemotes()
+    self.assertEqual(len(remotes), 4)
+
+  def testAddPath(self):
+    """Tests the AddPath function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.AddPath(u'README')
+    self.assertTrue(result)
 
   def testCheckHasBranch(self):
     """Tests the CheckHasBranch function."""
-    self.assertTrue(self._git_helper.CheckHasBranch(u'master'))
-    self.assertFalse(self._git_helper.CheckHasBranch(u'bogus'))
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.CheckHasBranch(u'master')
+    self.assertTrue(result)
+
+    result = git_helper.CheckHasBranch(u'feature')
+    self.assertTrue(result)
+
+    result = git_helper.CheckHasBranch(u'bogus')
+    self.assertFalse(result)
+
+    git_helper = ErrorGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.CheckHasBranch(u'master')
+    self.assertFalse(result)
 
   def testCheckHasProjectOrigin(self):
     """Tests the CheckHasProjectOrigin function."""
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
     # Only test if the method completes without errors.
-    self._git_helper.CheckHasProjectOrigin()
+    git_helper.CheckHasProjectOrigin()
 
   def testCheckHasProjectUpstream(self):
     """Tests the CheckHasProjectUpstream function."""
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
     # Only test if the method completes without errors.
-    self._git_helper.CheckHasProjectUpstream()
+    git_helper.CheckHasProjectUpstream()
 
   def testCheckHasUncommittedChanges(self):
     """Tests the CheckHasUncommittedChanges function."""
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
     # Only test if the method completes without errors.
-    self._git_helper.CheckHasUncommittedChanges()
+    git_helper.CheckHasUncommittedChanges()
 
   def testCheckSynchronizedWithUpstream(self):
     """Tests the CheckSynchronizedWithUpstream function."""
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
     # Only test if the method completes without errors.
-    self._git_helper.CheckSynchronizedWithUpstream()
+    git_helper.CheckSynchronizedWithUpstream()
 
   # TODO: add CommitToOriginInNameOf test.
   # TODO: add DropUncommittedChanges test.
 
   def testGetActiveBranch(self):
     """Tests the GetActiveBranch function."""
-    active_branch = self._git_helper.GetActiveBranch()
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
+    active_branch = git_helper.GetActiveBranch()
     self.assertIsNotNone(active_branch)
 
   def testGetChangedFiles(self):
     """Tests the GetChangedFiles function."""
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
     # Only test if the method completes without errors.
-    self._git_helper.GetChangedFiles(u'origin/master')
+    git_helper.GetChangedFiles(u'origin/master')
 
   def testGetChangedPythonFiles(self):
     """Tests the GetChangedPythonFiles function."""
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
     # Only test if the method completes without errors.
-    self._git_helper.GetChangedPythonFiles(u'origin/master')
+    git_helper.GetChangedPythonFiles(u'origin/master')
 
   def testGetEmailAddress(self):
     """Tests the GetEmailAddress function."""
-    email_address = self._git_helper.GetEmailAddress()
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
+    email_address = git_helper.GetEmailAddress()
     self.assertIsNotNone(email_address)
 
   def testGetLastCommitMessage(self):
     """Tests the GetLastCommitMessage function."""
-    last_commit_message = self._git_helper.GetLastCommitMessage()
+    git_helper = review.GitHelper(self._GIT_REPO_URL)
+
+    last_commit_message = git_helper.GetLastCommitMessage()
     self.assertIsNotNone(last_commit_message)
 
   # TODO: add GetRemoteOrigin test.

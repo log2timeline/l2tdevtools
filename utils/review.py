@@ -29,11 +29,11 @@ else:
 # Change PYTHONPATH to include utils.
 sys.path.insert(0, u'.')
 
-import utils.upload
+import utils.upload  # pylint: disable=wrong-import-position
 
 
 class CLIHelper(object):
-  """Class that defines CLI helper functions."""
+  """Command line interface (CLI) helper."""
 
   def RunCommand(self, command):
     """Runs a command.
@@ -42,7 +42,7 @@ class CLIHelper(object):
       command (str): command to run.
 
     Returns:
-      tuple[int, file, file]: exit code, stdout and stderr file-like objects.
+      tuple[int, bytes, bytes]: exit code, stdout and stderr data.
     """
     arguments = shlex.split(command)
     process = subprocess.Popen(
@@ -60,7 +60,7 @@ class CLIHelper(object):
 
 
 class CodeReviewHelper(CLIHelper):
-  """Class that defines codereview helper functions."""
+  """Codereview upload.py CLI helper."""
 
   _REVIEWERS = frozenset([
       u'jberggren@gmail.com',
@@ -73,7 +73,7 @@ class CodeReviewHelper(CLIHelper):
       u'log2timeline-dev@googlegroups.com'])
 
   def __init__(self, email_address, no_browser=False):
-    """Initializes a codereview helper object.
+    """Initializes a codereview helper.
 
     Args:
       email_address (str): email address.
@@ -398,10 +398,10 @@ class CodeReviewHelper(CLIHelper):
 
 
 class GitHelper(CLIHelper):
-  """Class that defines git helper functions."""
+  """Git CLI helper."""
 
   def __init__(self, git_repo_url):
-    """Initializes a git helper object.
+    """Initializes a git helper.
 
     Args:
       git_repo_url (str): git repo URL.
@@ -419,7 +419,7 @@ class GitHelper(CLIHelper):
     if not self._remotes:
       exit_code, output, _ = self.RunCommand(u'git remote -v')
       if exit_code == 0:
-        self._remotes = output.split(b'\n')
+        self._remotes = list(filter(None, output.split(b'\n')))
 
     return self._remotes
 
@@ -753,10 +753,10 @@ class GitHelper(CLIHelper):
 
 
 class GitHubHelper(object):
-  """Class that defines github helper functions."""
+  """Github helper."""
 
   def __init__(self, organization, project):
-    """Initializes a github helper object.
+    """Initializes a github helper.
 
     Args:
       organization (str): github organization name.
@@ -887,7 +887,7 @@ class ProjectHelper(CLIHelper):
       u'l2tdevtools', u'l2tdocs', u'plaso'])
 
   def __init__(self, script_path):
-    """Initializes a project helper object.
+    """Initializes a project helper.
 
     Args:
       script_path (str): path to the script.
@@ -1162,7 +1162,7 @@ class ReadTheDocsHelper(object):
   """Class that defines readthedocs helper functions."""
 
   def __init__(self, project):
-    """Initializes a readthedocs helper object.
+    """Initializes a readthedocs helper.
 
     Args:
       project (str): github project name.
@@ -1207,7 +1207,7 @@ class SphinxAPIDocHelper(CLIHelper):
   _MINIMUM_VERSION_TUPLE = (1, 2, 0)
 
   def __init__(self, project):
-    """Initializes a sphinx-apidoc helper object.
+    """Initializes a sphinx-apidoc helper.
 
     Args:
       project (str): github project name.
@@ -1253,7 +1253,7 @@ class NetRCFile(object):
   _NETRC_SEPARATOR_RE = re.compile(r'[^ \t\n]+')
 
   def __init__(self):
-    """Initializes a .netrc file object."""
+    """Initializes a .netrc file."""
     super(NetRCFile, self).__init__()
     self._contents = None
     self._values = None
@@ -1327,7 +1327,7 @@ class ReviewFile(object):
   """
 
   def __init__(self, branch_name):
-    """Initializes a review file object.
+    """Initializes a review file.
 
     Args:
       branch_name (str): name of the feature branch of the review.
@@ -1395,7 +1395,7 @@ class ReviewHelper(object):
   def __init__(
       self, command, github_origin, feature_branch, diffbase, all_files=False,
       no_browser=False, no_confirm=False):
-    """Initializes a review helper object.
+    """Initializes a review helper.
 
     Args:
       command (str): user provided command, for example "create", "lint".
@@ -1624,7 +1624,7 @@ class ReviewHelper(object):
     return True
 
   def InitializeHelpers(self):
-    """Initializes the helper objects.
+    """Initializes the helper.
 
     Returns:
       bool: True if the helper initialization was successful.
