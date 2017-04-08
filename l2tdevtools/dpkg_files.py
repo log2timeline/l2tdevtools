@@ -9,7 +9,7 @@ import time
 
 
 class DPKGBuildFilesGenerator(object):
-  """Class that helps in generating dpkg build files."""
+  """Dpkg build files generator."""
 
   _EMAIL_ADDRESS = (
       u'log2timeline development team <log2timeline-dev@googlegroups.com>')
@@ -731,7 +731,7 @@ class DPKGBuildFilesGenerator(object):
     Returns:
       bool: True if the project only support Python version 2.
     """
-    return (u'python2_only' in self._project_definition.build_options or
+    return (self._project_definition.IsPython2Only() or 
             self._distribution == u'precise')
 
   def GenerateFiles(self, dpkg_path):
