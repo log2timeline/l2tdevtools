@@ -60,7 +60,7 @@ class CLIHelper(object):
 
 
 class CodeReviewHelper(CLIHelper):
-  """Codereview upload.py CLI helper."""
+  """Codereview upload.py command helper."""
 
   _REVIEWERS = frozenset([
       u'jberggren@gmail.com',
@@ -288,7 +288,7 @@ class CodeReviewHelper(CLIHelper):
       request.add_header(u'X-Requesting-XSRF-Token', u'1')
 
       try:
-        url_object = urllib_request.urlopen(request)
+        url_object = urllib_request.urlopen(request, timeout=3)
       except urllib_error.HTTPError as exception:
         logging.error(
             u'Failed retrieving codereview XSRF token with error: {0!s}'.format(
@@ -398,7 +398,7 @@ class CodeReviewHelper(CLIHelper):
 
 
 class GitHelper(CLIHelper):
-  """Git CLI helper."""
+  """Git command helper."""
 
   def __init__(self, git_repo_url):
     """Initializes a git helper.

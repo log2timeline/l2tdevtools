@@ -27,6 +27,8 @@ class CodeReviewHelperTest(unittest.TestCase):
   # TODO: add CreateIssue test.
   # TODO: add GetAccessToken test.
 
+  @unittest.skipIf(
+      os.environ.get(u'TRAVIS_OS_NAME', u''), 'cannot run on Travis-CI')
   def testGetXSRFToken(self):
     """Tests the GetXSRFToken function."""
     codereview_helper = review.CodeReviewHelper(
