@@ -11,7 +11,7 @@ except ImportError:
 
 
 class ProjectDefinition(object):
-  """Class that implements a project definition.
+  """Project definition.
 
   Attributes:
     architecture_dependent (bool): True if the project is architecture
@@ -47,10 +47,10 @@ class ProjectDefinition(object):
   """
 
   def __init__(self, name):
-    """Initializes the project definition.
+    """Initializes a project definition.
 
     Args:
-      name: the name of the project.
+      name (str): name of the project.
     """
     super(ProjectDefinition, self).__init__()
     self.architecture_dependent = False
@@ -90,11 +90,11 @@ class ProjectDefinition(object):
     Returns:
       bool: True if the project only support Python version 2.
     """
-    return u'python2_only' in self.build_options
+    return self.build_options and u'python2_only' in self.build_options
 
 
 class ProjectVersionDefinition(object):
-  """Class that implements a project version definition."""
+  """Project version definition."""
 
   _VERSION_STRING_PART_RE = re.compile(
       r'^(<[=]?|>[=]?|==)([0-9]+)[.]?([0-9]+|)[.]?([0-9]+|)[.-]?([0-9]+|)$')
