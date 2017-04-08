@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the dpkg build files generator."""
 
-import os
 import unittest
 
 from l2tdevtools import dpkg_files
