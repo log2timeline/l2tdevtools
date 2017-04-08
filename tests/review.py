@@ -82,6 +82,8 @@ class TestGitHelper(review.GitHelper):
       b'* feature\n'
       b'  master\n')
 
+  _GIT_EMAIL_DATA = b'username@example.com\n'
+
   _GIT_LAST_LOG_DATA = (
       b'commit 79a78f3f0044192a0354ad682733a7996c15e89c\n'
       b'Author: User <username@example.com>\n'
@@ -106,6 +108,9 @@ class TestGitHelper(review.GitHelper):
     """
     if command == u'git branch':
       return 0, self._GIT_BRANCH_DATA, b''
+
+    if command == u'git config user.email':
+      return 0, self._GIT_EMAIL_DATA, b''
 
     if command == u'git log -1':
       return 0, self._GIT_LAST_LOG_DATA, b''
@@ -210,7 +215,10 @@ class GitHelperTest(unittest.TestCase):
 
   def testGetEmailAddress(self):
     """Tests the GetEmailAddress function."""
-    git_helper = review.GitHelper(self._GIT_REPO_URL)
+    if os.environ.get(u'TRAVIS_OS_NAME', u''):
+      git_helper = TestGitHelper(self._GIT_REPO_URL)
+    else:
+      git_helper = review.GitHelper(self._GIT_REPO_URL)
 
     email_address = git_helper.GetEmailAddress()
     self.assertIsNotNone(email_address)
