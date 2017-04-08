@@ -8,7 +8,7 @@ from l2tdevtools import dpkg_files
 
 
 class DPKGBuildFilesGeneratorTest(unittest.TestCase):
-  """Tests for dpkg build files generator."""
+  """Tests for the dpkg build files generator."""
 
   def testGenerateChangelogFile(self):
     """Tests the _GenerateChangelogFile function."""
