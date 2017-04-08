@@ -28,7 +28,7 @@ class CodeReviewHelperTest(unittest.TestCase):
   # TODO: add GetAccessToken test.
 
   @unittest.skipIf(
-      os.environ.get(u'TRAVIS_OS_NAME', u''), 'cannot run on Travis-CI')
+      os.environ.get(u'TRAVIS_OS_NAME', u''), 'Travis-CI not supported')
   def testGetXSRFToken(self):
     """Tests the GetXSRFToken function."""
     codereview_helper = review.CodeReviewHelper(
@@ -281,6 +281,8 @@ class ProjectHelper(unittest.TestCase):
   # TODO: add UpdateVersionFile test.
 
 
+@unittest.skipIf(
+    os.environ.get(u'TRAVIS_OS_NAME', u''), 'Travis-CI not supported')
 class PylintHelperTest(unittest.TestCase):
   """Tests for the pylint helper class."""
 
@@ -291,16 +293,19 @@ class PylintHelperTest(unittest.TestCase):
   def testCheckFiles(self):
     """Tests the CheckFiles function."""
     test_file = os.path.join(u'test_data', u'linter_pass.py')
-    self.assertTrue(self._pylint_helper.CheckFiles([test_file]))
+    result = self._pylint_helper.CheckFiles([test_file])
+    self.assertTrue(result)
 
     test_file = os.path.join(u'test_data', u'linter_fail.py')
-    self.assertFalse(self._pylint_helper.CheckFiles([test_file]))
+    result = self._pylint_helper.CheckFiles([test_file])
+    self.assertFalse(result)
 
     # TODO: capture output and compare.
 
   def testCheckUpToDateVersion(self):
     """Tests the CheckUpToDateVersion function."""
-    self.assertTrue(self._pylint_helper.CheckUpToDateVersion())
+    result = self._pylint_helper.CheckUpToDateVersion()
+    self.assertTrue(result)
 
 
 class ReadTheDocsHelperTest(unittest.TestCase):
