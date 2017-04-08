@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Project object implementations."""
+"""Project definitions."""
 
 import logging
 import re

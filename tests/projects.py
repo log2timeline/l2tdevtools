@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Tests for the project object implementations."""
+"""Tests for the project definitions."""
 
 import os
 import unittest
