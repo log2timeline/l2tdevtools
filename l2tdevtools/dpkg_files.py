@@ -731,7 +731,7 @@ class DPKGBuildFilesGenerator(object):
     Returns:
       bool: True if the project only support Python version 2.
     """
-    return (self._project_definition.IsPython2Only() or 
+    return (self._project_definition.IsPython2Only() or
             self._distribution == u'precise')
 
   def GenerateFiles(self, dpkg_path):
