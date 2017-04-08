@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Build helper object implementations."""
+"""Helper for building projects from source."""
 
 from __future__ import print_function
 import fileinput
@@ -20,7 +20,7 @@ from l2tdevtools import spec_file
 
 
 class BuildHelper(object):
-  """Base class that helps in building."""
+  """Helper to build projects from source."""
 
   LOG_FILENAME = u'build.log'
 
@@ -41,7 +41,10 @@ class BuildHelper(object):
     Returns:
       list[str]: build dependency names that are not met or an empty list.
     """
-    return list(self._project_definition.build_dependencies)
+    build_dependencies = self._project_definition.build_dependencies
+    if not build_dependencies:
+      build_dependencies = []
+    return list(build_dependencies)
 
   def CheckBuildRequired(self, unused_source_helper_object):
     """Checks if a build is required.
@@ -56,7 +59,7 @@ class BuildHelper(object):
 
 
 class DPKGBuildHelper(BuildHelper):
-  """Class that helps in building dpkg packages (.deb)."""
+  """Helper to build dpkg packages (.deb)."""
 
   _BUILD_DEPENDENCIES = frozenset([
       u'git',
@@ -200,7 +203,7 @@ class DPKGBuildHelper(BuildHelper):
 
 
 class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
-  """Class that helps in building dpkg packages (.deb)."""
+  """Helper to build dpkg packages (.deb)."""
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
@@ -373,7 +376,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
 
 class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
-  """Class that helps in building source dpkg packages (.deb)."""
+  """Helper to build source dpkg packages (.deb)."""
 
   _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
@@ -544,7 +547,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
 
 class SetupPyDPKGBuildHelper(DPKGBuildHelper):
-  """Class that helps in building dpkg packages (.deb)."""
+  """Helper to build dpkg packages (.deb)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -758,7 +761,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
 
 class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
-  """Class that helps in building source dpkg packages (.deb)."""
+  """Helper to build source dpkg packages (.deb)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -955,7 +958,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
 
 
 class MSIBuildHelper(BuildHelper):
-  """Class that helps in building Microsoft Installer packages (.msi)."""
+  """Helper to build Microsoft Installer packages (.msi)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -1010,7 +1013,7 @@ class MSIBuildHelper(BuildHelper):
 
 
 class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
-  """Class that helps in building Microsoft Installer packages (.msi)."""
+  """Helper to build Microsoft Installer packages (.msi)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -1539,7 +1542,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
 
 class SetupPyMSIBuildHelper(MSIBuildHelper):
-  """Class that helps in building Microsoft Installer packages (.msi)."""
+  """Helper to build Microsoft Installer packages (.msi)."""
 
   def _GetFilenameSafeProjectInformation(self, source_helper_object):
     """Determines the filename safe project name and version.
@@ -1717,7 +1720,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
 
 
 class OSCBuildHelper(BuildHelper):
-  """Class that helps in building with osc for the openSUSE build service."""
+  """Helper to build with osc for the openSUSE build service."""
 
   _OSC_PROJECT = u'home:joachimmetz:testing'
 
@@ -1929,7 +1932,7 @@ class OSCBuildHelper(BuildHelper):
 
 
 class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
-  """Class that helps in building with osc for the openSUSE build service."""
+  """Helper to build with osc for the openSUSE build service."""
 
   def Build(self, source_helper_object):
     """Builds the osc package.
@@ -2015,7 +2018,7 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
 
 
 class SetupPyOSCBuildHelper(OSCBuildHelper):
-  """Class that helps in building with osc for the openSUSE build service."""
+  """Helper to build with osc for the openSUSE build service."""
 
   _DOC_FILENAMES = [
       u'CHANGES', u'CHANGES.txt', u'CHANGES.TXT',
@@ -2134,7 +2137,7 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
 
 class PKGBuildHelper(BuildHelper):
-  """Class that helps in building MacOS-X packages (.pkg)."""
+  """Helper to build MacOS-X packages (.pkg)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -2253,7 +2256,7 @@ class PKGBuildHelper(BuildHelper):
 
 
 class ConfigureMakePKGBuildHelper(PKGBuildHelper):
-  """Class that helps in building MacOS-X packages (.pkg)."""
+  """Helper to build MacOS-X packages (.pkg)."""
 
   _DOC_FILENAMES = frozenset([
       u'AUTHORS',
@@ -2397,7 +2400,7 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
 
 
 class SetupPyPKGBuildHelper(PKGBuildHelper):
-  """Class that helps in building MacOS-X packages (.pkg)."""
+  """Helper to build MacOS-X packages (.pkg)."""
 
   def Build(self, source_helper_object):
     """Builds the pkg package and distributable disk image (.dmg).
@@ -2479,7 +2482,7 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
 
 
 class BaseRPMBuildHelper(BuildHelper):
-  """Base class that helps in building rpm packages."""
+  """Helper to build RPM packages (.rpm)."""
 
   _BUILD_DEPENDENCIES = frozenset([
       u'git',
@@ -2704,7 +2707,7 @@ class BaseRPMBuildHelper(BuildHelper):
 
 
 class RPMBuildHelper(BaseRPMBuildHelper):
-  """Class that helps in building rpm packages (.rpm)."""
+  """Helper to build RPM packages (.rpm)."""
 
   def _RemoveBuildDirectory(self, project_name, project_version):
     """Removes build directory.
@@ -2787,7 +2790,7 @@ class RPMBuildHelper(BaseRPMBuildHelper):
 
 
 class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
-  """Class that helps in building rpm packages (.rpm)."""
+  """Helper to build RPM packages (.rpm)."""
 
   def _MoveRPMs(self, project_name, project_version):
     """Moves the rpms from the rpmbuild directory into the current directory.
@@ -2854,7 +2857,7 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
 
 
 class SetupPyRPMBuildHelper(RPMBuildHelper):
-  """Class that helps in building rpm packages (.rpm)."""
+  """Helper to build RPM packages (.rpm)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -2992,7 +2995,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
 
 
 class SRPMBuildHelper(BaseRPMBuildHelper):
-  """Class that helps in building source rpm packages (.src.rpm)."""
+  """Helper to build source RPM packages (.src.rpm)."""
 
   def _MoveRPMs(self, project_name, project_version):
     """Moves the rpms from the rpmbuild directory into the current directory.
@@ -3058,7 +3061,7 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
 
 
 class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
-  """Class that helps in building source rpm packages (.src.rpm)."""
+  """Helper to build source RPM packages (.src.rpm)."""
 
   def Build(self, source_helper_object):
     """Builds the source rpm.
@@ -3101,7 +3104,7 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
 
 
 class SetupPySRPMBuildHelper(SRPMBuildHelper):
-  """Class that helps in building source rpm packages (.src.rpm)."""
+  """Helper to build source RPM packages (.src.rpm)."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -3200,11 +3203,11 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
 
 
 class SourceBuildHelper(BuildHelper):
-  """Class that helps in building source."""
+  """Helper to build projects from source."""
 
 
 class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
-  """Class that helps in building source."""
+  """Helper to build projects from source using configure and make."""
 
   def Build(self, source_helper_object):
     """Builds the source.
@@ -3261,7 +3264,7 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
 
 
 class SetupPySourceBuildHelper(SourceBuildHelper):
-  """Class that helps in building source."""
+  """Helper to build projects from source using setup.py."""
 
   def Build(self, source_helper_object):
     """Builds the source.
