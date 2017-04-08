@@ -108,6 +108,8 @@ class TestGitHelper(review.GitHelper):
 class GitHelperTest(unittest.TestCase):
   """Tests for the git helper class."""
 
+  # pylint: disable=protected-access
+
   _GIT_REPO_URL = b'https://github.com/log2timeline/l2tdevtools.git'
 
   def testGetRemotes(self):
