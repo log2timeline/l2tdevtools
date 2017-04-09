@@ -1444,7 +1444,7 @@ class ReviewHelper(object):
       bool: True if the state of the local git repository is sane.
     """
     if self._command in (
-          u'close', u'create', u'lint',  u'lint-test', u'lint_test', u'update'):
+        u'close', u'create', u'lint',  u'lint-test', u'lint_test', u'update'):
       if not self._git_helper.CheckHasProjectUpstream():
         print(u'{0:s} aborted - missing project upstream.'.format(
             self._command.title()))
@@ -1458,7 +1458,7 @@ class ReviewHelper(object):
         return False
 
     if self._command not in (
-        u'lint',  u'lint-test', u'lint_test', u'test', u'update-version',
+        u'lint', u'lint-test', u'lint_test', u'test', u'update-version',
         u'update_version'):
       if self._git_helper.CheckHasUncommittedChanges():
         print(u'{0:s} aborted - detected uncommitted changes.'.format(
@@ -1516,7 +1516,7 @@ class ReviewHelper(object):
             self._command.title(), self._active_branch))
         return False
 
-    elif self._command in (u'lint',  u'lint-test', u'lint_test'):
+    elif self._command in (u'lint', u'lint-test', u'lint_test'):
       self._git_helper.CheckSynchronizedWithUpstream()
 
     elif self._command == u'merge':
