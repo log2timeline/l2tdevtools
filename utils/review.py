@@ -1444,7 +1444,7 @@ class ReviewHelper(object):
       bool: True if the state of the local git repository is sane.
     """
     if self._command in (
-        u'close', u'create', u'lint',  u'lint-test', u'lint_test', u'update'):
+        u'close', u'create', u'lint', u'lint-test', u'lint_test', u'update'):
       if not self._git_helper.CheckHasProjectUpstream():
         print(u'{0:s} aborted - missing project upstream.'.format(
             self._command.title()))
