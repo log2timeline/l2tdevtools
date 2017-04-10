@@ -109,6 +109,9 @@ class TestGitHelper(review.GitHelper):
     if command == u'git branch':
       return 0, self._GIT_BRANCH_DATA, b''
 
+    if command == u'git checkout master':
+      return 0, b'', b''
+
     if command == u'git config user.email':
       return 0, self._GIT_EMAIL_DATA, b''
 
@@ -119,6 +122,21 @@ class TestGitHelper(review.GitHelper):
       return 0, self._GIT_REMOTE_DATA, b''
 
     if command.startswith(u'git add -A '):
+      return 0, b'', b''
+
+    if command.startswith(u'git branch -D '):
+      return 0, b'', b''
+
+    if command.startswith(u'git fetch '):
+      return 0, b'', b''
+
+    if command.startswith(u'git pull --no-edit '):
+      return 0, b'', b''
+
+    if command.startswith(u'git pull --squash '):
+      return 0, b'', b''
+
+    if command.startswith(u'git push'):
       return 0, b'', b''
 
 
@@ -233,13 +251,71 @@ class GitHelperTest(unittest.TestCase):
     last_commit_message = git_helper.GetLastCommitMessage()
     self.assertIsNotNone(last_commit_message)
 
-  # TODO: add GetRemoteOrigin test.
-  # TODO: add PullFromFork test.
-  # TODO: add PushToOrigin test.
-  # TODO: add RemoveFeatureBranch test.
-  # TODO: add SynchronizeWithOrigin test.
-  # TODO: add SynchronizeWithUpstream test.
-  # TODO: add SwitchToMasterBranch test.
+  def testGetRemoteOrigin(self):
+    """Tests the GetRemoteOrigin function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    expected_remote_origin = u'https://github.com/username/l2tdevtools.git'
+    remote_origin = git_helper.GetRemoteOrigin()
+    self.assertEqual(remote_origin, expected_remote_origin)
+
+  def testPullFromFork(self):
+    """Tests the PullFromFork function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.PullFromFork(
+        u'https://github.com/username/l2tdevtools.git', u'feature')
+    self.assertTrue(result)
+
+  def testPushToOrigin(self):
+    """Tests the PushToOrigin function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.PushToOrigin(u'feature')
+    self.assertTrue(result)
+
+    result = git_helper.PushToOrigin(u'feature', force=True)
+    self.assertTrue(result)
+
+  def testRemoveFeatureBranch(self):
+    """Tests the RemoveFeatureBranch function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    git_helper.RemoveFeatureBranch(u'feature')
+    git_helper.RemoveFeatureBranch(u'master')
+
+    # TODO: add return value.
+
+  def testSynchronizeWithOrigin(self):
+    """Tests the SynchronizeWithOrigin function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.SynchronizeWithOrigin()
+    self.assertTrue(result)
+
+    git_helper = ErrorGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.SynchronizeWithOrigin()
+    self.assertFalse(result)
+
+  def testSynchronizeWithUpstream(self):
+    """Tests the SynchronizeWithUpstream function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.SynchronizeWithUpstream()
+    self.assertTrue(result)
+
+    git_helper = ErrorGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.SynchronizeWithUpstream()
+    self.assertFalse(result)
+
+  def testSwitchToMasterBranch(self):
+    """Tests the SwitchToMasterBranch function."""
+    git_helper = TestGitHelper(self._GIT_REPO_URL)
+
+    result = git_helper.SwitchToMasterBranch()
+    self.assertTrue(result)
 
 
 class GitHubHelperTest(unittest.TestCase):

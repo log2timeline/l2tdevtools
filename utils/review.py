@@ -752,7 +752,7 @@ class GitHelper(CLIHelper):
       bool: True if the git repository has switched to the master branch.
     """
     exit_code, _, _ = self.RunCommand(u'git checkout master')
-    return exit_code != 0
+    return exit_code == 0
 
 
 class GitHubHelper(object):
