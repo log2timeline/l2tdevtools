@@ -22,6 +22,28 @@ class CLIHelperTest(unittest.TestCase):
 class CodeReviewHelperTest(unittest.TestCase):
   """Tests for the codereview helper class."""
 
+  # pylint: disable=protected-access
+
+  def testGetReviewer(self):
+    """Tests the _GetReviewer function."""
+    author = u'test@example.com'
+    codereview_helper = review.CodeReviewHelper(author, no_browser=True)
+
+    reviewer = codereview_helper._GetReviewer()
+    self.assertNotEqual(reviewer, author)
+    self.assertIn(reviewer, codereview_helper._REVIEWERS)
+
+  def testGetReviewersOnCC(self):
+    """Tests the _GetReviewersOnCC function."""
+    author = u'test@example.com'
+    reviewer = u'joachim.metz@gmail.com'
+    codereview_helper = review.CodeReviewHelper(author, no_browser=True)
+
+    reviewers_cc = codereview_helper._GetReviewersOnCC(reviewer)
+    self.assertNotIn(author, reviewers_cc)
+    self.assertNotIn(reviewer, reviewers_cc)
+    self.assertIn(u'log2timeline-dev@googlegroups.com', reviewers_cc)
+
   # TODO: add AddMergeMessage test.
   # TODO: add CloseIssue test.
   # TODO: add CreateIssue test.

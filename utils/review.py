@@ -7,6 +7,7 @@ import argparse
 import json
 import logging
 import os
+import random
 import re
 import shlex
 import subprocess
@@ -89,6 +90,45 @@ class CodeReviewHelper(CLIHelper):
     self._no_browser = no_browser
     self._upload_py_path = os.path.join(u'utils', u'upload.py')
     self._xsrf_token = None
+
+  def _GetReviewer(self):
+    """Determines the reviewer.
+
+    Returns:
+      str: email address of the reviewer that is used on codereview.
+    """
+    reviewers = list(self._REVIEWERS)
+
+    try:
+      reviewers.remove(self._email_address)
+    except ValueError:
+      pass
+
+    random.shuffle(reviewers)
+
+    return reviewers[0]
+
+  def _GetReviewersOnCC(self, reviewer):
+    """Determines the reviewers on CC.
+
+    Args:
+      reviewer (str): email address of the reviewer that is used on codereview.
+
+    Returns:
+      str: comma seperated email addresses of the reviewers that are used
+          on codereview.
+    """
+    reviewers_cc = set(self._REVIEWERS)
+    reviewers_cc.update(self._REVIEWERS_CC)
+
+    reviewers_cc.remove(reviewer)
+
+    try:
+      reviewers_cc.remove(self._email_address)
+    except KeyError:
+      pass
+
+    return u','.join(reviewers_cc)
 
   def AddMergeMessage(self, issue_number, message):
     """Adds a merge message to the code review issue.
@@ -198,23 +238,8 @@ class CodeReviewHelper(CLIHelper):
     Returns:
       int: codereview issue number or None.
     """
-    reviewers = list(self._REVIEWERS)
-    reviewers_cc = list(self._REVIEWERS_CC)
-
-    try:
-      # Remove self from reviewers list.
-      reviewers.remove(self._email_address)
-    except ValueError:
-      pass
-
-    try:
-      # Remove self from reviewers CC list.
-      reviewers_cc.remove(self._email_address)
-    except ValueError:
-      pass
-
-    reviewers = u','.join(reviewers)
-    reviewers_cc = u','.join(reviewers_cc)
+    reviewers = self._GetReviewer()
+    reviewers_cc = self._GetReviewersOnCC(reviewers)
 
     command = u'{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
