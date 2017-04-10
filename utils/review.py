@@ -115,8 +115,7 @@ class CodeReviewHelper(CLIHelper):
       reviewer (str): email address of the reviewer that is used on codereview.
 
     Returns:
-      str: comma seperated email addresses of the reviewers that are used
-          on codereview.
+      str: comma seperated email addresses.
     """
     reviewers_cc = set(self._REVIEWERS)
     reviewers_cc.update(self._REVIEWERS_CC)
@@ -238,8 +237,8 @@ class CodeReviewHelper(CLIHelper):
     Returns:
       int: codereview issue number or None.
     """
-    reviewers = self._GetReviewer()
-    reviewers_cc = self._GetReviewersOnCC(reviewers)
+    reviewer = self._GetReviewer()
+    reviewers_cc = self._GetReviewersOnCC(reviewer)
 
     command = u'{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
@@ -250,7 +249,7 @@ class CodeReviewHelper(CLIHelper):
     command = (
         u'{0:s} --send_mail -r {1:s} --cc {2:s} -t "{3:s}" -y -- '
         u'{4:s}').format(
-            command, reviewers, reviewers_cc, description, diffbase)
+            command, reviewer, reviewers_cc, description, diffbase)
 
     if self._no_browser:
       print(
