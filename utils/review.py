@@ -66,11 +66,17 @@ class CLIHelper(object):
 class CodeReviewHelper(CLIHelper):
   """Codereview upload.py command helper."""
 
-  _REVIEWERS = frozenset([
+  _REVIEWERS_PER_PROJECT = {
+      u'plaso': frozenset([
+          u'jberggren@gmail.com',
+          u'joachim.metz@gmail.com',
+          u'onager@deerpie.com',
+          u'romaing@google.com'])}
+
+  _REVIEWERS_DEFAULT = frozenset([
       u'jberggren@gmail.com',
       u'joachim.metz@gmail.com',
-      u'onager@deerpie.com',
-      u'romaing@google.com'])
+      u'onager@deerpie.com'])
 
   _REVIEWERS_CC = frozenset([
       u'kiddi@kiddaland.net',
@@ -91,13 +97,17 @@ class CodeReviewHelper(CLIHelper):
     self._upload_py_path = os.path.join(u'utils', u'upload.py')
     self._xsrf_token = None
 
-  def _GetReviewer(self):
+  def _GetReviewer(self, project_name):
     """Determines the reviewer.
+
+    Args:
+      project_name (str): name of the project.
 
     Returns:
       str: email address of the reviewer that is used on codereview.
     """
-    reviewers = list(self._REVIEWERS)
+    reviewers = list(self._REVIEWERS_PER_PROJECT.get(
+        project_name, self._REVIEWERS_DEFAULT))
 
     try:
       reviewers.remove(self._email_address)
@@ -108,16 +118,18 @@ class CodeReviewHelper(CLIHelper):
 
     return reviewers[0]
 
-  def _GetReviewersOnCC(self, reviewer):
+  def _GetReviewersOnCC(self, project_name, reviewer):
     """Determines the reviewers on CC.
 
     Args:
+      project_name (str): name of the project.
       reviewer (str): email address of the reviewer that is used on codereview.
 
     Returns:
       str: comma seperated email addresses.
     """
-    reviewers_cc = set(self._REVIEWERS)
+    reviewers_cc = set(self._REVIEWERS_PER_PROJECT.get(
+        project_name, self._REVIEWERS_DEFAULT))
     reviewers_cc.update(self._REVIEWERS_CC)
 
     reviewers_cc.remove(reviewer)
@@ -227,18 +239,19 @@ class CodeReviewHelper(CLIHelper):
 
     return True
 
-  def CreateIssue(self, diffbase, description):
+  def CreateIssue(self, project_name, diffbase, description):
     """Creates a new codereview issue.
 
     Args:
+      project_name (str): name of the project.
       diffbase (str): diffbase.
       description (str): description.
 
     Returns:
       int: codereview issue number or None.
     """
-    reviewer = self._GetReviewer()
-    reviewers_cc = self._GetReviewersOnCC(reviewer)
+    reviewer = self._GetReviewer(project_name)
+    reviewers_cc = self._GetReviewersOnCC(project_name, reviewer)
 
     command = u'{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
@@ -910,8 +923,8 @@ class ProjectHelper(CLIHelper):
       u'Google Inc. (*@google.com)']
 
   SUPPORTED_PROJECTS = frozenset([
-      u'dfdatetime', u'dfvfs', u'dfwinreg', u'dftimewolf', u'eccemotus',
-      u'l2tdevtools', u'l2tdocs', u'plaso'])
+      u'artifacts', u'dfdatetime', u'dfkinds', u'dfvfs', u'dfwinreg',
+      u'dftimewolf', u'eccemotus', u'l2tdevtools', u'l2tdocs', u'plaso'])
 
   def __init__(self, script_path):
     """Initializes a project helper.
@@ -1636,7 +1649,7 @@ class ReviewHelper(object):
         self._project_name, description)
 
     codereview_issue_number = self._codereview_helper.CreateIssue(
-        self._diffbase, code_review_description)
+        self._project_name, self._diffbase, code_review_description)
     if not codereview_issue_number:
       print(u'{0:s} aborted - unable to create codereview issue.'.format(
           self._command.title()))

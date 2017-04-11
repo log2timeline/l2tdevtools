@@ -29,7 +29,7 @@ class CodeReviewHelperTest(unittest.TestCase):
     author = u'test@example.com'
     codereview_helper = review.CodeReviewHelper(author, no_browser=True)
 
-    reviewer = codereview_helper._GetReviewer()
+    reviewer = codereview_helper._GetReviewer(u'l2tdevtools')
     self.assertNotEqual(reviewer, author)
     self.assertIn(reviewer, codereview_helper._REVIEWERS)
 
@@ -39,7 +39,7 @@ class CodeReviewHelperTest(unittest.TestCase):
     reviewer = u'joachim.metz@gmail.com'
     codereview_helper = review.CodeReviewHelper(author, no_browser=True)
 
-    reviewers_cc = codereview_helper._GetReviewersOnCC(reviewer)
+    reviewers_cc = codereview_helper._GetReviewersOnCC(u'l2tdevtools', reviewer)
     self.assertNotIn(author, reviewers_cc)
     self.assertNotIn(reviewer, reviewers_cc)
     self.assertIn(u'log2timeline-dev@googlegroups.com', reviewers_cc)
