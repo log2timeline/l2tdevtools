@@ -31,7 +31,7 @@ class CodeReviewHelperTest(unittest.TestCase):
 
     reviewer = codereview_helper._GetReviewer(u'l2tdevtools')
     self.assertNotEqual(reviewer, author)
-    self.assertIn(reviewer, codereview_helper._REVIEWERS)
+    self.assertIn(reviewer, codereview_helper._REVIEWERS_DEFAULT)
 
   def testGetReviewersOnCC(self):
     """Tests the _GetReviewersOnCC function."""
