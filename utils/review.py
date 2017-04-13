@@ -67,7 +67,24 @@ class CodeReviewHelper(CLIHelper):
   """Codereview upload.py command helper."""
 
   _REVIEWERS_PER_PROJECT = {
+      u'dfdatetime': frozenset([
+          u'joachim.metz@gmail.com',
+          u'onager@deerpie.com']),
+      u'dfkinds': frozenset([
+          u'joachim.metz@gmail.com',
+          u'onager@deerpie.com']),
+      u'dfvfs': frozenset([
+          u'joachim.metz@gmail.com',
+          u'onager@deerpie.com']),
+      u'dfwinreg': frozenset([
+          u'joachim.metz@gmail.com',
+          u'onager@deerpie.com']),
+      u'dftimewolf': frozenset([
+          u'jberggren@gmail.com',
+          u'someguyiknow@google.com',
+          u'tomchop@gmail.com']),
       u'plaso': frozenset([
+          u'aaronp@gmail.com',
           u'jberggren@gmail.com',
           u'joachim.metz@gmail.com',
           u'onager@deerpie.com',
