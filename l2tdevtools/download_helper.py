@@ -18,7 +18,7 @@ import pkg_resources
 
 
 class DownloadHelper(object):
-  """Class that helps in downloading files and web content."""
+  """Helps in downloading files and web content."""
 
   def __init__(self, download_url):
     """Initializes the download helper.
@@ -96,7 +96,7 @@ class DownloadHelper(object):
 
 
 class ProjectDownloadHelper(DownloadHelper):
-  """Class that helps in downloading a project."""
+  """Helps in downloading a project."""
 
   def __init__(self, download_url):
     """Initializes the download helper.
@@ -171,7 +171,7 @@ class ProjectDownloadHelper(DownloadHelper):
 
 
 class GitHubReleasesDownloadHelper(ProjectDownloadHelper):
-  """Class that helps in downloading a project with GitHub releases."""
+  """Helps in downloading a project with GitHub releases."""
 
   _VERSION_EXPRESSIONS = [
       u'[0-9]+',
@@ -395,7 +395,7 @@ class GitHubReleasesDownloadHelper(ProjectDownloadHelper):
 # TODO: Merge with GitHubReleasesDownloadHelper.
 # pylint: disable=abstract-method
 class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
-  """Class that helps in downloading a libyal GitHub project."""
+  """Helps in downloading a libyal GitHub project."""
 
   def __init__(self, download_url):
     """Initializes the download helper.
@@ -472,7 +472,7 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
 
 
 class PyPIDownloadHelper(ProjectDownloadHelper):
-  """Class that helps in downloading a PyPI code project."""
+  """Helps in downloading a PyPI code project."""
 
   def __init__(self, download_url):
     """Initializes the download helper.
@@ -586,7 +586,7 @@ class PyPIDownloadHelper(ProjectDownloadHelper):
 
 
 class SourceForgeDownloadHelper(ProjectDownloadHelper):
-  """Class that helps in downloading a Source Forge project."""
+  """Helps in downloading a Source Forge project."""
 
   def __init__(self, download_url):
     """Initializes the download helper.
@@ -713,7 +713,7 @@ class SourceForgeDownloadHelper(ProjectDownloadHelper):
 
 
 class ZlibDownloadHelper(ProjectDownloadHelper):
-  """Class that helps in downloading the zlib project."""
+  """Helps in downloading the zlib project."""
 
   def __init__(self, download_url):
     """Initializes the download helper.
@@ -816,8 +816,9 @@ class DownloadHelperFactory(object):
       download_helper_class = SourceForgeDownloadHelper
 
     # TODO: make this a more generic github download helper.
-    elif (download_url.startswith(u'http://github.com/libyal/') or
-          download_url.startswith(u'http://googledrive.com/host/')):
+    elif (u'dtfabric' not in download_url and (
+        download_url.startswith(u'http://github.com/libyal/') or
+        download_url.startswith(u'http://googledrive.com/host/'))):
       download_helper_class = LibyalGitHubDownloadHelper
 
     elif (download_url.startswith(u'http://github.com/') and
