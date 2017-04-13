@@ -9,7 +9,7 @@ import time
 
 
 class DPKGBuildFilesGenerator(object):
-  """Class that helps in generating dpkg build files."""
+  """Dpkg build files generator."""
 
   _EMAIL_ADDRESS = (
       u'log2timeline development team <log2timeline-dev@googlegroups.com>')
@@ -55,7 +55,7 @@ class DPKGBuildFilesGenerator(object):
       u'X-Python-Version: >= 2.7',
       u'Homepage: {upstream_homepage:s}',
       u'',
-      u'Package: python-{package_name:s}',
+      u'Package: {python_package_name:s}',
       u'Architecture: {architecture:s}',
       u'Depends: {python_depends:s}',
       u'Description: {description_short:s}',
@@ -73,13 +73,13 @@ class DPKGBuildFilesGenerator(object):
       u'X-Python3-Version: >= 3.4',
       u'Homepage: {upstream_homepage:s}',
       u'',
-      u'Package: python-{package_name:s}',
+      u'Package: {python_package_name:s}',
       u'Architecture: {architecture:s}',
       u'Depends: {python_depends:s}',
       u'Description: {description_short:s}',
       u' {description_long:s}',
       u'',
-      u'Package: python3-{package_name:s}',
+      u'Package: {python3_package_name:s}',
       u'Architecture: {architecture:s}',
       u'Depends: {python3_depends:s}',
       u'Description: {description_short:s}',
@@ -415,6 +415,12 @@ class DPKGBuildFilesGenerator(object):
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
+    python_package_name = package_name
+    if not self._project_definition.dpkg_name:
+      python_package_name = u'python-{0:s}'.format(package_name)
+
+    python3_package_name = u'python3-{0:s}'.format(package_name)
+
     if not self._project_definition.architecture_dependent:
       architecture = u'all'
     else:
@@ -423,6 +429,8 @@ class DPKGBuildFilesGenerator(object):
     python2_only = self._IsPython2Only()
 
     build_depends = []
+    python3_build_depends = []
+
     if self._project_definition.patches:
       build_depends.append(u'quilt')
 
@@ -436,14 +444,27 @@ class DPKGBuildFilesGenerator(object):
       if self._project_definition.architecture_dependent:
         build_depends.append(u'python-all-dev')
 
-      if not python2_only:
-        build_depends.append(u'python3-all (>= 3.4~)')
-        build_depends.append(u'python3-setuptools')
+      python3_build_depends.append(u'python3-all (>= 3.4~)')
+      python3_build_depends.append(u'python3-setuptools')
 
-        if self._project_definition.architecture_dependent:
-          build_depends.append(u'python3-all-dev')
+      if self._project_definition.architecture_dependent:
+        python3_build_depends.append(u'python3-all-dev')
 
-    build_depends.extend(self._project_definition.dpkg_build_dependencies)
+    for dependency in self._project_definition.dpkg_build_dependencies:
+      build_depends.append(dependency)
+
+      if self._project_definition.build_system == u'setup_py':
+        if dependency.startswith(u'python-'):
+          dependency = u'python3-{0:s}'.format(dependency[7:])
+          python3_build_depends.append(dependency)
+        else:
+          logging.warning(
+              u'Unable to determine Python 3 package name of: {0:s}'.format(
+                  dependency))
+
+    if (self._project_definition.build_system == u'setup_py' and
+        not python2_only):
+      build_depends.extend(python3_build_depends)
 
     if build_depends:
       build_depends = u', {0:s}'.format(u', '.join(build_depends))
@@ -490,7 +511,9 @@ class DPKGBuildFilesGenerator(object):
         u'description_short': description_short,
         u'package_name': package_name,
         u'python_depends': python_depends,
+        u'python_package_name': python_package_name,
         u'python3_depends': python3_depends,
+        u'python3_package_name': python3_package_name,
         u'source_package_name': source_package_name,
         u'upstream_homepage': self._project_definition.homepage_url,
         u'upstream_maintainer': self._project_definition.maintainer}
@@ -708,7 +731,7 @@ class DPKGBuildFilesGenerator(object):
     Returns:
       bool: True if the project only support Python version 2.
     """
-    return (u'python2_only' in self._project_definition.build_options or
+    return (self._project_definition.IsPython2Only() or
             self._distribution == u'precise')
 
   def GenerateFiles(self, dpkg_path):

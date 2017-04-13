@@ -496,9 +496,9 @@ class RPMSpecFileGenerator(object):
     if project_name == u'PyYAML':
       python2_package_prefix = u''
     elif project_name in (u'pyzmq', u'yara-python'):
-      python2_package_prefix = u'python-'
-    else:
       python2_package_prefix = u'python2-'
+    else:
+      python2_package_prefix = u'python-'
 
     result = self._RewriteSetupPyGeneratedFile(
         project_definition, source_directory, source_filename, project_name,

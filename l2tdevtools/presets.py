@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Preset object implementations."""
+"""Project preset definitions."""
 
 try:
   import ConfigParser as configparser
@@ -11,15 +11,15 @@ class PresetDefinition(object):
   """Class that implements a preset definition.
 
   Attributes:
-    name: string of the name of the dependency.
-    project_names: list of strings of the project names.
+    name (str): name of the dependency.
+    project_names (list[str]): project names.
   """
 
   def __init__(self, name):
     """Initializes the preset definition.
 
     Args:
-      name: the name of the preset.
+      name (str): name of the preset.
     """
     super(PresetDefinition, self).__init__()
     self.name = name
@@ -33,12 +33,12 @@ class PresetDefinitionReader(object):
     """Retrieves a value from the config parser.
 
     Args:
-      config_parser: the configuration parser (instance of ConfigParser).
-      section_name: the name of the section that contains the value.
-      value_name: the name of the value.
+      config_parser (ConfigParser): configuration parser.
+      section_name (str): name of the section that contains the value.
+      value_name (str): name of the value.
 
     Returns:
-      An object containing the value or None if the value does not exists.
+      object: value or None if the value does not exists.
     """
     try:
       return config_parser.get(section_name, value_name).decode('utf-8')
@@ -49,10 +49,10 @@ class PresetDefinitionReader(object):
     """Reads preset definitions.
 
     Args:
-      file_object: the file-like object to read from.
+      file_object (file): file-like object to read from.
 
     Yields:
-      A preset definitions (instance of PresetDefinition).
+      PresetDefinition: preset definitions.
     """
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Source helper object implementations."""
+"""Helper for managing project source code."""
 
 import abc
 import glob
@@ -13,13 +13,13 @@ import zipfile
 
 
 class SourceHelper(object):
-  """Base class that helps in managing the source code."""
+  """Helper to manager project source code."""
 
   def __init__(self, project_name, project_definition):
     """Initializes a source helper.
 
     Args:
-      project_name: the name of the project.
+      project_name (str): name of the project.
       project_definition (ProjectDefinition): project definition.
     """
     super(SourceHelper, self).__init__()
@@ -50,7 +50,7 @@ class GitRepositorySourceHelper(SourceHelper):
     """Initializes a source helper.
 
     Args:
-      project_name: the name of the project.
+      project_name (str): name of the project.
       project_definition (ProjectDefinition): project definition.
     """
     super(GitRepositorySourceHelper, self).__init__(
