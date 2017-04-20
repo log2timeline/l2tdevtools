@@ -177,6 +177,18 @@ class DPKGBuildHelper(BuildHelper):
     exit_code = subprocess.call(command, shell=True)
     return exit_code == 0
 
+  def _CreateOrigSourcePackage(
+      self, source_filename, project_name, project_version):
+    """Creates the .orig.tar.gz source package.
+
+    Args:
+      project_name (str): project name.
+      project_version (str): version of the project.
+    """
+    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
+        project_name, project_version)
+    shutil.copy(source_filename, deb_orig_source_filename)
+
   def CheckBuildDependencies(self):
     """Checks if the build dependencies are met.
 
@@ -244,9 +256,8 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        source_helper_object.project_name, project_version)
-    shutil.copy(source_filename, deb_orig_source_filename)
+    self._CreateOrigSourcePackage(
+        source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
     if not source_directory:
@@ -412,11 +423,10 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
     project_version = source_helper_object.GetProjectVersion()
 
-    # dpkg-buildpackage wants an source package filename without
+    # debuild wants an source package filename without
     # the status indication and orig indication.
-    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        source_helper_object.project_name, project_version)
-    shutil.copy(source_filename, deb_orig_source_filename)
+    self._CreateOrigSourcePackage(
+        source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
     if not source_directory:
@@ -647,9 +657,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
-    shutil.copy(source_filename, deb_orig_source_filename)
+    self._CreateOrigSourcePackage(
+        source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
     if not source_directory:
@@ -822,11 +831,10 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    # dpkg-buildpackage wants an source package filename without
+    # debuild wants an source package filename without
     # the status indication and orig indication.
-    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
-    shutil.copy(source_filename, deb_orig_source_filename)
+    self._CreateOrigSourcePackage(
+        source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
     if not source_directory:
