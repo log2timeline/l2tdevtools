@@ -751,7 +751,7 @@ class ZlibDownloadHelper(ProjectDownloadHelper):
     # The format of the project download URL is:
     # http://zlib.net/{project name}-{version}.tar.gz
     expression_string = (
-        u'<A HREF="http://zlib.net/{0:s}-([0-9].[0-9].[0-9]).tar.gz"').format(
+        u'<A HREF="{0:s}-([0-9].[0-9].[0-9]).tar.gz"').format(
             self._project_name)
     matches = re.findall(expression_string, page_content)
 
