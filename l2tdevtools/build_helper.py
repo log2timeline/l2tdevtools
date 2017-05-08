@@ -1011,7 +1011,7 @@ class MSIBuildHelper(BuildHelper):
         logging.warning(u'Missing patch file: {0:s}'.format(filename))
         continue
 
-      command = u'{0:s} --force --binary --input {1:s}'.format(patch, filename)
+      command = u'\"{0:s}\" --force --binary --input {1:s}'.format(patch, filename)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -1176,7 +1176,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     solution_filename = solution_filenames[0]
 
     command = (
-        u'{0:s} /p:Configuration=Release /p:Platform={1:s} /noconsolelogger '
+        u'\"{0:s}\" /p:Configuration=Release /p:Platform={1:s} /noconsolelogger '
         u'/fileLogger /maxcpucount {2:s}').format(
             msbuild, msvscpp_platform, solution_filename)
     exit_code = subprocess.call(command, shell=False)
@@ -1279,7 +1279,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     elif self.version == u'2015':
       os.environ[u'VS90COMNTOOLS'] = os.environ[u'VS140COMNTOOLS']
 
-    command = u'{0:s} setup.py bdist_msi'.format(sys.executable)
+    command = u'\"{0:s}\" setup.py bdist_msi'.format(sys.executable)
     exit_code = subprocess.call(command, shell=False)
     if exit_code != 0:
       logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -1306,7 +1306,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     solution_filename = solution_filenames[0]
 
     if not os.path.exists(u'vs2008'):
-      command = u'{0:s} {1:s} --to {2:s} {3:s}'.format(
+      command = u'\"{0:s}\" {1:s} --to {2:s} {3:s}'.format(
           sys.executable, self._msvscpp_convert, self.version,
           solution_filename)
       exit_code = subprocess.call(command, shell=False)
@@ -1610,7 +1610,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
         return False
 
     log_file_path = os.path.join(u'..', self.LOG_FILENAME)
-    command = u'{0:s} setup.py bdist_msi > {1:s} 2>&1'.format(
+    command = u'\"{0:s}\" setup.py bdist_msi > {1:s} 2>&1'.format(
         sys.executable, log_file_path)
     exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
