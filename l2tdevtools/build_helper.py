@@ -1011,7 +1011,8 @@ class MSIBuildHelper(BuildHelper):
         logging.warning(u'Missing patch file: {0:s}'.format(filename))
         continue
 
-      command = u'\"{0:s}\" --force --binary --input {1:s}'.format(patch, filename)
+      command = u'\"{0:s}\" --force --binary --input {1:s}'.format(
+          patch, filename)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -1176,8 +1177,8 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     solution_filename = solution_filenames[0]
 
     command = (
-        u'\"{0:s}\" /p:Configuration=Release /p:Platform={1:s} /noconsolelogger '
-        u'/fileLogger /maxcpucount {2:s}').format(
+        u'\"{0:s}\" /p:Configuration=Release /p:Platform={1:s} '
+        u'/noconsolelogger /fileLogger /maxcpucount {2:s}').format(
             msbuild, msvscpp_platform, solution_filename)
     exit_code = subprocess.call(command, shell=False)
     if exit_code != 0:
