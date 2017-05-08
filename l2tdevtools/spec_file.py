@@ -252,7 +252,7 @@ class RPMSpecFileGenerator(object):
           in_description = False
 
           if project_definition.description_long:
-            description = u'{0:s}\n\n'.format(
+            description = b'{0:s}\n\n'.format(
                 project_definition.description_long)
 
           output_file_object.write(description)
@@ -271,33 +271,33 @@ class RPMSpecFileGenerator(object):
 
         elif line.startswith(b'%define version '):
           version = line[16:-1]
-          if version.startswith(u'1!'):
+          if version.startswith(b'1!'):
             version = version[2:]
 
           if project_name == u'efilter':
-            line = u'%define version {0:s}\n'.format(version)
+            line = b'%define version {0:s}\n'.format(version)
 
         elif line.startswith(b'%define unmangled_version '):
           if project_name == u'efilter':
-            line = u'%define unmangled_version {0:s}\n'.format(version)
+            line = b'%define unmangled_version {0:s}\n'.format(version)
 
         elif not summary and line.startswith(b'Summary: '):
           summary = line
 
         elif line.startswith(b'Source0: '):
           if source_filename.endswith(u'.zip'):
-            line = u'Source0: %{name}-%{unmangled_version}.zip\n'
+            line = b'Source0: %{name}-%{unmangled_version}.zip\n'
 
         elif line.startswith(b'BuildRoot: '):
           if project_name == u'efilter':
             line = (
-                u'BuildRoot: %{_tmppath}/'
-                u'dotty-%{version}-%{release}-buildroot\n')
+                b'BuildRoot: %{_tmppath}/'
+                b'dotty-%{version}-%{release}-buildroot\n')
 
           elif project_name == u'psutil':
             line = (
-                u'BuildRoot: %{_tmppath}/'
-                u'%{name}-release-%{version}-%{release}-buildroot\n')
+                b'BuildRoot: %{_tmppath}/'
+                b'%{name}-release-%{version}-%{release}-buildroot\n')
 
         elif (not description and not requires and
               line.startswith(b'Requires: ')):
@@ -334,26 +334,26 @@ class RPMSpecFileGenerator(object):
 
         elif line.startswith(b'%prep'):
           if project_name == u'artifacts':
-            requires = u'{0:s}, artifacts-data\n'.format(requires[:-1])
+            requires = b'{0:s}, artifacts-data\n'.format(requires[:-1])
 
           if not has_python2_package:
             if project_name != package_name:
-              python_package_name = u'{0:s}{1:s}'.format(
+              python_package_name = b'{0:s}{1:s}'.format(
                   python2_package_prefix, package_name)
             else:
-              python_package_name = u'{0:s}%{{name}}'.format(
+              python_package_name = b'{0:s}%{{name}}'.format(
                   python2_package_prefix)
 
-            if python_package_name != u'%{name}':
+            if python_package_name != b'%{name}':
               self._WritePython2PackageDefinition(
                   output_file_object, python_package_name, summary, requires,
                   description)
 
           if not python2_only and not has_python3_package:
             if project_name != package_name:
-              python_package_name = u'python3-{0:s}'.format(package_name)
+              python_package_name = b'python3-{0:s}'.format(package_name)
             else:
-              python_package_name = u'python3-%{name}'
+              python_package_name = b'python3-%{name}'
 
             # TODO: convert python 2 package names to python 3
             self._WritePython3PackageDefinition(
@@ -413,10 +413,10 @@ class RPMSpecFileGenerator(object):
       lib_dir = '%{_libdir}'
 
     if project_name != package_name:
-      python_package_name = u'{0:s}{1:s}'.format(
+      python_package_name = b'{0:s}{1:s}'.format(
           python2_package_prefix, package_name)
     else:
-      python_package_name = u'{0:s}%{{name}}'.format(python2_package_prefix)
+      python_package_name = b'{0:s}%{{name}}'.format(python2_package_prefix)
 
     self._WritePython2PackageFiles(
         output_file_object, python_package_name, license_line, doc_line,
@@ -424,9 +424,9 @@ class RPMSpecFileGenerator(object):
 
     if not python2_only:
       if project_name != package_name:
-        python_package_name = u'python3-{0:s}'.format(package_name)
+        python_package_name = b'python3-{0:s}'.format(package_name)
       else:
-        python_package_name = u'python3-%{name}'
+        python_package_name = b'python3-%{name}'
 
       self._WritePython3PackageFiles(
           output_file_object, python_package_name, license_line, doc_line,
@@ -471,8 +471,6 @@ class RPMSpecFileGenerator(object):
     if project_name == u'dateutil':
       # TODO: work around for non-architecture dependent behavior.
       project_definition.architecture_dependent = False
-    elif project_name == u'PyYAML':
-      project_definition.build_options.append(u'python2_only')
 
     python2_only = project_definition.IsPython2Only()
 
@@ -493,11 +491,12 @@ class RPMSpecFileGenerator(object):
 
     output_file_object = open(output_file, 'wb')
 
-    if project_name == u'PyYAML':
-      python2_package_prefix = u''
-    elif project_name in (u'pyzmq', u'yara-python'):
-      python2_package_prefix = u'python2-'
-    else:
+    python2_package_prefix = u''
+    if project_definition.rpm_python2_prefix:
+      python2_package_prefix = u'{0:s}-'.format(
+          project_definition.rpm_python2_prefix)
+
+    elif project_definition.rpm_python2_prefix is None:
       python2_package_prefix = u'python-'
 
     result = self._RewriteSetupPyGeneratedFile(
