@@ -302,7 +302,8 @@ def Main():
           u'all' in project_definition.disabled):
         if project_definition.name not in project_names:
           is_disabled = True
-        else:
+
+        elif not options.preset:
           # If a project is manually specified ignore the disabled status.
           logging.info(u'Ignoring disabled status for: {0:s}'.format(
               project_definition.name))
