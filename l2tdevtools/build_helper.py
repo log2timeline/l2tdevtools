@@ -35,6 +35,17 @@ class BuildHelper(object):
     self._data_path = os.path.join(l2tdevtools_path, u'data')
     self._project_definition = project_definition
 
+  def _IsPython2Only(self):
+    """Determines if the project only supports Python version 2.
+
+    Note that Python 3 is supported as of 3.4 any earlier version is not
+    seen as compatible.
+
+    Returns:
+      bool: True if the project only support Python version 2.
+    """
+    return u'python2_only' in self._project_definition.build_options
+
   def CheckBuildDependencies(self):
     """Checks if the build dependencies are met.
 
@@ -237,6 +248,95 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     elif self.architecture == u'x86_64':
       self.architecture = u'amd64'
 
+  def _RemoveOlderDPKGPackages(self, project_name, project_version):
+    """Removes previous versions of dpkg packages.
+
+    Args:
+      project_name (str): project name.
+      project_version (str): project version.
+    """
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+        project_name, project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
+
+    # Remove files of previous versions in the format:
+    # project[-_]*version-1_architecture.*
+    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
+        project_name, self.architecture)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # project[-_]*version-1.*
+    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+  def _RemoveOlderSourceDPKGPackages(self, project_name, project_version):
+    """Removes previous versions of source dpkg packages.
+
+    Args:
+      project_name (str): project name.
+      project_version (str): project version.
+    """
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+        project_name, project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
+
+    # Remove files of previous versions in the format:
+    # project[-_]version-1suffix~distribution_architecture.*
+    filenames_glob = u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}_{4:s}.*'.format(
+        project_name, self._VERSION_GLOB, self.version_suffix,
+        self.distribution, self.architecture)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # project[-_]*version-1suffix~distribution.*
+    filenames_glob = u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}.*'.format(
+        project_name, self._VERSION_GLOB, self.version_suffix,
+        self.distribution)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+  def _RemoveOlderOriginalSourcePackage(self, project_name, project_version):
+    """Removes previous versions of original source package.
+
+    Args:
+      project_name (str): name of the project.
+      project_version (str): version of the project.
+    """
+    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
+        project_name, project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
+
+    # Remove files of previous versions in the format:
+    # project_version.orig.tar.gz
+    filenames_glob = u'{0:s}_{1:s}.orig.tar.gz'.format(
+        project_name, self._VERSION_GLOB)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
   def Build(self, source_helper_object):
     """Builds the dpkg packages.
 
@@ -343,47 +443,11 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     """
     project_version = source_helper_object.GetProjectVersion()
 
-    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
+    self._RemoveOlderOriginalSourcePackage(
         source_helper_object.project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    # Remove files of previous versions in the format:
-    # project_version.orig.tar.gz
-    filenames_glob = u'{0:s}_{1:s}.orig.tar.gz'.format(
-        source_helper_object.project_name, self._VERSION_GLOB)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+    self._RemoveOlderDPKGPackages(
         source_helper_object.project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
-
-    # Remove files of previous versions in the format:
-    # project[-_]version-1_architecture.*
-    filenames_glob = u'{0:s}[-_]*{1:s}-1_{2:s}.*'.format(
-        source_helper_object.project_name, self._VERSION_GLOB,
-        self.architecture)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1.*
-    filenames_glob = u'{0:s}[-_]*{1:s}-1.*'.format(
-        source_helper_object.project_name, self._VERSION_GLOB)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
 
 
 class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
@@ -505,55 +569,18 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     return not os.path.exists(changes_filename)
 
   def Clean(self, source_helper_object):
-    """Cleans the dpkg packages in the current directory.
+    """Cleans the source dpkg packages in the current directory.
 
     Args:
       source_helper_object (SourceHelper): source helper.
     """
     project_version = source_helper_object.GetProjectVersion()
 
-    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
+    self._RemoveOlderOriginalSourcePackage(
         source_helper_object.project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    # Remove files of previous versions in the format:
-    # project_version.orig.tar.gz
-    filenames_glob = u'{0:s}_{1:s}.orig.tar.gz'.format(
-        source_helper_object.project_name, self._VERSION_GLOB)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+    self._RemoveOlderSourceDPKGPackages(
         source_helper_object.project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
-
-    # Remove files of previous versions in the format:
-    # project[-_]version-1suffix~distribution_architecture.*
-    filenames_glob = u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}_{4:s}.*'.format(
-        source_helper_object.project_name, self._VERSION_GLOB,
-        self.version_suffix, self.distribution, self.architecture)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1suffix~distribution.*
-    filenames_glob = u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}.*'.format(
-        source_helper_object.project_name, self._VERSION_GLOB,
-        self.version_suffix, self.distribution)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
 
 
 class SetupPyDPKGBuildHelper(DPKGBuildHelper):
@@ -578,38 +605,6 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       self.architecture = u'i386'
     elif self.architecture == u'x86_64':
       self.architecture = u'amd64'
-
-  def _CleanDPKGPackages(self, project_name, project_version):
-    """Cleans the dpkg packages in the current directory.
-
-    Args:
-      project_name (str): project name.
-      project_version (str): project version.
-    """
-    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1_architecture.*
-    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
-        project_name, self.architecture)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1.*
-    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
 
   def _GetFilenameSafeProjectInformation(self, source_helper_object):
     """Determines the filename safe project name and version.
@@ -747,26 +742,15 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    self._RemoveOlderOriginalSourcePackage(
+        source_helper_object.project_name, project_version)
 
-    # Remove files of previous versions in the format:
-    # project_version.orig.tar.gz
-    filenames_glob = u'{0:s}_*.orig.tar.gz'.format(project_name)
-    filenames = glob.glob(filenames_glob)
+    self._RemoveOlderDPKGPackages(project_name, project_version)
 
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    self._CleanDPKGPackages(project_name, project_version)
-
-    if project_name.startswith(u'python-'):
+    if not self._IsPython2Only():
       project_name = u'python3-{0:s}'.format(project_name[7])
 
-      self._CleanDPKGPackages(project_name, project_version)
+      self._RemoveOlderDPKGPackages(project_name, project_version)
 
 
 class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
@@ -799,8 +783,8 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
         * str: filename safe project name.
         * str: version.
     """
-    if self._project_definition.dpkg_name:
-      project_name = self._project_definition.dpkg_name
+    if self._project_definition.dpkg_source_name:
+      project_name = self._project_definition.dpkg_source_name
     else:
       project_name = source_helper_object.project_name
       if not project_name.startswith(u'python-'):
@@ -923,46 +907,9 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    filenames_to_ignore = u'^{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    self._RemoveOlderOriginalSourcePackage(project_name, project_version)
 
-    # Remove files of previous versions in the format:
-    # project_version.orig.tar.gz
-    filenames_glob = u'{0:s}_*.orig.tar.gz'.format(project_name)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1suffix~distribution_architecture.*
-    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
-        project_name, self.version_suffix, self.distribution,
-        self.architecture)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1suffix~distribution.*
-    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
-        project_name, self.version_suffix, self.distribution)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
+    self._RemoveOlderSourceDPKGPackages(project_name, project_version)
 
 
 class MSIBuildHelper(BuildHelper):
@@ -2035,17 +1982,6 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
   _LICENSE_FILENAMES = [
       u'LICENSE', u'LICENSE.txt', u'LICENSE.TXT']
-
-  def _IsPython2Only(self):
-    """Determines if the project only supports Python version 2.
-
-    Note that Python 3 is supported as of 3.4 any earlier version is not
-    seen as compatible.
-
-    Returns:
-      bool: True if the project only support Python version 2.
-    """
-    return u'python2_only' in self._project_definition.build_options
 
   def Build(self, source_helper_object):
     """Builds the osc package.
