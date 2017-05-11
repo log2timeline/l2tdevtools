@@ -3030,9 +3030,16 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
         project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
+    src_rpm_filenames_glob = u'{0:s}-*-1.src.rpm'.format(project_name)
+    filenames = glob.glob(src_rpm_filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
     filenames_glob = os.path.join(
-        self.rpmbuild_path, u'SRPMS',
-        u'{0:s}-*-1.src.rpm'.format(project_name))
+        self.rpmbuild_path, u'SRPMS', src_rpm_filenames_glob)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
