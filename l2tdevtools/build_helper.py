@@ -200,54 +200,6 @@ class DPKGBuildHelper(BuildHelper):
         project_name, project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
-  def CheckBuildDependencies(self):
-    """Checks if the build dependencies are met.
-
-    Returns:
-      list[str]: build dependency names that are not met or an empty list.
-    """
-    missing_packages = []
-    for package_name in self._BUILD_DEPENDENCIES:
-      if not self._CheckIsInstalled(package_name):
-        missing_packages.append(package_name)
-
-    for package_name in self._project_definition.build_dependencies:
-      package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
-          package_name, package_name)
-      if not self._CheckIsInstalled(package_name):
-        missing_packages.append(package_name)
-
-      if package_name not in (
-          self._project_definition.dpkg_build_dependencies):
-        self._project_definition.dpkg_build_dependencies.append(
-            package_name)
-
-    return missing_packages
-
-
-class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
-  """Helper to build dpkg packages (.deb)."""
-
-  _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
-
-  def __init__(self, project_definition, l2tdevtools_path):
-    """Initializes a build helper.
-
-    Args:
-      project_definition (ProjectDefinition): project definition.
-      l2tdevtools_path (str): path to the l2tdevtools directory.
-    """
-    super(ConfigureMakeDPKGBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
-    self.architecture = platform.machine()
-    self.distribution = u''
-    self.version_suffix = u''
-
-    if self.architecture == u'i686':
-      self.architecture = u'i386'
-    elif self.architecture == u'x86_64':
-      self.architecture = u'amd64'
-
   def _RemoveOlderDPKGPackages(self, project_name, project_version):
     """Removes previous versions of dpkg packages.
 
@@ -280,41 +232,6 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-  def _RemoveOlderSourceDPKGPackages(self, project_name, project_version):
-    """Removes previous versions of source dpkg packages.
-
-    Args:
-      project_name (str): project name.
-      project_version (str): project version.
-    """
-    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
-
-    # Remove files of previous versions in the format:
-    # project[-_]version-1suffix~distribution_architecture.*
-    filenames_glob = u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}_{4:s}.*'.format(
-        project_name, self._VERSION_GLOB, self.version_suffix,
-        self.distribution, self.architecture)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove files of previous versions in the format:
-    # project[-_]*version-1suffix~distribution.*
-    filenames_glob = u'{0:s}[-_]*{1:s}-1{2:s}~{3:s}.*'.format(
-        project_name, self._VERSION_GLOB, self.version_suffix,
-        self.distribution)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(u'Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
   def _RemoveOlderOriginalSourcePackage(self, project_name, project_version):
     """Removes previous versions of original source package.
 
@@ -328,14 +245,92 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames_glob = u'{0:s}_{1:s}.orig.tar.gz'.format(
-        project_name, self._VERSION_GLOB)
+    filenames_glob = u'{0:s}_*.orig.tar.gz'.format(project_name)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info(u'Removing: {0:s}'.format(filename))
         os.remove(filename)
+
+  def _RemoveOlderSourceDPKGPackages(self, project_name, project_version):
+    """Removes previous versions of source dpkg packages.
+
+    Args:
+      project_name (str): project name.
+      project_version (str): project version.
+    """
+    filenames_to_ignore = u'^{0:s}[-_].*{1!s}'.format(
+        project_name, project_version)
+    filenames_to_ignore = re.compile(filenames_to_ignore)
+
+    # Remove files of previous versions in the format:
+    # project[-_]version-1suffix~distribution_architecture.*
+    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
+        project_name, self.version_suffix, self.distribution, self.architecture)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # project[-_]*version-1suffix~distribution.*
+    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
+        project_name, self.version_suffix, self.distribution)
+    filenames = glob.glob(filenames_glob)
+
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info(u'Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+  def CheckBuildDependencies(self):
+    """Checks if the build dependencies are met.
+
+    Returns:
+      list[str]: build dependency names that are not met or an empty list.
+    """
+    missing_packages = []
+    for package_name in self._BUILD_DEPENDENCIES:
+      if not self._CheckIsInstalled(package_name):
+        missing_packages.append(package_name)
+
+    for package_name in self._project_definition.build_dependencies:
+      package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
+          package_name, package_name)
+      if not self._CheckIsInstalled(package_name):
+        missing_packages.append(package_name)
+
+      if package_name not in (
+          self._project_definition.dpkg_build_dependencies):
+        self._project_definition.dpkg_build_dependencies.append(
+            package_name)
+
+    return missing_packages
+
+
+class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
+  """Helper to build dpkg packages (.deb)."""
+
+  def __init__(self, project_definition, l2tdevtools_path):
+    """Initializes a build helper.
+
+    Args:
+      project_definition (ProjectDefinition): project definition.
+      l2tdevtools_path (str): path to the l2tdevtools directory.
+    """
+    super(ConfigureMakeDPKGBuildHelper, self).__init__(
+        project_definition, l2tdevtools_path)
+    self.architecture = platform.machine()
+    self.distribution = u''
+    self.version_suffix = u''
+
+    if self.architecture == u'i686':
+      self.architecture = u'i386'
+    elif self.architecture == u'x86_64':
+      self.architecture = u'amd64'
 
   def Build(self, source_helper_object):
     """Builds the dpkg packages.
@@ -452,8 +447,6 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
 class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
   """Helper to build source dpkg packages (.deb)."""
-
-  _VERSION_GLOB = u'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
