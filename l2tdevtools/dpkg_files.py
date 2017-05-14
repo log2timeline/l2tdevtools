@@ -412,10 +412,11 @@ class DPKGBuildFilesGenerator(object):
     else:
       package_name = self._project_name
 
+    python_package_name = package_name
+
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
-    python_package_name = package_name
     if not self._project_definition.dpkg_name:
       python_package_name = u'python-{0:s}'.format(package_name)
 
