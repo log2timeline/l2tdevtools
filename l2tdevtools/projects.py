@@ -156,7 +156,7 @@ class ProjectVersionDefinition(object):
 
 
 class ProjectDefinitionReader(object):
-  """Class that implements a project definition reader."""
+  """Project definition reader."""
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
