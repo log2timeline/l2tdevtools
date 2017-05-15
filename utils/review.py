@@ -88,7 +88,10 @@ class CodeReviewHelper(CLIHelper):
           u'jberggren@gmail.com',
           u'joachim.metz@gmail.com',
           u'onager@deerpie.com',
-          u'romaing@google.com'])}
+          u'romaing@google.com']),
+      u'preg': frozenset([
+          u'joachim.metz@gmail.com',
+          u'onager@deerpie.com'])}
 
   _REVIEWERS_DEFAULT = frozenset([
       u'jberggren@gmail.com',
@@ -939,9 +942,21 @@ class ProjectHelper(CLIHelper):
       u'',
       u'Google Inc. (*@google.com)']
 
+  _MODULE_NAMES = {
+      u'preg': u'l2tpreg'}
+
   SUPPORTED_PROJECTS = frozenset([
-      u'artifacts', u'dfdatetime', u'dfkinds', u'dfvfs', u'dfwinreg',
-      u'dftimewolf', u'eccemotus', u'l2tdevtools', u'l2tdocs', u'plaso'])
+      u'artifacts',
+      u'dfdatetime',
+      u'dfkinds',
+      u'dfvfs',
+      u'dfwinreg',
+      u'dftimewolf',
+      u'eccemotus',
+      u'l2tdevtools',
+      u'l2tdocs',
+      u'plaso',
+      u'preg'])
 
   def __init__(self, script_path):
     """Initializes a project helper.
@@ -958,7 +973,9 @@ class ProjectHelper(CLIHelper):
   @property
   def version_file_path(self):
     """str: path of the version file."""
-    return os.path.join(self.project_name, u'__init__.py')
+    module_name = self._MODULE_NAMES.get(
+        self.project_name, self.project_name)
+    return os.path.join(module_name, u'__init__.py')
 
   def _GetProjectName(self, script_path):
     """Retrieves the project name from the script path.
@@ -1131,13 +1148,7 @@ class ProjectHelper(CLIHelper):
     date_version = time.strftime(u'%Y%m%d')
     lines = version_file_contents.split(u'\n')
     for line_index, line in enumerate(lines):
-      if (self.project_name == u'plaso' and
-          line.startswith(u'VERSION_DATE = ')):
-        version_string = u'VERSION_DATE = \'{0:s}\''.format(date_version)
-        lines[line_index] = version_string
-
-      elif (self.project_name != u'plaso' and
-            line.startswith(u'__version__ = ')):
+      if line.startswith(u'__version__ = '):
         version_string = u'__version__ = \'{0:s}\''.format(date_version)
         lines[line_index] = version_string
 
