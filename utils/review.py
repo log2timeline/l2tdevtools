@@ -83,15 +83,15 @@ class CodeReviewHelper(CLIHelper):
           u'jberggren@gmail.com',
           u'someguyiknow@google.com',
           u'tomchop@gmail.com']),
+      u'l2tpreg': frozenset([
+          u'joachim.metz@gmail.com',
+          u'onager@deerpie.com']),
       u'plaso': frozenset([
           u'aaronp@gmail.com',
           u'jberggren@gmail.com',
           u'joachim.metz@gmail.com',
           u'onager@deerpie.com',
-          u'romaing@google.com']),
-      u'preg': frozenset([
-          u'joachim.metz@gmail.com',
-          u'onager@deerpie.com'])}
+          u'romaing@google.com'])}
 
   _REVIEWERS_DEFAULT = frozenset([
       u'jberggren@gmail.com',
@@ -942,9 +942,6 @@ class ProjectHelper(CLIHelper):
       u'',
       u'Google Inc. (*@google.com)']
 
-  _MODULE_NAMES = {
-      u'preg': u'l2tpreg'}
-
   SUPPORTED_PROJECTS = frozenset([
       u'artifacts',
       u'dfdatetime',
@@ -955,8 +952,8 @@ class ProjectHelper(CLIHelper):
       u'eccemotus',
       u'l2tdevtools',
       u'l2tdocs',
-      u'plaso',
-      u'preg'])
+      u'l2tpreg',
+      u'plaso'])
 
   def __init__(self, script_path):
     """Initializes a project helper.
@@ -973,9 +970,7 @@ class ProjectHelper(CLIHelper):
   @property
   def version_file_path(self):
     """str: path of the version file."""
-    module_name = self._MODULE_NAMES.get(
-        self.project_name, self.project_name)
-    return os.path.join(module_name, u'__init__.py')
+    return os.path.join(self.project_name, u'__init__.py')
 
   def _GetProjectName(self, script_path):
     """Retrieves the project name from the script path.
