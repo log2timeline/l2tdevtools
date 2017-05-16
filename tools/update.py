@@ -312,12 +312,15 @@ class DependencyUpdater(object):
     """Determines the package filenames and versions.
 
     Args:
-      package_names: a list of package names that should be updated
-                     if an update is available. An empty list represents
-                     all available packages.
+      package_names (list[str]): package names that should be updated
+          if an update is available. An empty list represents all available
+          packages.
+
     Args:
-      A tuple of two dictionaries one containing the package filenames
-      another the package versions per package name.
+      tuple: contains:
+
+        dict[str, str]: filenames per package.
+        dict[str, str]: versions per package.
     """
     # The API is rate limited, so we scrape the web page instead.
     package_urls = self._download_helper.GetPackageDownloadURLs(
@@ -406,23 +409,15 @@ class DependencyUpdater(object):
     """Installs packages.
 
     Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_filenames (dict[str, str]): filenames per package.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the install was successful.
+      bool: True if the installation was successful.
     """
     if self.operating_system == u'Darwin':
       return self._InstallPackagesMacOSX(
           package_filenames, package_versions)
-
-    elif self.operating_system == u'Linux':
-      linux_name, _, _ = platform.linux_distribution()
-      if linux_name == u'Fedora':
-        return self._InstallPackagesFedoraLinux(
-            package_filenames, package_versions)
 
     elif self.operating_system == u'Windows':
       return self._InstallPackagesWindows(
@@ -430,57 +425,15 @@ class DependencyUpdater(object):
 
     return False
 
-  def _InstallPackagesFedoraLinux(
-      self, unused_package_filenames, unused_package_versions):
-    """Installs packages on Fedora Linux.
-
-    Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
-
-    Returns:
-      A boolean value indicating the install was successful.
-    """
-    result = True
-    # TODO: move these to a separate file?
-    dependencies = [
-        u'ipython',
-        u'libyaml'
-        u'python-dateutil',
-        u'pyparsing',
-        u'pytz',
-        u'PyYAML',
-        u'protobuf-python']
-
-    command = u'sudo dnf install {0:s}'.format(u' '.join(dependencies))
-    logging.info(u'Running: "{0:s}"'.format(command))
-    exit_code = subprocess.call(command, shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      result = False
-
-    command = u'sudo rpm -Fvh {0:s}/*'.format(self._download_directory)
-    logging.info(u'Running: "{0:s}"'.format(command))
-    exit_code = subprocess.call(command, shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      result = False
-
-    return result
-
   def _InstallPackagesMacOSX(self, package_filenames, package_versions):
     """Installs packages on Mac OS X.
 
     Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_filenames (dict[str, str]): filenames per package.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the install was successful.
+      bool: True if the installation was successful.
     """
     result = True
     for name, _ in package_versions.iteritems():
@@ -528,13 +481,11 @@ class DependencyUpdater(object):
     """Installs packages on Windows.
 
     Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_filenames (dict[str, str]): filenames per package.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the install was successful.
+      bool: True if the installation was successful.
     """
     log_file = u'msiexec.log'
     if os.path.exists(log_file):
@@ -573,11 +524,10 @@ class DependencyUpdater(object):
     every operating system seems to have a package manager capable to do so.
 
     Args:
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the uninstall was successful.
+      bool: True if the uninstall was successful.
     """
     if self.operating_system == u'Darwin':
       return self._UninstallPackagesMacOSX(package_versions)
@@ -591,11 +541,10 @@ class DependencyUpdater(object):
     """Uninstalls packages on Mac OS X.
 
     Args:
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the uninstall was successful.
+      bool: True if the uninstall was successful.
     """
     command = u'/usr/sbin/pkgutil --packages'
     logging.info(u'Running: "{0:s}"'.format(command))
@@ -781,11 +730,10 @@ class DependencyUpdater(object):
     """Uninstalls packages on Windows.
 
     Args:
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the uninstall was successful.
+      bool: True if the uninstall was successful.
     """
     connection = wmi.WMI()
 
@@ -830,12 +778,12 @@ class DependencyUpdater(object):
     """Updates packages.
 
     Args:
-      package_names: a list of package names that should be updated
-                     if an update is available. An empty list represents
-                     all available packages.
+      package_names (list[str]): package names that should be updated
+          if an update is available. An empty list represents all available
+          packages.
 
     Returns:
-      A boolean value indicating the update was successful.
+      bool: True if the update was successful.
     """
     package_filenames, package_versions = self._GetPackageFilenamesAndVersions(
         package_names)
