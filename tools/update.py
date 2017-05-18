@@ -889,6 +889,7 @@ def Main():
   for project_name in project_names:
     project_definition = project_definitions.get(project_name, None)
     if not project_definition:
+      logging.error(u'Missing definition for project: {0:s}'.from(project_name))
       continue
 
     package_name = project_name
