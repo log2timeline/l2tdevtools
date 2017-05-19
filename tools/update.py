@@ -259,12 +259,21 @@ class DependencyUpdater(object):
 
   _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
 
-  _DEVELOPER_PACKAGES = frozenset([
-      u'astroid',
-      u'lazy-object-proxy',
-      u'logilab-common',
-      u'pylint',
-      u'wrapt'])
+  _PKG_NAME_PREFIXES = [
+      u'com.github.dateutil.',
+      u'com.github.dfvfs.',
+      u'com.github.erocarrer.',
+      u'com.github.ForensicArtifacts.',
+      u'com.github.kennethreitz.',
+      u'com.github.google.',
+      u'org.github.ipython.',
+      u'com.github.libyal.',
+      u'com.github.log2timeline.',
+      u'com.github.sleuthkit.',
+      u'com.google.code.p.',
+      u'org.samba.',
+      u'org.python.pypi.',
+      u'net.sourceforge.projects.']
 
   def __init__(
       self, download_directory=u'build', download_only=False,
@@ -312,12 +321,15 @@ class DependencyUpdater(object):
     """Determines the package filenames and versions.
 
     Args:
-      package_names: a list of package names that should be updated
-                     if an update is available. An empty list represents
-                     all available packages.
+      package_names (list[str]): package names that should be updated
+          if an update is available. An empty list represents all available
+          packages.
+
     Args:
-      A tuple of two dictionaries one containing the package filenames
-      another the package versions per package name.
+      tuple: contains:
+
+        dict[str, str]: filenames per package.
+        dict[str, str]: versions per package.
     """
     # The API is rate limited, so we scrape the web page instead.
     package_urls = self._download_helper.GetPackageDownloadURLs(
@@ -370,10 +382,7 @@ class DependencyUpdater(object):
       if package_names and (
           (not self._exclude_packages and name not in package_names) or
           (self._exclude_packages and name in package_names)):
-        continue
-
-      # Ignore development packages for now.
-      if name in self._DEVELOPER_PACKAGES:
+        logging.info(u'Skipping: {0:s} because it was excluded'.format(name))
         continue
 
       if name not in package_versions:
@@ -396,7 +405,7 @@ class DependencyUpdater(object):
           os.remove(filename)
 
         logging.info(u'Downloading: {0:s}'.format(package_filename))
-        _ = self._download_helper.DownloadFile(package_url)
+        self._download_helper.DownloadFile(package_url)
 
     os.chdir(u'..')
 
@@ -406,23 +415,15 @@ class DependencyUpdater(object):
     """Installs packages.
 
     Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_filenames (dict[str, str]): filenames per package.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the install was successful.
+      bool: True if the installation was successful.
     """
     if self.operating_system == u'Darwin':
       return self._InstallPackagesMacOSX(
           package_filenames, package_versions)
-
-    elif self.operating_system == u'Linux':
-      linux_name, _, _ = platform.linux_distribution()
-      if linux_name == u'Fedora':
-        return self._InstallPackagesFedoraLinux(
-            package_filenames, package_versions)
 
     elif self.operating_system == u'Windows':
       return self._InstallPackagesWindows(
@@ -430,57 +431,15 @@ class DependencyUpdater(object):
 
     return False
 
-  def _InstallPackagesFedoraLinux(
-      self, unused_package_filenames, unused_package_versions):
-    """Installs packages on Fedora Linux.
-
-    Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
-
-    Returns:
-      A boolean value indicating the install was successful.
-    """
-    result = True
-    # TODO: move these to a separate file?
-    dependencies = [
-        u'ipython',
-        u'libyaml'
-        u'python-dateutil',
-        u'pyparsing',
-        u'pytz',
-        u'PyYAML',
-        u'protobuf-python']
-
-    command = u'sudo dnf install {0:s}'.format(u' '.join(dependencies))
-    logging.info(u'Running: "{0:s}"'.format(command))
-    exit_code = subprocess.call(command, shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      result = False
-
-    command = u'sudo rpm -Fvh {0:s}/*'.format(self._download_directory)
-    logging.info(u'Running: "{0:s}"'.format(command))
-    exit_code = subprocess.call(command, shell=True)
-    if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
-      result = False
-
-    return result
-
   def _InstallPackagesMacOSX(self, package_filenames, package_versions):
     """Installs packages on Mac OS X.
 
     Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_filenames (dict[str, str]): filenames per package.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the install was successful.
+      bool: True if the installation was successful.
     """
     result = True
     for name, _ in package_versions.iteritems():
@@ -528,13 +487,11 @@ class DependencyUpdater(object):
     """Installs packages on Windows.
 
     Args:
-      package_filenames: a dictionary containing the package filenames per
-                         package name.
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_filenames (dict[str, str]): filenames per package.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the install was successful.
+      bool: True if the installation was successful.
     """
     log_file = u'msiexec.log'
     if os.path.exists(log_file):
@@ -573,11 +530,10 @@ class DependencyUpdater(object):
     every operating system seems to have a package manager capable to do so.
 
     Args:
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the uninstall was successful.
+      bool: True if the uninstall was successful.
     """
     if self.operating_system == u'Darwin':
       return self._UninstallPackagesMacOSX(package_versions)
@@ -591,11 +547,10 @@ class DependencyUpdater(object):
     """Uninstalls packages on Mac OS X.
 
     Args:
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the uninstall was successful.
+      bool: True if the uninstall was successful.
     """
     command = u'/usr/sbin/pkgutil --packages'
     logging.info(u'Running: "{0:s}"'.format(command))
@@ -615,62 +570,13 @@ class DependencyUpdater(object):
       if not package_name:
         continue
 
-      if (package_name.startswith(u'com.github.dateutil.') or
-          package_name.startswith(u'com.github.dfvfs.') or
-          package_name.startswith(u'com.github.erocarrer.') or
-          package_name.startswith(u'com.github.ForensicArtifacts.') or
-          package_name.startswith(u'com.github.kennethreitz.') or
-          package_name.startswith(u'com.github.google.') or
-          package_name.startswith(u'org.github.ipython.') or
-          package_name.startswith(u'com.github.libyal.') or
-          package_name.startswith(u'com.github.log2timeline.') or
-          package_name.startswith(u'com.github.sleuthkit.') or
-          package_name.startswith(u'com.google.code.p.') or
-          package_name.startswith(u'org.samba.') or
-          package_name.startswith(u'org.python.pypi.') or
-          package_name.startswith(u'net.sourceforge.projects.')):
+      matching_prefix = None
+      for prefix in self._PKG_NAME_PREFIXES:
+        if package_name.startswith(prefix):
+          matching_prefix = prefix
 
-        if package_name.startswith(u'com.github.dateutil.'):
-          name = package_name[20:]
-
-        elif package_name.startswith(u'com.github.dfvfs.'):
-          name = package_name[17:]
-
-        elif package_name.startswith(u'com.github.erocarrer.'):
-          name = package_name[21:]
-
-        elif package_name.startswith(u'com.github.ForensicArtifacts.'):
-          name = package_name[29:]
-
-        elif package_name.startswith(u'com.github.google.'):
-          name = package_name[18:]
-
-        elif package_name.startswith(u'org.github.ipython.'):
-          name = package_name[19:]
-
-        elif package_name.startswith(u'com.github.kennethreitz.'):
-          name = package_name[24:]
-
-        elif package_name.startswith(u'com.github.libyal.'):
-          name = package_name[18:]
-
-        elif package_name.startswith(u'com.github.log2timeline.'):
-          name = package_name[24:]
-
-        elif package_name.startswith(u'com.github.sleuthkit.'):
-          name = package_name[21:]
-
-        elif package_name.startswith(u'com.google.code.p.'):
-          name = package_name[18:]
-
-        elif package_name.startswith(u'org.samba.'):
-          name = package_name[10:]
-
-        elif package_name.startswith(u'org.python.pypi.'):
-          name = package_name[16:]
-
-        elif package_name.startswith(u'net.sourceforge.projects.'):
-          name = package_name[25:]
+      if matching_prefix:
+        name = package_name[len(matching_prefix):]
 
         # Detect the PackageMaker naming convention.
         if name.endswith(u'.pkg'):
@@ -713,7 +619,7 @@ class DependencyUpdater(object):
             compare_result = -1
           elif name not in package_versions:
             compare_result = 1
-          elif name in [u'pytsk', u'pytsk3']:
+          elif name in (u'pytsk', u'pytsk3'):
             # We cannot really tell by the version number that pytsk3 needs to
             # be updated, so just uninstall and update it any way.
             compare_result = -1
@@ -734,7 +640,7 @@ class DependencyUpdater(object):
             if process.returncode is None:
               package_files, _ = process.communicate()
             else:
-              package_files = ''
+              package_files = u''
 
             if process.returncode != 0:
               logging.error(u'Running: "{0:s}" failed.'.format(command))
@@ -781,11 +687,10 @@ class DependencyUpdater(object):
     """Uninstalls packages on Windows.
 
     Args:
-      package_versions: a dictionary containing the package version per
-                         package name.
+      package_versions (dict[str, str]): versions per package.
 
     Returns:
-      A boolean value indicating the uninstall was successful.
+      bool: True if the uninstall was successful.
     """
     connection = wmi.WMI()
 
@@ -830,12 +735,12 @@ class DependencyUpdater(object):
     """Updates packages.
 
     Args:
-      package_names: a list of package names that should be updated
-                     if an update is available. An empty list represents
-                     all available packages.
+      package_names (list[str]): package names that should be updated
+          if an update is available. An empty list represents all available
+          packages.
 
     Returns:
-      A boolean value indicating the update was successful.
+      bool: True if the update was successful.
     """
     package_filenames, package_versions = self._GetPackageFilenamesAndVersions(
         package_names)
@@ -984,6 +889,8 @@ def Main():
   for project_name in project_names:
     project_definition = project_definitions.get(project_name, None)
     if not project_definition:
+      logging.error(u'Missing definition for project: {0:s}'.format(
+          project_name))
       continue
 
     package_name = project_name
