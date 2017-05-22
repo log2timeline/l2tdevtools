@@ -478,14 +478,19 @@ class RPMSpecFileGenerator(object):
     if project_definition.architecture_dependent:
       rpm_build_dependencies.append(u'python-devel')
 
+    if project_definition.rpm_build_dependencies:
+      rpm_build_dependencies.extend(
+          project_definition.rpm_build_dependencies)
+
     if not python2_only:
       rpm_build_dependencies.append(u'python3-setuptools')
       if project_definition.architecture_dependent:
         rpm_build_dependencies.append(u'python3-devel')
 
-    if project_definition.rpm_build_dependencies:
-      rpm_build_dependencies.extend(
-          project_definition.rpm_build_dependencies)
+      if project_definition.rpm_build_dependencies:
+        rpm_build_dependencies.extend([
+            dependency.replace(u'python-', u'python3-')
+            for dependency in project_definition.rpm_build_dependencies])
 
     # TODO: check if already prefixed with python-
 
