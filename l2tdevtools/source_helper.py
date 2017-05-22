@@ -154,8 +154,8 @@ class SourcePackageHelper(SourceHelper):
     self._project_version = None
     self._source_filename = None
 
-  def _CreateFromTarGz(self, source_filename):
-    """Creates the source directory from a .tar.gz source package.
+  def _CreateFromTar(self, source_filename):
+    """Creates the source directory from a .tar source package.
 
     Args:
       source_filename (str): filename of the source package.
@@ -164,7 +164,7 @@ class SourcePackageHelper(SourceHelper):
       str: name of the source directory or None if no files can be extracted
           from the .tar.gz source package.
     """
-    archive = tarfile.open(source_filename, 'r:gz', encoding='utf-8')
+    archive = tarfile.open(source_filename, 'r:*', encoding='utf-8')
     directory_name = ''
 
     for tar_info in archive.getmembers():
@@ -304,9 +304,10 @@ class SourcePackageHelper(SourceHelper):
       return
 
     directory_name = None
-    if (self._source_filename.endswith(u'.tar.gz') or
+    if (self._source_filename.endswith(u'.tar.bz2') or
+        self._source_filename.endswith(u'.tar.gz') or
         self._source_filename.endswith(u'.tgz')):
-      directory_name = self._CreateFromTarGz(self._source_filename)
+      directory_name = self._CreateFromTar(self._source_filename)
 
     elif self._source_filename.endswith(u'.zip'):
       directory_name = self._CreateFromZip(self._source_filename)
