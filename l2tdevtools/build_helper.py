@@ -219,7 +219,7 @@ class DPKGBuildHelper(BuildHelper):
     with zipfile.ZipFile(source_filename, 'r') as zip_file:
       with tarfile.open(name=orig_source_filename, mode='w:gz') as tar_file:
         for filename in zip_file.namelist():
-          with file.open(filename) as file_object:
+          with zip_file.open(filename) as file_object:
             tar_file.add(filename, file_object)
 
   def _RemoveOlderDPKGPackages(self, project_name, project_version):
