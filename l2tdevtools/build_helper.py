@@ -535,9 +535,6 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
-    temporary_directory = os.path.join(source_directory, u'tmp')
-    if os.path.exists(temporary_directory):
-
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
     if not self._CreatePackagingFiles():
