@@ -809,7 +809,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
         project_name = u'python-{0:s}'.format(project_name)
 
     project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
+    if project_version and project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
 
