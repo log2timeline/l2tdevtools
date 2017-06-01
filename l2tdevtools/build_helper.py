@@ -12,6 +12,8 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tarfile
+import zipfile
 
 from l2tdevtools import dpkg_files
 from l2tdevtools import download_helper
@@ -200,6 +202,23 @@ class DPKGBuildHelper(BuildHelper):
         project_name, project_version)
     shutil.copy(source_filename, deb_orig_source_filename)
 
+  def _CreateOrigSourcePackageFromZip(
+      self, source_filename, project_name, project_version):
+    """Creates the .orig.tar.gz source package from a .zip file.
+
+    Args:
+      project_name (str): project name.
+      project_version (str): version of the project.
+    """
+    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
+        project_name, project_version)
+
+    with zipfile.ZipFile(deb_orig_source_filename, 'r') as zip_file:
+      with tarfile.open(name=deb_orig_source_filename, mode='w:gz') as tar_file:
+        for filename in zip_file.namelist():
+          with file.open(filename) as file_object:
+            tar_file.add(filename, file_object)
+
   def _RemoveOlderDPKGPackages(self, project_name, project_version):
     """Removes previous versions of dpkg packages.
 
@@ -351,8 +370,12 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
-        source_filename, source_helper_object.project_name, project_version)
+    if source_filename.endswith(u'.zip'):
+      self._CreateOrigSourcePackageFromZip(
+          source_filename, source_helper_object.project_name, project_version)
+    else:
+      self._CreateOrigSourcePackage(
+          source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
     if not source_directory:
