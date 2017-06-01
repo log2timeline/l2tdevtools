@@ -237,8 +237,8 @@ class DPKGBuildHelper(BuildHelper):
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-1_architecture.*
-    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
+    # project[-_]*version-[1-9]_architecture.*
+    filenames_glob = u'{0:s}[-_]*-[1-9]_{1:s}.*'.format(
         project_name, self.architecture)
     filenames = glob.glob(filenames_glob)
 
@@ -248,8 +248,8 @@ class DPKGBuildHelper(BuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-1.*
-    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
+    # project[-_]*version-[1-9].*
+    filenames_glob = u'{0:s}[-_]*-[1-9].*'.format(project_name)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -290,8 +290,8 @@ class DPKGBuildHelper(BuildHelper):
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
-    # project[-_]version-1suffix~distribution_architecture.*
-    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
+    # project[-_]version-[1-9]suffix~distribution_architecture.*
+    filenames_glob = u'{0:s}[-_]*-[1-9]{1:s}~{2:s}_{3:s}.*'.format(
         project_name, self.version_suffix, self.distribution, self.architecture)
     filenames = glob.glob(filenames_glob)
 
@@ -301,8 +301,8 @@ class DPKGBuildHelper(BuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-1suffix~distribution.*
-    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
+    # project[-_]*version-[1-9]suffix~distribution.*
+    filenames_glob = u'{0:s}[-_]*-[1-9]{1:s}~{2:s}.*'.format(
         project_name, self.version_suffix, self.distribution)
     filenames = glob.glob(filenames_glob)
 
@@ -922,12 +922,13 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
-    project_name, project_version = self._GetFilenameSafeProjectInformation(
-        source_helper_object)
+    project_version = source_helper_object.GetProjectVersion()
 
-    self._RemoveOlderOriginalSourcePackage(project_name, project_version)
+    self._RemoveOlderOriginalSourcePackage(
+        source_helper_object.project_name, project_version)
 
-    self._RemoveOlderSourceDPKGPackages(project_name, project_version)
+    self._RemoveOlderSourceDPKGPackages(
+        source_helper_object.project_name, project_version)
 
 
 class MSIBuildHelper(BuildHelper):
