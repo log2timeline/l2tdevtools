@@ -216,7 +216,7 @@ class DPKGBuildHelper(BuildHelper):
       source_filename (str): name of the source package file.
       orig_source_filename (str): name of the .orig.tar.gz source package file.
     """
-    with zipfile.ZipFile(deb_orig_source_filename, 'r') as zip_file:
+    with zipfile.ZipFile(source_filename, 'r') as zip_file:
       with tarfile.open(name=orig_source_filename, mode='w:gz') as tar_file:
         for filename in zip_file.namelist():
           with file.open(filename) as file_object:
