@@ -201,6 +201,8 @@ class DPKGBuildHelper(BuildHelper):
     """
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, project_version)
+    if os.path.exists(deb_orig_source_filename):
+      return
 
     if source_filename.endswith(u'.zip'):
       self._CreateOrigSourcePackageFromZip(
