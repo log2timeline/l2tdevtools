@@ -416,7 +416,14 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     if os.path.exists(debian_directory):
       logging.info(u'Removing: {0:s}'.format(debian_directory))
       shutil.rmtree(debian_directory)
+
     shutil.copytree(dpkg_directory, debian_directory)
+
+    # If there is a temporary packaging directory remove it.
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+      logging.info(u'Removing: {0:s}'.format(temporary_directory))
+      shutil.rmtree(temporary_directory)
 
     if not self._BuildPrepare(
         source_directory, source_helper_object.project_name, project_version,
@@ -516,6 +523,9 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
           u'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
     dpkg_directory = os.path.join(source_directory, u'dpkg')
@@ -547,7 +557,14 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     if os.path.exists(debian_directory):
       logging.info(u'Removing: {0:s}'.format(debian_directory))
       shutil.rmtree(debian_directory)
+
     shutil.copytree(dpkg_directory, debian_directory)
+
+    # If there is a temporary packaging directory remove it.
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+      logging.info(u'Removing: {0:s}'.format(temporary_directory))
+      shutil.rmtree(temporary_directory)
 
     if not self._BuildPrepare(
         source_directory, source_helper_object.project_name, project_version,
@@ -711,7 +728,14 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     if os.path.exists(debian_directory):
       logging.info(u'Removing: {0:s}'.format(debian_directory))
       shutil.rmtree(debian_directory)
+
     shutil.copytree(dpkg_directory, debian_directory)
+
+    # If there is a temporary packaging directory remove it.
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+      logging.info(u'Removing: {0:s}'.format(temporary_directory))
+      shutil.rmtree(temporary_directory)
 
     if not self._BuildPrepare(
         source_directory, project_name, project_version, self.version_suffix,
@@ -876,7 +900,14 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     if os.path.exists(debian_directory):
       logging.info(u'Removing: {0:s}'.format(debian_directory))
       shutil.rmtree(debian_directory)
+
     shutil.copytree(dpkg_directory, debian_directory)
+
+    # If there is a temporary packaging directory remove it.
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+      logging.info(u'Removing: {0:s}'.format(temporary_directory))
+      shutil.rmtree(temporary_directory)
 
     if not self._BuildPrepare(
         source_directory, project_name, project_version, self.version_suffix,
