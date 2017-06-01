@@ -195,26 +195,29 @@ class DPKGBuildHelper(BuildHelper):
     """Creates the .orig.tar.gz source package.
 
     Args:
+      source_filename (str): name of the source package file.
       project_name (str): project name.
       project_version (str): version of the project.
     """
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, project_version)
-    shutil.copy(source_filename, deb_orig_source_filename)
+
+    if source_filename.endswith(u'.zip'):
+      self._CreateOrigSourcePackageFromZip(
+          source_filename, source_helper_object.project_name, project_version)
+    else:
+      shutil.copy(source_filename, deb_orig_source_filename)
 
   def _CreateOrigSourcePackageFromZip(
-      self, source_filename, project_name, project_version):
+      self, source_filename, orig_source_filename):
     """Creates the .orig.tar.gz source package from a .zip file.
 
     Args:
-      project_name (str): project name.
-      project_version (str): version of the project.
+      source_filename (str): name of the source package file.
+      orig_source_filename (str): name of the .orig.tar.gz source package file.
     """
-    deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
-
     with zipfile.ZipFile(deb_orig_source_filename, 'r') as zip_file:
-      with tarfile.open(name=deb_orig_source_filename, mode='w:gz') as tar_file:
+      with tarfile.open(name=orig_source_filename, mode='w:gz') as tar_file:
         for filename in zip_file.namelist():
           with file.open(filename) as file_object:
             tar_file.add(filename, file_object)
@@ -370,12 +373,8 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    if source_filename.endswith(u'.zip'):
-      self._CreateOrigSourcePackageFromZip(
-          source_filename, source_helper_object.project_name, project_version)
-    else:
-      self._CreateOrigSourcePackage(
-          source_filename, source_helper_object.project_name, project_version)
+    self._CreateOrigSourcePackage(
+        source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
     if not source_directory:
