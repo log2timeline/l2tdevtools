@@ -24,7 +24,8 @@ class DPKGBuildFilesGenerator(object):
       u'',
       u'  * Auto-generated',
       u'',
-      u' -- {maintainer_email_address:s}  {date_time:s}'])
+      u' -- {maintainer_email_address:s}  {date_time:s}',
+      u''])
 
   _COMPAT_TEMPLATE = u'\n'.join([
       u'7',
