@@ -190,7 +190,7 @@ class DPKGBuildHelper(BuildHelper):
     exit_code = subprocess.call(command, shell=True)
     return exit_code == 0
 
-  def _CreateOrigSourcePackage(
+  def _CreateOriginalSourcePackage(
       self, source_filename, project_name, project_version):
     """Creates the .orig.tar.gz source package.
 
@@ -205,12 +205,13 @@ class DPKGBuildHelper(BuildHelper):
       return
 
     if source_filename.endswith(u'.zip'):
-      self._CreateOrigSourcePackageFromZip(
+      self._CreateOriginalSourcePackageFromZip(
           source_filename, deb_orig_source_filename)
     else:
+      # TODO: add fix psutil package name.
       shutil.copy(source_filename, deb_orig_source_filename)
 
-  def _CreateOrigSourcePackageFromZip(
+  def _CreateOriginalSourcePackageFromZip(
       self, source_filename, orig_source_filename):
     """Creates the .orig.tar.gz source package from a .zip file.
 
@@ -421,7 +422,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
+    self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
@@ -531,7 +532,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
     # debuild wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
+    self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
@@ -673,7 +674,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
+    self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
@@ -816,7 +817,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
 
     # debuild wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
+    self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
