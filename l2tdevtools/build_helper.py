@@ -238,18 +238,19 @@ class DPKGBuildHelper(BuildHelper):
       bool: True if successful, False otherwise.
     """
     debian_directory = os.path.join(source_directory, u'debian')
+
+    # If there is a debian directory remove it and recreate it from
+    # the dpkg directory.
+    if os.path.exists(debian_directory):
+      logging.info(u'Removing: {0:s}'.format(debian_directory))
+      shutil.rmtree(debian_directory)
+
     dpkg_directory = os.path.join(source_directory, u'dpkg')
 
     if not os.path.exists(dpkg_directory):
       dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
 
     if os.path.exists(dpkg_directory):
-      # If there is a debian directory remove it and recreate it from
-      # the dpkg directory.
-      if os.path.exists(debian_directory):
-        logging.info(u'Removing: {0:s}'.format(debian_directory))
-        shutil.rmtree(debian_directory)
-
       shutil.copytree(dpkg_directory, debian_directory)
 
     else:
