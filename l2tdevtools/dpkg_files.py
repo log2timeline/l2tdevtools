@@ -24,10 +24,12 @@ class DPKGBuildFilesGenerator(object):
       u'',
       u'  * Auto-generated',
       u'',
-      u' -- {maintainer_email_address:s}  {date_time:s}'])
+      u' -- {maintainer_email_address:s}  {date_time:s}',
+      u''])
 
   _COMPAT_TEMPLATE = u'\n'.join([
-      u'7'])
+      u'7',
+      u''])
 
   _CONTROL_TEMPLATE_CONFIGURE_MAKE = u'\n'.join([
       u'Source: {source_package_name:s}',
@@ -326,7 +328,8 @@ class DPKGBuildFilesGenerator(object):
       u''])
 
   _SOURCE_FORMAT_TEMPLATE = u'\n'.join([
-      u'1.0'])
+      u'1.0',
+      u''])
 
   def __init__(
       self, project_name, project_version, project_definition, data_path,

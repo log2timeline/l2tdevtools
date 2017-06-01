@@ -190,7 +190,7 @@ class DPKGBuildHelper(BuildHelper):
     exit_code = subprocess.call(command, shell=True)
     return exit_code == 0
 
-  def _CreateOrigSourcePackage(
+  def _CreateOriginalSourcePackage(
       self, source_filename, project_name, project_version):
     """Creates the .orig.tar.gz source package.
 
@@ -205,12 +205,13 @@ class DPKGBuildHelper(BuildHelper):
       return
 
     if source_filename.endswith(u'.zip'):
-      self._CreateOrigSourcePackageFromZip(
+      self._CreateOriginalSourcePackageFromZip(
           source_filename, deb_orig_source_filename)
     else:
+      # TODO: add fix psutil package name.
       shutil.copy(source_filename, deb_orig_source_filename)
 
-  def _CreateOrigSourcePackageFromZip(
+  def _CreateOriginalSourcePackageFromZip(
       self, source_filename, orig_source_filename):
     """Creates the .orig.tar.gz source package from a .zip file.
 
@@ -224,6 +225,51 @@ class DPKGBuildHelper(BuildHelper):
           with zip_file.open(filename) as file_object:
             tar_info = tarfile.TarInfo(filename)
             tar_file.addfile(tar_info, fileobj=file_object)
+
+  def _CreatePackagingFiles(
+      self, source_helper_object, source_directory, project_version):
+    """Creates packacking files.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+      source_directory (str): name of the source directory.
+      project_version (str): project version.
+
+    Returns:
+      bool: True if successful, False otherwise.
+    """
+    debian_directory = os.path.join(source_directory, u'debian')
+
+    # If there is a debian directory remove it and recreate it from
+    # the dpkg directory.
+    if os.path.exists(debian_directory):
+      logging.info(u'Removing: {0:s}'.format(debian_directory))
+      shutil.rmtree(debian_directory)
+
+    dpkg_directory = os.path.join(source_directory, u'dpkg')
+
+    if not os.path.exists(dpkg_directory):
+      dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
+
+    if os.path.exists(dpkg_directory):
+      shutil.copytree(dpkg_directory, debian_directory)
+
+    else:
+      os.chdir(source_directory)
+
+      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
+          source_helper_object.project_name, project_version,
+          self._project_definition, self._data_path)
+      build_files_generator.GenerateFiles(u'debian')
+
+      os.chdir(u'..')
+
+    if not os.path.exists(debian_directory):
+      logging.error(u'Missing debian sub directory in: {0:s}'.format(
+          source_directory))
+      return False
+
+    return True
 
   def _RemoveOlderDPKGPackages(self, project_name, project_version):
     """Removes previous versions of dpkg packages.
@@ -376,7 +422,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
+    self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
@@ -387,36 +433,15 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
-    dpkg_directory = os.path.join(source_directory, u'dpkg')
-    if not os.path.exists(dpkg_directory):
-      dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
-
-    if not os.path.exists(dpkg_directory):
-      # Generate the dpkg build files if necessary.
-      os.chdir(source_directory)
-
-      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name, project_version,
-          self._project_definition, self._data_path)
-      build_files_generator.GenerateFiles(u'dpkg')
-
-      os.chdir(u'..')
-
-      dpkg_directory = os.path.join(source_directory, u'dpkg')
-
-    if not os.path.exists(dpkg_directory):
-      logging.error(u'Missing dpkg sub directory in: {0:s}'.format(
-          source_directory))
+    if not self._CreatePackagingFiles(
+        source_helper_object, source_directory, project_version):
       return False
 
-    debian_directory = os.path.join(source_directory, u'debian')
-
-    # If there is a debian directory remove it and recreate it from
-    # the dpkg directory.
-    if os.path.exists(debian_directory):
-      logging.info(u'Removing: {0:s}'.format(debian_directory))
-      shutil.rmtree(debian_directory)
-    shutil.copytree(dpkg_directory, debian_directory)
+    # If there is a temporary packaging directory remove it.
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+      logging.info(u'Removing: {0:s}'.format(temporary_directory))
+      shutil.rmtree(temporary_directory)
 
     if not self._BuildPrepare(
         source_directory, source_helper_object.project_name, project_version,
@@ -507,7 +532,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
     # debuild wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
+    self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
@@ -518,36 +543,15 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
-    dpkg_directory = os.path.join(source_directory, u'dpkg')
-    if not os.path.exists(dpkg_directory):
-      dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
-
-    if not os.path.exists(dpkg_directory):
-      # Generate the dpkg build files if necessary.
-      os.chdir(source_directory)
-
-      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name, project_version,
-          self._project_definition, self._data_path)
-      build_files_generator.GenerateFiles(u'dpkg')
-
-      os.chdir(u'..')
-
-      dpkg_directory = os.path.join(source_directory, u'dpkg')
-
-    if not os.path.exists(dpkg_directory):
-      logging.error(u'Missing dpkg sub directory in: {0:s}'.format(
-          source_directory))
+    if not self._CreatePackagingFiles(
+        source_helper_object, source_directory, project_version):
       return False
 
-    debian_directory = os.path.join(source_directory, u'debian')
-
-    # If there is a debian directory remove it and recreate it from
-    # the dpkg directory.
-    if os.path.exists(debian_directory):
-      logging.info(u'Removing: {0:s}'.format(debian_directory))
-      shutil.rmtree(debian_directory)
-    shutil.copytree(dpkg_directory, debian_directory)
+    # If there is a temporary packaging directory remove it.
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+      logging.info(u'Removing: {0:s}'.format(temporary_directory))
+      shutil.rmtree(temporary_directory)
 
     if not self._BuildPrepare(
         source_directory, source_helper_object.project_name, project_version,
@@ -670,7 +674,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
+    self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
@@ -681,37 +685,15 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
-    dpkg_directory = os.path.join(source_directory, u'dpkg')
-    if not os.path.exists(dpkg_directory):
-      dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
-
-    if not os.path.exists(dpkg_directory):
-      # Generate the dpkg build files if necessary.
-      os.chdir(source_directory)
-
-      # Pass the project name without the python- prefix.
-      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name, project_version,
-          self._project_definition, self._data_path)
-      build_files_generator.GenerateFiles(u'dpkg')
-
-      os.chdir(u'..')
-
-      dpkg_directory = os.path.join(source_directory, u'dpkg')
-
-    if not os.path.exists(dpkg_directory):
-      logging.error(u'Missing dpkg sub directory in: {0:s}'.format(
-          source_directory))
+    if not self._CreatePackagingFiles(
+        source_helper_object, source_directory, project_version):
       return False
 
-    debian_directory = os.path.join(source_directory, u'debian')
-
-    # If there is a debian directory remove it and recreate it from
-    # the dpkg directory.
-    if os.path.exists(debian_directory):
-      logging.info(u'Removing: {0:s}'.format(debian_directory))
-      shutil.rmtree(debian_directory)
-    shutil.copytree(dpkg_directory, debian_directory)
+    # If there is a temporary packaging directory remove it.
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+      logging.info(u'Removing: {0:s}'.format(temporary_directory))
+      shutil.rmtree(temporary_directory)
 
     if not self._BuildPrepare(
         source_directory, project_name, project_version, self.version_suffix,
@@ -809,7 +791,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
         project_name = u'python-{0:s}'.format(project_name)
 
     project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
+    if project_version and project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
 
@@ -835,7 +817,7 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
 
     # debuild wants an source package filename without
     # the status indication and orig indication.
-    self._CreateOrigSourcePackage(
+    self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
     source_directory = source_helper_object.Create()
@@ -846,37 +828,15 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
-    dpkg_directory = os.path.join(source_directory, u'dpkg')
-    if not os.path.exists(dpkg_directory):
-      dpkg_directory = os.path.join(source_directory, u'config', u'dpkg')
-
-    if not os.path.exists(dpkg_directory):
-      # Generate the dpkg build files if necessary.
-      os.chdir(source_directory)
-
-      # Pass the project name without the python- prefix.
-      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name, project_version,
-          self._project_definition, self._data_path)
-      build_files_generator.GenerateFiles(u'dpkg')
-
-      os.chdir(u'..')
-
-      dpkg_directory = os.path.join(source_directory, u'dpkg')
-
-    if not os.path.exists(dpkg_directory):
-      logging.error(u'Missing dpkg sub directory in: {0:s}'.format(
-          source_directory))
+    if not self._CreatePackagingFiles(
+        source_helper_object, source_directory, project_version):
       return False
 
-    debian_directory = os.path.join(source_directory, u'debian')
-
-    # If there is a debian directory remove it and recreate it from
-    # the dpkg directory.
-    if os.path.exists(debian_directory):
-      logging.info(u'Removing: {0:s}'.format(debian_directory))
-      shutil.rmtree(debian_directory)
-    shutil.copytree(dpkg_directory, debian_directory)
+    # If there is a temporary packaging directory remove it.
+    temporary_directory = os.path.join(source_directory, u'tmp')
+    if os.path.exists(temporary_directory):
+      logging.info(u'Removing: {0:s}'.format(temporary_directory))
+      shutil.rmtree(temporary_directory)
 
     if not self._BuildPrepare(
         source_directory, project_name, project_version, self.version_suffix,
