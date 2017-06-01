@@ -12,6 +12,8 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tarfile
+import zipfile
 
 from l2tdevtools import dpkg_files
 from l2tdevtools import download_helper
@@ -193,12 +195,35 @@ class DPKGBuildHelper(BuildHelper):
     """Creates the .orig.tar.gz source package.
 
     Args:
+      source_filename (str): name of the source package file.
       project_name (str): project name.
       project_version (str): version of the project.
     """
     deb_orig_source_filename = u'{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, project_version)
-    shutil.copy(source_filename, deb_orig_source_filename)
+    if os.path.exists(deb_orig_source_filename):
+      return
+
+    if source_filename.endswith(u'.zip'):
+      self._CreateOrigSourcePackageFromZip(
+          source_filename, deb_orig_source_filename)
+    else:
+      shutil.copy(source_filename, deb_orig_source_filename)
+
+  def _CreateOrigSourcePackageFromZip(
+      self, source_filename, orig_source_filename):
+    """Creates the .orig.tar.gz source package from a .zip file.
+
+    Args:
+      source_filename (str): name of the source package file.
+      orig_source_filename (str): name of the .orig.tar.gz source package file.
+    """
+    with zipfile.ZipFile(source_filename, 'r') as zip_file:
+      with tarfile.open(name=orig_source_filename, mode='w:gz') as tar_file:
+        for filename in zip_file.namelist():
+          with zip_file.open(filename) as file_object:
+            tar_info = tarfile.TarInfo(filename)
+            tar_file.addfile(tar_info, fileobj=file_object)
 
   def _RemoveOlderDPKGPackages(self, project_name, project_version):
     """Removes previous versions of dpkg packages.
@@ -212,8 +237,8 @@ class DPKGBuildHelper(BuildHelper):
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-1_architecture.*
-    filenames_glob = u'{0:s}[-_]*-1_{1:s}.*'.format(
+    # project[-_]*version-[1-9]_architecture.*
+    filenames_glob = u'{0:s}[-_]*-[1-9]_{1:s}.*'.format(
         project_name, self.architecture)
     filenames = glob.glob(filenames_glob)
 
@@ -223,8 +248,8 @@ class DPKGBuildHelper(BuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-1.*
-    filenames_glob = u'{0:s}[-_]*-1.*'.format(project_name)
+    # project[-_]*version-[1-9].*
+    filenames_glob = u'{0:s}[-_]*-[1-9].*'.format(project_name)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -265,8 +290,8 @@ class DPKGBuildHelper(BuildHelper):
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
-    # project[-_]version-1suffix~distribution_architecture.*
-    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}_{3:s}.*'.format(
+    # project[-_]version-[1-9]suffix~distribution_architecture.*
+    filenames_glob = u'{0:s}[-_]*-[1-9]{1:s}~{2:s}_{3:s}.*'.format(
         project_name, self.version_suffix, self.distribution, self.architecture)
     filenames = glob.glob(filenames_glob)
 
@@ -276,8 +301,8 @@ class DPKGBuildHelper(BuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-1suffix~distribution.*
-    filenames_glob = u'{0:s}[-_]*-1{1:s}~{2:s}.*'.format(
+    # project[-_]*version-[1-9]suffix~distribution.*
+    filenames_glob = u'{0:s}[-_]*-[1-9]{1:s}~{2:s}.*'.format(
         project_name, self.version_suffix, self.distribution)
     filenames = glob.glob(filenames_glob)
 
@@ -897,12 +922,13 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
-    project_name, project_version = self._GetFilenameSafeProjectInformation(
-        source_helper_object)
+    project_version = source_helper_object.GetProjectVersion()
 
-    self._RemoveOlderOriginalSourcePackage(project_name, project_version)
+    self._RemoveOlderOriginalSourcePackage(
+        source_helper_object.project_name, project_version)
 
-    self._RemoveOlderSourceDPKGPackages(project_name, project_version)
+    self._RemoveOlderSourceDPKGPackages(
+        source_helper_object.project_name, project_version)
 
 
 class MSIBuildHelper(BuildHelper):
