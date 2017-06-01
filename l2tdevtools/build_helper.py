@@ -204,7 +204,7 @@ class DPKGBuildHelper(BuildHelper):
 
     if source_filename.endswith(u'.zip'):
       self._CreateOrigSourcePackageFromZip(
-          source_filename, source_helper_object.project_name, project_version)
+          source_filename, deb_orig_source_filename)
     else:
       shutil.copy(source_filename, deb_orig_source_filename)
 
