@@ -225,11 +225,14 @@ class DPKGBuildHelper(BuildHelper):
             tar_info = tarfile.TarInfo(filename)
             tar_file.addfile(tar_info, fileobj=file_object)
 
-  def _CreatePackagingFiles(self, source_helper_object):
+  def _CreatePackagingFiles(
+      self, source_helper_object, source_directory, project_version):
     """Creates packacking files.
 
     Args:
       source_helper_object (SourceHelper): source helper.
+      source_directory (str): name of the source directory.
+      project_version (str): project version.
 
     Returns:
       bool: True if successful, False otherwise.
@@ -428,7 +431,8 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
-    if not self._CreatePackagingFiles():
+    if not self._CreatePackagingFiles(
+        source_helper_object, source_directory, project_version):
       return False
 
     # If there is a temporary packaging directory remove it.
@@ -537,7 +541,8 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
-    if not self._CreatePackagingFiles():
+    if not self._CreatePackagingFiles(
+        source_helper_object, source_directory, project_version):
       return False
 
     # If there is a temporary packaging directory remove it.
@@ -678,7 +683,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info(u'Building deb of: {0:s}'.format(source_filename))
 
-    if not self._CreatePackagingFiles():
+    if not self._CreatePackagingFiles(
+        source_helper_object, source_directory, project_version):
       return False
 
     # If there is a temporary packaging directory remove it.
@@ -820,7 +826,8 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info(u'Building source deb of: {0:s}'.format(source_filename))
 
-    if not self._CreatePackagingFiles():
+    if not self._CreatePackagingFiles(
+        source_helper_object, source_directory, project_version):
       return False
 
     # If there is a temporary packaging directory remove it.
