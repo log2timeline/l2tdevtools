@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 """The log2timeline devtools module."""
 
-__version__ = '20170608'
+__version__ = '20170609'
