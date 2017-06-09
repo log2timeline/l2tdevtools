@@ -75,7 +75,7 @@ class ProjectDefinition(object):
     self.maintainer = None
     self.msi_name = None
     self.name = name
-    self.prebuild = None
+    self.msi_prebuild = None
     self.rpm_build_dependencies = None
     self.rpm_name = None
     self.rpm_python2_prefix = None
@@ -232,8 +232,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'maintainer')
       project_definition.msi_name = self._GetConfigValue(
           config_parser, section_name, u'msi_name')
-      project_definition.prebuild = self._GetConfigValue(
-          config_parser, section_name, u'prebuild')
+      project_definition.msi_prebuild = self._GetConfigValue(
+          config_parser, section_name, u'msi_prebuild')
       project_definition.rpm_build_dependencies = self._GetConfigValue(
           config_parser, section_name, u'rpm_build_dependencies')
       project_definition.rpm_name = self._GetConfigValue(

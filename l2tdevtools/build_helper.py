@@ -947,7 +947,7 @@ class MSIBuildHelper(BuildHelper):
     return True
 
   def _RunPreBuildScript(self, script):
-    """Runs the prebuild script.
+    """Runs the msi_prebuild script.
 
     Args:
       script (str): the script's filename.
@@ -955,7 +955,7 @@ class MSIBuildHelper(BuildHelper):
     Returns:
       bool: True if running the script was successful.
     """
-    filepath = os.path.join(self._data_path, u'prebuild', script)
+    filepath = os.path.join(self._data_path, u'msi_prebuild', script)
     if filepath.endswith(u'.ps1'):
       command = u'powershell.exe "{0:s}"'.format(filepath)
 
@@ -1559,9 +1559,9 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
       if not result:
         return False
 
-    if self._project_definition.prebuild:
+    if self._project_definition.msi_prebuild:
       os.chdir(source_directory)
-      result = self._RunPreBuildScript(self._project_definition.prebuild)
+      result = self._RunPreBuildScript(self._project_definition.msi_prebuild)
       os.chdir(u'..')
 
       if not result:
