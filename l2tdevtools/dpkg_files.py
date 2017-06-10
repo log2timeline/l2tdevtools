@@ -196,7 +196,7 @@ class DPKGBuildFilesGenerator(object):
       u'',
       u'.PHONY: override_dh_auto_install',
       u'override_dh_auto_install:',
-      u'\tdh_auto_install --destdir $(CURDIR)/debian/python-{package_name:s}',
+      u'\tdh_auto_install --destdir $(CURDIR)/debian/{python_package_name:s}',
       u'',
       u'.PHONY: override_dh_auto_test',
       u'override_dh_auto_test:',
@@ -271,7 +271,7 @@ class DPKGBuildFilesGenerator(object):
       u'',
       u'.PHONY: override_dh_auto_install',
       u'override_dh_auto_install:',
-      u'\tdh_auto_install --destdir $(CURDIR)/debian/python-{package_name:s}',
+      u'\tdh_auto_install --destdir $(CURDIR)/debian/{python_package_name:s}',
       u'\tset -ex; for python in $(shell py3versions -r); do \\',
       (u'\t\t$$python setup.py install '
        u'--root=$(CURDIR)/debian/python3-{package_name:s} '
@@ -688,6 +688,8 @@ class DPKGBuildFilesGenerator(object):
     else:
       package_name = self._project_name
 
+    python_package_name = package_name
+
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
@@ -699,6 +701,7 @@ class DPKGBuildFilesGenerator(object):
     template_values = {
         u'package_name': package_name,
         u'project_name': self._project_name,
+        u'python_package_name': python_package_name,
         u'with_quilt': with_quilt}
 
     if self._IsPython2Only():
