@@ -72,7 +72,13 @@ class BuildHelper(object):
 
 
 class DPKGBuildHelper(BuildHelper):
-  """Helper to build dpkg packages (.deb)."""
+  """Helper to build dpkg packages (.deb).
+
+  Attributes:
+    architecture (str): dpkg target architecture.
+    distribution (str): dpkg target distributions.
+    version_suffix (str): dpkg version suffix.
+  """
 
   _BUILD_DEPENDENCIES = frozenset([
       u'git',
@@ -117,6 +123,10 @@ class DPKGBuildHelper(BuildHelper):
     super(DPKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg.sh'
     self._post_script = u'post-dpkg.sh'
+
+    self.architecture = None
+    self.distribution = None
+    self.version_suffix = None
 
   def _BuildPrepare(
       self, source_directory, project_name, project_version, version_suffix,
@@ -1715,7 +1725,7 @@ class OSCBuildHelper(BuildHelper):
           command, error))
       return False
 
-    if len(output):
+    if output:
       logging.error(u'Unable to continue with pending changes.')
       return False
 
