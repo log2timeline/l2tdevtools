@@ -72,7 +72,13 @@ class BuildHelper(object):
 
 
 class DPKGBuildHelper(BuildHelper):
-  """Helper to build dpkg packages (.deb)."""
+  """Helper to build dpkg packages (.deb).
+
+  Attributes:
+    architecture (str): dpkg target architecture.
+    distribution (str): dpkg target distributions.
+    version_suffix (str): dpkg version suffix.
+  """
 
   _BUILD_DEPENDENCIES = frozenset([
       u'git',
@@ -117,6 +123,10 @@ class DPKGBuildHelper(BuildHelper):
     super(DPKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._prep_script = u'prep-dpkg.sh'
     self._post_script = u'post-dpkg.sh'
+
+    self.architecture = None
+    self.distribution = None
+    self.version_suffix = None
 
   def _BuildPrepare(
       self, source_directory, project_name, project_version, version_suffix,
@@ -648,7 +658,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
         project_name = u'python-{0:s}'.format(project_name)
 
     project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
+    if project_version and project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
 
@@ -1746,7 +1756,7 @@ class OSCBuildHelper(BuildHelper):
           command, error))
       return False
 
-    if len(output):
+    if output:
       logging.error(u'Unable to continue with pending changes.')
       return False
 
@@ -2616,7 +2626,7 @@ class BaseRPMBuildHelper(BuildHelper):
       project_name = source_helper_object.project_name
 
     project_version = source_helper_object.GetProjectVersion()
-    if project_version.startswith(u'1!'):
+    if project_version and project_version.startswith(u'1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
 
