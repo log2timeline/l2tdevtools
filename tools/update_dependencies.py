@@ -10,8 +10,7 @@ from l2tdevtools import dependencies
 from l2tdevtools import project_config
 
 
-# TODO: merge with other project
-# TODO: replace plaso
+# TODO: merge with other projects
 # TODO: make GIFTCOPRInstallScriptWriter conditional
 # TODO: make GIFTPPAInstallScriptWriter conditional
 
@@ -219,7 +218,7 @@ class DPKGControlWriter(DependencyFileWriter):
 
 
 class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
-  """Class to help write the gift_copr_install.sh file."""
+  """GIFT COPR installation script file."""
 
   _PATH = os.path.join('config', 'linux', 'gift_copr_install.sh')
 
@@ -249,7 +248,7 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
       '',
       'sudo dnf install dnf-plugins-core',
       'sudo dnf copr enable @gift/dev',
-      'sudo dnf install -y ${PLASO_DEPENDENCIES}',
+      'sudo dnf install -y ${DEPENDENCIES}',
       '',
       'if [[ "$*" =~ "include-debug" ]]; then',
       '    sudo dnf install -y ${DEBUG_DEPENDENCIES}',
@@ -273,11 +272,11 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
     libyal_dependencies = []
     for index, dependency in enumerate(dependencies):
       if index == 0:
-        file_content.append('PLASO_DEPENDENCIES="{0:s}'.format(dependency))
+        file_content.append('DEPENDENCIES="{0:s}'.format(dependency))
       elif index + 1 == len(dependencies):
-        file_content.append('                    {0:s}";'.format(dependency))
+        file_content.append('              {0:s}";'.format(dependency))
       else:
-        file_content.append('                    {0:s}'.format(dependency))
+        file_content.append('              {0:s}'.format(dependency))
 
       if dependency.startswith('lib') and dependency.endswith('-python'):
         dependency, _, _ = dependency.partition('-')
@@ -306,7 +305,7 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
 
 
 class GIFTPPAInstallScriptWriter(DependencyFileWriter):
-  """Class to help write the gift_ppa_install.sh file."""
+  """GIFT PPA installation script file."""
 
   _PATH = os.path.join('config', 'linux', 'gift_ppa_install.sh')
 
@@ -336,7 +335,7 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
       '',
       'sudo add-apt-repository ppa:gift/dev -y',
       'sudo apt-get update -q',
-      'sudo apt-get install -y ${PLASO_DEPENDENCIES}',
+      'sudo apt-get install -y ${DEPENDENCIES}',
       '',
       'if [[ "$*" =~ "include-debug" ]]; then',
       '    sudo apt-get install -y ${DEBUG_DEPENDENCIES}',
@@ -360,11 +359,11 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
     libyal_dependencies = []
     for index, dependency in enumerate(dependencies):
       if index == 0:
-        file_content.append('PLASO_DEPENDENCIES="{0:s}'.format(dependency))
+        file_content.append('DEPENDENCIES="{0:s}'.format(dependency))
       elif index + 1 == len(dependencies):
-        file_content.append('                    {0:s}";'.format(dependency))
+        file_content.append('              {0:s}";'.format(dependency))
       else:
-        file_content.append('                    {0:s}'.format(dependency))
+        file_content.append('              {0:s}'.format(dependency))
 
       if dependency.startswith('lib') and dependency.endswith('-python'):
         dependency, _, _ = dependency.partition('-')
