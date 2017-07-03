@@ -95,7 +95,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
     sub_directory = None
 
     if operating_system == u'Darwin':
-      # TODO: determine OSX version.
+      # TODO: determine macOS version.
       if cpu_architecture != u'x86_64':
         logging.error(u'CPU architecture: {0:s} not supported.'.format(
             cpu_architecture))
@@ -422,7 +422,7 @@ class DependencyUpdater(object):
       bool: True if the installation was successful.
     """
     if self.operating_system == u'Darwin':
-      return self._InstallPackagesMacOSX(
+      return self._InstallPackagesMacOS(
           package_filenames, package_versions)
 
     elif self.operating_system == u'Windows':
@@ -431,8 +431,8 @@ class DependencyUpdater(object):
 
     return False
 
-  def _InstallPackagesMacOSX(self, package_filenames, package_versions):
-    """Installs packages on Mac OS X.
+  def _InstallPackagesMacOS(self, package_filenames, package_versions):
+    """Installs packages on macOS.
 
     Args:
       package_filenames (dict[str, str]): filenames per package.
