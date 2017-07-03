@@ -11,8 +11,6 @@ from l2tdevtools import project_config
 
 
 # TODO: merge with other projects
-# TODO: make GIFTCOPRInstallScriptWriter conditional
-# TODO: make GIFTPPAInstallScriptWriter conditional
 
 
 # pylint: disable=redefined-outer-name
@@ -36,7 +34,7 @@ class DependencyFileWriter(object):
 class AppveyorYmlWriter(DependencyFileWriter):
   """Appveyor.yml file writer."""
 
-  _PATH = os.path.join('appveyor.yml')
+  PATH = os.path.join('appveyor.yml')
 
   _VERSION_PYWIN32 = '220'
   _VERSION_WMI = '1.4.9'
@@ -72,21 +70,6 @@ class AppveyorYmlWriter(DependencyFileWriter):
       '  - cmd: "%PYTHON%\\\\Scripts\\\\easy_install.exe '
       'C:\\\\Projects\\\\WMI-{0:s}.win32.exe"').format(_VERSION_WMI)
 
-  _DOWNLOAD_SQLITE = (
-      '  - ps: (new-object net.webclient).DownloadFile('
-      '\'https://www.sqlite.org/2017/sqlite-dll-win32-x86-{0:s}.zip\', '
-      '\'C:\\Projects\\sqlite-dll-win32-x86-{0:s}.zip\')').format(
-          _VERSION_SQLITE)
-
-  _EXTRACT_SQLITE = (
-      '  - ps: $Output = Invoke-Expression -Command '
-      '"& \'C:\\\\Program Files\\\\7-Zip\\\\7z.exe\' -y '
-      '-oC:\\\\Projects\\\\ x C:\\\\Projects\\\\'
-      'sqlite-dll-win32-x86-{0:s}.zip 2>&1"').format(_VERSION_SQLITE)
-
-  _INSTALL_SQLITE = (
-      '  - cmd: copy C:\\Projects\\sqlite3.dll C:\\Python27\\DLLs\\')
-
   _DOWNLOAD_L2TDEVTOOLS = (
       '  - cmd: git clone https://github.com/log2timeline/l2tdevtools.git && '
       'move l2tdevtools ..\\')
@@ -105,7 +88,24 @@ class AppveyorYmlWriter(DependencyFileWriter):
       _INSTALL_PIP,
       _INSTALL_PYWIN32,
       _INSTALL_WMI,
-      _DOWNLOAD_L2TDEVTOOLS,
+      _DOWNLOAD_L2TDEVTOOLS]
+
+  _DOWNLOAD_SQLITE = (
+      '  - ps: (new-object net.webclient).DownloadFile('
+      '\'https://www.sqlite.org/2017/sqlite-dll-win32-x86-{0:s}.zip\', '
+      '\'C:\\Projects\\sqlite-dll-win32-x86-{0:s}.zip\')').format(
+          _VERSION_SQLITE)
+
+  _EXTRACT_SQLITE = (
+      '  - ps: $Output = Invoke-Expression -Command '
+      '"& \'C:\\\\Program Files\\\\7-Zip\\\\7z.exe\' -y '
+      '-oC:\\\\Projects\\\\ x C:\\\\Projects\\\\'
+      'sqlite-dll-win32-x86-{0:s}.zip 2>&1"').format(_VERSION_SQLITE)
+
+  _INSTALL_SQLITE = (
+      '  - cmd: copy C:\\Projects\\sqlite3.dll C:\\Python27\\DLLs\\')
+
+  _SQLITE = [
       _DOWNLOAD_SQLITE,
       _EXTRACT_SQLITE,
       _INSTALL_SQLITE]
@@ -131,8 +131,11 @@ class AppveyorYmlWriter(DependencyFileWriter):
 
     dependencies = self._dependency_helper.GetL2TBinaries()
     dependencies.extend(['funcsigs', 'mock', 'pbr'])
-    dependencies = ' '.join(dependencies)
 
+    if 'pysqlite' in dependencies:
+      file_content.extend(self._SQLITE)
+
+    dependencies = ' '.join(dependencies)
     l2tdevtools_update = self._L2TDEVTOOLS_UPDATE.format(dependencies)
     file_content.append(l2tdevtools_update)
 
@@ -141,14 +144,14 @@ class AppveyorYmlWriter(DependencyFileWriter):
     file_content = '\n'.join(file_content)
     file_content = file_content.encode('utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
 class DPKGControlWriter(DependencyFileWriter):
   """Dpkg control file writer."""
 
-  _PATH = os.path.join('config', 'dpkg', 'control')
+  PATH = os.path.join('config', 'dpkg', 'control')
 
   _FILE_CONTENT = '\n'.join([
       'Source: {project_name:s}',
@@ -213,14 +216,14 @@ class DPKGControlWriter(DependencyFileWriter):
 
     file_content = file_content.encode('utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
 class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
   """GIFT COPR installation script file."""
 
-  _PATH = os.path.join('config', 'linux', 'gift_copr_install.sh')
+  PATH = os.path.join('config', 'linux', 'gift_copr_install.sh')
 
   _FILE_HEADER = [
       '#!/usr/bin/env bash',
@@ -248,7 +251,7 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
       '',
       'sudo dnf install dnf-plugins-core',
       'sudo dnf copr enable @gift/dev',
-      'sudo dnf install -y ${DEPENDENCIES}',
+      'sudo dnf install -y ${PYTHON2_DEPENDENCIES}',
       '',
       'if [[ "$*" =~ "include-debug" ]]; then',
       '    sudo dnf install -y ${DEBUG_DEPENDENCIES}',
@@ -272,11 +275,11 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
     libyal_dependencies = []
     for index, dependency in enumerate(dependencies):
       if index == 0:
-        file_content.append('DEPENDENCIES="{0:s}'.format(dependency))
+        file_content.append('PYTHON2_DEPENDENCIES="{0:s}'.format(dependency))
       elif index + 1 == len(dependencies):
-        file_content.append('              {0:s}";'.format(dependency))
+        file_content.append('                      {0:s}";'.format(dependency))
       else:
-        file_content.append('              {0:s}'.format(dependency))
+        file_content.append('                      {0:s}'.format(dependency))
 
       if dependency.startswith('lib') and dependency.endswith('-python'):
         dependency, _, _ = dependency.partition('-')
@@ -300,14 +303,14 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
     file_content = '\n'.join(file_content)
     file_content = file_content.encode('utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
 class GIFTPPAInstallScriptWriter(DependencyFileWriter):
   """GIFT PPA installation script file."""
 
-  _PATH = os.path.join('config', 'linux', 'gift_ppa_install.sh')
+  PATH = os.path.join('config', 'linux', 'gift_ppa_install.sh')
 
   _FILE_HEADER = [
       '#!/usr/bin/env bash',
@@ -335,7 +338,7 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
       '',
       'sudo add-apt-repository ppa:gift/dev -y',
       'sudo apt-get update -q',
-      'sudo apt-get install -y ${DEPENDENCIES}',
+      'sudo apt-get install -y ${PYTHON2_DEPENDENCIES}',
       '',
       'if [[ "$*" =~ "include-debug" ]]; then',
       '    sudo apt-get install -y ${DEBUG_DEPENDENCIES}',
@@ -359,11 +362,11 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
     libyal_dependencies = []
     for index, dependency in enumerate(dependencies):
       if index == 0:
-        file_content.append('DEPENDENCIES="{0:s}'.format(dependency))
+        file_content.append('PYTHON2_DEPENDENCIES="{0:s}'.format(dependency))
       elif index + 1 == len(dependencies):
-        file_content.append('              {0:s}";'.format(dependency))
+        file_content.append('                      {0:s}";'.format(dependency))
       else:
-        file_content.append('              {0:s}'.format(dependency))
+        file_content.append('                      {0:s}'.format(dependency))
 
       if dependency.startswith('lib') and dependency.endswith('-python'):
         dependency, _, _ = dependency.partition('-')
@@ -387,14 +390,14 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
     file_content = '\n'.join(file_content)
     file_content = file_content.encode('utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
 class RequirementsWriter(DependencyFileWriter):
   """Requirements.txt file writer."""
 
-  _PATH = 'requirements.txt'
+  PATH = 'requirements.txt'
 
   _FILE_HEADER = ['pip >= 7.0.0']
 
@@ -410,14 +413,14 @@ class RequirementsWriter(DependencyFileWriter):
     file_content = '\n'.join(file_content)
     file_content = file_content.encode('utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
 class SetupCfgWriter(DependencyFileWriter):
   """Setup.cfg file writer."""
 
-  _PATH = 'setup.cfg'
+  PATH = 'setup.cfg'
 
   _FILE_HEADER = '\n'.join([
       '[sdist]',
@@ -456,14 +459,14 @@ class SetupCfgWriter(DependencyFileWriter):
     file_content = '\n'.join(file_content)
     file_content = file_content.encode('utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
 class TravisBeforeInstallScriptWriter(DependencyFileWriter):
   """Travis-CI install.sh file writer."""
 
-  _PATH = os.path.join('config', 'travis', 'install.sh')
+  PATH = os.path.join('config', 'travis', 'install.sh')
 
   _FILE_HEADER = [
       '#!/bin/bash',
@@ -532,14 +535,14 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
     file_content = '\n'.join(file_content)
     file_content = file_content.encode('utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
 class ToxIniWriter(DependencyFileWriter):
   """Tox.ini file writer."""
 
-  _PATH = 'tox.ini'
+  PATH = 'tox.ini'
 
   _FILE_CONTENT = '\n'.join([
       '[tox]',
@@ -567,14 +570,12 @@ class ToxIniWriter(DependencyFileWriter):
 
     file_content = file_content.encode('utf-8')
 
-    with open(self._PATH, 'wb') as file_object:
+    with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
 if __name__ == '__main__':
-  project_file = os.path.abspath(__file__)
-  project_file = os.path.dirname(project_file)
-  project_file = os.path.dirname(project_file)
+  project_file = os.getcwd()
   project_file = os.path.basename(project_file)
   project_file = '{0:s}.ini'.format(project_file)
 
@@ -585,8 +586,14 @@ if __name__ == '__main__':
   helper = dependencies.DependencyHelper()
 
   for writer_class in (
-      AppveyorYmlWriter, DPKGControlWriter, GIFTCOPRInstallScriptWriter,
-      GIFTPPAInstallScriptWriter, RequirementsWriter, SetupCfgWriter,
+      AppveyorYmlWriter, DPKGControlWriter, RequirementsWriter, SetupCfgWriter,
       TravisBeforeInstallScriptWriter, ToxIniWriter):
+    writer = writer_class(project_definition, helper)
+    writer.Write()
+
+  for writer_class in (GIFTCOPRInstallScriptWriter, GIFTPPAInstallScriptWriter):
+    if not os.path.exists(writer_class.PATH):
+      continue
+
     writer = writer_class(project_definition, helper)
     writer.Write()
