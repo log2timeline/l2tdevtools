@@ -11,6 +11,7 @@ from l2tdevtools import project_config
 
 
 # TODO: merge with other projects
+# TODO: generate .travis.yml
 
 
 # pylint: disable=redefined-outer-name
@@ -455,15 +456,19 @@ class SetupCfgWriter(DependencyFileWriter):
 
   PATH = 'setup.cfg'
 
-  _FILE_HEADER = '\n'.join([
+  _SDIST = [
       '[sdist]',
       'template = MANIFEST.in',
       'manifest = MANIFEST',
-      '',
+      '']
+
+  _SDIST_TEST_DATA = [
       '[sdist_test_data]',
       'template = MANIFEST.test_data.in',
       'manifest = MANIFEST.test_data',
-      '',
+      '']
+
+  _BDIST_RPM = [
       '[bdist_rpm]',
       'release = 1',
       'packager = {maintainer:s}',
@@ -471,14 +476,17 @@ class SetupCfgWriter(DependencyFileWriter):
       '            AUTHORS',
       '            LICENSE',
       '            README',
-      'build_requires = python-setuptools'])
+      'build_requires = python-setuptools']
 
   def Write(self):
     """Writes a setup.cfg file."""
-    kwargs = {'maintainer': self._project_definition.maintainer}
-    file_header = self._FILE_HEADER.format(**kwargs)
+    file_content = []
+    file_content.extend(self._SDIST)
 
-    file_content = [file_header]
+    if os.path.isdir('test_data'):
+      file_content.extend(self._SDIST_TEST_DATA)
+
+    file_content.extend(self._BDIST_RPM)
 
     dependencies = self._dependency_helper.GetRPMRequires()
     for index, dependency in enumerate(dependencies):
@@ -489,7 +497,10 @@ class SetupCfgWriter(DependencyFileWriter):
 
     file_content.append('')
 
+    kwargs = {'maintainer': self._project_definition.maintainer}
+
     file_content = '\n'.join(file_content)
+    file_content = file_content.format(**kwargs)
     file_content = file_content.encode('utf-8')
 
     with open(self.PATH, 'wb') as file_object:
@@ -582,6 +593,18 @@ class ToxIniWriter(DependencyFileWriter):
       'envlist = py2, py3',
       '',
       '[testenv]',
+      'pip_pre = True',
+      'setenv =',
+      '    PYTHONPATH = {{toxinidir}}',
+      'deps =',
+      '    coverage',
+      '    mock',
+      '    pytest',
+      '    -rrequirements.txt',
+      'commands =',
+      '    ./run_tests.py',
+      '',
+      '[testenv:py27]',
       'pip_pre = True',
       'setenv =',
       '    PYTHONPATH = {{toxinidir}}',
