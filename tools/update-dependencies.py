@@ -153,7 +153,7 @@ class DPKGControlWriter(DependencyFileWriter):
 
   PATH = os.path.join('config', 'dpkg', 'control')
 
-  _FILE_CONTENT = '\n'.join([
+  _FILE_HEADER = [
       'Source: {project_name:s}',
       'Section: python',
       'Priority: extra',
@@ -163,33 +163,63 @@ class DPKGControlWriter(DependencyFileWriter):
       'Standards-Version: 3.9.5',
       'X-Python-Version: >= 2.7',
       'Homepage: {homepage_url:s}',
-      '',
+      '']
+
+  _DATA_PACKAGE = [
       'Package: {project_name:s}-data',
       'Architecture: all',
       'Depends: ${{misc:Depends}}',
-      'Description: Data files for plaso (log2timeline)',
+      'Description: Data files for {project_description:s}',
       '{description_long:s}',
-      '',
+      '']
+
+  _PYTHON2_PACKAGE = [
       'Package: python-{project_name:s}',
       'Architecture: all',
-      ('Depends: {project_name:s}-data, {python2_dependencies:s}'
+      ('Depends: {python2_dependencies:s}'
        '${{python:Depends}}, ${{misc:Depends}}'),
-      'Description: Python 2 module of plaso (log2timeline)',
+      'Description: Python 2 module of {project_description:s}',
       '{description_long:s}',
-      '',
+      '']
+
+  _PYTHON3_PACKAGE = [
+      'Package: python3-{project_name:s}',
+      'Architecture: all',
+      ('Depends: {python3_dependencies:s}'
+       '${{python:Depends}}, ${{misc:Depends}}'),
+      'Description: Python 3 module of {project_description:s}',
+      '{description_long:s}',
+      '']
+
+  _TOOLS_PACKAGE = [
       'Package: {project_name:s}-tools',
       'Architecture: all',
       ('Depends: python-{project_name:s}, python (>= 2.7~), '
        '${{python:Depends}}, ${{misc:Depends}}'),
-      'Description: Tools of plaso (log2timeline)',
-      ' Plaso (log2timeline) is a framework to create super timelines. Its',
-      ' purpose is to extract timestamps from various files found on typical',
-      ' computer systems and aggregate them.',
-      ''])
+      'Description: Tools of {project_description:s}',
+      '{description_long:s}',
+      '']
 
   def Write(self):
     """Writes a dpkg control file."""
     dependencies = self._dependency_helper.GetDPKGDepends()
+
+    file_content = []
+    file_content.extend(self._FILE_HEADER)
+
+    if os.path.isdir('data'):
+      dependencies.insert(
+          0, '{0:s}-data'.format(self._project_definition.name))
+
+      file_content.extend(self._DATA_PACKAGE)
+
+    file_content.extend(self._PYTHON2_PACKAGE)
+
+    if not self._project_definition.python2_only:
+      file_content.extend(self._PYTHON3_PACKAGE)
+
+    if os.path.isdir('scripts') or os.path.isdir('tools'):
+      file_content.extend(self._TOOLS_PACKAGE)
 
     description_long = self._project_definition.description_long
     description_long = '\n'.join([
@@ -209,10 +239,13 @@ class DPKGControlWriter(DependencyFileWriter):
         'description_short': self._project_definition.description_short,
         'homepage_url': self._project_definition.homepage_url,
         'maintainer': self._project_definition.maintainer,
+        'project_description': self._project_definition.name,
         'project_name': self._project_definition.name,
         'python2_dependencies': python2_dependencies,
         'python3_dependencies': python3_dependencies}
-    file_content = self._FILE_CONTENT.format(**kwargs)
+
+    file_content = '\n'.join(file_content)
+    file_content = file_content.format(**kwargs)
 
     file_content = file_content.encode('utf-8')
 

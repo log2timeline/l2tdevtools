@@ -18,6 +18,7 @@ class ProjectDefinition(object):
     homepage_url (str): URL of the homepage.
     maintainer (str): maintainer.
     name (str): name of the project.
+    python2_only (bool): True if the project is only supported by Python 2.
   """
 
   def __init__(self):
@@ -28,6 +29,7 @@ class ProjectDefinition(object):
     self.homepage_url = None
     self.maintainer = None
     self.name = None
+    self.python2_only = False
 
 
 class ProjectDefinitionReader(object):
@@ -38,7 +40,8 @@ class ProjectDefinitionReader(object):
       u'description_short',
       u'homepage_url',
       u'maintainer',
-      u'name'])
+      u'name',
+      u'python2_only'])
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.
