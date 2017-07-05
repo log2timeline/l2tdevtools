@@ -460,9 +460,7 @@ class SetupCfgWriter(DependencyFileWriter):
       '[sdist]',
       'template = MANIFEST.in',
       'manifest = MANIFEST',
-      '']
-
-  _SDIST_TEST_DATA = [
+      ''
       '[sdist_test_data]',
       'template = MANIFEST.test_data.in',
       'manifest = MANIFEST.test_data',
@@ -481,10 +479,9 @@ class SetupCfgWriter(DependencyFileWriter):
   def Write(self):
     """Writes a setup.cfg file."""
     file_content = []
-    file_content.extend(self._SDIST)
 
     if os.path.isdir('test_data'):
-      file_content.extend(self._SDIST_TEST_DATA)
+      file_content.extend(self._SDIST)
 
     file_content.extend(self._BDIST_RPM)
 
