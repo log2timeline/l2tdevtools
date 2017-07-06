@@ -47,7 +47,7 @@ class DPKGBuildFilesGenerator(object):
       u' {description_long:s}',
       u''])
 
-  _CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY = u'\n'.join([
+  _CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY = [
       u'Source: {source_package_name:s}',
       u'Section: python',
       u'Priority: extra',
@@ -62,9 +62,9 @@ class DPKGBuildFilesGenerator(object):
       u'Depends: {python_depends:s}',
       u'Description: {description_short:s}',
       u' {description_long:s}',
-      u''])
+      u'']
 
-  _CONTROL_TEMPLATE_SETUP_PY = u'\n'.join([
+  _CONTROL_TEMPLATE_SETUP_PY = [
       u'Source: {source_package_name:s}',
       u'Section: python',
       u'Priority: extra',
@@ -78,15 +78,24 @@ class DPKGBuildFilesGenerator(object):
       u'Package: {python_package_name:s}',
       u'Architecture: {architecture:s}',
       u'Depends: {python_depends:s}',
-      u'Description: {description_short:s}',
+      u'Description: Python 2 module of {description_name:s}',
       u' {description_long:s}',
       u'',
       u'Package: {python3_package_name:s}',
       u'Architecture: {architecture:s}',
       u'Depends: {python3_depends:s}',
-      u'Description: {description_short:s}',
+      u'Description: Python 3 module of {description_name:s}',
       u' {description_long:s}',
-      u''])
+      u'']
+
+  _CONTROL_TEMPLATE_SETUP_PY_TOOLS = [
+      u'Package: {project_name:s}-tools',
+      u'Architecture: all',
+      (u'Depends: python-{project_name:s}, python (>= 2.7~), '
+       u'${{python:Depends}}, ${{misc:Depends}}'),
+      u'Description: Tools of {description_name:s}',
+      u' {description_long:s}',
+      u'']
 
   _COPYRIGHT_TEMPLATE = u'\n'.join([
       u''])
@@ -522,14 +531,21 @@ class DPKGBuildFilesGenerator(object):
         u'upstream_homepage': self._project_definition.homepage_url,
         u'upstream_maintainer': self._project_definition.maintainer}
 
+    control_template = []
     if self._project_definition.build_system == u'configure_make':
-      control_template = self._CONTROL_TEMPLATE_CONFIGURE_MAKE
+      control_template.append(self._CONTROL_TEMPLATE_CONFIGURE_MAKE)
 
     elif self._project_definition.build_system == u'setup_py':
       if python2_only:
-        control_template = self._CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY
+        control_template.append(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY)
       else:
-        control_template = self._CONTROL_TEMPLATE_SETUP_PY
+        control_template.append(self._CONTROL_TEMPLATE_SETUP_PY)
+
+    print("CP1", os.getcwd())
+    if os.path.isdir(u'tools'):
+      control_template.append(_CONTROL_TEMPLATE_SETUP_PY_TOOLS)
+
+    control_template = u'\n'.join(control_template)
 
     if self._project_definition.dpkg_template_control:
       template_file_path = os.path.join(
