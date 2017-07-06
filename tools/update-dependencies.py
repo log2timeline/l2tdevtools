@@ -10,7 +10,6 @@ from l2tdevtools import dependencies
 from l2tdevtools import project_config
 
 
-# TODO: merge with other projects
 # TODO: generate .travis.yml
 
 
