@@ -1297,7 +1297,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     filenames = glob.glob(filenames_glob)
 
     if len(filenames) != 1:
-      logging.error(u'Unable to find MSI file.')
+      logging.error(u'Unable to find MSI file: {0:s}.'.format(filenames_glob))
       return False
 
     _, _, msi_filename = filenames[0].rpartition(os.path.sep)
@@ -1595,7 +1595,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     filenames = glob.glob(filenames_glob)
 
     if len(filenames) != 1:
-      logging.error(u'Unable to find MSI file.')
+      logging.error(u'Unable to find MSI file: {0:s}.'.format(filenames_glob))
       return False
 
     _, _, msi_filename = filenames[0].rpartition(os.path.sep)
