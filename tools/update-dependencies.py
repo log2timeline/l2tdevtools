@@ -688,6 +688,7 @@ if __name__ == '__main__':
 
       file_data.append(line)
 
+  file_data.pop()
   file_data = ''.join(file_data)
 
   path = os.path.join('utils', 'dependencies.py')
