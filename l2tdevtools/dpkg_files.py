@@ -31,7 +31,7 @@ class DPKGBuildFilesGenerator(object):
       u'7',
       u''])
 
-  _CONTROL_TEMPLATE_CONFIGURE_MAKE = u'\n'.join([
+  _CONTROL_TEMPLATE_CONFIGURE_MAKE = [
       u'Source: {source_package_name:s}',
       u'Section: libs',
       u'Priority: extra',
@@ -45,7 +45,7 @@ class DPKGBuildFilesGenerator(object):
       u'Depends: {depends:s}',
       u'Description: {description_short:s}',
       u' {description_long:s}',
-      u''])
+      u'']
 
   _CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY = [
       u'Source: {source_package_name:s}',
@@ -89,9 +89,9 @@ class DPKGBuildFilesGenerator(object):
       u'']
 
   _CONTROL_TEMPLATE_SETUP_PY_TOOLS = [
-      u'Package: {project_name:s}-tools',
+      u'Package: {source_package_name:s}-tools',
       u'Architecture: all',
-      (u'Depends: python-{project_name:s}, python (>= 2.7~), '
+      (u'Depends: {python_package_name:s}, python (>= 2.7~), '
        u'${{python:Depends}}, ${{misc:Depends}}'),
       u'Description: Tools of {description_name:s}',
       u' {description_long:s}',
@@ -521,6 +521,7 @@ class DPKGBuildFilesGenerator(object):
         u'build_depends': build_depends,
         u'depends': depends,
         u'description_long': description_long,
+        u'description_name': self._project_name,
         u'description_short': description_short,
         u'package_name': package_name,
         u'python_depends': python_depends,
@@ -533,17 +534,16 @@ class DPKGBuildFilesGenerator(object):
 
     control_template = []
     if self._project_definition.build_system == u'configure_make':
-      control_template.append(self._CONTROL_TEMPLATE_CONFIGURE_MAKE)
+      control_template.extend(self._CONTROL_TEMPLATE_CONFIGURE_MAKE)
 
     elif self._project_definition.build_system == u'setup_py':
       if python2_only:
-        control_template.append(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY)
+        control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY)
       else:
-        control_template.append(self._CONTROL_TEMPLATE_SETUP_PY)
+        control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY)
 
-    print("CP1", os.getcwd())
-    if os.path.isdir(u'tools'):
-      control_template.append(_CONTROL_TEMPLATE_SETUP_PY_TOOLS)
+      if os.path.isdir(u'scripts') or os.path.isdir(u'tools'):
+        control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_TOOLS)
 
     control_template = u'\n'.join(control_template)
 
