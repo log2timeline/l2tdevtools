@@ -133,6 +133,9 @@ class AppveyorYmlWriter(DependencyFileWriter):
     dependencies = self._dependency_helper.GetL2TBinaries()
     dependencies.extend(['funcsigs', 'mock', 'pbr'])
 
+    if 'six' not in dependencies:
+      dependencies.append('six')
+
     if 'pysqlite' in dependencies:
       file_content.extend(self._SQLITE)
 
@@ -154,7 +157,7 @@ class DPKGControlWriter(DependencyFileWriter):
 
   PATH = os.path.join('config', 'dpkg', 'control')
 
-  _FILE_HEADER = [
+  _PYTHON2_FILE_HEADER = [
       'Source: {project_name:s}',
       'Section: python',
       'Priority: extra',
@@ -163,6 +166,19 @@ class DPKGControlWriter(DependencyFileWriter):
        'python-setuptools'),
       'Standards-Version: 3.9.5',
       'X-Python-Version: >= 2.7',
+      'Homepage: {homepage_url:s}',
+      '']
+
+  _PYTHON3_FILE_HEADER = [
+      'Source: {project_name:s}',
+      'Section: python',
+      'Priority: extra',
+      'Maintainer: {maintainer:s}',
+      ('Build-Depends: debhelper (>= 7), python-all (>= 2.7~), '
+       'python-setuptools, python3-all (>= 3.4~), python3-setuptools'),
+      'Standards-Version: 3.9.5',
+      'X-Python-Version: >= 2.7',
+      'X-Python3-Version: >= 3.4',
       'Homepage: {homepage_url:s}',
       '']
 
@@ -179,7 +195,7 @@ class DPKGControlWriter(DependencyFileWriter):
       'Architecture: all',
       ('Depends: {python2_dependencies:s}'
        '${{python:Depends}}, ${{misc:Depends}}'),
-      'Description: Python 2 module of {project_description:s}',
+      'Description: Python 2 module of {name_description:s}',
       '{description_long:s}',
       '']
 
@@ -187,8 +203,8 @@ class DPKGControlWriter(DependencyFileWriter):
       'Package: python3-{project_name:s}',
       'Architecture: all',
       ('Depends: {python3_dependencies:s}'
-       '${{python:Depends}}, ${{misc:Depends}}'),
-      'Description: Python 3 module of {project_description:s}',
+       '${{python3:Depends}}, ${{misc:Depends}}'),
+      'Description: Python 3 module of {name_description:s}',
       '{description_long:s}',
       '']
 
@@ -197,7 +213,7 @@ class DPKGControlWriter(DependencyFileWriter):
       'Architecture: all',
       ('Depends: python-{project_name:s}, python (>= 2.7~), '
        '${{python:Depends}}, ${{misc:Depends}}'),
-      'Description: Tools of {project_description:s}',
+      'Description: Tools of {name_description:s}',
       '{description_long:s}',
       '']
 
@@ -206,7 +222,11 @@ class DPKGControlWriter(DependencyFileWriter):
     dependencies = self._dependency_helper.GetDPKGDepends()
 
     file_content = []
-    file_content.extend(self._FILE_HEADER)
+
+    if self._project_definition.python2_only:
+      file_content.extend(self._PYTHON2_FILE_HEADER)
+    else:
+      file_content.extend(self._PYTHON3_FILE_HEADER)
 
     if os.path.isdir('data'):
       dependencies.insert(
@@ -240,7 +260,7 @@ class DPKGControlWriter(DependencyFileWriter):
         'description_short': self._project_definition.description_short,
         'homepage_url': self._project_definition.homepage_url,
         'maintainer': self._project_definition.maintainer,
-        'project_description': self._project_definition.name,
+        'name_description': self._project_definition.name_description,
         'project_name': self._project_definition.name,
         'python2_dependencies': python2_dependencies,
         'python3_dependencies': python3_dependencies}
@@ -559,8 +579,13 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
         dependencies))
 
     file_content.append('')
-    file_content.append(
-        'L2TBINARIES_TEST_DEPENDENCIES="funcsigs mock pbr";')
+
+    if 'six' in dependencies:
+      file_content.append(
+          'L2TBINARIES_TEST_DEPENDENCIES="funcsigs mock pbr";')
+    else:
+      file_content.append(
+          'L2TBINARIES_TEST_DEPENDENCIES="funcsigs mock pbr six";')
 
     file_content.append('')
 
@@ -650,3 +675,22 @@ if __name__ == '__main__':
 
     writer = writer_class(project_definition, helper)
     writer.Write()
+
+  l2tdevtools_path = os.path.abspath(__file__)
+  l2tdevtools_path = os.path.dirname(l2tdevtools_path)
+  l2tdevtools_path = os.path.dirname(l2tdevtools_path)
+
+  path = os.path.join(l2tdevtools_path, 'l2tdevtools', 'dependencies.py')
+  file_data = []
+  with open(path, 'rb') as file_object:
+    for line in file_object.readlines():
+      if 'GetDPKGDepends' in line:
+        break
+
+      file_data.append(line)
+
+  file_data = ''.join(file_data)
+
+  path = os.path.join('utils', 'dependencies.py')
+  with open(path, 'wb') as file_object:
+    file_object.write(file_data)
