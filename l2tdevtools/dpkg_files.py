@@ -274,7 +274,7 @@ class DPKGBuildFilesGenerator(object):
       u'\tdh_auto_install --destdir $(CURDIR)/debian/{python_package_name:s}',
       u'\tset -ex; for python in $(shell py3versions -r); do \\',
       (u'\t\t$$python setup.py install '
-       u'--root=$(CURDIR)/debian/python3-{package_name:s} '
+       u'--root=$(CURDIR)/debian/{python3_package_name:s} '
        u'--install-layout=deb; \\'),
       u'\tdone;',
       u'',
@@ -693,6 +693,11 @@ class DPKGBuildFilesGenerator(object):
     if package_name.startswith(u'python-'):
       package_name = package_name[7:]
 
+    if not self._project_definition.dpkg_name:
+      python_package_name = u'python-{0:s}'.format(package_name)
+
+    python3_package_name = u'python3-{0:s}'.format(package_name)
+
     if self._project_definition.patches:
       with_quilt = u'--with quilt'
     else:
@@ -702,6 +707,7 @@ class DPKGBuildFilesGenerator(object):
         u'package_name': package_name,
         u'project_name': self._project_name,
         u'python_package_name': python_package_name,
+        u'python3_package_name': python3_package_name,
         u'with_quilt': with_quilt}
 
     if self._IsPython2Only():
