@@ -930,14 +930,21 @@ class MSIBuildHelper(BuildHelper):
       bool: True if applying the patches was successful.
     """
     # Search common locations for patch.exe
-    patch = u'{0:s}:{1:s}{2:s}'.format(
-        u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe'))
+    patch_exe_path = None
+    for patch_exe_path in [
+        u'{0:s}:{1:s}{2:s}'.format(
+            u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe')),
+        u'{0:s}:{1:s}{2:s}'.format(
+            u'C', os.sep, os.path.join(u'GnuWin32', u'bin', u'patch.exe'))
+        u'{0:s}:{1:s}{2:s}'.format(
+            u'C', os.sep, os.path.join(u'Program Files (x86)', u'GnuWin', u'bin', u'patch.exe')),
+        u'{0:s}:{1:s}{2:s}'.format(
+            u'C', os.sep, os.path.join(u'Program Files (x86)', u'GnuWin32', u'bin', u'patch.exe'))
+    ]:
+      if os.path.exists(patch_exe_path):
+        continue
 
-    if not os.path.exists(patch):
-      patch = u'{0:s}:{1:s}{2:s}'.format(
-          u'C', os.sep, os.path.join(u'GnuWin32', u'bin', u'patch.exe'))
-
-    if not os.path.exists(patch):
+    if not patch_exe_path:
       logging.error(u'Unable to find patch.exe')
       return False
 
@@ -948,7 +955,7 @@ class MSIBuildHelper(BuildHelper):
         continue
 
       command = u'\"{0:s}\" --force --binary --input {1:s}'.format(
-          patch, filename)
+          patch_exe_path, filename)
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error(u'Running: "{0:s}" failed.'.format(command))
