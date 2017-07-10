@@ -301,8 +301,7 @@ class DPKGBuildFilesGenerator(object):
 
     template_data = template_data.encode('utf-8')
 
-    filename = os.path.join(dpkg_path, output_filename)
-    with open(filename, 'wb') as file_object:
+    with open(output_filename, 'wb') as file_object:
       file_object.write(template_data)
 
   def _GenerateChangelogFile(self, dpkg_path):
@@ -334,8 +333,9 @@ class DPKGBuildFilesGenerator(object):
         'project_version': self._project_version,
         'source_package_name': source_package_name}
 
+    output_filename = os.path.join(dpkg_path, 'changelog')
     self._GenerateFile(
-        None, self._CHANGELOG_TEMPLATE, template_values, 'changelog')
+        None, self._CHANGELOG_TEMPLATE, template_values, output_filename)
 
   def _GenerateCleanFile(self, dpkg_path):
     """Generates the dpkg build clean file.
@@ -351,8 +351,9 @@ class DPKGBuildFilesGenerator(object):
       template_values = {
           'setup_name': setup_name}
 
+      output_filename = os.path.join(dpkg_path, 'clean')
       self._GenerateFile(
-          None, self._CLEAN_TEMPLATE_PYTHON, template_values, 'clean')
+          None, self._CLEAN_TEMPLATE_PYTHON, template_values, output_filename)
 
   def _GenerateCompatFile(self, dpkg_path):
     """Generates the dpkg build compat file.
@@ -360,7 +361,8 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
-    self._GenerateFile(None, self._COMPAT_TEMPLATE, None, 'compat')
+    output_filename = os.path.join(dpkg_path, 'compat')
+    self._GenerateFile(None, self._COMPAT_TEMPLATE, None, output_filename)
 
   def _GenerateControlFile(self, dpkg_path):
     """Generates the dpkg build control file.
@@ -483,9 +485,10 @@ class DPKGBuildFilesGenerator(object):
 
     control_template = '\n'.join(control_template)
 
+    output_filename = os.path.join(dpkg_path, 'control')
     self._GenerateFile(
         self._project_definition.dpkg_template_control, control_template,
-        template_values, 'control')
+        template_values, output_filename)
 
   def _GenerateCopyrightFile(self, dpkg_path):
     """Generates the dpkg build copyright file.
@@ -528,19 +531,24 @@ class DPKGBuildFilesGenerator(object):
           'setup_name': setup_name}
 
       install_file = '{0:s}.install'.format(python_package_name)
+      output_filename = os.path.join(dpkg_path, install_file)
       self._GenerateFile(
-          None, self._INSTALL_TEMPLATE_PYTHON2, template_values, install_file)
+          None, self._INSTALL_TEMPLATE_PYTHON2, template_values,
+          output_filename)
 
       if not self._IsPython2Only():
         install_file = '{0:s}.install'.format(python3_package_name)
+        output_filename = os.path.join(dpkg_path, install_file)
         self._GenerateFile(
-            None, self._INSTALL_TEMPLATE_PYTHON3, template_values, install_file)
+            None, self._INSTALL_TEMPLATE_PYTHON3, template_values,
+            output_filename)
 
       if os.path.isdir('scripts') or os.path.isdir('tools'):
         install_file = '{0:s}-tools.install'.format(package_name)
+        output_filename = os.path.join(dpkg_path, install_file)
         self._GenerateFile(
             None, self._INSTALL_TEMPLATE_PYTHON_TOOLS, template_values,
-            install_file)
+            output_filename)
 
       # TODO: add support for data install files.
 
@@ -601,9 +609,10 @@ class DPKGBuildFilesGenerator(object):
         'package_name': package_name,
         'with_quilt': with_quilt}
 
+    output_filename = os.path.join(dpkg_path, 'rules')
     self._GenerateFile(
         self._project_definition.dpkg_template_rules,
-        self._RULES_TEMPLATE_CONFIGURE_MAKE, template_values, 'rules')
+        self._RULES_TEMPLATE_CONFIGURE_MAKE, template_values, output_filename)
 
   def _GenerateSetupPyRulesFile(self, dpkg_path):
     """Generates the dpkg build rules file.
@@ -631,8 +640,8 @@ class DPKGBuildFilesGenerator(object):
 
     # TODO: replace manual write of rules file by call to _GenerateFile.
 
-    filename = os.path.join(dpkg_path, 'rules')
-    with open(filename, 'wb') as file_object:
+    output_filename = os.path.join(dpkg_path, 'rules')
+    with open(output_filename, 'wb') as file_object:
       data = rules_template.format(**template_values)
       file_object.write(data.encode('utf-8'))
 
@@ -646,9 +655,10 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
-    filename = os.path.join('source', 'format')
+    output_filename = os.path.join(dpkg_path, 'source', 'format')
 
-    self._GenerateFile(None, self._SOURCE_FORMAT_TEMPLATE, None, filename)
+    self._GenerateFile(
+        None, self._SOURCE_FORMAT_TEMPLATE, None, output_filename)
 
   def _GetArchitecture(self):
     """Retrieves the architecture.
