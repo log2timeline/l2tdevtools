@@ -1330,25 +1330,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     # TODO: implement.
     return False
 
-  def _SetupBuildDependencySqlite(self):
-    """Sets up the sqlite build dependency.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    # TODO: download and build sqlite3 from source
-    # http://www.sqlite.org/download.html
-    # copy sqlite3.h to <source>/src/ directory?
-    # copy .lib and .dll to <source>/ directory?
-    # bundle .dll
-
-    # <a id='a3' href='hp1.html'>sqlite-amalgamation-3081002.zip
-    # d391('a3','2015/sqlite-amalgamation-3081002.zip');
-    # http://www.sqlite.org/2015/sqlite-amalgamation-3081002.zip
-
-    # Create msvscpp files and build dll
-    return False
-
   def _SetupBuildDependencyZeroMQ(self):
     """Sets up the zeromq build dependency.
 
@@ -1397,9 +1378,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     for package_name in self._project_definition.build_dependencies:
       if package_name == u'fuse':
         self._SetupBuildDependencyDokan()
-
-      elif package_name == u'sqlite':
-        self._SetupBuildDependencySqlite()
 
       elif package_name == u'zeromq':
         self._SetupBuildDependencyZeroMQ()
