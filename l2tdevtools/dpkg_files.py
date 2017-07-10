@@ -16,17 +16,17 @@ class DPKGBuildFilesGenerator(object):
   _EMAIL_ADDRESS = (
       'log2timeline development team <log2timeline-dev@googlegroups.com>')
 
-  _DOCS_FILENAMES = [
-      'CHANGES', 'CHANGES.txt', 'CHANGES.TXT',
-      'LICENSE', 'LICENSE.txt', 'LICENSE.TXT',
-      'README', 'README.txt', 'README.TXT']
-
   _CHANGELOG_TEMPLATE = '\n'.join([
       '{source_package_name:s} ({project_version!s}-1) unstable; urgency=low',
       '',
       '  * Auto-generated',
       '',
       ' -- {maintainer_email_address:s}  {date_time:s}',
+      ''])
+
+  _CLEAN_TEMPLATE_PYTHON = '\n'.join([
+      '{setup_name:s}/*.pyc',
+      '*.pyc',
       ''])
 
   _COMPAT_TEMPLATE = '\n'.join([
@@ -131,7 +131,7 @@ class DPKGBuildFilesGenerator(object):
       'export DH_OPTIONS',
       '',
       '%:',
-      '\tdh  $@ {build_system:s} {with_quilt:s}',
+      '\tdh  $@ {build_system:s}{with_quilt:s}',
       '',
       '.PHONY: override_dh_auto_configure',
       'override_dh_auto_configure:',
@@ -204,92 +204,39 @@ class DPKGBuildFilesGenerator(object):
   # a Makefile or equivalent.
   _RULES_TEMPLATE_SETUP_PY_PYTHON2_ONLY = '\n'.join([
       '#!/usr/bin/make -f',
-      '# debian/rules that uses debhelper >= 7.',
-      '',
-      '# Uncomment this to turn on verbose mode.',
-      '#export DH_VERBOSE=1',
-      '',
-      '# This has to be exported to make some magic below work.',
-      'export DH_OPTIONS',
-      '',
       '',
       '%:',
-      ('\tdh  $@ --buildsystem=python_distutils --with=python2 '
-       '{with_quilt:s}'),
+      '\tdh $@ --buildsystem=python_distutils --with=python2{with_quilt:s}',
       '',
       '.PHONY: override_dh_auto_clean',
       'override_dh_auto_clean:',
       '\tdh_auto_clean',
-      ('\trm -rf build {project_name:s}.egg-info/SOURCES.txt '
-       '{project_name:s}.egg-info/PKG-INFO'),
+      ('\trm -rf build {setup_name:s}.egg-info/SOURCES.txt '
+       '{setup_name:s}.egg-info/PKG-INFO'),
       '',
       '.PHONY: override_dh_auto_install',
       'override_dh_auto_install:',
-      '\tdh_auto_install --destdir $(CURDIR)/debian/{python_package_name:s}',
-      '',
-      '.PHONY: override_dh_auto_test',
-      'override_dh_auto_test:',
-      '',
-      '.PHONY: override_dh_installmenu',
-      'override_dh_installmenu:',
-      '',
-      '.PHONY: override_dh_installmime',
-      'override_dh_installmime:',
-      '',
-      '.PHONY: override_dh_installmodules',
-      'override_dh_installmodules:',
-      '',
-      '.PHONY: override_dh_installlogcheck',
-      'override_dh_installlogcheck:',
-      '',
-      '.PHONY: override_dh_installlogrotate',
-      'override_dh_installlogrotate:',
-      '',
-      '.PHONY: override_dh_installpam',
-      'override_dh_installpam:',
-      '',
-      '.PHONY: override_dh_installppp',
-      'override_dh_installppp:',
-      '',
-      '.PHONY: override_dh_installudev',
-      'override_dh_installudev:',
-      '',
-      '.PHONY: override_dh_installwm',
-      'override_dh_installwm:',
-      '',
-      '.PHONY: override_dh_installxfonts',
-      'override_dh_installxfonts:',
-      '',
-      '.PHONY: override_dh_gconf',
-      'override_dh_gconf:',
-      '',
-      '.PHONY: override_dh_icons',
-      'override_dh_icons:',
-      '',
-      '.PHONY: override_dh_perl',
-      'override_dh_perl:',
+      '\tdh_auto_install --destdir $(CURDIR)',
+      ''])
+
+  _RULES_SETUP_PY_PYTHON2_OVERRIDE = '\n'.join([
+      '.PHONY: override_dh_python2',
+      'override_dh_python2:',
+      '\tdh_python2 -V 2.7 setup.py',
       ''])
 
   _RULES_TEMPLATE_SETUP_PY = '\n'.join([
       '#!/usr/bin/make -f',
-      '# debian/rules that uses debhelper >= 7.',
-      '',
-      '# Uncomment this to turn on verbose mode.',
-      '#export DH_VERBOSE=1',
-      '',
-      '# This has to be exported to make some magic below work.',
-      'export DH_OPTIONS',
-      '',
       '',
       '%:',
-      ('\tdh  $@ --buildsystem=python_distutils --with=python2,python3 '
+      ('\tdh $@ --buildsystem=python_distutils --with=python2,python3'
        '{with_quilt:s}'),
       '',
       '.PHONY: override_dh_auto_clean',
       'override_dh_auto_clean:',
       '\tdh_auto_clean',
-      ('\trm -rf build {project_name:s}.egg-info/SOURCES.txt '
-       '{project_name:s}.egg-info/PKG-INFO'),
+      ('\trm -rf build {setup_name:s}.egg-info/SOURCES.txt '
+       '{setup_name:s}.egg-info/PKG-INFO'),
       '',
       '.PHONY: override_dh_auto_build',
       'override_dh_auto_build:',
@@ -300,64 +247,14 @@ class DPKGBuildFilesGenerator(object):
       '',
       '.PHONY: override_dh_auto_install',
       'override_dh_auto_install:',
-      '\tdh_auto_install --destdir $(CURDIR)/debian/{python_package_name:s}',
+      '\tdh_auto_install --destdir $(CURDIR)',
       '\tset -ex; for python in $(shell py3versions -r); do \\',
-      ('\t\t$$python setup.py install '
-       '--root=$(CURDIR)/debian/{python3_package_name:s} '
-       '--install-layout=deb; \\'),
+      '\t\t$$python setup.py install --root=$(CURDIR) --install-layout=deb; \\',
       '\tdone;',
-      '',
-      '.PHONY: override_dh_auto_test',
-      'override_dh_auto_test:',
-      '',
-      '.PHONY: override_dh_installmenu',
-      'override_dh_installmenu:',
-      '',
-      '.PHONY: override_dh_installmime',
-      'override_dh_installmime:',
-      '',
-      '.PHONY: override_dh_installmodules',
-      'override_dh_installmodules:',
-      '',
-      '.PHONY: override_dh_installlogcheck',
-      'override_dh_installlogcheck:',
-      '',
-      '.PHONY: override_dh_installlogrotate',
-      'override_dh_installlogrotate:',
-      '',
-      '.PHONY: override_dh_installpam',
-      'override_dh_installpam:',
-      '',
-      '.PHONY: override_dh_installppp',
-      'override_dh_installppp:',
-      '',
-      '.PHONY: override_dh_installudev',
-      'override_dh_installudev:',
-      '',
-      '.PHONY: override_dh_installwm',
-      'override_dh_installwm:',
-      '',
-      '.PHONY: override_dh_installxfonts',
-      'override_dh_installxfonts:',
-      '',
-      '.PHONY: override_dh_gconf',
-      'override_dh_gconf:',
-      '',
-      '.PHONY: override_dh_icons',
-      'override_dh_icons:',
-      '',
-      '.PHONY: override_dh_perl',
-      'override_dh_perl:',
-      ''])
-
-  _RULES_SETUP_PY_PYTHON2_OVERRIDE = '\n'.join([
-      '.PHONY: override_dh_python2',
-      'override_dh_python2:',
-      '\tdh_python2 -V 2.7 setup.py',
       ''])
 
   _SOURCE_FORMAT_TEMPLATE = '\n'.join([
-      '1.0',
+      '3.0 (quilt)',
       ''])
 
   def __init__(
@@ -439,6 +336,23 @@ class DPKGBuildFilesGenerator(object):
 
     self._GenerateFile(
         None, self._CHANGELOG_TEMPLATE, template_values, 'changelog')
+
+  def _GenerateCleanFile(self, dpkg_path):
+    """Generates the dpkg build clean file.
+
+    Args:
+      dpkg_path (str): path to the dpkg files.
+    """
+    # TODO: add support for configure_make
+
+    if self._project_definition.build_system == 'setup_py':
+      setup_name = self._GetPythonSetupName()
+
+      template_values = {
+          'setup_name': setup_name}
+
+      self._GenerateFile(
+          None, self._CLEAN_TEMPLATE_PYTHON, template_values, 'clean')
 
   def _GenerateCompatFile(self, dpkg_path):
     """Generates the dpkg build compat file.
@@ -595,64 +509,40 @@ class DPKGBuildFilesGenerator(object):
       with open(filename, 'wb') as file_object:
         file_object.write('\n')
 
-  def _GenerateDocsFiles(self, dpkg_path):
-    """Generates the dpkg build .docs files.
-
-    Args:
-      dpkg_path (str): path to the dpkg files.
-    """
-    # Determine the available doc files.
-    doc_files = []
-    for filename in self._DOCS_FILENAMES:
-      if os.path.exists(filename):
-        doc_files.append(filename)
-
-    package_doc_files = []
-    if self._project_definition.build_system == 'configure_make':
-      package_name = self._GetPackageName()
-
-      doc_file = '{0:s}.docs'.format(package_name)
-      package_doc_files.append(doc_file)
-
-    elif self._project_definition.build_system == 'setup_py':
-      python_package_name, python3_package_name = self._GetPythonPackageNames()
-
-      doc_file = '{0:s}.docs'.format(python_package_name)
-      package_doc_files.append(doc_file)
-
-      if not self._IsPython2Only():
-        doc_file = '{0:s}.docs'.format(python3_package_name)
-        package_doc_files.append(doc_file)
-
-    for package_doc_file in package_doc_files:
-      path = os.path.join(dpkg_path, package_doc_file)
-      with open(path, 'wb') as file_object:
-        file_object.write('\n'.join(doc_files))
-
   def _GenerateInstallFiles(self, dpkg_path):
     """Generates the dpkg build .install files.
 
     Args:
       dpkg_path (str): path to the dpkg files.
     """
+    package_name = self._GetPackageName()
+
     # TODO: add support for configure_make
+
     if self._project_definition.build_system == 'setup_py':
-      self._GenerateSetupPyInstallFiles(dpkg_path)
+      python_package_name, python3_package_name = self._GetPythonPackageNames()
 
-  def _GenerateSetupPyInstallFiles(self, dpkg_path):
-    """Generates the dpkg build .install files.
+      setup_name = self._GetPythonSetupName()
 
-    Args:
-      dpkg_path (str): path to the dpkg files.
-    """
-    python_package_name, python3_package_name = self._GetPythonPackageNames()
+      template_values = {
+          'setup_name': setup_name}
 
-    install_file = '{0:s}.install'.format(python_package_name)
+      install_file = '{0:s}.install'.format(python_package_name)
+      self._GenerateFile(
+          None, self._INSTALL_TEMPLATE_PYTHON2, template_values, install_file)
 
-    if self._IsPython2Only():
-      return
+      if not self._IsPython2Only():
+        install_file = '{0:s}.install'.format(python3_package_name)
+        self._GenerateFile(
+            None, self._INSTALL_TEMPLATE_PYTHON3, template_values, install_file)
 
-    install_file = '{0:s}.install'.format(python3_package_name)
+      if os.path.isdir('scripts') or os.path.isdir('tools'):
+        install_file = '{0:s}-tools.install'.format(package_name)
+        self._GenerateFile(
+            None, self._INSTALL_TEMPLATE_PYTHON_TOOLS, template_values,
+            install_file)
+
+      # TODO: add support for data install files.
 
   def _GenerateRulesFile(self, dpkg_path):
     """Generates the dpkg build rules file.
@@ -681,7 +571,7 @@ class DPKGBuildFilesGenerator(object):
     build_system = '--buildsystem=autoconf'
 
     if self._project_definition.patches:
-      with_quilt = '--with quilt'
+      with_quilt = ' --with quilt'
     else:
       with_quilt = ''
 
@@ -722,18 +612,16 @@ class DPKGBuildFilesGenerator(object):
       dpkg_path (str): path to the dpkg files.
     """
     package_name = self._GetPackageName()
-    python_package_name, python3_package_name = self._GetPythonPackageNames()
+
+    setup_name = self._GetPythonSetupName()
 
     if self._project_definition.patches:
-      with_quilt = '--with quilt'
+      with_quilt = ' --with quilt'
     else:
       with_quilt = ''
 
     template_values = {
-        'package_name': package_name,
-        'project_name': self._project_name,
-        'python_package_name': python_package_name,
-        'python3_package_name': python3_package_name,
+        'setup_name': setup_name,
         'with_quilt': with_quilt}
 
     if self._IsPython2Only():
@@ -814,6 +702,17 @@ class DPKGBuildFilesGenerator(object):
 
     return python2_package_name, python3_package_name
 
+  def _GetPythonSetupName(self):
+    """Retrieves the Python setup.py name.
+
+    Returns:
+      str: setup.py name.
+    """
+    if self._project_definition.setup_name:
+      return self._project_definition.setup_name
+
+    return self._project_name
+
   def _GetSourcePackageName(self):
     """Retrieves the source package name.
 
@@ -845,10 +744,11 @@ class DPKGBuildFilesGenerator(object):
     """
     os.mkdir(dpkg_path)
     self._GenerateChangelogFile(dpkg_path)
+    self._GenerateCleanFile(dpkg_path)
     self._GenerateCompatFile(dpkg_path)
     self._GenerateControlFile(dpkg_path)
     self._GenerateCopyrightFile(dpkg_path)
-    self._GenerateDocsFiles(dpkg_path)
+    self._GenerateInstallFiles(dpkg_path)
     self._GenerateRulesFile(dpkg_path)
 
     os.mkdir(os.path.join(dpkg_path, 'source'))
