@@ -904,6 +904,19 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
 class MSIBuildHelper(BuildHelper):
   """Helper to build Microsoft Installer packages (.msi)."""
 
+  _COMMON_PATCH_EXE_PATHS = [
+        u'{0:s}:{1:s}{2:s}'.format(
+            u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe')),
+        u'{0:s}:{1:s}{2:s}'.format(
+            u'C', os.sep, os.path.join(u'GnuWin32', u'bin', u'patch.exe')),
+        u'{0:s}:{1:s}{2:s}'.format(
+            u'C', os.sep, os.path.join(
+                u'Program Files (x86)', u'GnuWin', u'bin', u'patch.exe')),
+        u'{0:s}:{1:s}{2:s}'.format(
+            u'C', os.sep, os.path.join(
+                u'Program Files (x86)', u'GnuWin32', u'bin', u'patch.exe'))
+    ]
+
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
 
@@ -931,18 +944,7 @@ class MSIBuildHelper(BuildHelper):
     """
     # Search common locations for patch.exe
     patch_exe_path = None
-    for patch_exe_path in [
-        u'{0:s}:{1:s}{2:s}'.format(
-            u'C', os.sep, os.path.join(u'GnuWin', u'bin', u'patch.exe')),
-        u'{0:s}:{1:s}{2:s}'.format(
-            u'C', os.sep, os.path.join(u'GnuWin32', u'bin', u'patch.exe')),
-        u'{0:s}:{1:s}{2:s}'.format(
-            u'C', os.sep, os.path.join(
-                u'Program Files (x86)', u'GnuWin', u'bin', u'patch.exe')),
-        u'{0:s}:{1:s}{2:s}'.format(
-            u'C', os.sep, os.path.join(
-                u'Program Files (x86)', u'GnuWin32', u'bin', u'patch.exe'))
-    ]:
+    for patch_exe_path in _COMMON_PATCH_EXE_PATHS:
       if os.path.exists(patch_exe_path):
         continue
 
