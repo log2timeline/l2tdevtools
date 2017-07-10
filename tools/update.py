@@ -69,6 +69,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
   _GITHUB_REPO_URL = (
       u'https://github.com/log2timeline/l2tbinaries')
 
+  _GITHUB_REPO_BRANCH = u'dev'
+
   def _GetMachineTypeSubDirectory(
       self, preferred_machine_type=None, preferred_operating_system=None):
     """Retrieves the machine type sub directory.
@@ -164,8 +166,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
           self._GITHUB_REPO_API_URL, sub_directory)
 
     else:
-      download_url = u'{0:s}/tree/master/{1:s}'.format(
-          self._GITHUB_REPO_URL, sub_directory)
+      download_url = u'{0:s}/tree/{1:s}/{2:s}'.format(
+          self._GITHUB_REPO_URL, self._GITHUB_REPO_BRANCH, sub_directory)
 
     return download_url
 
@@ -242,8 +244,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       for match_tuple in matches:
         _, _, filename = match_tuple[0].rpartition(u'/')
         download_url = (
-            u'https://github.com/log2timeline/l2tbinaries/raw/master/{0:s}/'
-            u'{1:s}').format(sub_directory, filename)
+            u'https://github.com/log2timeline/l2tbinaries/raw/{0:s}/{1:s}/'
+            u'{2:s}').format(self._GITHUB_REPO_BRANCH, sub_directory, filename)
         download_urls.append(download_url)
 
     return download_urls
