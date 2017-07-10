@@ -107,14 +107,12 @@ class DPKGBuildFilesGenerator(object):
       ''])
 
   _INSTALL_TEMPLATE_PYTHON2 = '\n'.join([
-      'usr/lib/python2*/dist-packages/{setup_name:s}/*.py',
-      'usr/lib/python2*/dist-packages/{setup_name:s}/*/*.py',
+      'usr/lib/python2*/dist-packages/{setup_name:s}/',
       'usr/lib/python2*/dist-packages/{setup_name:s}*.egg-info/*',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON3 = '\n'.join([
-      'usr/lib/python3*/dist-packages/{setup_name:s}/*.py',
-      'usr/lib/python3*/dist-packages/{setup_name:s}/*/*.py',
+      'usr/lib/python3*/dist-packages/{setup_name:s}/',
       'usr/lib/python3*/dist-packages/{setup_name:s}*.egg-info/*',
       ''])
 
@@ -531,8 +529,6 @@ class DPKGBuildFilesGenerator(object):
 
       template_values = {
           'setup_name': setup_name}
-
-      # TODO: check levels of directories in python module.
 
       install_file = '{0:s}.install'.format(python_package_name)
       output_filename = os.path.join(dpkg_path, install_file)
