@@ -944,7 +944,7 @@ class MSIBuildHelper(BuildHelper):
     """
     # Search common locations for patch.exe
     patch_exe_path = None
-    for patch_exe_path in _COMMON_PATCH_EXE_PATHS:
+    for patch_exe_path in self._COMMON_PATCH_EXE_PATHS:
       if os.path.exists(patch_exe_path):
         continue
 
