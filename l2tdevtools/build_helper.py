@@ -1596,6 +1596,19 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
 
     return True
 
+  def CheckBuildDependencies(self):
+    """Checks if the build dependencies are met.
+
+    Returns:
+      list[str]: build dependency names that are not met or an empty list.
+    """
+    missing_packages = []
+    for package_name in self._project_definition.build_dependencies:
+        # Ignore sqlite dependency for MSI builds
+        if package_name != u'sqlite':
+            missing_packages.append(package_name)
+    return missing_packages
+
   def CheckBuildRequired(self, source_helper_object):
     """Checks if a build is required.
 
