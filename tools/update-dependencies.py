@@ -185,7 +185,7 @@ class DPKGControlWriter(DependencyFileWriter):
       'Package: {project_name:s}-data',
       'Architecture: all',
       'Depends: ${{misc:Depends}}',
-      'Description: Data files for {project_description:s}',
+      'Description: Data files for {name_description:s}',
       '{description_long:s}',
       '']
 
