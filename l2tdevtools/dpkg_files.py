@@ -103,17 +103,17 @@ class DPKGBuildFilesGenerator(object):
       ''])
 
   _INSTALL_TEMPLATE_PYTHON_TOOLS = '\n'.join([
-      'data/* usr/share/{setup_name:s}',
+      'data/* usr/share/{package_name:s}',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON2 = '\n'.join([
-      'usr/lib/python2*/dist-packages/{setup_name:s}/',
-      'usr/lib/python2*/dist-packages/{setup_name:s}*.egg-info/*',
+      'usr/lib/python2*/dist-packages/{package_name:s}/',
+      'usr/lib/python2*/dist-packages/{package_name:s}*.egg-info/*',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON3 = '\n'.join([
-      'usr/lib/python3*/dist-packages/{setup_name:s}/',
-      'usr/lib/python3*/dist-packages/{setup_name:s}*.egg-info/*',
+      'usr/lib/python3*/dist-packages/{package_name:s}/',
+      'usr/lib/python3*/dist-packages/{package_name:s}*.egg-info/*',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON_TOOLS = '\n'.join([
@@ -527,21 +527,20 @@ class DPKGBuildFilesGenerator(object):
 
       setup_name = self._GetPythonSetupName()
 
-      template_values = {
-          'setup_name': setup_name}
+      template_values = {'package_name': package_name}
 
       install_file = '{0:s}.install'.format(python_package_name)
       output_filename = os.path.join(dpkg_path, install_file)
       self._GenerateFile(
-          None, self._INSTALL_TEMPLATE_PYTHON2, template_values,
-          output_filename)
+          self._project_definition.dpkg_template_install_python2,
+          self._INSTALL_TEMPLATE_PYTHON2, template_values, output_filename)
 
       if not self._IsPython2Only():
         install_file = '{0:s}.install'.format(python3_package_name)
         output_filename = os.path.join(dpkg_path, install_file)
         self._GenerateFile(
-            None, self._INSTALL_TEMPLATE_PYTHON3, template_values,
-            output_filename)
+          self._project_definition.dpkg_template_install_python3,
+            self._INSTALL_TEMPLATE_PYTHON3, template_values, output_filename)
 
       if os.path.isdir('scripts') or os.path.isdir('tools'):
         install_file = '{0:s}-tools.install'.format(package_name)
