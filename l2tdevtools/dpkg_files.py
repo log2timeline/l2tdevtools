@@ -525,8 +525,6 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'setup_py':
       python_package_name, python3_package_name = self._GetPythonPackageNames()
 
-      setup_name = self._GetPythonSetupName()
-
       template_values = {'package_name': package_name}
 
       install_file = '{0:s}.install'.format(python_package_name)
@@ -539,7 +537,7 @@ class DPKGBuildFilesGenerator(object):
         install_file = '{0:s}.install'.format(python3_package_name)
         output_filename = os.path.join(dpkg_path, install_file)
         self._GenerateFile(
-          self._project_definition.dpkg_template_install_python3,
+            self._project_definition.dpkg_template_install_python3,
             self._INSTALL_TEMPLATE_PYTHON3, template_values, output_filename)
 
       if os.path.isdir('scripts') or os.path.isdir('tools'):
