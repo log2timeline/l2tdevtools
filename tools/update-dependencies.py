@@ -663,12 +663,14 @@ if __name__ == '__main__':
   helper = dependencies.DependencyHelper()
 
   for writer_class in (
-      AppveyorYmlWriter, DPKGControlWriter, RequirementsWriter, SetupCfgWriter,
+      AppveyorYmlWriter, RequirementsWriter, SetupCfgWriter,
       TravisBeforeInstallScriptWriter, ToxIniWriter):
     writer = writer_class(project_definition, helper)
     writer.Write()
 
-  for writer_class in (GIFTCOPRInstallScriptWriter, GIFTPPAInstallScriptWriter):
+  for writer_class in (
+      DPKGControlWriter, GIFTCOPRInstallScriptWriter,
+      GIFTPPAInstallScriptWriter):
     if not os.path.exists(writer_class.PATH):
       continue
 
