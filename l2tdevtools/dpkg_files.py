@@ -253,7 +253,11 @@ class DPKGBuildFilesGenerator(object):
       '\tdone;',
       ''])
 
-  _SOURCE_FORMAT_TEMPLATE = '\n'.join([
+  _SOURCE_FORMAT_NATIVE_TEMPLATE = '\n'.join([
+      '3.0 (native)',
+      ''])
+
+  _SOURCE_FORMAT_QUILT_TEMPLATE = '\n'.join([
       '3.0 (quilt)',
       ''])
 
@@ -636,6 +640,14 @@ class DPKGBuildFilesGenerator(object):
       rules_template = self._RULES_TEMPLATE_SETUP_PY
 
     # TODO: replace manual write of rules file by call to _GenerateFile.
+    template_filename = self._project_definition.dpkg_template_rules
+    if template_filename:
+      template_file_path = os.path.join(
+          self._data_path, 'dpkg_templates', template_filename)
+      with open(template_file_path, 'rb') as file_object:
+        rules_template = file_object.read()
+
+      rules_template = rules_template.decode('utf-8')
 
     output_filename = os.path.join(dpkg_path, 'rules')
     with open(output_filename, 'wb') as file_object:
@@ -652,10 +664,15 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
+    package_name = self._GetPackageName()
+    if package_name == 'setuptools':
+      template_file = self._SOURCE_FORMAT_NATIVE_TEMPLATE
+    else:
+      template_file = self._SOURCE_FORMAT_QUILT_TEMPLATE
+
     output_filename = os.path.join(dpkg_path, 'source', 'format')
 
-    self._GenerateFile(
-        None, self._SOURCE_FORMAT_TEMPLATE, None, output_filename)
+    self._GenerateFile(None, template_file, None, output_filename)
 
   def _GetArchitecture(self):
     """Retrieves the architecture.
