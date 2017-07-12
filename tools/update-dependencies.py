@@ -185,7 +185,7 @@ class DPKGControlWriter(DependencyFileWriter):
       'Package: {project_name:s}-data',
       'Architecture: all',
       'Depends: ${{misc:Depends}}',
-      'Description: Data files for {project_description:s}',
+      'Description: Data files for {name_description:s}',
       '{description_long:s}',
       '']
 
@@ -479,7 +479,7 @@ class SetupCfgWriter(DependencyFileWriter):
       '[sdist]',
       'template = MANIFEST.in',
       'manifest = MANIFEST',
-      ''
+      '',
       '[sdist_test_data]',
       'template = MANIFEST.test_data.in',
       'manifest = MANIFEST.test_data',
@@ -663,12 +663,14 @@ if __name__ == '__main__':
   helper = dependencies.DependencyHelper()
 
   for writer_class in (
-      AppveyorYmlWriter, DPKGControlWriter, RequirementsWriter, SetupCfgWriter,
+      AppveyorYmlWriter, RequirementsWriter, SetupCfgWriter,
       TravisBeforeInstallScriptWriter, ToxIniWriter):
     writer = writer_class(project_definition, helper)
     writer.Write()
 
-  for writer_class in (GIFTCOPRInstallScriptWriter, GIFTPPAInstallScriptWriter):
+  for writer_class in (
+      DPKGControlWriter, GIFTCOPRInstallScriptWriter,
+      GIFTPPAInstallScriptWriter):
     if not os.path.exists(writer_class.PATH):
       continue
 
