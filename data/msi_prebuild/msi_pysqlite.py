@@ -14,7 +14,7 @@ from distutils.spawn import spawn
 if os.name != u'nt':
   sys.exit
 
-# This script does what's explaine over there:
+# This script does what's explained over there:
 # https://trac.edgewall.org/wiki/PySqlite#BuildingonWindows
 # To build pysqlite on windows.
 
