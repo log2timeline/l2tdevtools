@@ -946,7 +946,7 @@ class MSIBuildHelper(BuildHelper):
     patch_exe_path = None
     for patch_exe_path in self._COMMON_PATCH_EXE_PATHS:
       if os.path.exists(patch_exe_path):
-        continue
+        break
 
     if not patch_exe_path:
       logging.error(u'Unable to find patch.exe')
