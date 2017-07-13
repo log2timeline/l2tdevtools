@@ -665,7 +665,7 @@ class DPKGBuildFilesGenerator(object):
       dpkg_path (str): path to the dpkg files.
     """
     package_name = self._GetPackageName()
-    if package_name == 'setuptools':
+    if package_name in ('pbr', 'setuptools'):
       template_file = self._SOURCE_FORMAT_NATIVE_TEMPLATE
     else:
       template_file = self._SOURCE_FORMAT_QUILT_TEMPLATE
