@@ -31,6 +31,10 @@ class ProjectDefinition(object):
     dpkg_name (str): dpkg package name.
     dpkg_source_name (str): dpkg source package name.
     dpkg_template_control (str): name of the dpkg control template file.
+    dpkg_template_install_python2 (str): name of the dpkg Python 2 install
+        template file.
+    dpkg_template_install_python3 (str): name of the dpkg Python 3 install
+        template file.
     dpkg_template_rules (str): name of the dpkg rules template file.
     download_url (str): source package download URL.
     git_url (str): git repository URL.
@@ -68,6 +72,8 @@ class ProjectDefinition(object):
     self.dpkg_name = None
     self.dpkg_source_name = None
     self.dpkg_template_control = None
+    self.dpkg_template_install_python2 = None
+    self.dpkg_template_install_python3 = None
     self.dpkg_template_rules = None
     self.download_url = None
     self.git_url = None
@@ -220,6 +226,10 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, u'dpkg_source_name')
       project_definition.dpkg_template_control = self._GetConfigValue(
           config_parser, section_name, u'dpkg_template_control')
+      project_definition.dpkg_template_install_python2 = self._GetConfigValue(
+          config_parser, section_name, u'dpkg_template_install_python2')
+      project_definition.dpkg_template_install_python3 = self._GetConfigValue(
+          config_parser, section_name, u'dpkg_template_install_python3')
       project_definition.dpkg_template_rules = self._GetConfigValue(
           config_parser, section_name, u'dpkg_template_rules')
       project_definition.download_url = self._GetConfigValue(

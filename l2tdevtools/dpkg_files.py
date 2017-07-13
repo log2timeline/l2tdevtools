@@ -103,17 +103,17 @@ class DPKGBuildFilesGenerator(object):
       ''])
 
   _INSTALL_TEMPLATE_PYTHON_TOOLS = '\n'.join([
-      'data/* usr/share/{setup_name:s}',
+      'data/* usr/share/{package_name:s}',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON2 = '\n'.join([
-      'usr/lib/python2*/dist-packages/{setup_name:s}/',
-      'usr/lib/python2*/dist-packages/{setup_name:s}*.egg-info/*',
+      'usr/lib/python2*/dist-packages/{package_name:s}/',
+      'usr/lib/python2*/dist-packages/{package_name:s}*.egg-info/*',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON3 = '\n'.join([
-      'usr/lib/python3*/dist-packages/{setup_name:s}/',
-      'usr/lib/python3*/dist-packages/{setup_name:s}*.egg-info/*',
+      'usr/lib/python3*/dist-packages/{package_name:s}/',
+      'usr/lib/python3*/dist-packages/{package_name:s}*.egg-info/*',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON_TOOLS = '\n'.join([
@@ -253,7 +253,11 @@ class DPKGBuildFilesGenerator(object):
       '\tdone;',
       ''])
 
-  _SOURCE_FORMAT_TEMPLATE = '\n'.join([
+  _SOURCE_FORMAT_NATIVE_TEMPLATE = '\n'.join([
+      '3.0 (native)',
+      ''])
+
+  _SOURCE_FORMAT_QUILT_TEMPLATE = '\n'.join([
       '3.0 (quilt)',
       ''])
 
@@ -525,23 +529,20 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'setup_py':
       python_package_name, python3_package_name = self._GetPythonPackageNames()
 
-      setup_name = self._GetPythonSetupName()
-
-      template_values = {
-          'setup_name': setup_name}
+      template_values = {'package_name': package_name}
 
       install_file = '{0:s}.install'.format(python_package_name)
       output_filename = os.path.join(dpkg_path, install_file)
       self._GenerateFile(
-          None, self._INSTALL_TEMPLATE_PYTHON2, template_values,
-          output_filename)
+          self._project_definition.dpkg_template_install_python2,
+          self._INSTALL_TEMPLATE_PYTHON2, template_values, output_filename)
 
       if not self._IsPython2Only():
         install_file = '{0:s}.install'.format(python3_package_name)
         output_filename = os.path.join(dpkg_path, install_file)
         self._GenerateFile(
-            None, self._INSTALL_TEMPLATE_PYTHON3, template_values,
-            output_filename)
+            self._project_definition.dpkg_template_install_python3,
+            self._INSTALL_TEMPLATE_PYTHON3, template_values, output_filename)
 
       if os.path.isdir('scripts') or os.path.isdir('tools'):
         install_file = '{0:s}-tools.install'.format(package_name)
@@ -639,6 +640,14 @@ class DPKGBuildFilesGenerator(object):
       rules_template = self._RULES_TEMPLATE_SETUP_PY
 
     # TODO: replace manual write of rules file by call to _GenerateFile.
+    template_filename = self._project_definition.dpkg_template_rules
+    if template_filename:
+      template_file_path = os.path.join(
+          self._data_path, 'dpkg_templates', template_filename)
+      with open(template_file_path, 'rb') as file_object:
+        rules_template = file_object.read()
+
+      rules_template = rules_template.decode('utf-8')
 
     output_filename = os.path.join(dpkg_path, 'rules')
     with open(output_filename, 'wb') as file_object:
@@ -655,10 +664,15 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
+    package_name = self._GetPackageName()
+    if package_name == 'setuptools':
+      template_file = self._SOURCE_FORMAT_NATIVE_TEMPLATE
+    else:
+      template_file = self._SOURCE_FORMAT_QUILT_TEMPLATE
+
     output_filename = os.path.join(dpkg_path, 'source', 'format')
 
-    self._GenerateFile(
-        None, self._SOURCE_FORMAT_TEMPLATE, None, output_filename)
+    self._GenerateFile(None, template_file, None, output_filename)
 
   def _GetArchitecture(self):
     """Retrieves the architecture.
