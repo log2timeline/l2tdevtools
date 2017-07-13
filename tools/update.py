@@ -120,9 +120,9 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       logging.error('Linux: {0:s} {1:s} not supported.'.format(
           linux_name, linux_version))
 
-      if linux_name == 'Ubunt':
+      if linux_name == 'Ubuntu':
         wiki_url = (
-            'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubunt'
+            'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
             '#prepackaged-dependencies')
         logging.error(
             'Use the gift PPA instead. For more info see: {0:s}'.format(
@@ -172,6 +172,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       return
 
     if use_api:
+      # TODO: add support for branch.
       download_url = '{0:s}/contents/{1:s}'.format(
           self._GITHUB_REPO_API_URL, sub_directory)
 
