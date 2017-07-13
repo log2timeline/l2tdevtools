@@ -3,6 +3,8 @@
 """Script to update prebuilt versions of the projects."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import argparse
 import glob
 import json
@@ -18,7 +20,7 @@ from l2tdevtools import presets
 from l2tdevtools import projects
 
 
-if platform.system() == u'Windows':
+if platform.system() == 'Windows':
   import wmi  # pylint: disable=import-error
 
 
@@ -61,15 +63,23 @@ def CompareVersions(first_version_list, second_version_list):
 
 
 class GithubRepoDownloadHelper(download_helper.DownloadHelper):
-  """Class that helps in downloading from a GitHub repository."""
+  """Helps in downloading from a GitHub repository."""
 
   _GITHUB_REPO_API_URL = (
-      u'https://api.github.com/repos/log2timeline/l2tbinaries')
+      'https://api.github.com/repos/log2timeline/l2tbinaries')
 
   _GITHUB_REPO_URL = (
-      u'https://github.com/log2timeline/l2tbinaries')
+      'https://github.com/log2timeline/l2tbinaries')
 
-  _GITHUB_REPO_BRANCH = u'dev'
+  def __init__(self, download_url, branch='master'):
+    """Initializes a download helper.
+
+    Args:
+      download_url (str): download URL.
+      branch (Optional[str]): git branch to download from.
+    """
+    super(GithubRepoDownloadHelper, self).__init__(download_url)
+    self._branch = branch
 
   def _GetMachineTypeSubDirectory(
       self, preferred_machine_type=None, preferred_operating_system=None):
@@ -96,44 +106,44 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
     sub_directory = None
 
-    if operating_system == u'Darwin':
+    if operating_system == 'Darwin':
       # TODO: determine macOS version.
-      if cpu_architecture != u'x86_64':
-        logging.error(u'CPU architecture: {0:s} not supported.'.format(
+      if cpu_architecture != 'x86_64':
+        logging.error('CPU architecture: {0:s} not supported.'.format(
             cpu_architecture))
         return
 
-      sub_directory = u'macosx'
+      sub_directory = 'macosx'
 
-    elif operating_system == u'Linux':
+    elif operating_system == 'Linux':
       linux_name, linux_version, _ = platform.linux_distribution()
-      logging.error(u'Linux: {0:s} {1:s} not supported.'.format(
+      logging.error('Linux: {0:s} {1:s} not supported.'.format(
           linux_name, linux_version))
 
-      if linux_name == u'Ubuntu':
+      if linux_name == 'Ubunt':
         wiki_url = (
-            u'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
-            u'#prepackaged-dependencies')
+            'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubunt'
+            '#prepackaged-dependencies')
         logging.error(
-            u'Use the gift PPA instead. For more info see: {0:s}'.format(
+            'Use the gift PPA instead. For more info see: {0:s}'.format(
                 wiki_url))
 
       return
 
-    elif operating_system == u'Windows':
-      if cpu_architecture == u'x86':
-        sub_directory = u'win32'
+    elif operating_system == 'Windows':
+      if cpu_architecture == 'x86':
+        sub_directory = 'win32'
 
-      elif cpu_architecture == u'amd64':
-        sub_directory = u'win64'
+      elif cpu_architecture == 'amd64':
+        sub_directory = 'win64'
 
       else:
-        logging.error(u'CPU architecture: {0:s} not supported.'.format(
+        logging.error('CPU architecture: {0:s} not supported.'.format(
             cpu_architecture))
         return
 
     else:
-      logging.error(u'Operating system: {0:s} not supported.'.format(
+      logging.error('Operating system: {0:s} not supported.'.format(
           operating_system))
       return
 
@@ -162,12 +172,12 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       return
 
     if use_api:
-      download_url = u'{0:s}/contents/{1:s}'.format(
+      download_url = '{0:s}/contents/{1:s}'.format(
           self._GITHUB_REPO_API_URL, sub_directory)
 
     else:
-      download_url = u'{0:s}/tree/{1:s}/{2:s}'.format(
-          self._GITHUB_REPO_URL, self._GITHUB_REPO_BRANCH, sub_directory)
+      download_url = '{0:s}/tree/{1:s}/{2:s}'.format(
+          self._GITHUB_REPO_URL, self._branch, sub_directory)
 
     return download_url
 
@@ -191,7 +201,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
         preferred_machine_type=preferred_machine_type,
         preferred_operating_system=preferred_operating_system, use_api=use_api)
     if not download_url:
-      logging.info(u'Missing download URL.')
+      logging.info('Missing download URL.')
       return
 
     page_content = self.DownloadPageContent(download_url)
@@ -222,7 +232,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       # }
 
       for directory_entry in json.loads(page_content):
-        download_url = directory_entry.get(u'download_url', None)
+        download_url = directory_entry.get('download_url', None)
         if download_url:
           download_urls.append(download_url)
 
@@ -238,56 +248,62 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       # <a href="{path}" class="js-directory-link js-navigation-open"
       # <a href="{path}" class="js-navigation-open"
       expression_string = (
-          u'<a href="([^"]*)" class="(js-directory-link|js-navigation-open)')
+          '<a href="([^"]*)" class="(js-directory-link|js-navigation-open)')
       matches = re.findall(expression_string, page_content)
 
       for match_tuple in matches:
-        _, _, filename = match_tuple[0].rpartition(u'/')
+        _, _, filename = match_tuple[0].rpartition('/')
         download_url = (
-            u'https://github.com/log2timeline/l2tbinaries/raw/{0:s}/{1:s}/'
-            u'{2:s}').format(self._GITHUB_REPO_BRANCH, sub_directory, filename)
+            'https://github.com/log2timeline/l2tbinaries/raw/{0:s}/{1:s}/'
+            '{2:s}').format(self._branch, sub_directory, filename)
         download_urls.append(download_url)
 
     return download_urls
 
 
 class DependencyUpdater(object):
-  """Class that helps in updating dependencies.
+  """Helps in updating dependencies.
 
   Attributes:
     operating_system (str): the operating system on which to update
         dependencies and remove previous versions.
   """
 
-  _DOWNLOAD_URL = u'https://github.com/log2timeline/l2tbinaries/releases'
+  _DOWNLOAD_URL = 'https://github.com/log2timeline/l2tbinaries/releases'
+
+  _GIT_BRANCH_PER_TRACK = {
+      'dev': 'dev',
+      'stable': 'master',
+      'testing': 'testing'}
 
   _PKG_NAME_PREFIXES = [
-      u'com.github.dateutil.',
-      u'com.github.dfvfs.',
-      u'com.github.erocarrer.',
-      u'com.github.ForensicArtifacts.',
-      u'com.github.kennethreitz.',
-      u'com.github.google.',
-      u'org.github.ipython.',
-      u'com.github.libyal.',
-      u'com.github.log2timeline.',
-      u'com.github.sleuthkit.',
-      u'com.google.code.p.',
-      u'org.samba.',
-      u'org.python.pypi.',
-      u'net.sourceforge.projects.']
+      'com.github.dateutil.',
+      'com.github.dfvfs.',
+      'com.github.erocarrer.',
+      'com.github.ForensicArtifacts.',
+      'com.github.kennethreitz.',
+      'com.github.google.',
+      'org.github.ipython.',
+      'com.github.libyal.',
+      'com.github.log2timeline.',
+      'com.github.sleuthkit.',
+      'com.google.code.p.',
+      'org.samba.',
+      'org.python.pypi.',
+      'net.sourceforge.projects.']
 
   def __init__(
-      self, download_directory=u'build', download_only=False,
-      exclude_packages=False, force_install=False, msi_targetdir=None,
-      preferred_machine_type=None, preferred_operating_system=None,
-      verbose_output=False):
+      self, download_directory='build', download_only=False,
+      download_track='stable', exclude_packages=False, force_install=False,
+      msi_targetdir=None, preferred_machine_type=None,
+      preferred_operating_system=None, verbose_output=False):
     """Initializes the dependency updater.
 
     Args:
       download_directory (Optional[str]): path of the download directory.
       download_only (Optional[bool]): True if the dependency packages should
           only be downloaded.
+      download_track (Optional[str]): track to download from.
       exclude_packages (Optional[bool]): True if packages should be excluded
           instead of included.
       force_install (Optional[bool]): True if the installation (update) should
@@ -300,10 +316,14 @@ class DependencyUpdater(object):
       verbose_output (Optional[bool]): True more verbose output should be
           provided.
     """
+    branch = self._GIT_BRANCH_PER_TRACK.get(download_track, 'master')
+
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory
-    self._download_helper = GithubRepoDownloadHelper(self._DOWNLOAD_URL)
+    self._download_helper = GithubRepoDownloadHelper(
+        self._DOWNLOAD_URL, branch=branch)
     self._download_only = download_only
+    self._download_track = download_track
     self._exclude_packages = exclude_packages
     self._force_install = force_install
     self._msi_targetdir = msi_targetdir
@@ -338,7 +358,7 @@ class DependencyUpdater(object):
         preferred_machine_type=self._preferred_machine_type,
         preferred_operating_system=self.operating_system)
     if not package_urls:
-      logging.error(u'Unable to determine package download URLs.')
+      logging.error('Unable to determine package download URLs.')
       return None, None
 
     if not os.path.exists(self._download_directory):
@@ -349,42 +369,42 @@ class DependencyUpdater(object):
     package_filenames = {}
     package_versions = {}
     for package_url in package_urls:
-      _, _, package_filename = package_url.rpartition(u'/')
-      if package_filename.endswith(u'.dmg'):
+      _, _, package_filename = package_url.rpartition('/')
+      if package_filename.endswith('.dmg'):
         # Strip off the trailing part starting with '.dmg'.
-        package_name, _, _ = package_filename.partition(u'.dmg')
-        package_suffix = u'.dmg'
+        package_name, _, _ = package_filename.partition('.dmg')
+        package_suffix = '.dmg'
 
-      elif package_filename.endswith(u'.msi'):
+      elif package_filename.endswith('.msi'):
         # Strip off the trailing part starting with '.win'.
-        package_name, _, _ = package_filename.partition(u'.win')
-        package_suffix = u'.msi'
+        package_name, _, _ = package_filename.partition('.win')
+        package_suffix = '.msi'
 
       else:
         # Ignore all other file exensions.
         continue
 
-      if package_name.startswith(u'pefile-1.'):
+      if package_name.startswith('pefile-1.'):
         # We need to use the most left '-' character as the separator of the
         # name and the version, since version can contain the '-' character.
-        name, _, version = package_name.partition(u'-')
+        name, _, version = package_name.partition('-')
       else:
         # We need to use the most right '-' character as the separator of the
         # name and the version, since name can contain the '-' character.
-        name, _, version = package_name.rpartition(u'-')
+        name, _, version = package_name.rpartition('-')
 
       package_prefix = name
-      version = version.split(u'.')
+      version = version.split('.')
 
-      if package_name.startswith(u'pefile-1.'):
+      if package_name.startswith('pefile-1.'):
         last_part = version.pop()
-        version.extend(last_part.split(u'-'))
+        version.extend(last_part.split('-'))
 
       # Ignore package names if defined.
       if package_names and (
           (not self._exclude_packages and name not in package_names) or
           (self._exclude_packages and name in package_names)):
-        logging.info(u'Skipping: {0:s} because it was excluded'.format(name))
+        logging.info('Skipping: {0:s} because it was excluded'.format(name))
         continue
 
       if name not in package_versions:
@@ -397,19 +417,19 @@ class DependencyUpdater(object):
         package_versions[name] = version
 
       if not os.path.exists(package_filename):
-        filenames = glob.glob(u'{0:s}*{1:s}'.format(
+        filenames = glob.glob('{0:s}*{1:s}'.format(
             package_prefix, package_suffix))
         for filename in filenames:
           if os.path.isdir(filename):
             continue
 
-          logging.info(u'Removing: {0:s}'.format(filename))
+          logging.info('Removing: {0:s}'.format(filename))
           os.remove(filename)
 
-        logging.info(u'Downloading: {0:s}'.format(package_filename))
+        logging.info('Downloading: {0:s}'.format(package_filename))
         self._download_helper.DownloadFile(package_url)
 
-    os.chdir(u'..')
+    os.chdir('..')
 
     return package_filenames, package_versions
 
@@ -423,11 +443,11 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the installation was successful.
     """
-    if self.operating_system == u'Darwin':
+    if self.operating_system == 'Darwin':
       return self._InstallPackagesMacOS(
           package_filenames, package_versions)
 
-    elif self.operating_system == u'Windows':
+    elif self.operating_system == 'Windows':
       return self._InstallPackagesWindows(
           package_filenames, package_versions)
 
@@ -447,40 +467,40 @@ class DependencyUpdater(object):
     for name, _ in package_versions.iteritems():
       package_filename = package_filenames[name]
 
-      command = u'sudo /usr/bin/hdiutil attach {0:s}'.format(
+      command = 'sudo /usr/bin/hdiutil attach {0:s}'.format(
           os.path.join(self._download_directory, package_filename))
-      logging.info(u'Running: "{0:s}"'.format(command))
+      logging.info('Running: "{0:s}"'.format(command))
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        logging.error('Running: "{0:s}" failed.'.format(command))
         result = False
         continue
 
-      volume_path = u'/Volumes/{0:s}.pkg'.format(package_filename[:-4])
+      volume_path = '/Volumes/{0:s}.pkg'.format(package_filename[:-4])
       if not os.path.exists(volume_path):
-        logging.error(u'Missing volume: {0:s}.'.format(volume_path))
+        logging.error('Missing volume: {0:s}.'.format(volume_path))
         result = False
         continue
 
-      pkg_file = u'{0:s}/{1:s}.pkg'.format(volume_path, package_filename[:-4])
+      pkg_file = '{0:s}/{1:s}.pkg'.format(volume_path, package_filename[:-4])
       if not os.path.exists(pkg_file):
-        logging.error(u'Missing pkg file: {0:s}.'.format(pkg_file))
+        logging.error('Missing pkg file: {0:s}.'.format(pkg_file))
         result = False
         continue
 
-      command = u'sudo /usr/sbin/installer -target / -pkg {0:s}'.format(
+      command = 'sudo /usr/sbin/installer -target / -pkg {0:s}'.format(
           pkg_file)
-      logging.info(u'Running: "{0:s}"'.format(command))
+      logging.info('Running: "{0:s}"'.format(command))
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        logging.error('Running: "{0:s}" failed.'.format(command))
         result = False
 
-      command = u'sudo /usr/bin/hdiutil detach {0:s}'.format(volume_path)
-      logging.info(u'Running: "{0:s}"'.format(command))
+      command = 'sudo /usr/bin/hdiutil detach {0:s}'.format(volume_path)
+      logging.info('Running: "{0:s}"'.format(command))
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        logging.error('Running: "{0:s}" failed.'.format(command))
         result = False
 
     return result
@@ -495,33 +515,33 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the installation was successful.
     """
-    log_file = u'msiexec.log'
+    log_file = 'msiexec.log'
     if os.path.exists(log_file):
       os.remove(log_file)
 
     if self._msi_targetdir:
-      parameters = u' TARGETDIR={0:s}'.format(self._msi_targetdir)
+      parameters = ' TARGETDIR={0:s}'.format(self._msi_targetdir)
     else:
-      parameters = u''
+      parameters = ''
 
     result = True
     for name, version in package_versions.iteritems():
       # TODO: add RunAs ?
       package_filename = package_filenames[name]
       package_path = os.path.join(self._download_directory, package_filename)
-      command = u'msiexec.exe /i {0:s} /q /log {1:s}{2:s}'.format(
+      command = 'msiexec.exe /i {0:s} /q /log {1:s}{2:s}'.format(
           package_path, log_file, parameters)
-      logging.info(u'Installing: {0:s} {1:s}'.format(name, u'.'.join(version)))
+      logging.info('Installing: {0:s} {1:s}'.format(name, '.'.join(version)))
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
-        logging.error(u'Running: "{0:s}" failed.'.format(command))
+        logging.error('Running: "{0:s}" failed.'.format(command))
         result = False
 
         if self._verbose_output:
           with open(log_file, 'r') as file_object:
             log_file_contents = file_object.read()
-            log_file_contents = log_file_contents.decode(u'utf-16-le')
-            print(log_file_contents.encode(u'ascii', errors=u'replace'))
+            log_file_contents = log_file_contents.decode('utf-16-le')
+            print(log_file_contents.encode('ascii', errors='replace'))
 
     return result
 
@@ -537,10 +557,10 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the uninstall was successful.
     """
-    if self.operating_system == u'Darwin':
+    if self.operating_system == 'Darwin':
       return self._UninstallPackagesMacOSX(package_versions)
 
-    elif self.operating_system == u'Windows':
+    elif self.operating_system == 'Windows':
       return self._UninstallPackagesWindows(package_versions)
 
     return True
@@ -554,16 +574,16 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the uninstall was successful.
     """
-    command = u'/usr/sbin/pkgutil --packages'
-    logging.info(u'Running: "{0:s}"'.format(command))
+    command = '/usr/sbin/pkgutil --packages'
+    logging.info('Running: "{0:s}"'.format(command))
     process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     if process.returncode is None:
       packages, _ = process.communicate()
     else:
-      packages = u''
+      packages = ''
 
     if process.returncode != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      logging.error('Running: "{0:s}" failed.'.format(command))
       return False
 
     result = True
@@ -581,17 +601,17 @@ class DependencyUpdater(object):
         name = package_name[len(matching_prefix):]
 
         # Detect the PackageMaker naming convention.
-        if name.endswith(u'.pkg'):
-          _, _, sub_name = name[:-4].rpartition(u'.')
+        if name.endswith('.pkg'):
+          _, _, sub_name = name[:-4].rpartition('.')
           is_package_maker_pkg = True
         else:
           is_package_maker_pkg = False
-        name, _, _ = name.partition(u'.')
+        name, _, _ = name.partition('.')
 
         if name in package_versions:
           # Determine the package version.
-          command = u'/usr/sbin/pkgutil --pkg-info {0:s}'.format(package_name)
-          logging.info(u'Running: "{0:s}"'.format(command))
+          command = '/usr/sbin/pkgutil --pkg-info {0:s}'.format(package_name)
+          logging.info('Running: "{0:s}"'.format(command))
           process = subprocess.Popen(
               command, stdout=subprocess.PIPE, shell=True)
           if process.returncode is None:
@@ -600,7 +620,7 @@ class DependencyUpdater(object):
             package_info = ''
 
           if process.returncode != 0:
-            logging.error(u'Running: "{0:s}" failed.'.format(command))
+            logging.error('Running: "{0:s}" failed.'.format(command))
             result = False
             continue
 
@@ -608,25 +628,25 @@ class DependencyUpdater(object):
           version = None
           volume = None
           for attribute in package_info.split('\n'):
-            if attribute.startswith(u'location: '):
-              _, _, location = attribute.rpartition(u'location: ')
+            if attribute.startswith('location: '):
+              _, _, location = attribute.rpartition('location: ')
 
-            elif attribute.startswith(u'version: '):
-              _, _, version = attribute.rpartition(u'version: ')
+            elif attribute.startswith('version: '):
+              _, _, version = attribute.rpartition('version: ')
 
-            elif attribute.startswith(u'volume: '):
-              _, _, volume = attribute.rpartition(u'volume: ')
+            elif attribute.startswith('volume: '):
+              _, _, volume = attribute.rpartition('volume: ')
 
           if self._force_install:
             compare_result = -1
           elif name not in package_versions:
             compare_result = 1
-          elif name in (u'pytsk', u'pytsk3'):
+          elif name in ('pytsk', 'pytsk3'):
             # We cannot really tell by the version number that pytsk3 needs to
             # be updated, so just uninstall and update it any way.
             compare_result = -1
           else:
-            version_tuple = version.split(u'.')
+            version_tuple = version.split('.')
             compare_result = CompareVersions(
                 version_tuple, package_versions[name])
             if compare_result >= 0:
@@ -635,17 +655,17 @@ class DependencyUpdater(object):
 
           if compare_result < 0:
             # Determine the files in the package.
-            command = u'/usr/sbin/pkgutil --files {0:s}'.format(package_name)
-            logging.info(u'Running: "{0:s}"'.format(command))
+            command = '/usr/sbin/pkgutil --files {0:s}'.format(package_name)
+            logging.info('Running: "{0:s}"'.format(command))
             process = subprocess.Popen(
                 command, stdout=subprocess.PIPE, shell=True)
             if process.returncode is None:
               package_files, _ = process.communicate()
             else:
-              package_files = u''
+              package_files = ''
 
             if process.returncode != 0:
-              logging.error(u'Running: "{0:s}" failed.'.format(command))
+              logging.error('Running: "{0:s}" failed.'.format(command))
               result = False
               continue
 
@@ -653,17 +673,17 @@ class DependencyUpdater(object):
             files = []
             for filename in package_files.split('\n'):
               if is_package_maker_pkg:
-                filename = u'{0:s}{1:s}/{2:s}/{3:s}'.format(
+                filename = '{0:s}{1:s}/{2:s}/{3:s}'.format(
                     volume, location, sub_name, filename)
               else:
-                filename = u'{0:s}{1:s}'.format(location, filename)
+                filename = '{0:s}{1:s}'.format(location, filename)
 
               if os.path.isdir(filename):
                 directories.append(filename)
               else:
                 files.append(filename)
 
-            logging.info(u'Removing: {0:s} {1:s}'.format(name, version))
+            logging.info('Removing: {0:s} {1:s}'.format(name, version))
             for filename in files:
               if os.path.exists(filename):
                 os.remove(filename)
@@ -676,11 +696,11 @@ class DependencyUpdater(object):
                   # Ignore directories that are not empty.
                   pass
 
-            command = u'/usr/sbin/pkgutil --forget {0:s}'.format(
+            command = '/usr/sbin/pkgutil --forget {0:s}'.format(
                 package_name)
             exit_code = subprocess.call(command, shell=True)
             if exit_code != 0:
-              logging.error(u'Running: "{0:s}" failed.'.format(command))
+              logging.error('Running: "{0:s}" failed.'.format(command))
               result = False
 
     return result
@@ -696,20 +716,20 @@ class DependencyUpdater(object):
     """
     connection = wmi.WMI()
 
-    query = u'SELECT Name FROM Win32_Product'
+    query = 'SELECT Name FROM Win32_Product'
     for product in connection.query(query):
-      name = getattr(product, u'Name', u'')
+      name = getattr(product, 'Name', '')
       # Windows package names start with 'Python' or 'Python 2.7 '.
-      if name.startswith(u'Python '):
-        _, _, name = name.rpartition(u' ')
-        if name.startswith(u'2.7 '):
-          _, _, name = name.rpartition(u' ')
+      if name.startswith('Python '):
+        _, _, name = name.rpartition(' ')
+        if name.startswith('2.7 '):
+          _, _, name = name.rpartition(' ')
 
-        name, _, version = name.rpartition(u'-')
+        name, _, version = name.rpartition('-')
 
         found_package = name in package_versions
 
-        version_tuple = version.split(u'.')
+        version_tuple = version.split('.')
         if self._force_install:
           compare_result = -1
         elif not found_package:
@@ -721,14 +741,14 @@ class DependencyUpdater(object):
             # The latest or newer version is already installed.
             del package_versions[name]
 
-        if not found_package and name.startswith(u'py'):
+        if not found_package and name.startswith('py'):
           # Remove libyal Python packages using the old naming convention.
-          new_name = u'lib{0:s}-python'.format(name[2:])
+          new_name = 'lib{0:s}-python'.format(name[2:])
           if new_name in package_versions:
             compare_result = -1
 
         if compare_result < 0:
-          logging.info(u'Removing: {0:s} {1:s}'.format(name, version))
+          logging.info('Removing: {0:s} {1:s}'.format(name, version))
           product.Uninstall()
 
     return True
@@ -747,14 +767,14 @@ class DependencyUpdater(object):
     package_filenames, package_versions = self._GetPackageFilenamesAndVersions(
         package_names)
     if not package_filenames:
-      logging.error(u'No packages found.')
+      logging.error('No packages found.')
       return False
 
     if self._download_only:
       return True
 
     if not self._UninstallPackages(package_versions):
-      logging.error(u'Unable to uninstall packages.')
+      logging.error('Unable to uninstall packages.')
       return False
 
     return self._InstallPackages(package_filenames, package_versions)
@@ -766,71 +786,78 @@ def Main():
   Returns:
     bool: True if successful or False if not.
   """
+  tracks = ['dev', 'stable', 'testing']
+
   argument_parser = argparse.ArgumentParser(description=(
-      u'Installs the latest versions of project dependencies.'))
+      'Installs the latest versions of project dependencies.'))
 
   argument_parser.add_argument(
-      u'-c', u'--config', dest=u'config_path', action=u'store',
-      metavar=u'CONFIG_PATH', default=None, help=(
-          u'path of the directory containing the build configuration '
-          u'files e.g. projects.ini.'))
+      '-c', '--config', dest='config_path', action='store',
+      metavar='CONFIG_PATH', default=None, help=(
+          'path of the directory containing the build configuration '
+          'files e.g. projects.ini.'))
 
   argument_parser.add_argument(
-      u'--download-directory', u'--download_directory', action=u'store',
-      metavar=u'DIRECTORY', dest=u'download_directory', type=str,
-      default=u'build', help=u'The location of the download directory.')
+      '--download-directory', '--download_directory', action='store',
+      metavar='DIRECTORY', dest='download_directory', type=str,
+      default='build', help='The location of the download directory.')
 
   argument_parser.add_argument(
-      '--download-only', u'--download_only', action='store_true',
+      '--download-only', '--download_only', action='store_true',
       dest='download_only', default=False, help=(
-          u'Only download the dependencies. The default behavior is to '
-          u'download and update the dependencies.'))
+          'Only download the dependencies. The default behavior is to '
+          'download and update the dependencies.'))
 
   argument_parser.add_argument(
       '-e', '--exclude', action='store_true', dest='exclude_packages',
       default=False, help=(
-          u'Excludes the package names instead of including them.'))
+          'Excludes the package names instead of including them.'))
 
   argument_parser.add_argument(
       '-f', '--force', action='store_true', dest='force_install',
       default=False, help=(
-          u'Force installation. This option removes existing versions '
-          u'of installed dependencies. The default behavior is to only'
-          u'install a dependency if not or an older version is installed.'))
+          'Force installation. This option removes existing versions '
+          'of installed dependencies. The default behavior is to only'
+          'install a dependency if not or an older version is installed.'))
 
   argument_parser.add_argument(
-      '--machine-type', '--machine_type', action=u'store', metavar=u'TYPE',
-      dest=u'machine_type', type=str, default=None, help=(
-          u'Manually sets the machine type instead of using the value returned '
-          u'by platform.machine(). Usage of this argument is not recommended '
-          u'unless want to force the installation of one machine type e.g. '
-          u'\'x86\' onto another \'amd64\'.'))
+      '--machine-type', '--machine_type', action='store', metavar='TYPE',
+      dest='machine_type', type=str, default=None, help=(
+          'Manually sets the machine type instead of using the value returned '
+          'by platform.machine(). Usage of this argument is not recommended '
+          'unless want to force the installation of one machine type e.g. '
+          '\'x86\' onto another \'amd64\'.'))
 
   argument_parser.add_argument(
-      '--msi-targetdir', '--msi_targetdir', action=u'store', metavar=u'TYPE',
-      dest=u'msi_targetdir', type=str, default=None, help=(
-          u'Manually sets the MSI TARGETDIR property. Usage of this argument '
-          u'is not recommended unless want to force the installation of the '
-          u'MSIs into different directory than the system default.'))
+      '--msi-targetdir', '--msi_targetdir', action='store', metavar='TYPE',
+      dest='msi_targetdir', type=str, default=None, help=(
+          'Manually sets the MSI TARGETDIR property. Usage of this argument '
+          'is not recommended unless want to force the installation of the '
+          'MSIs into different directory than the system default.'))
 
   argument_parser.add_argument(
-      u'--preset', dest=u'preset', action=u'store',
-      metavar=u'PRESET_NAME', default=None, help=(
-          u'name of the preset of project names to update. The default is to '
-          u'build all project defined in the projects.ini configuration file. '
-          u'The presets are defined in the preset.ini configuration file.'))
+      '--preset', dest='preset', action='store',
+      metavar='PRESET_NAME', default=None, help=(
+          'name of the preset of project names to update. The default is to '
+          'build all project defined in the projects.ini configuration file. '
+          'The presets are defined in the preset.ini configuration file.'))
+
+  argument_parser.add_argument(
+      '-t', '--track', dest='track', action='store', metavar='TRACK',
+      default='stable', choices=sorted(tracks), help=(
+          'the l2tbinaries track to download from. The default is stable.'))
 
   argument_parser.add_argument(
       '-v', '--verbose', dest='verbose', action='store_true', default=False,
-      help=u'have more verbose output.')
+      help='have more verbose output.')
 
   argument_parser.add_argument(
-      u'project_names', nargs=u'*', action=u'store', metavar=u'NAME',
+      'project_names', nargs='*', action='store', metavar='NAME',
       type=str, help=(
-          u'Optional project names which should be updated if an update is '
-          u'available. The corresponding package names are derived from '
-          u'the projects.ini configuration file. If no value is provided '
-          u'all available packages are updated.'))
+          'Optional project names which should be updated if an update is '
+          'available. The corresponding package names are derived from '
+          'the projects.ini configuration file. If no value is provided '
+          'all available packages are updated.'))
 
   options = argument_parser.parse_args()
 
@@ -838,22 +865,22 @@ def Main():
   if not config_path:
     config_path = os.path.dirname(__file__)
     config_path = os.path.dirname(config_path)
-    config_path = os.path.join(config_path, u'data')
+    config_path = os.path.join(config_path, 'data')
 
-  presets_file = os.path.join(config_path, u'presets.ini')
+  presets_file = os.path.join(config_path, 'presets.ini')
   if options.preset and not os.path.exists(presets_file):
-    print(u'No such config file: {0:s}.'.format(presets_file))
-    print(u'')
+    print('No such config file: {0:s}.'.format(presets_file))
+    print('')
     return False
 
-  projects_file = os.path.join(config_path, u'projects.ini')
+  projects_file = os.path.join(config_path, 'projects.ini')
   if not os.path.exists(projects_file):
-    print(u'No such config file: {0:s}.'.format(projects_file))
-    print(u'')
+    print('No such config file: {0:s}.'.format(projects_file))
+    print('')
     return False
 
   logging.basicConfig(
-      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
+      level=logging.INFO, format='[%(levelname)s] %(message)s')
 
   project_names = []
   if options.preset:
@@ -865,8 +892,8 @@ def Main():
           break
 
     if not project_names:
-      print(u'Undefined preset: {0:s}'.format(options.preset))
-      print(u'')
+      print('Undefined preset: {0:s}'.format(options.preset))
+      print('')
       return False
 
   elif options.project_names:
@@ -891,12 +918,12 @@ def Main():
   for project_name in project_names:
     project_definition = project_definitions.get(project_name, None)
     if not project_definition:
-      logging.error(u'Missing definition for project: {0:s}'.format(
+      logging.error('Missing definition for project: {0:s}'.format(
           project_name))
       continue
 
     package_name = project_name
-    if (dependency_updater.operating_system == u'Windows' and
+    if (dependency_updater.operating_system == 'Windows' and
         project_definition.msi_name):
       package_name = project_definition.msi_name
 
