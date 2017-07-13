@@ -116,7 +116,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
       '  - cmd: mkdir dependencies && set PYTHONPATH=..\\l2tdevtools && '
       '"%PYTHON%\\\\python.exe" ..\\l2tdevtools\\tools\\update.py '
       '--download-directory dependencies --machine-type x86 '
-      '--msi-targetdir "%PYTHON%" {0:s}')
+      '--msi-targetdir "%PYTHON%" --track dev {0:s}')
 
   _FILE_FOOTER = [
       '',
@@ -554,8 +554,8 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\tmkdir dependencies;',
       '',
       ('\tPYTHONPATH=../l2tdevtools ../l2tdevtools/tools/update.py '
-       '--download-directory=dependencies ${L2TBINARIES_DEPENDENCIES} '
-       '${L2TBINARIES_TEST_DEPENDENCIES};'),
+       '--download-directory dependencies --track dev '
+       '${L2TBINARIES_DEPENDENCIES} ${L2TBINARIES_TEST_DEPENDENCIES};'),
       '',
       'elif test ${TRAVIS_OS_NAME} = "linux";',
       'then',
