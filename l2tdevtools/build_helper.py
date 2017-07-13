@@ -946,7 +946,7 @@ class MSIBuildHelper(BuildHelper):
     patch_exe_path = None
     for patch_exe_path in self._COMMON_PATCH_EXE_PATHS:
       if os.path.exists(patch_exe_path):
-        continue
+        break
 
     if not patch_exe_path:
       logging.error(u'Unable to find patch.exe')
@@ -1330,25 +1330,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     # TODO: implement.
     return False
 
-  def _SetupBuildDependencySqlite(self):
-    """Sets up the sqlite build dependency.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    # TODO: download and build sqlite3 from source
-    # http://www.sqlite.org/download.html
-    # copy sqlite3.h to <source>/src/ directory?
-    # copy .lib and .dll to <source>/ directory?
-    # bundle .dll
-
-    # <a id='a3' href='hp1.html'>sqlite-amalgamation-3081002.zip
-    # d391('a3','2015/sqlite-amalgamation-3081002.zip');
-    # http://www.sqlite.org/2015/sqlite-amalgamation-3081002.zip
-
-    # Create msvscpp files and build dll
-    return False
-
   def _SetupBuildDependencyZeroMQ(self):
     """Sets up the zeromq build dependency.
 
@@ -1397,9 +1378,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     for package_name in self._project_definition.build_dependencies:
       if package_name == u'fuse':
         self._SetupBuildDependencyDokan()
-
-      elif package_name == u'sqlite':
-        self._SetupBuildDependencySqlite()
 
       elif package_name == u'zeromq':
         self._SetupBuildDependencyZeroMQ()
@@ -1617,6 +1595,19 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
       shutil.move(filenames[0], u'.')
 
     return True
+
+  def CheckBuildDependencies(self):
+    """Checks if the build dependencies are met.
+
+    Returns:
+      list[str]: build dependency names that are not met or an empty list.
+    """
+    missing_packages = []
+    for package_name in self._project_definition.build_dependencies:
+      # Ignore sqlite dependency for MSI builds
+      if package_name != u'sqlite':
+        missing_packages.append(package_name)
+    return missing_packages
 
   def CheckBuildRequired(self, source_helper_object):
     """Checks if a build is required.
