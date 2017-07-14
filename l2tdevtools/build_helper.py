@@ -914,7 +914,10 @@ class MSIBuildHelper(BuildHelper):
               u'Program Files (x86)', u'GnuWin', u'bin', u'patch.exe')),
       u'{0:s}:{1:s}{2:s}'.format(
           u'C', os.sep, os.path.join(
-              u'Program Files (x86)', u'GnuWin32', u'bin', u'patch.exe'))
+              u'Program Files (x86)', u'GnuWin32', u'bin', u'patch.exe')),
+      u'{0:s}:{1:s}{2:s}'.format(
+          u'C', os.sep, os.path.join(
+              u'ProgramData', u'chocolatey', u'bin', u'patch.exe'))
   ]
 
   def __init__(self, project_definition, l2tdevtools_path):
