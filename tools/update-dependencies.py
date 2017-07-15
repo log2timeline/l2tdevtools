@@ -70,9 +70,11 @@ class AppveyorYmlWriter(DependencyFileWriter):
       '  - cmd: "%PYTHON%\\\\Scripts\\\\easy_install.exe '
       'C:\\\\Projects\\\\WMI-{0:s}.win32.exe"').format(_VERSION_WMI)
 
+  _URL_L2TDEVTOOLS = 'https://github.com/log2timeline/l2tdevtools.git'
+
   _DOWNLOAD_L2TDEVTOOLS = (
-      '  - cmd: git clone https://github.com/log2timeline/l2tdevtools.git && '
-      'move l2tdevtools ..\\')
+      '  - cmd: git clone {0:s} && move l2tdevtools ..\\'.format(
+          _URL_L2TDEVTOOLS))
 
   _FILE_HEADER = [
       'environment:',
@@ -114,7 +116,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
       '  - cmd: mkdir dependencies && set PYTHONPATH=..\\l2tdevtools && '
       '"%PYTHON%\\\\python.exe" ..\\l2tdevtools\\tools\\update.py '
       '--download-directory dependencies --machine-type x86 '
-      '--msi-targetdir "%PYTHON%" {0:s}')
+      '--msi-targetdir "%PYTHON%" --track dev {0:s}')
 
   _FILE_FOOTER = [
       '',
@@ -528,6 +530,8 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
 
   PATH = os.path.join('config', 'travis', 'install.sh')
 
+  _URL_L2TDEVTOOLS = 'https://github.com/log2timeline/l2tdevtools.git'
+
   _FILE_HEADER = [
       '#!/bin/bash',
       '#',
@@ -544,14 +548,14 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '',
       'if test ${TRAVIS_OS_NAME} = "osx";',
       'then',
-      '\tgit clone https://github.com/log2timeline/l2tdevtools.git;',
+      '\tgit clone {0:s};'.format(_URL_L2TDEVTOOLS),
       '',
       '\tmv l2tdevtools ../;',
       '\tmkdir dependencies;',
       '',
       ('\tPYTHONPATH=../l2tdevtools ../l2tdevtools/tools/update.py '
-       '--download-directory=dependencies ${L2TBINARIES_DEPENDENCIES} '
-       '${L2TBINARIES_TEST_DEPENDENCIES};'),
+       '--download-directory dependencies --track dev '
+       '${L2TBINARIES_DEPENDENCIES} ${L2TBINARIES_TEST_DEPENDENCIES};'),
       '',
       'elif test ${TRAVIS_OS_NAME} = "linux";',
       'then',
