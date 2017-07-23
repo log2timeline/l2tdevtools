@@ -2070,9 +2070,15 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     else:
       project_prefix = ''
 
-    spec_filename = '{0:s}.spec'.format(project_name)
-    input_file_path = '{0:s}{1:s}'.format(project_prefix, spec_filename)
+    if self._project_definition.setup_name:
+      setup_name = self._project_definition.setup_name
+    else:
+      setup_name = source_helper_object.project_name
+
+    input_file_path = '{0:s}.spec'.format(setup_name)
     input_file_path = os.path.join(source_directory, 'dist', input_file_path)
+
+    spec_filename = '{0:s}.spec'.format(project_name)
     output_file_path = os.path.join(osc_package_path, spec_filename)
 
     # Determine if the output file exists before it is generated.
@@ -2880,9 +2886,15 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     else:
       project_prefix = ''
 
-    spec_filename = '{0:s}.spec'.format(project_name)
-    input_file_path = '{0:s}{1:s}'.format(project_prefix, spec_filename)
+    if self._project_definition.setup_name:
+      setup_name = self._project_definition.setup_name
+    else:
+      setup_name = source_helper_object.project_name
+
+    input_file_path = '{0:s}.spec'.format(setup_name)
     input_file_path = os.path.join(source_directory, 'dist', input_file_path)
+
+    spec_filename = '{0:s}.spec'.format(project_name)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
@@ -3134,9 +3146,15 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     else:
       project_prefix = ''
 
-    spec_filename = '{0:s}.spec'.format(project_name)
-    input_file_path = '{0:s}{1:s}'.format(project_prefix, spec_filename)
+    if self._project_definition.setup_name:
+      setup_name = self._project_definition.setup_name
+    else:
+      setup_name = source_helper_object.project_name
+
+    input_file_path = '{0:s}.spec'.format(setup_name)
     input_file_path = os.path.join(source_directory, 'dist', input_file_path)
+
+    spec_filename = '{0:s}.spec'.format(project_name)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
