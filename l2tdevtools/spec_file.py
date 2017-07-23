@@ -237,6 +237,7 @@ class RPMSpecFileGenerator(object):
     has_build_requires = False
     has_python2_package = False
     has_python3_package = False
+    has_unmangled_version = False
 
     python2_only = project_definition.IsPython2Only()
 
@@ -247,6 +248,11 @@ class RPMSpecFileGenerator(object):
 
     if package_name.startswith('python-'):
       package_name = package_name[7:]
+
+    if project_definition.setup_name:
+      unmangled_name = project_definition.setup_name
+    else:
+      unmangled_name = project_name
 
     with open(input_file, 'r+b') as input_file_object:
       for line in input_file_object.readlines():
@@ -280,15 +286,27 @@ class RPMSpecFileGenerator(object):
             line = b'%define version {0:s}\n'.format(version)
 
         elif line.startswith(b'%define unmangled_version '):
+          # setup.py generates %define unmangled_version twice ignore
+          # the second define.
+          if has_unmangled_version:
+            continue
+
+          output_file_object.write(
+              b'%define unmangled_name {0:s}\n'.format(unmangled_name))
+
           if project_name == 'efilter':
             line = b'%define unmangled_version {0:s}\n'.format(version)
+
+          has_unmangled_version = True
 
         elif not summary and line.startswith(b'Summary: '):
           summary = line
 
         elif line.startswith(b'Source0: '):
           if source_filename.endswith('.zip'):
-            line = b'Source0: %{name}-%{unmangled_version}.zip\n'
+            line = b'Source0: %{unmangled_name}-%{unmangled_version}.zip\n'
+          else:
+            line = b'Source0: %{unmangled_name}-%{unmangled_version}.tar.gz\n'
 
         elif line.startswith(b'BuildRoot: '):
           if project_name == 'efilter':
@@ -300,6 +318,11 @@ class RPMSpecFileGenerator(object):
             line = (
                 b'BuildRoot: %{_tmppath}/'
                 b'%{name}-release-%{version}-%{release}-buildroot\n')
+
+          else:
+            line = (
+                b'BuildRoot: %{_tmppath}/'
+                b'%{unmangled_name}-release-%{version}-%{release}-buildroot\n')
 
         elif (not description and not requires and
               line.startswith(b'Requires: ')):
@@ -381,7 +404,7 @@ class RPMSpecFileGenerator(object):
           elif project_name == 'psutil':
             line = b'%autosetup -n %{name}-release-%{unmangled_version}\n'
           else:
-            line = b'%autosetup -n %{name}-%{unmangled_version}\n'
+            line = b'%autosetup -n %{unmangled_name}-%{unmangled_version}\n'
 
         elif line.startswith(b'python setup.py build'):
           line = self._GetBuildDefinition(python2_only)
@@ -490,9 +513,10 @@ class RPMSpecFileGenerator(object):
         rpm_build_dependencies.append('python3-devel')
 
       if project_definition.rpm_build_dependencies:
-        rpm_build_dependencies.extend([
-            dependency.replace('python-', 'python3-')
-            for dependency in project_definition.rpm_build_dependencies])
+        for dependency in project_definition.rpm_build_dependencies:
+          dependency = dependency.replace('python-', 'python3-')
+          dependency = dependency.replace('python2-', 'python3-')
+          rpm_build_dependencies.append(dependency)
 
     # TODO: check if already prefixed with python-
 

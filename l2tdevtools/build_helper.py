@@ -2029,9 +2029,9 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     else:
       setup_name = source_helper_object.project_name
 
-    spec_file = u'{0:s}.spec'.format(setup_name)
+    spec_file = '{0:s}.spec'.format(setup_name)
 
-    return os.path.join(source_directory, u'dist', spec_file)
+    return os.path.join(source_directory, 'dist', spec_file)
 
   def Build(self, source_helper_object):
     """Builds the osc package.
@@ -2488,16 +2488,16 @@ class BaseRPMBuildHelper(BuildHelper):
       'libtool',
       'gettext-devel',
       'make',
-      'pkgconfig',
+      'pkgconf',
       'gcc',
       'gcc-c++',
       'flex',
       'byacc',
       'rpm-build',
-      'python-devel',
-      'python-test',
       'python2-dateutil',
+      'python2-devel',
       'python2-setuptools',
+      'python2-test',
       'python3-dateutil',
       'python3-devel',
       'python3-setuptools',
@@ -2681,9 +2681,9 @@ class BaseRPMBuildHelper(BuildHelper):
     else:
       setup_name = source_helper_object.project_name
 
-    spec_file = u'{0:s}.spec'.format(setup_name)
+    spec_file = '{0:s}.spec'.format(setup_name)
 
-    return os.path.join(source_directory, u'dist', spec_file)
+    return os.path.join(source_directory, 'dist', spec_file)
 
   def _MoveFilesToCurrentDirectory(self, filenames_glob):
     """Moves files into the current directory.
@@ -2735,7 +2735,13 @@ class RPMBuildHelper(BaseRPMBuildHelper):
     filename = os.path.join(self.rpmbuild_path, 'BUILD', filename)
 
     logging.info('Removing: {0:s}'.format(filename))
-    shutil.rmtree(filename)
+
+    logging.info('Removing: {0:s}'.format(filename))
+
+    try:
+      shutil.rmtree(filename)
+    except OSError:
+      logging.warning('Unable to remove: {0:s}'.format(filename))
 
   def _RemoveOlderBuildDirectory(self, project_name, project_version):
     """Removes previous versions of build directories.
