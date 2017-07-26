@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """Project preset definitions."""
 
+from __future__ import unicode_literals
+
 try:
   import ConfigParser as configparser
 except ImportError:
   import configparser  # pylint: disable=import-error
+
+from l2tdevtools import py2to3
 
 
 class PresetDefinition(object):
@@ -57,20 +61,22 @@ class PresetDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
+    # TODO: replace readfp by read_file, check if Python 2 compatible
     config_parser.readfp(file_object)
 
     for section_name in config_parser.sections():
       preset_definition = PresetDefinition(section_name)
 
       preset_definition.project_names = self._GetConfigValue(
-          config_parser, section_name, u'projects')
+          config_parser, section_name, 'projects')
 
       if preset_definition.project_names is None:
         preset_definition.project_names = []
       elif isinstance(
-          preset_definition.project_names, basestring):
+          preset_definition.project_names, py2to3.STRING_TYPES):
         preset_definition.project_names = (
-            preset_definition.project_names.split(u','))
+            preset_definition.project_names.split(','))
 
       # Need at minimum a name.
       if preset_definition.name:

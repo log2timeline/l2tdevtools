@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """RPM spec file generator."""
 
+from __future__ import unicode_literals
+
 import datetime
 import logging
 import os
@@ -12,14 +14,14 @@ class RPMSpecFileGenerator(object):
   """Class that helps in generating RPM spec files."""
 
   _EMAIL_ADDRESS = (
-      u'log2timeline development team <log2timeline-dev@googlegroups.com>')
+      'log2timeline development team <log2timeline-dev@googlegroups.com>')
 
   _DOC_FILENAMES = [
-      u'CHANGES', u'CHANGES.txt', u'CHANGES.TXT',
-      u'README', u'README.txt', u'README.TXT']
+      'CHANGES', 'CHANGES.txt', 'CHANGES.TXT',
+      'README', 'README.txt', 'README.TXT']
 
   _LICENSE_FILENAMES = [
-      u'LICENSE', u'LICENSE.txt', u'LICENSE.TXT']
+      'LICENSE', 'LICENSE.txt', 'LICENSE.TXT']
 
   def _GetBuildDefinition(self, python2_only):
     """Retrieves the build definition.
@@ -102,7 +104,7 @@ class RPMSpecFileGenerator(object):
       version (str): version.
     """
     date_time = datetime.datetime.now()
-    date_time_string = date_time.strftime(u'%a %b %e %Y')
+    date_time_string = date_time.strftime('%a %b %e %Y')
 
     output_file_object.write((
         b'\n'
@@ -196,12 +198,12 @@ class RPMSpecFileGenerator(object):
     Returns:
       bool: True if successful, False otherwise.
     """
-    command = u'{0:s} setup.py bdist_rpm --spec-only >> {1:s} 2>&1'.format(
+    command = '{0:s} setup.py bdist_rpm --spec-only >> {1:s} 2>&1'.format(
         sys.executable, build_log_file)
-    exit_code = subprocess.call(u'(cd {0:s} && {1:s})'.format(
+    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
-      logging.error(u'Running: "{0:s}" failed.'.format(command))
+      logging.error('Running: "{0:s}" failed.'.format(command))
       return False
 
     return True
@@ -209,7 +211,7 @@ class RPMSpecFileGenerator(object):
   def _RewriteSetupPyGeneratedFile(
       self, project_definition, source_directory, source_filename,
       project_name, rpm_build_dependencies, input_file, output_file_object,
-      python2_package_prefix=u'python-'):
+      python2_package_prefix='python-'):
     """Rewrites the RPM spec file generated with setup.py.
 
     Args:
@@ -243,7 +245,7 @@ class RPMSpecFileGenerator(object):
     else:
       package_name = project_name
 
-    if package_name.startswith(u'python-'):
+    if package_name.startswith('python-'):
       package_name = package_name[7:]
 
     with open(input_file, 'r+b') as input_file_object:
@@ -274,27 +276,27 @@ class RPMSpecFileGenerator(object):
           if version.startswith(b'1!'):
             version = version[2:]
 
-          if project_name == u'efilter':
+          if project_name == 'efilter':
             line = b'%define version {0:s}\n'.format(version)
 
         elif line.startswith(b'%define unmangled_version '):
-          if project_name == u'efilter':
+          if project_name == 'efilter':
             line = b'%define unmangled_version {0:s}\n'.format(version)
 
         elif not summary and line.startswith(b'Summary: '):
           summary = line
 
         elif line.startswith(b'Source0: '):
-          if source_filename.endswith(u'.zip'):
+          if source_filename.endswith('.zip'):
             line = b'Source0: %{name}-%{unmangled_version}.zip\n'
 
         elif line.startswith(b'BuildRoot: '):
-          if project_name == u'efilter':
+          if project_name == 'efilter':
             line = (
                 b'BuildRoot: %{_tmppath}/'
                 b'dotty-%{version}-%{release}-buildroot\n')
 
-          elif project_name == u'psutil':
+          elif project_name == 'psutil':
             line = (
                 b'BuildRoot: %{_tmppath}/'
                 b'%{name}-release-%{version}-%{release}-buildroot\n')
@@ -323,7 +325,7 @@ class RPMSpecFileGenerator(object):
 
         elif (line.startswith(b'%package -n python-') or
               line.startswith(b'%package -n python2-')):
-          if project_name == u'artifacts':
+          if project_name == 'artifacts':
             in_python_package = True
             continue
 
@@ -333,7 +335,7 @@ class RPMSpecFileGenerator(object):
           has_python3_package = True
 
         elif line.startswith(b'%prep'):
-          if project_name == u'artifacts':
+          if project_name == 'artifacts':
             requires = b'{0:s}, artifacts-data\n'.format(requires[:-1])
 
           if not has_python2_package:
@@ -360,7 +362,7 @@ class RPMSpecFileGenerator(object):
                 output_file_object, python_package_name, summary, requires,
                 description)
 
-          if project_name == u'artifacts':
+          if project_name == 'artifacts':
             output_file_object.write((
                 b'%package -n %{{name}}-data\n'
                 b'{0:s}'
@@ -368,15 +370,15 @@ class RPMSpecFileGenerator(object):
                 b'%description -n %{{name}}-data\n'
                 b'{1:s}').format(summary, description))
 
-          elif project_name == u'PyYAML':
+          elif project_name == 'PyYAML':
             output_file_object.write(
                 b'%global debug_package %{nil}\n'
                 b'\n')
 
         elif line.startswith(b'%setup -n %{name}-%{unmangled_version}'):
-          if project_name == u'efilter':
+          if project_name == 'efilter':
             line = b'%autosetup -n dotty-%{unmangled_version}\n'
-          elif project_name == u'psutil':
+          elif project_name == 'psutil':
             line = b'%autosetup -n %{name}-release-%{unmangled_version}\n'
           else:
             line = b'%autosetup -n %{name}-%{unmangled_version}\n'
@@ -432,7 +434,7 @@ class RPMSpecFileGenerator(object):
           output_file_object, python_package_name, license_line, doc_line,
           lib_dir)
 
-    if project_name == u'artifacts':
+    if project_name == 'artifacts':
       output_file_object.write(
           b'\n'
           b'%files -n %{name}-data\n'
@@ -443,7 +445,7 @@ class RPMSpecFileGenerator(object):
         b'\n'
         b'%exclude %{_bindir}/*\n'))
 
-    if project_name == u'pysqlite':
+    if project_name == 'pysqlite':
       output_file_object.write(b'%exclude /usr/pysqlite2-doc/*\n')
 
     # TODO: add shared data support.
@@ -468,41 +470,41 @@ class RPMSpecFileGenerator(object):
     Returns:
       bool: True if successful, False otherwise.
     """
-    if project_name == u'dateutil':
+    if project_name == 'dateutil':
       # TODO: work around for non-architecture dependent behavior.
       project_definition.architecture_dependent = False
 
     python2_only = project_definition.IsPython2Only()
 
-    rpm_build_dependencies = [u'python2-setuptools']
+    rpm_build_dependencies = ['python2-setuptools']
     if project_definition.architecture_dependent:
-      rpm_build_dependencies.append(u'python-devel')
+      rpm_build_dependencies.append('python-devel')
 
     if project_definition.rpm_build_dependencies:
       rpm_build_dependencies.extend(
           project_definition.rpm_build_dependencies)
 
     if not python2_only:
-      rpm_build_dependencies.append(u'python3-setuptools')
+      rpm_build_dependencies.append('python3-setuptools')
       if project_definition.architecture_dependent:
-        rpm_build_dependencies.append(u'python3-devel')
+        rpm_build_dependencies.append('python3-devel')
 
       if project_definition.rpm_build_dependencies:
         rpm_build_dependencies.extend([
-            dependency.replace(u'python-', u'python3-')
+            dependency.replace('python-', 'python3-')
             for dependency in project_definition.rpm_build_dependencies])
 
     # TODO: check if already prefixed with python-
 
     output_file_object = open(output_file, 'wb')
 
-    python2_package_prefix = u''
+    python2_package_prefix = ''
     if project_definition.rpm_python2_prefix:
-      python2_package_prefix = u'{0:s}-'.format(
+      python2_package_prefix = '{0:s}-'.format(
           project_definition.rpm_python2_prefix)
 
     elif project_definition.rpm_python2_prefix is None:
-      python2_package_prefix = u'python-'
+      python2_package_prefix = 'python-'
 
     result = self._RewriteSetupPyGeneratedFile(
         project_definition, source_directory, source_filename, project_name,
@@ -531,11 +533,11 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    rpm_build_dependencies = [u'python-devel', u'python-setuptools']
+    rpm_build_dependencies = ['python-devel', 'python-setuptools']
 
     if not python2_only:
-      rpm_build_dependencies.append(u'python3-devel')
-      rpm_build_dependencies.append(u'python3-setuptools')
+      rpm_build_dependencies.append('python3-devel')
+      rpm_build_dependencies.append('python3-setuptools')
 
     if project_definition.rpm_build_dependencies:
       rpm_build_dependencies.extend(

@@ -9,14 +9,22 @@ import json
 import logging
 import os
 import re
-import urllib2
+import sys
+
+# pylint: disable=import-error,no-name-in-module
+if sys.version_info[0] < 3:
+  import urllib2 as urllib_error
+  import urllib2 as urllib_request
+else:
+  import urllib.error as urllib_error
+  import urllib.request as urllib_request
 
 try:
   import ConfigParser as configparser
 except ImportError:
   import configparser  # pylint: disable=import-error
 
-import pkg_resources
+import pkg_resources  # pylint: disable=wrong-import-position
 
 
 class DownloadHelper(object):
@@ -51,8 +59,8 @@ class DownloadHelper(object):
       logging.info('Downloading: {0:s}'.format(download_url))
 
       try:
-        url_object = urllib2.urlopen(download_url)
-      except urllib2.URLError as exception:
+        url_object = urllib_request.urlopen(download_url)
+      except urllib_error.URLError as exception:
         logging.warning(
             'Unable to download URL: {0:s} with error: {1:s}'.format(
                 download_url, exception))
@@ -81,8 +89,8 @@ class DownloadHelper(object):
 
     if self._cached_url != download_url:
       try:
-        url_object = urllib2.urlopen(download_url)
-      except urllib2.URLError as exception:
+        url_object = urllib_request.urlopen(download_url)
+      except urllib_error.URLError as exception:
         logging.warning(
             'Unable to download URL: {0:s} with error: {1:s}'.format(
                 download_url, exception))
@@ -426,6 +434,8 @@ class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
       return
 
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
+    # TODO: replace readfp by read_file, check if Python 2 compatible
     config_parser.readfp(io.BytesIO(page_content))
 
     return json.loads(config_parser.get('project', 'download_url'))
