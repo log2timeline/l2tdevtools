@@ -386,7 +386,7 @@ class DPKGBuildHelper(BuildHelper):
 
     for package_name in self._project_definition.build_dependencies:
       package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
-          package_name, package_name)
+          package_name, [package_name])
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
@@ -2504,12 +2504,14 @@ class BaseRPMBuildHelper(BuildHelper):
   ])
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
-      'bzip2': 'bzip2-devel',
-      'fuse': 'fuse-devel',
-      'libcrypto': 'openssl-devel',
-      'sqlite': 'sqlite-devel',
-      'zeromq': 'libzmq3-devel',
-      'zlib': 'zlib-devel'
+      'bzip2': ['bzip2-devel'],
+      'fuse': ['fuse-devel'],
+      'libcrypto': ['openssl-devel'],
+      'pytest-runner': [
+          'python2-pytest-runner', 'python3-pytest-runner'],
+      'sqlite': ['sqlite-devel'],
+      'zeromq': ['libzmq3-devel'],
+      'zlib': ['zlib-devel']
   }
 
   def __init__(self, project_definition, l2tdevtools_path):
@@ -2713,10 +2715,11 @@ class BaseRPMBuildHelper(BuildHelper):
         missing_packages.append(package_name)
 
     for package_name in self._project_definition.build_dependencies:
-      package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
+      dependencies = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
           package_name, package_name)
-      if not self._CheckIsInstalled(package_name):
-        missing_packages.append(package_name)
+      for dependency in dependencies:
+        if not self._CheckIsInstalled(dependency):
+          missing_packages.append(dependency)
 
     return missing_packages
 

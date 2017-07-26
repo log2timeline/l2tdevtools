@@ -37,6 +37,7 @@ class RPMSpecFileGenerator(object):
     if not python2_only:
       lines.append(b'python3 setup.py build')
 
+    lines.append(b'')
     return b'\n'.join(lines)
 
   def _GetDocumentationFilesDefinition(self, source_directory):
@@ -60,10 +61,11 @@ class RPMSpecFileGenerator(object):
 
     return doc_file_definition
 
-  def _GetInstallDefinition(self, python2_only):
+  def _GetInstallDefinition(self, project_name, python2_only):
     """Retrieves the install definition.
 
     Args:
+      project_name (str): name of the project.
       python2_only (bool): True if the spec file should build Python 2
           packages only.
 
@@ -75,6 +77,17 @@ class RPMSpecFileGenerator(object):
       lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
 
     lines.append(b'rm -rf %{buildroot}/usr/share/doc/%{name}/')
+
+    if project_name == 'astroid':
+      lines.append('rm -rf %{buildroot}%{python2_sitelib}/astroid/tests')
+      if not python2_only:
+        lines.append('rm -rf %{buildroot}%{python3_sitelib}/astroid/tests')
+
+    elif project_name == 'pylint':
+      lines.append('rm -rf %{buildroot}%{python2_sitelib}/pylint/test')
+      if not python2_only:
+        lines.append('rm -rf %{buildroot}%{python3_sitelib}/pylint/test')
+
     lines.append(b'')
     return b'\n'.join(lines)
 
@@ -133,7 +146,7 @@ class RPMSpecFileGenerator(object):
         b'{3:s}').format(name, summary, requires, description))
 
   def _WritePython2PackageFiles(
-      self, output_file_object, name, license_line, doc_line, lib_dir):
+      self, output_file_object, name, license_line, doc_line, setup_name):
     """Writes the Python 2 package files.
 
     Args:
@@ -141,14 +154,15 @@ class RPMSpecFileGenerator(object):
       name (str): package name.
       license_line (str): line containing the license file definition.
       doc_line (str): line containing the document files definition.
-      lib_dir (str): path of the library directory.
+      setup_name (str): project name used in setup.py.
     """
     output_file_object.write((
         b'%files -n {0:s}\n'
         b'{1:s}'
         b'{2:s}'
-        b'{3:s}/python2*/*\n').format(
-            name, license_line, doc_line, lib_dir))
+        b'%{{python2_sitelib}}/{3:s}\n'
+        b'%{{python2_sitelib}}/{3:s}*.egg-info\n').format(
+            name, license_line, doc_line, setup_name))
 
   def _WritePython3PackageDefinition(
       self, output_file_object, name, summary, requires, description):
@@ -170,7 +184,7 @@ class RPMSpecFileGenerator(object):
         b'{3:s}').format(name, summary, requires, description))
 
   def _WritePython3PackageFiles(
-      self, output_file_object, name, license_line, doc_line, lib_dir):
+      self, output_file_object, name, license_line, doc_line, setup_name):
     """Writes the Python 3 package files.
 
     Args:
@@ -178,15 +192,16 @@ class RPMSpecFileGenerator(object):
       name (str): package name.
       license_line (str): line containing the license file definition.
       doc_line (str): line containing the document files definition.
-      lib_dir (str): path of the library directory.
+      setup_name (str): project name used in setup.py.
     """
     output_file_object.write((
         b'\n'
         b'%files -n {0:s}\n'
         b'{1:s}'
         b'{2:s}'
-        b'{3:s}/python3*/*\n').format(
-            name, license_line, doc_line, lib_dir))
+        b'%{{python3_sitelib}}/{3:s}\n'
+        b'%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
+            name, license_line, doc_line, setup_name))
 
   def GenerateWithSetupPy(self, source_directory, build_log_file):
     """Generates the RPM spec file with setup.py.
@@ -419,7 +434,7 @@ class RPMSpecFileGenerator(object):
           line = self._GetBuildDefinition(python2_only)
 
         elif line.startswith(b'python setup.py install'):
-          line = self._GetInstallDefinition(python2_only)
+          line = self._GetInstallDefinition(project_name, python2_only)
 
         elif line == b'rm -rf $RPM_BUILD_ROOT\n':
           line = b'rm -rf %{buildroot}\n'
@@ -452,9 +467,14 @@ class RPMSpecFileGenerator(object):
     else:
       python_package_name = b'{0:s}%{{name}}'.format(python2_package_prefix)
 
+    if project_definition.setup_name:
+      setup_name = project_definition.setup_name
+    else:
+      setup_name = project_name
+
     self._WritePython2PackageFiles(
         output_file_object, python_package_name, license_line, doc_line,
-        lib_dir)
+        setup_name)
 
     if not python2_only:
       if project_name != package_name:
@@ -464,7 +484,7 @@ class RPMSpecFileGenerator(object):
 
       self._WritePython3PackageFiles(
           output_file_object, python_package_name, license_line, doc_line,
-          lib_dir)
+          setup_name)
 
     if project_name == 'artifacts':
       output_file_object.write(
