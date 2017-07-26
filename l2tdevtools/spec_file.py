@@ -393,6 +393,15 @@ class RPMSpecFileGenerator(object):
                 b'%description -n %{{name}}-data\n'
                 b'{1:s}').format(summary, description))
 
+          elif project_name == 'efilter':
+            output_file_object.write((
+                b'%package -n %{{name}}-data\n'
+                b'{0:s}'
+                b'Requires: python-dateutil, python-six >= 1.4.0, pytz'
+                b'\n'
+                b'%description -n %{{name}}-data\n'
+                b'{1:s}').format(summary, description))
+
           elif project_name == 'PyYAML':
             output_file_object.write(
                 b'%global debug_package %{nil}\n'
