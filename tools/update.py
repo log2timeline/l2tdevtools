@@ -113,7 +113,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
             cpu_architecture))
         return
 
-      sub_directory = 'macosx'
+      sub_directory = 'macos'
 
     elif operating_system == 'Linux':
       linux_name, linux_version, _ = platform.linux_distribution()

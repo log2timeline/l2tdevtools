@@ -675,7 +675,7 @@ class BinariesManager(object):
             cpu_architecture))
         return
 
-      sub_directory = u'macosx'
+      sub_directory = u'macos'
 
     elif operating_system == u'Linux':
       linux_name, linux_version, _ = platform.linux_distribution()
