@@ -180,7 +180,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = u'log2timeline'
   _PROJECT_NAME = u'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = u'20170715'
+  _PROJECT_VERSION = u'20170723'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -251,6 +251,9 @@ class PyPIDownloadHelperTest(unittest.TestCase):
         r'/packages\/\w{{2}}\/\w{{2}}\/\w+\/{0:s}-{1:s}\.tar\.gz').format(
             self._PROJECT_NAME, self._PROJECT_VERSION)
 
+    # pylint: disable=deprecated-method
+    # TODO: replace assertRegexpMatches by assertRegexp, check if compatible
+    # with Python 2 first.
     self.assertRegexpMatches(download_url, test_regexp)
 
   def testGetProjectIdentifier(self):
