@@ -111,9 +111,17 @@ class DPKGBuildFilesGenerator(object):
       'usr/lib/python2*/dist-packages/{package_name:s}*.egg-info/*',
       ''])
 
+  _INSTALL_TEMPLATE_PYTHON2_NO_EGG_INFO = '\n'.join([
+      'usr/lib/python2*/dist-packages/{package_name:s}/',
+      ''])
+
   _INSTALL_TEMPLATE_PYTHON3 = '\n'.join([
       'usr/lib/python3*/dist-packages/{package_name:s}/',
       'usr/lib/python3*/dist-packages/{package_name:s}*.egg-info/*',
+      ''])
+
+  _INSTALL_TEMPLATE_PYTHON3_NO_EGG_INFO = '\n'.join([
+      'usr/lib/python3*/dist-packages/{package_name:s}/',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON_TOOLS = '\n'.join([
@@ -531,18 +539,30 @@ class DPKGBuildFilesGenerator(object):
 
       template_values = {'package_name': package_name}
 
+      # TODO: add check for egg-info
+      if package_name == 'dateutil':
+        template_filename = self._INSTALL_TEMPLATE_PYTHON2_NO_EGG_INFO
+      else:
+        template_filename = self._INSTALL_TEMPLATE_PYTHON2
+
       install_file = '{0:s}.install'.format(python_package_name)
       output_filename = os.path.join(dpkg_path, install_file)
       self._GenerateFile(
           self._project_definition.dpkg_template_install_python2,
-          self._INSTALL_TEMPLATE_PYTHON2, template_values, output_filename)
+          template_filename, template_values, output_filename)
 
       if not self._IsPython2Only():
+        # TODO: add check for egg-info
+        if package_name == 'dateutil':
+          template_filename = self._INSTALL_TEMPLATE_PYTHON3_NO_EGG_INFO
+        else:
+          template_filename = self._INSTALL_TEMPLATE_PYTHON3
+
         install_file = '{0:s}.install'.format(python3_package_name)
         output_filename = os.path.join(dpkg_path, install_file)
         self._GenerateFile(
             self._project_definition.dpkg_template_install_python3,
-            self._INSTALL_TEMPLATE_PYTHON3, template_values, output_filename)
+            template_filename, template_values, output_filename)
 
       if os.path.isdir('scripts') or os.path.isdir('tools'):
         install_file = '{0:s}-tools.install'.format(package_name)
