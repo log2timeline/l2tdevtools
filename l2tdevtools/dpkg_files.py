@@ -538,6 +538,9 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'setup_py':
       python_package_name, python3_package_name = self._GetPythonPackageNames()
 
+      # Python modules names contain "_" instead of "-"
+      package_name = package_name.replace('-', '_')
+
       template_values = {'package_name': package_name}
 
       # TODO: add check for egg-info
