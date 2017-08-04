@@ -1,0 +1,46 @@
+Source: python-setuptools
+Section: python
+Priority: optional
+Maintainer: Matthias Klose <doko@debian.org>
+Build-Depends: debhelper (>= 9), dh-python, python-all, python3-all
+Standards-Version: 3.9.7
+Homepage: https://pypi.python.org/pypi/setuptools
+
+Package: python-pkg-resources
+Suggests: python-setuptools
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Package Discovery and Resource Access using pkg_resources
+ The pkg_resources module provides an API for Python libraries to
+ access their resource files, and for extensible applications and
+ frameworks to automatically discover plugins.  It also provides
+ runtime support for using C extensions that are inside zipfile-format
+ eggs, support for merging packages that have separately-distributed
+ modules or subpackages, and APIs for managing Python's current
+ "working set" of active packages.
+
+Package: python-setuptools
+Architecture: all
+Depends: python-pkg-resources (= ${binary:Version}), ${misc:Depends}, ${python:Depends}
+Provides: python-distribute
+Description: Python Distutils Enhancements
+ Extensions to the python-distutils for large or complex distributions.
+
+Package: python3-pkg-resources
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}
+Suggests: python3-setuptools
+Description: Package Discovery and Resource Access using pkg_resources
+ The pkg_resources module provides an API for Python libraries to
+ access their resource files, and for extensible applications and
+ frameworks to automatically discover plugins.  It also provides
+ runtime support for using C extensions that are inside zipfile-format
+ eggs, support for merging packages that have separately-distributed
+ modules or subpackages, and APIs for managing Python's current
+ "working set" of active packages.
+
+Package: python3-setuptools
+Architecture: all
+Depends: python3-pkg-resources (= ${binary:Version}), ${misc:Depends}, ${python3:Depends}
+Description: Python3 Distutils Enhancements
+ Extensions to the python-distutils for large or complex distributions.

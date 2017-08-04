@@ -35,10 +35,10 @@ class ProjectDefinition(object):
     dpkg_name (str): dpkg package name.
     dpkg_source_name (str): dpkg source package name.
     dpkg_template_control (str): name of the dpkg control template file.
-    dpkg_template_install_python2 (str): name of the dpkg Python 2 install
-        template file.
-    dpkg_template_install_python3 (str): name of the dpkg Python 3 install
-        template file.
+    dpkg_template_install_python2 (list[str]): names of the dpkg Python 2
+        install template files.
+    dpkg_template_install_python3 (list[str]): names of the dpkg Python 3
+        install template files.
     dpkg_template_rules (str): name of the dpkg rules template file.
     download_url (str): source package download URL.
     git_url (str): git repository URL.
@@ -312,6 +312,20 @@ class ProjectDefinitionReader(object):
           project_definition.dpkg_dependencies, py2to3.STRING_TYPES):
         project_definition.dpkg_dependencies = (
             project_definition.dpkg_dependencies.split(','))
+
+      if project_definition.dpkg_template_install_python2 is None:
+        project_definition.dpkg_template_install_python2 = []
+      elif isinstance(
+          project_definition.dpkg_template_install_python2, basestring):
+        project_definition.dpkg_template_install_python2 = (
+            project_definition.dpkg_template_install_python2.split(u','))
+
+      if project_definition.dpkg_template_install_python3 is None:
+        project_definition.dpkg_template_install_python3 = []
+      elif isinstance(
+          project_definition.dpkg_template_install_python3, basestring):
+        project_definition.dpkg_template_install_python3 = (
+            project_definition.dpkg_template_install_python3.split(u','))
 
       if project_definition.rpm_build_dependencies is None:
         project_definition.rpm_build_dependencies = []
