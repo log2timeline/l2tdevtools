@@ -484,8 +484,9 @@ class DPKGBuildFilesGenerator(object):
       else:
         control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY)
 
-      if os.path.isdir('scripts') or os.path.isdir('tools'):
-        control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_TOOLS)
+      if package_name != 'idna':
+        if os.path.isdir('scripts') or os.path.isdir('tools'):
+          control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_TOOLS)
 
     control_template = '\n'.join(control_template)
 
