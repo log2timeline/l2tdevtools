@@ -316,14 +316,16 @@ class ProjectDefinitionReader(object):
       if project_definition.dpkg_template_install_python2 is None:
         project_definition.dpkg_template_install_python2 = []
       elif isinstance(
-          project_definition.dpkg_template_install_python2, basestring):
+          project_definition.dpkg_template_install_python2,
+          py2to3.STRING_TYPES):
         project_definition.dpkg_template_install_python2 = (
             project_definition.dpkg_template_install_python2.split(u','))
 
       if project_definition.dpkg_template_install_python3 is None:
         project_definition.dpkg_template_install_python3 = []
       elif isinstance(
-          project_definition.dpkg_template_install_python3, basestring):
+          project_definition.dpkg_template_install_python3,
+          py2to3.STRING_TYPES):
         project_definition.dpkg_template_install_python3 = (
             project_definition.dpkg_template_install_python3.split(u','))
 
