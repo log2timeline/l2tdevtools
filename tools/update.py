@@ -116,6 +116,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       sub_directory = 'macos'
 
     elif operating_system == 'Linux':
+      # pylint: disable=deprecated-method
       linux_name, linux_version, _ = platform.linux_distribution()
       logging.error('Linux: {0:s} {1:s} not supported.'.format(
           linux_name, linux_version))
