@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Project definitions."""
 
+from __future__ import unicode_literals
+
 import logging
 import re
 
@@ -8,6 +10,8 @@ try:
   import ConfigParser as configparser
 except ImportError:
   import configparser  # pylint: disable=import-error
+
+from l2tdevtools import py2to3
 
 
 class ProjectDefinition(object):
@@ -99,7 +103,7 @@ class ProjectDefinition(object):
     Returns:
       bool: True if the project only support Python version 2.
     """
-    return self.build_options and u'python2_only' in self.build_options
+    return self.build_options and 'python2_only' in self.build_options
 
 
 class ProjectVersionDefinition(object):
@@ -120,23 +124,23 @@ class ProjectVersionDefinition(object):
     if not version_string:
       return
 
-    version_string_parts = version_string.split(u',')
+    version_string_parts = version_string.split(',')
     number_of_version_string_parts = len(version_string_parts)
     if number_of_version_string_parts > 2:
-      logging.warning(u'Unsupported version string: {0:s}'.format(
+      logging.warning('Unsupported version string: {0:s}'.format(
           version_string))
       return
 
     self._version_string_parts = []
     for index, version_string_part in enumerate(version_string_parts):
-      if index == 1 and not version_string_part.startswith(u'<'):
-        logging.warning(u'Unsupported version string part: {0:s}'.format(
+      if index == 1 and not version_string_part.startswith('<'):
+        logging.warning('Unsupported version string part: {0:s}'.format(
             version_string_part))
         return
 
       matches = self._VERSION_STRING_PART_RE.findall(version_string_part)
       if not matches:
-        logging.warning(u'Unsupported version string part: {0:s}'.format(
+        logging.warning('Unsupported version string part: {0:s}'.format(
             version_string_part))
         return
 
@@ -193,138 +197,141 @@ class ProjectDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
+    # TODO: replace readfp by read_file, check if Python 2 compatible
     config_parser.readfp(file_object)
 
     for section_name in config_parser.sections():
       project_definition = ProjectDefinition(section_name)
 
       project_definition.architecture_dependent = self._GetConfigValue(
-          config_parser, section_name, u'architecture_dependent')
+          config_parser, section_name, 'architecture_dependent')
       project_definition.build_dependencies = self._GetConfigValue(
-          config_parser, section_name, u'build_dependencies')
+          config_parser, section_name, 'build_dependencies')
       project_definition.build_options = self._GetConfigValue(
-          config_parser, section_name, u'build_options')
+          config_parser, section_name, 'build_options')
       project_definition.build_system = self._GetConfigValue(
-          config_parser, section_name, u'build_system')
+          config_parser, section_name, 'build_system')
       project_definition.configure_options = self._GetConfigValue(
-          config_parser, section_name, u'configure_options')
+          config_parser, section_name, 'configure_options')
       project_definition.description_long = self._GetConfigValue(
-          config_parser, section_name, u'description_long')
+          config_parser, section_name, 'description_long')
       project_definition.description_short = self._GetConfigValue(
-          config_parser, section_name, u'description_short')
+          config_parser, section_name, 'description_short')
       project_definition.disabled = self._GetConfigValue(
-          config_parser, section_name, u'disabled')
+          config_parser, section_name, 'disabled')
       project_definition.dpkg_build_dependencies = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_build_dependencies')
+          config_parser, section_name, 'dpkg_build_dependencies')
       project_definition.dpkg_configure_options = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_configure_options')
+          config_parser, section_name, 'dpkg_configure_options')
       project_definition.dpkg_dependencies = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_dependencies')
+          config_parser, section_name, 'dpkg_dependencies')
       project_definition.dpkg_name = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_name')
+          config_parser, section_name, 'dpkg_name')
       project_definition.dpkg_source_name = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_source_name')
+          config_parser, section_name, 'dpkg_source_name')
       project_definition.dpkg_template_control = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_template_control')
+          config_parser, section_name, 'dpkg_template_control')
       project_definition.dpkg_template_install_python2 = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_template_install_python2')
+          config_parser, section_name, 'dpkg_template_install_python2')
       project_definition.dpkg_template_install_python3 = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_template_install_python3')
+          config_parser, section_name, 'dpkg_template_install_python3')
       project_definition.dpkg_template_rules = self._GetConfigValue(
-          config_parser, section_name, u'dpkg_template_rules')
+          config_parser, section_name, 'dpkg_template_rules')
       project_definition.download_url = self._GetConfigValue(
-          config_parser, section_name, u'download_url')
+          config_parser, section_name, 'download_url')
       project_definition.git_url = self._GetConfigValue(
-          config_parser, section_name, u'git_url')
+          config_parser, section_name, 'git_url')
       project_definition.homepage_url = self._GetConfigValue(
-          config_parser, section_name, u'homepage_url')
+          config_parser, section_name, 'homepage_url')
       project_definition.maintainer = self._GetConfigValue(
-          config_parser, section_name, u'maintainer')
+          config_parser, section_name, 'maintainer')
       project_definition.msi_name = self._GetConfigValue(
-          config_parser, section_name, u'msi_name')
+          config_parser, section_name, 'msi_name')
       project_definition.msi_prebuild = self._GetConfigValue(
-          config_parser, section_name, u'msi_prebuild')
+          config_parser, section_name, 'msi_prebuild')
       project_definition.rpm_build_dependencies = self._GetConfigValue(
-          config_parser, section_name, u'rpm_build_dependencies')
+          config_parser, section_name, 'rpm_build_dependencies')
       project_definition.rpm_name = self._GetConfigValue(
-          config_parser, section_name, u'rpm_name')
+          config_parser, section_name, 'rpm_name')
       project_definition.rpm_python2_prefix = self._GetConfigValue(
-          config_parser, section_name, u'rpm_python2_prefix')
+          config_parser, section_name, 'rpm_python2_prefix')
       project_definition.patches = self._GetConfigValue(
-          config_parser, section_name, u'patches')
+          config_parser, section_name, 'patches')
       project_definition.pkg_configure_options = self._GetConfigValue(
-          config_parser, section_name, u'pkg_configure_options')
+          config_parser, section_name, 'pkg_configure_options')
       project_definition.setup_name = self._GetConfigValue(
-          config_parser, section_name, u'setup_name')
+          config_parser, section_name, 'setup_name')
       project_definition.version = self._GetConfigValue(
-          config_parser, section_name, u'version')
+          config_parser, section_name, 'version')
 
       if project_definition.build_dependencies is None:
         project_definition.build_dependencies = []
       elif isinstance(
-          project_definition.build_dependencies, basestring):
+          project_definition.build_dependencies, py2to3.STRING_TYPES):
         project_definition.build_dependencies = (
-            project_definition.build_dependencies.split(u','))
+            project_definition.build_dependencies.split(','))
 
       if project_definition.build_options is None:
         project_definition.build_options = []
       elif isinstance(
-          project_definition.build_options, basestring):
+          project_definition.build_options, py2to3.STRING_TYPES):
         project_definition.build_options = (
-            project_definition.build_options.split(u','))
+            project_definition.build_options.split(','))
 
       if project_definition.configure_options is None:
         project_definition.configure_options = []
       elif isinstance(
-          project_definition.configure_options, basestring):
+          project_definition.configure_options, py2to3.STRING_TYPES):
         project_definition.configure_options = (
-            project_definition.configure_options.split(u','))
+            project_definition.configure_options.split(','))
 
       if project_definition.disabled is None:
         project_definition.disabled = []
-      elif isinstance(project_definition.disabled, basestring):
+      elif isinstance(project_definition.disabled, py2to3.STRING_TYPES):
         project_definition.disabled = project_definition.disabled.split(
-            u',')
+            ',')
 
       if project_definition.dpkg_build_dependencies is None:
         project_definition.dpkg_build_dependencies = []
       elif isinstance(
-          project_definition.dpkg_build_dependencies, basestring):
+          project_definition.dpkg_build_dependencies, py2to3.STRING_TYPES):
         project_definition.dpkg_build_dependencies = (
-            project_definition.dpkg_build_dependencies.split(u','))
+            project_definition.dpkg_build_dependencies.split(','))
 
       if project_definition.dpkg_configure_options is None:
         project_definition.dpkg_configure_options = []
       elif isinstance(
-          project_definition.dpkg_configure_options, basestring):
+          project_definition.dpkg_configure_options, py2to3.STRING_TYPES):
         project_definition.dpkg_configure_options = (
-            project_definition.dpkg_configure_options.split(u','))
+            project_definition.dpkg_configure_options.split(','))
 
       if project_definition.dpkg_dependencies is None:
         project_definition.dpkg_dependencies = []
-      elif isinstance(project_definition.dpkg_dependencies, basestring):
+      elif isinstance(
+          project_definition.dpkg_dependencies, py2to3.STRING_TYPES):
         project_definition.dpkg_dependencies = (
-            project_definition.dpkg_dependencies.split(u','))
+            project_definition.dpkg_dependencies.split(','))
 
       if project_definition.rpm_build_dependencies is None:
         project_definition.rpm_build_dependencies = []
       elif isinstance(
-          project_definition.rpm_build_dependencies, basestring):
+          project_definition.rpm_build_dependencies, py2to3.STRING_TYPES):
         project_definition.rpm_build_dependencies = (
-            project_definition.rpm_build_dependencies.split(u','))
+            project_definition.rpm_build_dependencies.split(','))
 
       if project_definition.patches is None:
         project_definition.patches = []
-      elif isinstance(project_definition.patches, basestring):
+      elif isinstance(project_definition.patches, py2to3.STRING_TYPES):
         project_definition.patches = project_definition.patches.split(
-            u',')
+            ',')
 
       if project_definition.pkg_configure_options is None:
         project_definition.pkg_configure_options = []
       elif isinstance(
-          project_definition.pkg_configure_options, basestring):
+          project_definition.pkg_configure_options, py2to3.STRING_TYPES):
         project_definition.pkg_configure_options = (
-            project_definition.pkg_configure_options.split(u','))
+            project_definition.pkg_configure_options.split(','))
 
       # Need at minimum a name and a download URL.
       if project_definition.name and project_definition.download_url:
