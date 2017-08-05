@@ -903,6 +903,7 @@ def Main():
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
       download_only=options.download_only,
+      download_track=options.track,
       exclude_packages=options.exclude_packages,
       force_install=options.force_install,
       msi_targetdir=options.msi_targetdir,
