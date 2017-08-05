@@ -212,6 +212,9 @@ class DPKGBuildHelper(BuildHelper):
       project_name (str): project name.
       project_version (str): version of the project.
     """
+    if self._project_definition.dpkg_source_name:
+      project_name = self._project_definition.dpkg_source_name
+
     deb_orig_source_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, project_version)
     if os.path.exists(deb_orig_source_filename):
