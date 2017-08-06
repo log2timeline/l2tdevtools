@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the project definitions."""
 
+from __future__ import unicode_literals
+
 import os
 import unittest
 
@@ -13,7 +15,7 @@ class ProjectDefinitionTest(unittest.TestCase):
 
   def testIsPython2Only(self):
     """Tests the IsPython2Only function."""
-    project_definition = projects.ProjectDefinition(u'test')
+    project_definition = projects.ProjectDefinition('test')
 
     result = project_definition.IsPython2Only()
     self.assertFalse(result)
@@ -24,44 +26,44 @@ class ProjectVersionDefinitionTest(unittest.TestCase):
 
   def testInitialize(self):
     """Tests the __init__ function."""
-    project_version_definition = projects.ProjectVersionDefinition(u'')
+    project_version_definition = projects.ProjectVersionDefinition('')
     self.assertIsNotNone(project_version_definition)
 
-    project_version_definition = projects.ProjectVersionDefinition(u'>1.0')
+    project_version_definition = projects.ProjectVersionDefinition('>1.0')
     self.assertIsNotNone(project_version_definition)
 
-    project_version_definition = projects.ProjectVersionDefinition(u'<=1.0')
-    self.assertIsNotNone(project_version_definition)
-
-    project_version_definition = projects.ProjectVersionDefinition(
-        u'>=1.0,<2.0')
+    project_version_definition = projects.ProjectVersionDefinition('<=1.0')
     self.assertIsNotNone(project_version_definition)
 
     project_version_definition = projects.ProjectVersionDefinition(
-        u'>=1.0,==2.0')
+        '>=1.0,<2.0')
     self.assertIsNotNone(project_version_definition)
 
     project_version_definition = projects.ProjectVersionDefinition(
-        u'>=1.0,<2.0,>3.0')
+        '>=1.0,==2.0')
     self.assertIsNotNone(project_version_definition)
 
-    project_version_definition = projects.ProjectVersionDefinition(u'bogus')
+    project_version_definition = projects.ProjectVersionDefinition(
+        '>=1.0,<2.0,>3.0')
+    self.assertIsNotNone(project_version_definition)
+
+    project_version_definition = projects.ProjectVersionDefinition('bogus')
     self.assertIsNotNone(project_version_definition)
 
   def testVersionStringAttribute(self):
     """Tests the version_string attribute."""
-    project_version_definition = projects.ProjectVersionDefinition(u'>1.0')
+    project_version_definition = projects.ProjectVersionDefinition('>1.0')
     self.assertIsNotNone(project_version_definition)
 
-    self.assertEqual(project_version_definition.version_string, u'>1.0')
+    self.assertEqual(project_version_definition.version_string, '>1.0')
 
   def testGetEarliestVersion(self):
     """Tests the GetEarliestVersion function."""
-    project_version_definition = projects.ProjectVersionDefinition(u'>1.0')
+    project_version_definition = projects.ProjectVersionDefinition('>1.0')
     self.assertIsNotNone(project_version_definition)
 
     earliest_version = project_version_definition.GetEarliestVersion()
-    self.assertEqual(earliest_version, [u'>', u'1', u'0'])
+    self.assertEqual(earliest_version, ['>', '1', '0'])
 
 
 class ProjectDefinitionReaderTest(unittest.TestCase):
@@ -71,7 +73,7 @@ class ProjectDefinitionReaderTest(unittest.TestCase):
 
   def testRead(self):
     """Tests the Read function."""
-    config_file = os.path.join(u'data', u'projects.ini')
+    config_file = os.path.join('data', 'projects.ini')
 
     project_definitions = {}
     with open(config_file) as file_object:
@@ -83,16 +85,16 @@ class ProjectDefinitionReaderTest(unittest.TestCase):
 
     self.assertGreaterEqual(len(project_definitions), 1)
 
-    project_definition = project_definitions[u'artifacts']
+    project_definition = project_definitions['artifacts']
 
-    self.assertEqual(project_definition.name, u'artifacts')
+    self.assertEqual(project_definition.name, 'artifacts')
     self.assertIsNotNone(project_definition.version)
 
     self.assertEqual(
-        project_definition.version.version_string, u'>=20150409')
+        project_definition.version.version_string, '>=20150409')
 
     expected_download_url = (
-        u'https://github.com/ForensicArtifacts/artifacts/releases')
+        'https://github.com/ForensicArtifacts/artifacts/releases')
     self.assertEqual(project_definition.download_url, expected_download_url)
 
 

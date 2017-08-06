@@ -319,7 +319,7 @@ class ProjectDefinitionReader(object):
           project_definition.dpkg_template_install_python2,
           py2to3.STRING_TYPES):
         project_definition.dpkg_template_install_python2 = (
-            project_definition.dpkg_template_install_python2.split(u','))
+            project_definition.dpkg_template_install_python2.split(','))
 
       if project_definition.dpkg_template_install_python3 is None:
         project_definition.dpkg_template_install_python3 = []
@@ -327,7 +327,7 @@ class ProjectDefinitionReader(object):
           project_definition.dpkg_template_install_python3,
           py2to3.STRING_TYPES):
         project_definition.dpkg_template_install_python3 = (
-            project_definition.dpkg_template_install_python3.split(u','))
+            project_definition.dpkg_template_install_python3.split(','))
 
       if project_definition.rpm_build_dependencies is None:
         project_definition.rpm_build_dependencies = []
