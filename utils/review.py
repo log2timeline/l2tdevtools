@@ -323,6 +323,7 @@ class CodeReviewHelper(CLIHelper):
     """
     if not self._access_token:
       # TODO: add support to get access token directly from user.
+      # pylint: disable=no-member
       self._access_token = utils.upload.GetAccessToken()
       if not self._access_token:
         logging.error('Unable to retrieve access token.')
