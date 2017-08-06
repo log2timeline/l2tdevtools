@@ -456,11 +456,6 @@ class RPMSpecFileGenerator(object):
 
     doc_line = self._GetDocumentationFilesDefinition(source_directory)
 
-    if not project_definition.architecture_dependent:
-      lib_dir = '%{_exec_prefix}/lib'
-    else:
-      lib_dir = '%{_libdir}'
-
     if project_name != package_name:
       python_package_name = b'{0:s}{1:s}'.format(
           python2_package_prefix, package_name)

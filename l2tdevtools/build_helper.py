@@ -2029,9 +2029,9 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     else:
       setup_name = source_helper_object.project_name
 
-    spec_file = '{0:s}.spec'.format(setup_name)
+    spec_filename = '{0:s}.spec'.format(setup_name)
 
-    return os.path.join(source_directory, 'dist', spec_file)
+    return os.path.join(source_directory, 'dist', spec_filename)
 
   def Build(self, source_helper_object):
     """Builds the osc package.
@@ -2082,12 +2082,6 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     project_name = source_helper_object.project_name
     if project_name.startswith('python-') and project_name != 'python-gflags':
       project_name = project_name[7:]
-
-    # TODO: move this to configuration.
-    if project_name == 'dateutil':
-      project_prefix = 'python-'
-    else:
-      project_prefix = ''
 
     input_file_path = self._GetSetupPySpecFilePath(
         source_helper_object, source_directory)
@@ -2683,9 +2677,9 @@ class BaseRPMBuildHelper(BuildHelper):
     else:
       setup_name = source_helper_object.project_name
 
-    spec_file = '{0:s}.spec'.format(setup_name)
+    spec_filename = '{0:s}.spec'.format(setup_name)
 
-    return os.path.join(source_directory, 'dist', spec_file)
+    return os.path.join(source_directory, 'dist', spec_filename)
 
   def _MoveFilesToCurrentDirectory(self, filenames_glob):
     """Moves files into the current directory.
@@ -2921,12 +2915,6 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name = source_helper_object.project_name
     if project_name.startswith('python-'):
       project_name = project_name[7:]
-
-    # TODO: move this to configuration.
-    if project_name == 'dateutil':
-      project_prefix = 'python-'
-    else:
-      project_prefix = ''
 
     input_file_path = self._GetSetupPySpecFilePath(
         source_helper_object, source_directory)
@@ -3176,12 +3164,6 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     project_name = source_helper_object.project_name
     if project_name.startswith('python-'):
       project_name = project_name[7:]
-
-    # TODO: move this to configuration.
-    if project_name == 'dateutil':
-      project_prefix = 'python-'
-    else:
-      project_prefix = ''
 
     input_file_path = self._GetSetupPySpecFilePath(
         source_helper_object, source_directory)
