@@ -1,4 +1,4 @@
-Source: python-setuptools
+Source: setuptools
 Section: python
 Priority: optional
 Maintainer: Matthias Klose <doko@debian.org>
