@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the project preset definitions."""
 
+from __future__ import unicode_literals
+
 import unittest
 
 from l2tdevtools import presets
@@ -12,7 +14,7 @@ class PresetDefinitionTest(unittest.TestCase):
 
   def testInitialize(self):
     """Tests the __init__ function."""
-    preset_definition = presets.PresetDefinition(u'test')
+    preset_definition = presets.PresetDefinition('test')
     self.assertIsNotNone(preset_definition)
 
 

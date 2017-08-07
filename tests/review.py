@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the review script."""
 
+from __future__ import unicode_literals
+
 import os
 import unittest
 
@@ -15,7 +17,7 @@ class CLIHelperTest(unittest.TestCase):
     """Tests the RunCommand function."""
     cli_helper = review.CLIHelper()
 
-    exit_code, _, _ = cli_helper.RunCommand(u'echo')
+    exit_code, _, _ = cli_helper.RunCommand('echo')
     self.assertEqual(exit_code, 0)
 
 
@@ -26,23 +28,23 @@ class CodeReviewHelperTest(unittest.TestCase):
 
   def testGetReviewer(self):
     """Tests the _GetReviewer function."""
-    author = u'test@example.com'
+    author = 'test@example.com'
     codereview_helper = review.CodeReviewHelper(author, no_browser=True)
 
-    reviewer = codereview_helper._GetReviewer(u'l2tdevtools')
+    reviewer = codereview_helper._GetReviewer('l2tdevtools')
     self.assertNotEqual(reviewer, author)
     self.assertIn(reviewer, codereview_helper._REVIEWERS_DEFAULT)
 
   def testGetReviewersOnCC(self):
     """Tests the _GetReviewersOnCC function."""
-    author = u'test@example.com'
-    reviewer = u'joachim.metz@gmail.com'
+    author = 'test@example.com'
+    reviewer = 'joachim.metz@gmail.com'
     codereview_helper = review.CodeReviewHelper(author, no_browser=True)
 
-    reviewers_cc = codereview_helper._GetReviewersOnCC(u'l2tdevtools', reviewer)
+    reviewers_cc = codereview_helper._GetReviewersOnCC('l2tdevtools', reviewer)
     self.assertNotIn(author, reviewers_cc)
     self.assertNotIn(reviewer, reviewers_cc)
-    self.assertIn(u'log2timeline-dev@googlegroups.com', reviewers_cc)
+    self.assertIn('log2timeline-dev@googlegroups.com', reviewers_cc)
 
   # TODO: add AddMergeMessage test.
   # TODO: add CloseIssue test.
@@ -50,11 +52,11 @@ class CodeReviewHelperTest(unittest.TestCase):
   # TODO: add GetAccessToken test.
 
   @unittest.skipIf(
-      os.environ.get(u'TRAVIS_OS_NAME', u''), 'Travis-CI not supported')
+      os.environ.get('TRAVIS_OS_NAME', ''), 'Travis-CI not supported')
   def testGetXSRFToken(self):
     """Tests the GetXSRFToken function."""
     codereview_helper = review.CodeReviewHelper(
-        u'test@example.com', no_browser=True)
+        'test@example.com', no_browser=True)
 
     # Only test if the method completes without errors.
     codereview_helper.GetXSRFToken()
@@ -62,14 +64,14 @@ class CodeReviewHelperTest(unittest.TestCase):
   def testQueryIssue(self):
     """Tests the QueryIssue function."""
     codereview_helper = review.CodeReviewHelper(
-        u'test@example.com', no_browser=True)
+        'test@example.com', no_browser=True)
 
     codereview_information = codereview_helper.QueryIssue(269830043)
     self.assertIsNotNone(codereview_information)
 
     expected_description = (
-        u'Updated review scripts and added Python variant #40')
-    description = codereview_information.get(u'subject')
+        'Updated review scripts and added Python variant #40')
+    description = codereview_information.get('subject')
     self.assertEqual(description, expected_description)
 
     codereview_information = codereview_helper.QueryIssue(0)
@@ -128,37 +130,37 @@ class TestGitHelper(review.GitHelper):
     Returns:
       tuple[int, bytes, bytes]: exit code, stdout and stderr data.
     """
-    if command == u'git branch':
+    if command == 'git branch':
       return 0, self._GIT_BRANCH_DATA, b''
 
-    if command == u'git checkout master':
+    if command == 'git checkout master':
       return 0, b'', b''
 
-    if command == u'git config user.email':
+    if command == 'git config user.email':
       return 0, self._GIT_EMAIL_DATA, b''
 
-    if command == u'git log -1':
+    if command == 'git log -1':
       return 0, self._GIT_LAST_LOG_DATA, b''
 
-    if command == u'git remote -v':
+    if command == 'git remote -v':
       return 0, self._GIT_REMOTE_DATA, b''
 
-    if command.startswith(u'git add -A '):
+    if command.startswith('git add -A '):
       return 0, b'', b''
 
-    if command.startswith(u'git branch -D '):
+    if command.startswith('git branch -D '):
       return 0, b'', b''
 
-    if command.startswith(u'git fetch '):
+    if command.startswith('git fetch '):
       return 0, b'', b''
 
-    if command.startswith(u'git pull --no-edit '):
+    if command.startswith('git pull --no-edit '):
       return 0, b'', b''
 
-    if command.startswith(u'git pull --squash '):
+    if command.startswith('git pull --squash '):
       return 0, b'', b''
 
-    if command.startswith(u'git push'):
+    if command.startswith('git push'):
       return 0, b'', b''
 
 
@@ -180,25 +182,25 @@ class GitHelperTest(unittest.TestCase):
     """Tests the AddPath function."""
     git_helper = TestGitHelper(self._GIT_REPO_URL)
 
-    result = git_helper.AddPath(u'README')
+    result = git_helper.AddPath('README')
     self.assertTrue(result)
 
   def testCheckHasBranch(self):
     """Tests the CheckHasBranch function."""
     git_helper = TestGitHelper(self._GIT_REPO_URL)
 
-    result = git_helper.CheckHasBranch(u'master')
+    result = git_helper.CheckHasBranch('master')
     self.assertTrue(result)
 
-    result = git_helper.CheckHasBranch(u'feature')
+    result = git_helper.CheckHasBranch('feature')
     self.assertTrue(result)
 
-    result = git_helper.CheckHasBranch(u'bogus')
+    result = git_helper.CheckHasBranch('bogus')
     self.assertFalse(result)
 
     git_helper = ErrorGitHelper(self._GIT_REPO_URL)
 
-    result = git_helper.CheckHasBranch(u'master')
+    result = git_helper.CheckHasBranch('master')
     self.assertFalse(result)
 
   def testCheckHasProjectOrigin(self):
@@ -244,18 +246,18 @@ class GitHelperTest(unittest.TestCase):
     git_helper = review.GitHelper(self._GIT_REPO_URL)
 
     # Only test if the method completes without errors.
-    git_helper.GetChangedFiles(u'origin/master')
+    git_helper.GetChangedFiles('origin/master')
 
   def testGetChangedPythonFiles(self):
     """Tests the GetChangedPythonFiles function."""
     git_helper = review.GitHelper(self._GIT_REPO_URL)
 
     # Only test if the method completes without errors.
-    git_helper.GetChangedPythonFiles(u'origin/master')
+    git_helper.GetChangedPythonFiles('origin/master')
 
   def testGetEmailAddress(self):
     """Tests the GetEmailAddress function."""
-    if os.environ.get(u'TRAVIS_OS_NAME', u''):
+    if os.environ.get('TRAVIS_OS_NAME', ''):
       git_helper = TestGitHelper(self._GIT_REPO_URL)
     else:
       git_helper = review.GitHelper(self._GIT_REPO_URL)
@@ -265,7 +267,7 @@ class GitHelperTest(unittest.TestCase):
 
   def testGetLastCommitMessage(self):
     """Tests the GetLastCommitMessage function."""
-    if os.environ.get(u'TRAVIS_OS_NAME', u''):
+    if os.environ.get('TRAVIS_OS_NAME', ''):
       git_helper = TestGitHelper(self._GIT_REPO_URL)
     else:
       git_helper = review.GitHelper(self._GIT_REPO_URL)
@@ -277,7 +279,7 @@ class GitHelperTest(unittest.TestCase):
     """Tests the GetRemoteOrigin function."""
     git_helper = TestGitHelper(self._GIT_REPO_URL)
 
-    expected_remote_origin = u'https://github.com/username/l2tdevtools.git'
+    expected_remote_origin = 'https://github.com/username/l2tdevtools.git'
     remote_origin = git_helper.GetRemoteOrigin()
     self.assertEqual(remote_origin, expected_remote_origin)
 
@@ -286,25 +288,25 @@ class GitHelperTest(unittest.TestCase):
     git_helper = TestGitHelper(self._GIT_REPO_URL)
 
     result = git_helper.PullFromFork(
-        u'https://github.com/username/l2tdevtools.git', u'feature')
+        'https://github.com/username/l2tdevtools.git', 'feature')
     self.assertTrue(result)
 
   def testPushToOrigin(self):
     """Tests the PushToOrigin function."""
     git_helper = TestGitHelper(self._GIT_REPO_URL)
 
-    result = git_helper.PushToOrigin(u'feature')
+    result = git_helper.PushToOrigin('feature')
     self.assertTrue(result)
 
-    result = git_helper.PushToOrigin(u'feature', force=True)
+    result = git_helper.PushToOrigin('feature', force=True)
     self.assertTrue(result)
 
   def testRemoveFeatureBranch(self):
     """Tests the RemoveFeatureBranch function."""
     git_helper = TestGitHelper(self._GIT_REPO_URL)
 
-    git_helper.RemoveFeatureBranch(u'feature')
-    git_helper.RemoveFeatureBranch(u'master')
+    git_helper.RemoveFeatureBranch('feature')
+    git_helper.RemoveFeatureBranch('master')
 
     # TODO: add return value.
 
@@ -347,20 +349,20 @@ class GitHubHelperTest(unittest.TestCase):
   # TODO: add GetForkGitRepoUrl test.
 
   @unittest.skipIf(
-      os.environ.get(u'TRAVIS_OS_NAME', u''), 'Travis-CI not supported')
+      os.environ.get('TRAVIS_OS_NAME', ''), 'Travis-CI not supported')
   def testQueryUser(self):
     """Tests the QueryUser function."""
-    github_helper = review.GitHubHelper(u'log2timeline', u'l2tdevtools')
+    github_helper = review.GitHubHelper('log2timeline', 'l2tdevtools')
 
-    user_information = github_helper.QueryUser(u'joachimmetz')
+    user_information = github_helper.QueryUser('joachimmetz')
     self.assertIsNotNone(user_information)
 
-    expected_name = u'Joachim Metz'
-    name = user_information.get(u'name')
+    expected_name = 'Joachim Metz'
+    name = user_information.get('name')
     self.assertEqual(name, expected_name)
 
     user_information = github_helper.QueryUser(
-        u'df07128937706371903f6ca7241a73db')
+        'df07128937706371903f6ca7241a73db')
     self.assertIsNone(user_information)
 
     # TODO: determine why this test fails on Travis-CI osx.
@@ -371,16 +373,16 @@ class ProjectHelper(unittest.TestCase):
 
   def testProjectName(self):
     """Tests the project_name attribute."""
-    test_path = u'/Users/l2tdevtools/l2tdevtools/utils/review.py'
+    test_path = '/Users/l2tdevtools/l2tdevtools/utils/review.py'
     project_helper = review.ProjectHelper(test_path)
 
-    self.assertEqual(project_helper.project_name, u'l2tdevtools')
+    self.assertEqual(project_helper.project_name, 'l2tdevtools')
 
     # Create a new helper, as the project name is cached.
-    test_path = u'/Users/l2tdevtools/plaso_master/utils/review.py'
+    test_path = '/Users/l2tdevtools/plaso_master/utils/review.py'
     project_helper = review.ProjectHelper(test_path)
 
-    self.assertEqual(project_helper.project_name, u'plaso')
+    self.assertEqual(project_helper.project_name, 'plaso')
 
   # TODO: add version_file_path test.
   # TODO: add _GetProjectName test.
@@ -392,7 +394,7 @@ class ProjectHelper(unittest.TestCase):
 
 
 @unittest.skipIf(
-    os.environ.get(u'TRAVIS_OS_NAME', u''), 'Travis-CI not supported')
+    os.environ.get('TRAVIS_OS_NAME', ''), 'Travis-CI not supported')
 class PylintHelperTest(unittest.TestCase):
   """Tests for the pylint helper class."""
 
@@ -402,11 +404,11 @@ class PylintHelperTest(unittest.TestCase):
 
   def testCheckFiles(self):
     """Tests the CheckFiles function."""
-    test_file = os.path.join(u'test_data', u'linter_pass.py')
+    test_file = os.path.join('test_data', 'linter_pass.py')
     result = self._pylint_helper.CheckFiles([test_file])
     self.assertTrue(result)
 
-    test_file = os.path.join(u'test_data', u'linter_fail.py')
+    test_file = os.path.join('test_data', 'linter_fail.py')
     result = self._pylint_helper.CheckFiles([test_file])
     self.assertFalse(result)
 
@@ -429,7 +431,7 @@ class SphinxAPIDocHelperTest(unittest.TestCase):
 
   def setUp(self):
     """Sets up a test case."""
-    self._sphinxapidoc_helper = review.SphinxAPIDocHelper(u'plaso')
+    self._sphinxapidoc_helper = review.SphinxAPIDocHelper('plaso')
 
   # TODO: the version check fails for sphinx-apidoc 1.2.2 on Unbuntu 14.04.
   @unittest.expectedFailure
@@ -460,19 +462,19 @@ class ReviewFileTest(unittest.TestCase):
   def testCreateUseRemove(self):
     """Tests the Create, GetCodeReviewIssueNumber and Remove functions."""
     # Check if the review file does not already exist.
-    review_file_path = os.path.join(u'.review', u'bogus')
+    review_file_path = os.path.join('.review', 'bogus')
     self.assertFalse(os.path.exists(review_file_path))
 
-    review_file = review.ReviewFile(u'bogus')
+    review_file = review.ReviewFile('bogus')
     review_file.Create(123456789)
 
     self.assertTrue(os.path.exists(review_file_path))
 
-    review_file = review.ReviewFile(u'bogus')
+    review_file = review.ReviewFile('bogus')
     codereview_issue_number = review_file.GetCodeReviewIssueNumber()
     self.assertEqual(codereview_issue_number, 123456789)
 
-    review_file = review.ReviewFile(u'bogus')
+    review_file = review.ReviewFile('bogus')
     review_file.Remove()
     self.assertFalse(os.path.exists(review_file_path))
 

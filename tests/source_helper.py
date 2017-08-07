@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the elper for managing project source code."""
 
+from __future__ import unicode_literals
+
 import unittest
 
 from l2tdevtools import source_helper
@@ -12,7 +14,7 @@ class SourceHelperTest(unittest.TestCase):
 
   def testInitialize(self):
     """Tests the __init__ function."""
-    source_helper_object = source_helper.SourceHelper(u'test', None)
+    source_helper_object = source_helper.SourceHelper('test', None)
     self.assertIsNotNone(source_helper_object)
 
 

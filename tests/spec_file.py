@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the RPM spec file generator."""
 
+from __future__ import unicode_literals
+
 import unittest
 
 from l2tdevtools import spec_file

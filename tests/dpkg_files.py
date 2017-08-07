@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the dpkg build files generator."""
 
+from __future__ import unicode_literals
+
 import unittest
 
 from l2tdevtools import dpkg_files
@@ -13,7 +15,7 @@ class DPKGBuildFilesGeneratorTest(unittest.TestCase):
   def testGenerateChangelogFile(self):
     """Tests the _GenerateChangelogFile function."""
     dpkg_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-        u'test', u'1.0', None, u'')
+        'test', '1.0', None, '')
 
     _ = dpkg_files_generator
     # TODO: implement tests.

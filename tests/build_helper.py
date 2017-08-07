@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the helper for building projects from source."""
 
+from __future__ import unicode_literals
+
 import unittest
 
 from l2tdevtools import build_helper
@@ -13,16 +15,16 @@ class BuildHelperTest(unittest.TestCase):
 
   def testCheckBuildDependencies(self):
     """Tests the CheckBuildDependencies function."""
-    project_definition = projects.ProjectDefinition(u'test')
-    build_helper_object = build_helper.BuildHelper(project_definition, u'')
+    project_definition = projects.ProjectDefinition('test')
+    build_helper_object = build_helper.BuildHelper(project_definition, '')
 
     build_dependencies = build_helper_object.CheckBuildDependencies()
     self.assertEqual(build_dependencies, [])
 
   def testCheckBuildRequired(self):
     """Tests the CheckBuildRequired function."""
-    project_definition = projects.ProjectDefinition(u'test')
-    build_helper_object = build_helper.BuildHelper(project_definition, u'')
+    project_definition = projects.ProjectDefinition('test')
+    build_helper_object = build_helper.BuildHelper(project_definition, '')
 
     result = build_helper_object.CheckBuildRequired(None)
     self.assertTrue(result)

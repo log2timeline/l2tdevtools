@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the download helper object implementations."""
 
+from __future__ import unicode_literals
+
 import os
 import shutil
 import tempfile
@@ -16,7 +18,7 @@ class TempDirectory(object):
   def __init__(self):
     """Initializes the temporary directory."""
     super(TempDirectory, self).__init__()
-    self.name = u''
+    self.name = ''
 
   def __enter__(self):
     """Make this work with the 'with' statement."""
@@ -31,17 +33,17 @@ class TempDirectory(object):
 class DownloadHelperTest(unittest.TestCase):
   """Tests for the download helper."""
 
-  _FILENAME = u'LICENSE'
+  _FILENAME = 'LICENSE'
 
   def setUp(self):
     """Sets up a test case."""
     self._download_url = (
-        u'https://raw.githubusercontent.com/log2timeline/devtools/master/'
-        u'{0:s}').format(self._FILENAME)
+        'https://raw.githubusercontent.com/log2timeline/devtools/master/'
+        '{0:s}').format(self._FILENAME)
 
   def testDownloadPageContent(self):
     """Tests the DownloadPageContent functions."""
-    download_helper_object = download_helper.DownloadHelper(u'')
+    download_helper_object = download_helper.DownloadHelper('')
 
     page_content = download_helper_object.DownloadPageContent(
         self._download_url)
@@ -79,11 +81,11 @@ class DownloadHelperTest(unittest.TestCase):
 class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the docopt github releases download helper."""
 
-  _DOWNLOAD_URL = u'https://github.com/docopt/docopt/releases'
+  _DOWNLOAD_URL = 'https://github.com/docopt/docopt/releases'
 
-  _PROJECT_ORGANIZATION = u'docopt'
-  _PROJECT_NAME = u'docopt'
-  _PROJECT_VERSION = u'0.6.2'
+  _PROJECT_ORGANIZATION = 'docopt'
+  _PROJECT_NAME = 'docopt'
+  _PROJECT_VERSION = '0.6.2'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -104,7 +106,7 @@ class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        u'https://github.com/{0:s}/{1:s}/archive/{2:s}.tar.gz').format(
+        'https://github.com/{0:s}/{1:s}/archive/{2:s}.tar.gz').format(
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_VERSION)
 
@@ -117,7 +119,7 @@ class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
 
     project_identifier = download_helper_object.GetProjectIdentifier()
 
-    expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
+    expected_project_identifier = 'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
 
     self.assertEqual(project_identifier, expected_project_identifier)
@@ -126,12 +128,12 @@ class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
 class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the libyal github releases download helper."""
 
-  _DOWNLOAD_URL = u'https://github.com/libyal/libevt/releases'
+  _DOWNLOAD_URL = 'https://github.com/libyal/libevt/releases'
 
-  _PROJECT_ORGANIZATION = u'libyal'
-  _PROJECT_NAME = u'libevt'
-  _PROJECT_STATUS = u'alpha'
-  _PROJECT_VERSION = u'20170120'
+  _PROJECT_ORGANIZATION = 'libyal'
+  _PROJECT_NAME = 'libevt'
+  _PROJECT_STATUS = 'alpha'
+  _PROJECT_VERSION = '20170120'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -152,8 +154,8 @@ class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        u'https://github.com/{0:s}/{1:s}/releases/download/{3:s}/'
-        u'{1:s}-{2:s}-{3:s}.tar.gz').format(
+        'https://github.com/{0:s}/{1:s}/releases/download/{3:s}/'
+        '{1:s}-{2:s}-{3:s}.tar.gz').format(
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_STATUS, self._PROJECT_VERSION)
 
@@ -166,7 +168,7 @@ class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
 
     project_identifier = download_helper_object.GetProjectIdentifier()
 
-    expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
+    expected_project_identifier = 'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
 
     self.assertEqual(project_identifier, expected_project_identifier)
@@ -175,12 +177,12 @@ class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
 class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the log2timeline GitHub releases download helper."""
 
-  _DOWNLOAD_URL = u'https://github.com/log2timeline/dfvfs/releases'
+  _DOWNLOAD_URL = 'https://github.com/log2timeline/dfvfs/releases'
 
-  _PROJECT_ORGANIZATION = u'log2timeline'
-  _PROJECT_NAME = u'dfvfs'
+  _PROJECT_ORGANIZATION = 'log2timeline'
+  _PROJECT_NAME = 'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = u'20170723'
+  _PROJECT_VERSION = '20170723'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -201,8 +203,8 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        u'https://github.com/{0:s}/{1:s}/releases/download/{2:s}/'
-        u'{1:s}-{2:s}.tar.gz').format(
+        'https://github.com/{0:s}/{1:s}/releases/download/{2:s}/'
+        '{1:s}-{2:s}.tar.gz').format(
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_VERSION)
 
@@ -215,7 +217,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
 
     project_identifier = download_helper_object.GetProjectIdentifier()
 
-    expected_project_identifier = u'com.github.{0:s}.{1:s}'.format(
+    expected_project_identifier = 'com.github.{0:s}.{1:s}'.format(
         self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
 
     self.assertEqual(project_identifier, expected_project_identifier)
@@ -224,10 +226,10 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
 class PyPIDownloadHelperTest(unittest.TestCase):
   """Tests for the PyPi download helper."""
 
-  _DOWNLOAD_URL = u'https://pypi.python.org/pypi/construct'
+  _DOWNLOAD_URL = 'https://pypi.python.org/pypi/construct'
 
-  _PROJECT_NAME = u'construct'
-  _PROJECT_VERSION = u'2.8.12'
+  _PROJECT_NAME = 'construct'
+  _PROJECT_VERSION = '2.8.12'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -263,7 +265,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
 
     project_identifier = download_helper_object.GetProjectIdentifier()
 
-    expected_project_identifier = u'org.python.pypi.{0:s}'.format(
+    expected_project_identifier = 'org.python.pypi.{0:s}'.format(
         self._PROJECT_NAME)
 
     self.assertEqual(project_identifier, expected_project_identifier)
@@ -272,11 +274,11 @@ class PyPIDownloadHelperTest(unittest.TestCase):
 class SourceForgeDownloadHelperTest(unittest.TestCase):
   """Tests for the Source Forge download helper."""
 
-  _DOWNLOAD_URL = u'https://sourceforge.net/projects/pyparsing/files'
+  _DOWNLOAD_URL = 'https://sourceforge.net/projects/pyparsing/files'
 
-  _PROJECT_NAME = u'pyparsing'
+  _PROJECT_NAME = 'pyparsing'
   # Hard-coded version to check parsing of SourceForge page.
-  _PROJECT_VERSION = u'2.2.0'
+  _PROJECT_VERSION = '2.2.0'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -297,8 +299,8 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        u'https://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
-        u'/{0:s}-{1:s}.tar.gz').format(
+        'https://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
+        '/{0:s}-{1:s}.tar.gz').format(
             self._PROJECT_NAME, self._PROJECT_VERSION)
 
     self.assertEqual(download_url, expected_download_url)
@@ -310,7 +312,7 @@ class SourceForgeDownloadHelperTest(unittest.TestCase):
 
     project_identifier = download_helper_object.GetProjectIdentifier()
 
-    expected_project_identifier = u'net.sourceforge.projects.{0:s}'.format(
+    expected_project_identifier = 'net.sourceforge.projects.{0:s}'.format(
         self._PROJECT_NAME)
 
     self.assertEqual(project_identifier, expected_project_identifier)
