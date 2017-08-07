@@ -2733,8 +2733,6 @@ class RPMBuildHelper(BaseRPMBuildHelper):
 
     logging.info('Removing: {0:s}'.format(filename))
 
-    logging.info('Removing: {0:s}'.format(filename))
-
     try:
       shutil.rmtree(filename)
     except OSError:
