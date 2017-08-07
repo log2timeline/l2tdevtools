@@ -386,7 +386,7 @@ class DPKGBuildHelper(BuildHelper):
 
     for package_name in self._project_definition.build_dependencies:
       package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
-          package_name, package_name)
+          package_name, [package_name])
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
@@ -2014,6 +2014,25 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
   _LICENSE_FILENAMES = [
       'LICENSE', 'LICENSE.txt', 'LICENSE.TXT']
 
+  def _GetSetupPySpecFilePath(self, source_helper_object, source_directory):
+    """Retrieves the path of the setup.py generated .spec file.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+      source_directory (str): name of the source directory.
+
+    Returns:
+      str: path of the setup.py generated .spec file.
+    """
+    if self._project_definition.setup_name:
+      setup_name = self._project_definition.setup_name
+    else:
+      setup_name = source_helper_object.project_name
+
+    spec_filename = '{0:s}.spec'.format(setup_name)
+
+    return os.path.join(source_directory, 'dist', spec_filename)
+
   def Build(self, source_helper_object):
     """Builds the osc package.
 
@@ -2064,15 +2083,10 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     if project_name.startswith('python-') and project_name != 'python-gflags':
       project_name = project_name[7:]
 
-    # TODO: move this to configuration.
-    if project_name == 'dateutil':
-      project_prefix = 'python-'
-    else:
-      project_prefix = ''
+    input_file_path = self._GetSetupPySpecFilePath(
+        source_helper_object, source_directory)
 
     spec_filename = '{0:s}.spec'.format(project_name)
-    input_file_path = '{0:s}{1:s}'.format(project_prefix, spec_filename)
-    input_file_path = os.path.join(source_directory, 'dist', input_file_path)
     output_file_path = os.path.join(osc_package_path, spec_filename)
 
     # Determine if the output file exists before it is generated.
@@ -2468,28 +2482,30 @@ class BaseRPMBuildHelper(BuildHelper):
       'libtool',
       'gettext-devel',
       'make',
-      'pkgconfig',
+      'pkgconf',
       'gcc',
       'gcc-c++',
       'flex',
       'byacc',
       'rpm-build',
-      'python-devel',
-      'python-test',
       'python2-dateutil',
+      'python2-devel',
       'python2-setuptools',
+      'python2-test',
       'python3-dateutil',
       'python3-devel',
       'python3-setuptools',
   ])
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
-      'bzip2': 'bzip2-devel',
-      'fuse': 'fuse-devel',
-      'libcrypto': 'openssl-devel',
-      'sqlite': 'sqlite-devel',
-      'zeromq': 'libzmq3-devel',
-      'zlib': 'zlib-devel'
+      'bzip2': ['bzip2-devel'],
+      'fuse': ['fuse-devel'],
+      'libcrypto': ['openssl-devel'],
+      'pytest-runner': [
+          'python2-pytest-runner', 'python3-pytest-runner'],
+      'sqlite': ['sqlite-devel'],
+      'zeromq': ['libzmq3-devel'],
+      'zlib': ['zlib-devel']
   }
 
   def __init__(self, project_definition, l2tdevtools_path):
@@ -2646,6 +2662,25 @@ class BaseRPMBuildHelper(BuildHelper):
 
     return project_name, project_version
 
+  def _GetSetupPySpecFilePath(self, source_helper_object, source_directory):
+    """Retrieves the path of the setup.py generated .spec file.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+      source_directory (str): name of the source directory.
+
+    Returns:
+      str: path of the setup.py generated .spec file.
+    """
+    if self._project_definition.setup_name:
+      setup_name = self._project_definition.setup_name
+    else:
+      setup_name = source_helper_object.project_name
+
+    spec_filename = '{0:s}.spec'.format(setup_name)
+
+    return os.path.join(source_directory, 'dist', spec_filename)
+
   def _MoveFilesToCurrentDirectory(self, filenames_glob):
     """Moves files into the current directory.
 
@@ -2674,10 +2709,11 @@ class BaseRPMBuildHelper(BuildHelper):
         missing_packages.append(package_name)
 
     for package_name in self._project_definition.build_dependencies:
-      package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
+      dependencies = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
           package_name, package_name)
-      if not self._CheckIsInstalled(package_name):
-        missing_packages.append(package_name)
+      for dependency in dependencies:
+        if not self._CheckIsInstalled(dependency):
+          missing_packages.append(dependency)
 
     return missing_packages
 
@@ -2696,7 +2732,11 @@ class RPMBuildHelper(BaseRPMBuildHelper):
     filename = os.path.join(self.rpmbuild_path, 'BUILD', filename)
 
     logging.info('Removing: {0:s}'.format(filename))
-    shutil.rmtree(filename)
+
+    try:
+      shutil.rmtree(filename)
+    except OSError:
+      logging.warning('Unable to remove: {0:s}'.format(filename))
 
   def _RemoveOlderBuildDirectory(self, project_name, project_version):
     """Removes previous versions of build directories.
@@ -2874,15 +2914,10 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     if project_name.startswith('python-'):
       project_name = project_name[7:]
 
-    # TODO: move this to configuration.
-    if project_name == 'dateutil':
-      project_prefix = 'python-'
-    else:
-      project_prefix = ''
+    input_file_path = self._GetSetupPySpecFilePath(
+        source_helper_object, source_directory)
 
     spec_filename = '{0:s}.spec'.format(project_name)
-    input_file_path = '{0:s}{1:s}'.format(project_prefix, spec_filename)
-    input_file_path = os.path.join(source_directory, 'dist', input_file_path)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
@@ -3128,15 +3163,10 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     if project_name.startswith('python-'):
       project_name = project_name[7:]
 
-    # TODO: move this to configuration.
-    if project_name == 'dateutil':
-      project_prefix = 'python-'
-    else:
-      project_prefix = ''
+    input_file_path = self._GetSetupPySpecFilePath(
+        source_helper_object, source_directory)
 
     spec_filename = '{0:s}.spec'.format(project_name)
-    input_file_path = '{0:s}{1:s}'.format(project_prefix, spec_filename)
-    input_file_path = os.path.join(source_directory, 'dist', input_file_path)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
