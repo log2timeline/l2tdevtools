@@ -1,4 +1,4 @@
-Source: python-setuptools
+Source: setuptools
 Section: python
 Priority: optional
 Maintainer: Matthias Klose <doko@debian.org>
@@ -9,7 +9,7 @@ Homepage: https://pypi.python.org/pypi/setuptools
 Package: python-pkg-resources
 Suggests: python-setuptools
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: ${{misc:Depends}}, ${{python:Depends}}
 Description: Package Discovery and Resource Access using pkg_resources
  The pkg_resources module provides an API for Python libraries to
  access their resource files, and for extensible applications and
@@ -21,14 +21,14 @@ Description: Package Discovery and Resource Access using pkg_resources
 
 Package: python-setuptools
 Architecture: all
-Depends: python-pkg-resources (= ${binary:Version}), ${misc:Depends}, ${python:Depends}
+Depends: python-pkg-resources (= ${{binary:Version}}), ${{misc:Depends}}, ${{python:Depends}}
 Provides: python-distribute
 Description: Python Distutils Enhancements
  Extensions to the python-distutils for large or complex distributions.
 
 Package: python3-pkg-resources
 Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends}
+Depends: ${{misc:Depends}}, ${{python3:Depends}}
 Suggests: python3-setuptools
 Description: Package Discovery and Resource Access using pkg_resources
  The pkg_resources module provides an API for Python libraries to
@@ -41,6 +41,6 @@ Description: Package Discovery and Resource Access using pkg_resources
 
 Package: python3-setuptools
 Architecture: all
-Depends: python3-pkg-resources (= ${binary:Version}), ${misc:Depends}, ${python3:Depends}
+Depends: python3-pkg-resources (= ${{binary:Version}}), ${{misc:Depends}}, ${{python3:Depends}}
 Description: Python3 Distutils Enhancements
  Extensions to the python-distutils for large or complex distributions.
