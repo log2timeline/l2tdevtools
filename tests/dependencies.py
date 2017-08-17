@@ -23,6 +23,8 @@ class DependencyDefinitionTest(test_lib.BaseTestCase):
 class DependencyDefinitionReaderTest(test_lib.BaseTestCase):
   """Tests for the dependency definition reader."""
 
+  # pylint: disable=protected-access
+
   # TODO: add tests for _GetConfigValue.
   # TODO: add tests for Read.
 
@@ -30,6 +32,8 @@ class DependencyDefinitionReaderTest(test_lib.BaseTestCase):
 @test_lib.skipUnlessHasTestFile(['dependencies.ini'])
 class DependencyHelperTest(test_lib.BaseTestCase):
   """Tests for the dependency helper."""
+
+  # pylint: disable=protected-access
 
   def testInitialize(self):
     """Tests the __init__ function."""
