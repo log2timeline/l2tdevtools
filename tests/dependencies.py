@@ -73,7 +73,13 @@ class DependencyHelperTest(test_lib.BaseTestCase):
 
     # TODO: add test with version with suffix 17.0.0b1
 
-  # TODO: add tests for _CheckSQLite3
+  def testCheckSQLite3(self):
+    """Tests the _CheckSQLite3 function."""
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    dependency_helper._CheckSQLite3()
 
   def testImportPythonModule(self):
     """Tests the _ImportPythonModule function."""
@@ -87,12 +93,58 @@ class DependencyHelperTest(test_lib.BaseTestCase):
     # TODO: add test with submodule.
 
   # TODO: add tests for _PrintCheckDependencyStatus
-  # TODO: add tests for CheckDependencies
-  # TODO: add tests for CheckTestDependencies
-  # TODO: add tests for GetDPKGDepends
-  # TODO: add tests for GetL2TBinaries
-  # TODO: add tests for GetInstallRequires
-  # TODO: add tests for GetRPMRequires
+
+  def testCheckDependencies(self):
+    """Tests the CheckDependencies function."""
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    dependency_helper.CheckDependencies(verbose_output=False)
+
+  def testCheckTestDependencies(self):
+    """Tests the CheckTestDependencies function."""
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    dependency_helper.CheckTestDependencies(verbose_output=False)
+
+  def testGetDPKGDepends(self):
+    """Tests the GetDPKGDepends function."""
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    dpkg_depends = dependency_helper.GetDPKGDepends()
+    self.assertEqual(len(dpkg_depends), 1)
+
+  def testGetL2TBinaries(self):
+    """Tests the GetL2TBinaries function."""
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    l2tbinaries = dependency_helper.GetL2TBinaries()
+    self.assertEqual(len(l2tbinaries), 1)
+
+  def testGetInstallRequires(self):
+    """Tests the GetInstallRequires function."""
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    install_requires = dependency_helper.GetInstallRequires()
+    self.assertEqual(len(install_requires), 1)
+
+  def testGetRPMRequires(self):
+    """Tests the GetRPMRequires function."""
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    rpm_requires = dependency_helper.GetRPMRequires()
+    self.assertEqual(len(rpm_requires), 1)
 
 
 if __name__ == '__main__':
