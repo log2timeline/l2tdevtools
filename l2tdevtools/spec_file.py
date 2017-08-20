@@ -146,23 +146,42 @@ class RPMSpecFileGenerator(object):
         b'{3:s}').format(name, summary, requires, description))
 
   def _WritePython2PackageFiles(
-      self, output_file_object, name, license_line, doc_line, setup_name):
+      self, output_file_object, project_name, name, license_line, doc_line,
+      setup_name):
     """Writes the Python 2 package files.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      project_name (str): name of the project.
       name (str): package name.
       license_line (str): line containing the license file definition.
       doc_line (str): line containing the document files definition.
       setup_name (str): project name used in setup.py.
     """
-    output_file_object.write((
-        b'%files -n {0:s}\n'
-        b'{1:s}'
-        b'{2:s}'
-        b'%{{python2_sitelib}}/{3:s}\n'
-        b'%{{python2_sitelib}}/{3:s}*.egg-info\n').format(
-            name, license_line, doc_line, setup_name))
+    # Python modules names contain "_" instead of "-"
+    setup_name = setup_name.replace('-', '_')
+
+    # Note that copr currently fails if %{python2_sitelib} is used.
+
+    if project_name == 'dateutil':
+      # Python modules names contain "_" instead of "-"
+      project_name = project_name.replace('-', '_')
+
+      output_file_object.write((
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}\n'
+          b'%{{_libdir}}/python2*/site-packages/{4:s}*.egg-info\n').format(
+              name, license_line, doc_line, project_name, setup_name))
+    else:
+      output_file_object.write((
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}\n'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
+              name, license_line, doc_line, setup_name))
 
   def _WritePython3PackageDefinition(
       self, output_file_object, name, summary, requires, description):
@@ -184,24 +203,44 @@ class RPMSpecFileGenerator(object):
         b'{3:s}').format(name, summary, requires, description))
 
   def _WritePython3PackageFiles(
-      self, output_file_object, name, license_line, doc_line, setup_name):
+      self, output_file_object, project_name, name, license_line, doc_line,
+      setup_name):
     """Writes the Python 3 package files.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      project_name (str): name of the project.
       name (str): package name.
       license_line (str): line containing the license file definition.
       doc_line (str): line containing the document files definition.
       setup_name (str): project name used in setup.py.
     """
-    output_file_object.write((
-        b'\n'
-        b'%files -n {0:s}\n'
-        b'{1:s}'
-        b'{2:s}'
-        b'%{{python3_sitelib}}/{3:s}\n'
-        b'%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
-            name, license_line, doc_line, setup_name))
+    # Python modules names contain "_" instead of "-"
+    setup_name = setup_name.replace('-', '_')
+
+    # Note that copr currently fails if %{python3_sitelib} is used.
+
+    if project_name == 'dateutil':
+      # Python modules names contain "_" instead of "-"
+      project_name = project_name.replace('-', '_')
+
+      output_file_object.write((
+          b'\n'
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}\n'
+          b'%{{_libdir}}/python3*/site-packages/{4:s}*.egg-info\n').format(
+              name, license_line, doc_line, project_name, setup_name))
+    else:
+      output_file_object.write((
+          b'\n'
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}\n'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
+              name, license_line, doc_line, setup_name))
 
   def GenerateWithSetupPy(self, source_directory, build_log_file):
     """Generates the RPM spec file with setup.py.
@@ -264,7 +303,7 @@ class RPMSpecFileGenerator(object):
     if package_name.startswith('python-'):
       package_name = package_name[7:]
 
-    if project_definition.setup_name:
+    if project_definition.setup_name and project_name != 'dateutil':
       unmangled_name = project_definition.setup_name
     else:
       unmangled_name = project_name
@@ -355,7 +394,7 @@ class RPMSpecFileGenerator(object):
 
         elif line == b'\n' and summary and not has_build_requires:
           has_build_requires = True
-          line = b'BuildRequires: {0:s}\n'.format(b', '.join(
+          line = b'BuildRequires: {0:s}\n\n'.format(b', '.join(
               rpm_build_dependencies))
 
         elif line.startswith(b'%description') and not description:
@@ -468,8 +507,8 @@ class RPMSpecFileGenerator(object):
       setup_name = project_name
 
     self._WritePython2PackageFiles(
-        output_file_object, python_package_name, license_line, doc_line,
-        setup_name)
+        output_file_object, project_name, python_package_name, license_line,
+        doc_line, setup_name)
 
     if not python2_only:
       if project_name != package_name:
@@ -478,8 +517,8 @@ class RPMSpecFileGenerator(object):
         python_package_name = b'python3-%{name}'
 
       self._WritePython3PackageFiles(
-          output_file_object, python_package_name, license_line, doc_line,
-          setup_name)
+          output_file_object, project_name, python_package_name, license_line,
+          doc_line, setup_name)
 
     if project_name == 'artifacts':
       output_file_object.write(
