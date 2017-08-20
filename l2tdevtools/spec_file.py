@@ -146,25 +146,27 @@ class RPMSpecFileGenerator(object):
         b'{3:s}').format(name, summary, requires, description))
 
   def _WritePython2PackageFiles(
-      self, output_file_object, project_name, name, license_line, doc_line,
-      setup_name):
+      self, output_file_object, project_definition, project_name, name,
+      license_line, doc_line):
     """Writes the Python 2 package files.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      project_definition (ProjectDefinition): project definition.
       project_name (str): name of the project.
       name (str): package name.
       license_line (str): line containing the license file definition.
       doc_line (str): line containing the document files definition.
-      setup_name (str): project name used in setup.py.
     """
-    # Python modules names contain "_" instead of "-"
-    setup_name = setup_name.replace('-', '_')
-
     # Note that copr currently fails if %{python2_sitelib} is used.
 
-    # TODO: check if %{{_libdir}} is needed for architecture dependent
-    # Python modules.
+    if project_definition.setup_name:
+      setup_name = project_definition.setup_name
+    else:
+      setup_name = project_name
+
+    # Python modules names contain "_" instead of "-"
+    setup_name = setup_name.replace('-', '_')
 
     if project_name == 'dateutil':
       # Python modules names contain "_" instead of "-"
@@ -177,6 +179,25 @@ class RPMSpecFileGenerator(object):
           b'/usr/lib/python2*/site-packages/{3:s}\n'
           b'/usr/lib/python2*/site-packages/{4:s}*.egg-info\n').format(
               name, license_line, doc_line, project_name, setup_name))
+
+    elif project_name == 'pytsk3':
+      output_file_object.write((
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}.so\n'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
+              name, license_line, doc_line, setup_name))
+
+    elif project_definition.architecture_dependent:
+      output_file_object.write((
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}\n'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
+              name, license_line, doc_line, setup_name))
+
     else:
       output_file_object.write((
           b'%files -n {0:s}\n'
@@ -206,22 +227,27 @@ class RPMSpecFileGenerator(object):
         b'{3:s}').format(name, summary, requires, description))
 
   def _WritePython3PackageFiles(
-      self, output_file_object, project_name, name, license_line, doc_line,
-      setup_name):
+      self, output_file_object, project_definition, project_name, name,
+      license_line, doc_line):
     """Writes the Python 3 package files.
 
     Args:
       output_file_object (file): output file-like object to write to.
+      project_definition (ProjectDefinition): project definition.
       project_name (str): name of the project.
       name (str): package name.
       license_line (str): line containing the license file definition.
       doc_line (str): line containing the document files definition.
-      setup_name (str): project name used in setup.py.
     """
+    # Note that copr currently fails if %{python3_sitelib} is used.
+
+    if project_definition.setup_name:
+      setup_name = project_definition.setup_name
+    else:
+      setup_name = project_name
+
     # Python modules names contain "_" instead of "-"
     setup_name = setup_name.replace('-', '_')
-
-    # Note that copr currently fails if %{python3_sitelib} is used.
 
     if project_name == 'dateutil':
       # Python modules names contain "_" instead of "-"
@@ -235,6 +261,25 @@ class RPMSpecFileGenerator(object):
           b'/usr/lib/python3*/site-packages/{3:s}\n'
           b'/usr/lib/python3*/site-packages/{4:s}*.egg-info\n').format(
               name, license_line, doc_line, project_name, setup_name))
+
+    elif project_name == 'pytsk3':
+      output_file_object.write((
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}.so\n'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
+              name, license_line, doc_line, setup_name))
+
+    elif project_definition.architecture_dependent:
+      output_file_object.write((
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}\n'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
+              name, license_line, doc_line, setup_name))
+
     else:
       output_file_object.write((
           b'\n'
@@ -405,7 +450,7 @@ class RPMSpecFileGenerator(object):
 
         elif (line.startswith(b'%package -n python-') or
               line.startswith(b'%package -n python2-')):
-          if project_name == 'artifacts':
+          if project_name in ('artifacts', 'plaso'):
             in_python_package = True
             continue
 
@@ -415,8 +460,8 @@ class RPMSpecFileGenerator(object):
           has_python3_package = True
 
         elif line.startswith(b'%prep'):
-          if project_name == 'artifacts':
-            requires = b'{0:s}, artifacts-data\n'.format(requires[:-1])
+          if project_name in ('artifacts', 'plaso'):
+            requires = b'{0:s}, {1:s}-data\n'.format(requires[:-1], project_name)
 
           if not has_python2_package:
             if project_name != package_name:
@@ -442,7 +487,7 @@ class RPMSpecFileGenerator(object):
                 output_file_object, python_package_name, summary, requires,
                 description)
 
-          if project_name == 'artifacts':
+          if project_name in ('artifacts', 'plaso'):
             output_file_object.write((
                 b'%package -n %{{name}}-data\n'
                 b'{0:s}'
@@ -504,14 +549,9 @@ class RPMSpecFileGenerator(object):
     else:
       python_package_name = b'{0:s}%{{name}}'.format(python2_package_prefix)
 
-    if project_definition.setup_name:
-      setup_name = project_definition.setup_name
-    else:
-      setup_name = project_name
-
     self._WritePython2PackageFiles(
-        output_file_object, project_name, python_package_name, license_line,
-        doc_line, setup_name)
+        output_file_object, project_definition, project_name,
+        python_package_name, license_line, doc_line)
 
     if not python2_only:
       if project_name != package_name:
@@ -520,10 +560,10 @@ class RPMSpecFileGenerator(object):
         python_package_name = b'python3-%{name}'
 
       self._WritePython3PackageFiles(
-          output_file_object, project_name, python_package_name, license_line,
-          doc_line, setup_name)
+          output_file_object, project_definition, project_name,
+          python_package_name, license_line, doc_line)
 
-    if project_name == 'artifacts':
+    if project_name in ('artifacts', 'plaso'):
       output_file_object.write(
           b'\n'
           b'%files -n %{name}-data\n'
