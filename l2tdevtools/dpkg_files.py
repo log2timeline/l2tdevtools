@@ -525,6 +525,9 @@ class DPKGBuildFilesGenerator(object):
     """
     package_name = self._GetPackageName()
 
+    if package_name == 'xlsxwriter':
+      package_name = 'XlsxWriter'
+
     # TODO: add support for configure_make
 
     if self._project_definition.build_system == 'setup_py':
