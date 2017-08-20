@@ -185,7 +185,7 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python2*/site-packages/{3:s}.so\n'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}*.so\n'
           b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
@@ -267,7 +267,7 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python3*/site-packages/{3:s}.so\n'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}*.so\n'
           b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
