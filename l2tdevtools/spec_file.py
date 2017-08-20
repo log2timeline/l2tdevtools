@@ -180,6 +180,14 @@ class RPMSpecFileGenerator(object):
           b'/usr/lib/python2*/site-packages/{4:s}*.egg-info\n').format(
               name, license_line, doc_line, project_name, setup_name))
 
+    elif project_name == 'pefile':
+      output_file_object.write((
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'/usr/lib/python2*/site-packages/\n').format(
+              name, license_line, doc_line))
+
     elif project_name == 'pytsk3':
       output_file_object.write((
           b'%files -n {0:s}\n'
@@ -261,6 +269,14 @@ class RPMSpecFileGenerator(object):
           b'/usr/lib/python3*/site-packages/{3:s}\n'
           b'/usr/lib/python3*/site-packages/{4:s}*.egg-info\n').format(
               name, license_line, doc_line, project_name, setup_name))
+
+    elif project_name == 'pefile':
+      output_file_object.write((
+          b'%files -n {0:s}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'/usr/lib/python3*/site-packages/\n').format(
+              name, license_line, doc_line))
 
     elif project_name == 'pytsk3':
       output_file_object.write((
