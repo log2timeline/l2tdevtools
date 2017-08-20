@@ -163,6 +163,9 @@ class RPMSpecFileGenerator(object):
 
     # Note that copr currently fails if %{python2_sitelib} is used.
 
+    # TODO: check if %{{_libdir}} is needed for architecture dependent
+    # Python modules.
+
     if project_name == 'dateutil':
       # Python modules names contain "_" instead of "-"
       project_name = project_name.replace('-', '_')
@@ -171,16 +174,16 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python2*/site-packages/{3:s}\n'
-          b'%{{_libdir}}/python2*/site-packages/{4:s}*.egg-info\n').format(
+          b'/usr/lib/python2*/site-packages/{3:s}\n'
+          b'/usr/lib/python2*/site-packages/{4:s}*.egg-info\n').format(
               name, license_line, doc_line, project_name, setup_name))
     else:
       output_file_object.write((
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python2*/site-packages/{3:s}\n'
-          b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
+          b'/usr/lib/python2*/site-packages/{3:s}\n'
+          b'/usr/lib/python2*/site-packages/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
   def _WritePython3PackageDefinition(
@@ -229,8 +232,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python3*/site-packages/{3:s}\n'
-          b'%{{_libdir}}/python3*/site-packages/{4:s}*.egg-info\n').format(
+          b'/usr/lib/python3*/site-packages/{3:s}\n'
+          b'/usr/lib/python3*/site-packages/{4:s}*.egg-info\n').format(
               name, license_line, doc_line, project_name, setup_name))
     else:
       output_file_object.write((
@@ -238,8 +241,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python3*/site-packages/{3:s}\n'
-          b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
+          b'/usr/lib/python3*/site-packages/{3:s}\n'
+          b'/usr/lib/python3*/site-packages/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
   def GenerateWithSetupPy(self, source_directory, build_log_file):
