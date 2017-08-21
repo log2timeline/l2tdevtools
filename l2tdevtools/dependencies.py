@@ -197,12 +197,15 @@ class DependencyHelper(object):
     # Strip any semantic suffixes such as a1, b1, pre, post, rc, dev.
     module_version = self._VERSION_NUMBERS_REGEX.findall(module_version)[0]
 
+    if module_version[-1] == '.':
+      module_version = module_version[:-1]
+
     try:
       module_version_map = list(
           map(int, self._VERSION_SPLIT_REGEX.split(module_version)))
     except ValueError:
       status_message = 'unable to parse module version: {0:s} {1:s}'.format(
-          module_name, minimum_version)
+          module_name, module_version)
       return False, status_message
 
     try:

@@ -2647,10 +2647,9 @@ class BaseRPMBuildHelper(BuildHelper):
         * str: filename safe project name.
         * str: version.
     """
-    if self._project_definition.setup_name:
+    project_name = source_helper_object.project_name
+    if self._project_definition.setup_name and project_name != 'dateutil':
       project_name = self._project_definition.setup_name
-    else:
-      project_name = source_helper_object.project_name
 
     project_version = source_helper_object.GetProjectVersion()
     if project_version and project_version.startswith('1!'):
