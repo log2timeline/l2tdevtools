@@ -477,7 +477,8 @@ class RPMSpecFileGenerator(object):
 
         elif line.startswith(b'%prep'):
           if project_name in ('artifacts', 'plaso'):
-            requires = b'{0:s}, {1:s}-data\n'.format(requires[:-1], project_name)
+            requires = b'{0:s}, {1:s}-data\n'.format(
+                requires[:-1], project_name)
 
           if not has_python2_package:
             if project_name != package_name:
