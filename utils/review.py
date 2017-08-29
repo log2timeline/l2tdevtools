@@ -1190,7 +1190,7 @@ class PylintHelper(CLIHelper):
     for filename in filenames:
       print('Checking: {0:s}'.format(filename))
 
-      command = 'pylint --rcfile=utils/pylintrc {0:s}'.format(filename)
+      command = 'pylint --rcfile=.pylintrc {0:s}'.format(filename)
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
         failed_filenames.append(filename)
