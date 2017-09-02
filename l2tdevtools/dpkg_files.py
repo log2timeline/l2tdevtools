@@ -412,10 +412,6 @@ class DPKGBuildFilesGenerator(object):
         if dependency.startswith('python-'):
           dependency = 'python3-{0:s}'.format(dependency[7:])
           python3_build_depends.append(dependency)
-        else:
-          logging.warning(
-              'Unable to determine Python 3 package name of: {0:s}'.format(
-                  dependency))
 
     if (self._project_definition.build_system == 'setup_py' and
         not python2_only):
@@ -681,7 +677,8 @@ class DPKGBuildFilesGenerator(object):
       dpkg_path (str): path to the dpkg files.
     """
     package_name = self._GetPackageName()
-    if package_name in ('mccabe', 'pbr', 'setuptools'):
+    if package_name in (
+        'cryptography', 'mccabe', 'pbr', 'pytest-runner', 'setuptools'):
       template_file = self._SOURCE_FORMAT_NATIVE_TEMPLATE
     else:
       template_file = self._SOURCE_FORMAT_QUILT_TEMPLATE
