@@ -1,0 +1,39 @@
+--- certifi-2017.7.27.1/setup.py	2017-07-27 17:43:14.000000000 +0200
++++ setup.py	2017-09-08 11:11:51.924510033 +0200
+@@ -16,6 +16,26 @@
+ except ImportError:
+     from distutils.core import setup
+ 
++try:
++    from distutils.command.bdist_msi import bdist_msi
++except ImportError:
++    bdist_msi = None
++
++if not bdist_msi:
++    BdistMSICommand = None
++else:
++    class BdistMSICommand(bdist_msi):
++        """Custom handler for the bdist_msi command."""
++
++        def run(self):
++          """Builds an MSI."""
++          # Command bdist_msi does not support the YYYY.MM.DD.N version format
++          tab = self.distribution.metadata.version.split('.')
++          last_digit = ''.join(tab[-2:])
++          self.distribution.metadata.version = '.'.join(tab[0:-2]+[last_digit])
++
++          bdist_msi.run(self)
++
+ 
+ version_regex = r'__version__ = ["\']([^"\']*)["\']'
+ with open('certifi/__init__.py', 'r') as f:
+@@ -33,6 +53,9 @@
+ 
+ required = []
+ setup(
++    cmdclass={
++        "bdist_msi": BdistMSICommand,
++        },
+     name='certifi',
+     version=VERSION,
+     description='Python package for providing Mozilla\'s CA Bundle.',
