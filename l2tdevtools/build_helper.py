@@ -1020,7 +1020,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     if 'VS150COMNTOOLS' in os.environ:
       self.version = '2017'
 
-    rlif 'VS140COMNTOOLS' in os.environ:
+    elif 'VS140COMNTOOLS' in os.environ:
       self.version = '2015'
 
     elif 'VS120COMNTOOLS' in os.environ:
@@ -1069,7 +1069,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     # Note that MSBuild in .NET 3.5 does not support vs2010 solution files
     # and MSBuild in .NET 4.0 is needed instead.
-    elif self.version in ('2010', '2012', '2013', '2015'):
+    elif self.version in ('2010', '2012', '2013', '2015', '2017'):
       msbuild = '{0:s}:{1:s}{2:s}'.format(
           'C', os.sep, os.path.join(
               'Windows', 'Microsoft.NET', 'Framework', 'v4.0.30319',
@@ -1139,7 +1139,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
-    if self.version in ('2010', '2012', '2013', '2015'):
+    if self.version in ('2010', '2012', '2013', '2015', '2017'):
       self._ConvertSolutionFiles(source_directory)
 
     # Detect architecture based on Visual Studion Platform environment
@@ -1277,9 +1277,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     elif self.version == '2017':
       os.environ['VS90COMNTOOLS'] = os.environ['VS150COMNTOOLS']
-
-    elif self.version == 'python':
-      os.environ['VS90COMNTOOLS'] = os.environ['VCINSTALLDIR']
 
     command = '\"{0:s}\" setup.py bdist_msi'.format(sys.executable)
     exit_code = subprocess.call(command, shell=False)
