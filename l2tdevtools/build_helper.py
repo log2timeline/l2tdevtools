@@ -1034,6 +1034,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     elif 'VS90COMNTOOLS' in os.environ:
       self.version = '2008'
 
+    elif 'VCINSTALLDIR' in os.environ:
+      self.version = 'python'
+
     else:
       raise RuntimeError('Unable to determine Visual Studio version.')
 
@@ -1100,6 +1103,12 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       if not os.environ['VS140COMNTOOLS']:
         logging.error('Missing VS140COMNTOOLS environment variable.')
         return False
+
+    elif self.version == 'python':
+      if not os.environ['VCINSTALLDIR']:
+        logging.error('Missing VCINSTALLDIR environment variable.')
+        return False
+
 
     zlib_project_file = os.path.join(
         source_directory, 'msvscpp', 'zlib', 'zlib.vcproj')
