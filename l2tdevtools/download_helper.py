@@ -67,11 +67,13 @@ class DownloadHelper(object):
         return
 
       if url_object.code != 200:
+        logging.warning(
+            'Unable to download URL: {0:s} with status code: {1:d}'.format(
+                download_url, url_object.code))
         return
 
-      file_object = open(filename, 'wb')
-      file_object.write(url_object.read())
-      file_object.close()
+      with open(filename, 'wb') as file_object:
+        file_object.write(url_object.read())
 
     return filename
 

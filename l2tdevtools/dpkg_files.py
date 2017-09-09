@@ -678,7 +678,7 @@ class DPKGBuildFilesGenerator(object):
     """
     package_name = self._GetPackageName()
     if package_name in (
-        'cryptography', 'mccabe', 'pbr', 'pytest-runner', 'pytz', 'setuptools'):
+        'cryptography', 'mccabe', 'pbr', 'pytest-runner', 'setuptools'):
       template_file = self._SOURCE_FORMAT_NATIVE_TEMPLATE
     else:
       template_file = self._SOURCE_FORMAT_QUILT_TEMPLATE
