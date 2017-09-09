@@ -1278,6 +1278,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     elif self.version == '2017':
       os.environ['VS90COMNTOOLS'] = os.environ['VS150COMNTOOLS']
 
+    elif self.version == 'python':
+      os.environ['VS90COMNTOOLS'] = os.environ['VCINSTALLDIR']
+
     command = '\"{0:s}\" setup.py bdist_msi'.format(sys.executable)
     exit_code = subprocess.call(command, shell=False)
     if exit_code != 0:
