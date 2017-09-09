@@ -1017,7 +1017,10 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     super(ConfigureMakeMSIBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
 
-    if 'VS140COMNTOOLS' in os.environ:
+    if 'VS150COMNTOOLS' in os.environ:
+      self.version = '2017'
+
+    rlif 'VS140COMNTOOLS' in os.environ:
       self.version = '2015'
 
     elif 'VS120COMNTOOLS' in os.environ:
@@ -1104,11 +1107,15 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
         logging.error('Missing VS140COMNTOOLS environment variable.')
         return False
 
+    elif self.version == '2017':
+      if not os.environ['VS150COMNTOOLS']:
+        logging.error('Missing VS150COMNTOOLS environment variable.')
+        return False
+
     elif self.version == 'python':
       if not os.environ['VCINSTALLDIR']:
         logging.error('Missing VCINSTALLDIR environment variable.')
         return False
-
 
     zlib_project_file = os.path.join(
         source_directory, 'msvscpp', 'zlib', 'zlib.vcproj')
@@ -1267,6 +1274,12 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     elif self.version == '2015':
       os.environ['VS90COMNTOOLS'] = os.environ['VS140COMNTOOLS']
+
+    elif self.version == '2017':
+      os.environ['VS90COMNTOOLS'] = os.environ['VS150COMNTOOLS']
+
+    elif self.version == 'python':
+      os.environ['VS90COMNTOOLS'] = os.environ['VCINSTALLDIR']
 
     command = '\"{0:s}\" setup.py bdist_msi'.format(sys.executable)
     exit_code = subprocess.call(command, shell=False)
