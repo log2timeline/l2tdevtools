@@ -38,7 +38,7 @@ class DownloadHelperTest(unittest.TestCase):
   def setUp(self):
     """Sets up a test case."""
     self._download_url = (
-        'https://raw.githubusercontent.com/log2timeline/devtools/master/'
+        'https://raw.githubusercontent.com/log2timeline/l2tdevtools/master/'
         '{0:s}').format(self._FILENAME)
 
   def testDownloadPageContent(self):
