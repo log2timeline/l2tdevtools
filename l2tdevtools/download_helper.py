@@ -4,8 +4,6 @@
 from __future__ import unicode_literals
 
 import abc
-import io
-import json
 import logging
 import os
 import re
@@ -18,11 +16,6 @@ if sys.version_info[0] < 3:
 else:
   import urllib.error as urllib_error
   import urllib.request as urllib_request
-
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
 
 import pkg_resources  # pylint: disable=wrong-import-position
 
