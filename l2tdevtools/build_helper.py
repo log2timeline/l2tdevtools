@@ -1017,7 +1017,10 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     super(ConfigureMakeMSIBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
 
-    if 'VS140COMNTOOLS' in os.environ:
+    if 'VS150COMNTOOLS' in os.environ:
+      self.version = '2017'
+
+    elif 'VS140COMNTOOLS' in os.environ:
       self.version = '2015'
 
     elif 'VS120COMNTOOLS' in os.environ:
@@ -1033,6 +1036,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     # to check the other Visual Studio environment variables first.
     elif 'VS90COMNTOOLS' in os.environ:
       self.version = '2008'
+
+    elif 'VCINSTALLDIR' in os.environ:
+      self.version = 'python'
 
     else:
       raise RuntimeError('Unable to determine Visual Studio version.')
@@ -1063,7 +1069,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     # Note that MSBuild in .NET 3.5 does not support vs2010 solution files
     # and MSBuild in .NET 4.0 is needed instead.
-    elif self.version in ('2010', '2012', '2013', '2015'):
+    elif self.version in ('2010', '2012', '2013', '2015', '2017'):
       msbuild = '{0:s}:{1:s}{2:s}'.format(
           'C', os.sep, os.path.join(
               'Windows', 'Microsoft.NET', 'Framework', 'v4.0.30319',
@@ -1101,6 +1107,16 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
         logging.error('Missing VS140COMNTOOLS environment variable.')
         return False
 
+    elif self.version == '2017':
+      if not os.environ['VS150COMNTOOLS']:
+        logging.error('Missing VS150COMNTOOLS environment variable.')
+        return False
+
+    elif self.version == 'python':
+      if not os.environ['VCINSTALLDIR']:
+        logging.error('Missing VCINSTALLDIR environment variable.')
+        return False
+
     zlib_project_file = os.path.join(
         source_directory, 'msvscpp', 'zlib', 'zlib.vcproj')
     zlib_source_directory = os.path.join(
@@ -1123,7 +1139,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     # For the Visual Studio builds later than 2008 the convert the 2008
     # solution and project files need to be converted to the newer version.
-    if self.version in ('2010', '2012', '2013', '2015'):
+    if self.version in ('2010', '2012', '2013', '2015', '2017'):
       self._ConvertSolutionFiles(source_directory)
 
     # Detect architecture based on Visual Studion Platform environment
@@ -1258,6 +1274,12 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     elif self.version == '2015':
       os.environ['VS90COMNTOOLS'] = os.environ['VS140COMNTOOLS']
+
+    elif self.version == '2017':
+      os.environ['VS90COMNTOOLS'] = os.environ['VS150COMNTOOLS']
+
+    elif self.version == 'python':
+      os.environ['VS90COMNTOOLS'] = os.environ['VCINSTALLDIR']
 
     command = '\"{0:s}\" setup.py bdist_msi'.format(sys.executable)
     exit_code = subprocess.call(command, shell=False)
