@@ -404,87 +404,6 @@ class GitHubReleasesDownloadHelper(ProjectDownloadHelper):
         self._organization, self._repository)
 
 
-# TODO: Merge with GitHubReleasesDownloadHelper.
-# pylint: disable=abstract-method
-class LibyalGitHubDownloadHelper(ProjectDownloadHelper):
-  """Helps in downloading a libyal GitHub project."""
-
-  def __init__(self, download_url):
-    """Initializes the download helper.
-
-    Args:
-      download_url (str): download URL.
-    """
-    super(LibyalGitHubDownloadHelper, self).__init__(download_url)
-    self._download_helper = None
-
-  def GetProjectConfigurationSourcePackageURL(self, project_name):
-    """Retrieves the source package URL from the libyal project configuration.
-
-    Args:
-      project_name (str): name of the project.
-
-    Returns:
-      str: source package URL or None on error.
-    """
-    download_url = (
-        'https://raw.githubusercontent.com/libyal/{0:s}/master/'
-        '{0:s}.ini').format(project_name)
-
-    page_content = self.DownloadPageContent(download_url)
-    if not page_content:
-      return
-
-    config_parser = configparser.RawConfigParser()
-    # pylint: disable=deprecated-method
-    # TODO: replace readfp by read_file, check if Python 2 compatible
-    config_parser.readfp(io.BytesIO(page_content))
-
-    return json.loads(config_parser.get('project', 'download_url'))
-
-  def GetLatestVersion(self, project_name, version_definition):
-    """Retrieves the latest version number for a given project name.
-
-    Args:
-      project_name (str): name of the project.
-      version_definition (ProjectVersionDefinition): project version definition
-          or None.
-
-    Returns:
-      str: latest version number or None on error.
-    """
-    if not self._download_helper:
-      download_url = self.GetProjectConfigurationSourcePackageURL(project_name)
-      if not download_url:
-        return
-
-      self._download_helper = GitHubReleasesDownloadHelper(download_url)
-
-    return self._download_helper.GetLatestVersion(
-        project_name, version_definition)
-
-  def GetDownloadURL(self, project_name, project_version):
-    """Retrieves the download URL for a given project name and version.
-
-    Args:
-      project_name (str): name of the project.
-      project_version (str): version of the project.
-
-    Returns:
-      str: download URL of the project or None on error.
-    """
-    if not self._download_helper:
-      download_url = self.GetProjectConfigurationSourcePackageURL(
-          project_name)
-
-      if not download_url:
-        return 0
-
-      self._download_helper = GitHubReleasesDownloadHelper(download_url)
-
-    return self._download_helper.GetDownloadURL(project_name, project_version)
-
-
 class PyPIDownloadHelper(ProjectDownloadHelper):
   """Helps in downloading a PyPI code project."""
 
@@ -828,12 +747,6 @@ class DownloadHelperFactory(object):
     elif (download_url.startswith('http://sourceforge.net/projects/') and
           download_url.endswith('/files')):
       download_helper_class = SourceForgeDownloadHelper
-
-    # TODO: make this a more generic github download helper.
-    elif ('dtfabric' not in download_url and (
-        download_url.startswith('http://github.com/libyal/') or
-        download_url.startswith('http://googledrive.com/host/'))):
-      download_helper_class = LibyalGitHubDownloadHelper
 
     elif (download_url.startswith('http://github.com/') and
           download_url.endswith('/releases')):
