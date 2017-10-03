@@ -178,6 +178,7 @@ class RPMSpecFileGenerator(object):
     # Python modules names contain "_" instead of "-"
     setup_name = setup_name.replace('-', '_')
 
+    # TODO: replace hardcoded exception for templates
     if project_name == 'pefile':
       output_file_object.write((
           b'%files -n {0:s}\n'
