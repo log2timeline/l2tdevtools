@@ -2105,6 +2105,9 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     if project_name.startswith('python-') and project_name != 'python-gflags':
       project_name = project_name[7:]
 
+    # TODO: determine project version.
+    project_version = ''
+
     input_file_path = self._GetSetupPySpecFilePath(
         source_helper_object, source_directory)
 
@@ -2911,7 +2914,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       self.architecture = 'noarch'
 
   def _GenerateSpecFile(
-      self,project_name, project_version, source_filename,
+      self, project_name, project_version, source_filename,
       source_helper_object):
     """Generates the rpm spec file.
 
@@ -3163,7 +3166,7 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
       self.architecture = 'noarch'
 
   def _GenerateSpecFile(
-      self,project_name, project_version, source_filename,
+      self, project_name, project_version, source_filename,
       source_helper_object):
     """Generates the rpm spec file.
 

@@ -547,7 +547,8 @@ class RPMSpecFileGenerator(object):
         b'\n'
         b'%exclude /usr/lib/python2*/site-packages/{0:s}/*.pyc\n'
         b'%exclude /usr/lib/python2*/site-packages/{0:s}/*.pyo\n'
-        b'%exclude /usr/lib/python3*/site-packages/{0:s}/__pycache__/*\n').format(
+        b'%exclude /usr/lib/python3*/site-packages/{0:s}/'
+        b'__pycache__/*\n').format(
             project_name))
 
     # TODO: add bindir support.
@@ -690,6 +691,6 @@ class RPMSpecFileGenerator(object):
       with open(output_file, 'wb') as file_object:
         result = self._RewriteSetupPyGeneratedFile(
             project_definition, source_directory, source_filename,
-            project_name, rpm_build_dependencies, input_file,_file_object)
+            project_name, rpm_build_dependencies, input_file, file_object)
 
     return result

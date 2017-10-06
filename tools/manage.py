@@ -685,11 +685,12 @@ class BinariesManager(object):
       sub_directory = 'macos'
 
     elif operating_system == 'Linux':
+      # pylint: disable=deprecated-method
       linux_name, linux_version, _ = platform.linux_distribution()
       logging.error('Linux: {0:s} {1:s} not supported.'.format(
           linux_name, linux_version))
 
-      if linux_name == 'Ubunt':
+      if linux_name == 'Ubuntu':
         wiki_url = (
             'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubunt'
             '#prepackaged-dependencies')
@@ -744,7 +745,7 @@ def Main():
 
   argument_parser.add_argument(
       '--machine-type', '--machine_type', action='store', metavar='TYPE',
-      dest='machine_type', type=unicode, default=None, help=(
+      dest='machine_type', type=str, default=None, help=(
           'Manually sets the machine type instead of using the value returned '
           'by platform.machine(). Usage of this argument is not recommended '
           'unless want to force the installation of one machine type e.g. '
