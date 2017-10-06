@@ -569,7 +569,7 @@ class RPMSpecFileGenerator(object):
         b'\n'
         b'%exclude /usr/lib/python2*/site-packages/{0:s}/*.pyc\n'
         b'%exclude /usr/lib/python2*/site-packages/{0:s}/*.pyo\n'
-        b'%exclude /usr/lib/python3*/site-packages/__pycache__/*\n').format(
+        b'%exclude /usr/lib/python3*/site-packages/{0:s}/__pycache__/*\n').format(
             project_name))
 
     # TODO: add bindir support.

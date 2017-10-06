@@ -2517,6 +2517,7 @@ class BaseRPMBuildHelper(BuildHelper):
       'python3-dateutil',
       'python3-devel',
       'python3-setuptools',
+      'python3-test',
   ])
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
@@ -2670,7 +2671,8 @@ class BaseRPMBuildHelper(BuildHelper):
         * str: version.
     """
     project_name = source_helper_object.project_name
-    if self._project_definition.setup_name and project_name != 'dateutil':
+    if (self._project_definition.setup_name and
+        project_name not in ('bencode', 'dateutil')):
       project_name = self._project_definition.setup_name
 
     project_version = source_helper_object.GetProjectVersion()
