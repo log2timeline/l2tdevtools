@@ -554,9 +554,6 @@ class RPMSpecFileGenerator(object):
     output_file_object.write((
         b'%exclude %{_bindir}/*\n'))
 
-    if project_name == 'pysqlite':
-      output_file_object.write(b'%exclude /usr/pysqlite2-doc/*\n')
-
     # TODO: add shared data support.
 
     self._WriteChangeLog(output_file_object, version)
