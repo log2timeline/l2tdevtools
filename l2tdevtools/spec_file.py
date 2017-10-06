@@ -384,9 +384,6 @@ class RPMSpecFileGenerator(object):
           if version.startswith(b'1!'):
             version = version[2:]
 
-          if project_name == 'efilter':
-            line = b'%define version {0:s}\n'.format(version)
-
         elif line.startswith(b'%define unmangled_version '):
           # setup.py generates %define unmangled_version twice ignore
           # the second define.
@@ -395,9 +392,6 @@ class RPMSpecFileGenerator(object):
 
           output_file_object.write(
               b'%define unmangled_name {0:s}\n'.format(unmangled_name))
-
-          if project_name == 'efilter':
-            line = b'%define unmangled_version {0:s}\n'.format(version)
 
           has_unmangled_version = True
 
@@ -411,12 +405,7 @@ class RPMSpecFileGenerator(object):
             line = b'Source0: %{unmangled_name}-%{unmangled_version}.tar.gz\n'
 
         elif line.startswith(b'BuildRoot: '):
-          if project_name == 'efilter':
-            line = (
-                b'BuildRoot: %{_tmppath}/'
-                b'dotty-%{version}-%{release}-buildroot\n')
-
-          elif project_name == 'psutil':
+          if project_name == 'psutil':
             line = (
                 b'BuildRoot: %{_tmppath}/'
                 b'%{name}-release-%{version}-%{release}-buildroot\n')
@@ -496,19 +485,8 @@ class RPMSpecFileGenerator(object):
                 b'%description -n %{{name}}-data\n'
                 b'{1:s}').format(summary, description))
 
-          elif project_name == 'efilter':
-            output_file_object.write((
-                b'%package -n %{{name}}-data\n'
-                b'{0:s}'
-                b'Requires: python-dateutil, python-six >= 1.4.0, pytz'
-                b'\n'
-                b'%description -n %{{name}}-data\n'
-                b'{1:s}').format(summary, description))
-
         elif line.startswith(b'%setup -n %{name}-%{unmangled_version}'):
-          if project_name == 'efilter':
-            line = b'%autosetup -n dotty-%{unmangled_version}\n'
-          elif project_name == 'psutil':
+          if project_name == 'psutil':
             line = b'%autosetup -n %{name}-release-%{unmangled_version}\n'
           else:
             line = b'%autosetup -n %{unmangled_name}-%{unmangled_version}\n'

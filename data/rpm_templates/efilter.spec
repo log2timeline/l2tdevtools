@@ -58,12 +58,12 @@ rm -rf %{{buildroot}}
 
 %files -n python-%{{name}}
 %license LICENSE.txt
-/usr/lib/python2*/site-packages/efilter
+/usr/lib/python2*/site-packages/efilter/
 /usr/lib/python2*/site-packages/efilter*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE.txt
-/usr/lib/python3*/site-packages/efilter
+/usr/lib/python3*/site-packages/efilter/
 /usr/lib/python3*/site-packages/efilter*.egg-info
 
 %exclude /usr/lib/python2*/site-packages/efilter/*.pyc

@@ -3,6 +3,8 @@
 """Script to manage the GIFT launchpad PPA and l2tbinaries."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import argparse
 import json
 import logging
@@ -18,11 +20,11 @@ from l2tdevtools import download_helper
 class COPRProjectManager(object):
   """Defines a COPR project manager."""
 
-  _COPR_BASE_URL = u'https://copr.fedorainfracloud.org{0:s}'
+  _COPR_BASE_URL = 'https://copr.fedorainfracloud.org{0:s}'
 
   _COPR_URL = (
-      u'https://copr.fedorainfracloud.org/api_2/projects?group={name:s}&'
-      u'name={project:s}')
+      'https://copr.fedorainfracloud.org/api_2/projects?group={name:s}&'
+      'name={project:s}')
 
   def __init__(self, name):
     """Initializes the COPR manager.
@@ -31,7 +33,7 @@ class COPRProjectManager(object):
       name (str): name of the group.
     """
     super(COPRProjectManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper(u'')
+    self._download_helper = download_helper.DownloadHelper('')
     self._name = name
 
   def GetPackages(self, project):
@@ -44,34 +46,39 @@ class COPRProjectManager(object):
       dict[str, str]: package names and versions as values or None if
           the packages cannot be determined.
     """
+    # TODO: do not use builds information, it is incomplete
+    # instead use https://copr-be.cloud.fedoraproject.org/results/%40gift/
+    # testing/fedora-26-x86_64/repodata/repomd.xml
+    # to find primary.xml.gz or primary.sqlite.bz2
+
     kwargs = {
-        u'name': self._name,
-        u'project': project}
+        'name': self._name,
+        'project': project}
     download_url = self._COPR_URL.format(**kwargs)
 
     page_content = self._download_helper.DownloadPageContent(download_url)
     if not page_content:
-      logging.error(u'Unable to retrieve project information page content.')
+      logging.error('Unable to retrieve project information page content.')
       return
 
     project_information = json.loads(page_content)
     if not project_information:
-      logging.error(u'Unable to retrieve project information.')
+      logging.error('Unable to retrieve project information.')
       return
 
-    projects = project_information.get(u'projects', None)
+    projects = project_information.get('projects', None)
     if len(projects) != 1:
       return
 
-    links = projects[0].get(u'_links', None)
+    links = projects[0].get('_links', None)
     if not links:
       return
 
-    builds = links.get(u'builds', None)
+    builds = links.get('builds', None)
     if not builds:
       return
 
-    builds_href = builds.get(u'href', None)
+    builds_href = builds.get('href', None)
     if not builds_href:
       return
 
@@ -79,30 +86,30 @@ class COPRProjectManager(object):
 
     page_content = self._download_helper.DownloadPageContent(download_url)
     if not page_content:
-      logging.error(u'Unable to retrieve builds information page content.')
+      logging.error('Unable to retrieve builds information page content.')
       return
 
     builds_information = json.loads(page_content)
     if not builds_information:
-      logging.error(u'Unable to retrieve builds information.')
+      logging.error('Unable to retrieve builds information.')
       return
 
-    builds = builds_information.get(u'builds', None)
+    builds = builds_information.get('builds', None)
     if not builds:
       return
 
     packages = {}
     for build_information in builds:
-      build = build_information.get(u'build', None)
+      build = build_information.get('build', None)
       if not build:
         continue
 
-      package_name = build.get(u'package_name', None)
-      package_version = build.get(u'package_version', None)
+      package_name = build.get('package_name', None)
+      package_version = build.get('package_version', None)
       if not package_name or not package_version:
         continue
 
-      package_version, _, _ = package_version.rpartition(u'-')
+      package_version, _, _ = package_version.rpartition('-')
       # TODO: improve version check.
       if package_name in packages and packages[package_name] > package_version:
         continue
@@ -116,15 +123,15 @@ class GithubRepoManager(object):
   """Defines a github reposistory manager."""
 
   _GITHUB_REPO_API_URL = (
-      u'https://api.github.com/repos/log2timeline/l2tbinaries')
+      'https://api.github.com/repos/log2timeline/l2tbinaries')
 
   _GITHUB_REPO_URL = (
-      u'https://github.com/log2timeline/l2tbinaries')
+      'https://github.com/log2timeline/l2tbinaries')
 
   def __init__(self):
     """Initializes the github reposistory manager."""
     super(GithubRepoManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper(u'')
+    self._download_helper = download_helper.DownloadHelper('')
 
   def _GetDownloadURL(self, sub_directory, use_api=False):
     """Retrieves the download URL.
@@ -140,11 +147,11 @@ class GithubRepoManager(object):
       return
 
     if use_api:
-      download_url = u'{0:s}/contents/{1:s}'.format(
+      download_url = '{0:s}/contents/{1:s}'.format(
           self._GITHUB_REPO_API_URL, sub_directory)
 
     else:
-      download_url = u'{0:s}/tree/master/{1:s}'.format(
+      download_url = '{0:s}/tree/master/{1:s}'.format(
           self._GITHUB_REPO_URL, sub_directory)
 
     return download_url
@@ -161,12 +168,12 @@ class GithubRepoManager(object):
           the packages cannot be determined.
     """
     if not sub_directory:
-      logging.info(u'Missing machine type sub directory.')
+      logging.info('Missing machine type sub directory.')
       return
 
     download_url = self._GetDownloadURL(sub_directory, use_api=use_api)
     if not download_url:
-      logging.info(u'Missing download URL.')
+      logging.info('Missing download URL.')
       return
 
     page_content = self._download_helper.DownloadPageContent(download_url)
@@ -195,7 +202,7 @@ class GithubRepoManager(object):
       # }
 
       for directory_entry in json.loads(page_content):
-        filename = directory_entry.get(u'name', None)
+        filename = directory_entry.get('name', None)
         if filename:
           filenames.append(filename)
 
@@ -203,11 +210,11 @@ class GithubRepoManager(object):
       # The format of the download URL is:
       # <a href="{path}" class="js-directory-link"
       # <a href="{path}" class="js-directory-link js-navigation-open"
-      expression_string = u'<a href="([^"]*)" class="js-directory-link'
+      expression_string = '<a href="([^"]*)" class="js-directory-link'
       matches = re.findall(expression_string, page_content)
 
       for match in matches:
-        _, _, filename = match.rpartition(u'/')
+        _, _, filename = match.rpartition('/')
         filenames.append(filename)
 
     packages = {}
@@ -215,19 +222,19 @@ class GithubRepoManager(object):
       if not filename:
         continue
 
-      if filename.endswith(u'.dmg'):
-        filename, _, _ = filename.rpartition(u'.dmg')
+      if filename.endswith('.dmg'):
+        filename, _, _ = filename.rpartition('.dmg')
 
-      elif filename.endswith(u'.msi'):
-        if sub_directory == u'win32':
-          filename, _, _ = filename.rpartition(u'.win32')
-        elif sub_directory == u'win64':
-          filename, _, _ = filename.rpartition(u'.win-amd64')
+      elif filename.endswith('.msi'):
+        if sub_directory == 'win32':
+          filename, _, _ = filename.rpartition('.win32')
+        elif sub_directory == 'win64':
+          filename, _, _ = filename.rpartition('.win-amd64')
 
       else:
         continue
 
-      name, _, version = filename.rpartition(u'-')
+      name, _, version = filename.rpartition('-')
       packages[name] = version
 
     return packages
@@ -237,8 +244,8 @@ class LaunchpadPPAManager(object):
   """Defines a Launchpad PPA manager."""
 
   _LAUNCHPAD_URL = (
-      u'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
-      u'/trusty/main/source/Sources.gz')
+      'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
+      '/trusty/main/source/Sources.gz')
 
   def __init__(self, name):
     """Initializes the Launchpad PPA manager.
@@ -247,7 +254,7 @@ class LaunchpadPPAManager(object):
       name (str): name of the PPA.
     """
     super(LaunchpadPPAManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper(u'')
+    self._download_helper = download_helper.DownloadHelper('')
     self._name = name
 
   def CopyPackages(self):
@@ -268,33 +275,33 @@ class LaunchpadPPAManager(object):
           the packages cannot be determined.
     """
     kwargs = {
-        u'name': self._name,
-        u'track': track}
+        'name': self._name,
+        'track': track}
     download_url = self._LAUNCHPAD_URL.format(**kwargs)
 
     ppa_sources = self._download_helper.DownloadPageContent(download_url)
     if not ppa_sources:
-      logging.error(u'Unable to retrieve PPA sources list.')
+      logging.error('Unable to retrieve PPA sources list.')
       return
 
     ppa_sources = zlib.decompress(ppa_sources, 16 + zlib.MAX_WBITS)
 
     try:
-      ppa_sources = ppa_sources.decode(u'utf-8')
+      ppa_sources = ppa_sources.decode('utf-8')
     except UnicodeDecodeError as exception:
       logging.error(
-          u'Unable to decode PPA sources list with error: {0:s}'.format(
+          'Unable to decode PPA sources list with error: {0:s}'.format(
               exception))
       return
 
     packages = {}
-    for line in ppa_sources.split(u'\n'):
-      if line.startswith(u'Package: '):
-        _, _, package = line.rpartition(u'Package: ')
+    for line in ppa_sources.split('\n'):
+      if line.startswith('Package: '):
+        _, _, package = line.rpartition('Package: ')
 
-      elif line.startswith(u'Version: '):
-        _, _, version = line.rpartition(u'Version: ')
-        version, _, _ = version.rpartition(u'-')
+      elif line.startswith('Version: '):
+        _, _, version = line.rpartition('Version: ')
+        version, _, _ = version.rpartition('-')
 
         packages[package] = version
 
@@ -311,69 +318,69 @@ class OpenSuseBuildServiceManager(object):
 class PyPIManager(object):
   """Defines a PyPI manager object."""
 
-  _PYPI_URL = u'https://pypi.python.org/pypi/{package_name:s}'
+  _PYPI_URL = 'https://pypi.python.org/pypi/{package_name:s}'
 
   # TODO: move to projects.ini configuration.
   _PYPI_PACKAGE_NAMES = {
-      u'artifacts': u'artifacts',
-      u'astroid': u'astroid',
-      u'bencode': u'bencode',
-      u'binplist': u'binplist',
-      u'construct': u'construct',
-      u'dfdatetime': u'dfdatetime',
-      u'dfvfs': u'dfvfs',
-      u'dfwinreg': u'dfwinreg',
-      u'dpkt': u'dpkt',
-      u'efilter': u'efilter',
-      u'google-apputils': u'google-apputils',
-      u'hachoir-core': u'hachoir-core',
-      u'hachoir-metadata': u'hachoir-metadata',
-      u'hachoir-parser': u'hachoir-parser',
-      u'lazy-object-proxy': u'lazy-object-proxy',
-      u'libbde-python': u'libbde',
-      u'libcaes-python': u'libcaes',
-      u'libcreg-python': u'libcreg',
-      u'libesedb-python': u'libesedb',
-      u'libevt-python': u'libevt',
-      u'libevtx-python': u'libevtx',
-      u'libewf-python': u'libewf',
-      u'libexe-python': u'libexe',
-      u'libfsntfs-python': u'libfsntfs',
-      u'libfwps-python': u'libfwps',
-      u'libfwsi-python': u'libfwsi',
-      u'liblnk-python': u'liblnk',
-      u'libmsiecf-python': u'libmsiecf',
-      u'libolecf-python': u'libolecf',
-      u'libqcow-python': u'libqcow',
-      u'libregf-python': u'libregf',
-      u'libscca-python': u'libscca',
-      u'libsigscan-python': u'libsigscan',
-      u'libsmdev-python': u'libsmdev',
-      u'libsmraw-python': u'libsmraw',
-      u'libvhdi-python': u'libvhdi',
-      u'libvmdk-python': u'libvmdk',
-      u'libvshadow-python': u'libvshadow',
-      u'libvslvm-python': u'libvslvm',
-      u'logilab-common': u'logilab-common',
-      u'pefile': u'pefile',
-      u'pycrypto': u'pycrypto',
-      u'pylint': u'pylint',
-      u'pyparsing': u'pyparsing',
-      u'pysqlite': u'pysqlite',
-      u'python-dateutil': u'dateutil',
-      u'python-gflags': u'python-gflags',
-      u'pytsk3': u'pytsk3',
-      u'pytz': u'pytz',
-      u'PyYAML': u'PyYAML',
-      u'requests': u'requests',
-      u'six': u'six',
-      u'wrapt': u'wrapt',
-      u'XlsxWriter': u'XlsxWriter'}
+      'artifacts': 'artifacts',
+      'astroid': 'astroid',
+      'bencode': 'bencode',
+      'binplist': 'binplist',
+      'construct': 'construct',
+      'dfdatetime': 'dfdatetime',
+      'dfvfs': 'dfvfs',
+      'dfwinreg': 'dfwinreg',
+      'dpkt': 'dpkt',
+      'efilter': 'efilter',
+      'google-apputils': 'google-apputils',
+      'hachoir-core': 'hachoir-core',
+      'hachoir-metadata': 'hachoir-metadata',
+      'hachoir-parser': 'hachoir-parser',
+      'lazy-object-proxy': 'lazy-object-proxy',
+      'libbde-python': 'libbde',
+      'libcaes-python': 'libcaes',
+      'libcreg-python': 'libcreg',
+      'libesedb-python': 'libesedb',
+      'libevt-python': 'libevt',
+      'libevtx-python': 'libevtx',
+      'libewf-python': 'libewf',
+      'libexe-python': 'libexe',
+      'libfsntfs-python': 'libfsntfs',
+      'libfwps-python': 'libfwps',
+      'libfwsi-python': 'libfwsi',
+      'liblnk-python': 'liblnk',
+      'libmsiecf-python': 'libmsiecf',
+      'libolecf-python': 'libolecf',
+      'libqcow-python': 'libqcow',
+      'libregf-python': 'libregf',
+      'libscca-python': 'libscca',
+      'libsigscan-python': 'libsigscan',
+      'libsmdev-python': 'libsmdev',
+      'libsmraw-python': 'libsmraw',
+      'libvhdi-python': 'libvhdi',
+      'libvmdk-python': 'libvmdk',
+      'libvshadow-python': 'libvshadow',
+      'libvslvm-python': 'libvslvm',
+      'logilab-common': 'logilab-common',
+      'pefile': 'pefile',
+      'pycrypto': 'pycrypto',
+      'pylint': 'pylint',
+      'pyparsing': 'pyparsing',
+      'pysqlite': 'pysqlite',
+      'python-dateutil': 'dateutil',
+      'python-gflags': 'python-gflags',
+      'pytsk3': 'pytsk3',
+      'pytz': 'pytz',
+      'PyYAML': 'PyYAML',
+      'requests': 'requests',
+      'six': 'six',
+      'wrapt': 'wrapt',
+      'XlsxWriter': 'XlsxWriter'}
 
   def __init__(self):
     """Initializes the PyPI manager object."""
     super(PyPIManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper(u'')
+    self._download_helper = download_helper.DownloadHelper('')
 
   def CopyPackages(self):
     """Copies packages."""
@@ -391,30 +398,30 @@ class PyPIManager(object):
     """
     packages = {}
     for package_name in iter(self._PYPI_PACKAGE_NAMES.keys()):
-      kwargs = {u'package_name': package_name}
+      kwargs = {'package_name': package_name}
       download_url = self._PYPI_URL.format(**kwargs)
 
       page_content = self._download_helper.DownloadPageContent(download_url)
       if not page_content:
-        logging.error(u'Unable to retrieve PyPI package: {0:s} page.'.format(
+        logging.error('Unable to retrieve PyPI package: {0:s} page.'.format(
             package_name))
         continue
 
       try:
-        page_content = page_content.decode(u'utf-8')
+        page_content = page_content.decode('utf-8')
       except UnicodeDecodeError as exception:
         logging.error((
-            u'Unable to decode PyPI package: {0:s} page with error: '
-            u'{1:s}').format(package_name, exception))
+            'Unable to decode PyPI package: {0:s} page with error: '
+            '{1:s}').format(package_name, exception))
         continue
 
       expression_string = (
-          u'<title>{0:s} ([^ ]*) : Python Package Index</title>'.format(
+          '<title>{0:s} ([^ ]*) : Python Package Index</title>'.format(
               package_name))
       matches = re.findall(expression_string, page_content)
       if not matches or len(matches) != 1:
         logging.warning(
-            u'Unable to determine PyPI package: {0:s} information.'.format(
+            'Unable to determine PyPI package: {0:s} information.'.format(
                 package_name))
         continue
 
@@ -430,9 +437,9 @@ class BinariesManager(object):
   def __init__(self):
     """Initializes the binaries manager object."""
     super(BinariesManager, self).__init__()
-    self._copr_project_manager = COPRProjectManager(u'gift')
+    self._copr_project_manager = COPRProjectManager('gift')
     self._github_repo_manager = GithubRepoManager()
-    self._launchpad_ppa_manager = LaunchpadPPAManager(u'gift')
+    self._launchpad_ppa_manager = LaunchpadPPAManager('gift')
     self._pypi_manager = PyPIManager()
 
   def _ComparePackages(self, reference_packages, packages):
@@ -483,11 +490,11 @@ class BinariesManager(object):
       # The directory contains various files and we are only interested
       # in the source RPM packages that use the naming convention:
       # package-version-#.src.rpm
-      if not directory_entry.endswith(u'.src.rpm'):
+      if not directory_entry.endswith('.src.rpm'):
         continue
 
-      name, _, _ = directory_entry.rpartition(u'-')
-      name, _, version = name.rpartition(u'-')
+      name, _, _ = directory_entry.rpartition('-')
+      name, _, version = name.rpartition('-')
 
       reference_packages[name] = version
 
@@ -514,19 +521,19 @@ class BinariesManager(object):
     """
     reference_packages = {}
     for directory_entry in os.listdir(reference_directory):
-      if directory_entry.endswith(u'.dmg'):
-        directory_entry, _, _ = directory_entry.rpartition(u'.dmg')
+      if directory_entry.endswith('.dmg'):
+        directory_entry, _, _ = directory_entry.rpartition('.dmg')
 
-      elif directory_entry.endswith(u'.msi'):
-        if sub_directory == u'win32':
-          directory_entry, _, _ = directory_entry.rpartition(u'.win32')
-        elif sub_directory == u'win64':
-          directory_entry, _, _ = directory_entry.rpartition(u'.win-amd64')
+      elif directory_entry.endswith('.msi'):
+        if sub_directory == 'win32':
+          directory_entry, _, _ = directory_entry.rpartition('.win32')
+        elif sub_directory == 'win64':
+          directory_entry, _, _ = directory_entry.rpartition('.win-amd64')
 
       else:
         continue
 
-      name, _, version = directory_entry.rpartition(u'-')
+      name, _, version = directory_entry.rpartition('-')
       reference_packages[name] = version
 
     packages = self._github_repo_manager.GetPackages(sub_directory)
@@ -555,11 +562,11 @@ class BinariesManager(object):
       # The directory contains various files and we are only interested
       # in the source dpkg packages that use the naming convention:
       # package_version-#ppa1~trusty_source.changes
-      if not directory_entry.endswith(u'ppa1~trusty_source.changes'):
+      if not directory_entry.endswith('ppa1~trusty_source.changes'):
         continue
 
-      name, _, _ = directory_entry.rpartition(u'-')
-      name, _, version = name.rpartition(u'_')
+      name, _, _ = directory_entry.rpartition('-')
+      name, _, version = name.rpartition('_')
 
       reference_packages[name] = version
 
@@ -628,15 +635,15 @@ class BinariesManager(object):
     """
     reference_packages = {}
     for directory_entry in os.listdir(reference_directory):
-      if not directory_entry.endswith(u'.tar.gz'):
+      if not directory_entry.endswith('.tar.gz'):
         continue
 
-      directory_entry, _, _ = directory_entry.rpartition(u'.tar.gz')
-      name, _, version = directory_entry.rpartition(u'-')
+      directory_entry, _, _ = directory_entry.rpartition('.tar.gz')
+      name, _, version = directory_entry.rpartition('-')
 
-      if (name.endswith(u'-alpha') or name.endswith(u'-beta') or
-          name.endswith(u'-experimental')):
-        name, _, _ = name.rpartition(u'-')
+      if (name.endswith('-alpha') or name.endswith('-beta') or
+          name.endswith('-experimental')):
+        name, _, _ = name.rpartition('-')
 
       reference_packages[name] = version
 
@@ -668,44 +675,44 @@ class BinariesManager(object):
 
     sub_directory = None
 
-    if operating_system == u'Darwin':
+    if operating_system == 'Darwin':
       # TODO: determine OSX version.
-      if cpu_architecture != u'x86_64':
-        logging.error(u'CPU architecture: {0:s} not supported.'.format(
+      if cpu_architecture != 'x86_64':
+        logging.error('CPU architecture: {0:s} not supported.'.format(
             cpu_architecture))
         return
 
-      sub_directory = u'macos'
+      sub_directory = 'macos'
 
-    elif operating_system == u'Linux':
+    elif operating_system == 'Linux':
       linux_name, linux_version, _ = platform.linux_distribution()
-      logging.error(u'Linux: {0:s} {1:s} not supported.'.format(
+      logging.error('Linux: {0:s} {1:s} not supported.'.format(
           linux_name, linux_version))
 
-      if linux_name == u'Ubuntu':
+      if linux_name == 'Ubunt':
         wiki_url = (
-            u'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
-            u'#prepackaged-dependencies')
+            'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubunt'
+            '#prepackaged-dependencies')
         logging.error(
-            u'Use the gift PPA instead. For more info see: {0:s}'.format(
+            'Use the gift PPA instead. For more info see: {0:s}'.format(
                 wiki_url))
 
       return
 
-    elif operating_system == u'Windows':
-      if cpu_architecture == u'x86':
-        sub_directory = u'win32'
+    elif operating_system == 'Windows':
+      if cpu_architecture == 'x86':
+        sub_directory = 'win32'
 
-      elif cpu_architecture == u'amd64':
-        sub_directory = u'win64'
+      elif cpu_architecture == 'amd64':
+        sub_directory = 'win64'
 
       else:
-        logging.error(u'CPU architecture: {0:s} not supported.'.format(
+        logging.error('CPU architecture: {0:s} not supported.'.format(
             cpu_architecture))
         return
 
     else:
-      logging.error(u'Operating system: {0:s} not supported.'.format(
+      logging.error('Operating system: {0:s} not supported.'.format(
           operating_system))
       return
 
@@ -719,37 +726,37 @@ def Main():
     bool: True if successful or False if not.
   """
   actions = frozenset([
-      u'copr-diff-dev', u'copr-diff-stable', u'copr-diff-testing',
-      u'l2tbinaries-diff', u'launchpad-diff-dev', u'launchpad-diff-stable',
-      u'launchpad-diff-testing', u'pypi-diff'])
+      'copr-diff-dev', 'copr-diff-stable', 'copr-diff-testing',
+      'l2tbinaries-diff', 'launchpad-diff-dev', 'launchpad-diff-stable',
+      'launchpad-diff-testing', 'pypi-diff'])
 
   argument_parser = argparse.ArgumentParser(description=(
-      u'Manages the GIFT copr, launchpad PPA and l2tbinaries.'))
+      'Manages the GIFT copr, launchpad PPA and l2tbinaries.'))
 
   argument_parser.add_argument(
-      u'action', choices=sorted(actions), action=u'store',
-      metavar=u'ACTION', default=None, help=u'The action.')
+      'action', choices=sorted(actions), action='store',
+      metavar='ACTION', default=None, help='The action.')
 
   argument_parser.add_argument(
-      u'--build-directory', u'--build_directory', action=u'store',
-      metavar=u'DIRECTORY', dest=u'build_directory', type=str,
-      default=u'build', help=u'The location of the build directory.')
+      '--build-directory', '--build_directory', action='store',
+      metavar='DIRECTORY', dest='build_directory', type=str,
+      default='build', help='The location of the build directory.')
 
   argument_parser.add_argument(
-      '--machine-type', '--machine_type', action=u'store', metavar=u'TYPE',
-      dest=u'machine_type', type=unicode, default=None, help=(
-          u'Manually sets the machine type instead of using the value returned '
-          u'by platform.machine(). Usage of this argument is not recommended '
-          u'unless want to force the installation of one machine type e.g. '
-          u'\'x86\' onto another \'amd64\'.'))
+      '--machine-type', '--machine_type', action='store', metavar='TYPE',
+      dest='machine_type', type=unicode, default=None, help=(
+          'Manually sets the machine type instead of using the value returned '
+          'by platform.machine(). Usage of this argument is not recommended '
+          'unless want to force the installation of one machine type e.g. '
+          '\'x86\' onto another \'amd64\'.'))
 
   options = argument_parser.parse_args()
 
   if not options.action:
-    print(u'Missing action.')
-    print(u'')
+    print('Missing action.')
+    print('')
     argument_parser.print_help()
-    print(u'')
+    print('')
     return False
 
   # TODO: add action to upload files to PPA.
@@ -759,12 +766,12 @@ def Main():
 
   binaries_manager = BinariesManager()
 
-  action_tuple = options.action.split(u'-')
+  action_tuple = options.action.split('-')
 
-  if action_tuple[0] == u'copr' and action_tuple[1] == u'diff':
+  if action_tuple[0] == 'copr' and action_tuple[1] == 'diff':
     track = action_tuple[2]
 
-    if track == u'testing':
+    if track == 'testing':
       reference_directory = options.build_directory
 
       new_packages, new_versions = (
@@ -772,23 +779,23 @@ def Main():
               reference_directory, track))
 
       diff_header = (
-          u'Difference between: {0:s} and COPR project: {1:s}'.format(
+          'Difference between: {0:s} and COPR project: {1:s}'.format(
               reference_directory, track))
 
     else:
-      if track == u'dev':
-        reference_track = u'testing'
+      if track == 'dev':
+        reference_track = 'testing'
       else:
-        reference_track = u'dev'
+        reference_track = 'dev'
 
       new_packages, new_versions = binaries_manager.CompareCOPRProjects(
           reference_track, track)
 
       diff_header = (
-          u'Difference between COPR project: {0:s} and {1:s}'.format(
+          'Difference between COPR project: {0:s} and {1:s}'.format(
               reference_track, track))
 
-  elif action_tuple[0] == u'l2tbinaries' and action_tuple[1] == u'diff':
+  elif action_tuple[0] == 'l2tbinaries' and action_tuple[1] == 'diff':
     sub_directory = binaries_manager.GetMachineTypeSubDirectory(
         preferred_machine_type=options.machine_type)
 
@@ -800,12 +807,12 @@ def Main():
             reference_directory, sub_directory))
 
     diff_header = (
-        u'Difference between: {0:s} and release'.format(reference_directory))
+        'Difference between: {0:s} and release'.format(reference_directory))
 
-  elif action_tuple[0] == u'launchpad' and action_tuple[1] == u'diff':
+  elif action_tuple[0] == 'launchpad' and action_tuple[1] == 'diff':
     track = action_tuple[2]
 
-    if track == u'testing':
+    if track == 'testing':
       reference_directory = options.build_directory
 
       new_packages, new_versions = (
@@ -813,46 +820,46 @@ def Main():
               reference_directory, track))
 
       diff_header = (
-          u'Difference between: {0:s} and Launchpad track: {1:s}'.format(
+          'Difference between: {0:s} and Launchpad track: {1:s}'.format(
               reference_directory, track))
 
     else:
-      if track == u'dev':
-        reference_track = u'testing'
+      if track == 'dev':
+        reference_track = 'testing'
       else:
-        reference_track = u'dev'
+        reference_track = 'dev'
 
       new_packages, new_versions = binaries_manager.CompareLaunchpadPPATracks(
           reference_track, track)
 
       diff_header = (
-          u'Difference between Launchpad tracks: {0:s} and {1:s}'.format(
+          'Difference between Launchpad tracks: {0:s} and {1:s}'.format(
               reference_track, track))
 
-  # elif action_tuple[0] == u'osb' and action_tuple[1] == u'diff':
+  # elif action_tuple[0] == 'osb' and action_tuple[1] == 'diff':
 
-  elif action_tuple[0] == u'pypi' and action_tuple[1] == u'diff':
+  elif action_tuple[0] == 'pypi' and action_tuple[1] == 'diff':
     reference_directory = options.build_directory
 
     new_packages, new_versions = (
         binaries_manager.CompareDirectoryWithPyPI(reference_directory))
 
     diff_header = (
-        u'Difference between: {0:s} and release'.format(reference_directory))
+        'Difference between: {0:s} and release'.format(reference_directory))
 
-  if action_tuple[1] == u'diff':
+  if action_tuple[1] == 'diff':
     print(diff_header)
-    print(u'')
+    print('')
 
-    print(u'New packages:')
+    print('New packages:')
     for package in sorted(new_packages.keys()):
-      print(u'  {0:s}'.format(package))
-    print(u'')
+      print('  {0:s}'.format(package))
+    print('')
 
-    print(u'New versions:')
+    print('New versions:')
     for package in sorted(new_versions.keys()):
-      print(u'  {0:s}'.format(package))
-    print(u'')
+      print('  {0:s}'.format(package))
+    print('')
 
   return True
 
