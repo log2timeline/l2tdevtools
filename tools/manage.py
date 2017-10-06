@@ -692,7 +692,7 @@ class BinariesManager(object):
 
       if linux_name == 'Ubuntu':
         wiki_url = (
-            'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubunt'
+            'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
             '#prepackaged-dependencies')
         logging.error(
             'Use the gift PPA instead. For more info see: {0:s}'.format(
