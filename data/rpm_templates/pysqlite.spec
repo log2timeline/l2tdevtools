@@ -38,7 +38,7 @@ env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 python2 setup.py install -O1 --root=%{{buildroot}}
 find %{{buildroot}} -type f -name ".pyc" -delete
 find %{{buildroot}} -type f -name ".pyo" -delete
-find %{{buildroot}} -type d -name "__pycache__" -delete
+find %{{buildroot}} -type d -name "__pycache__" -prune
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
