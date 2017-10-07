@@ -37,6 +37,7 @@ Plaso (log2timeline) is a framework to create super timelines. Its purpose is to
 
 %package -n %{{name}}-tools
 Summary: Tools of plaso (log2timeline)
+Requires: python-%{{name}}
 
 %description -n %{{name}}-tools
 Plaso (log2timeline) is a framework to create super timelines. Its purpose is to extract timestamps from various files found on typical computer systems and aggregate them.
