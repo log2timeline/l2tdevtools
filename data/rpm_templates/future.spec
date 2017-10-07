@@ -64,6 +64,8 @@ rm -rf %{{buildroot}}
 %license LICENSE.txt
 /usr/lib/python3*/site-packages/*
 
+%exclude %{{_bindir}}/*
+
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1
 - Auto-generated
