@@ -57,8 +57,6 @@ rm -rf %{{buildroot}}
 %{{_libdir}}/python3*/site-packages/zmq
 %{{_libdir}}/python3*/site-packages/pyzmq*.egg-info
 
-%exclude %{{_bindir}}/*
-
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1
 - Auto-generated

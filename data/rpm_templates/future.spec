@@ -52,6 +52,9 @@ python2 setup.py install -O1 --root=%{{buildroot}}
 rm -rf %{{_builddir}}/%{{unmangled_name}}-%{{unmangled_version}}/build
 python3 setup.py install -O1 --root=%{{buildroot}}
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
+find %{{buildroot}} -type f -name ".pyc" -delete
+find %{{buildroot}} -type f -name ".pyo" -delete
+find %{{buildroot}} -type d -name "__pycache__" -delete
 
 %clean
 rm -rf %{{buildroot}}
@@ -63,8 +66,6 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{name}}
 %license LICENSE.txt
 /usr/lib/python3*/site-packages/*
-
-%exclude %{{_bindir}}/*
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

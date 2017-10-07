@@ -52,6 +52,9 @@ python3 setup.py build
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
 python3 setup.py install -O1 --root=%{{buildroot}}
+find %{{buildroot}} -type f -name ".pyc" -delete
+find %{{buildroot}} -type f -name ".pyo" -delete
+find %{{buildroot}} -type d -name "__pycache__" -delete
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -66,8 +69,6 @@ rm -rf %{{buildroot}}
 %license LICENSE.txt
 /usr/lib/python3*/site-packages/xlsxwriter
 /usr/lib/python3*/site-packages/XlsxWriter*.egg-info
-
-%exclude %{{_bindir}}/*
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

@@ -86,7 +86,11 @@ class RPMSpecFileGenerator(object):
     if not python2_only:
       lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
 
-    lines.append(b'rm -rf %{buildroot}/usr/share/doc/%{name}/')
+    lines.extend([
+        b'find %{{buildroot}} -type f -name ".pyc" -delete',
+        b'find %{{buildroot}} -type f -name ".pyo" -delete',
+        b'find %{{buildroot}} -type d -name "__pycache__" -delete',
+        b'rm -rf %{buildroot}/usr/share/doc/%{name}/'])
 
     if project_name == 'astroid':
       lines.append('rm -rf %{buildroot}%{python2_sitelib}/astroid/tests')
@@ -542,14 +546,6 @@ class RPMSpecFileGenerator(object):
           b'\n'
           b'%files -n %{name}-data\n'
           b'%{_datadir}/%{name}/*\n')
-
-    output_file_object.write((
-        b'\n'
-        b'%exclude /usr/lib/python2*/site-packages/{0:s}/*.pyc\n'
-        b'%exclude /usr/lib/python2*/site-packages/{0:s}/*.pyo\n'
-        b'%exclude /usr/lib/python3*/site-packages/{0:s}/'
-        b'__pycache__/*\n').format(
-            project_name))
 
     # TODO: add bindir support.
     output_file_object.write((

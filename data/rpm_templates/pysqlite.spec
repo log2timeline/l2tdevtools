@@ -36,6 +36,9 @@ env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
+find %{{buildroot}} -type f -name ".pyc" -delete
+find %{{buildroot}} -type f -name ".pyo" -delete
+find %{{buildroot}} -type d -name "__pycache__" -delete
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -47,8 +50,6 @@ rm -rf %{{buildroot}}
 %{{_libdir}}/python2*/site-packages/pysqlite2/*.so
 %{{_libdir}}/python2*/site-packages/pysqlite*.egg-info
 
-%exclude %{{_libdir}}/python2*/site-packages/pysqlite2/*.pyc
-%exclude %{{_libdir}}/python2*/site-packages/pysqlite2/*.pyo
 %exclude %{{_libdir}}/python2*/site-packages/pysqlite2/test/*
 %exclude /usr/pysqlite2-doc/*
 

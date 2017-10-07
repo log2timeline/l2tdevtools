@@ -46,6 +46,9 @@ python3 setup.py build
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
 python3 setup.py install -O1 --root=%{{buildroot}}
+find %{{buildroot}} -type f -name ".pyc" -delete
+find %{{buildroot}} -type f -name ".pyo" -delete
+find %{{buildroot}} -type d -name "__pycache__" -delete
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -58,11 +61,6 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{name}}
 /usr/lib/python3*/site-packages/bencode
 /usr/lib/python3*/site-packages/bencode.py*.egg-info
-
-%exclude /usr/lib/python2*/site-packages/bencode/*.pyc
-%exclude /usr/lib/python2*/site-packages/bencode/*.pyo
-%exclude /usr/lib/python3*/site-packages/bencode/__pycache__/*
-%exclude %{{_bindir}}/*
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

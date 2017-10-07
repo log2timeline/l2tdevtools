@@ -51,6 +51,9 @@ python3 setup.py build
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
 python3 setup.py install -O1 --root=%{{buildroot}}
+find %{{buildroot}} -type f -name ".pyc" -delete
+find %{{buildroot}} -type f -name ".pyo" -delete
+find %{{buildroot}} -type d -name "__pycache__" -delete
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -66,10 +69,6 @@ rm -rf %{{buildroot}}
 /usr/lib/python3*/site-packages/efilter/
 /usr/lib/python3*/site-packages/efilter*.egg-info
 
-%exclude /usr/lib/python2*/site-packages/efilter/*.pyc
-%exclude /usr/lib/python2*/site-packages/efilter/*.pyo
-%exclude /usr/lib/python3*/site-packages/efilter/__pycache__/*
-%exclude %{{_bindir}}/*
 %exclude /usr/lib/python2*/site-packages/sample_projects
 %exclude /usr/lib/python3*/site-packages/sample_projects
 
