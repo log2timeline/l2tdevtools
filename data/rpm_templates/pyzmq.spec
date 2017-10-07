@@ -50,11 +50,11 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 rm -rf %{{buildroot}}
 
 %files -n python2-zmq
-%{{_libdir}}/python2*/site-packages/zmq
+%{{_libdir}}/python2*/site-packages/zmq/
 %{{_libdir}}/python2*/site-packages/pyzmq*.egg-info
 
 %files -n python3-zmq
-%{{_libdir}}/python3*/site-packages/zmq
+%{{_libdir}}/python3*/site-packages/zmq/
 %{{_libdir}}/python3*/site-packages/pyzmq*.egg-info
 
 %changelog

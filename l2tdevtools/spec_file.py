@@ -87,9 +87,6 @@ class RPMSpecFileGenerator(object):
       lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
 
     lines.extend([
-        b'find %{buildroot} -type f -name ".pyc" -delete',
-        b'find %{buildroot} -type f -name ".pyo" -delete',
-        b'find %{buildroot} -type d -name "__pycache__" -prune',
         b'rm -rf %{buildroot}/usr/share/doc/%{name}/'])
 
     if project_name == 'astroid':

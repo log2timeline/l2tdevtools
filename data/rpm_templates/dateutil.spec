@@ -46,9 +46,6 @@ python3 setup.py build
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
 python3 setup.py install -O1 --root=%{{buildroot}}
-find %{{buildroot}} -type f -name ".pyc" -delete
-find %{{buildroot}} -type f -name ".pyo" -delete
-find %{{buildroot}} -type d -name "__pycache__" -prune
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -56,18 +53,12 @@ rm -rf %{{buildroot}}
 
 %files -n python-%{{name}}
 %license LICENSE
-/usr/lib/python2*/site-packages/dateutil/*.py
-/usr/lib/python2*/site-packages/dateutil/tz/*.py
-/usr/lib/python2*/site-packages/dateutil/zoneinfo/*.py
-/usr/lib/python2*/site-packages/dateutil/zoneinfo/dateutil-zoneinfo.tar.gz
+/usr/lib/python2*/site-packages/dateutil/
 /usr/lib/python2*/site-packages/python_dateutil*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE
-/usr/lib/python3*/site-packages/dateutil/*.py
-/usr/lib/python3*/site-packages/dateutil/tz/*.py
-/usr/lib/python3*/site-packages/dateutil/zoneinfo/*.py
-/usr/lib/python3*/site-packages/dateutil/zoneinfo/dateutil-zoneinfo.tar.gz
+/usr/lib/python3*/site-packages/dateutil/
 /usr/lib/python3*/site-packages/python_dateutil*.egg-info
 
 %changelog

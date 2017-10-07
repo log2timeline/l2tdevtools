@@ -50,9 +50,6 @@ python2 setup.py build
 
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
-find %{{buildroot}} -type f -name ".pyc" -delete
-find %{{buildroot}} -type f -name ".pyo" -delete
-find %{{buildroot}} -type d -name "__pycache__" -prune
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -61,7 +58,7 @@ rm -rf %{{buildroot}}
 %files -n python-%{{name}}
 %license LICENSE
 %doc README
-/usr/lib/python2*/site-packages/plaso
+/usr/lib/python2*/site-packages/plaso/
 /usr/lib/python2*/site-packages/plaso*.egg-info
 
 %files -n %{{name}}-data

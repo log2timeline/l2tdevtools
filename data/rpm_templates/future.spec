@@ -52,9 +52,6 @@ python2 setup.py install -O1 --root=%{{buildroot}}
 rm -rf %{{_builddir}}/%{{unmangled_name}}-%{{unmangled_version}}/build
 python3 setup.py install -O1 --root=%{{buildroot}}
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
-find %{{buildroot}} -type f -name ".pyc" -delete
-find %{{buildroot}} -type f -name ".pyo" -delete
-find %{{buildroot}} -type d -name "__pycache__" -prune
 
 %clean
 rm -rf %{{buildroot}}

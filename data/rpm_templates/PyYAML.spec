@@ -45,9 +45,6 @@ env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
 python3 setup.py install -O1 --root=%{{buildroot}}
-find %{{buildroot}} -type f -name ".pyc" -delete
-find %{{buildroot}} -type f -name ".pyo" -delete
-find %{{buildroot}} -type d -name "__pycache__" -prune
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -56,13 +53,13 @@ rm -rf %{{buildroot}}
 %files -n %{{name}}
 %license LICENSE
 %doc CHANGES README
-%{{_libdir}}/python2*/site-packages/yaml/*.py
+%{{_libdir}}/python2*/site-packages/yaml/
 %{{_libdir}}/python2*/site-packages/PyYAML*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE
 %doc CHANGES README
-%{{_libdir}}/python3*/site-packages/yaml/*.py
+%{{_libdir}}/python3*/site-packages/yaml/
 %{{_libdir}}/python3*/site-packages/PyYAML*.egg-info
 
 %changelog
