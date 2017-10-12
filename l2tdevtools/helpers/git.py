@@ -212,7 +212,7 @@ class GitHelper(cli.CLIHelper):
     Returns:
       list[str]: names of the changed Python files.
     """
-    upload_path = os.path.join('review', 'lib', 'upload.py')
+    upload_path = os.path.join('l2tdevtools', 'lib', 'upload.py')
     python_files = []
     for changed_file in self.GetChangedFiles(diffbase=diffbase):
       if (not changed_file.endswith('.py') or
