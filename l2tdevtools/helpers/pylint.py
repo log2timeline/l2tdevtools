@@ -52,7 +52,7 @@ class PylintHelper(cli.CLIHelper):
     Returns:
       bool: True if the pylint version is up to date.
     """
-    exit_code, output, _ = self.RunCommand(u'pylint --version')
+    exit_code, output, _ = self.RunCommand('pylint --version')
     if exit_code != 0:
       return False
 
@@ -82,4 +82,3 @@ class PylintHelper(cli.CLIHelper):
 
     default_path = os.path.join(__file__, '..', '..', '..', self._RCFILE_NAME)
     return os.path.abspath(default_path)
-

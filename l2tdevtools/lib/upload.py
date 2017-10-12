@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+# pylint: skip-file
 #
 # This file originates from the Rietveld project:
 # https://github.com/rietveld-codereview/rietveld/blob/
