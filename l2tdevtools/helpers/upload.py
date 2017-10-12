@@ -79,7 +79,7 @@ class UploadHelper(cli.CLIHelper):
     self._access_token = None
     self._email_address = email_address
     self._no_browser = no_browser
-    self._upload_py_path = os.path.join('l2devtools', 'lib', 'upload.py')
+    self._upload_py_path = os.path.join(__file__, '..', 'lib', 'upload.py')
     self._xsrf_token = None
 
   def _GetReviewer(self, project_name):
