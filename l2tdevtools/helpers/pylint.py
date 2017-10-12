@@ -12,9 +12,9 @@ from l2tdevtools.helpers import cli
 class PylintHelper(cli.CLIHelper):
   """Pylint helper."""
 
-  MINIMUM_VERSION = u'1.6.5'
+  MINIMUM_VERSION = '1.6.5'
 
-  _MINIMUM_VERSION_TUPLE = MINIMUM_VERSION.split(u'.')
+  _MINIMUM_VERSION_TUPLE = MINIMUM_VERSION.split('.')
 
   _RCFILE_NAME = '.pylintrc'
 
@@ -28,20 +28,20 @@ class PylintHelper(cli.CLIHelper):
     Returns:
       bool: True if the files were linted without errors.
     """
-    print(u'Running linter on changed files.')
+    print('Running linter on changed files.')
     failed_filenames = []
     for filename in filenames:
-      print(u'Checking: {0:s}'.format(filename))
+      print('Checking: {0:s}'.format(filename))
 
-      command = u'pylint --rcfile="{0:s}" {1:s}'.format(rcfile, filename)
+      command = 'pylint --rcfile="{0:s}" {1:s}'.format(rcfile, filename)
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
         failed_filenames.append(filename)
 
     if failed_filenames:
-      print(u'\nFiles with linter errors:')
+      print('\nFiles with linter errors:')
       for failed_filename in filenames:
-        print(u'\t{0:s}'.format(failed_filename))
+        print('\t{0:s}'.format(failed_filename))
       return False
 
     return True

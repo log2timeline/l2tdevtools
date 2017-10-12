@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with readthedocs."""
 
+from __future__ import unicode_literals
+
 import logging
 
 from l2tdevtools.helpers import url_lib
@@ -26,14 +28,14 @@ class ReadTheDocsHelper(object):
     Returns:
       bool: True if the build was triggered.
     """
-    readthedocs_url = u'https://readthedocs.org/build/{0:s}'.format(
+    readthedocs_url = 'https://readthedocs.org/build/{0:s}'.format(
         self._project)
 
     try:
       self._url_lib_helper.Request(readthedocs_url, post_data=b'')
 
     except errors.ConnectionError as exception:
-      logging.warning(u'{0!s}'.format(exception))
+      logging.warning('{0!s}'.format(exception))
       return False
 
     return True

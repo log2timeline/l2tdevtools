@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for using URL library (urllib)."""
+from __future__ import unicode_literals
 
 import sys
 
@@ -22,7 +23,7 @@ class URLLibHelper(object):
 
     Args:
       url (str): URL to send the request.
-      data (Optional[bytes]): data to send.
+      post_data (Optional[bytes]): data to send.
 
     Returns:
       bytes: response data.
@@ -40,11 +41,12 @@ class URLLibHelper(object):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       raise errors.ConnectionError(
-          u'Failed triggering build with error: {0!s}'.format(exception))
+          'Failed requesting URL {0:s} with error: {1!s}'.format(
+              url, exception))
 
     if url_object.code not in (200, 201):
       raise errors.ConnectionError(
-          u'Failed triggering build with status code: {0:d}'.format(
-              url_object.code))
+          'Failed requesting URL {0:s} with status code: {1:d}'.format(
+              url, url_object.code))
 
     return url_object.read()

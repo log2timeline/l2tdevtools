@@ -26,7 +26,7 @@ class ReviewHelper(object):
 
   _PROJECT_NAME_PREFIX_REGEX = re.compile(
       r'\[({0:s})\] '.format(
-          u'|'.join(project.ProjectHelper.SUPPORTED_PROJECTS)))
+          '|'.join(project.ProjectHelper.SUPPORTED_PROJECTS)))
 
   def __init__(
       self, command, project_path, github_origin, feature_branch, diffbase,

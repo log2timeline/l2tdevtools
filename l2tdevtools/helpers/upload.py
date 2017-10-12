@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with the Codereview upload.py tool."""
-
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import json
 import logging
 import os
@@ -29,40 +30,40 @@ class UploadHelper(cli.CLIHelper):
   # yapf: disable
 
   _REVIEWERS_PER_PROJECT = {
-      u'dfdatetime': frozenset([
-          u'joachim.metz@gmail.com',
-          u'onager@deerpie.com']),
-      u'dfkinds': frozenset([
-          u'joachim.metz@gmail.com',
-          u'onager@deerpie.com']),
-      u'dfvfs': frozenset([
-          u'joachim.metz@gmail.com',
-          u'onager@deerpie.com']),
-      u'dfwinreg': frozenset([
-          u'joachim.metz@gmail.com',
-          u'onager@deerpie.com']),
-      u'dftimewolf': frozenset([
-          u'jberggren@gmail.com',
-          u'someguyiknow@google.com',
-          u'tomchop@gmail.com']),
-      u'l2tpreg': frozenset([
-          u'joachim.metz@gmail.com',
-          u'onager@deerpie.com']),
-      u'plaso': frozenset([
-          u'aaronp@gmail.com',
-          u'jberggren@gmail.com',
-          u'joachim.metz@gmail.com',
-          u'onager@deerpie.com',
-          u'romaing@google.com'])}
+      'dfdatetime': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'dfkinds': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'dfvfs': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'dfwinreg': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'dftimewolf': frozenset([
+          'jberggren@gmail.com',
+          'someguyiknow@google.com',
+          'tomchop@gmail.com']),
+      'l2tpreg': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'plaso': frozenset([
+          'aaronp@gmail.com',
+          'jberggren@gmail.com',
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com',
+          'romaing@google.com'])}
 
   _REVIEWERS_DEFAULT = frozenset([
-      u'jberggren@gmail.com',
-      u'joachim.metz@gmail.com',
-      u'onager@deerpie.com'])
+      'jberggren@gmail.com',
+      'joachim.metz@gmail.com',
+      'onager@deerpie.com'])
 
   _REVIEWERS_CC = frozenset([
-      u'kiddi@kiddaland.net',
-      u'log2timeline-dev@googlegroups.com'])
+      'kiddi@kiddaland.net',
+      'log2timeline-dev@googlegroups.com'])
 
   # yapf: enable
 
@@ -78,7 +79,7 @@ class UploadHelper(cli.CLIHelper):
     self._access_token = None
     self._email_address = email_address
     self._no_browser = no_browser
-    self._upload_py_path = os.path.join(u'review', u'lib', u'upload.py')
+    self._upload_py_path = os.path.join('review', 'lib', 'upload.py')
     self._xsrf_token = None
 
   def _GetReviewer(self, project_name):
@@ -123,7 +124,7 @@ class UploadHelper(cli.CLIHelper):
     except KeyError:
       pass
 
-    return u','.join(reviewers_cc)
+    return ','.join(reviewers_cc)
 
   def AddMergeMessage(self, issue_number, message):
     """Adds a merge message to the code review issue.
@@ -146,18 +147,18 @@ class UploadHelper(cli.CLIHelper):
         issue_number)
 
     post_data = urllib_parse.urlencode({
-        u'add_as_reviewer': u'False',
-        u'message': message,
-        u'message_only': u'True',
-        u'no_redirect': 'True',
-        u'send_mail': 'True',
-        u'xsrf_token': xsrf_token})
+        'add_as_reviewer': 'False',
+        'message': message,
+        'message_only': 'True',
+        'no_redirect': 'True',
+        'send_mail': 'True',
+        'xsrf_token': xsrf_token})
 
     request = urllib_request.Request(codereview_url)
 
     # Add header: Authorization: OAuth <codereview access token>
     request.add_header(
-        u'Authorization', u'OAuth {0:s}'.format(codereview_access_token))
+        'Authorization', 'OAuth {0:s}'.format(codereview_access_token))
 
     # This will change the request into a POST.
     request.add_data(post_data)
@@ -166,14 +167,14 @@ class UploadHelper(cli.CLIHelper):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed publish to codereview issue: {0!s} with error: {1!s}'.format(
+          'Failed publish to codereview issue: {0!s} with error: {1!s}'.format(
               issue_number, exception))
       return False
 
     if url_object.code not in (200, 201):
       logging.error((
-          u'Failed publish to codereview issue: {0!s} with status code: '
-          u'{1:d}').format(issue_number, url_object.code))
+          'Failed publish to codereview issue: {0!s} with status code: '
+          '{1:d}').format(issue_number, url_object.code))
       return False
 
     return True
@@ -195,13 +196,13 @@ class UploadHelper(cli.CLIHelper):
     codereview_url = b'https://codereview.appspot.com/{0!s}/close'.format(
         issue_number)
 
-    post_data = urllib_parse.urlencode({u'xsrf_token': xsrf_token})
+    post_data = urllib_parse.urlencode({'xsrf_token': xsrf_token})
 
     request = urllib_request.Request(codereview_url)
 
     # Add header: Authorization: OAuth <codereview access token>
     request.add_header(
-        u'Authorization', u'OAuth {0:s}'.format(codereview_access_token))
+        'Authorization', 'OAuth {0:s}'.format(codereview_access_token))
 
     # This will change the request into a POST.
     request.add_data(post_data)
@@ -210,14 +211,14 @@ class UploadHelper(cli.CLIHelper):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed closing codereview issue: {0!s} with error: {1!s}'.format(
+          'Failed closing codereview issue: {0!s} with error: {1!s}'.format(
               issue_number, exception))
       return False
 
     if url_object.code != 200:
       logging.error((
-          u'Failed closing codereview issue: {0!s} with status code: '
-          u'{1:d}').format(issue_number, url_object.code))
+          'Failed closing codereview issue: {0!s} with status code: '
+          '{1:d}').format(issue_number, url_object.code))
       return False
 
     return True
@@ -236,27 +237,27 @@ class UploadHelper(cli.CLIHelper):
     reviewer = self._GetReviewer(project_name)
     reviewers_cc = self._GetReviewersOnCC(project_name, reviewer)
 
-    command = u'{0:s} {1:s} --oauth2'.format(
+    command = '{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
 
     if self._no_browser:
-      command = u'{0:s} --no_oauth2_webbrowser'.format(command)
+      command = '{0:s} --no_oauth2_webbrowser'.format(command)
 
     command = (
-        u'{0:s} --send_mail -r {1:s} --cc {2:s} -t "{3:s}" -y -- '
-        u'{4:s}').format(
+        '{0:s} --send_mail -r {1:s} --cc {2:s} -t "{3:s}" -y -- '
+        '{4:s}').format(
             command, reviewer, reviewers_cc, description, diffbase)
 
     if self._no_browser:
       print(
-          u'Upload server: codereview.appspot.com (change with -s/--server)\n'
-          u'Go to the following link in your browser:\n'
-          u'\n'
-          u'    https://codereview.appspot.com/get-access-token\n'
-          u'\n'
-          u'and copy the access token.\n'
-          u'\n')
-      print(u'Enter access token:', end=u' ')
+          'Upload server: codereview.appspot.com (change with -s/--server)\n'
+          'Go to the following link in your browser:\n'
+          '\n'
+          '    https://codereview.appspot.com/get-access-token\n'
+          '\n'
+          'and copy the access token.\n'
+          '\n')
+      print('Enter access token:', end=' ')
 
       sys.stdout.flush()
 
@@ -267,7 +268,7 @@ class UploadHelper(cli.CLIHelper):
       return
 
     issue_url_line_start = (
-        u'Issue created. URL: http://codereview.appspot.com/')
+        'Issue created. URL: http://codereview.appspot.com/')
     for line in output.split(b'\n'):
       if issue_url_line_start in line:
         _, _, issue_number = line.rpartition(issue_url_line_start)
@@ -286,7 +287,7 @@ class UploadHelper(cli.CLIHelper):
       # TODO: add support to get access token directly from user.
       self._access_token = upload_tool.GetAccessToken()
       if not self._access_token:
-        logging.error(u'Unable to retrieve access token.')
+        logging.error('Unable to retrieve access token.')
 
     return self._access_token
 
@@ -307,21 +308,21 @@ class UploadHelper(cli.CLIHelper):
 
       # Add header: Authorization: OAuth <codereview access token>
       request.add_header(
-          u'Authorization', u'OAuth {0:s}'.format(codereview_access_token))
-      request.add_header(u'X-Requesting-XSRF-Token', u'1')
+          'Authorization', 'OAuth {0:s}'.format(codereview_access_token))
+      request.add_header('X-Requesting-XSRF-Token', '1')
 
       try:
         url_object = urllib_request.urlopen(request)
       except urllib_error.HTTPError as exception:
         logging.error(
-            u'Failed retrieving codereview XSRF token with error: {0!s}'.format(
+            'Failed retrieving codereview XSRF token with error: {0!s}'.format(
                 exception))
         return
 
       if url_object.code != 200:
         logging.error((
-            u'Failed retrieving codereview XSRF token with status code: '
-            u'{0:d}').format(url_object.code))
+            'Failed retrieving codereview XSRF token with status code: '
+            '{0:d}').format(url_object.code))
         return
 
       self._xsrf_token = url_object.read()
@@ -367,14 +368,14 @@ class UploadHelper(cli.CLIHelper):
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
       logging.error(
-          u'Failed querying codereview issue: {0!s} with error: {1!s}'.format(
+          'Failed querying codereview issue: {0!s} with error: {1!s}'.format(
               issue_number, exception))
       return
 
     if url_object.code != 200:
       logging.error((
-          u'Failed querying codereview issue: {0!s} with status code: '
-          u'{1:d}').format(issue_number, url_object.code))
+          'Failed querying codereview issue: {0!s} with status code: '
+          '{1:d}').format(issue_number, url_object.code))
       return
 
     response_data = url_object.read()
@@ -391,25 +392,25 @@ class UploadHelper(cli.CLIHelper):
     Returns:
       bool: True if the code review was updated.
     """
-    command = u'{0:s} {1:s} --oauth2'.format(
+    command = '{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)
 
     if self._no_browser:
-      command = u'{0:s} --no_oauth2_webbrowser'.format(command)
+      command = '{0:s} --no_oauth2_webbrowser'.format(command)
 
-    command = (u'{0:s} -i {1!s} -m "Code updated." -t "{2:s}" -y -- '
-               u'{3:s}').format(command, issue_number, description, diffbase)
+    command = ('{0:s} -i {1!s} -m "Code updated." -t "{2:s}" -y -- '
+               '{3:s}').format(command, issue_number, description, diffbase)
 
     if self._no_browser:
       print(
-          u'Upload server: codereview.appspot.com (change with -s/--server)\n'
-          u'Go to the following link in your browser:\n'
-          u'\n'
-          u'    https://codereview.appspot.com/get-access-token\n'
-          u'\n'
-          u'and copy the access token.\n'
-          u'\n')
-      print(u'Enter access token:', end=u' ')
+          'Upload server: codereview.appspot.com (change with -s/--server)\n'
+          'Go to the following link in your browser:\n'
+          '\n'
+          '    https://codereview.appspot.com/get-access-token\n'
+          '\n'
+          'and copy the access token.\n'
+          '\n')
+      print('Enter access token:', end=' ')
 
       sys.stdout.flush()
 

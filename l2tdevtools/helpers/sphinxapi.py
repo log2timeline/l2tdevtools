@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with sphinx-apidoc."""
 from __future__ import print_function
+from __future__ import unicode_literals
 
 from l2tdevtools.helpers import cli
 
@@ -25,7 +26,7 @@ class SphinxAPIDocHelper(cli.CLIHelper):
     Returns:
       bool: True if the sphinx-apidoc version is up to date.
     """
-    exit_code, output, _ = self.RunCommand(u'sphinx-apidoc --version')
+    exit_code, output, _ = self.RunCommand('sphinx-apidoc --version')
     if exit_code != 0:
       return False
 
@@ -44,7 +45,7 @@ class SphinxAPIDocHelper(cli.CLIHelper):
     Returns:
       bool: True if the API docs have been updated.
     """
-    command = u'sphinx-apidoc -f -o docs {0:s}'.format(self._project)
+    command = 'sphinx-apidoc -f -o docs {0:s}'.format(self._project)
     exit_code, output, _ = self.RunCommand(command)
     print(output)
 

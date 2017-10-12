@@ -23,11 +23,10 @@ def Main():
 
   # TODO: add option to directly pass code review issue number.
 
-
   # yapf: disable
   argument_parser.add_argument(
-      '--project-path', '--project_path', '--p', dest='all_files',
-      action='store_true', default=os.getcwd(), help=(
+      '--project-path', '--project_path', '-p', dest='project_path',
+      action='store', default=os.getcwd(), help=(
           'Path to the project being reviewed.'))
 
   argument_parser.add_argument(

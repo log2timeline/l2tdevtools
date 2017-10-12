@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Helper for command line functions."""
+from __future__ import unicode_literals
+
 import logging
 import shlex
 import subprocess
@@ -30,7 +32,7 @@ class CLIHelper(object):
     if self.mock_responses:
       return_values = self.mock_responses.get(command, None)
       if not return_values:
-        raise AttributeError(u'Unrecognized command.')
+        raise AttributeError('Unrecognized command.')
       return return_values
 
     arguments = shlex.split(command)
@@ -40,13 +42,13 @@ class CLIHelper(object):
           arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     except OSError as exception:
       logging.error(
-          u'Running: "{0:s}" failed with error: {1:s}'.format(
+          'Running: "{0:s}" failed with error: {1:s}'.format(
               command, exception))
       return 1, None, None
 
     output, error = process.communicate()
     if process.returncode != 0:
       logging.error(
-          u'Running: "{0:s}" failed with error: {1!s}.'.format(command, error))
+          'Running: "{0:s}" failed with error: {1!s}.'.format(command, error))
 
     return process.returncode, output, error

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Implementation of a net resources file."""
+from __future__ import unicode_literals
+
 import os
 import re
 
@@ -15,8 +17,8 @@ class NetRCFile(object):
     self._contents = None
     self._values = None
 
-    home_path = os.path.expanduser(u'~')
-    self._path = os.path.join(home_path, u'.netrc')
+    home_path = os.path.expanduser('~')
+    self._path = os.path.join(home_path, '.netrc')
     if not os.path.exists(self._path):
       return
 
@@ -32,13 +34,13 @@ class NetRCFile(object):
     if not self._contents:
       return
 
-    # Note that according to GNU's manual on .netrc file, the credential
+    # Note that according to GN's manual on .netrc file, the credential
     # tokens "may be separated by spaces, tabs, or new-lines".
     if not self._values:
       self._values = self._NETRC_SEPARATOR_RE.findall(self._contents)
 
     for value_index, value in enumerate(self._values):
-      if value == u'github.com' and self._values[value_index - 1] == u'machine':
+      if value == 'github.com' and self._values[value_index - 1] == 'machine':
         return self._values[value_index + 1:]
 
   def GetGitHubAccessToken(self):
@@ -52,7 +54,7 @@ class NetRCFile(object):
       return
 
     for value_index, value in enumerate(values):
-      if value == u'password':
+      if value == 'password':
         return values[value_index + 1]
 
   def GetGitHubUsername(self):
@@ -67,9 +69,9 @@ class NetRCFile(object):
 
     login_value = None
     for value_index, value in enumerate(values):
-      if value == u'login':
+      if value == 'login':
         login_value = values[value_index + 1]
 
       # If the next field is 'password' we assume the login field is empty.
-      if login_value != u'password':
+      if login_value != 'password':
         return login_value

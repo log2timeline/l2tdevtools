@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with projects."""
+from __future__ import unicode_literals
+
 import logging
 import os
 import time
@@ -16,22 +18,22 @@ class ProjectHelper(cli.CLIHelper):
 
 
   _AUTHORS_FILE_HEADER = [
-      u'# Names should be added to this file with this pattern:',
-      u'#',
-      u'# For individuals:',
-      u'#   Name (email address)',
-      u'#',
-      u'# For organizations:',
-      u'#   Organization (fnmatch pattern)',
-      u'#',
-      u'# See python fnmatch module documentation for more information.',
-      u'',
-      u'Google Inc. (*@google.com)'] # yapf: disable
+      '# Names should be added to this file with this pattern:',
+      '#',
+      '# For individuals:',
+      '#   Name (email address)',
+      '#',
+      '# For organizations:',
+      '#   Organization (fnmatch pattern)',
+      '#',
+      '# See python fnmatch module documentation for more information.',
+      '',
+      'Google Inc. (*@google.com)'] # yapf: disable
 
   SUPPORTED_PROJECTS = frozenset([
-      u'artifacts', u'dfdatetime', u'dfkinds', u'dfvfs', u'dfwinreg',
-      u'dftimewolf', u'eccemotus', u'l2tdevtools', u'l2tdocs', u'l2tpreg',
-      u'review', u'plaso'])
+      'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs', 'dfwinreg',
+      'dftimewolf', 'eccemotus', 'l2tdevtools', 'l2tdocs', 'l2tpreg',
+      'review', 'plaso'])
 
   def __init__(self, project_path):
     """Initializes a project helper.
@@ -48,7 +50,7 @@ class ProjectHelper(cli.CLIHelper):
   @property
   def version_file_path(self):
     """str: path of the version file."""
-    return os.path.join(self.project_name, u'__init__.py')
+    return os.path.join(self.project_name, '__init__.py')
 
   def _GetProjectName(self, project_path):
     """Retrieves the project name from the script path.
@@ -63,15 +65,13 @@ class ProjectHelper(cli.CLIHelper):
       ValueError: if the project name is not supported.
     """
     project_name = os.path.abspath(project_path)
-    project_name = os.path.dirname(project_name)
-    project_name = os.path.dirname(project_name)
     project_name = os.path.basename(project_name)
 
     for supported_project_name in self.SUPPORTED_PROJECTS:
       if supported_project_name in project_name:
         return supported_project_name
 
-    raise ValueError(u'Unsupported project name: {0:s}.'.format(project_name))
+    raise ValueError('Unsupported project name: {0:s}.'.format(project_name))
 
   def _ReadFileContents(self, path):
     """Reads the contents of a file.
@@ -83,21 +83,21 @@ class ProjectHelper(cli.CLIHelper):
       bytes: file content or None.
     """
     if not os.path.exists(path):
-      logging.error(u'Missing file: {0:s}'.format(path))
+      logging.error('Missing file: {0:s}'.format(path))
       return
 
     try:
-      with open(path, u'rb') as file_object:
+      with open(path, 'rb') as file_object:
         file_contents = file_object.read()
 
     except IOError as exception:
-      logging.error(u'Unable to read file with error: {0!s}'.format(exception))
+      logging.error('Unable to read file with error: {0!s}'.format(exception))
       return
 
     try:
-      file_contents = file_contents.decode(u'utf-8')
+      file_contents = file_contents.decode('utf-8')
     except UnicodeDecodeError as exception:
-      logging.error(u'Unable to read file with error: {0!s}'.format(exception))
+      logging.error('Unable to read file with error: {0!s}'.format(exception))
       return
 
     return file_contents
@@ -114,9 +114,9 @@ class ProjectHelper(cli.CLIHelper):
 
     # The version is formatted as:
     # __version__ = 'VERSION'
-    version_line_prefix = u'__version__ = \''
+    version_line_prefix = '__version__ = \''
 
-    lines = version_file_contents.split(u'\n')
+    lines = version_file_contents.split('\n')
     for line in lines:
       if line.startswith(version_line_prefix):
         return line[len(version_line_prefix):-1]
@@ -132,34 +132,34 @@ class ProjectHelper(cli.CLIHelper):
     """
     project_version = self.GetVersion()
 
-    dpkg_changelog_path = os.path.join(u'config', u'dpkg', u'changelog')
+    dpkg_changelog_path = os.path.join('config', 'dpkg', 'changelog')
     if not os.path.exists(dpkg_changelog_path):
       return True
 
-    dpkg_maintainter = u'Log2Timeline <log2timeline-dev@googlegroups.com>'
-    dpkg_date = time.strftime(u'%a, %d %b %Y %H:%M:%S %z')
-    dpkg_changelog_content = u'\n'.join([
-        u'{0:s} ({1:s}-1) unstable; urgency=low'.format(
+    dpkg_maintainter = 'Log2Timeline <log2timeline-dev@googlegroups.com>'
+    dpkg_date = time.strftime('%a, %d %b %Y %H:%M:%S %z')
+    dpkg_changelog_content = '\n'.join([
+        '{0:s} ({1:s}-1) unstable; urgency=low'.format(
             self.project_name, project_version),
-        u'',
-        u'  * Auto-generated',
-        u'',
-        u' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)]) #yapf: disable
+        '',
+        '  * Auto-generated',
+        '',
+        ' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)]) #yapf: disable
 
     try:
-      dpkg_changelog_content = dpkg_changelog_content.encode(u'utf-8')
+      dpkg_changelog_content = dpkg_changelog_content.encode('utf-8')
     except UnicodeEncodeError as exception:
       logging.error(
-          u'Unable to write dpkg changelog file with error: {0!s}'.format(
+          'Unable to write dpkg changelog file with error: {0!s}'.format(
               exception))
       return False
 
     try:
-      with open(dpkg_changelog_path, u'wb') as file_object:
+      with open(dpkg_changelog_path, 'wb') as file_object:
         file_object.write(dpkg_changelog_content)
     except IOError as exception:
       logging.error(
-          u'Unable to write dpkg changelog file with error: {0!s}'.format(
+          'Unable to write dpkg changelog file with error: {0!s}'.format(
               exception))
       return False
 
@@ -171,7 +171,7 @@ class ProjectHelper(cli.CLIHelper):
     Returns:
       bool: True if the AUTHORS file update was successful.
     """
-    exit_code, output, _ = self.RunCommand(u'git log --format="%aN (%aE)"')
+    exit_code, output, _ = self.RunCommand('git log --format="%aN (%aE)"')
     if exit_code != 0:
       return False
 
@@ -183,11 +183,11 @@ class ProjectHelper(cli.CLIHelper):
     authors_by_commit = []
     authors = {}
     for author in lines:
-      name, _, email_address = author[:-1].rpartition(u'(')
+      name, _, email_address = author[:-1].rpartition('(')
       if email_address in authors:
         if name != authors[email_address]:
           logging.warning(
-              u'Detected name mismatch for author: {0:d}.'.format(
+              'Detected name mismatch for author: {0:d}.'.format(
                   email_address))
         continue
 
@@ -198,10 +198,10 @@ class ProjectHelper(cli.CLIHelper):
     file_content.extend(self._AUTHORS_FILE_HEADER)
     file_content.extend(authors_by_commit)
 
-    file_content = u'\n'.join(file_content)
-    file_content = file_content.encode(u'utf-8')
+    file_content = '\n'.join(file_content)
+    file_content = file_content.encode('utf-8')
 
-    with open(u'AUTHORS', 'wb') as file_object:
+    with open('AUTHORS', 'wb') as file_object:
       file_object.write(file_content)
 
     return True
@@ -214,32 +214,32 @@ class ProjectHelper(cli.CLIHelper):
     """
     version_file_contents = self._ReadFileContents(self.version_file_path)
     if not version_file_contents:
-      logging.error(u'Unable to read version file.')
+      logging.error('Unable to read version file.')
       return False
 
-    date_version = time.strftime(u'%Y%m%d')
-    lines = version_file_contents.split(u'\n')
+    date_version = time.strftime('%Y%m%d')
+    lines = version_file_contents.split('\n')
     for line_index, line in enumerate(lines):
-      if line.startswith(u'__version__ = '):
-        version_string = u'__version__ = \'{0:s}\''.format(date_version)
+      if line.startswith('__version__ = '):
+        version_string = '__version__ = \'{0:s}\''.format(date_version)
         lines[line_index] = version_string
 
-    version_file_contents = u'\n'.join(lines)
+    version_file_contents = '\n'.join(lines)
 
     try:
-      version_file_contents = version_file_contents.encode(u'utf-8')
+      version_file_contents = version_file_contents.encode('utf-8')
     except UnicodeEncodeError as exception:
       logging.error(
-          u'Unable to write version file with error: {0!s}'.format(exception))
+          'Unable to write version file with error: {0!s}'.format(exception))
       return False
 
     try:
-      with open(self.version_file_path, u'wb') as file_object:
+      with open(self.version_file_path, 'wb') as file_object:
         file_object.write(version_file_contents)
 
     except IOError as exception:
       logging.error(
-          u'Unable to write version file with error: {0!s}'.format(exception))
+          'Unable to write version file with error: {0!s}'.format(exception))
       return False
 
     return True
