@@ -14,7 +14,7 @@ class RPMSpecFileGeneratorTest(unittest.TestCase):
 
   def testGetBuildDefinition(self):
     """Tests the _GetBuildDefinition function."""
-    spec_file_generator = spec_file.RPMSpecFileGenerator()
+    spec_file_generator = spec_file.RPMSpecFileGenerator('')
 
     _ = spec_file_generator
     # TODO: implement tests.

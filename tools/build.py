@@ -3,6 +3,8 @@
 """Script to automate creating builds of projects."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import argparse
 import logging
 import os
@@ -29,7 +31,7 @@ class ProjectBuilder(object):
 
   # The distributions to build dpkg-source packages for.
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
-      u'trusty', u'xenial'])
+      'trusty', 'xenial'])
 
   def __init__(self, build_target):
     """Initializes the project builder.
@@ -63,18 +65,18 @@ class ProjectBuilder(object):
 
     # Unify http:// and https:// URLs for the download helper check.
     download_url = project_definition.download_url
-    if download_url.startswith(u'https://'):
-      download_url = u'http://{0:s}'.format(download_url[8:])
+    if download_url.startswith('https://'):
+      download_url = 'http://{0:s}'.format(download_url[8:])
 
-    if self._build_target == u'download':
+    if self._build_target == 'download':
       source_filename = source_helper_object.Download()
 
       # If available run the script post-download.sh after download.
-      if os.path.exists(u'post-download.sh'):
-        command = u'sh ./post-download.sh {0:s}'.format(source_filename)
+      if os.path.exists('post-download.sh'):
+        command = 'sh ./post-download.sh {0:s}'.format(source_filename)
         exit_code = subprocess.call(command, shell=True)
         if exit_code != 0:
-          logging.error(u'Running: "{0:s}" failed.'.format(command))
+          logging.error('Running: "{0:s}" failed.'.format(command))
           return False
 
       return True
@@ -82,18 +84,18 @@ class ProjectBuilder(object):
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
         project_definition, self._build_target, self._l2tdevtools_path)
     if not build_helper_object:
-      logging.warning(u'Unable to determine how to build: {0:s}'.format(
+      logging.warning('Unable to determine how to build: {0:s}'.format(
           project_definition.name))
       return False
 
     build_dependencies = build_helper_object.CheckBuildDependencies()
     if build_dependencies:
       logging.warning(
-          u'Missing build dependencies: {0:s}'.format(
-              u' '.join(build_dependencies)))
+          'Missing build dependencies: {0:s}'.format(
+              ' '.join(build_dependencies)))
       return False
 
-    if self._build_target == u'dpkg-source':
+    if self._build_target == 'dpkg-source':
       distributions = self._DPKG_SOURCE_DISTRIBUTIONS
     else:
       distributions = [None]
@@ -104,7 +106,7 @@ class ProjectBuilder(object):
         return False
 
     if os.path.exists(build_helper_object.LOG_FILENAME):
-      logging.info(u'Removing: {0:s}'.format(
+      logging.info('Removing: {0:s}'.format(
           build_helper_object.LOG_FILENAME))
       os.remove(build_helper_object.LOG_FILENAME)
 
@@ -134,10 +136,10 @@ class ProjectBuilder(object):
       return True
 
     if not os.path.exists(build_helper_object.LOG_FILENAME):
-      logging.warning(u'Build of: {0:s} failed.'.format(
+      logging.warning('Build of: {0:s} failed.'.format(
           source_helper_object.project_name))
     else:
-      log_filename = u'{0:s}_{1:s}'.format(
+      log_filename = '{0:s}_{1:s}'.format(
           source_helper_object.project_name,
           build_helper_object.LOG_FILENAME)
 
@@ -148,8 +150,8 @@ class ProjectBuilder(object):
 
       os.rename(build_helper_object.LOG_FILENAME, log_filename)
       logging.warning((
-          u'Build of: {0:s} failed, for more information check '
-          u'{1:s}').format(
+          'Build of: {0:s} failed, for more information check '
+          '{1:s}').format(
               source_helper_object.project_name, log_filename))
 
     return False
@@ -171,7 +173,7 @@ class ProjectBuilder(object):
             project_definition.download_url))
 
     if not download_helper_object:
-      raise ValueError(u'Unsupported download URL: {0:s}.'.format(
+      raise ValueError('Unsupported download URL: {0:s}.'.format(
           project_definition.download_url))
 
     return self._BuildProject(download_helper_object, project_definition)
@@ -184,84 +186,84 @@ def Main():
     bool: True if successful or False if not.
   """
   build_targets = frozenset([
-      u'download', u'dpkg', u'dpkg-source', u'msi', u'osc', u'pkg',
-      u'rpm', u'source', u'srpm'])
+      'download', 'dpkg', 'dpkg-source', 'msi', 'osc', 'pkg',
+      'rpm', 'source', 'srpm'])
 
   argument_parser = argparse.ArgumentParser(description=(
-      u'Downloads and builds the latest versions of projects.'))
+      'Downloads and builds the latest versions of projects.'))
 
   argument_parser.add_argument(
-      u'build_target', choices=sorted(build_targets), action=u'store',
-      metavar=u'BUILD_TARGET', default=None, help=u'The build target.')
+      'build_target', choices=sorted(build_targets), action='store',
+      metavar='BUILD_TARGET', default=None, help='The build target.')
 
   argument_parser.add_argument(
-      u'--build-directory', u'--build_directory', action=u'store',
-      metavar=u'DIRECTORY', dest=u'build_directory', type=str,
-      default=u'build', help=u'The location of the build directory.')
+      '--build-directory', '--build_directory', action='store',
+      metavar='DIRECTORY', dest='build_directory', type=str,
+      default='build', help='The location of the build directory.')
 
   argument_parser.add_argument(
-      u'-c', u'--config', dest=u'config_path', action=u'store',
-      metavar=u'CONFIG_PATH', default=None, help=(
-          u'path of the directory containing the build configuration '
-          u'files e.g. projects.ini.'))
+      '-c', '--config', dest='config_path', action='store',
+      metavar='CONFIG_PATH', default=None, help=(
+          'path of the directory containing the build configuration '
+          'files e.g. projects.ini.'))
 
   argument_parser.add_argument(
-      u'--preset', dest=u'preset', action=u'store',
-      metavar=u'PRESET_NAME', default=None, help=(
-          u'name of the preset of project names to build. The default is to '
-          u'build all project defined in the projects.ini configuration file. '
-          u'The presets are defined in the preset.ini configuration file.'))
+      '--preset', dest='preset', action='store',
+      metavar='PRESET_NAME', default=None, help=(
+          'name of the preset of project names to build. The default is to '
+          'build all project defined in the projects.ini configuration file. '
+          'The presets are defined in the preset.ini configuration file.'))
 
   argument_parser.add_argument(
-      u'--projects', dest=u'projects', action=u'store',
-      metavar=u'PROJECT_NAME(S)', default=None, help=(
-          u'comma separated list of specific project names to build. The '
-          u'default is to build all project defined in the projects.ini '
-          u'configuration file.'))
+      '--projects', dest='projects', action='store',
+      metavar='PROJECT_NAME(S)', default=None, help=(
+          'comma separated list of specific project names to build. The '
+          'default is to build all project defined in the projects.ini '
+          'configuration file.'))
 
   options = argument_parser.parse_args()
 
   if not options.build_target:
-    print(u'Build target missing.')
-    print(u'')
+    print('Build target missing.')
+    print('')
     argument_parser.print_help()
-    print(u'')
+    print('')
     return False
 
   if options.build_target not in build_targets:
-    print(u'Unsupported build target: {0:s}.'.format(options.build_target))
-    print(u'')
+    print('Unsupported build target: {0:s}.'.format(options.build_target))
+    print('')
     argument_parser.print_help()
-    print(u'')
+    print('')
     return False
 
   config_path = options.config_path
   if not config_path:
     config_path = os.path.dirname(__file__)
     config_path = os.path.dirname(config_path)
-    config_path = os.path.join(config_path, u'data')
+    config_path = os.path.join(config_path, 'data')
 
-  presets_file = os.path.join(config_path, u'presets.ini')
+  presets_file = os.path.join(config_path, 'presets.ini')
   if options.preset and not os.path.exists(presets_file):
-    print(u'No such config file: {0:s}.'.format(presets_file))
-    print(u'')
+    print('No such config file: {0:s}.'.format(presets_file))
+    print('')
     return False
 
-  projects_file = os.path.join(config_path, u'projects.ini')
+  projects_file = os.path.join(config_path, 'projects.ini')
   if not os.path.exists(projects_file):
-    print(u'No such config file: {0:s}.'.format(projects_file))
-    print(u'')
+    print('No such config file: {0:s}.'.format(projects_file))
+    print('')
     return False
 
   logging.basicConfig(
-      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
+      level=logging.INFO, format='[%(levelname)s] %(message)s')
 
   project_builder = ProjectBuilder(options.build_target)
 
   # TODO: package ipython.
 
   # TODO:
-  # (u'protobuf', ProjectBuilder.PROJECT_TYPE_GOOGLE_CODE_WIKI),
+  # ('protobuf', ProjectBuilder.PROJECT_TYPE_GOOGLE_CODE_WIKI),
   # ./configure
   # make
   # cd python
@@ -274,7 +276,7 @@ def Main():
   # Solution: use protobuf-python.spec to build
 
   # TODO: rpm build of psutil is broken, fix upstream or add patching.
-  # (u'psutil', ProjectBuilder.PROJECT_TYPE_PYPI),
+  # ('psutil', ProjectBuilder.PROJECT_TYPE_PYPI),
 
   project_names = []
   if options.preset:
@@ -286,12 +288,12 @@ def Main():
           break
 
     if not project_names:
-      print(u'Undefined preset: {0:s}'.format(options.preset))
-      print(u'')
+      print('Undefined preset: {0:s}'.format(options.preset))
+      print('')
       return False
 
   elif options.projects:
-    project_names = options.projects.split(u',')
+    project_names = options.projects.split(',')
 
   builds = []
   with open(projects_file) as file_object:
@@ -299,13 +301,13 @@ def Main():
     for project_definition in project_definition_reader.Read(file_object):
       is_disabled = False
       if (options.build_target in project_definition.disabled or
-          u'all' in project_definition.disabled):
+          'all' in project_definition.disabled):
         if project_definition.name not in project_names:
           is_disabled = True
 
         elif not options.preset:
           # If a project is manually specified ignore the disabled status.
-          logging.info(u'Ignoring disabled status for: {0:s}'.format(
+          logging.info('Ignoring disabled status for: {0:s}'.format(
               project_definition.name))
 
       if not is_disabled:
@@ -327,27 +329,27 @@ def Main():
       project_index = undefined_packages.index(project_definition.name)
       del undefined_packages[project_index]
 
-    logging.info(u'Processing: {0:s}'.format(project_definition.name))
+    logging.info('Processing: {0:s}'.format(project_definition.name))
 
     # TODO: add support for dokan, bzip2
     # TODO: setup sqlite in build directory.
     if not project_builder.Build(project_definition):
-      print(u'Failed building: {0:s}'.format(project_definition.name))
+      print('Failed building: {0:s}'.format(project_definition.name))
       failed_builds.append(project_definition.name)
 
   os.chdir(current_working_directory)
 
   if undefined_packages:
-    print(u'')
-    print(u'Undefined packages:')
+    print('')
+    print('Undefined packages:')
     for undefined_package in undefined_packages:
-      print(u'\t{0:s}'.format(undefined_package))
+      print('\t{0:s}'.format(undefined_package))
 
   if failed_builds:
-    print(u'')
-    print(u'Failed buiding:')
+    print('')
+    print('Failed buiding:')
     for failed_build in failed_builds:
-      print(u'\t{0:s}'.format(failed_build))
+      print('\t{0:s}'.format(failed_build))
 
   return not failed_builds
 
