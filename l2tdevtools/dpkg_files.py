@@ -270,8 +270,8 @@ class DPKGBuildFilesGenerator(object):
       project_name (str): name of the project.
       project_version (str): version of the project.
       project_definition (ProjectDefinition): project definition.
-      data_path (str): path to the data directory which contains the patches
-          sub directory.
+      data_path (str): path to the data directory which contains the DPKG
+          templates and patches sub directories.
       distribution (Optional[str]): name of the distribution.
     """
     super(DPKGBuildFilesGenerator, self).__init__()

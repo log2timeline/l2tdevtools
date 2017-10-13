@@ -23,6 +23,16 @@ class RPMSpecFileGenerator(object):
   _LICENSE_FILENAMES = [
       'LICENSE', 'LICENSE.txt', 'LICENSE.TXT']
 
+  def __init__(self, data_path):
+    """Initializes the RPM spec file generator.
+
+    Args:
+      data_path (str): path to the data directory which contains the RPM
+          templates and patches sub directories.
+    """
+    super(RPMSpecFileGenerator, self).__init__()
+    self._data_path = data_path
+
   def _GetBuildDefinition(self, python2_only):
     """Retrieves the build definition.
 
@@ -76,7 +86,8 @@ class RPMSpecFileGenerator(object):
     if not python2_only:
       lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
 
-    lines.append(b'rm -rf %{buildroot}/usr/share/doc/%{name}/')
+    lines.extend([
+        b'rm -rf %{buildroot}/usr/share/doc/%{name}/'])
 
     if project_name == 'astroid':
       lines.append('rm -rf %{buildroot}%{python2_sitelib}/astroid/tests')
@@ -168,19 +179,8 @@ class RPMSpecFileGenerator(object):
     # Python modules names contain "_" instead of "-"
     setup_name = setup_name.replace('-', '_')
 
-    if project_name == 'dateutil':
-      # Python modules names contain "_" instead of "-"
-      project_name = project_name.replace('-', '_')
-
-      output_file_object.write((
-          b'%files -n {0:s}\n'
-          b'{1:s}'
-          b'{2:s}'
-          b'/usr/lib/python2*/site-packages/{3:s}\n'
-          b'/usr/lib/python2*/site-packages/{4:s}*.egg-info\n').format(
-              name, license_line, doc_line, project_name, setup_name))
-
-    elif project_name == 'pefile':
+    # TODO: replace hardcoded exception for templates
+    if project_name == 'pefile':
       output_file_object.write((
           b'%files -n {0:s}\n'
           b'{1:s}'
@@ -257,20 +257,8 @@ class RPMSpecFileGenerator(object):
     # Python modules names contain "_" instead of "-"
     setup_name = setup_name.replace('-', '_')
 
-    if project_name == 'dateutil':
-      # Python modules names contain "_" instead of "-"
-      project_name = project_name.replace('-', '_')
-
-      output_file_object.write((
-          b'\n'
-          b'%files -n {0:s}\n'
-          b'{1:s}'
-          b'{2:s}'
-          b'/usr/lib/python3*/site-packages/{3:s}\n'
-          b'/usr/lib/python3*/site-packages/{4:s}*.egg-info\n').format(
-              name, license_line, doc_line, project_name, setup_name))
-
-    elif project_name == 'pefile':
+    # TODO: replace hard coding one-offs with templates.
+    if project_name == 'pefile':
       output_file_object.write((
           b'%files -n {0:s}\n'
           b'{1:s}'
@@ -367,10 +355,7 @@ class RPMSpecFileGenerator(object):
     if package_name.startswith('python-'):
       package_name = package_name[7:]
 
-    if project_definition.setup_name and project_name != 'dateutil':
-      unmangled_name = project_definition.setup_name
-    else:
-      unmangled_name = project_name
+    unmangled_name = project_name
 
     with open(input_file, 'r+b') as input_file_object:
       for line in input_file_object.readlines():
@@ -400,9 +385,6 @@ class RPMSpecFileGenerator(object):
           if version.startswith(b'1!'):
             version = version[2:]
 
-          if project_name == 'efilter':
-            line = b'%define version {0:s}\n'.format(version)
-
         elif line.startswith(b'%define unmangled_version '):
           # setup.py generates %define unmangled_version twice ignore
           # the second define.
@@ -411,9 +393,6 @@ class RPMSpecFileGenerator(object):
 
           output_file_object.write(
               b'%define unmangled_name {0:s}\n'.format(unmangled_name))
-
-          if project_name == 'efilter':
-            line = b'%define unmangled_version {0:s}\n'.format(version)
 
           has_unmangled_version = True
 
@@ -427,12 +406,7 @@ class RPMSpecFileGenerator(object):
             line = b'Source0: %{unmangled_name}-%{unmangled_version}.tar.gz\n'
 
         elif line.startswith(b'BuildRoot: '):
-          if project_name == 'efilter':
-            line = (
-                b'BuildRoot: %{_tmppath}/'
-                b'dotty-%{version}-%{release}-buildroot\n')
-
-          elif project_name == 'psutil':
+          if project_name == 'psutil':
             line = (
                 b'BuildRoot: %{_tmppath}/'
                 b'%{name}-release-%{version}-%{release}-buildroot\n')
@@ -512,24 +486,8 @@ class RPMSpecFileGenerator(object):
                 b'%description -n %{{name}}-data\n'
                 b'{1:s}').format(summary, description))
 
-          elif project_name == 'efilter':
-            output_file_object.write((
-                b'%package -n %{{name}}-data\n'
-                b'{0:s}'
-                b'Requires: python-dateutil, python-six >= 1.4.0, pytz'
-                b'\n'
-                b'%description -n %{{name}}-data\n'
-                b'{1:s}').format(summary, description))
-
-          elif project_name == 'PyYAML':
-            output_file_object.write(
-                b'%global debug_package %{nil}\n'
-                b'\n')
-
         elif line.startswith(b'%setup -n %{name}-%{unmangled_version}'):
-          if project_name == 'efilter':
-            line = b'%autosetup -n dotty-%{unmangled_version}\n'
-          elif project_name == 'psutil':
+          if project_name == 'psutil':
             line = b'%autosetup -n %{name}-release-%{unmangled_version}\n'
           else:
             line = b'%autosetup -n %{unmangled_name}-%{unmangled_version}\n'
@@ -588,11 +546,7 @@ class RPMSpecFileGenerator(object):
 
     # TODO: add bindir support.
     output_file_object.write((
-        b'\n'
         b'%exclude %{_bindir}/*\n'))
-
-    if project_name == 'pysqlite':
-      output_file_object.write(b'%exclude /usr/pysqlite2-doc/*\n')
 
     # TODO: add shared data support.
 
@@ -600,9 +554,41 @@ class RPMSpecFileGenerator(object):
 
     return True
 
+  def _WriteSpecFileFromTempate(
+      self, template_filename, project_version, output_file):
+    """Writes the RPM spec file from a template.
+
+    Args:
+      template_filename (str): name of the template file.
+      project_version (str): project version.
+      output_file (str): path of the output RPM spec file.
+
+    Returns:
+      bool: True if successful, False otherwise.
+    """
+    date_time = datetime.datetime.now()
+    date_time_string = date_time.strftime('%a %b %e %Y')
+
+    template_values = {
+        'date_time': date_time_string,
+        'version': project_version}
+
+    template_file_path = os.path.join(
+        self._data_path, 'rpm_templates', template_filename)
+    with open(template_file_path, 'rb') as file_object:
+      rules_template = file_object.read()
+
+    rules_template = rules_template.decode('utf-8')
+
+    with open(output_file, 'wb') as file_object:
+      data = rules_template.format(**template_values)
+      file_object.write(data.encode('utf-8'))
+
+    return True
+
   def RewriteSetupPyGeneratedFile(
       self, project_definition, source_directory, source_filename,
-      project_name, input_file, output_file):
+      project_name, project_version, input_file, output_file):
     """Rewrites the RPM spec file generated with setup.py.
 
     Args:
@@ -610,16 +596,13 @@ class RPMSpecFileGenerator(object):
       source_directory (str): path of the source directory.
       source_filename (str): name of the source package.
       project_name (str): name of the project.
+      project_version (str): version of the project.
       input_file (str): path of the input RPM spec file.
       output_file (str): path of the output RPM spec file.
 
     Returns:
       bool: True if successful, False otherwise.
     """
-    if project_name == 'dateutil':
-      # TODO: work around for non-architecture dependent behavior.
-      project_definition.architecture_dependent = False
-
     python2_only = project_definition.IsPython2Only()
 
     rpm_build_dependencies = ['python2-setuptools']
@@ -643,8 +626,6 @@ class RPMSpecFileGenerator(object):
 
     # TODO: check if already prefixed with python-
 
-    output_file_object = open(output_file, 'wb')
-
     python2_package_prefix = ''
     if project_definition.rpm_python2_prefix:
       python2_package_prefix = '{0:s}-'.format(
@@ -653,18 +634,21 @@ class RPMSpecFileGenerator(object):
     elif project_definition.rpm_python2_prefix is None:
       python2_package_prefix = 'python-'
 
-    result = self._RewriteSetupPyGeneratedFile(
-        project_definition, source_directory, source_filename, project_name,
-        rpm_build_dependencies, input_file, output_file_object,
-        python2_package_prefix=python2_package_prefix)
-
-    output_file_object.close()
+    if project_definition.rpm_template_spec:
+      result = self._WriteSpecFileFromTempate(
+          project_definition.rpm_template_spec, project_version, output_file)
+    else:
+      with open(output_file, 'wb') as file_object:
+        result = self._RewriteSetupPyGeneratedFile(
+            project_definition, source_directory, source_filename,
+            project_name, rpm_build_dependencies, input_file, file_object,
+            python2_package_prefix=python2_package_prefix)
 
     return result
 
   def RewriteSetupPyGeneratedFileForOSC(
       self, project_definition, source_directory, source_filename,
-      project_name, input_file, output_file):
+      project_name, project_version, input_file, output_file):
     """Rewrites the RPM spec file generated with setup.py for OSC.
 
     Args:
@@ -672,6 +656,7 @@ class RPMSpecFileGenerator(object):
       source_directory (str): path of the source directory.
       source_filename (str): name of the source package.
       project_name (str): name of the project.
+      project_version (str): version of the project.
       input_file (str): path of the input RPM spec file.
       output_file (str): path of the output RPM spec file.
 
@@ -692,12 +677,13 @@ class RPMSpecFileGenerator(object):
 
     # TODO: check if already prefixed with python-
 
-    output_file_object = open(output_file, 'wb')
-
-    result = self._RewriteSetupPyGeneratedFile(
-        project_definition, source_directory, source_filename, project_name,
-        rpm_build_dependencies, input_file, output_file_object)
-
-    output_file_object.close()
+    if project_definition.rpm_template_spec:
+      result = self._WriteSpecFileFromTempate(
+          project_definition.rpm_template_spec, project_version, output_file)
+    else:
+      with open(output_file, 'wb') as file_object:
+        result = self._RewriteSetupPyGeneratedFile(
+            project_definition, source_directory, source_filename,
+            project_name, rpm_build_dependencies, input_file, file_object)
 
     return result

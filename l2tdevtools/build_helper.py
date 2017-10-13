@@ -2094,7 +2094,7 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           'Extraction of source package: {0:s} failed'.format(source_filename))
       return False
 
-    spec_file_generator = spec_file.RPMSpecFileGenerator()
+    spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     if not spec_file_generator.GenerateWithSetupPy(
@@ -2104,6 +2104,9 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     project_name = source_helper_object.project_name
     if project_name.startswith('python-') and project_name != 'python-gflags':
       project_name = project_name[7:]
+
+    # TODO: determine project version.
+    project_version = ''
 
     input_file_path = self._GetSetupPySpecFilePath(
         source_helper_object, source_directory)
@@ -2116,7 +2119,7 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
 
     if not spec_file_generator.RewriteSetupPyGeneratedFileForOSC(
         self._project_definition, source_directory, source_filename,
-        project_name, input_file_path, output_file_path):
+        project_name, project_version, input_file_path, output_file_path):
       return False
 
     if not output_file_exists:
@@ -2517,6 +2520,7 @@ class BaseRPMBuildHelper(BuildHelper):
       'python3-dateutil',
       'python3-devel',
       'python3-setuptools',
+      'python3-test',
   ])
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
@@ -2670,7 +2674,8 @@ class BaseRPMBuildHelper(BuildHelper):
         * str: version.
     """
     project_name = source_helper_object.project_name
-    if self._project_definition.setup_name and project_name != 'dateutil':
+    if (self._project_definition.setup_name and
+        project_name not in ('bencode', 'dateutil')):
       project_name = self._project_definition.setup_name
 
     project_version = source_helper_object.GetProjectVersion()
@@ -2908,10 +2913,14 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     if not project_definition.architecture_dependent:
       self.architecture = 'noarch'
 
-  def _GenerateSpecFile(self, source_filename, source_helper_object):
+  def _GenerateSpecFile(
+      self, project_name, project_version, source_filename,
+      source_helper_object):
     """Generates the rpm spec file.
 
     Args:
+      project_name (str): name of the project.
+      project_version (str): version of the project.
       source_filename (str): name of the source package file.
       source_helper_object (SourceHelper): source helper.
 
@@ -2924,14 +2933,13 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
           'Extraction of source package: {0:s} failed'.format(source_filename))
       return
 
-    spec_file_generator = spec_file.RPMSpecFileGenerator()
+    spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     if not spec_file_generator.GenerateWithSetupPy(
         source_directory, log_file_path):
       return
 
-    project_name = source_helper_object.project_name
     if project_name.startswith('python-'):
       project_name = project_name[7:]
 
@@ -2943,7 +2951,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
         self._project_definition, source_directory, source_filename,
-        project_name, input_file_path, output_file_path):
+        project_name, project_version, input_file_path, output_file_path):
       return
 
     return output_file_path
@@ -2992,7 +3000,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     self._CopySourcePackageToRPMBuildSources(source_filename)
 
     rpm_spec_file_path = self._GenerateSpecFile(
-        source_filename, source_helper_object)
+        project_name, project_version, source_filename, source_helper_object)
     if not rpm_spec_file_path:
       logging.error('Unable to generate rpm spec file.')
       return False
@@ -3157,10 +3165,14 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     if not project_definition.architecture_dependent:
       self.architecture = 'noarch'
 
-  def _GenerateSpecFile(self, source_filename, source_helper_object):
+  def _GenerateSpecFile(
+      self, project_name, project_version, source_filename,
+      source_helper_object):
     """Generates the rpm spec file.
 
     Args:
+      project_name (str): name of the project.
+      project_version (str): version of the project.
       source_filename (str): name of the source package file.
       source_helper_object (SourceHelper): source helper.
 
@@ -3173,14 +3185,13 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
           'Extraction of source package: {0:s} failed'.format(source_filename))
       return
 
-    spec_file_generator = spec_file.RPMSpecFileGenerator()
+    spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     if not spec_file_generator.GenerateWithSetupPy(
         source_directory, log_file_path):
       return
 
-    project_name = source_helper_object.project_name
     if project_name.startswith('python-'):
       project_name = project_name[7:]
 
@@ -3192,7 +3203,7 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
         self._project_definition, source_directory, source_filename,
-        project_name, input_file_path, output_file_path):
+        project_name, project_version, input_file_path, output_file_path):
       return
 
     return output_file_path
@@ -3220,7 +3231,7 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     self._CopySourcePackageToRPMBuildSources(source_filename)
 
     rpm_spec_file_path = self._GenerateSpecFile(
-        source_filename, source_helper_object)
+        project_name, project_version, source_filename, source_helper_object)
     if not rpm_spec_file_path:
       logging.error('Unable to generate rpm spec file.')
       return False
