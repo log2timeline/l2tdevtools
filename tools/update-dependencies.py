@@ -41,8 +41,6 @@ class AppveyorYmlWriter(DependencyFileWriter):
   _VERSION_SQLITE = '3180000'
 
   _DOWNLOAD_PIP = (
-      '  - ps: "[System.Net.ServicePointManager]::SecurityProtocol = '
-      '[System.Net.SecurityProtocolType]::Tls12"',
       '  - ps: (new-object net.webclient).DownloadFile('
       '\'https://bootstrap.pypa.io/get-pip.py\', '
       '\'C:\\Projects\\get-pip.py\')')
@@ -86,6 +84,8 @@ class AppveyorYmlWriter(DependencyFileWriter):
       'install:',
       ('  - cmd: \'"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\'
        'SetEnv.cmd" /x86 /release\''),
+      ('  - ps: "[System.Net.ServicePointManager]::SecurityProtocol = '
+       '[System.Net.SecurityProtocolType]::Tls12"'),
       _DOWNLOAD_PIP,
       _DOWNLOAD_PYWIN32,
       _DOWNLOAD_WMI,
