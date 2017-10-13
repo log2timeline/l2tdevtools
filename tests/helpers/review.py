@@ -1,6 +1,9 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Tests for the review helper."""
+
 from __future__ import unicode_literals
+
 import unittest
 
 import l2tdevtools.helpers.review as review_helper
@@ -15,3 +18,7 @@ class ReviewHelperTest(unittest.TestCase):
         'test', '.', 'https://github.com/log2timeline/l2tdevtools.git',
         'import', 'upstream/master')
     self.assertIsNotNone(helper)
+
+
+if __name__ == '__main__':
+  unittest.main()

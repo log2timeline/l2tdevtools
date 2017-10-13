@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Helper related functions and classes for testing."""
 
+
 class TestURLLibHelper(object):
   """URL library (urllib) helper for testing."""
 
@@ -24,6 +25,6 @@ class TestURLLibHelper(object):
       bytes: response data.
 
     Raises:
-      ConnectionError: if the request failed.
+      ConnectivityError: if the request failed.
     """
     return b''

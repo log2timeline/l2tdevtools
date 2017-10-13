@@ -34,7 +34,7 @@ class ReadTheDocsHelper(object):
     try:
       self._url_lib_helper.Request(readthedocs_url, post_data=b'')
 
-    except errors.ConnectionError as exception:
+    except errors.ConnectivityError as exception:
       logging.warning('{0!s}'.format(exception))
       return False
 

@@ -61,7 +61,7 @@ class GitHubHelper(object):
     try:
       self._url_lib_helper.Request(github_url, post_data=post_data)
 
-    except errors.ConnectionError as exception:
+    except errors.ConnectivityError as exception:
       logging.warning('{0!s}'.format(exception))
       return False
 
@@ -92,7 +92,7 @@ class GitHubHelper(object):
     try:
       response_data = self._url_lib_helper.Request(github_url)
 
-    except errors.ConnectionError as exception:
+    except errors.ConnectivityError as exception:
       logging.warning('{0!s}'.format(exception))
       return
 

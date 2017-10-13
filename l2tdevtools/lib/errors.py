@@ -6,5 +6,5 @@ class Error(Exception):
   """Generic error."""
 
 
-class ConnectionError(Error):
-  """Connection error."""
+class ConnectivityError(Error):
+  """Connectivity error."""

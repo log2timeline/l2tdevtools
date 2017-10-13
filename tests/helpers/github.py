@@ -1,5 +1,9 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Tests for the GitHub helper."""
+
+from __future__ import unicode_literals
+
 import unittest
 
 from l2tdevtools.helpers import github
@@ -19,7 +23,7 @@ class GitHubHelperTest(unittest.TestCase):
     helper._url_lib_helper = test_lib.TestURLLibHelper()
 
     result = helper.CreatePullRequest(
-        u'TOKEN', 1, u'origin', u'description')
+        'TOKEN', 1, 'origin', 'description')
     self.assertTrue(result)
 
   def testGetForkGitRepoUrl(self):
@@ -29,7 +33,7 @@ class GitHubHelperTest(unittest.TestCase):
     helper._url_lib_helper = test_lib.TestURLLibHelper()
 
     expected_url = u'https://github.com/test_user/test_project.git'
-    url = helper.GetForkGitRepoUrl(u'test_user')
+    url = helper.GetForkGitRepoUrl('test_user')
     self.assertEqual(url, expected_url)
 
   def testQueryUser(self):
@@ -38,5 +42,9 @@ class GitHubHelperTest(unittest.TestCase):
         organization='test', project='test_project')
     helper._url_lib_helper = test_lib.TestURLLibHelper()
 
-    result = helper.QueryUser(u'test_user')
+    result = helper.QueryUser('test_user')
     self.assertIsNone(result)
+
+
+if __name__ == '__main__':
+  unittest.main()

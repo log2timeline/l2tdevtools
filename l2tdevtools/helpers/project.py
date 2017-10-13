@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with projects."""
+
 from __future__ import unicode_literals
 
 import logging
@@ -15,7 +16,6 @@ class ProjectHelper(cli.CLIHelper):
   Attributes:
     project_name (str): name of the project.
   """
-
 
   _AUTHORS_FILE_HEADER = [
       '# Names should be added to this file with this pattern:',

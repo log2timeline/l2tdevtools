@@ -29,7 +29,7 @@ class URLLibHelper(object):
       bytes: response data.
 
     Raises:
-      ConnectionError: if the request failed.
+      ConnectivityError: if the request failed.
     """
     request = urllib_request.Request(url)
 
@@ -40,12 +40,12 @@ class URLLibHelper(object):
     try:
       url_object = urllib_request.urlopen(request)
     except urllib_error.HTTPError as exception:
-      raise errors.ConnectionError(
+      raise errors.ConnectivityError(
           'Failed requesting URL {0:s} with error: {1!s}'.format(
               url, exception))
 
     if url_object.code not in (200, 201):
-      raise errors.ConnectionError(
+      raise errors.ConnectivityError(
           'Failed requesting URL {0:s} with status code: {1:d}'.format(
               url, url_object.code))
 

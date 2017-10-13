@@ -1,5 +1,8 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Tests for the readthedocs helper."""
+
+from __future__ import unicode_literals
 
 import unittest
 
@@ -15,7 +18,7 @@ class ReadthedocsHelperTest(unittest.TestCase):
 
   def testTriggerBuild(self):
     """Tests the TriggerBuild function."""
-    helper = readthedocs.ReadTheDocsHelper(project=u'test')
+    helper = readthedocs.ReadTheDocsHelper(project='test')
     helper._url_lib_helper = test_lib.TestURLLibHelper()
 
     result = helper.TriggerBuild()
