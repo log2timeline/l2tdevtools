@@ -594,12 +594,7 @@ class SetupCfgWriter(DependencyFileWriter):
   _BDIST_RPM = [
       '[bdist_rpm]',
       'release = 1',
-      'packager = {maintainer:s}',
-      'doc_files = ACKNOWLEDGEMENTS',
-      '            AUTHORS',
-      '            LICENSE',
-      '            README',
-      'build_requires = python-setuptools']
+      'packager = {maintainer:s}']
 
   def Write(self):
     """Writes a setup.cfg file."""
@@ -609,6 +604,19 @@ class SetupCfgWriter(DependencyFileWriter):
       file_content.extend(self._SDIST)
 
     file_content.extend(self._BDIST_RPM)
+
+    doc_files = ['AUTHORS', 'LICENSE', 'README']
+
+    if os.path.isfile('ACKNOWLEDGEMENTS'):
+      doc_files.append('ACKNOWLEDGEMENTS')
+
+    for index, doc_file in enumerate(sorted(doc_files)):
+      if index == 0:
+        file_content.append('doc_files = {0:s}'.format(doc_file))
+      else:
+        file_content.append('            {0:s}'.format(doc_file))
+
+    file_content.append('build_requires = python-setuptools')
 
     python2_dependencies = self._dependency_helper.GetRPMRequires(
         python_version=2)
