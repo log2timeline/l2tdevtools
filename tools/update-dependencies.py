@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to update the dependencies in various configuration files."""
 
 from __future__ import unicode_literals

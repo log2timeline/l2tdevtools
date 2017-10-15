@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to generate different versions of Visual Studio (express) files.
 
 Currently supported input formats:
@@ -33,7 +34,7 @@ import sys
 import uuid
 
 
-# pylint: disable=logging-format-interpolation
+# pylint: disable=logging-format-interpolation,missing-docstring
 
 class VSConfiguration(object):
   """Class to represent a Visual Studio configurations."""
@@ -1931,7 +1932,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     Args:
       source_files: a list of strings of the source filenames.
     """
-    if len(source_files) > 0:
+    if source_files:
       self.WriteLine('  <ItemGroup>')
 
       for filename in source_files:
@@ -1945,7 +1946,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     Args:
       header_files: a list of strings of the header filenames.
     """
-    if len(header_files) > 0:
+    if header_files:
       self.WriteLine('  <ItemGroup>')
 
       for filename in header_files:
@@ -1959,7 +1960,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     Args:
       resource_files: a list of strings of the resource filenames.
     """
-    if len(resource_files) > 0:
+    if resource_files:
       self.WriteLine('  <ItemGroup>')
 
       for filename in resource_files:
@@ -1989,7 +1990,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
                                  VSSolutionProject) with their GUID in lower
                                  case as the key.
     """
-    if len(dependencies) > 0:
+    if dependencies:
       self.WriteLine('  <ItemGroup>')
 
       dependencies_by_name = {}
@@ -2707,7 +2708,7 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
             solution_project.name, solution_project_filename,
             solution_project.guid.upper()))
 
-    if len(solution_project.dependencies) > 0:
+    if solution_project.dependencies:
       self.WriteLine(
           '\tProjectSection(ProjectDependencies) = postProject')
 
@@ -3936,6 +3937,7 @@ class LibyalSourceVSSolution(VSSolution):
 
     return bin_programs
 
+  # pylint: disable=arguments-differ
   def Convert(self, input_directory, output_version):
     """Converts a Visual Studio solution.
 
@@ -4090,7 +4092,7 @@ class LibyalSourceVSSolution(VSSolution):
       solution_projects_by_guid[solution_project.guid] = solution_project
 
     # Set-up the solution dependencies.
-    for guid, project_information in projects_by_guid.iteritems():
+    for guid, project_information in projects_by_guid.items():
       solution_project = solution_projects_by_guid[guid]
 
       for dependency in project_information.dependencies:

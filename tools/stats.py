@@ -18,8 +18,7 @@ try:
 except ImportError:
   import configparser  # pylint: disable=import-error
 
-# pylint: disable=import-error
-# pylint: disable=no-name-in-module
+# pylint: disable=import-error,no-name-in-module
 if sys.version_info[0] < 3:
   # Keep urllib2 here since we this code should be able to be used
   # by a default Python set up.
@@ -28,6 +27,9 @@ if sys.version_info[0] < 3:
 else:
   import urllib.error as urllib_error
   from urllib.request import urlopen
+
+# pylint: disable=wrong-import-position
+from l2tdevtools import py2to3
 
 
 class StatsDefinitionReader(object):
@@ -61,6 +63,7 @@ class StatsDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
     config_parser.readfp(file_object)
 
     projects_per_organization = {}
@@ -70,7 +73,7 @@ class StatsDefinitionReader(object):
 
       if project_names is None:
         project_names = []
-      elif isinstance(project_names, basestring):
+      elif isinstance(project_names, py2to3.STRING_TYPES):
         project_names = project_names.split(',')
 
       projects_per_organization[option_name] = project_names
@@ -89,6 +92,7 @@ class StatsDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
     config_parser.readfp(file_object)
 
     user_mappings = {}
@@ -113,6 +117,7 @@ class StatsDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
     config_parser.readfp(file_object)
 
     usernames = {}
