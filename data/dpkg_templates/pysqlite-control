@@ -9,7 +9,7 @@ Homepage: https://github.com/ghaering/pysqlite
 
 Package: python-pysqlite2
 Architecture: any
-Depends: ${python:Depends}, ${misc:Depends}
+Depends: ${{python:Depends}}, ${{misc:Depends}}
 Description: Python DB-API module for SQLite 3
  pysqlite is a DB-API 2.0-compliant database interface
  for SQLite.
