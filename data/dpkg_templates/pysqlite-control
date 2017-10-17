@@ -1,0 +1,15 @@
+Source: pysqlite
+Section: python
+Priority: extra
+Maintainer: Gerhard Häring <gh@ghaering.de>
+Build-Depends: debhelper (>= 7), python-all (>= 2.7~), python-setuptools, python-all-dev, libsqlite3-dev
+Standards-Version: 3.9.5
+X-Python-Version: >= 2.7
+Homepage: https://github.com/ghaering/pysqlite
+
+Package: python-pysqlite2
+Architecture: any
+Depends: ${{python:Depends}}, ${{misc:Depends}}
+Description: Python DB-API module for SQLite 3
+ pysqlite is a DB-API 2.0-compliant database interface
+ for SQLite.
