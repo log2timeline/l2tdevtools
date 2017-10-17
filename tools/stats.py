@@ -3,6 +3,8 @@
 """Script to retrieve github project statistics."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import argparse
 import datetime
 import json
@@ -16,8 +18,7 @@ try:
 except ImportError:
   import configparser  # pylint: disable=import-error
 
-# pylint: disable=import-error
-# pylint: disable=no-name-in-module
+# pylint: disable=import-error,no-name-in-module
 if sys.version_info[0] < 3:
   # Keep urllib2 here since we this code should be able to be used
   # by a default Python set up.
@@ -26,6 +27,9 @@ if sys.version_info[0] < 3:
 else:
   import urllib.error as urllib_error
   from urllib.request import urlopen
+
+# pylint: disable=wrong-import-position
+from l2tdevtools import py2to3
 
 
 class StatsDefinitionReader(object):
@@ -59,17 +63,18 @@ class StatsDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
     config_parser.readfp(file_object)
 
     projects_per_organization = {}
-    for option_name in config_parser.options(u'organizations'):
+    for option_name in config_parser.options('organizations'):
       project_names = self._GetConfigValue(
-          config_parser, u'organizations', option_name)
+          config_parser, 'organizations', option_name)
 
       if project_names is None:
         project_names = []
-      elif isinstance(project_names, basestring):
-        project_names = project_names.split(u',')
+      elif isinstance(project_names, py2to3.STRING_TYPES):
+        project_names = project_names.split(',')
 
       projects_per_organization[option_name] = project_names
 
@@ -87,12 +92,13 @@ class StatsDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
     config_parser.readfp(file_object)
 
     user_mappings = {}
-    for option_name in config_parser.options(u'user_mappings'):
+    for option_name in config_parser.options('user_mappings'):
       user_mapping = self._GetConfigValue(
-          config_parser, u'user_mappings', option_name)
+          config_parser, 'user_mappings', option_name)
 
       option_name = option_name.lower()
       user_mappings[option_name] = user_mapping.lower()
@@ -111,12 +117,13 @@ class StatsDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
+    # pylint: disable=deprecated-method
     config_parser.readfp(file_object)
 
     usernames = {}
-    for option_name in config_parser.options(u'usernames'):
+    for option_name in config_parser.options('usernames'):
       email_address = self._GetConfigValue(
-          config_parser, u'usernames', option_name)
+          config_parser, 'usernames', option_name)
 
       usernames[option_name] = email_address
 
@@ -143,7 +150,7 @@ class DownloadHelper(object):
       url_object = urlopen(download_url)
     except urllib_error.URLError as exception:
       logging.warning(
-          u'Unable to download URL: {0:s} with error: {1:s}'.format(
+          'Unable to download URL: {0:s} with error: {1:s}'.format(
               download_url, exception))
       return None, None
 
@@ -166,7 +173,7 @@ class GithubContributionsHelper(DownloadHelper):
       output_writer (OutputWriter): output writer.
     """
     download_url = (
-        u'https://api.github.com/repos/{0:s}/{1:s}/stats/contributors').format(
+        'https://api.github.com/repos/{0:s}/{1:s}/stats/contributors').format(
             organization, project_name)
 
     contributors_data, response = self._DownloadPageContent(download_url)
@@ -189,7 +196,7 @@ class GithubContributionsHelper(DownloadHelper):
       output_writer (OutputWriter): output writer.
     """
     download_url = (
-        u'https://api.github.com/repos/{0:s}/{1:s}/pulls?state=all').format(
+        'https://api.github.com/repos/{0:s}/{1:s}/pulls?state=all').format(
             organization, project_name)
 
     pulls_data, response = self._DownloadPageContent(download_url)
@@ -228,38 +235,38 @@ class GithubContributionsHelper(DownloadHelper):
     for contributions_per_author_json in contributors_json:
       author_json = contributions_per_author_json.get("author", None)
       if not author_json:
-        logging.error(u'Missing author JSON dictionary.')
+        logging.error('Missing author JSON dictionary.')
         continue
 
       weeks_json = contributions_per_author_json.get("weeks", None)
       if not weeks_json:
-        logging.error(u'Missing weeks JSON list.')
+        logging.error('Missing weeks JSON list.')
         continue
 
       login_name = author_json.get("login", None)
       if not login_name:
-        logging.error(u'Missing login name JSON value.')
+        logging.error('Missing login name JSON value.')
         continue
 
       # TODO: map login name to username
 
       for week_json in weeks_json:
-        number_of_lines_added = week_json.get(u'a', 0)
-        number_of_contributions = week_json.get(u'c', 0)
-        number_of_lines_deleted = week_json.get(u'd', 0)
+        number_of_lines_added = week_json.get('a', 0)
+        number_of_contributions = week_json.get('c', 0)
+        number_of_lines_deleted = week_json.get('d', 0)
 
         if (not number_of_lines_added and not number_of_contributions and
             not number_of_lines_deleted):
           continue
 
-        week_timestamp = week_json.get(u'w', None)
+        week_timestamp = week_json.get('w', None)
         if not week_timestamp:
-          logging.error(u'Missing week timestamp JSON value.')
+          logging.error('Missing week timestamp JSON value.')
           continue
 
         time_elements = time.gmtime(week_timestamp)
-        year = time.strftime(u'%Y', time_elements)
-        week_number = time.strftime(u'%U', time_elements)
+        year = time.strftime('%Y', time_elements)
+        week_number = time.strftime('%U', time_elements)
 
         if week_number not in contributions_per_week:
           contributions_per_week[week_number] = {}
@@ -343,8 +350,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
     cursor = None
     while True:
       download_url = (
-          u'https://codereview.appspot.com/search?reviewer={0:s}'
-          u'&format=json&keys_only=False&with_messages=True').format(
+          'https://codereview.appspot.com/search?reviewer={0:s}'
+          '&format=json&keys_only=False&with_messages=True').format(
               email_address)
 
 
@@ -353,10 +360,10 @@ class CodeReviewIssuesHelper(DownloadHelper):
       # 2 => Yes
       # 3 => No
       if not self._include_closed:
-        download_url = u'{0:s}&closed=3'.format(download_url)
+        download_url = '{0:s}&closed=3'.format(download_url)
 
       if cursor:
-        download_url = u'{0:s}&cursor={1:s}'.format(download_url, cursor)
+        download_url = '{0:s}&cursor={1:s}'.format(download_url, cursor)
 
       reviews_data, response = self._DownloadPageContent(download_url)
       if not reviews_data:
@@ -368,7 +375,7 @@ class CodeReviewIssuesHelper(DownloadHelper):
       try:
         reviews_json = json.loads(reviews_data)
       except ValueError:
-        logging.error(u'Unable to decode JSON for: {0:s}'.format(email_address))
+        logging.error('Unable to decode JSON for: {0:s}'.format(email_address))
         break
 
       for review_values in self._ParserReviewsJSON(reviews_json):
@@ -380,14 +387,14 @@ class CodeReviewIssuesHelper(DownloadHelper):
 
         # TODO: add in review status.
         if review_values[5]:
-          status = u'closed'
+          status = 'closed'
         elif review_values[4]:
-          status = u'in review'
+          status = 'in review'
         else:
-          status = u'new'
+          status = 'new'
 
         if not self._include_closed:
-          reviewers = u', '.join(review_values[4])
+          reviewers = ', '.join(review_values[4])
           output_writer.WriteReview(
               review_values[0], review_values[1], review_values[2],
               review_values[3], reviewers, status)
@@ -399,7 +406,7 @@ class CodeReviewIssuesHelper(DownloadHelper):
                 review_values[0], review_values[1], review_values[2],
                 review_values[3], reviewer, status)
 
-      cursor = reviews_json.get(u'cursor', None)
+      cursor = reviews_json.get('cursor', None)
 
   def _ParserReviewsJSON(self, reviews_json):
     """Parser the reviews JSON data.
@@ -411,42 +418,42 @@ class CodeReviewIssuesHelper(DownloadHelper):
       tuple[str, str, int, str, set[str], bool]: creation time, owner email
           address, issue number, reviewers, is closed.
     """
-    results_list_json = reviews_json.get(u'results', None)
+    results_list_json = reviews_json.get('results', None)
     if results_list_json is None:
-      logging.error(u'Missing results JSON list.')
+      logging.error('Missing results JSON list.')
       return
 
     for review_json in results_list_json:
-      issue_number = review_json.get(u'issue', None)
+      issue_number = review_json.get('issue', None)
       if issue_number is None:
-        logging.error(u'Missing issue number.')
+        logging.error('Missing issue number.')
         continue
 
-      subject = review_json.get(u'subject', None)
+      subject = review_json.get('subject', None)
       if subject is None:
-        logging.error(u'Missing subject.')
+        logging.error('Missing subject.')
         continue
 
       subject = subject.strip()
 
-      creation_time = review_json.get(u'created', None)
-      owner_email = review_json.get(u'owner_email', None)
-      is_closed = review_json.get(u'closed', False)
+      creation_time = review_json.get('created', None)
+      owner_email = review_json.get('owner_email', None)
+      is_closed = review_json.get('closed', False)
 
-      reviewers_list_json = review_json.get(u'reviewers', None)
+      reviewers_list_json = review_json.get('reviewers', None)
       if not reviewers_list_json:
-        logging.error(u'Missing reviewers JSON list.')
+        logging.error('Missing reviewers JSON list.')
         continue
 
       reviewers = set()
-      messages_list_json = review_json.get(u'messages', None)
+      messages_list_json = review_json.get('messages', None)
       # Note that the messages_list_json will be absent if the CL has not
       # yet been reviewed.
       if messages_list_json:
         for message_json in messages_list_json:
-          sender_value = message_json.get(u'sender', None)
+          sender_value = message_json.get('sender', None)
           if not sender_value:
-            logging.error(u'Missing sender JSON value.')
+            logging.error('Missing sender JSON value.')
             continue
 
           reviewers.add(sender_value)
@@ -476,7 +483,7 @@ class CodeReviewIssuesHelper(DownloadHelper):
 class StdoutWriter(object):
   """Class that defines a stdout output writer."""
 
-  def __init__(self, user_mappings, output_format=u'csv'):
+  def __init__(self, user_mappings, output_format='csv'):
     """Initializes a stdout output writer.
 
     Args:
@@ -507,7 +514,7 @@ class StdoutWriter(object):
     Args:
       data (bytes): data to write.
     """
-    print(data, end=u'')
+    print(data, end='')
 
   def WriteContribution(
       self, year, week_number, login_name, project_name,
@@ -533,36 +540,36 @@ class StdoutWriter(object):
         # Skip login names without a username mapping.
         return
 
-    if self._output_format == u'csv':
+    if self._output_format == 'csv':
       if not self._header_written:
         output_line = (
-            u'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
-            u'number lines added\tnumber lines deleted\n')
-        self.Write(output_line.encode(u'utf-8'))
+            'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
+            'number lines added\tnumber lines deleted\n')
+        self.Write(output_line.encode('utf-8'))
 
         self._header_written = True
 
       output_line = (
-          u'{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n').format(
+          '{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n').format(
               year, week_number, username, project_name,
               number_of_contributions, number_of_lines_added,
               number_of_lines_deleted)
 
-    elif self._output_format == u'tilde':
-      date_time_string = u'{0:s}-W{1:s}-0'.format(year, week_number)
-      date_time = datetime.datetime.strptime(date_time_string, u'%Y-W%W-%w')
+    elif self._output_format == 'tilde':
+      date_time_string = '{0:s}-W{1:s}-0'.format(year, week_number)
+      date_time = datetime.datetime.strptime(date_time_string, '%Y-W%W-%w')
       date_time_string = date_time.isoformat()
 
       # TODO: add description.
       output_line = (
-          u'{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
-          u'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
-          u'~ py:{4:d} ~ file_type:py ~ op_type:ADD ~\n').format(
+          '{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
+          'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
+          '~ py:{4:d} ~ file_type:py ~ op_type:ADD ~\n').format(
               date_time_string, username, project_name,
               number_of_contributions, number_of_lines_added,
               number_of_lines_deleted)
 
-    self.Write(output_line.encode(u'utf-8'))
+    self.Write(output_line.encode('utf-8'))
 
   def WriteReview(
       self, creation_time, created_by, issue_number, description, reviewers,
@@ -577,19 +584,19 @@ class StdoutWriter(object):
       reviewers (str): reviewers.
       status (str): status.
     """
-    if self._output_format == u'csv':
+    if self._output_format == 'csv':
       if not self._header_written:
         output_line = (
-            u'creation time\tcreated by\tissue number\tdescription\treviewers\t'
-            u'status\n')
-        self.Write(output_line.encode(u'utf-8'))
+            'creation time\tcreated by\tissue number\tdescription\treviewers\t'
+            'status\n')
+        self.Write(output_line.encode('utf-8'))
 
         self._header_written = True
 
-      output_line = u'{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
+      output_line = '{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
           creation_time, created_by, issue_number, description, reviewers,
           status)
-      self.Write(output_line.encode(u'utf-8'))
+      self.Write(output_line.encode('utf-8'))
 
 
 def Main():
@@ -599,46 +606,46 @@ def Main():
     bool: True if successful or False if not.
   """
   statistics_types = frozenset([
-      u'codereviews', u'codereviews-history', u'contributions'])
+      'codereviews', 'codereviews-history', 'contributions'])
 
   argument_parser = argparse.ArgumentParser(description=(
-      u'Generates an overview of project statistics of github projects.'))
+      'Generates an overview of project statistics of github projects.'))
 
   argument_parser.add_argument(
-      u'-c', u'--config', dest=u'config_path', action=u'store',
-      metavar=u'PATH', default=None, help=(
-          u'path of the directory containing the statistics configuration '
-          u'files e.g. stats.ini.'))
+      '-c', '--config', dest='config_path', action='store',
+      metavar='PATH', default=None, help=(
+          'path of the directory containing the statistics configuration '
+          'files e.g. stats.ini.'))
 
   argument_parser.add_argument(
-      u'-f', u'--format', dest=u'output_format', action=u'store',
-      metavar=u'FORMAT', choices=[u'csv', u'tilde'], default=u'csv',
-      help=u'output format.')
+      '-f', '--format', dest='output_format', action='store',
+      metavar='FORMAT', choices=['csv', 'tilde'], default='csv',
+      help='output format.')
 
   argument_parser.add_argument(
-      u'statistics_type', action=u'store', metavar=u'TYPE',
+      'statistics_type', action='store', metavar='TYPE',
       choices=sorted(statistics_types), default=None,
-      help=u'The statistics type.')
+      help='The statistics type.')
 
   options = argument_parser.parse_args()
 
   if not options.statistics_type:
-    print(u'Statistics type missing.')
-    print(u'')
+    print('Statistics type missing.')
+    print('')
     argument_parser.print_help()
-    print(u'')
+    print('')
     return False
 
   config_path = options.config_path
   if not config_path:
     config_path = os.path.dirname(__file__)
     config_path = os.path.dirname(config_path)
-    config_path = os.path.join(config_path, u'data')
+    config_path = os.path.join(config_path, 'data')
 
-  stats_file = os.path.join(config_path, u'stats.ini')
+  stats_file = os.path.join(config_path, 'stats.ini')
   if not os.path.exists(stats_file):
-    print(u'No such config file: {0:s}.'.format(stats_file))
-    print(u'')
+    print('No such config file: {0:s}.'.format(stats_file))
+    print('')
     return False
 
   stats_definition_reader = StatsDefinitionReader()
@@ -651,24 +658,24 @@ def Main():
       user_mappings, output_format=options.output_format)
 
   if not output_writer.Open():
-    print(u'Unable to open output writer.')
-    print(u'')
+    print('Unable to open output writer.')
+    print('')
     return False
 
-  if options.statistics_type.startswith(u'codereviews'):
+  if options.statistics_type.startswith('codereviews'):
     usernames = {}
     with open(stats_file) as file_object:
       stats_definition_reader = StatsDefinitionReader()
       usernames = stats_definition_reader.ReadUsernames(file_object)
 
     include_closed = False
-    if options.statistics_type == u'codereviews-history':
+    if options.statistics_type == 'codereviews-history':
       include_closed = True
 
     codereviews_helper = CodeReviewIssuesHelper(include_closed=include_closed)
     codereviews_helper.ListIssues(usernames, output_writer)
 
-  elif options.statistics_type == u'contributions':
+  elif options.statistics_type == 'contributions':
     projects_per_organization = {}
     with open(stats_file) as file_object:
       stats_definition_reader = StatsDefinitionReader()

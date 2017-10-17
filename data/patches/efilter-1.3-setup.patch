@@ -5,7 +5,7 @@
          sdist.run(self)
  
 +efilter_version = __version__
-+if 'bdist_msi' in sys.argv or u'bdist_rpm' in sys.argv:
++if 'bdist_msi' in sys.argv or 'bdist_rpm' in sys.argv:
 + _, _, efilter_version = efilter_version.partition('!')
 +
  
