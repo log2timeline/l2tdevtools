@@ -69,6 +69,9 @@ class CodeReviewHelper(CLIHelper):
   """Codereview upload.py command helper."""
 
   _REVIEWERS_PER_PROJECT = {
+      'acstore': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
       'dfdatetime': frozenset([
           'joachim.metz@gmail.com',
           'onager@deerpie.com']),
@@ -946,6 +949,7 @@ class ProjectHelper(CLIHelper):
       'Google Inc. (*@google.com)']
 
   SUPPORTED_PROJECTS = frozenset([
+      'acstore',
       'artifacts',
       'dfdatetime',
       'dfkinds',

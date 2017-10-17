@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to generate different versions of Visual Studio (express) files.
 
 Currently supported input formats:
@@ -22,6 +23,8 @@ Copied with permission from: https://github.com/libyal/libyal
 # TODO: add vs2013 writer.
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import abc
 import argparse
 import logging
@@ -31,7 +34,7 @@ import sys
 import uuid
 
 
-# pylint: disable=logging-format-interpolation
+# pylint: disable=logging-format-interpolation,missing-docstring
 
 class VSConfiguration(object):
   """Class to represent a Visual Studio configurations."""
@@ -1929,7 +1932,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     Args:
       source_files: a list of strings of the source filenames.
     """
-    if len(source_files) > 0:
+    if source_files:
       self.WriteLine('  <ItemGroup>')
 
       for filename in source_files:
@@ -1943,7 +1946,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     Args:
       header_files: a list of strings of the header filenames.
     """
-    if len(header_files) > 0:
+    if header_files:
       self.WriteLine('  <ItemGroup>')
 
       for filename in header_files:
@@ -1957,7 +1960,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
     Args:
       resource_files: a list of strings of the resource filenames.
     """
-    if len(resource_files) > 0:
+    if resource_files:
       self.WriteLine('  <ItemGroup>')
 
       for filename in resource_files:
@@ -1987,7 +1990,7 @@ class VS2010ProjectFileWriter(VSProjectFileWriter):
                                  VSSolutionProject) with their GUID in lower
                                  case as the key.
     """
-    if len(dependencies) > 0:
+    if dependencies:
       self.WriteLine('  <ItemGroup>')
 
       dependencies_by_name = {}
@@ -2705,7 +2708,7 @@ class VS2008SolutionFileWriter(VSSolutionFileWriter):
             solution_project.name, solution_project_filename,
             solution_project.guid.upper()))
 
-    if len(solution_project.dependencies) > 0:
+    if solution_project.dependencies:
       self.WriteLine(
           '\tProjectSection(ProjectDependencies) = postProject')
 
@@ -3646,7 +3649,7 @@ class LibyalSourceVSSolution(VSSolution):
 
           elif line.endswith('\\'):
             logging.warning(
-                u'Detected missing space before \\ in line: ${0:s}'.format(
+                'Detected missing space before \\ in line: ${0:s}'.format(
                     line))
             line = line[:-1]
 
@@ -3692,7 +3695,7 @@ class LibyalSourceVSSolution(VSSolution):
 
           elif line.endswith('\\'):
             logging.warning(
-                u'Detected missing space before \\ in line: ${0:s}'.format(
+                'Detected missing space before \\ in line: ${0:s}'.format(
                     line))
             line = line[:-1]
 
@@ -3727,7 +3730,7 @@ class LibyalSourceVSSolution(VSSolution):
             dependency_name = dependency_name[:-3]
           else:
             logging.warning(
-                u'Unuspported dependency definition: {0:s}'.format(line))
+                'Unuspported dependency definition: {0:s}'.format(line))
             dependency_name = ''
 
           if dependency_name:
@@ -3754,7 +3757,7 @@ class LibyalSourceVSSolution(VSSolution):
 
           elif line.endswith('\\'):
             logging.warning(
-                u'Detected missing space before \\ in line: ${0:s}'.format(
+                'Detected missing space before \\ in line: ${0:s}'.format(
                     line))
             line = line[:-1]
 
@@ -3785,7 +3788,7 @@ class LibyalSourceVSSolution(VSSolution):
             dependency_name = dependency_name[:-3]
           else:
             logging.warning(
-                u'Unuspported dependency definition: {0:s}'.format(line))
+                'Unuspported dependency definition: {0:s}'.format(line))
             dependency_name = ''
 
           if dependency_name:
@@ -3934,6 +3937,7 @@ class LibyalSourceVSSolution(VSSolution):
 
     return bin_programs
 
+  # pylint: disable=arguments-differ
   def Convert(self, input_directory, output_version):
     """Converts a Visual Studio solution.
 
@@ -3946,7 +3950,7 @@ class LibyalSourceVSSolution(VSSolution):
     """
     configure_ac_path = os.path.join(input_directory, 'configure.ac')
     if not os.path.exists(configure_ac_path):
-      logging.warning(u'No such file: {0:s}.'.format(configure_ac_path))
+      logging.warning('No such file: {0:s}.'.format(configure_ac_path))
       return False
 
     solution_name = None
@@ -3968,7 +3972,7 @@ class LibyalSourceVSSolution(VSSolution):
     file_object.close()
 
     if not solution_name:
-      logging.warning(u'Unable to determine solution name.')
+      logging.warning('Unable to determine solution name.')
       return False
 
     # Use the existing msvscpp solution file to determine the project
@@ -4007,7 +4011,7 @@ class LibyalSourceVSSolution(VSSolution):
       makefile_am_path = os.path.join(
           input_directory, directory_entry, 'Makefile.am')
       if not os.path.exists(makefile_am_path):
-        logging.warning(u'No such file: {0:s}.'.format(makefile_am_path))
+        logging.warning('No such file: {0:s}.'.format(makefile_am_path))
         continue
 
       if directory_entry == 'tests' or directory_entry.endswith('tools'):
@@ -4088,7 +4092,7 @@ class LibyalSourceVSSolution(VSSolution):
       solution_projects_by_guid[solution_project.guid] = solution_project
 
     # Set-up the solution dependencies.
-    for guid, project_information in projects_by_guid.iteritems():
+    for guid, project_information in projects_by_guid.items():
       solution_project = solution_projects_by_guid[guid]
 
       for dependency in project_information.dependencies:
@@ -4196,7 +4200,7 @@ def Main():
     return False
 
   logging.basicConfig(
-      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
+      level=logging.INFO, format='[%(levelname)s] %(message)s')
 
   if os.path.isdir(options.solution_file):
     input_solution = LibyalSourceVSSolution()

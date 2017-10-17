@@ -1,8 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 """Script to generate dpkg packaging files."""
 
 from __future__ import print_function
+from __future__ import unicode_literals
+
 import argparse
 import glob
 import logging
@@ -20,37 +23,37 @@ def Main():
     A boolean containing True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
-      u'Generates dpkg packaging files for a project.'))
+      'Generates dpkg packaging files for a project.'))
 
   argument_parser.add_argument(
-      u'project_name', action=u'store', metavar=u'NAME', type=str, help=(
-          u'Project name for which the dpkg packaging files should be '
-          u'generated.'))
+      'project_name', action='store', metavar='NAME', type=str, help=(
+          'Project name for which the dpkg packaging files should be '
+          'generated.'))
 
   argument_parser.add_argument(
-      u'-c', u'--config', dest=u'config_file', action=u'store',
-      metavar=u'CONFIG_FILE', default=None,
-      help=u'path of the build configuration file.')
+      '-c', '--config', dest='config_file', action='store',
+      metavar='CONFIG_FILE', default=None,
+      help='path of the build configuration file.')
 
   argument_parser.add_argument(
-      u'--source-directory', u'--source_directory', action=u'store',
-      metavar=u'DIRECTORY', dest=u'source_directory', type=str,
-      default=None, help=u'The location of the the source directory.')
+      '--source-directory', '--source_directory', action='store',
+      metavar='DIRECTORY', dest='source_directory', type=str,
+      default=None, help='The location of the the source directory.')
 
   options = argument_parser.parse_args()
 
   logging.basicConfig(
-      level=logging.INFO, format=u'[%(levelname)s] %(message)s')
+      level=logging.INFO, format='[%(levelname)s] %(message)s')
 
   if not options.config_file:
     options.config_file = os.path.dirname(__file__)
     options.config_file = os.path.dirname(options.config_file)
     options.config_file = os.path.join(
-        options.config_file, u'data', u'projects.ini')
+        options.config_file, 'data', 'projects.ini')
 
   if not os.path.exists(options.config_file):
-    print(u'No such config file: {0:s}.'.format(options.config_file))
-    print(u'')
+    print('No such config file: {0:s}.'.format(options.config_file))
+    print('')
     return False
 
   project_definition_match = None
@@ -61,59 +64,59 @@ def Main():
         project_definition_match = project_definition
 
   if not project_definition_match:
-    print(u'No such package name: {0:s}.'.format(options.project_name))
-    print(u'')
+    print('No such package name: {0:s}.'.format(options.project_name))
+    print('')
     return False
 
   source_path = options.source_directory
   if not source_path:
     globbed_paths = []
-    for path in glob.glob(u'{0:s}*'.format(options.project_name)):
+    for path in glob.glob('{0:s}*'.format(options.project_name)):
       if not os.path.isdir(path):
         continue
       globbed_paths.append(path)
 
     if not len(globbed_paths) == 1:
-      print(u'Unable to determine source directory.')
-      print(u'')
+      print('Unable to determine source directory.')
+      print('')
       return False
 
     source_path = globbed_paths[0]
 
   if not os.path.exists(source_path):
-    print(u'No such source directory: {0:s}.'.format(source_path))
-    print(u'')
+    print('No such source directory: {0:s}.'.format(source_path))
+    print('')
     return False
 
   source_path = os.path.abspath(source_path)
   project_version = os.path.basename(source_path)
-  if not project_version.startswith(u'{0:s}-'.format(options.project_name)):
+  if not project_version.startswith('{0:s}-'.format(options.project_name)):
     print((
-        u'Unable to determine project version based on source '
-        u'directory: {0:s}.').format(source_path))
-    print(u'')
+        'Unable to determine project version based on source '
+        'directory: {0:s}.').format(source_path))
+    print('')
     return False
 
-  _, _, project_version = project_version.partition(u'-')
+  _, _, project_version = project_version.partition('-')
 
-  dpkg_path = os.path.join(source_path, u'dpkg')
+  dpkg_path = os.path.join(source_path, 'dpkg')
   if os.path.exists(dpkg_path):
-    print(u'Destination dpkg directory: {0:s} already exists.'.format(
+    print('Destination dpkg directory: {0:s} already exists.'.format(
         dpkg_path))
-    print(u'')
+    print('')
     return False
 
   tools_path = os.path.dirname(__file__)
-  data_path = os.path.join(os.path.dirname(tools_path), u'data')
+  data_path = os.path.join(os.path.dirname(tools_path), 'data')
 
   build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
       options.project_name, project_version,
       project_definition_match, data_path)
 
-  print(u'Generating dpkg files for: {0:s} {1:s} in: {2:s}'.format(
+  print('Generating dpkg files for: {0:s} {1:s} in: {2:s}'.format(
       options.project_name, project_version, dpkg_path))
   build_files_generator.GenerateFiles(dpkg_path)
-  print(u'')
+  print('')
 
   return True
 
