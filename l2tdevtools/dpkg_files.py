@@ -677,8 +677,7 @@ class DPKGBuildFilesGenerator(object):
       dpkg_path (str): path to the dpkg files.
     """
     package_name = self._GetPackageName()
-    if package_name in (
-        'cryptography', 'mccabe', 'pbr', 'pytest-runner', 'setuptools'):
+    if self._project_definition.dpkg_source_format == 'native':
       template_file = self._SOURCE_FORMAT_NATIVE_TEMPLATE
     else:
       template_file = self._SOURCE_FORMAT_QUILT_TEMPLATE
