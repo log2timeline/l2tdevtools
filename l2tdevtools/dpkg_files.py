@@ -676,7 +676,6 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
-    package_name = self._GetPackageName()
     if self._project_definition.dpkg_source_format == 'native':
       template_file = self._SOURCE_FORMAT_NATIVE_TEMPLATE
     else:
