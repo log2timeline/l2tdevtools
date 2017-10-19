@@ -38,7 +38,7 @@ class DownloadHelperTest(unittest.TestCase):
   def setUp(self):
     """Sets up a test case."""
     self._download_url = (
-        'https://raw.githubusercontent.com/log2timeline/devtools/master/'
+        'https://raw.githubusercontent.com/log2timeline/l2tdevtools/master/'
         '{0:s}').format(self._FILENAME)
 
   def testDownloadPageContent(self):
@@ -182,7 +182,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = 'log2timeline'
   _PROJECT_NAME = 'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = '20170723'
+  _PROJECT_VERSION = '20171018'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
