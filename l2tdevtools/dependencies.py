@@ -392,7 +392,7 @@ class DependencyHelper(object):
 
       module_name = dependency.dpkg_name or dependency.name
       if python_version == 3:
-        module_name = module_name.replace('python-', 'python3-')
+        module_name = module_name.replace('python', 'python3')
 
       if exclude_version or not dependency.minimum_version:
         requires_string = module_name
@@ -478,10 +478,9 @@ class DependencyHelper(object):
       if dependency.python2_only and python_version != 2:
         continue
 
-      module_name = dependency.dpkg_name or dependency.name
+      module_name = dependency.rpm_name or dependency.name
       if python_version == 3:
-        module_name = module_name.replace('python-', 'python3-')
-        module_name = module_name.replace('python2-', 'python3-')
+        module_name = module_name.replace('python', 'python3')
 
       if exclude_version or not dependency.minimum_version:
         requires_string = module_name
