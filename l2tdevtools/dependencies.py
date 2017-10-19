@@ -392,7 +392,7 @@ class DependencyHelper(object):
 
       module_name = dependency.dpkg_name or dependency.name
       if python_version == 3:
-        module_name = module_name.replace('python', 'python3')
+        module_name = module_name.replace('python-', 'python3-')
 
       if exclude_version or not dependency.minimum_version:
         requires_string = module_name
@@ -461,12 +461,13 @@ class DependencyHelper(object):
 
     return sorted(install_requires)
 
-  def GetRPMRequires(self, exclude_version=False):
+  def GetRPMRequires(self, exclude_version=False, python_version=2):
     """Retrieves the setup.cfg RPM installation requirements.
 
     Args:
       exclude_version (Optional[bool]): True if the version should be excluded
           from the dependency definitions.
+      python_version (Optional[int]): Python major version.
 
     Returns:
       list[str]: dependency definitions for requires for setup.cfg.
@@ -474,7 +475,13 @@ class DependencyHelper(object):
     requires = []
     for dependency in sorted(
         self._dependencies.values(), key=lambda dependency: dependency.name):
-      module_name = dependency.rpm_name or dependency.name
+      if dependency.python2_only and python_version != 2:
+        continue
+
+      module_name = dependency.dpkg_name or dependency.name
+      if python_version == 3:
+        module_name = module_name.replace('python-', 'python3-')
+        module_name = module_name.replace('python2-', 'python3-')
 
       if exclude_version or not dependency.minimum_version:
         requires_string = module_name
