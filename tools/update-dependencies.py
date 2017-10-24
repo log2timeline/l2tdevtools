@@ -172,12 +172,15 @@ class DependenciesPyWriter(DependencyFileWriter):
 
     python_dependencies = []
     for dependency in dependencies:
+      if dependency.maximum_version:
+        maximum_version = '\'{0:s}\''.format(dependency.maximum_version)
+      else:
+        maximum_version = 'None'
+
       python_dependency = (
           '    \'{0:s}\': (\'{1:s}\', \'{2:s}\', {3:s}, {4!s})').format(
-              dependency.name,
-              dependency.version_property or '',
-              dependency.minimum_version or '',
-              dependency.maximum_version or 'None',
+              dependency.name, dependency.version_property or '',
+              dependency.minimum_version or '', maximum_version,
               not dependency.is_optional)
 
       python_dependencies.append(python_dependency)
