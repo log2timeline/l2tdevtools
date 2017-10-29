@@ -105,7 +105,7 @@ class DependencyHelper(object):
   """Dependency helper.
 
   Attributes:
-    dependencies (list[DependencyDefinition]): dependencies.
+    dependencies (dict[str, DependencyDefinition]): dependencies.
   """
 
   _VERSION_NUMBERS_REGEX = re.compile(r'[0-9.]+')
