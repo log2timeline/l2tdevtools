@@ -462,7 +462,7 @@ class DependencyUpdater(object):
       bool: True if the installation was successful.
     """
     result = True
-    for name, _ in package_versions.iteritems():
+    for name in package_versions.keys():
       package_filename = package_filenames[name]
 
       command = 'sudo /usr/bin/hdiutil attach {0:s}'.format(
@@ -523,7 +523,7 @@ class DependencyUpdater(object):
       parameters = ''
 
     result = True
-    for name, version in package_versions.iteritems():
+    for name, version in package_versions.items():
       # TODO: add RunAs ?
       package_filename = package_filenames[name]
       package_path = os.path.join(self._download_directory, package_filename)
