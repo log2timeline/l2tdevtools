@@ -390,7 +390,7 @@ class DependencyHelper(object):
     """
     requires = []
     for dependency in sorted(
-        self._dependencies.values(), key=lambda dependency: dependency.name):
+        self.dependencies.values(), key=lambda dependency: dependency.name):
       if dependency.python2_only and python_version != 2:
         continue
 
@@ -478,7 +478,7 @@ class DependencyHelper(object):
     """
     requires = []
     for dependency in sorted(
-        self._dependencies.values(), key=lambda dependency: dependency.name):
+        self.dependencies.values(), key=lambda dependency: dependency.name):
       if dependency.python2_only and python_version != 2:
         continue
 
