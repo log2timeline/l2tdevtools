@@ -22,8 +22,6 @@ import pkg_resources
 
 from l2tdevtools import py2to3
 
-from l2tdevtools import py2to3
-
 
 class DownloadHelper(object):
   """Helps in downloading files and web content."""
