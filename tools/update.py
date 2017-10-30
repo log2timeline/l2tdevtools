@@ -113,8 +113,8 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       return
 
     if (sys.version_info[0] not in (2, 3) or
-          (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
-          (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
+        (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
+        (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
       logging.error('Python version: {0:d}.{1:d} not supported.'.format(
           sys.version_info[0], sys.version_info[1]))
       return
