@@ -17,7 +17,10 @@ else:
   import urllib.error as urllib_error
   import urllib.request as urllib_request
 
-import pkg_resources  # pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-position
+import pkg_resources
+
+from l2tdevtools import py2to3
 
 
 class DownloadHelper(object):
@@ -55,7 +58,7 @@ class DownloadHelper(object):
         url_object = urllib_request.urlopen(download_url)
       except urllib_error.URLError as exception:
         logging.warning(
-            'Unable to download URL: {0:s} with error: {1:s}'.format(
+            'Unable to download URL: {0:s} with error: {1!s}'.format(
                 download_url, exception))
         return
 
@@ -87,14 +90,19 @@ class DownloadHelper(object):
         url_object = urllib_request.urlopen(download_url)
       except urllib_error.URLError as exception:
         logging.warning(
-            'Unable to download URL: {0:s} with error: {1:s}'.format(
+            'Unable to download URL: {0:s} with error: {1!s}'.format(
                 download_url, exception))
         return
 
       if url_object.code != 200:
         return
 
-      self._cached_page_content = url_object.read()
+      page_content = url_object.read()
+
+      if isinstance(page_content, py2to3.BYTES_TYPE):
+        page_content = page_content.decode('utf-8')
+
+      self._cached_page_content = page_content
       self._cached_url = download_url
 
     return self._cached_page_content
@@ -284,18 +292,21 @@ class GitHubReleasesDownloadHelper(ProjectDownloadHelper):
       # we want this to be '.'.
       comparable_match = match.replace('-', '.')
 
-      comparable_match = map(int, comparable_match.split('.'))
+      # Convert the result of map() into a list for Python 3.
+      comparable_match = list(map(int, comparable_match.split('.')))
       comparable_matches[match] = comparable_match
 
     # Find the latest version number and transform it back into a string.
     latest_match = [digit for digit in max(comparable_matches.values())]
 
     # Map the latest match value to its index within the dictionary.
-    latest_match = comparable_matches.values().index(latest_match)
+    # Convert the result of dict.values() into a list for Python 3.
+    latest_match = list(comparable_matches.values()).index(latest_match)
 
     # Return the original version string which is stored as the key in within
     # the dictionary.
-    return comparable_matches.keys()[latest_match]
+    # Convert the result of dict.keys() into a list for Python 3.
+    return list(comparable_matches.keys())[latest_match]
 
   def GetDownloadURL(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
