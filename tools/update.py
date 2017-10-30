@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import argparse
 import glob
+import io
 import json
 import logging
 import os
@@ -535,9 +536,8 @@ class DependencyUpdater(object):
         result = False
 
         if self._verbose_output:
-          with open(log_file, 'r') as file_object:
+          with io.open(log_file, 'r', encoding='utf-16-le') as file_object:
             log_file_contents = file_object.read()
-            log_file_contents = log_file_contents.decode('utf-16-le')
             print(log_file_contents.encode('ascii', errors='replace'))
 
     return result
@@ -881,7 +881,7 @@ def Main():
 
   project_names = []
   if options.preset:
-    with open(presets_file) as file_object:
+    with io.open(presets_file, 'r', encoding='utf-8') as file_object:
       preset_definition_reader = presets.PresetDefinitionReader()
       for preset_definition in preset_definition_reader.Read(file_object):
         if preset_definition.name == options.preset:
@@ -907,7 +907,7 @@ def Main():
       verbose_output=options.verbose)
 
   project_definitions = {}
-  with open(projects_file) as file_object:
+  with io.open(projects_file, 'r', encoding='utf-8') as file_object:
     project_definition_reader = projects.ProjectDefinitionReader()
     for project_definition in project_definition_reader.Read(file_object):
       project_definitions[project_definition.name] = project_definition
