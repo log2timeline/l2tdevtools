@@ -106,30 +106,22 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
     sub_directory = None
 
+    if operating_system not in ('Darwin', 'Windows'):
+      logging.error('Operating system: {0:s} not supported.'.format(
+          operating_system))
+      return
+
+    if (sys.version_info[0] not in (2, 3) or
+          (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
+          (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
+      logging.error('Python version: {0:d}.{1:d} not supported.'.format(
+          sys.version_info[0], sys.version_info[1]))
+      return
+
     if operating_system == 'Darwin':
       # TODO: determine macOS version.
-      if cpu_architecture != 'x86_64':
-        logging.error('CPU architecture: {0:s} not supported.'.format(
-            cpu_architecture))
-        return
-
-      sub_directory = 'macos'
-
-    elif operating_system == 'Linux':
-      # pylint: disable=deprecated-method
-      linux_name, linux_version, _ = platform.linux_distribution()
-      logging.error('Linux: {0:s} {1:s} not supported.'.format(
-          linux_name, linux_version))
-
-      if linux_name == 'Ubuntu':
-        wiki_url = (
-            'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
-            '#prepackaged-dependencies')
-        logging.error(
-            'Use the gift PPA instead. For more info see: {0:s}'.format(
-                wiki_url))
-
-      return
+      if cpu_architecture == 'x86_64':
+        sub_directory = 'macos'
 
     elif operating_system == 'Windows':
       if cpu_architecture == 'x86':
@@ -138,14 +130,9 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
       elif cpu_architecture == 'amd64':
         sub_directory = 'win64'
 
-      else:
-        logging.error('CPU architecture: {0:s} not supported.'.format(
-            cpu_architecture))
-        return
-
-    else:
-      logging.error('Operating system: {0:s} not supported.'.format(
-          operating_system))
+    if not sub_directory:
+      logging.error('CPU architecture: {0:s} not supported.'.format(
+          cpu_architecture))
       return
 
     return sub_directory
@@ -355,6 +342,9 @@ class DependencyUpdater(object):
         dict[str, str]: filenames per package.
         dict[str, str]: versions per package.
     """
+    python_version_indicator = '-py{0:d}.{1:d}'.format(
+        sys.version_info[0], sys.version_info[1])
+
     # The API is rate limited, so we scrape the web page instead.
     package_urls = self._download_helper.GetPackageDownloadURLs(
         preferred_machine_type=self._preferred_machine_type,
@@ -379,8 +369,13 @@ class DependencyUpdater(object):
 
       elif package_filename.endswith('.msi'):
         # Strip off the trailing part starting with '.win'.
-        package_name, _, _ = package_filename.partition('.win')
+        package_name, _, package_version = package_filename.partition('.win')
         package_suffix = '.msi'
+
+        if ('-py' in package_version and
+            python_version_indicator not in package_version):
+          # Ignore packages that are for different versions of Python.
+          continue
 
       else:
         # Ignore all other file exensions.
@@ -565,7 +560,7 @@ class DependencyUpdater(object):
     elif self.operating_system == 'Windows':
       return self._UninstallPackagesWindows(package_versions)
 
-    return True
+    return False
 
   def _UninstallPackagesMacOSX(self, package_versions):
     """Uninstalls packages on Mac OS X.
