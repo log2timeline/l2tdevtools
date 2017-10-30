@@ -290,7 +290,7 @@ class LaunchpadPPAManager(object):
       ppa_sources = ppa_sources.decode('utf-8')
     except UnicodeDecodeError as exception:
       logging.error(
-          'Unable to decode PPA sources list with error: {0:s}'.format(
+          'Unable to decode PPA sources list with error: {0!s}'.format(
               exception))
       return
 
