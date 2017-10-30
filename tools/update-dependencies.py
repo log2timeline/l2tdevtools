@@ -223,8 +223,6 @@ class DPKGControlWriter(DependencyFileWriter):
 
   def Write(self):
     """Writes a dpkg control file."""
-    dependencies = self._dependency_helper.GetDPKGDepends()
-
     file_content = []
 
     if self._project_definition.python2_only:
@@ -232,9 +230,9 @@ class DPKGControlWriter(DependencyFileWriter):
     else:
       file_content.extend(self._PYTHON3_FILE_HEADER)
 
+    data_dependency = ''
     if os.path.isdir('data'):
-      dependencies.insert(
-          0, '{0:s}-data'.format(self._project_definition.name))
+      data_dependency = '{0:s}-data'.format(self._project_definition.name)
 
       file_content.extend(self._DATA_PACKAGE)
 
@@ -250,12 +248,23 @@ class DPKGControlWriter(DependencyFileWriter):
     description_long = '\n'.join([
         ' {0:s}'.format(line) for line in description_long.split('\n')])
 
-    python2_dependencies = ', '.join(dependencies)
+    python2_dependencies = self._dependency_helper.GetDPKGDepends(
+        python_version=2)
+
+    if data_dependency:
+      python2_dependencies.insert(0, data_dependency)
+
+    python2_dependencies = ', '.join(python2_dependencies)
     if python2_dependencies:
       python2_dependencies = '{0:s}, '.format(python2_dependencies)
 
-    python3_dependencies = ', '.join(dependencies).replace(
-        'python', 'python3')
+    python3_dependencies = self._dependency_helper.GetDPKGDepends(
+        python_version=3)
+
+    if data_dependency:
+      python3_dependencies.insert(0, data_dependency)
+
+    python3_dependencies = ', '.join(python3_dependencies)
     if python3_dependencies:
       python3_dependencies = '{0:s}, '.format(python3_dependencies)
 
@@ -329,12 +338,14 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
     file_content = []
     file_content.extend(self._FILE_HEADER)
 
-    dependencies = self._dependency_helper.GetRPMRequires(exclude_version=True)
+    python2_dependencies = self._dependency_helper.GetRPMRequires(
+        exclude_version=True, python_version=2)
+
     libyal_dependencies = []
-    for index, dependency in enumerate(dependencies):
+    for index, dependency in enumerate(python2_dependencies):
       if index == 0:
         file_content.append('PYTHON2_DEPENDENCIES="{0:s}'.format(dependency))
-      elif index + 1 == len(dependencies):
+      elif index + 1 == len(python2_dependencies):
         file_content.append('                      {0:s}";'.format(dependency))
       else:
         file_content.append('                      {0:s}'.format(dependency))
@@ -416,12 +427,14 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
     file_content = []
     file_content.extend(self._FILE_HEADER)
 
-    dependencies = self._dependency_helper.GetDPKGDepends(exclude_version=True)
+    python2_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=2)
+
     libyal_dependencies = []
-    for index, dependency in enumerate(dependencies):
+    for index, dependency in enumerate(python2_dependencies):
       if index == 0:
         file_content.append('PYTHON2_DEPENDENCIES="{0:s}'.format(dependency))
-      elif index + 1 == len(dependencies):
+      elif index + 1 == len(python2_dependencies):
         file_content.append('                      {0:s}";'.format(dependency))
       else:
         file_content.append('                      {0:s}'.format(dependency))
@@ -509,8 +522,10 @@ class SetupCfgWriter(DependencyFileWriter):
 
     file_content.extend(self._BDIST_RPM)
 
-    dependencies = self._dependency_helper.GetRPMRequires()
-    for index, dependency in enumerate(dependencies):
+    python2_dependencies = self._dependency_helper.GetRPMRequires(
+        python_version=2)
+
+    for index, dependency in enumerate(python2_dependencies):
       if index == 0:
         file_content.append('requires = {0:s}'.format(dependency))
       else:
@@ -595,9 +610,11 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
 
     file_content.append('')
 
-    dependencies = self._dependency_helper.GetDPKGDepends(exclude_version=True)
-    dependencies = ' '.join(dependencies)
-    file_content.append('PYTHON2_DEPENDENCIES="{0:s}";'.format(dependencies))
+    python2_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=2)
+    python2_dependencies = ' '.join(python2_dependencies)
+    file_content.append('PYTHON2_DEPENDENCIES="{0:s}";'.format(
+        python2_dependencies))
 
     file_content.append('')
     file_content.append('PYTHON2_TEST_DEPENDENCIES="python-mock python-tox";')
