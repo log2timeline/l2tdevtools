@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import logging
 import re
+import sys
 
 try:
   import ConfigParser as configparser
@@ -185,7 +186,7 @@ class ProjectDefinitionReader(object):
       object: value or None if the value does not exists.
     """
     try:
-      return config_parser.get(section_name, value_name).decode('utf-8')
+      return config_parser.get(section_name, value_name)
     except configparser.NoOptionError:
       return
 
@@ -201,9 +202,11 @@ class ProjectDefinitionReader(object):
     # TODO: replace by:
     # config_parser = configparser. ConfigParser(interpolation=None)
     config_parser = configparser.RawConfigParser()
-    # pylint: disable=deprecated-method
-    # TODO: replace readfp by read_file, check if Python 2 compatible
-    config_parser.readfp(file_object)
+
+    if sys.version_info[0] < 3:
+      config_parser.readfp(file_object)  # pylint: disable=deprecated-method
+    else:
+      config_parser.read_file(file_object)
 
     for section_name in config_parser.sections():
       project_definition = ProjectDefinition(section_name)
