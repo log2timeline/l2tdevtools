@@ -1785,7 +1785,7 @@ class OSCBuildHelper(BuildHelper):
 
     output, error = process.communicate()
     if process.returncode != 0:
-      logging.error('Running: "{0:s}" failed with error: {1:s}.'.format(
+      logging.error('Running: "{0:s}" failed with error: {1!s}.'.format(
           command, error))
       return False
 

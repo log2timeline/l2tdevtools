@@ -13,6 +13,8 @@ import subprocess
 import tarfile
 import zipfile
 
+from l2tdevtools import py2to3
+
 
 class SourceHelper(object):
   """Helper to manager project source code."""
@@ -171,13 +173,15 @@ class SourcePackageHelper(SourceHelper):
 
     for tar_info in archive.getmembers():
       filename = getattr(tar_info, 'name', None)
-      try:
-        filename = filename.decode(self.ENCODING)
-      except UnicodeDecodeError:
-        logging.warning(
-            'Unable to decode filename in tar file: {0:s}'.format(
-                source_filename))
-        continue
+
+      if isinstance(filename, py2to3.BYTES_TYPE):
+        try:
+          filename = filename.decode(self.ENCODING)
+        except UnicodeDecodeError:
+          logging.warning(
+              'Unable to decode filename in tar file: {0:s}'.format(
+                  source_filename))
+          continue
 
       if filename is None:
         logging.warning('Missing filename in tar file: {0:s}'.format(
