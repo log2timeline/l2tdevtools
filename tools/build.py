@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
+import io
 import logging
 import os
 import subprocess
@@ -280,7 +281,7 @@ def Main():
 
   project_names = []
   if options.preset:
-    with open(presets_file) as file_object:
+    with io.open(presets_file, 'r', encoding='utf-8') as file_object:
       preset_definition_reader = presets.PresetDefinitionReader()
       for preset_definition in preset_definition_reader.Read(file_object):
         if preset_definition.name == options.preset:
@@ -296,7 +297,7 @@ def Main():
     project_names = options.projects.split(',')
 
   builds = []
-  with open(projects_file) as file_object:
+  with io.open(projects_file, 'r', encoding='utf-8') as file_object:
     project_definition_reader = projects.ProjectDefinitionReader()
     for project_definition in project_definition_reader.Read(file_object):
       is_disabled = False

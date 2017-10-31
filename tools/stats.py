@@ -150,7 +150,7 @@ class DownloadHelper(object):
       url_object = urlopen(download_url)
     except urllib_error.URLError as exception:
       logging.warning(
-          'Unable to download URL: {0:s} with error: {1:s}'.format(
+          'Unable to download URL: {0:s} with error: {1!s}'.format(
               download_url, exception))
       return None, None
 
