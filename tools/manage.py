@@ -279,7 +279,8 @@ class LaunchpadPPAManager(object):
         'track': track}
     download_url = self._LAUNCHPAD_URL.format(**kwargs)
 
-    ppa_sources = self._download_helper.DownloadPageContent(download_url)
+    ppa_sources = self._download_helper.DownloadPageContent(
+        download_url, encoding=None)
     if not ppa_sources:
       logging.error('Unable to retrieve PPA sources list.')
       return
