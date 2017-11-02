@@ -73,11 +73,13 @@ class DownloadHelper(object):
 
     return filename
 
-  def DownloadPageContent(self, download_url):
+  def DownloadPageContent(self, download_url, encoding='utf-8'):
     """Downloads the page content from the URL and caches it.
 
     Args:
       download_url (str): URL where to download the page content.
+      encoding (Optional[str]): encoding of the page content, where None
+          represents no encoding (or binary data).
 
     Returns:
       str: page content if successful, None otherwise.
@@ -99,8 +101,8 @@ class DownloadHelper(object):
 
       page_content = url_object.read()
 
-      if isinstance(page_content, py2to3.BYTES_TYPE):
-        page_content = page_content.decode('utf-8')
+      if encoding and isinstance(page_content, py2to3.BYTES_TYPE):
+        page_content = page_content.decode(encoding)
 
       self._cached_page_content = page_content
       self._cached_url = download_url
