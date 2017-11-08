@@ -5,6 +5,7 @@
 
 from __future__ import unicode_literals
 
+import string
 import os
 
 from l2tdevtools import dependencies
@@ -20,15 +21,17 @@ from l2tdevtools import project_config
 class DependencyFileWriter(object):
   """Dependency file writer."""
 
-  def __init__(self, project_definition, dependency_helper):
+  def __init__(self, l2tdevtools_path, project_definition, dependency_helper):
     """Initializes a dependency file writer.
 
     Args:
+      l2tdevtools_path (str): path to l2tdevtools.
       project_definition (ProjectDefinition): project definition.
       dependency_helper (DependencyHelper): dependency helper.
     """
     super(DependencyFileWriter, self).__init__()
     self._dependency_helper = dependency_helper
+    self._l2tdevtools_path = l2tdevtools_path
     self._project_definition = project_definition
 
 
@@ -150,6 +153,50 @@ class AppveyorYmlWriter(DependencyFileWriter):
     file_content.extend(self._FILE_FOOTER)
 
     file_content = '\n'.join(file_content)
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
+class DependenciesPyWriter(DependencyFileWriter):
+  """Dependencies.py file writer."""
+
+  PATH = os.path.join('plaso', 'dependencies.py')
+
+  def Write(self):
+    """Writes a dependencies.py file."""
+    dependencies = sorted(
+        self._dependency_helper.dependencies.values(),
+        key=lambda dependency: dependency.name.lower())
+
+    python_dependencies = []
+    for dependency in dependencies:
+      if dependency.maximum_version:
+        maximum_version = '\'{0:s}\''.format(dependency.maximum_version)
+      else:
+        maximum_version = 'None'
+
+      python_dependency = (
+          '    \'{0:s}\': (\'{1:s}\', \'{2:s}\', {3:s}, {4!s})').format(
+              dependency.name, dependency.version_property or '',
+              dependency.minimum_version or '', maximum_version,
+              not dependency.is_optional)
+
+      python_dependencies.append(python_dependency)
+
+    python_dependencies = ',\n'.join(python_dependencies)
+
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', 'dependencies.py')
+    with open(template_file, 'rb') as file_object:
+      file_data = file_object.read()
+
+    template_mappings = {'python_dependencies': python_dependencies}
+
+    template_string = string.Template(file_data)
+    file_content = template_string.substitute(template_mappings)
+
     file_content = file_content.encode('utf-8')
 
     with open(self.PATH, 'wb') as file_object:
@@ -676,6 +723,10 @@ class ToxIniWriter(DependencyFileWriter):
 
 
 if __name__ == '__main__':
+  l2tdevtools_path = os.path.abspath(__file__)
+  l2tdevtools_path = os.path.dirname(l2tdevtools_path)
+  l2tdevtools_path = os.path.dirname(l2tdevtools_path)
+
   project_file = os.getcwd()
   project_file = os.path.basename(project_file)
   project_file = '{0:s}.ini'.format(project_file)
@@ -689,21 +740,17 @@ if __name__ == '__main__':
   for writer_class in (
       AppveyorYmlWriter, RequirementsWriter, SetupCfgWriter,
       TravisBeforeInstallScriptWriter, ToxIniWriter):
-    writer = writer_class(project_definition, helper)
+    writer = writer_class(l2tdevtools_path, project_definition, helper)
     writer.Write()
 
   for writer_class in (
-      DPKGControlWriter, GIFTCOPRInstallScriptWriter,
+      DependenciesPyWriter, DPKGControlWriter, GIFTCOPRInstallScriptWriter,
       GIFTPPAInstallScriptWriter):
     if not os.path.exists(writer_class.PATH):
       continue
 
-    writer = writer_class(project_definition, helper)
+    writer = writer_class(l2tdevtools_path, project_definition, helper)
     writer.Write()
-
-  l2tdevtools_path = os.path.abspath(__file__)
-  l2tdevtools_path = os.path.dirname(l2tdevtools_path)
-  l2tdevtools_path = os.path.dirname(l2tdevtools_path)
 
   path = os.path.join(l2tdevtools_path, 'l2tdevtools', 'dependencies.py')
   file_data = []
