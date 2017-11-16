@@ -13,7 +13,7 @@ from l2tdevtools.helpers import cli
 class PylintHelper(cli.CLIHelper):
   """Pylint helper."""
 
-  MINIMUM_VERSION = '1.6.5'
+  MINIMUM_VERSION = '1.7.0'
 
   _MINIMUM_VERSION_TUPLE = MINIMUM_VERSION.split('.')
 
@@ -40,9 +40,8 @@ class PylintHelper(cli.CLIHelper):
         failed_filenames.append(filename)
 
     if failed_filenames:
-      print('\nFiles with linter errors:')
-      for failed_filename in filenames:
-        print('\t{0:s}'.format(failed_filename))
+      print('\nFiles with linter errors:\n{0:s}\n'.format(
+          '\n'.join(failed_filenames)))
       return False
 
     return True
