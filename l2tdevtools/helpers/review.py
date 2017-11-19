@@ -50,6 +50,7 @@ class ReviewHelper(object):
     self._active_branch = None
     self._all_files = all_files
     self._codereview_helper = None
+    self._codereview_issue_number = None
     self._command = command
     self._diffbase = diffbase
     self._feature_branch = feature_branch
@@ -485,6 +486,22 @@ class ReviewHelper(object):
 
     return True
 
+  def PrepareUpdate(self):
+    """Prepares updating a review.
+
+    Returns:
+      bool: True if the preperations were successful.
+    """
+    review_file = reviewfile.ReviewFile(self._active_branch)
+    if not review_file.Exists():
+      print('Review file missing for branch: {0:s}'.format(
+          self._active_branch))  # yapf: disable
+      return False
+
+    self._codereview_issue_number = review_file.GetCodeReviewIssueNumber()
+
+    return True
+
   def PullChangesFromFork(self):
     """Pulls changes from a feature branch on a fork.
 
@@ -540,14 +557,6 @@ class ReviewHelper(object):
     Returns:
       bool: True if the update was successful.
     """
-    review_file = reviewfile.ReviewFile(self._active_branch)
-    if not review_file.Exists():
-      print('Review file missing for branch: {0:s}'.format(
-          self._active_branch))  # yapf: disable
-      return False
-
-    codereview_issue_number = review_file.GetCodeReviewIssueNumber()
-
     last_commit_message = self._git_helper.GetLastCommitMessage()
     print('Automatic generated description of the update:')
     print(last_commit_message)
@@ -567,9 +576,9 @@ class ReviewHelper(object):
       description = user_input
 
     if not self._codereview_helper.UpdateIssue(
-        codereview_issue_number, self._diffbase, description):   # yapf: disable
+        self._codereview_issue_number, self._diffbase, description):  # yapf: disable
       print('Unable to update code review: {0!s}'.format(
-          codereview_issue_number))  # yapf: disable
+          self._codereview_issue_number))  # yapf: disable
       return False
 
     return True
