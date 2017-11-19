@@ -576,9 +576,9 @@ class ReviewHelper(object):
       description = user_input
 
     if not self._codereview_helper.UpdateIssue(
-        self._codereview_issue_number, self._diffbase, description):  # yapf: disable
+        self._codereview_issue_number, self._diffbase, description):
       print('Unable to update code review: {0!s}'.format(
-          self._codereview_issue_number))  # yapf: disable
+          self._codereview_issue_number))
       return False
 
     return True
