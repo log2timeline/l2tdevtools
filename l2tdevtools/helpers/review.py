@@ -487,10 +487,10 @@ class ReviewHelper(object):
     return True
 
   def PrepareUpdate(self):
-    """Prepares updating a review.
+    """Prepares to update a review.
 
     Returns:
-      bool: True if the preperations were successful.
+      bool: True if the preparations were successful.
     """
     review_file = reviewfile.ReviewFile(self._active_branch)
     if not review_file.Exists():
