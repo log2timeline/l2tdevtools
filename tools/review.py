@@ -210,6 +210,10 @@ def Main():
     if not review_helper.PullChangesFromFork():
       return False
 
+  if options.command == 'update':
+    if not review_helper.PrepareUpdate():
+      return False
+
   if not review_helper.Lint():
     return False
 
