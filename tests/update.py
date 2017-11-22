@@ -15,7 +15,7 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
   _DOWNLOAD_URL = 'https://github.com/ForensicArtifacts/artifacts/releases'
 
   _PROJECT_NAME = 'artifacts'
-  _PROJECT_VERSION = '20170909'
+  _PROJECT_VERSION = '20171107'
 
   def testGetPackageDownloadURLs(self):
     """Tests the GetPackageDownloadURLs function."""
@@ -35,7 +35,7 @@ class DependencyUpdaterTest(unittest.TestCase):
   """Tests for the dependency updater class."""
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20170723'
+  _PROJECT_VERSION = '20171022'
 
   def testGetPackageFilenamesAndVersions(self):
     """Tests the GetPackageFilenamesAndVersions function."""
