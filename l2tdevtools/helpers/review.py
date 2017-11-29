@@ -399,7 +399,7 @@ class ReviewHelper(object):
     commit_message = (
         'Changes have been merged with master branch. '
         'To close the review and clean up the feature branch you can run: '
-        'python ./utils/review.py close {0:s}'
+        'review.py close {0:s}'
     ).format(self._fork_feature_branch)
     self._codereview_helper.AddMergeMessage(
         codereview_issue_number, commit_message)
