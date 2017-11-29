@@ -343,40 +343,44 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
       '#!/usr/bin/env bash',
       'set -e',
       '',
-      '# Dependencies for running Plaso, alphabetized, one per line.',
+      ('# Dependencies for running {project_name:s}, alphabetized, one per '
+       'line.'),
       ('# This should not include packages only required for testing or '
        'development.')]
 
   _ADDITIONAL_DEPENDENCIES = [
       '',
-      '# Additional dependencies for running Plaso tests, alphabetized,',
+      ('# Additional dependencies for running {project_name:s} tests, '
+       'alphabetized,'),
       '# one per line.',
       'TEST_DEPENDENCIES="python-mock";',
       '',
-      '# Additional dependencies for doing Plaso development, alphabetized,',
+      ('# Additional dependencies for doing {project_name:s} development, '
+       'alphabetized,'),
       '# one per line.',
       'DEVELOPMENT_DEPENDENCIES="python-sphinx',
       '                          pylint";',
       '',
-      '# Additional dependencies for doing Plaso debugging, alphabetized,',
+      ('# Additional dependencies for doing {project_name:s} debugging, '
+       'alphabetized,'),
       '# one per line.']
 
   _FILE_FOOTER = [
       '',
       'sudo dnf install dnf-plugins-core',
       'sudo dnf copr enable @gift/dev',
-      'sudo dnf install -y ${PYTHON2_DEPENDENCIES}',
+      'sudo dnf install -y ${{PYTHON2_DEPENDENCIES}}',
       '',
       'if [[ "$*" =~ "include-debug" ]]; then',
-      '    sudo dnf install -y ${DEBUG_DEPENDENCIES}',
+      '    sudo dnf install -y ${{DEBUG_DEPENDENCIES}}',
       'fi',
       '',
       'if [[ "$*" =~ "include-development" ]]; then',
-      '    sudo dnf install -y ${DEVELOPMENT_DEPENDENCIES}',
+      '    sudo dnf install -y ${{DEVELOPMENT_DEPENDENCIES}}',
       'fi',
       '',
       'if [[ "$*" =~ "include-test" ]]; then',
-      '    sudo dnf install -y ${TEST_DEPENDENCIES}',
+      '    sudo dnf install -y ${{TEST_DEPENDENCIES}}',
       'fi',
       '']
 
@@ -416,7 +420,11 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
 
     file_content.extend(self._FILE_FOOTER)
 
+    kwargs = {'project_name': self._project_definition.name}
+
     file_content = '\n'.join(file_content)
+    file_content = file_content.format(**kwargs)
+
     file_content = file_content.encode('utf-8')
 
     with open(self.PATH, 'wb') as file_object:
@@ -432,40 +440,52 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
       '#!/usr/bin/env bash',
       'set -e',
       '',
-      '# Dependencies for running Plaso, alphabetized, one per line.',
+      ('# Dependencies for running {project_name:s}, alphabetized, one per '
+       'line.'),
       ('# This should not include packages only required for testing or '
        'development.')]
 
   _ADDITIONAL_DEPENDENCIES = [
       '',
-      '# Additional dependencies for running Plaso tests, alphabetized,',
+      ('# Additional dependencies for running {project_name:s} tests, '
+       'alphabetized,'),
       '# one per line.',
       'TEST_DEPENDENCIES="python-mock";',
       '',
-      '# Additional dependencies for doing Plaso development, alphabetized,',
+      ('# Additional dependencies for doing {project_name:s} development, '
+       'alphabetized,'),
       '# one per line.',
       'DEVELOPMENT_DEPENDENCIES="python-sphinx',
-      '                          pylint";',
+      '                          pylint";']
+
+  _DEBUG_DEPENDENCIES = [
       '',
-      '# Additional dependencies for doing Plaso debugging, alphabetized,',
+      ('# Additional dependencies for doing {project_name:s} debugging, '
+       'alphabetized,'),
       '# one per line.']
 
   _FILE_FOOTER = [
       '',
       'sudo add-apt-repository ppa:gift/dev -y',
       'sudo apt-get update -q',
-      'sudo apt-get install -y ${PYTHON2_DEPENDENCIES}',
+      'sudo apt-get install -y ${{PYTHON2_DEPENDENCIES}}']
+
+  _FILE_FOOTER_DEBUG_DEPENDENCIES = [
       '',
       'if [[ "$*" =~ "include-debug" ]]; then',
-      '    sudo apt-get install -y ${DEBUG_DEPENDENCIES}',
-      'fi',
+      '    sudo apt-get install -y ${{DEBUG_DEPENDENCIES}}',
+      'fi']
+
+  _FILE_FOOTER_DEVELOPMENT_DEPENDENCIES = [
       '',
       'if [[ "$*" =~ "include-development" ]]; then',
-      '    sudo apt-get install -y ${DEVELOPMENT_DEPENDENCIES}',
-      'fi',
+      '    sudo apt-get install -y ${{DEVELOPMENT_DEPENDENCIES}}',
+      'fi']
+
+  _FILE_FOOTER_TEST_DEPENDENCIES = [
       '',
       'if [[ "$*" =~ "include-test" ]]; then',
-      '    sudo apt-get install -y ${TEST_DEPENDENCIES}',
+      '    sudo apt-get install -y ${{TEST_DEPENDENCIES}}',
       'fi',
       '']
 
@@ -492,20 +512,38 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
 
     file_content.extend(self._ADDITIONAL_DEPENDENCIES)
 
+    debug_dependencies = []
     for index, dependency in enumerate(libyal_dependencies):
-      if index == 0:
-        file_content.append('DEBUG_DEPENDENCIES="{0:s}-dbg'.format(dependency))
-      else:
-        file_content.append('                    {0:s}-dbg'.format(dependency))
+      debug_dependencies.append('{0:s}-dbg'.format(dependency))
+      debug_dependencies.append('{0:s}-python-dbg'.format(dependency))
 
-      file_content.append('                    {0:s}-python-dbg'.format(
-          dependency))
+    if self._project_definition.name == 'plaso':
+      debug_dependencies.append('python-guppy')
 
-    file_content.append('                    python-guppy";')
+    if debug_dependencies:
+      file_content.extend(self._DEBUG_DEPENDENCIES)
+
+      for index, dependency in enumerate(debug_dependencies):
+        if index == 0:
+          file_content.append('DEBUG_DEPENDENCIES="{0:s}'.format(dependency))
+        elif index + 1 == len(debug_dependencies):
+          file_content.append('                    {0:s}";'.format(dependency))
+        else:
+          file_content.append('                    {0:s}'.format(dependency))
 
     file_content.extend(self._FILE_FOOTER)
 
+    if debug_dependencies:
+      file_content.extend(self._FILE_FOOTER_DEBUG_DEPENDENCIES)
+
+    file_content.extend(self._FILE_FOOTER_DEVELOPMENT_DEPENDENCIES)
+    file_content.extend(self._FILE_FOOTER_TEST_DEPENDENCIES)
+
+    kwargs = {'project_name': self._project_definition.name}
+
     file_content = '\n'.join(file_content)
+    file_content = file_content.format(**kwargs)
+
     file_content = file_content.encode('utf-8')
 
     with open(self.PATH, 'wb') as file_object:
