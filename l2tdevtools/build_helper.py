@@ -90,7 +90,7 @@ class DPKGBuildHelper(BuildHelper):
       'autoconf',
       'automake',
       'autopoint',
-      'dh-autoreconf,',
+      'dh-autoreconf',
       'libtool',
       'gettext',
       'flex',

@@ -182,7 +182,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = 'log2timeline'
   _PROJECT_NAME = 'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = '20171125'
+  _PROJECT_VERSION = '20171203'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -229,7 +229,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
   _DOWNLOAD_URL = 'https://pypi.python.org/pypi/construct'
 
   _PROJECT_NAME = 'construct'
-  _PROJECT_VERSION = '2.8.16'
+  _PROJECT_VERSION = '2.8.17'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
