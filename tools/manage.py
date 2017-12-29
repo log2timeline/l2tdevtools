@@ -536,6 +536,8 @@ class PackagesManager(object):
         continue
 
       name, _, _ = directory_entry.rpartition('.')
+      if name.endswith('.tar'):
+        name, _, _ = name.rpartition('.')
       name, _, version = name.rpartition('-')
 
       if (name.endswith('-alpha') or
