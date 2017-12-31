@@ -20,6 +20,7 @@ import zlib
 from xml.etree import ElementTree
 
 from l2tdevtools import download_helper
+from l2tdevtools import versions
 
 
 class COPRProjectManager(object):
@@ -123,9 +124,13 @@ class COPRProjectManager(object):
       if not package_name or not package_version:
         continue
 
-      # TODO: improve version check.
-      if package_name in packages and packages[package_name] > package_version:
-        continue
+      if package_name in packages:
+        package_version_tuple = package_version.split('.')
+        version_tuple = packages[package_name].split('.')
+        compare_result = versions.CompareVersions(
+            package_version_tuple, version_tuple)
+        if compare_result < 0:
+          continue
 
       packages[package_name] = package_version
 
