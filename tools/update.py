@@ -675,6 +675,15 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the uninstall was successful.
     """
+    # Tuple of packge name suffix, machine type, Python version
+    package_info = (
+        ('.win32.msi', 'x86', None),
+        ('.win32-py2.7.msi', 'x86', 2),
+        ('.win32-py3.6.msi', 'x86', 3),
+        ('.win-amd64.msi', 'amd64', None),
+        ('.win-amd64-py2.7.msi', 'amd64', 2),
+        ('.win-amd64-py3.6.msi', 'amd64', 3))
+
     connection = wmi.WMI()
 
     query = 'SELECT PackageName FROM Win32_Product'
@@ -682,16 +691,19 @@ class DependencyUpdater(object):
       name = getattr(product, 'PackageName', '')
 
       has_known_suffix = False
-      suffix = ''
-      for suffix in (
-          '.win32.msi', '.win32-py2.7.msi', '.win32-py3.6.msi',
-          '.win-amd64.msi', '.win-amd64-py2.7.msi', '.win-amd64-py3.6.msi'):
-        has_known_suffix = name.endswith(suffix)
+      machine_type = None
+      python_version = None
+      for name_suffix, machine_type, python_version in package_info:
+        has_known_suffix = name.endswith(name_suffix)
         if has_known_suffix:
-          name = name[:-len(suffix)]
+          name = name[:-len(name_suffix)]
           break
 
       if not has_known_suffix:
+        continue
+
+      if (self._preferred_machine_type and
+          self._preferred_machine_type != machine_type):
         continue
 
       name, _, version = name.rpartition('-')
