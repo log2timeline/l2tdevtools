@@ -482,7 +482,8 @@ class DependencyUpdater(object):
       os.remove(log_file)
 
     if self._msi_targetdir:
-      parameters = ' TARGETDIR={0:s}'.format(self._msi_targetdir)
+      # Note the bounding square brackets allow targetdir to contain spaces.
+      parameters = ' TARGETDIR="[{0:s}]"'.format(self._msi_targetdir)
     else:
       parameters = ''
 
