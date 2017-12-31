@@ -706,6 +706,10 @@ class DependencyUpdater(object):
           self._preferred_machine_type != machine_type):
         continue
 
+      # TODO: improve this check to support Python 3.
+      if python_version and python_version != 2:
+        continue
+
       name, _, version = name.rpartition('-')
 
       found_package = name in package_versions
