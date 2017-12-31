@@ -677,40 +677,49 @@ class DependencyUpdater(object):
     """
     connection = wmi.WMI()
 
-    query = 'SELECT Name FROM Win32_Product'
+    query = 'SELECT PackageName FROM Win32_Product'
     for product in connection.query(query):
-      name = getattr(product, 'Name', '')
-      # Windows package names start with 'Python', 'Python 2.7 ' or 'Python 3.6.x '.
-      if name.startswith('Python '):
-        _, _, name = name.rpartition(' ')
-        if name.startswith('2.7 ') or name.startswith('3.6.'):
-          _, _, name = name.rpartition(' ')
+      name = getattr(product, 'PackageName', '')
 
-        name, _, version = name.rpartition('-')
+      has_known_suffix = False
+      suffix = ''
+      for suffix in (
+          '.win32.msi', '.win32-py2.7.msi', '.win32-py3.6.msi',
+          '.win-amd64.msi', '.win-amd64-py2.7.msi', '.win-amd64-py3.6.msi'):
+        has_known_suffix = name.endswith(suffix)
+        if has_known_suffix:
+          name = name[:-len(suffix)]
+          break
 
-        found_package = name in package_versions
+      if not has_known_suffix:
+        continue
 
-        version_tuple = version.split('.')
-        if self._force_install:
+      name, _, version = name.rpartition('-')
+
+      found_package = name in package_versions
+
+      version_tuple = version.split('.')
+      if self._force_install:
+        compare_result = -1
+      elif not found_package:
+        compare_result = 1
+      else:
+        compare_result = CompareVersions(
+            version_tuple, package_versions[name])
+        if compare_result >= 0:
+          # The latest or newer version is already installed.
+          del package_versions[name]
+
+      if not found_package and name.startswith('py'):
+        # Remove libyal Python packages using the old naming convention.
+        new_name = 'lib{0:s}-python'.format(name[2:])
+        found_package = new_name in package_versions
+        if found_package:
           compare_result = -1
-        elif not found_package:
-          compare_result = 1
-        else:
-          compare_result = versions.CompareVersions(
-              version_tuple, package_versions[name])
-          if compare_result >= 0:
-            # The latest or newer version is already installed.
-            del package_versions[name]
 
-        if not found_package and name.startswith('py'):
-          # Remove libyal Python packages using the old naming convention.
-          new_name = 'lib{0:s}-python'.format(name[2:])
-          if new_name in package_versions:
-            compare_result = -1
-
-        if found_package and compare_result < 0:
-          logging.info('Removing: {0:s} {1:s}'.format(name, version))
-          product.Uninstall()
+      if found_package and compare_result < 0:
+        logging.info('Removing: {0:s} {1:s}'.format(name, version))
+        product.Uninstall()
 
     return True
 
