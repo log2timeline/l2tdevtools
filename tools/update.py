@@ -482,8 +482,7 @@ class DependencyUpdater(object):
       os.remove(log_file)
 
     if self._msi_targetdir:
-      # Note the bounding square brackets allow targetdir to contain spaces.
-      parameters = ' TARGETDIR="[{0:s}]"'.format(self._msi_targetdir)
+      parameters = ' TARGETDIR="{0:s}"'.format(self._msi_targetdir)
     else:
       parameters = ''
 
@@ -681,10 +680,10 @@ class DependencyUpdater(object):
     query = 'SELECT Name FROM Win32_Product'
     for product in connection.query(query):
       name = getattr(product, 'Name', '')
-      # Windows package names start with 'Python' or 'Python 2.7 '.
+      # Windows package names start with 'Python', 'Python 2.7 ' or 'Python 3.6.x '.
       if name.startswith('Python '):
         _, _, name = name.rpartition(' ')
-        if name.startswith('2.7 '):
+        if name.startswith('2.7 ') or name.startswith('3.6.'):
           _, _, name = name.rpartition(' ')
 
         name, _, version = name.rpartition('-')
@@ -709,7 +708,7 @@ class DependencyUpdater(object):
           if new_name in package_versions:
             compare_result = -1
 
-        if compare_result < 0:
+        if found_package and compare_result < 0:
           logging.info('Removing: {0:s} {1:s}'.format(name, version))
           product.Uninstall()
 
