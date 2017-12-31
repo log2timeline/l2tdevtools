@@ -35,7 +35,7 @@ class DependencyUpdaterTest(unittest.TestCase):
   """Tests for the dependency updater class."""
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20171022'
+  _PROJECT_VERSION = '20171230'
 
   def testGetPackageFilenamesAndVersions(self):
     """Tests the GetPackageFilenamesAndVersions function."""
