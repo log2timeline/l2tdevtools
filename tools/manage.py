@@ -7,6 +7,8 @@ from __future__ import unicode_literals
 
 import argparse
 import csv
+import gzip
+import io
 import json
 import logging
 import os
@@ -15,7 +17,10 @@ import re
 import sys
 import zlib
 
+from xml.etree import ElementTree
+
 from l2tdevtools import download_helper
+from l2tdevtools import versions
 
 
 class COPRProjectManager(object):
@@ -27,8 +32,16 @@ class COPRProjectManager(object):
       'https://copr.fedorainfracloud.org/api_2/projects?group={name:s}&'
       'name={project:s}')
 
+  _COPR_REPO_URL = (
+      'https://copr-be.cloud.fedoraproject.org/results/%40{name:s}/'
+      '{project:s}/fedora-26-i386')
+
+  _PRIMARY_XML_XPATH = (
+      './{http://linux.duke.edu/metadata/repo}data[@type="primary"]/'
+      '{http://linux.duke.edu/metadata/repo}location')
+
   def __init__(self, name):
-    """Initializes the COPR manager.
+    """Initializes a COPR manager.
 
     Args:
       name (str): name of the group.
@@ -55,65 +68,69 @@ class COPRProjectManager(object):
     kwargs = {
         'name': self._name,
         'project': project}
-    download_url = self._COPR_URL.format(**kwargs)
+    copr_repo_url = self._COPR_REPO_URL.format(**kwargs)
 
+    download_url = '/'.join([copr_repo_url, 'repodata', 'repomd.xml'])
     page_content = self._download_helper.DownloadPageContent(download_url)
     if not page_content:
-      logging.error('Unable to retrieve project information page content.')
+      logging.error('Unable to retrieve repomd.xml.')
       return
 
-    project_information = json.loads(page_content)
-    if not project_information:
-      logging.error('Unable to retrieve project information.')
+    repomd_xml = ElementTree.fromstring(page_content)
+    xml_elements = repomd_xml.findall(self._PRIMARY_XML_XPATH)
+    if not xml_elements or not xml_elements[0].items():
+      logging.error('Primary data type missing from repomd.xml.')
       return
 
-    projects = project_information.get('projects', None)
-    if len(projects) != 1:
+    href_value_tuple = xml_elements[0].items()[0]
+    if not href_value_tuple[1]:
+      logging.error('Primary data type missing from repomd.xml.')
       return
 
-    links = projects[0].get('_links', None)
-    if not links:
-      return
-
-    builds = links.get('builds', None)
-    if not builds:
-      return
-
-    builds_href = builds.get('href', None)
-    if not builds_href:
-      return
-
-    download_url = self._COPR_BASE_URL.format(builds_href)
-
-    page_content = self._download_helper.DownloadPageContent(download_url)
+    download_url = '/'.join([copr_repo_url, href_value_tuple[1]])
+    page_content = self._download_helper.DownloadPageContent(
+        download_url, encoding=None)
     if not page_content:
-      logging.error('Unable to retrieve builds information page content.')
+      _, _, download_url = download_url.rpartition('/')
+      logging.error('Unable to retrieve primary.xml.gz.')
       return
 
-    builds_information = json.loads(page_content)
-    if not builds_information:
-      logging.error('Unable to retrieve builds information.')
-      return
+    with gzip.GzipFile(fileobj=io.BytesIO(page_content)) as file_object:
+      page_content = file_object.read()
 
-    builds = builds_information.get('builds', None)
-    if not builds:
+    primary_xml = ElementTree.fromstring(page_content)
+    # Note explicitly checking xml.Element against None because of deprecation
+    # warning.
+    if primary_xml is None:
+      logging.error('Packages missing from primary.xml.')
       return
 
     packages = {}
-    for build_information in builds:
-      build = build_information.get('build', None)
-      if not build:
+    for project_xml in primary_xml:
+      arch_xml = project_xml.find('{http://linux.duke.edu/metadata/common}arch')
+      if arch_xml is None or arch_xml.text != 'src':
         continue
 
-      package_name = build.get('package_name', None)
-      package_version = build.get('package_version', None)
+      package_name_xml = project_xml.find(
+          '{http://linux.duke.edu/metadata/common}name')
+      package_version_xml = project_xml.find(
+          '{http://linux.duke.edu/metadata/common}version')
+      if package_name_xml is None or package_version_xml is None:
+        continue
+
+      package_name = package_name_xml.text
+      package_version = package_version_xml.attrib['ver']
+
       if not package_name or not package_version:
         continue
 
-      package_version, _, _ = package_version.rpartition('-')
-      # TODO: improve version check.
-      if package_name in packages and packages[package_name] > package_version:
-        continue
+      if package_name in packages:
+        package_version_tuple = package_version.split('.')
+        version_tuple = packages[package_name].split('.')
+        compare_result = versions.CompareVersions(
+            package_version_tuple, version_tuple)
+        if compare_result < 0:
+          continue
 
       packages[package_name] = package_version
 
@@ -130,7 +147,7 @@ class GithubRepoManager(object):
       'https://github.com/log2timeline/l2tbinaries')
 
   def __init__(self):
-    """Initializes the github reposistory manager."""
+    """Initializes a github reposistory manager."""
     super(GithubRepoManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper('')
 
@@ -249,7 +266,7 @@ class LaunchpadPPAManager(object):
       '/trusty/main/source/Sources.gz')
 
   def __init__(self, name):
-    """Initializes the Launchpad PPA manager.
+    """Initializes a Launchpad PPA manager.
 
     Args:
       name (str): name of the PPA.
@@ -380,7 +397,7 @@ class PyPIManager(object):
       'XlsxWriter': 'XlsxWriter'}
 
   def __init__(self):
-    """Initializes the PyPI manager object."""
+    """Initializes a PyPI manager object."""
     super(PyPIManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper('')
 
@@ -509,7 +526,7 @@ class PackagesManager(object):
     Args:
       reference_directory (str): path of the reference directory that contains
           dpkg source packages.
-      csv_file (str): name of the CSV file.
+      csv_file (str): path of the CSV file.
 
     Returns:
       tuple: containing:
