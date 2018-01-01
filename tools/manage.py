@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
+import csv
 import json
 import logging
 import os
@@ -432,12 +433,12 @@ class PyPIManager(object):
     return packages
 
 
-class BinariesManager(object):
-  """Defines the binaries manager."""
+class PackagesManager(object):
+  """Manages packages across various repositories."""
 
   def __init__(self):
-    """Initializes the binaries manager object."""
-    super(BinariesManager, self).__init__()
+    """Initializes a packages manager."""
+    super(PackagesManager, self).__init__()
     self._copr_project_manager = COPRProjectManager('gift')
     self._github_repo_manager = GithubRepoManager()
     self._launchpad_ppa_manager = LaunchpadPPAManager('gift')
@@ -500,6 +501,57 @@ class BinariesManager(object):
       reference_packages[name] = version
 
     packages = self._copr_project_manager.GetPackages(project)
+    return self._ComparePackages(reference_packages, packages)
+
+  def CompareDirectoryWithCSV(self, reference_directory, csv_file):
+    """Compares a directory containing source packages with a CSV file.
+
+    Args:
+      reference_directory (str): path of the reference directory that contains
+          dpkg source packages.
+      csv_file (str): name of the CSV file.
+
+    Returns:
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference directory but not in the project.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference directory.
+    """
+    reference_packages = {}
+    for directory_entry in os.listdir(reference_directory):
+      # The directory contains various files and we are only interested
+      # in the source packages that use the naming convention:
+      # package-version-#.tar.gz
+      # package-version-#.zip
+      if (not directory_entry.endswith('.tar.gz') and
+          not directory_entry.endswith('.zip')):
+        continue
+
+      if (directory_entry.endswith('.debian.tar.gz') or
+          directory_entry.endswith('.orig.tar.gz') or
+          directory_entry.endswith('-1.tar.gz')):
+        continue
+
+      name, _, _ = directory_entry.rpartition('.')
+      if name.endswith('.tar'):
+        name, _, _ = name.rpartition('.')
+      name, _, version = name.rpartition('-')
+
+      if (name.endswith('-alpha') or
+          name.endswith('-beta') or
+          name.endswith('-experimental')):
+        name, _, _ = name.rpartition('-')
+
+      reference_packages[name] = version
+
+    packages = {}
+    with open(csv_file, 'r') as file_object:
+      for row in csv.DictReader(file_object):
+        packages[row['project']] = row['version']
+
     return self._ComparePackages(reference_packages, packages)
 
   def CompareDirectoryWithGithubRepo(self, reference_directory, sub_directory):
@@ -728,7 +780,7 @@ def Main():
     bool: True if successful or False if not.
   """
   actions = frozenset([
-      'copr-diff-dev', 'copr-diff-stable', 'copr-diff-testing',
+      'copr-diff-dev', 'copr-diff-stable', 'copr-diff-testing', 'csv-diff',
       'l2tbinaries-diff', 'launchpad-diff-dev', 'launchpad-diff-stable',
       'launchpad-diff-testing', 'pypi-diff'])
 
@@ -743,6 +795,11 @@ def Main():
       '--build-directory', '--build_directory', action='store',
       metavar='DIRECTORY', dest='build_directory', type=str,
       default='build', help='The location of the build directory.')
+
+  argument_parser.add_argument(
+      '--csv-file', '--csv_file', action='store', metavar='FILE',
+      dest='csv_file', type=str, default='', help=(
+          'The location of the CSV file.'))
 
   argument_parser.add_argument(
       '--machine-type', '--machine_type', action='store', metavar='TYPE',
@@ -766,7 +823,7 @@ def Main():
   # TODO: add l2tbinaries support.
   # TODO: add pypi support.
 
-  binaries_manager = BinariesManager()
+  packages_manager = PackagesManager()
 
   action_tuple = options.action.split('-')
 
@@ -777,7 +834,7 @@ def Main():
       reference_directory = options.build_directory
 
       new_packages, new_versions = (
-          binaries_manager.CompareDirectoryWithCOPRProject(
+          packages_manager.CompareDirectoryWithCOPRProject(
               reference_directory, track))
 
       diff_header = (
@@ -790,22 +847,32 @@ def Main():
       else:
         reference_track = 'dev'
 
-      new_packages, new_versions = binaries_manager.CompareCOPRProjects(
+      new_packages, new_versions = packages_manager.CompareCOPRProjects(
           reference_track, track)
 
       diff_header = (
           'Difference between COPR project: {0:s} and {1:s}'.format(
               reference_track, track))
 
+  elif action_tuple[0] == 'csv' and action_tuple[1] == 'diff':
+    reference_directory = options.build_directory
+
+    new_packages, new_versions = (
+        packages_manager.CompareDirectoryWithCSV(
+            reference_directory, options.csv_file))
+
+    diff_header = (
+        'Difference between: {0:s} and CSV'.format(reference_directory))
+
   elif action_tuple[0] == 'l2tbinaries' and action_tuple[1] == 'diff':
-    sub_directory = binaries_manager.GetMachineTypeSubDirectory(
+    sub_directory = packages_manager.GetMachineTypeSubDirectory(
         preferred_machine_type=options.machine_type)
 
     reference_directory = options.build_directory
 
     # TODO: compare from l2tbinaries git repo.
     new_packages, new_versions = (
-        binaries_manager.CompareDirectoryWithGithubRepo(
+        packages_manager.CompareDirectoryWithGithubRepo(
             reference_directory, sub_directory))
 
     diff_header = (
@@ -818,7 +885,7 @@ def Main():
       reference_directory = options.build_directory
 
       new_packages, new_versions = (
-          binaries_manager.CompareDirectoryWithLaunchpadPPATrack(
+          packages_manager.CompareDirectoryWithLaunchpadPPATrack(
               reference_directory, track))
 
       diff_header = (
@@ -831,7 +898,7 @@ def Main():
       else:
         reference_track = 'dev'
 
-      new_packages, new_versions = binaries_manager.CompareLaunchpadPPATracks(
+      new_packages, new_versions = packages_manager.CompareLaunchpadPPATracks(
           reference_track, track)
 
       diff_header = (
@@ -844,7 +911,7 @@ def Main():
     reference_directory = options.build_directory
 
     new_packages, new_versions = (
-        binaries_manager.CompareDirectoryWithPyPI(reference_directory))
+        packages_manager.CompareDirectoryWithPyPI(reference_directory))
 
     diff_header = (
         'Difference between: {0:s} and release'.format(reference_directory))
