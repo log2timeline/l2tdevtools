@@ -40,7 +40,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
 
   PATH = os.path.join('appveyor.yml')
 
-  _VERSION_PYWIN32 = '220'
+  _VERSION_PYWIN32 = '221'
   _VERSION_WMI = '1.4.9'
   _VERSION_SQLITE = '3180000'
 
