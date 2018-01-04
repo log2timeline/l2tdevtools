@@ -61,8 +61,8 @@ def Main():
 
   help_message = 'Enable code style checking with yapf.'
   argument_parser.add_argument(
-      '--enable-yapf','--enable_yapf', dest='enable_yapf', action='store_true',
-          default=False, help=help_message)
+      '--enable-yapf', '--enable_yapf', dest='enable_yapf', action='store_true',
+      default=False, help=help_message)
 
   commands_parser = argument_parser.add_subparsers(dest='command')
 

@@ -660,6 +660,7 @@ class ReviewHelper(object):
     else:
       description = user_input
 
+    # yapf: disable
     if not self._codereview_helper.UpdateIssue(
         self._codereview_issue_number, self._diffbase, description):
       print('Unable to update code review: {0!s}'.format(
@@ -667,6 +668,7 @@ class ReviewHelper(object):
       return False
 
     return True
+    # yapf: enable
 
   def UpdateAuthors(self):
     """Updates the authors.
