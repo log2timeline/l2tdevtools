@@ -348,7 +348,7 @@ def Main():
 
   if failed_builds:
     print('')
-    print('Failed buiding:')
+    print('Failed building:')
     for failed_build in failed_builds:
       print('\t{0:s}'.format(failed_build))
 
