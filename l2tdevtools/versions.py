@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Fuctions to handle package versions."""
+"""Functions to handle package versions."""
 
 
 def CompareVersions(first_version_list, second_version_list):

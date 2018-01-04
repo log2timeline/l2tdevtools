@@ -138,7 +138,7 @@ class COPRProjectManager(object):
 
 
 class GithubRepoManager(object):
-  """Defines a github reposistory manager."""
+  """Defines a github repository manager."""
 
   _GITHUB_REPO_API_URL = (
       'https://api.github.com/repos/log2timeline/l2tbinaries')
@@ -147,7 +147,7 @@ class GithubRepoManager(object):
       'https://github.com/log2timeline/l2tbinaries')
 
   def __init__(self):
-    """Initializes a github reposistory manager."""
+    """Initializes a github repository manager."""
     super(GithubRepoManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper('')
 
