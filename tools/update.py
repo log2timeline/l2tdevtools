@@ -720,7 +720,7 @@ class DependencyUpdater(object):
       elif not found_package:
         compare_result = 1
       else:
-        compare_result = CompareVersions(
+        compare_result = versions.CompareVersions(
             version_tuple, package_versions[name])
         if compare_result >= 0:
           # The latest or newer version is already installed.
