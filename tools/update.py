@@ -482,7 +482,7 @@ class DependencyUpdater(object):
       os.remove(log_file)
 
     if self._msi_targetdir:
-      parameters = ' TARGETDIR={0:s}'.format(self._msi_targetdir)
+      parameters = ' TARGETDIR="{0:s}"'.format(self._msi_targetdir)
     else:
       parameters = ''
 
@@ -675,42 +675,67 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the uninstall was successful.
     """
+    # Tuple of packge name suffix, machine type, Python version
+    package_info = (
+        ('.win32.msi', 'x86', None),
+        ('.win32-py2.7.msi', 'x86', 2),
+        ('.win32-py3.6.msi', 'x86', 3),
+        ('.win-amd64.msi', 'amd64', None),
+        ('.win-amd64-py2.7.msi', 'amd64', 2),
+        ('.win-amd64-py3.6.msi', 'amd64', 3))
+
     connection = wmi.WMI()
 
-    query = 'SELECT Name FROM Win32_Product'
+    query = 'SELECT PackageName FROM Win32_Product'
     for product in connection.query(query):
-      name = getattr(product, 'Name', '')
-      # Windows package names start with 'Python' or 'Python 2.7 '.
-      if name.startswith('Python '):
-        _, _, name = name.rpartition(' ')
-        if name.startswith('2.7 '):
-          _, _, name = name.rpartition(' ')
+      name = getattr(product, 'PackageName', '')
 
-        name, _, version = name.rpartition('-')
+      has_known_suffix = False
+      machine_type = None
+      python_version = None
+      for name_suffix, machine_type, python_version in package_info:
+        has_known_suffix = name.endswith(name_suffix)
+        if has_known_suffix:
+          name = name[:-len(name_suffix)]
+          break
 
-        found_package = name in package_versions
+      if not has_known_suffix:
+        continue
 
-        version_tuple = version.split('.')
-        if self._force_install:
+      if (self._preferred_machine_type and
+          self._preferred_machine_type != machine_type):
+        continue
+
+      # TODO: improve this check to support Python 3.
+      if python_version and python_version != 2:
+        continue
+
+      name, _, version = name.rpartition('-')
+
+      found_package = name in package_versions
+
+      version_tuple = version.split('.')
+      if self._force_install:
+        compare_result = -1
+      elif not found_package:
+        compare_result = 1
+      else:
+        compare_result = versions.CompareVersions(
+            version_tuple, package_versions[name])
+        if compare_result >= 0:
+          # The latest or newer version is already installed.
+          del package_versions[name]
+
+      if not found_package and name.startswith('py'):
+        # Remove libyal Python packages using the old naming convention.
+        new_name = 'lib{0:s}-python'.format(name[2:])
+        found_package = new_name in package_versions
+        if found_package:
           compare_result = -1
-        elif not found_package:
-          compare_result = 1
-        else:
-          compare_result = versions.CompareVersions(
-              version_tuple, package_versions[name])
-          if compare_result >= 0:
-            # The latest or newer version is already installed.
-            del package_versions[name]
 
-        if not found_package and name.startswith('py'):
-          # Remove libyal Python packages using the old naming convention.
-          new_name = 'lib{0:s}-python'.format(name[2:])
-          if new_name in package_versions:
-            compare_result = -1
-
-        if compare_result < 0:
-          logging.info('Removing: {0:s} {1:s}'.format(name, version))
-          product.Uninstall()
+      if found_package and compare_result < 0:
+        logging.info('Removing: {0:s} {1:s}'.format(name, version))
+        product.Uninstall()
 
     return True
 
