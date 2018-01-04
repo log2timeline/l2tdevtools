@@ -194,7 +194,7 @@ class SourcePackageHelper(SourceHelper):
         directory_name, _, _ = filename.partition('/')
         if not directory_name or directory_name.startswith('..'):
           logging.error(
-              'Unsuppored directory name in tar file: {0:s}'.format(
+              'Unsupported directory name in tar file: {0:s}'.format(
                   source_filename))
           return
         if os.path.exists(directory_name):
@@ -238,7 +238,7 @@ class SourcePackageHelper(SourceHelper):
         directory_name, _, _ = filename.partition('/')
         if not directory_name or directory_name.startswith('..'):
           logging.error(
-              'Unsuppored directory name in zip file: {0:s}'.format(
+              'Unsupported directory name in zip file: {0:s}'.format(
                   source_filename))
           return
         if os.path.exists(directory_name):
