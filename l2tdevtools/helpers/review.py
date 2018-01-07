@@ -81,7 +81,8 @@ class ReviewHelper(object):
       bool: True if the state of the local git repository is sane.
     """
     if self._command in (
-        'close', 'create', 'lint', 'lint-test', 'lint_test', 'update'):
+        'close', 'create', 'create-pr', 'create_pr', 'lint', 'lint-test',
+        'lint_test', 'update'):
       if not self._git_helper.CheckHasProjectUpstream():
         print('{0:s} aborted - missing project upstream.'.format(
             self._command.title()))
@@ -104,7 +105,7 @@ class ReviewHelper(object):
         return False
 
     self._active_branch = self._git_helper.GetActiveBranch()
-    if self._command in ('create', 'update'):
+    if self._command in ('create', 'create-pr', 'create_pr', 'update'):
       if self._active_branch == 'master':
         print('{0:s} aborted - active branch is master.'.format(
             self._command.title()))
@@ -137,7 +138,7 @@ class ReviewHelper(object):
             'upstream/master.').format(self._command.title()))
         return False
 
-    elif self._command in ('create', 'update'):
+    elif self._command in ('create', 'create-pr', 'create_pr', 'update'):
       if not self._git_helper.CheckSynchronizedWithUpstream():
         if not self._git_helper.SynchronizeWithUpstream():
           print((
@@ -382,7 +383,8 @@ class ReviewHelper(object):
       return True
 
     if self._command not in (
-        'create', 'merge', 'lint', 'lint-test', 'lint_test', 'update'):
+        'create', 'create-pr', 'create_pr', 'merge', 'lint', 'lint-test',
+        'lint_test', 'update'):
       return True
 
     pylint_helper = pylint.PylintHelper()
@@ -586,7 +588,8 @@ class ReviewHelper(object):
       return True
 
     if self._command not in (
-        'create', 'lint-test', 'lint_test', 'merge', 'test', 'update'):
+        'create', 'create-pr', 'create_pr', 'lint-test', 'lint_test', 'merge',
+        'test', 'update'):
       return True
 
     # TODO: determine why this alters the behavior of argparse.
