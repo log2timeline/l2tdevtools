@@ -22,8 +22,7 @@ class GitHubHelperTest(unittest.TestCase):
         organization='test', project='test_project')
     helper._url_lib_helper = test_lib.TestURLLibHelper()
 
-    result = helper.CreatePullRequest(
-        'TOKEN', 1, 'origin', 'description')
+    result = helper.CreatePullRequest('TOKEN', 'origin', 'title', 'body')
     self.assertTrue(result)
 
   def testGetForkGitRepoUrl(self):
