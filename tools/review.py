@@ -9,7 +9,7 @@ import argparse
 import os
 import sys
 
-from l2tdevtools.helpers.review import ReviewHelper
+from l2tdevtools.helpers import review
 
 
 def Main():
@@ -69,6 +69,8 @@ def Main():
       help='name of the corresponding feature branch.')
 
   commands_parser.add_parser('create')
+  commands_parser.add_parser('create-pr')
+  commands_parser.add_parser('create_pr')
 
   merge_command_parser = commands_parser.add_parser('merge')
 
@@ -183,7 +185,7 @@ def Main():
         options.command.title()))  # yapf: disable
     return False
 
-  review_helper = ReviewHelper(
+  review_helper = review.ReviewHelper(
       options.command,
       options.project_path,
       github_origin,
@@ -223,6 +225,9 @@ def Main():
   result = False
   if options.command == 'create':
     result = review_helper.Create()
+
+  elif options.command in ('create-pr', 'create_pr'):
+    result = review_helper.CreatePullRequest()
 
   elif options.command == 'close':
     result = review_helper.Close()

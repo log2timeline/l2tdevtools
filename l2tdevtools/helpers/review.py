@@ -22,7 +22,7 @@ from l2tdevtools.lib import reviewfile
 
 
 class ReviewHelper(object):
-  """Defines review helper functions."""
+  """Helper for conducting code reviews."""
 
   _PROJECT_NAME_PREFIX_REGEX = re.compile(
       r'\[({0:s})\] '.format(
@@ -81,7 +81,8 @@ class ReviewHelper(object):
       bool: True if the state of the local git repository is sane.
     """
     if self._command in (
-        'close', 'create', 'lint', 'lint-test', 'lint_test', 'update'):
+        'close', 'create', 'create-pr', 'create_pr', 'lint', 'lint-test',
+        'lint_test', 'update'):
       if not self._git_helper.CheckHasProjectUpstream():
         print('{0:s} aborted - missing project upstream.'.format(
             self._command.title()))
@@ -104,7 +105,7 @@ class ReviewHelper(object):
         return False
 
     self._active_branch = self._git_helper.GetActiveBranch()
-    if self._command in ('create', 'update'):
+    if self._command in ('create', 'create-pr', 'create_pr', 'update'):
       if self._active_branch == 'master':
         print('{0:s} aborted - active branch is master.'.format(
             self._command.title()))
@@ -137,7 +138,7 @@ class ReviewHelper(object):
             'upstream/master.').format(self._command.title()))
         return False
 
-    elif self._command in ('create', 'update'):
+    elif self._command in ('create', 'create-pr', 'create_pr', 'update'):
       if not self._git_helper.CheckSynchronizedWithUpstream():
         if not self._git_helper.SynchronizeWithUpstream():
           print((
@@ -264,14 +265,68 @@ class ReviewHelper(object):
 
     review_file.Create(codereview_issue_number)
 
-    create_github_origin = '{0:s}:{1:s}'.format(
-        git_origin, self._active_branch)
+    title = '{0!s}: {1:s}'.format(codereview_issue_number, description)
+    body = (
+        '[Code review: {0!s}: {1:s}]'
+        '(https://codereview.appspot.com/{0!s}/)').format(
+            codereview_issue_number, description)
+
+    create_github_origin = '{0:s}:{1:s}'.format(git_origin, self._active_branch)
     if not self._github_helper.CreatePullRequest(
-        github_access_token, codereview_issue_number, create_github_origin,
-        description):
+        github_access_token, create_github_origin, title, body):
       print('Unable to create pull request.')
 
     # yapf: enable
+    return True
+
+  def CreatePullRequest(self):
+    """Creates a github pull request.
+
+    Returns:
+      bool: True if the create was successful.
+    """
+    git_origin = self._git_helper.GetRemoteOrigin()
+    if not git_origin.startswith('https://github.com/'):
+      print('{0:s} aborted - unsupported git remote origin: {1:s}'.format(
+          self._command.title(), git_origin))
+      print('Make sure the git remote origin is hosted on github.com')
+      return False
+
+    git_origin, _, _ = git_origin[len('https://github.com/'):].rpartition('/')
+
+    netrc_file = netrcfile.NetRCFile()
+    github_access_token = netrc_file.GetGitHubAccessToken()
+    if not github_access_token:
+      print('{0:s} aborted - unable to determine github access token.'.format(
+          self._command.title()))
+      print('Make sure .netrc is configured with a github access token.')
+      return False
+
+    last_commit_message = self._git_helper.GetLastCommitMessage()
+    print('Automatic generated description of code review:')
+    print(last_commit_message)
+    print('')
+
+    if self._no_confirm:
+      user_input = None
+    else:
+      print('Enter a description for the code review or hit enter to use the')
+      print('automatic generated one:')
+      user_input = sys.stdin.readline()
+      user_input = user_input.strip()
+
+    if not user_input:
+      title = last_commit_message
+      body = last_commit_message
+    else:
+      title = user_input
+      body = user_input
+
+    create_github_origin = '{0:s}:{1:s}'.format(git_origin, self._active_branch)
+    if not self._github_helper.CreatePullRequest(
+        github_access_token, create_github_origin, title, body):
+      print('Unable to create pull request.')
+
     return True
 
   def InitializeHelpers(self):
@@ -328,7 +383,8 @@ class ReviewHelper(object):
       return True
 
     if self._command not in (
-        'create', 'merge', 'lint', 'lint-test', 'lint_test', 'update'):
+        'create', 'create-pr', 'create_pr', 'merge', 'lint', 'lint-test',
+        'lint_test', 'update'):
       return True
 
     pylint_helper = pylint.PylintHelper()
@@ -532,7 +588,8 @@ class ReviewHelper(object):
       return True
 
     if self._command not in (
-        'create', 'lint-test', 'lint_test', 'merge', 'test', 'update'):
+        'create', 'create-pr', 'create_pr', 'lint-test', 'lint_test', 'merge',
+        'test', 'update'):
       return True
 
     # TODO: determine why this alters the behavior of argparse.
