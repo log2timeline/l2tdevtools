@@ -626,7 +626,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '#',
       '# Script to set up Travis-CI test VM.',
       '',
-      ('COVERALL_DEPENDENCIES="python-coverage python-coveralls '
+      ('COVERALLS_DEPENDENCIES="python-coverage python-coveralls '
        'python-docopt";'),
       '']
 
@@ -655,7 +655,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\t# Only install the Python 2 dependencies.',
       ('\t# Also see: https://docs.travis-ci.com/user/languages/python/'
        '#Travis-CI-Uses-Isolated-virtualenvs'),
-      ('\tsudo apt-get install -y ${COVERALL_DEPENDENCIES} '
+      ('\tsudo apt-get install -y ${COVERALLS_DEPENDENCIES} '
        '${PYTHON2_DEPENDENCIES} ${PYTHON2_TEST_DEPENDENCIES};'),
       'fi',
       '']
