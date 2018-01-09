@@ -120,7 +120,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
     file_content.extend(self._FILE_HEADER)
 
     dependencies = self._dependency_helper.GetL2TBinaries()
-    dependencies.extend(['funcsigs', 'mock', 'pbr'])
+    dependencies.extend(['funcsigs', 'mock', 'pbr', 'yapf'])
 
     if 'six' not in dependencies:
       dependencies.append('six')
@@ -130,7 +130,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
 
     file_content.extend(self._L2TDEVTOOLS)
 
-    dependencies = ' '.join(dependencies)
+    dependencies = ' '.join(sorted(dependencies))
     l2tdevtools_update = self._L2TDEVTOOLS_UPDATE.format(dependencies)
     file_content.append(l2tdevtools_update)
 
@@ -550,6 +550,8 @@ class RequirementsWriter(DependencyFileWriter):
     for dependency in dependencies:
       file_content.append('{0:s}'.format(dependency))
 
+    file_content.append('')
+
     file_content = '\n'.join(file_content)
     file_content = file_content.encode('utf-8')
 
@@ -624,7 +626,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '#',
       '# Script to set up Travis-CI test VM.',
       '',
-      ('COVERALL_DEPENDENCIES="python-coverage python-coveralls '
+      ('COVERALLS_DEPENDENCIES="python-coverage python-coveralls '
        'python-docopt";'),
       '']
 
@@ -653,7 +655,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\t# Only install the Python 2 dependencies.',
       ('\t# Also see: https://docs.travis-ci.com/user/languages/python/'
        '#Travis-CI-Uses-Isolated-virtualenvs'),
-      ('\tsudo apt-get install -y ${COVERALL_DEPENDENCIES} '
+      ('\tsudo apt-get install -y ${COVERALLS_DEPENDENCIES} '
        '${PYTHON2_DEPENDENCIES} ${PYTHON2_TEST_DEPENDENCIES};'),
       'fi',
       '']
@@ -670,12 +672,13 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
 
     file_content.append('')
 
-    if 'six' in dependencies:
-      file_content.append(
-          'L2TBINARIES_TEST_DEPENDENCIES="funcsigs mock pbr";')
-    else:
-      file_content.append(
-          'L2TBINARIES_TEST_DEPENDENCIES="funcsigs mock pbr six";')
+    test_dependencies = ['funcsigs', 'mock', 'pbr', 'yapf']
+    if 'six' not in dependencies:
+      test_dependencies.append('six')
+
+    test_dependencies = ' '.join(sorted(test_dependencies))
+    file_content.append('L2TBINARIES_TEST_DEPENDENCIES="{0:s}";'.format(
+        test_dependencies))
 
     file_content.append('')
 
@@ -686,7 +689,11 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
         python2_dependencies))
 
     file_content.append('')
-    file_content.append('PYTHON2_TEST_DEPENDENCIES="python-mock python-tox";')
+
+    test_dependencies = ['python-mock', 'python-tox', 'python-yapf']
+    test_dependencies = ' '.join(sorted(test_dependencies))
+    file_content.append('PYTHON2_TEST_DEPENDENCIES="{0:s}";'.format(
+        test_dependencies))
 
     file_content.extend(self._FILE_FOOTER)
 
@@ -711,8 +718,8 @@ class ToxIniWriter(DependencyFileWriter):
       'setenv =',
       '    PYTHONPATH = {{toxinidir}}',
       'deps =',
-      '    coverage',
       '    mock',
+      '    yapf',
       '    pytest',
       '    -rrequirements.txt',
       'commands =',
@@ -725,6 +732,7 @@ class ToxIniWriter(DependencyFileWriter):
       'deps =',
       '    coverage',
       '    mock',
+      '    yapf',
       '    pytest',
       '    -rrequirements.txt',
       'commands =',
