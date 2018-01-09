@@ -25,26 +25,19 @@ class GitHubHelper(object):
     self._project = project
     self._url_lib_helper = url_lib.URLLibHelper()
 
-  def CreatePullRequest(
-      self, access_token, codereview_issue_number, origin, description):
+  def CreatePullRequest(self, access_token, origin, title, body):
     """Creates a pull request.
 
     Args:
       access_token (str): github access token.
-      codereview_issue_number (int|str): codereview issue number.
       origin (str): origin of the pull request, formatted as:
           "username:feature".
-      description (str): description.
+      title (str): title of the pull request.
+      body (str): body of the pull request.
 
     Returns:
       bool: True if the pull request was created.
     """
-    title = '{0!s}: {1:s}'.format(codereview_issue_number, description)
-    body = (
-        '[Code review: {0!s}: {1:s}]'
-        '(https://codereview.appspot.com/{0!s}/)').format(
-            codereview_issue_number, description)
-
     post_data = (
         '{{\n'
         '  "title": "{0:s}",\n'
@@ -62,6 +55,8 @@ class GitHubHelper(object):
       self._url_lib_helper.Request(github_url, post_data=post_data)
 
     except errors.ConnectivityError as exception:
+      # Handle existing PR HTTP status code 422.
+      # Also see: https://github.com/log2timeline/l2tdevtools/issues/205
       logging.warning('{0!s}'.format(exception))
       return False
 
