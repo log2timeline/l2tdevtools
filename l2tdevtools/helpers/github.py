@@ -73,16 +73,6 @@ class GitHubHelper(object):
     """
     return 'https://github.com/{0:s}/{1:s}.git'.format(username, self._project)
 
-  def SetReviewer(self):
-    """Queries a github user.
-
-    Args:
-      username (str): github user name.
-
-    Returns:
-      dict[str,object]: JSON response or None.
-    """
-
   def QueryUser(self, username):
     """Queries a github user.
 
