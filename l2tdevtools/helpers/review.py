@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 from l2tdevtools.helpers import github
-from l2tdevtools.helpers import project
+from l2tdevtools.helpers import projects
 from l2tdevtools.helpers import pylint
 from l2tdevtools.helpers import readthedocs
 from l2tdevtools.helpers import sphinxapi
@@ -26,7 +26,7 @@ class ReviewHelper(object):
 
   _PROJECT_NAME_PREFIX_REGEX = re.compile(
       r'\[({0:s})\] '.format(
-          '|'.join(project.ProjectHelper.SUPPORTED_PROJECTS)))
+          '|'.join(projects.ProjectsHelper.SUPPORTED_PROJECTS)))
 
   def __init__(
       self, command, project_path, github_origin, feature_branch, diffbase,
@@ -64,7 +64,7 @@ class ReviewHelper(object):
     self._merge_description = None
     self._no_browser = no_browser
     self._no_confirm = no_confirm
-    self._project_helper = None
+    self._projects_helper = None
     self._project_name = None
     self._project_path = project_path
     self._sphinxapidoc_helper = None
@@ -337,9 +337,9 @@ class ReviewHelper(object):
     """
     project_path = os.path.abspath(self._project_path)
 
-    self._project_helper = project.ProjectHelper(project_path)
+    self._projects_helper = projects.ProjectsHelper(project_path)
 
-    self._project_name = self._project_helper.project_name
+    self._project_name = self._projects_helper.project_name
     if not self._project_name:
       print('{0:s} aborted - unable to determine project name.'.format(
           self._command.title()))  # yapf: disable
@@ -424,12 +424,12 @@ class ReviewHelper(object):
     Returns:
       bool: True if the merge was successful.
     """
-    if not self._project_helper.UpdateVersionFile():
+    if not self._projects_helper.UpdateVersionFile():
       print('Unable to update version file.')
       self._git_helper.DropUncommittedChanges()
       return False
 
-    if not self._project_helper.UpdateDpkgChangelogFile():
+    if not self._projects_helper.UpdateDpkgChangelogFile():
       print('Unable to update dpkg changelog file.')
       self._git_helper.DropUncommittedChanges()
       return False
@@ -649,7 +649,7 @@ class ReviewHelper(object):
     if self._project_name == 'l2tdocs':
       return True
 
-    if not self._project_helper.UpdateAuthorsFile():
+    if not self._projects_helper.UpdateAuthorsFile():
       print('Unable to update authors file.')
       return False
 
@@ -664,11 +664,11 @@ class ReviewHelper(object):
     if self._project_name == 'l2tdocs':
       return True
 
-    if not self._project_helper.UpdateVersionFile():
+    if not self._projects_helper.UpdateVersionFile():
       print('Unable to update version file.')
       return False
 
-    if not self._project_helper.UpdateDpkgChangelogFile():
+    if not self._projects_helper.UpdateDpkgChangelogFile():
       print('Unable to update dpkg changelog file.')
       return False
 

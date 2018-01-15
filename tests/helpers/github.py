@@ -35,6 +35,8 @@ class GitHubHelperTest(unittest.TestCase):
     url = helper.GetForkGitRepoUrl('test_user')
     self.assertEqual(url, expected_url)
 
+  # TODO: add tests for SetReviewer.
+
   def testQueryUser(self):
     """Tests the QueryUser function."""
     helper = github.GitHubHelper(
