@@ -5,12 +5,13 @@ from __future__ import unicode_literals
 
 import logging
 import os
+import random
 import time
 
 from l2tdevtools.helpers import cli
 
 
-class ProjectHelper(cli.CLIHelper):
+class ProjectsHelper(cli.CLIHelper):
   """Helper for interacting with projects.
 
   Attributes:
@@ -30,6 +31,46 @@ class ProjectHelper(cli.CLIHelper):
       '',
       'Google Inc. (*@google.com)'] # yapf: disable
 
+  # yapf: disable
+
+  _REVIEWERS_PER_PROJECT = {
+      'dfdatetime': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'dfkinds': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'dfvfs': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'dfwinreg': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'dftimewolf': frozenset([
+          'jberggren@gmail.com',
+          'someguyiknow@google.com',
+          'tomchop@gmail.com']),
+      'l2tpreg': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com']),
+      'plaso': frozenset([
+          'aaronp@gmail.com',
+          'jberggren@gmail.com',
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com',
+          'romaing@google.com'])}
+
+  _REVIEWERS_DEFAULT = frozenset([
+      'jberggren@gmail.com',
+      'joachim.metz@gmail.com',
+      'onager@deerpie.com'])
+
+  _REVIEWERS_CC = frozenset([
+      'kiddi@kiddaland.net',
+      'log2timeline-dev@googlegroups.com'])
+
+  # yapf: enable
+
   SUPPORTED_PROJECTS = frozenset([
       'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs', 'dfwinreg',
       'dftimewolf', 'eccemotus', 'l2tdevtools', 'l2tdocs', 'l2tpreg',
@@ -44,7 +85,7 @@ class ProjectHelper(cli.CLIHelper):
     Raises:
       ValueError: if the project name is not supported.
     """
-    super(ProjectHelper, self).__init__()
+    super(ProjectsHelper, self).__init__()
     self.project_name = self._GetProjectName(project_path)
 
   @property
@@ -101,6 +142,54 @@ class ProjectHelper(cli.CLIHelper):
       return
 
     return file_contents
+
+  @classmethod
+  def GetReviewer(cls, project_name, author):
+    """Determines the reviewer.
+
+    Args:
+      project_name (str): name of the project.
+      email_address (str): email address of the author.
+
+    Returns:
+      str: email address of the reviewer that is used on codereview.
+    """
+    reviewers = list(
+        cls._REVIEWERS_PER_PROJECT.get(project_name, cls._REVIEWERS_DEFAULT))
+
+    try:
+      reviewers.remove(author)
+    except ValueError:
+      pass
+
+    random.shuffle(reviewers)
+
+    return reviewers[0]
+
+  @classmethod
+  def GetReviewersOnCC(cls, project_name, author, reviewer):
+    """Determines the reviewers on CC.
+
+    Args:
+      project_name (str): name of the project.
+      author (str): email address of the author.
+      reviewer (str): email address of the reviewer that is used on codereview.
+
+    Returns:
+      str: comma separated email addresses.
+    """
+    reviewers_cc = set(
+        cls._REVIEWERS_PER_PROJECT.get(project_name, cls._REVIEWERS_DEFAULT))
+    reviewers_cc.update(cls._REVIEWERS_CC)
+
+    reviewers_cc.remove(reviewer)
+
+    try:
+      reviewers_cc.remove(author)
+    except KeyError:
+      pass
+
+    return ','.join(reviewers_cc)
 
   def GetVersion(self):
     """Retrieves the project version from the version file.

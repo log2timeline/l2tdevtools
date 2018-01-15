@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import json
 import logging
 import os
-import random
 import sys
 
 # pylint: disable=import-error,no-name-in-module
@@ -21,51 +20,12 @@ else:
 
 # pylint: disable=wrong-import-position
 from l2tdevtools.helpers import cli
+from l2tdevtools.helpers import projects
 from l2tdevtools.lib import upload as upload_tool
 
 
 class UploadHelper(cli.CLIHelper):
   """Codereview upload.py command helper."""
-
-  # yapf: disable
-
-  _REVIEWERS_PER_PROJECT = {
-      'dfdatetime': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
-      'dfkinds': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
-      'dfvfs': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
-      'dfwinreg': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
-      'dftimewolf': frozenset([
-          'jberggren@gmail.com',
-          'someguyiknow@google.com',
-          'tomchop@gmail.com']),
-      'l2tpreg': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
-      'plaso': frozenset([
-          'aaronp@gmail.com',
-          'jberggren@gmail.com',
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com',
-          'romaing@google.com'])}
-
-  _REVIEWERS_DEFAULT = frozenset([
-      'jberggren@gmail.com',
-      'joachim.metz@gmail.com',
-      'onager@deerpie.com'])
-
-  _REVIEWERS_CC = frozenset([
-      'kiddi@kiddaland.net',
-      'log2timeline-dev@googlegroups.com'])
-
-  # yapf: enable
 
   def __init__(self, email_address, no_browser=False):
     """Initializes a codereview helper.
@@ -82,50 +42,6 @@ class UploadHelper(cli.CLIHelper):
     self._upload_py_path = os.path.join(
         os.path.dirname(__file__), '..', 'lib', 'upload.py')
     self._xsrf_token = None
-
-  def _GetReviewer(self, project_name):
-    """Determines the reviewer.
-
-    Args:
-      project_name (str): name of the project.
-
-    Returns:
-      str: email address of the reviewer that is used on codereview.
-    """
-    reviewers = list(
-        self._REVIEWERS_PER_PROJECT.get(project_name, self._REVIEWERS_DEFAULT))
-
-    try:
-      reviewers.remove(self._email_address)
-    except ValueError:
-      pass
-
-    random.shuffle(reviewers)
-
-    return reviewers[0]
-
-  def _GetReviewersOnCC(self, project_name, reviewer):
-    """Determines the reviewers on CC.
-
-    Args:
-      project_name (str): name of the project.
-      reviewer (str): email address of the reviewer that is used on codereview.
-
-    Returns:
-      str: comma separated email addresses.
-    """
-    reviewers_cc = set(
-        self._REVIEWERS_PER_PROJECT.get(project_name, self._REVIEWERS_DEFAULT))
-    reviewers_cc.update(self._REVIEWERS_CC)
-
-    reviewers_cc.remove(reviewer)
-
-    try:
-      reviewers_cc.remove(self._email_address)
-    except KeyError:
-      pass
-
-    return ','.join(reviewers_cc)
 
   def AddMergeMessage(self, issue_number, message):
     """Adds a merge message to the code review issue.
@@ -235,8 +151,10 @@ class UploadHelper(cli.CLIHelper):
     Returns:
       int: codereview issue number or None.
     """
-    reviewer = self._GetReviewer(project_name)
-    reviewers_cc = self._GetReviewersOnCC(project_name, reviewer)
+    reviewer = projects.ProjectsHelper.GetReviewer(
+        project_name, self._email_address)
+    reviewers_cc = projects.ProjectsHelper.GetReviewersOnCC(
+        project_name, self._email_address, reviewer)
 
     command = '{0:s} {1:s} --oauth2'.format(
         sys.executable, self._upload_py_path)

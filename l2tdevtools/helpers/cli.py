@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for command line functions."""
+
 from __future__ import unicode_literals
 
 import logging
