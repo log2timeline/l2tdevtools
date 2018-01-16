@@ -120,13 +120,16 @@ class AppveyorYmlWriter(DependencyFileWriter):
     file_content.extend(self._FILE_HEADER)
 
     dependencies = self._dependency_helper.GetL2TBinaries()
-    dependencies.extend(['funcsigs', 'mock', 'pbr', 'yapf'])
+    dependencies.extend(['funcsigs', 'mock', 'pbr'])
 
     if 'six' not in dependencies:
       dependencies.append('six')
 
     if 'pysqlite' in dependencies:
       file_content.extend(self._SQLITE)
+
+    if self._project_definition.name == 'artifacts':
+      dependencies.append('yapf')
 
     file_content.extend(self._L2TDEVTOOLS)
 
@@ -672,9 +675,12 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
 
     file_content.append('')
 
-    test_dependencies = ['funcsigs', 'mock', 'pbr', 'yapf']
+    test_dependencies = ['funcsigs', 'mock', 'pbr']
     if 'six' not in dependencies:
       test_dependencies.append('six')
+
+    if self._project_definition.name == 'artifacts':
+      test_dependencies.append('yapf')
 
     test_dependencies = ' '.join(sorted(test_dependencies))
     file_content.append('L2TBINARIES_TEST_DEPENDENCIES="{0:s}";'.format(
@@ -690,7 +696,10 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
 
     file_content.append('')
 
-    test_dependencies = ['python-mock', 'python-tox', 'python-yapf']
+    test_dependencies = ['python-mock', 'python-tox']
+    if self._project_definition.name == 'artifacts':
+      test_dependencies.append('python-yapf')
+
     test_dependencies = ' '.join(sorted(test_dependencies))
     file_content.append('PYTHON2_TEST_DEPENDENCIES="{0:s}";'.format(
         test_dependencies))
@@ -718,9 +727,7 @@ class ToxIniWriter(DependencyFileWriter):
       'setenv =',
       '    PYTHONPATH = {{toxinidir}}',
       'deps =',
-      '    mock',
-      '    yapf',
-      '    pytest',
+      '{test_dependencies:s}',
       '    -rrequirements.txt',
       'commands =',
       '    ./run_tests.py',
@@ -731,9 +738,7 @@ class ToxIniWriter(DependencyFileWriter):
       '    PYTHONPATH = {{toxinidir}}',
       'deps =',
       '    coverage',
-      '    mock',
-      '    yapf',
-      '    pytest',
+      '{test_dependencies:s}',
       '    -rrequirements.txt',
       'commands =',
       '    coverage erase',
@@ -743,7 +748,17 @@ class ToxIniWriter(DependencyFileWriter):
 
   def Write(self):
     """Writes a setup.cfg file."""
-    kwargs = {'project_name': self._project_definition.name}
+    test_dependencies = ['mock', 'pytest']
+    if self._project_definition.name == 'artifacts':
+      test_dependencies.append('yapf')
+
+    test_dependencies = '\n'.join([
+        '    {0:s}'.format(dependency) for dependency in test_dependencies])
+
+    kwargs = {
+        'project_name': self._project_definition.name,
+        'test_dependencies': test_dependencies}
+
     file_content = self._FILE_CONTENT.format(**kwargs)
 
     file_content = file_content.encode('utf-8')
