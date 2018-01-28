@@ -48,6 +48,10 @@ class AppveyorYmlWriter(DependencyFileWriter):
   _INSTALL_PYWIN32_WMI = (
       '- cmd: "%PYTHON%\\\\Scripts\\\\pip.exe install pypiwin32 WMI"')
 
+  _POST_INSTALL_PYWIN32 = (
+      '- cmd: "%PYTHON%\\\\python.exe %PYTHON%\\\\Scripts\\\\'
+      'pywin32_postinstall.py -install"')
+
   _URL_L2TDEVTOOLS = 'https://github.com/log2timeline/l2tdevtools.git'
 
   _DOWNLOAD_L2TDEVTOOLS = (
@@ -57,6 +61,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
   _L2TDEVTOOLS = [
       _UPGRADE_PIP,
       _INSTALL_PYWIN32_WMI,
+      _POST_INSTALL_PYWIN32,
       _DOWNLOAD_L2TDEVTOOLS]
 
   _FILE_HEADER = [
