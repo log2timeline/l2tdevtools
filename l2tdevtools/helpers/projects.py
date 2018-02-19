@@ -47,21 +47,21 @@ class ProjectsHelper(cli.CLIHelper):
           'joachim.metz@gmail.com',
           'onager@deerpie.com']),
       'dftimewolf': frozenset([
-          'jberggren@gmail.com',
+          'onager@deerpie.com',
           'someguyiknow@google.com',
           'tomchop@gmail.com']),
       'l2tpreg': frozenset([
           'joachim.metz@gmail.com',
           'onager@deerpie.com']),
       'plaso': frozenset([
-          'aaronp@gmail.com',
-          'jberggren@gmail.com',
           'joachim.metz@gmail.com',
           'onager@deerpie.com',
-          'romaing@google.com'])}
+          'romaing@google.com']),
+      'PlasoScaffolder': frozenset([
+          'joachim.metz@gmail.com',
+          'onager@deerpie.com'])}
 
   _REVIEWERS_DEFAULT = frozenset([
-      'jberggren@gmail.com',
       'joachim.metz@gmail.com',
       'onager@deerpie.com'])
 
