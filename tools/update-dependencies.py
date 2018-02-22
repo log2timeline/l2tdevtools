@@ -46,7 +46,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
       '- cmd: "%PYTHON%\\\\Scripts\\\\pip.exe install --upgrade pip"')
 
   _INSTALL_PYWIN32_WMI = (
-      '- cmd: "%PYTHON%\\\\Scripts\\\\pip.exe install pypiwin32 WMI"')
+      '- cmd: "%PYTHON%\\\\Scripts\\\\pip.exe install pywin32 WMI"')
 
   _POST_INSTALL_PYWIN32 = (
       '- cmd: "%PYTHON%\\\\python.exe %PYTHON%\\\\Scripts\\\\'
