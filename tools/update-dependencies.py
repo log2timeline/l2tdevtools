@@ -742,7 +742,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
 
     file_content.append('')
 
-    test_dependencies = ['python3-mock', 'python3-tox']
+    test_dependencies = ['python3-mock', 'python3-setuptools', 'python3-tox']
     if self._project_definition.name == 'artifacts':
       test_dependencies.append('python3-yapf')
 
