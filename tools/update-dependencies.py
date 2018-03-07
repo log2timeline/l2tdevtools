@@ -71,11 +71,15 @@ class AppveyorYmlWriter(DependencyFileWriter):
       '    PYTHON: "C:\\\\Python27"',
       '  - TARGET: python36',
       '    PYTHON: "C:\\\\Python36"',
-      '',
+      '']
+
+  _ALLOW_FAILURES = [
       'matrix:',
       '  allow_failures:',
       '  - TARGET: python36',
-      '',
+      '']
+
+  _INSTALL = [
       'install:',
       ('- cmd: \'"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\'
        'SetEnv.cmd" /x86 /release\'')]
@@ -123,6 +127,11 @@ class AppveyorYmlWriter(DependencyFileWriter):
     """Writes an appveyor.yml file."""
     file_content = []
     file_content.extend(self._FILE_HEADER)
+
+    if self._project_definition.name in ('dfvfs', 'plaso'):
+      file_content.extend(self._ALLOW_FAILURES)
+
+    file_content.extend(self._INSTALL)
 
     dependencies = self._dependency_helper.GetL2TBinaries()
     dependencies.extend(['funcsigs', 'mock', 'pbr'])
@@ -596,7 +605,7 @@ class SetupCfgWriter(DependencyFileWriter):
     """Writes a setup.cfg file."""
     file_content = []
 
-    if os.path.isdir('test_data'):
+    if self._project_definition.name in ('dfvfs', 'plaso'):
       file_content.extend(self._SDIST)
 
     file_content.extend(self._BDIST_RPM)
@@ -645,14 +654,25 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '',
       'if test ${TRAVIS_OS_NAME} = "osx";',
       'then',
-      '\tgit clone {0:s};'.format(_URL_L2TDEVTOOLS),
+      '\tgit clone https://github.com/log2timeline/l2tbinaries.git -b dev;',
       '',
-      '\tmv l2tdevtools ../;',
-      '\tmkdir dependencies;',
+      '\tmv l2tbinaries ../;',
       '',
-      ('\tPYTHONPATH=../l2tdevtools ../l2tdevtools/tools/update.py '
-       '--download-directory dependencies --track dev '
-       '${L2TBINARIES_DEPENDENCIES} ${L2TBINARIES_TEST_DEPENDENCIES};'),
+      '\tfor PACKAGE in ${L2TBINARIES_DEPENDENCIES};',
+      '\tdo',
+      '\t\tsudo /usr/bin/hdiutil attach ../l2tbinaries/macos/${PACKAGE}-*.dmg;',
+      ('\t\tsudo /usr/sbin/installer -target / -pkg '
+       '/Volumes/${PACKAGE}-*.pkg/${PACKAGE}-*.pkg;'),
+      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg ',
+      '\tdone',
+      '',
+      '\tfor PACKAGE in ${L2TBINARIES_TEST_DEPENDENCIES};',
+      '\tdo',
+      '\t\tsudo /usr/bin/hdiutil attach ../l2tbinaries/macos/${PACKAGE}-*.dmg;',
+      ('\t\tsudo /usr/sbin/installer -target / -pkg '
+       '/Volumes/${PACKAGE}-*.pkg/${PACKAGE}-*.pkg;'),
+      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg ',
+      '\tdone',
       '',
       'elif test ${TRAVIS_OS_NAME} = "linux";',
       'then',
@@ -660,11 +680,15 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '',
       '\tsudo add-apt-repository ppa:gift/dev -y;',
       '\tsudo apt-get update -q;',
-      '\t# Only install the Python 2 dependencies.',
-      ('\t# Also see: https://docs.travis-ci.com/user/languages/python/'
-       '#Travis-CI-Uses-Isolated-virtualenvs'),
-      ('\tsudo apt-get install -y ${COVERALLS_DEPENDENCIES} '
+      '',
+      '\tif test ${TRAVIS_PYTHON_VERSION} = "2.7";',
+      '\tthen',
+      ('\t\tsudo apt-get install -y ${COVERALLS_DEPENDENCIES} '
        '${PYTHON2_DEPENDENCIES} ${PYTHON2_TEST_DEPENDENCIES};'),
+      '\telse',
+      ('\t\tsudo apt-get install -y ${PYTHON3_DEPENDENCIES} '
+       '${PYTHON3_TEST_DEPENDENCIES};'),
+      '\tfi',
       'fi',
       '']
 
@@ -707,6 +731,23 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
 
     test_dependencies = ' '.join(sorted(test_dependencies))
     file_content.append('PYTHON2_TEST_DEPENDENCIES="{0:s}";'.format(
+        test_dependencies))
+    file_content.append('')
+
+    python3_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=3)
+    python3_dependencies = ' '.join(python3_dependencies)
+    file_content.append('PYTHON3_DEPENDENCIES="{0:s}";'.format(
+        python3_dependencies))
+
+    file_content.append('')
+
+    test_dependencies = ['python3-mock', 'python3-setuptools', 'python3-tox']
+    if self._project_definition.name == 'artifacts':
+      test_dependencies.append('python3-yapf')
+
+    test_dependencies = ' '.join(sorted(test_dependencies))
+    file_content.append('PYTHON3_TEST_DEPENDENCIES="{0:s}";'.format(
         test_dependencies))
 
     file_content.extend(self._FILE_FOOTER)
