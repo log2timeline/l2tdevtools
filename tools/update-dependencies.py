@@ -227,8 +227,7 @@ class DependenciesPyWriter(DependencyFileWriter):
 
     template_file = os.path.join(
         self._l2tdevtools_path, 'data', 'templates', 'dependencies.py')
-    file_content = [
-        self._GenerateFromTemplate(template_file, template_mappings)]
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
 

@@ -473,18 +473,21 @@ class DependencyHelper(object):
     """
     # Do not move to a class constant due to how DependencyHelper is used
     # to generate utils.DependencyHelper of the individual projects.
-    NAMES = (
+    names = (
         'pyfsntfs',
         'pyfwnt',
+        'pyqcow',
         'pyregf',
         'pytsk3',
+        'pyvhdi',
+        'pyvmdk',
         'pyvshadow',
         'pyvslvm')
 
     extension_packages = []
     for dependency in sorted(
         self.dependencies.values(), key=lambda dependency: dependency.name):
-      if dependency.name not in NAMES:
+      if dependency.name not in names:
         continue
 
       extension_packages.append(dependency.name)
