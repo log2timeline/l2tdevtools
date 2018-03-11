@@ -859,7 +859,7 @@ class TravisYmlWriter(DependencyFileWriter):
 
   PATH = '.travis.yml'
 
-  _FILE_CONTENT = '\n'.join([
+  _FILE_CONTENT = [
       'language: python',
       'matrix:',
       '  include:',
@@ -905,7 +905,7 @@ class TravisYmlWriter(DependencyFileWriter):
       'after_success:',
       '- if test ${TARGET} = "linux-python27"; then coveralls --verbose; fi',
       '',
-      ''])
+      '']
 
   def Write(self):
     """Writes a setup.cfg file."""
