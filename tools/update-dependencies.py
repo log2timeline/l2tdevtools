@@ -583,6 +583,25 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
       file_object.write(file_content)
 
 
+class PylintRcWriter(DependencyFileWriter):
+  """Pylint.rc file writer."""
+
+  PATH = '.pylintrc'
+
+  def Write(self):
+    """Writes a .travis.yml file."""
+    template_mappings = {'extension-pkg-whitelist': ''}
+
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', '.pylintrc')
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
 class RequirementsWriter(DependencyFileWriter):
   """Requirements.txt file writer."""
 
@@ -885,7 +904,7 @@ if __name__ == '__main__':
   helper = dependencies.DependencyHelper()
 
   for writer_class in (
-      AppveyorYmlWriter, RequirementsWriter, SetupCfgWriter,
+      AppveyorYmlWriter, PylintRcWriter, RequirementsWriter, SetupCfgWriter,
       TravisInstallScriptWriter, TravisRunTestsScriptWriter, TravisYmlWriter,
       ToxIniWriter):
     writer = writer_class(l2tdevtools_path, project_definition, helper)
