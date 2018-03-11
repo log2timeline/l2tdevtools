@@ -1,2 +1,3 @@
+usr/lib/python2*/dist-packages/backports/__init__.py
 usr/lib/python2*/dist-packages/backports/*
 usr/lib/python2*/dist-packages/backports.functools_lru_cache*.egg-info/*
