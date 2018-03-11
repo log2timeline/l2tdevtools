@@ -316,7 +316,7 @@ class DPKGControlWriter(DependencyFileWriter):
     if python3_dependencies:
       python3_dependencies = '{0:s}, '.format(python3_dependencies)
 
-    kwargs = {
+    template_mappings = {
         'description_long': description_long,
         'description_short': self._project_definition.description_short,
         'homepage_url': self._project_definition.homepage_url,
@@ -327,7 +327,7 @@ class DPKGControlWriter(DependencyFileWriter):
         'python3_dependencies': python3_dependencies}
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -421,10 +421,10 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
 
     file_content.extend(self._FILE_FOOTER)
 
-    kwargs = {'project_name': self._project_definition.name}
+    template_mappings = {'project_name': self._project_definition.name}
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -540,10 +540,10 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
     file_content.extend(self._FILE_FOOTER_DEVELOPMENT_DEPENDENCIES)
     file_content.extend(self._FILE_FOOTER_TEST_DEPENDENCIES)
 
-    kwargs = {'project_name': self._project_definition.name}
+    template_mappings = {'project_name': self._project_definition.name}
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -629,17 +629,17 @@ class SetupCfgWriter(DependencyFileWriter):
 
     file_content.append('')
 
-    kwargs = {'maintainer': self._project_definition.maintainer}
+    template_mappings = {'maintainer': self._project_definition.maintainer}
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
     file_content = file_content.encode('utf-8')
 
     with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
-class TravisBeforeInstallScriptWriter(DependencyFileWriter):
+class TravisInstallScriptWriter(DependencyFileWriter):
   """Travis-CI install.sh file writer."""
 
   PATH = os.path.join('config', 'travis', 'install.sh')
@@ -671,7 +671,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\t\tsudo /usr/bin/hdiutil attach ../l2tbinaries/macos/${PACKAGE}-*.dmg;',
       ('\t\tsudo /usr/sbin/installer -target / -pkg '
        '/Volumes/${PACKAGE}-*.pkg/${PACKAGE}-*.pkg;'),
-      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg ',
+      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg',
       '\tdone',
       '',
       '\tfor PACKAGE in ${L2TBINARIES_TEST_DEPENDENCIES};',
@@ -679,7 +679,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\t\tsudo /usr/bin/hdiutil attach ../l2tbinaries/macos/${PACKAGE}-*.dmg;',
       ('\t\tsudo /usr/sbin/installer -target / -pkg '
        '/Volumes/${PACKAGE}-*.pkg/${PACKAGE}-*.pkg;'),
-      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg ',
+      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg',
       '\tdone',
       '',
       'elif test ${TRAVIS_OS_NAME} = "linux";',
@@ -689,7 +689,11 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\tsudo add-apt-repository ppa:gift/dev -y;',
       '\tsudo apt-get update -q;',
       '',
-      '\tif test ${TRAVIS_PYTHON_VERSION} = "2.7";',
+      '\tif test ${TARGET} = "pylint";',
+      '\tthen',
+      '\t\tsudo apt-get install -y pylint;',
+      '',
+      '\telif test ${TRAVIS_PYTHON_VERSION} = "2.7";',
       '\tthen',
       ('\t\tsudo apt-get install -y ${COVERALLS_DEPENDENCIES} '
        '${PYTHON2_DEPENDENCIES} ${PYTHON2_TEST_DEPENDENCIES};'),
@@ -767,12 +771,159 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       file_object.write(file_content)
 
 
+class TravisRunTestsScriptWriter(DependencyFileWriter):
+  """Travis-CI runtests.sh file writer."""
+
+  PATH = os.path.join('config', 'travis', 'runtests.sh')
+
+  _FILE_CONTENT = [
+      '#!/bin/bash',
+      '#',
+      '# Script to run tests on Travis-CI.',
+      '',
+      '# Exit on error.',
+      'set -e;',
+      '',
+      'if test "${{TARGET}}" = "pylint";',
+      'then',
+      '\tpylint --version',
+      '',
+      '\tfor FILE in `find setup.py {project_name:s} tests -name \*.py`;',
+      '\tdo',
+      '\t\techo "Checking: ${{FILE}}";',
+      '',
+      '\t\tpylint --rcfile=.pylintrc ${{FILE}};',
+      '\tdone',
+      '',
+      'elif test "${{TRAVIS_OS_NAME}}" = "osx";',
+      'then',
+      ('\tPYTHONPATH=/Library/Python/2.7/site-packages/ /usr/bin/python '
+       './run_tests.py;'),
+      '',
+      '\tpython ./setup.py build',
+      '',
+      '\tpython ./setup.py sdist',
+      '',
+      '\tpython ./setup.py bdist',
+      '',
+      'elif test "${{TRAVIS_OS_NAME}}" = "linux";',
+      'then',
+      '\tif test -n "${{TOXENV}}";',
+      '\tthen',
+      '\t\ttox --sitepackages ${{TOXENV}};',
+      '',
+      '\telif test "${{TRAVIS_PYTHON_VERSION}}" = "2.7";',
+      '\tthen',
+      '\t\tcoverage erase',
+      ('\t\tcoverage run --source={project_name:s} '
+       '--omit="*_test*,*__init__*,*test_lib*" ./run_tests.py'),
+      '\telse',
+      '\t\tpython ./run_tests.py',
+      '\tfi',
+      '',
+      '\tpython ./setup.py build',
+      '',
+      '\tpython ./setup.py sdist',
+      '',
+      '\tpython ./setup.py bdist',
+      '',
+      '\tTMPDIR="${{PWD}}/tmp";',
+      ('\tTMPSITEPACKAGES="${{TMPDIR}}/lib/python${{TRAVIS_PYTHON_VERSION}}/'
+       'site-packages";'),
+      '',
+      '\tmkdir -p ${{TMPSITEPACKAGES}};',
+      '',
+      ('\tPYTHONPATH=${{TMPSITEPACKAGES}} python ./setup.py install '
+       '--prefix=${{TMPDIR}};'),
+      'fi',
+      '',
+      '']
+
+  def Write(self):
+    """Writes an install.sh file."""
+    file_content = list(self._FILE_CONTENT)
+    file_content = '\n'.join(file_content)
+
+    template_mappings = {'project_name': self._project_definition.name}
+
+    file_content = file_content.format(**template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
+class TravisYmlWriter(DependencyFileWriter):
+  """Travis.yml file writer."""
+
+  PATH = '.travis.yml'
+
+  _FILE_CONTENT = '\n'.join([
+      'language: python',
+      'matrix:',
+      '  include:',
+      '  - env: TARGET="pylint"',
+      '    os: linux',
+      '    dist: trusty',
+      '    sudo: required',
+      '    group: edge',
+      '    python: 2.7',
+      '  - env: TARGET="linux-python27"',
+      '    os: linux',
+      '    dist: trusty',
+      '    sudo: required',
+      '    group: edge',
+      '    python: 2.7',
+      '  - env: TARGET="linux-python34"',
+      '    os: linux',
+      '    dist: trusty',
+      '    sudo: required',
+      '    group: edge',
+      '    python: 3.4',
+      '  - env: [TARGET="linux-python27-tox", TOXENV="py27"]',
+      '    os: linux',
+      '    dist: trusty',
+      '    sudo: required',
+      '    group: edge',
+      '    python: 2.7',
+      '  - env: [TARGET="linux-python34-tox", TOXENV="py34"]',
+      '    os: linux',
+      '    dist: trusty',
+      '    sudo: required',
+      '    group: edge',
+      '    python: 3.4',
+      ('  - env: TARGET=["macos-python27", '
+       'PYTHONPATH="/Library/Python/2.7/site-packages/"]'),
+      '    os: osx',
+      '    osx_image: xcode8.3',
+      '    language: generic',
+      'install:',
+      '- ./config/travis/install.sh',
+      'script:',
+      '- ./config/travis/runtests.sh',
+      'after_success:',
+      '- if test ${TARGET} = "linux-python27"; then coveralls --verbose; fi',
+      '',
+      ''])
+
+  def Write(self):
+    """Writes a setup.cfg file."""
+    file_content = list(self._FILE_CONTENT)
+    file_content = '\n'.join(file_content)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
 class ToxIniWriter(DependencyFileWriter):
   """Tox.ini file writer."""
 
   PATH = 'tox.ini'
 
-  _FILE_CONTENT = '\n'.join([
+  _FILE_CONTENT = [
       '[tox]',
       'envlist = py2, py3',
       '',
@@ -798,7 +949,8 @@ class ToxIniWriter(DependencyFileWriter):
       '    coverage erase',
       ('    coverage run --source={project_name:s} '
        '--omit="*_test*,*__init__*,*test_lib*" run_tests.py'),
-      ''])
+      '',
+      '']
 
   def Write(self):
     """Writes a setup.cfg file."""
@@ -809,11 +961,14 @@ class ToxIniWriter(DependencyFileWriter):
     test_dependencies = '\n'.join([
         '    {0:s}'.format(dependency) for dependency in test_dependencies])
 
-    kwargs = {
+    file_content = list(self._FILE_CONTENT)
+    file_content = '\n'.join(file_content)
+
+    template_mappings = {
         'project_name': self._project_definition.name,
         'test_dependencies': test_dependencies}
 
-    file_content = self._FILE_CONTENT.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -838,7 +993,7 @@ if __name__ == '__main__':
 
   for writer_class in (
       AppveyorYmlWriter, RequirementsWriter, SetupCfgWriter,
-      TravisBeforeInstallScriptWriter, ToxIniWriter):
+      TravisInstallScriptWriter, TravisRunTestsScriptWriter, ToxIniWriter):
     writer = writer_class(l2tdevtools_path, project_definition, helper)
     writer.Write()
 
