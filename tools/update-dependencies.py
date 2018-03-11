@@ -689,17 +689,17 @@ class TravisInstallScriptWriter(DependencyFileWriter):
       '\tsudo add-apt-repository ppa:gift/dev -y;',
       '\tsudo apt-get update -q;',
       '',
-      '\tif test ${TARGET} = "pylint";',
-      '\tthen',
-      '\t\tsudo apt-get install -y pylint;',
-      '',
-      '\telif test ${TRAVIS_PYTHON_VERSION} = "2.7";',
+      '\tif test ${TRAVIS_PYTHON_VERSION} = "2.7";',
       '\tthen',
       ('\t\tsudo apt-get install -y ${COVERALLS_DEPENDENCIES} '
        '${PYTHON2_DEPENDENCIES} ${PYTHON2_TEST_DEPENDENCIES};'),
       '\telse',
       ('\t\tsudo apt-get install -y ${PYTHON3_DEPENDENCIES} '
        '${PYTHON3_TEST_DEPENDENCIES};'),
+      '\tfi',
+      '\tif test ${TARGET} = "pylint";',
+      '\tthen',
+      '\t\tsudo apt-get install -y pylint;',
       '\tfi',
       'fi',
       '']
