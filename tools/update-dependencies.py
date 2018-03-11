@@ -993,7 +993,8 @@ if __name__ == '__main__':
 
   for writer_class in (
       AppveyorYmlWriter, RequirementsWriter, SetupCfgWriter,
-      TravisInstallScriptWriter, TravisRunTestsScriptWriter, ToxIniWriter):
+      TravisInstallScriptWriter, TravisRunTestsScriptWriter, TravisYmlWriter,
+      ToxIniWriter):
     writer = writer_class(l2tdevtools_path, project_definition, helper)
     writer.Write()
 
