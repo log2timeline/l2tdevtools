@@ -788,7 +788,7 @@ class TravisRunTestsScriptWriter(DependencyFileWriter):
       'then',
       '\tpylint --version',
       '',
-      '\tfor FILE in `find setup.py {project_name:s} tests -name \*.py`;',
+      '\tfor FILE in `find setup.py {project_name:s} tests -name \\*.py`;',
       '\tdo',
       '\t\techo "Checking: ${{FILE}}";',
       '',
