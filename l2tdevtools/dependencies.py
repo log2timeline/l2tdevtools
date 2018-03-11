@@ -427,7 +427,7 @@ class DependencyHelper(object):
     """Retrieves the setup.py installation requirements.
 
     Returns:
-      list[str]: dependency definitions for install_requires for setup.py.
+      list[str]: dependency definitions for install_requires in setup.py.
     """
     install_requires = []
     for dependency in sorted(
@@ -464,6 +464,32 @@ class DependencyHelper(object):
       install_requires.append(requires_string)
 
     return sorted(install_requires)
+
+  def GetPylintRcExtensionPkgs(self):
+    """Retrieves the .pylintrc extension packages.
+
+    Returns:
+      list[str]: name of packages for extension-pkg-whitelist in .pylintrc.
+    """
+    # Do not move to a class constant due to how DependencyHelper is used
+    # to generate utils.DependencyHelper of the individual projects.
+    NAMES = (
+        'pyfsntfs',
+        'pyfwnt',
+        'pyregf',
+        'pytsk3',
+        'pyvshadow',
+        'pyvslvm')
+
+    extension_packages = []
+    for dependency in sorted(
+        self.dependencies.values(), key=lambda dependency: dependency.name):
+      if dependency.name not in NAMES:
+        continue
+
+      extension_packages.append(dependency.name)
+
+    return sorted(extension_packages)
 
   def GetRPMRequires(self, exclude_version=False, python_version=2):
     """Retrieves the setup.cfg RPM installation requirements.

@@ -590,7 +590,9 @@ class PylintRcWriter(DependencyFileWriter):
 
   def Write(self):
     """Writes a .travis.yml file."""
-    template_mappings = {'extension-pkg-whitelist': ''}
+    dependencies = self._dependency_helper.GetPylintRcExtensionPkgs()
+
+    template_mappings = {'extension_pkg_whitelist': ','.join(dependencies)}
 
     template_file = os.path.join(
         self._l2tdevtools_path, 'data', 'templates', '.pylintrc')
