@@ -474,10 +474,16 @@ class DependencyHelper(object):
     # Do not move to a class constant due to how DependencyHelper is used
     # to generate utils.DependencyHelper of the individual projects.
     names = (
+        'pybde',
+        'pyewf',
         'pyfsntfs',
+        'pyfvde',
         'pyfwnt',
         'pyqcow',
         'pyregf',
+        'pysigscan',
+        'pysmdev',
+        'pysmraw',
         'pytsk3',
         'pyvhdi',
         'pyvmdk',
