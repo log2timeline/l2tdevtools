@@ -12,9 +12,6 @@ from l2tdevtools import dependencies
 from l2tdevtools import project_config
 
 
-# TODO: generate .travis.yml
-
-
 # pylint: disable=redefined-outer-name
 
 
@@ -33,6 +30,44 @@ class DependencyFileWriter(object):
     self._dependency_helper = dependency_helper
     self._l2tdevtools_path = l2tdevtools_path
     self._project_definition = project_definition
+
+  def _ReadTemplateFile(self, filename):
+    """Reads a template string from file.
+
+    Args:
+      filename (str): name of the file containing the template string.
+
+    Returns:
+      string.Template: template string.
+    """
+    with open(filename, 'rb') as file_object:
+      file_data = file_object.read()
+
+    return string.Template(file_data)
+
+  def _GenerateFromTemplate(self, template_filename, template_mappings):
+    """Generates file context based on a template file.
+
+    Args:
+      template_filename (str): path of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+
+    Returns:
+      str: output based on the template string.
+
+    Raises:
+      RuntimeError: if the template cannot be formatted.
+    """
+    template_string = self._ReadTemplateFile(template_filename)
+
+    try:
+      return template_string.substitute(template_mappings)
+
+    except (KeyError, ValueError) as exception:
+      raise RuntimeError(
+          'Unable to format template: {0:s} with error: {1!s}'.format(
+              template_filename, exception))
 
 
 class AppveyorYmlWriter(DependencyFileWriter):
@@ -188,15 +223,11 @@ class DependenciesPyWriter(DependencyFileWriter):
 
     python_dependencies = ',\n'.join(python_dependencies)
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, 'data', 'templates', 'dependencies.py')
-    with open(template_file, 'rb') as file_object:
-      file_data = file_object.read()
-
     template_mappings = {'python_dependencies': python_dependencies}
 
-    template_string = string.Template(file_data)
-    file_content = template_string.substitute(template_mappings)
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', 'dependencies.py')
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -316,7 +347,7 @@ class DPKGControlWriter(DependencyFileWriter):
     if python3_dependencies:
       python3_dependencies = '{0:s}, '.format(python3_dependencies)
 
-    kwargs = {
+    template_mappings = {
         'description_long': description_long,
         'description_short': self._project_definition.description_short,
         'homepage_url': self._project_definition.homepage_url,
@@ -327,7 +358,7 @@ class DPKGControlWriter(DependencyFileWriter):
         'python3_dependencies': python3_dependencies}
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -336,7 +367,7 @@ class DPKGControlWriter(DependencyFileWriter):
 
 
 class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
-  """GIFT COPR installation script file."""
+  """GIFT COPR installation script file writer."""
 
   PATH = os.path.join('config', 'linux', 'gift_copr_install.sh')
 
@@ -421,10 +452,10 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
 
     file_content.extend(self._FILE_FOOTER)
 
-    kwargs = {'project_name': self._project_definition.name}
+    template_mappings = {'project_name': self._project_definition.name}
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -433,7 +464,7 @@ class GIFTCOPRInstallScriptWriter(DependencyFileWriter):
 
 
 class GIFTPPAInstallScriptWriter(DependencyFileWriter):
-  """GIFT PPA installation script file."""
+  """GIFT PPA installation script file writer."""
 
   PATH = os.path.join('config', 'linux', 'gift_ppa_install.sh')
 
@@ -540,10 +571,31 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
     file_content.extend(self._FILE_FOOTER_DEVELOPMENT_DEPENDENCIES)
     file_content.extend(self._FILE_FOOTER_TEST_DEPENDENCIES)
 
-    kwargs = {'project_name': self._project_definition.name}
+    template_mappings = {'project_name': self._project_definition.name}
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
+class PylintRcWriter(DependencyFileWriter):
+  """Pylint.rc file writer."""
+
+  PATH = '.pylintrc'
+
+  def Write(self):
+    """Writes a .travis.yml file."""
+    dependencies = self._dependency_helper.GetPylintRcExtensionPkgs()
+
+    template_mappings = {'extension_pkg_whitelist': ','.join(dependencies)}
+
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', '.pylintrc')
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -594,12 +646,7 @@ class SetupCfgWriter(DependencyFileWriter):
   _BDIST_RPM = [
       '[bdist_rpm]',
       'release = 1',
-      'packager = {maintainer:s}',
-      'doc_files = ACKNOWLEDGEMENTS',
-      '            AUTHORS',
-      '            LICENSE',
-      '            README',
-      'build_requires = python-setuptools']
+      'packager = {maintainer:s}']
 
   def Write(self):
     """Writes a setup.cfg file."""
@@ -609,6 +656,19 @@ class SetupCfgWriter(DependencyFileWriter):
       file_content.extend(self._SDIST)
 
     file_content.extend(self._BDIST_RPM)
+
+    doc_files = ['AUTHORS', 'LICENSE', 'README']
+
+    if os.path.isfile('ACKNOWLEDGEMENTS'):
+      doc_files.append('ACKNOWLEDGEMENTS')
+
+    for index, doc_file in enumerate(sorted(doc_files)):
+      if index == 0:
+        file_content.append('doc_files = {0:s}'.format(doc_file))
+      else:
+        file_content.append('            {0:s}'.format(doc_file))
+
+    file_content.append('build_requires = python-setuptools')
 
     python2_dependencies = self._dependency_helper.GetRPMRequires(
         python_version=2)
@@ -621,17 +681,17 @@ class SetupCfgWriter(DependencyFileWriter):
 
     file_content.append('')
 
-    kwargs = {'maintainer': self._project_definition.maintainer}
+    template_mappings = {'maintainer': self._project_definition.maintainer}
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.format(**kwargs)
+    file_content = file_content.format(**template_mappings)
     file_content = file_content.encode('utf-8')
 
     with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
 
-class TravisBeforeInstallScriptWriter(DependencyFileWriter):
+class TravisInstallScriptWriter(DependencyFileWriter):
   """Travis-CI install.sh file writer."""
 
   PATH = os.path.join('config', 'travis', 'install.sh')
@@ -663,7 +723,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\t\tsudo /usr/bin/hdiutil attach ../l2tbinaries/macos/${PACKAGE}-*.dmg;',
       ('\t\tsudo /usr/sbin/installer -target / -pkg '
        '/Volumes/${PACKAGE}-*.pkg/${PACKAGE}-*.pkg;'),
-      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg ',
+      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg',
       '\tdone',
       '',
       '\tfor PACKAGE in ${L2TBINARIES_TEST_DEPENDENCIES};',
@@ -671,7 +731,7 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\t\tsudo /usr/bin/hdiutil attach ../l2tbinaries/macos/${PACKAGE}-*.dmg;',
       ('\t\tsudo /usr/sbin/installer -target / -pkg '
        '/Volumes/${PACKAGE}-*.pkg/${PACKAGE}-*.pkg;'),
-      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg ',
+      '\t\tsudo /usr/bin/hdiutil detach /Volumes/${PACKAGE}-*.pkg',
       '\tdone',
       '',
       'elif test ${TRAVIS_OS_NAME} = "linux";',
@@ -688,6 +748,10 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       '\telse',
       ('\t\tsudo apt-get install -y ${PYTHON3_DEPENDENCIES} '
        '${PYTHON3_TEST_DEPENDENCIES};'),
+      '\tfi',
+      '\tif test ${TARGET} = "pylint";',
+      '\tthen',
+      '\t\tsudo apt-get install -y pylint;',
       '\tfi',
       'fi',
       '']
@@ -759,41 +823,51 @@ class TravisBeforeInstallScriptWriter(DependencyFileWriter):
       file_object.write(file_content)
 
 
+class TravisRunTestsScriptWriter(DependencyFileWriter):
+  """Travis-CI runtests.sh file writer."""
+
+  PATH = os.path.join('config', 'travis', 'runtests.sh')
+
+  def Write(self):
+    """Writes a runtests.sh file."""
+    template_mappings = {'project_name': self._project_definition.name}
+
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', 'runtests.sh')
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
+class TravisYmlWriter(DependencyFileWriter):
+  """Travis.yml file writer."""
+
+  PATH = '.travis.yml'
+
+  def Write(self):
+    """Writes a .travis.yml file."""
+    template_mappings = {}
+
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', '.travis.yml')
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
 class ToxIniWriter(DependencyFileWriter):
   """Tox.ini file writer."""
 
   PATH = 'tox.ini'
 
-  _FILE_CONTENT = '\n'.join([
-      '[tox]',
-      'envlist = py2, py3',
-      '',
-      '[testenv]',
-      'pip_pre = True',
-      'setenv =',
-      '    PYTHONPATH = {{toxinidir}}',
-      'deps =',
-      '{test_dependencies:s}',
-      '    -rrequirements.txt',
-      'commands =',
-      '    ./run_tests.py',
-      '',
-      '[testenv:py27]',
-      'pip_pre = True',
-      'setenv =',
-      '    PYTHONPATH = {{toxinidir}}',
-      'deps =',
-      '    coverage',
-      '{test_dependencies:s}',
-      '    -rrequirements.txt',
-      'commands =',
-      '    coverage erase',
-      ('    coverage run --source={project_name:s} '
-       '--omit="*_test*,*__init__*,*test_lib*" run_tests.py'),
-      ''])
-
   def Write(self):
-    """Writes a setup.cfg file."""
+    """Writes a tox.ini file."""
     test_dependencies = ['mock', 'pytest']
     if self._project_definition.name == 'artifacts':
       test_dependencies.append('yapf')
@@ -801,11 +875,13 @@ class ToxIniWriter(DependencyFileWriter):
     test_dependencies = '\n'.join([
         '    {0:s}'.format(dependency) for dependency in test_dependencies])
 
-    kwargs = {
+    template_mappings = {
         'project_name': self._project_definition.name,
         'test_dependencies': test_dependencies}
 
-    file_content = self._FILE_CONTENT.format(**kwargs)
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', 'tox.ini')
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
 
@@ -829,8 +905,9 @@ if __name__ == '__main__':
   helper = dependencies.DependencyHelper()
 
   for writer_class in (
-      AppveyorYmlWriter, RequirementsWriter, SetupCfgWriter,
-      TravisBeforeInstallScriptWriter, ToxIniWriter):
+      AppveyorYmlWriter, PylintRcWriter, RequirementsWriter, SetupCfgWriter,
+      TravisInstallScriptWriter, TravisRunTestsScriptWriter, TravisYmlWriter,
+      ToxIniWriter):
     writer = writer_class(l2tdevtools_path, project_definition, helper)
     writer.Write()
 
