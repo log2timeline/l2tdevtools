@@ -197,15 +197,14 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
         return
 
       # The format of the download URL is:
-      # <a href="{path}" class="js-directory-link"
-      # <a href="{path}" class="js-directory-link js-navigation-open"
-      # <a href="{path}" class="js-navigation-open"
+      # <a class="js-navigation-open" title="{title}" id="{id}" href="{path}"
       expression_string = (
-          '<a href="([^"]*)" class="(js-directory-link|js-navigation-open)')
+          '<a class="js-navigation-open" title="[^"]*" id="[^"]*" '
+          'href="([^"]*)"')
       matches = re.findall(expression_string, page_content)
 
-      for match_tuple in matches:
-        _, _, filename = match_tuple[0].rpartition('/')
+      for match in matches:
+        _, _, filename = match.rpartition('/')
         download_url = (
             'https://github.com/log2timeline/l2tbinaries/raw/{0:s}/{1:s}/'
             '{2:s}').format(self._branch, sub_directory, filename)
