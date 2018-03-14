@@ -7,6 +7,8 @@ $ExitFailure = 1
 
 Function DownloadFile($Url, $Destination)
 {
+	[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
 	$Client = New-Object Net.WebClient
 	${Client}.DownloadFile(${Url}, ${Destination})
 }
