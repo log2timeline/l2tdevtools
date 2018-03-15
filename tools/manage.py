@@ -226,9 +226,10 @@ class GithubRepoManager(object):
 
     else:
       # The format of the download URL is:
-      # <a href="{path}" class="js-directory-link"
-      # <a href="{path}" class="js-directory-link js-navigation-open"
-      expression_string = '<a href="([^"]*)" class="js-directory-link'
+      # <a class="js-navigation-open" title="{title}" id="{id}" href="{path}"
+      expression_string = (
+          '<a class="js-navigation-open" title="[^"]*" id="[^"]*" '
+          'href="([^"]*)"')
       matches = re.findall(expression_string, page_content)
 
       for match in matches:
