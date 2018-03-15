@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+import os
 import unittest
 
 from tools import update
@@ -31,6 +32,7 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
     self.assertIn(expected_url, package_download_urls)
 
 
+@unittest.skipIf('TRAVIS_OS_NAME' in os.environ, 'TLS 1.2 not supported')
 class DependencyUpdaterTest(unittest.TestCase):
   """Tests for the dependency updater class."""
 

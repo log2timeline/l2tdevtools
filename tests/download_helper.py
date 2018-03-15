@@ -78,6 +78,7 @@ class DownloadHelperTest(unittest.TestCase):
     self.assertEqual(page_content, expected_page_content)
 
 
+@unittest.skipIf('TRAVIS_OS_NAME' in os.environ, 'TLS 1.2 not supported')
 class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the docopt github releases download helper."""
 
@@ -125,6 +126,7 @@ class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
+@unittest.skipIf('TRAVIS_OS_NAME' in os.environ, 'TLS 1.2 not supported')
 class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the libyal github releases download helper."""
 
@@ -174,6 +176,7 @@ class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
+@unittest.skipIf('TRAVIS_OS_NAME' in os.environ, 'TLS 1.2 not supported')
 class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
   """Tests for the log2timeline GitHub releases download helper."""
 
@@ -271,6 +274,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
+@unittest.skipIf('TRAVIS_OS_NAME' in os.environ, 'TLS 1.2 not supported')
 class SourceForgeDownloadHelperTest(unittest.TestCase):
   """Tests for the Source Forge download helper."""
 
