@@ -13,7 +13,6 @@ from l2tdevtools.helpers import github
 from l2tdevtools.helpers import projects
 from l2tdevtools.helpers import pylint
 from l2tdevtools.helpers import readthedocs
-from l2tdevtools.helpers import sphinxapi
 from l2tdevtools.helpers import upload
 
 from l2tdevtools.helpers import git
@@ -67,7 +66,6 @@ class ReviewHelper(object):
     self._projects_helper = None
     self._project_name = None
     self._project_path = project_path
-    self._sphinxapidoc_helper = None
 
     if self._github_origin:
       self._fork_username, _, self._fork_feature_branch = (
@@ -358,18 +356,6 @@ class ReviewHelper(object):
       self._codereview_helper = upload.UploadHelper(
           email_address, no_browser=self._no_browser)
 
-    if self._command == 'merge':
-      self._sphinxapidoc_helper = sphinxapi.SphinxAPIDocHelper(
-          self._project_name)
-      # TODO: disable the version check for now since sphinx-apidoc 1.2.2
-      # on Unbuntu 14.04 does not have the --version option. Re-enable when
-      # sphinx-apidoc 1.2.3 or later is introduced.
-      # if not self._sphinxapidoc_helper.CheckUpToDateVersion():
-      #   print((
-      #       '{0:s} aborted - sphinx-apidoc version 1.2.0 or later '
-      #       'required.').format(self._command.title()))
-      #   return False
-
     return True
 
   # yapf: disable
@@ -436,7 +422,6 @@ class ReviewHelper(object):
 
     apidoc_config_path = os.path.join('docs', 'conf.py')
     if os.path.exists(apidoc_config_path):
-      self._sphinxapidoc_helper.UpdateAPIDocs()
       self._git_helper.AddPath('docs')
 
       readthedocs_helper = readthedocs.ReadTheDocsHelper(self._project_name)
