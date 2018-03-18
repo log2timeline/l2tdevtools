@@ -78,7 +78,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
   _VERSION_SQLITE = '3180000'
 
   _UPGRADE_PIP = (
-      '- cmd: "%PYTHON%\\\\Scripts\\\\pip.exe install --upgrade pip"')
+      '- cmd: "%PYTHON%\\\\python.exe -m pip install --upgrade pip')
 
   _INSTALL_PYWIN32_WMI = (
       '- cmd: "%PYTHON%\\\\Scripts\\\\pip.exe install pywin32 WMI"')
