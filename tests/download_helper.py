@@ -133,7 +133,7 @@ class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
   _PROJECT_ORGANIZATION = 'libyal'
   _PROJECT_NAME = 'libevt'
   _PROJECT_STATUS = 'alpha'
-  _PROJECT_VERSION = '20170120'
+  _PROJECT_VERSION = '20180317'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -229,7 +229,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
   _DOWNLOAD_URL = 'https://pypi.python.org/pypi/construct'
 
   _PROJECT_NAME = 'construct'
-  _PROJECT_VERSION = '2.9.38'
+  _PROJECT_VERSION = '2.9.39'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
