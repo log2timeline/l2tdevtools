@@ -381,7 +381,7 @@ class DependencyUpdater(object):
         filenames = glob.glob('{0:s}*{1:s}'.format(
             package_prefix, package_suffix))
         for filename in filenames:
-          if os.path.isdir(filename):
+          if os.path.isfile(filename):
             continue
 
           logging.info('Removing: {0:s}'.format(filename))
