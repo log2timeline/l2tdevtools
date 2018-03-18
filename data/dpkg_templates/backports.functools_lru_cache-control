@@ -1,0 +1,15 @@
+Source: backports.functools-lru-cache
+Section: python
+Priority: extra
+Maintainer: Jason R. Coombs <jaraco@jaraco.com>
+Build-Depends: debhelper (>= 7), dh-python, python-all (>= 2.7~), python-setuptools, python-setuptools-scm
+Standards-Version: 3.9.5
+X-Python-Version: >= 2.7
+Homepage: https://github.com/jaraco/backports.functools_lru_cache
+
+Package: python-backports.functools-lru-cache
+Architecture: all
+Depends: ${{python:Depends}}, ${{misc:Depends}}
+Description: Backport of functools.lru_cache from Python 3.3 as published at ActiveState
+ Backport of functools.lru_cache from Python 3.3 as
+ published at ActiveState
