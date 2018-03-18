@@ -6,7 +6,6 @@
 .PHONY: override_dh_auto_clean
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -rf build setuptools.egg-info/SOURCES.txt setuptools.egg-info/PKG-INFO
 	rm -f setuptools/*.exe
 
 .PHONY: override_dh_auto_build

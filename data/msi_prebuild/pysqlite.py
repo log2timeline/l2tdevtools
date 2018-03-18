@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Pre-build script helping build pysqlite on windows."""
+"""Script to set up build environment for pysqlite on Windows.
+
+Also see: https://trac.edgewall.org/wiki/PySqlite#BuildingonWindows
+"""
 
 from __future__ import unicode_literals
 
@@ -61,8 +64,6 @@ def DownloadFile(download_url):
   return filename
 
 
-# This script builds pysqlite on Windows.
-# Also see: https://trac.edgewall.org/wiki/PySqlite#BuildingonWindows
 if __name__ == '__main__':
   if os.name != 'nt':
     logging.error('Unsupport operating system: {0:s}'.format(os.name))
@@ -79,7 +80,7 @@ if __name__ == '__main__':
   os.chdir(compile_dir)
 
   if not os.path.isfile('sqlite3.c'):
-    url = 'https://www.sqlite.org/2017/sqlite-amalgamation-3190200.zip'
+    url = 'https://www.sqlite.org/2017/sqlite-amalgamation-3220000.zip'
 
     sqlite_filename = DownloadFile(url)
     if not sqlite_filename:
