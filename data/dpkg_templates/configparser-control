@@ -9,6 +9,6 @@ Homepage: http://docs.python.org/3/library/configparser.html
 
 Package: python-configparser
 Architecture: all
-Depends: $${python:Depends}, $${misc:Depends}
+Depends: ${{python:Depends}, ${{misc:Depends}}
 Description: Backport of configparser from Python 3.5
  Backport of configparser from Python 3.5
