@@ -180,6 +180,9 @@ class AppveyorYmlWriter(DependencyFileWriter):
     if self._project_definition.name == 'artifacts':
       dependencies.append('yapf')
 
+    if 'backports.lzma' in dependencies:
+      dependencies.remove('backports.lzma')
+
     file_content.extend(self._L2TDEVTOOLS)
 
     dependencies = ' '.join(sorted(dependencies))
