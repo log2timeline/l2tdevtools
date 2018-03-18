@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Script to manage the GIFT launchpad PPA and l2tbinaries."""
 
