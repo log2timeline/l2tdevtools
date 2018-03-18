@@ -988,7 +988,8 @@ class MSIBuildHelper(BuildHelper):
     """
     filepath = os.path.join(self._data_path, 'msi_prebuild', script)
     if filepath.endswith('.ps1'):
-      command = 'powershell.exe "{0:s}"'.format(filepath)
+      command = 'Powershell.exe -ExecutionPolicy ByPass "{0:s}"'.format(
+          filepath)
 
     elif filepath.endswith('py'):
       command = '{0:s} "{1:s}"'.format(sys.executable, filepath)

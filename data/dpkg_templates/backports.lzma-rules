@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --buildsystem=pybuild --with=python2
+
+.PHONY: override_dh_auto_install
+override_dh_auto_install:
+	dh_auto_install --destdir $(CURDIR) --namespace backports
+
+.PHONY: override_dh_python2
+override_dh_python2:
+	dh_python2 --namespace backports
