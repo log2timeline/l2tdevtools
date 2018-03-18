@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # pylint: disable=invalid-name
 """Script to generate dpkg packaging files."""
