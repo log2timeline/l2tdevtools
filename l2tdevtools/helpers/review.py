@@ -12,7 +12,6 @@ import sys
 from l2tdevtools.helpers import github
 from l2tdevtools.helpers import projects
 from l2tdevtools.helpers import pylint
-from l2tdevtools.helpers import readthedocs
 from l2tdevtools.helpers import upload
 from l2tdevtools.helpers import yapf
 
@@ -463,17 +462,6 @@ class ReviewHelper(object):
       print('Unable to update dpkg changelog file.')
       self._git_helper.DropUncommittedChanges()
       return False
-
-    apidoc_config_path = os.path.join('docs', 'conf.py')
-    if os.path.exists(apidoc_config_path):
-      self._git_helper.AddPath('docs')
-
-      readthedocs_helper = readthedocs.ReadTheDocsHelper(self._project_name)
-
-      # The project wiki repo contains the documentation and
-      # has no trigger on update webhook for readthedocs.
-      # So we trigger readthedocs directly to build the docs.
-      readthedocs_helper.TriggerBuild()
 
     if not self._git_helper.CommitToOriginInNameOf(
         codereview_issue_number, self._merge_author, self._merge_description):
