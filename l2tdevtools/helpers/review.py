@@ -14,6 +14,7 @@ from l2tdevtools.helpers import projects
 from l2tdevtools.helpers import pylint
 from l2tdevtools.helpers import readthedocs
 from l2tdevtools.helpers import upload
+from l2tdevtools.helpers import yapf
 
 from l2tdevtools.helpers import git
 from l2tdevtools.lib import netrcfile
@@ -26,6 +27,10 @@ class ReviewHelper(object):
   _PROJECT_NAME_PREFIX_REGEX = re.compile(
       r'\[({0:s})\] '.format(
           '|'.join(projects.ProjectsHelper.SUPPORTED_PROJECTS)))
+
+  # Commands that trigger inspection (pylint, yapf) of changed files.
+  _CODE_INSPECTION_COMMANDS = frozenset(
+      ['create', 'merge', 'lint', 'lint-test', 'lint_test', 'update'])
 
   def __init__(
       self, command, project_path, github_origin, feature_branch, diffbase,
@@ -192,9 +197,9 @@ class ReviewHelper(object):
         if not self._codereview_helper.CloseIssue(codereview_issue_number):
           print('Unable to close code review: {0!s}'.format(
               codereview_issue_number))  # yapf: disable
-          print((
-              'Close it manually on: https://codereview.appspot.com/'
-              '{0!s}').format(codereview_issue_number))
+          print(
+              ('Close it manually on: https://codereview.appspot.com/'
+               '{0!s}').format(codereview_issue_number))
 
     return True
 
@@ -358,6 +363,47 @@ class ReviewHelper(object):
 
     return True
 
+  def CheckStyle(self):
+    """Checks the code style of a change.
+
+    Returns:
+      bool: True if the code style check was successful or no style was defined.
+    """
+    yapf_helper = yapf.YapfHelper()
+    configuration = yapf_helper.GetStyleConfig(self._project_path)
+    if not configuration:
+      return True
+
+    if self._command not in self._CODE_INSPECTION_COMMANDS:
+      return True
+
+    if not yapf_helper.CheckUpToDateVersion():
+      message = '{0:s} aborted - yapf version {1:s} or later required.'.format(
+          self._command.title(), pylint.PylintHelper.MINIMUM_VERSION)
+      print(message)
+      return False
+
+    if self._all_files:
+      diffbase = None
+    elif self._command == 'merge':
+      diffbase = 'origin/master'
+    else:
+      diffbase = self._diffbase
+
+    changed_python_files = self._git_helper.GetChangedPythonFiles(
+        diffbase=diffbase)
+
+    if not yapf_helper.CheckFiles(changed_python_files, configuration):
+      message = '{0:s} aborted - unable to pass style inspection.'.format(
+          self._command.title())
+      print(message)
+
+      if self._command == 'merge':
+        self._git_helper.DropUncommittedChanges()
+      return False
+
+    return True
+
   # yapf: disable
   def Lint(self):
     """Lints a review.
@@ -368,9 +414,7 @@ class ReviewHelper(object):
     if self._project_name == 'l2tdocs':
       return True
 
-    if self._command not in (
-        'create', 'create-pr', 'create_pr', 'merge', 'lint', 'lint-test',
-        'lint_test', 'update'):
+    if self._command not in self._CODE_INSPECTION_COMMANDS:
       return True
 
     pylint_helper = pylint.PylintHelper()
@@ -440,8 +484,7 @@ class ReviewHelper(object):
     commit_message = (
         'Changes have been merged with master branch. '
         'To close the review and clean up the feature branch you can run: '
-        'review.py close {0:s}'
-    ).format(self._fork_feature_branch)
+        'review.py close {0:s}').format(self._fork_feature_branch)
     self._codereview_helper.AddMergeMessage(
         codereview_issue_number, commit_message)
 
@@ -617,6 +660,7 @@ class ReviewHelper(object):
     else:
       description = user_input
 
+    # yapf: disable
     if not self._codereview_helper.UpdateIssue(
         self._codereview_issue_number, self._diffbase, description):
       print('Unable to update code review: {0!s}'.format(
@@ -624,6 +668,7 @@ class ReviewHelper(object):
       return False
 
     return True
+    # yapf: enable
 
   def UpdateAuthors(self):
     """Updates the authors.

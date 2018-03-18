@@ -59,6 +59,11 @@ def Main():
           'The review script is running offline and any online check is '
           'skipped.'))
 
+  help_message = 'Enable code style checking with yapf.'
+  argument_parser.add_argument(
+      '--enable-yapf', '--enable_yapf', dest='enable_yapf', action='store_true',
+      default=False, help=help_message)
+
   commands_parser = argument_parser.add_subparsers(dest='command')
 
   close_command_parser = commands_parser.add_parser('close')
@@ -218,6 +223,10 @@ def Main():
 
   if not review_helper.Lint():
     return False
+
+  if options.enable_yapf:
+    if not review_helper.CheckStyle():
+      return False
 
   if not review_helper.Test():
     return False
