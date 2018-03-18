@@ -6,7 +6,7 @@
 .PHONY: override_dh_auto_clean
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -rf build backports.functools_lru_cache.egg-info/SOURCES.txt backports.functools_lru_cache.egg-info/PKG-INFO
+	rm -rf build backports.functools_lru_cache*.egg-info/SOURCES.txt backports.functools_lru_cache*.egg-info/PKG-INFO
 
 .PHONY: override_dh_auto_install
 override_dh_auto_install:

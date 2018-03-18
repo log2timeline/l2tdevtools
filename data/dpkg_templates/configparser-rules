@@ -6,11 +6,11 @@
 .PHONY: override_dh_auto_clean
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -rf build backports.lzma*.egg-info
+	rm -rf build configparser*.egg-info/SOURCES.txt configparser*.egg-info/PKG-INFO
 
 .PHONY: override_dh_auto_install
 override_dh_auto_install:
-	dh_auto_install --destdir $(CURDIR) --namespace backports
+	dh_auto_install --destdir $(CURDIR)
 
 .PHONY: override_dh_python2
 override_dh_python2:
