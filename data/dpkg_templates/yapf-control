@@ -9,7 +9,7 @@ Homepage: https://github.com/google/yapf
 
 Package: python-yapf
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: ${{misc:Depends}}, ${{python:Depends}}
 Breaks: yapf (<< 0.19.0-1~)
 Replaces: yapf (<< 0.19.0-1~)
 Description: public modules for yapf (Python 2)
@@ -23,7 +23,7 @@ Description: public modules for yapf (Python 2)
 
 Package: yapf
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-yapf (= ${binary:Version})
+Depends: ${{misc:Depends}}, ${{python:Depends}}, python-yapf (= ${{binary:Version}})
 Description: Python code formatter for different styles (Python 2)
  Yapf is a tool that reformats code to the best formatting that conforms to the
  style guide. It is not only concerned with lint errors, but also with the
