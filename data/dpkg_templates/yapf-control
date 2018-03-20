@@ -1,0 +1,34 @@
+Source: yapf
+Section: python
+Priority: extra
+Maintainer: Bill Wendling <morbo@google.com>
+Build-Depends: debhelper (>=9), dh-python, python-all, python-setuptools, python-nose
+Standards-Version: 3.9.5
+X-Python-Version: >= 2.7
+Homepage: https://github.com/google/yapf
+
+Package: python-yapf
+Architecture: all
+Depends: ${{misc:Depends}}, ${{python:Depends}}
+Breaks: yapf (<< 0.19.0-1~)
+Replaces: yapf (<< 0.19.0-1~)
+Description: public modules for yapf (Python 2)
+ Yapf is a tool that reformats code to the best formatting that conforms to the
+ style guide. It is not only concerned with lint errors, but also with the
+ styilistic appearance of Python code. The idea is also similar to the 'gofmt'
+ tool for the Go programming language. This package installs the tool for Python
+ 2.
+ .
+ This package provides the modules for Python 2.
+
+Package: yapf
+Architecture: all
+Depends: ${{misc:Depends}}, ${{python:Depends}}, python-yapf (= ${{binary:Version}})
+Description: Python code formatter for different styles (Python 2)
+ Yapf is a tool that reformats code to the best formatting that conforms to the
+ style guide. It is not only concerned with lint errors, but also with the
+ styilistic appearance of Python code. The idea is also similar to the 'gofmt'
+ tool for the Go programming language. This package installs the tool for Python
+ 2.
+ .
+ This package provides the command-line interface for Python 2.
