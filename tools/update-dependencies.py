@@ -812,7 +812,9 @@ class TravisInstallScriptWriter(DependencyFileWriter):
 
     test_dependencies = ['python-mock', 'python-tox']
     if self._project_definition.name == 'artifacts':
+      # Note that the artifacts tests will use the Python 2 version of yapf.
       test_dependencies.append('python-yapf')
+      test_dependencies.append('yapf')
 
     test_dependencies = ' '.join(sorted(test_dependencies))
     file_content.append('PYTHON2_TEST_DEPENDENCIES="{0:s}";'.format(
@@ -829,7 +831,9 @@ class TravisInstallScriptWriter(DependencyFileWriter):
 
     test_dependencies = ['python3-mock', 'python3-setuptools', 'python3-tox']
     if self._project_definition.name == 'artifacts':
-      test_dependencies.append('python3-yapf')
+      # Note that the artifacts tests will use the Python 2 version of yapf.
+      test_dependencies.append('python-yapf')
+      test_dependencies.append('yapf')
 
     test_dependencies = ' '.join(sorted(test_dependencies))
     file_content.append('PYTHON3_TEST_DEPENDENCIES="{0:s}";'.format(
