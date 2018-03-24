@@ -2,16 +2,23 @@
 #
 # Script to set up Travis-CI test VM.
 
-COVERALL_DEPENDENCIES="python-coverage python-coveralls python-docopt";
+PYTHON2_DEPENDENCIES="pylint";
 
-L2TDEVTOOLS_DEPENDENCIES="pylint";
+PYTHON2_TEST_DEPENDENCIES="python-coverage";
+
+PYTHON3_DEPENDENCIES="";
+
+PYTHON3_TEST_DEPENDENCIES="pylint";
 
 # Exit on error.
 set -e;
 
-if test `uname -s` = "Linux";
+if test ${TRAVIS_OS_NAME} = "linux";
 then
-	sudo add-apt-repository ppa:gift/dev -y;
-	sudo apt-get update -q;
-	sudo apt-get install -y ${COVERALL_DEPENDENCIES} ${L2TDEVTOOLS_DEPENDENCIES};
+	if test ${TRAVIS_PYTHON_VERSION} = "2.7";
+	then
+		sudo apt-get install -y ${PYTHON2_DEPENDENCIES} ${PYTHON2_TEST_DEPENDENCIES};
+	else
+		sudo apt-get install -y ${PYTHON3_DEPENDENCIES} ${PYTHON3_TEST_DEPENDENCIES};
+	fi
 fi
