@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-import l2tdevtools.helpers.review as review_helper
+from l2tdevtools.review_helpers import review
 
 
 class ReviewHelperTest(unittest.TestCase):
@@ -14,7 +14,7 @@ class ReviewHelperTest(unittest.TestCase):
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""
-    helper = review_helper.ReviewHelper(
+    helper = review.ReviewHelper(
         'test', '.', 'https://github.com/log2timeline/l2tdevtools.git',
         'import', 'upstream/master')
     self.assertIsNotNone(helper)

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import json
 import logging
 
-from l2tdevtools.helpers import url_lib
+from l2tdevtools.review_helpers import url_lib
 from l2tdevtools.lib import errors
 
 
