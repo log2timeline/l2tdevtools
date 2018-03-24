@@ -233,8 +233,9 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
-# Test is flaky on Travis-CI macOS.
-@unittest.expectedFailure
+@unittest.skipIf(
+    os.environ.get('TRAVIS_OS_NAME') == 'osx',
+    'Test is flaky for macOS on Travis')
 class PyPIDownloadHelperTest(unittest.TestCase):
   """Tests for the PyPi download helper."""
 
