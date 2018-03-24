@@ -137,7 +137,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
   def GetPackageDownloadURLs(
       self, preferred_machine_type=None, preferred_operating_system=None,
       use_api=False):
-    """Retrieves the package download URL for a given URL.
+    """Retrieves the package download URLs for a given system configuration.
 
     Args:
       preferred_machine_type (Optional[str]): preferred machine type, where
@@ -149,7 +149,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
 
     Returns:
       list[str]: list of package download URLs or None if no package download
-          URL could be determined.
+          URLs could be determined.
     """
     download_url = self._GetDownloadURL(
         preferred_machine_type=preferred_machine_type,

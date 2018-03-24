@@ -51,6 +51,7 @@ class DownloadHelperTest(unittest.TestCase):
     expected_page_content = b''
     with open(self._FILENAME, 'rb') as file_object:
       expected_page_content = file_object.read()
+      expected_page_content = expected_page_content.decode('utf-8')
 
     self.assertEqual(page_content, expected_page_content)
 

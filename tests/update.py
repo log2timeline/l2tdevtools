@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import os
+import sys
 import unittest
 
 from tools import update
@@ -27,13 +28,22 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
 
     package_download_urls = download_helper.GetPackageDownloadURLs(
         preferred_machine_type='x86', preferred_operating_system='Windows')
-    self.assertIsNotNone(package_download_urls)
 
-    expected_url = (
-        'https://github.com/log2timeline/l2tbinaries/raw/master/win32/'
-        '{0:s}-{1:s}.1.win32.msi').format(
-            self._PROJECT_NAME, self._PROJECT_VERSION)
-    self.assertIn(expected_url, package_download_urls)
+    if (sys.version_info[0] not in (2, 3) or
+        (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
+        (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
+
+      # Python versions other than 2.7 and 3.6 are not supported.
+      self.assertIsNone(package_download_urls)
+
+    else:
+      self.assertIsNotNone(package_download_urls)
+
+      expected_url = (
+          'https://github.com/log2timeline/l2tbinaries/raw/master/win32/'
+          '{0:s}-{1:s}.1.win32.msi').format(
+              self._PROJECT_NAME, self._PROJECT_VERSION)
+      self.assertIn(expected_url, package_download_urls)
 
 
 @unittest.skipIf(
@@ -41,6 +51,8 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
     'TLS 1.2 not supported by macOS on Travis')
 class DependencyUpdaterTest(unittest.TestCase):
   """Tests for the dependency updater class."""
+
+  # pylint: disable=protected-access
 
   _PROJECT_NAME = 'dfvfs'
   _PROJECT_VERSION = '20171230'
@@ -50,17 +62,25 @@ class DependencyUpdaterTest(unittest.TestCase):
     dependency_updater = update.DependencyUpdater(
         preferred_machine_type='x86', preferred_operating_system='Windows')
 
-    # pylint: disable=protected-access
     package_filenames, package_versions = (
         dependency_updater._GetPackageFilenamesAndVersions([]))
 
-    self.assertIsNotNone(package_filenames)
-    self.assertIsNotNone(package_versions)
+    if (sys.version_info[0] not in (2, 3) or
+        (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
+        (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
 
-    self.assertEqual(
-        package_filenames.get(self._PROJECT_NAME, None),
-        '{0:s}-{1:s}.1.win32.msi'.format(
-            self._PROJECT_NAME, self._PROJECT_VERSION))
+      # Python versions other than 2.7 and 3.6 are not supported.
+      self.assertIsNone(package_filenames)
+      self.assertIsNone(package_versions)
+
+    else:
+      self.assertIsNotNone(package_filenames)
+      self.assertIsNotNone(package_versions)
+
+      self.assertEqual(
+          package_filenames.get(self._PROJECT_NAME, None),
+          '{0:s}-{1:s}.1.win32.msi'.format(
+              self._PROJECT_NAME, self._PROJECT_VERSION))
 
     self.assertEqual(
         package_versions.get(self._PROJECT_NAME, None),
