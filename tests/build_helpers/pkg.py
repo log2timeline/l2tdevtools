@@ -7,7 +7,9 @@ from __future__ import unicode_literals
 import unittest
 
 
-# TODO: add BuildHelperFactory tests.
+# TODO: add PKGBuildHelper tests.
+# TODO: add ConfigureMakePKGBuildHelper tests.
+# TODO: add SetupPyPKGBuildHelper tests.
 
 
 if __name__ == '__main__':
