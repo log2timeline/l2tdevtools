@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 
 import unittest
 
-from l2tdevtools.helpers import github
+from l2tdevtools.review_helpers import github
 
-from tests.helpers import test_lib
+from tests.review_helpers import test_lib
 
 
 class GitHubHelperTest(unittest.TestCase):

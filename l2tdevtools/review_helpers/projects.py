@@ -8,7 +8,7 @@ import os
 import random
 import time
 
-from l2tdevtools.helpers import cli
+from l2tdevtools.review_helpers import cli
 
 
 class ProjectsHelper(cli.CLIHelper):

@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Tests for the yapf helper."""
+"""Tests for the git helper."""
 
 from __future__ import unicode_literals
 
 import unittest
 
-import l2tdevtools.helpers.yapf as yapf_helper
+from l2tdevtools.review_helpers import git
 
 
-class YapfHelperTest(unittest.TestCase):
-  """Tests the yapf helper"""
+class GitHelperTest(unittest.TestCase):
+  """Tests the git helper"""
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""
-    helper = yapf_helper.YapfHelper()
+    helper = git.GitHelper(
+        u'https://github.com/log2timeline/l2tdevtools.git')
     self.assertIsNotNone(helper)
 
 

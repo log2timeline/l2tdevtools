@@ -9,7 +9,7 @@ import argparse
 import os
 import sys
 
-from l2tdevtools.helpers import review
+from l2tdevtools.review_helpers import review
 
 
 def Main():

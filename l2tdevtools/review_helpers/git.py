@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import os
 
-from l2tdevtools.helpers import cli
+from l2tdevtools.review_helpers import cli
 
 
 class GitHelper(cli.CLIHelper):
