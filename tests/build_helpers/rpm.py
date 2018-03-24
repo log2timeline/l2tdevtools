@@ -7,10 +7,6 @@ from __future__ import unicode_literals
 import unittest
 
 
-# TODO: add PKGBuildHelper tests.
-# TODO: add ConfigureMakePKGBuildHelper tests.
-# TODO: add SetupPyPKGBuildHelper tests.
-
 # TODO: add BaseRPMBuildHelper tests.
 # TODO: add RPMBuildHelper tests.
 # TODO: add ConfigureMakeRPMBuildHelper tests.
@@ -19,12 +15,6 @@ import unittest
 # TODO: add SRPMBuildHelper tests.
 # TODO: add ConfigureMakeSRPMBuildHelper tests.
 # TODO: add SetupPySRPMBuildHelper tests.
-
-# TODO: add SourceBuildHelper tests.
-# TODO: add ConfigureMakeSourceBuildHelper tests.
-# TODO: add SetupPySourceBuildHelper tests.
-
-# TODO: add BuildHelperFactory tests.
 
 
 if __name__ == '__main__':
