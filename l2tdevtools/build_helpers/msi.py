@@ -14,9 +14,9 @@ import shutil
 import subprocess
 import sys
 
-from l2tdevtools.build_helpers import interface
-from l2tdevtools import download_helper
 from l2tdevtools import source_helper
+from l2tdevtools.build_helpers import interface
+from l2tdevtools.download_helpers import zlib
 
 
 class MSIBuildHelper(interface.BuildHelper):
@@ -489,10 +489,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    download_helper_object = download_helper.ZlibDownloadHelper(
-        'http://www.zlib.net')
+    download_helper = zlib.ZlibDownloadHelper('http://www.zlib.net')
     source_helper_object = source_helper.SourcePackageHelper(
-        'zlib', None, download_helper_object)
+        'zlib', None, download_helper)
 
     source_filename = source_helper_object.Download()
     if not source_filename:
