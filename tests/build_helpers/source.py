@@ -7,7 +7,9 @@ from __future__ import unicode_literals
 import unittest
 
 
-# TODO: add BuildHelperFactory tests.
+# TODO: add SourceBuildHelper tests.
+# TODO: add ConfigureMakeSourceBuildHelper tests.
+# TODO: add SetupPySourceBuildHelper tests.
 
 
 if __name__ == '__main__':
