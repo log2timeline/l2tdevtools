@@ -302,8 +302,10 @@ class DependencyUpdater(object):
     Args:
       tuple: contains:
 
-        dict[str, str]: filenames per package.
-        dict[str, str]: versions per package.
+        dict[str, str]: filenames per package or None if no filenames could
+           be determined.
+        dict[str, str]: versions per package or None if no version could
+           be determined.
     """
     python_version_indicator = '-py{0:d}.{1:d}'.format(
         sys.version_info[0], sys.version_info[1])

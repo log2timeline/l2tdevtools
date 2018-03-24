@@ -53,6 +53,9 @@ class DependencyUpdaterTest(unittest.TestCase):
     package_filenames, package_versions = (
         dependency_updater._GetPackageFilenamesAndVersions([]))
 
+    self.assertIsNotNone(package_filenames)
+    self.assertIsNotNone(package_versions)
+
     self.assertEqual(
         package_filenames.get(self._PROJECT_NAME, None),
         '{0:s}-{1:s}.1.win32.msi'.format(

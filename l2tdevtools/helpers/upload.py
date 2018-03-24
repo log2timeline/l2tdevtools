@@ -8,7 +8,7 @@ import logging
 import os
 import sys
 
-# pylint: disable=import-error,no-name-in-module
+# pylint: disable=import-error,no-name-in-module,ungrouped-imports
 if sys.version_info[0] < 3:
   import urllib2 as urllib_error
   import urllib as  urllib_parse
@@ -60,7 +60,7 @@ class UploadHelper(cli.CLIHelper):
     if not codereview_access_token or not xsrf_token:
       return False
 
-    codereview_url = b'https://codereview.appspot.com/{0!s}/publish'.format(
+    codereview_url = 'https://codereview.appspot.com/{0!s}/publish'.format(
         issue_number)
 
     post_data = urllib_parse.urlencode({
@@ -110,7 +110,7 @@ class UploadHelper(cli.CLIHelper):
     if not codereview_access_token or not xsrf_token:
       return False
 
-    codereview_url = b'https://codereview.appspot.com/{0!s}/close'.format(
+    codereview_url = 'https://codereview.appspot.com/{0!s}/close'.format(
         issue_number)
 
     post_data = urllib_parse.urlencode({'xsrf_token': xsrf_token})
@@ -221,7 +221,7 @@ class UploadHelper(cli.CLIHelper):
       if not codereview_access_token:
         return
 
-      codereview_url = b'https://codereview.appspot.com/xsrf_token'
+      codereview_url = 'https://codereview.appspot.com/xsrf_token'
 
       request = urllib_request.Request(codereview_url)
 
@@ -278,7 +278,7 @@ class UploadHelper(cli.CLIHelper):
     Returns:
       dict[str,object]: JSON response or None.
     """
-    codereview_url = b'https://codereview.appspot.com/api/{0!s}'.format(
+    codereview_url = 'https://codereview.appspot.com/api/{0!s}'.format(
         issue_number)
 
     request = urllib_request.Request(codereview_url)
