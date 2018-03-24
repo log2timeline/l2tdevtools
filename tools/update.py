@@ -16,17 +16,17 @@ import re
 import subprocess
 import sys
 
-from l2tdevtools import download_helper
 from l2tdevtools import presets
 from l2tdevtools import projects
 from l2tdevtools import versions
+from l2tdevtools.download_helpers import interface
 
 
 if platform.system() == 'Windows':
   import wmi  # pylint: disable=import-error
 
 
-class GithubRepoDownloadHelper(download_helper.DownloadHelper):
+class GithubRepoDownloadHelper(interface.DownloadHelper):
   """Helps in downloading from a GitHub repository."""
 
   _GITHUB_REPO_API_URL = (
