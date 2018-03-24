@@ -68,7 +68,7 @@ class DependencyHelperTest(test_lib.BaseTestCase):
     module_object = dependency_helper._ImportPythonModule('os')
 
     result, _ = dependency_helper._CheckPythonModuleVersion(
-        module_object, 'os', '__version__', '1.0', '2.0')
+        'os', module_object, '__version__', '1.0', '2.0')
     self.assertFalse(result)
 
     # TODO: add test with version with suffix 17.0.0b1

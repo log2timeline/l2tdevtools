@@ -51,6 +51,7 @@ class DownloadHelperTest(unittest.TestCase):
     expected_page_content = b''
     with open(self._FILENAME, 'rb') as file_object:
       expected_page_content = file_object.read()
+      expected_page_content = expected_page_content.decode('utf-8')
 
     self.assertEqual(page_content, expected_page_content)
 
@@ -232,6 +233,9 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
+@unittest.skipIf(
+    os.environ.get('TRAVIS_OS_NAME') == 'osx',
+    'Test is flaky for macOS on Travis')
 class PyPIDownloadHelperTest(unittest.TestCase):
   """Tests for the PyPi download helper."""
 
@@ -280,6 +284,8 @@ class PyPIDownloadHelperTest(unittest.TestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
+@unittest.skipIf(
+    os.environ.get('APPVEYOR', ''), 'Test is flaky for Windows on AppVeyor')
 @unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')

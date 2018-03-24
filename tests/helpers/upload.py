@@ -23,6 +23,7 @@ class UploadHelperTest(unittest.TestCase):
   # TODO: add test for CreateIssue
   # TODO: add test for GetAccessToken
 
+  @unittest.skipIf(os.environ.get('APPVEYOR', ''), 'AppVeyor not supported')
   @unittest.skipIf(
       os.environ.get('TRAVIS_OS_NAME', ''), 'Travis-CI not supported')
   def testGetXSRFToken(self):
