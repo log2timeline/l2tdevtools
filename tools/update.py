@@ -73,14 +73,14 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
     if operating_system not in ('Darwin', 'Windows'):
       logging.error('Operating system: {0:s} not supported.'.format(
           operating_system))
-      return
+      return None
 
     if (sys.version_info[0] not in (2, 3) or
         (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
         (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
       logging.error('Python version: {0:d}.{1:d} not supported.'.format(
           sys.version_info[0], sys.version_info[1]))
-      return
+      return None
 
     if operating_system == 'Darwin':
       # TODO: determine macOS version.
@@ -97,7 +97,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
     if not sub_directory:
       logging.error('CPU architecture: {0:s} not supported.'.format(
           cpu_architecture))
-      return
+      return None
 
     return sub_directory
 
@@ -121,7 +121,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
         preferred_machine_type=preferred_machine_type,
         preferred_operating_system=preferred_operating_system)
     if not sub_directory:
-      return
+      return None
 
     if use_api:
       # TODO: add support for branch.
@@ -137,7 +137,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
   def GetPackageDownloadURLs(
       self, preferred_machine_type=None, preferred_operating_system=None,
       use_api=False):
-    """Retrieves the package downloads URL for a given URL.
+    """Retrieves the package download URLs for a given system configuration.
 
     Args:
       preferred_machine_type (Optional[str]): preferred machine type, where
@@ -148,18 +148,19 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
           determine the download URL.
 
     Returns:
-      list[str]: list of package download URLs or None.
+      list[str]: list of package download URLs or None if no package download
+          URLs could be determined.
     """
     download_url = self._GetDownloadURL(
         preferred_machine_type=preferred_machine_type,
         preferred_operating_system=preferred_operating_system, use_api=use_api)
     if not download_url:
       logging.info('Missing download URL.')
-      return
+      return None
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     # TODO: skip SHA256SUMS
 
@@ -194,7 +195,7 @@ class GithubRepoDownloadHelper(download_helper.DownloadHelper):
           preferred_machine_type=preferred_machine_type,
           preferred_operating_system=preferred_operating_system)
       if not sub_directory:
-        return
+        return None
 
       # The format of the download URL is:
       # <a class="js-navigation-open" title="{title}" id="{id}" href="{path}"
@@ -302,8 +303,10 @@ class DependencyUpdater(object):
     Args:
       tuple: contains:
 
-        dict[str, str]: filenames per package.
-        dict[str, str]: versions per package.
+        dict[str, str]: filenames per package or None if no filenames could
+           be determined.
+        dict[str, str]: versions per package or None if no version could
+           be determined.
     """
     python_version_indicator = '-py{0:d}.{1:d}'.format(
         sys.version_info[0], sys.version_info[1])
