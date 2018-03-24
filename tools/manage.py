@@ -19,8 +19,8 @@ import zlib
 
 from xml.etree import ElementTree
 
-from l2tdevtools import download_helper
 from l2tdevtools import versions
+from l2tdevtools.download_helpers import interface
 
 
 class COPRProjectManager(object):
@@ -47,7 +47,7 @@ class COPRProjectManager(object):
       name (str): name of the group.
     """
     super(COPRProjectManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper('')
+    self._download_helper = interface.DownloadHelper('')
     self._name = name
 
   def GetPackages(self, project):
@@ -149,7 +149,7 @@ class GithubRepoManager(object):
   def __init__(self):
     """Initializes a github repository manager."""
     super(GithubRepoManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper('')
+    self._download_helper = interface.DownloadHelper('')
 
   def _GetDownloadURL(self, sub_directory, track, use_api=False):
     """Retrieves the download URL.
@@ -280,7 +280,7 @@ class LaunchpadPPAManager(object):
       name (str): name of the PPA.
     """
     super(LaunchpadPPAManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper('')
+    self._download_helper = interface.DownloadHelper('')
     self._name = name
 
   def CopyPackages(self):
@@ -407,7 +407,7 @@ class PyPIManager(object):
   def __init__(self):
     """Initializes a PyPI manager object."""
     super(PyPIManager, self).__init__()
-    self._download_helper = download_helper.DownloadHelper('')
+    self._download_helper = interface.DownloadHelper('')
 
   def CopyPackages(self):
     """Copies packages."""
