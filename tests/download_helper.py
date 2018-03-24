@@ -285,6 +285,8 @@ class PyPIDownloadHelperTest(unittest.TestCase):
 
 
 @unittest.skipIf(
+    os.environ.get('APPVEYOR', ''), 'Test is flaky for Windows on AppVeyor')
+@unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
 class SourceForgeDownloadHelperTest(unittest.TestCase):
