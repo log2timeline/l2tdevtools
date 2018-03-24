@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Tests for the git helper."""
+"""Tests for the pylint helper."""
 
 from __future__ import unicode_literals
 
 import unittest
 
-import l2tdevtools.helpers.git as git_helper
+from l2tdevtools.review_helpers import pylint
 
 
-class GitHelperTest(unittest.TestCase):
-  """Tests the git helper"""
+class PylintHelperTest(unittest.TestCase):
+  """Tests the pylint helper"""
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""
-    helper = git_helper.GitHelper(
-        u'https://github.com/log2timeline/l2tdevtools.git')
+    helper = pylint.PylintHelper()
     self.assertIsNotNone(helper)
 
 

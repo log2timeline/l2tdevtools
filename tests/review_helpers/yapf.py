@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Tests for the pylint helper."""
+"""Tests for the yapf helper."""
 
 from __future__ import unicode_literals
 
 import unittest
 
-import l2tdevtools.helpers.pylint as pylint_helper
+from l2tdevtools.review_helpers import yapf
 
 
-class PylintHelperTest(unittest.TestCase):
-  """Tests the pylint helper"""
+class YapfHelperTest(unittest.TestCase):
+  """Tests the yapf helper"""
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""
-    helper = pylint_helper.PylintHelper()
+    helper = yapf.YapfHelper()
     self.assertIsNotNone(helper)
 
 

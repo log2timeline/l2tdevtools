@@ -1,64 +1,64 @@
 # -*- coding: utf-8 -*-
-"""Helper for interacting with pylint."""
-
+"""Helper for using yapf (Yet Another Python Formatter)."""
 from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
 import subprocess
 
-from l2tdevtools.helpers import cli
+from l2tdevtools.review_helpers import cli
 
 
-class PylintHelper(cli.CLIHelper):
-  """Pylint helper."""
+class YapfHelper(cli.CLIHelper):
+  """yapf helper."""
 
-  MINIMUM_VERSION = '1.7.0'
+  MINIMUM_VERSION = '0.22.0'
 
   _MINIMUM_VERSION_TUPLE = MINIMUM_VERSION.split('.')
 
-  _RCFILE_NAME = '.pylintrc'
+  _RCFILE_NAME = '.style.yapf'
 
   def CheckFiles(self, filenames, rcfile):
-    """Checks if the linting of the files is correct using pylint.
+    """Checks if the style of the files is correct using yapf.
 
     Args:
       filenames (list[str]): names of the files to lint.
       rcfile (str): path to the pylint configuration file to use.
 
     Returns:
-      bool: True if the files were linted without errors.
+      bool: True if the files were checked without errors.
     """
-    print('Running linter on changed files.')
+    print('Checking code style with yapf in changed files.')
     failed_filenames = []
     for filename in filenames:
       print('Checking: {0:s}'.format(filename))
 
-      command = 'pylint --rcfile="{0:s}" {1:s}'.format(rcfile, filename)
+      command = 'yapf --style="{0:s}" --diff {1:s}'.format(rcfile, filename)
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
         failed_filenames.append(filename)
 
     if failed_filenames:
-      print('\nFiles with linter errors:\n{0:s}\n'.format(
-          '\n'.join(failed_filenames)))
+      print(
+          '\nFiles with code style problems:\n{0:s}\n'.format(
+              '\n'.join(failed_filenames)))
       return False
 
     return True
 
   def CheckUpToDateVersion(self):
-    """Checks if the pylint version is up to date.
+    """Checks if the yapf version is up to date.
 
     Returns:
-      bool: True if the pylint version is up to date.
+      bool: True if the yapf version is up to date.
     """
-    exit_code, output, _ = self.RunCommand('pylint --version')
+    exit_code, output, _ = self.RunCommand('yapf --version')
     if exit_code != 0:
       return False
 
     version_tuple = (0, 0, 0)
     for line in output.split(b'\n'):
-      if line.startswith(b'pylint '):
+      if line.startswith(b'yapf '):
         _, _, version = line.partition(b' ')
         # Remove a trailing comma.
         version, _, _ = version.partition(b',')
@@ -67,18 +67,22 @@ class PylintHelper(cli.CLIHelper):
 
     return version_tuple >= self._MINIMUM_VERSION_TUPLE
 
-  def GetRCFile(self, project_path):
-    """Gets the path to the pylint configuration file for a project.
+  def GetStyleConfig(self, project_path):
+    """Gets the path to the yapf code style file for a project.
 
     Args:
       project_path (str): path to the root of the project.
 
     Returns:
-      str: absolute path to the pylint configuration file for the project.
+      str: absolute path to the yapf code style file for the project, or None
+          if there's no code style defined.
     """
     project_file_path = os.path.join(project_path, self._RCFILE_NAME)
     if os.path.exists(project_file_path):
       return os.path.abspath(project_file_path)
 
     default_path = os.path.join(__file__, '..', '..', '..', self._RCFILE_NAME)
-    return os.path.abspath(default_path)
+    default_path = os.path.abspath(default_path)
+    if os.path.exists(default_path):
+      return default_path
+    return None

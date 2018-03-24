@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import os
 import unittest
 
-import l2tdevtools.helpers.upload as upload_helper
+from l2tdevtools.review_helpers import upload
 
 
 class UploadHelperTest(unittest.TestCase):
@@ -15,7 +15,7 @@ class UploadHelperTest(unittest.TestCase):
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""
-    helper = upload_helper.UploadHelper(email_address='onager@deerpie.com')
+    helper = upload.UploadHelper(email_address='onager@deerpie.com')
     self.assertIsNotNone(helper)
 
   # TODO: add test for AddMergeMessage
@@ -28,7 +28,7 @@ class UploadHelperTest(unittest.TestCase):
       os.environ.get('TRAVIS_OS_NAME', ''), 'Travis-CI not supported')
   def testGetXSRFToken(self):
     """Tests the GetXSRFToken function."""
-    helper = upload_helper.UploadHelper(
+    helper = upload.UploadHelper(
         email_address='test@example.com', no_browser=True)
 
     # Only test if the method completes without errors.
@@ -36,7 +36,7 @@ class UploadHelperTest(unittest.TestCase):
 
   def testQueryIssue(self):
     """Tests the QueryIssue function."""
-    helper = upload_helper.UploadHelper(
+    helper = upload.UploadHelper(
         email_address='test@example.com', no_browser=True)
 
     codereview_information = helper.QueryIssue(269830043)
