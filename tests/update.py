@@ -82,9 +82,9 @@ class DependencyUpdaterTest(unittest.TestCase):
           '{0:s}-{1:s}.1.win32.msi'.format(
               self._PROJECT_NAME, self._PROJECT_VERSION))
 
-    self.assertEqual(
-        package_versions.get(self._PROJECT_NAME, None),
-        [self._PROJECT_VERSION, '1'])
+      self.assertEqual(
+          package_versions.get(self._PROJECT_NAME, None),
+          [self._PROJECT_VERSION, '1'])
 
 
 if __name__ == '__main__':
