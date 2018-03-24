@@ -7,7 +7,6 @@ environment:
 
 matrix:
   allow_failures:
-  - TARGET: python27
   - TARGET: python36
 
 install:
