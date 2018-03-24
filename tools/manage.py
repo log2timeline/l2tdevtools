@@ -151,11 +151,12 @@ class GithubRepoManager(object):
     super(GithubRepoManager, self).__init__()
     self._download_helper = download_helper.DownloadHelper('')
 
-  def _GetDownloadURL(self, sub_directory, use_api=False):
+  def _GetDownloadURL(self, sub_directory, track, use_api=False):
     """Retrieves the download URL.
 
     Args:
       sub_directory (str): machine type sub directory.
+      track (str): track name.
       use_api (Optional[bool]): True if the API should be used.
 
     Returns:
@@ -164,21 +165,27 @@ class GithubRepoManager(object):
     if not sub_directory:
       return
 
+    if track == 'stable':
+      branch = 'master'
+    else:
+      branch = track
+
     if use_api:
-      download_url = '{0:s}/contents/{1:s}'.format(
-          self._GITHUB_REPO_API_URL, sub_directory)
+      download_url = '{0:s}/contents/{1:s}?ref={2:s}'.format(
+          self._GITHUB_REPO_API_URL, sub_directory, branch)
 
     else:
-      download_url = '{0:s}/tree/master/{1:s}'.format(
-          self._GITHUB_REPO_URL, sub_directory)
+      download_url = '{0:s}/tree/{1:s}/{2:s}'.format(
+          self._GITHUB_REPO_URL, branch, sub_directory)
 
     return download_url
 
-  def GetPackages(self, sub_directory, use_api=False):
+  def GetPackages(self, sub_directory, track, use_api=False):
     """Retrieves a list of packages of a specific sub directory.
 
     Args:
       sub_directory (str): machine type sub directory.
+      track (str): track name.
       use_api (Optional[bool]): True if the API should be used.
 
     Returns:
@@ -189,7 +196,7 @@ class GithubRepoManager(object):
       logging.info('Missing machine type sub directory.')
       return
 
-    download_url = self._GetDownloadURL(sub_directory, use_api=use_api)
+    download_url = self._GetDownloadURL(sub_directory, track, use_api=use_api)
     if not download_url:
       logging.info('Missing download URL.')
       return
@@ -572,13 +579,15 @@ class PackagesManager(object):
 
     return self._ComparePackages(reference_packages, packages)
 
-  def CompareDirectoryWithGithubRepo(self, reference_directory, sub_directory):
+  def CompareDirectoryWithGithubRepo(
+      self, reference_directory, sub_directory, track):
     """Compares a directory containing msi or dmg packages with a github repo.
 
     Args:
       reference_directory (str): path of the reference directory that contains
           msi or dmg packages.
       sub_directory (str): name of the machine type sub directory.
+      track (str): name of the track.
 
     Returns:
       tuple: containing:
@@ -607,7 +616,7 @@ class PackagesManager(object):
       name, _, version = directory_entry.rpartition('-')
       reference_packages[name] = version
 
-    packages = self._github_repo_manager.GetPackages(sub_directory)
+    packages = self._github_repo_manager.GetPackages(sub_directory, track)
     return self._ComparePackages(reference_packages, packages)
 
   def CompareDirectoryWithLaunchpadPPATrack(
@@ -663,6 +672,29 @@ class PackagesManager(object):
     reference_packages = self._copr_project_manager.GetPackages(
         reference_project)
     packages = self._copr_project_manager.GetPackages(project)
+
+    return self._ComparePackages(reference_packages, packages)
+
+  def CompareGithubRepos(self, sub_directory, reference_track, track):
+    """Compares two github repos PPA tracks.
+
+    Args:
+      sub_directory (str): name of the machine type sub directory.
+      reference_track (str): name of the reference track.
+      track (str): name of the track.
+
+    Returns:
+      tuple: containing:
+
+        dict[str, str]: new package names and versions. New packages are those
+            that are present in the reference track but not in the track.
+        dict[str, str]: newer existing package names and versions. Newer
+            existing packages are those that have a newer version in the
+            reference track.
+    """
+    reference_packages = self._github_repo_manager.GetPackages(
+        sub_directory, reference_track)
+    packages = self._github_repo_manager.GetPackages(sub_directory, track)
 
     return self._ComparePackages(reference_packages, packages)
 
@@ -799,7 +831,8 @@ def Main():
   """
   actions = frozenset([
       'copr-diff-dev', 'copr-diff-stable', 'copr-diff-testing', 'csv-diff',
-      'l2tbinaries-diff', 'launchpad-diff-dev', 'launchpad-diff-stable',
+      'l2tbinaries-diff-dev', 'l2tbinaries-diff-stable',
+      'l2tbinaries-diff-testing', 'launchpad-diff-dev', 'launchpad-diff-stable',
       'launchpad-diff-testing', 'pypi-diff'])
 
   argument_parser = argparse.ArgumentParser(description=(
@@ -838,7 +871,6 @@ def Main():
 
   # TODO: add action to upload files to PPA.
   # TODO: add action to copy files between PPA tracks.
-  # TODO: add l2tbinaries support.
   # TODO: add pypi support.
 
   packages_manager = PackagesManager()
@@ -886,15 +918,29 @@ def Main():
     sub_directory = packages_manager.GetMachineTypeSubDirectory(
         preferred_machine_type=options.machine_type)
 
-    reference_directory = options.build_directory
+    if track == 'testing':
+      reference_directory = options.build_directory
 
-    # TODO: compare from l2tbinaries git repo.
-    new_packages, new_versions = (
-        packages_manager.CompareDirectoryWithGithubRepo(
-            reference_directory, sub_directory))
+      new_packages, new_versions = (
+          packages_manager.CompareDirectoryWithGithubRepo(
+              reference_directory, sub_directory, track))
 
-    diff_header = (
-        'Difference between: {0:s} and release'.format(reference_directory))
+      diff_header = (
+          'Difference between: {0:s} and testing for: {1:s}'.format(
+              reference_directory, sub_directory))
+
+    else:
+      if track == 'dev':
+        reference_track = 'testing'
+      else:
+        reference_track = 'dev'
+
+      new_packages, new_versions = packages_manager.CompareGithubRepos(
+          sub_directory, reference_track, track)
+
+      diff_header = (
+          'Difference between l2tbinaries tracks: {0:s} and {1:s} for: '
+          '{2:s}').format(reference_track, track, sub_directory)
 
   elif action_tuple[0] == 'launchpad' and action_tuple[1] == 'diff':
     track = action_tuple[2]
