@@ -298,6 +298,7 @@ class UploadHelper(cli.CLIHelper):
       return
 
     response_data = url_object.read()
+    response_data = response_data.decode('utf-8')
     return json.loads(response_data)
 
   def UpdateIssue(self, issue_number, diffbase, description):

@@ -27,6 +27,7 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
 
     package_download_urls = download_helper.GetPackageDownloadURLs(
         preferred_machine_type='x86', preferred_operating_system='Windows')
+    self.assertIsNotNone(package_download_urls)
 
     expected_url = (
         'https://github.com/log2timeline/l2tbinaries/raw/master/win32/'
