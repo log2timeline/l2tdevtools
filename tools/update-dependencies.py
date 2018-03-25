@@ -852,7 +852,18 @@ class TravisRunTestsScriptWriter(DependencyFileWriter):
 
   def Write(self):
     """Writes a runtests.sh file."""
-    template_mappings = {'project_name': self._project_definition.name}
+    paths_to_lint = [self._project_definition.name]
+    for path_to_lint in ('config', 'scripts', 'tests', 'tools'):
+      if os.path.isdir(path_to_lint):
+        paths_to_lint.append(path_to_lint)
+
+    paths_to_lint = sorted(paths_to_lint)
+    if os.path.isfile('setup.py'):
+      paths_to_lint.insert(0, 'setup.py')
+
+    template_mappings = {
+        'project_name': self._project_definition.name,
+        'paths_to_lint': ' '.join(paths_to_lint)}
 
     template_file = os.path.join(
         self._l2tdevtools_path, 'data', 'templates', 'runtests.sh')
