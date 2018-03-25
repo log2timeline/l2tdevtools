@@ -242,11 +242,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       logging.error('Missing dependency: dokan.')
       return False
 
-    # For the Visual Studio builds later than 2008 the convert the 2008
-    # solution and project files need to be converted to the newer version.
-    if self.version in ('2010', '2012', '2013', '2015', '2017'):
-      self._ConvertSolutionFiles(source_directory)
-
     # Detect architecture based on Visual Studion Platform environment
     self._BuildPrepare(source_helper_object, source_directory)
 
@@ -393,28 +388,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       return False
 
     return True
-
-  def _ConvertSolutionFiles(self, source_directory):
-    """Converts the Visual Studio solution and project files.
-
-    Args:
-      source_directory (str): name of the source directory.
-    """
-    logging.info('Converting Visual Studio solution and project files.')
-
-    os.chdir(source_directory)
-
-    try:
-      filenames_glob = os.path.join('msvscpp', '*.sln')
-      solution_filenames = glob.glob(filenames_glob)
-
-      if len(solution_filenames) != 1:
-        logging.error('Unable to find Visual Studio solution file')
-      else:
-        solution_filename = solution_filenames[0]
-
-    finally:
-      os.chdir('..')
 
   def _MoveMSI(self, python_module_name, build_directory):
     """Moves the MSI from the dist sub directory into the build directory.
