@@ -12,7 +12,7 @@ if test "$${TARGET}" = "pylint";
 then
 	pylint --version
 
-	for FILE in `find setup.py ${project_name} tests -name \*.py`;
+	for FILE in `find ${paths_to_lint} -name \*.py`;
 	do
 		echo "Checking: $${FILE}";
 
