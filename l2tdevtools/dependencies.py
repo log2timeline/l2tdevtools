@@ -501,7 +501,8 @@ class DependencyHelper(object):
         'pyvhdi',
         'pyvmdk',
         'pyvshadow',
-        'pyvslvm')
+        'pyvslvm',
+        'yara')
 
     extension_packages = []
     for dependency in sorted(
