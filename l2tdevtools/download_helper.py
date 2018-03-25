@@ -19,7 +19,8 @@ class DownloadHelperFactory(object):
       download_url (str): download URL.
 
     Returns:
-      DownloadHelper: download helper or None.
+      DownloadHelper: download helper or None if no corresponding helper
+          could be found for the download URL.
     """
     if download_url.endswith('/'):
       download_url = download_url[:-1]
@@ -46,6 +47,6 @@ class DownloadHelperFactory(object):
       download_helper_class = None
 
     if not download_helper_class:
-      return
+      return None
 
     return download_helper_class(download_url)

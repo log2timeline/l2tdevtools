@@ -445,20 +445,20 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       source_helper_object (SourceHelper): source helper.
 
     Returns:
-      str: path of the generated rpm spec file or None.
+      str: path of the generated rpm spec file or None if not available.
     """
     source_directory = source_helper_object.Create()
     if not source_directory:
       logging.error(
           'Extraction of source package: {0:s} failed'.format(source_filename))
-      return
+      return None
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     if not spec_file_generator.GenerateWithSetupPy(
         source_directory, log_file_path):
-      return
+      return None
 
     if project_name.startswith('python-'):
       project_name = project_name[7:]
@@ -472,7 +472,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
         self._project_definition, source_directory, source_filename,
         project_name, project_version, input_file_path, output_file_path):
-      return
+      return None
 
     return output_file_path
 
@@ -697,20 +697,20 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
       source_helper_object (SourceHelper): source helper.
 
     Returns:
-      str: path of the generated rpm spec file or None.
+      str: path of the generated rpm spec file or None if not available.
     """
     source_directory = source_helper_object.Create()
     if not source_directory:
       logging.error(
           'Extraction of source package: {0:s} failed'.format(source_filename))
-      return
+      return None
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     if not spec_file_generator.GenerateWithSetupPy(
         source_directory, log_file_path):
-      return
+      return None
 
     if project_name.startswith('python-'):
       project_name = project_name[7:]
@@ -724,7 +724,7 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
         self._project_definition, source_directory, source_filename,
         project_name, project_version, input_file_path, output_file_path):
-      return
+      return None
 
     return output_file_path
 

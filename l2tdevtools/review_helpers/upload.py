@@ -149,7 +149,7 @@ class UploadHelper(cli.CLIHelper):
       description (str): description.
 
     Returns:
-      int: codereview issue number or None.
+      int: codereview issue number or None if not available.
     """
     reviewer = projects.ProjectsHelper.GetReviewer(
         project_name, self._email_address)
@@ -184,7 +184,7 @@ class UploadHelper(cli.CLIHelper):
     print(output)
 
     if exit_code != 0:
-      return
+      return None
 
     issue_url_line_start = (
         'Issue created. URL: http://codereview.appspot.com/')
@@ -214,12 +214,12 @@ class UploadHelper(cli.CLIHelper):
     """Retrieves the XSRF token.
 
     Returns:
-      str: codereview XSRF token or None if the token could not be obtained.
+      str: codereview XSRF token or None if not available.
     """
     if not self._xsrf_token:
       codereview_access_token = self.GetAccessToken()
       if not codereview_access_token:
-        return
+        return None
 
       codereview_url = 'https://codereview.appspot.com/xsrf_token'
 
@@ -236,13 +236,13 @@ class UploadHelper(cli.CLIHelper):
         logging.error(
             'Failed retrieving codereview XSRF token with error: {0!s}'.format(
                 exception))
-        return
+        return None
 
       if url_object.code != 200:
         logging.error((
             'Failed retrieving codereview XSRF token with status code: '
             '{0:d}').format(url_object.code))
-        return
+        return None
 
       self._xsrf_token = url_object.read()
 
@@ -276,7 +276,7 @@ class UploadHelper(cli.CLIHelper):
       issue_number (int|str): codereview issue number.
 
     Returns:
-      dict[str,object]: JSON response or None.
+      dict[str,object]: JSON response or None if not available.
     """
     codereview_url = 'https://codereview.appspot.com/api/{0!s}'.format(
         issue_number)
@@ -289,13 +289,13 @@ class UploadHelper(cli.CLIHelper):
       logging.error(
           'Failed querying codereview issue: {0!s} with error: {1!s}'.format(
               issue_number, exception))
-      return
+      return None
 
     if url_object.code != 200:
       logging.error((
           'Failed querying codereview issue: {0!s} with status code: '
           '{1:d}').format(issue_number, url_object.code))
-      return
+      return None
 
     response_data = url_object.read()
     response_data = response_data.decode('utf-8')

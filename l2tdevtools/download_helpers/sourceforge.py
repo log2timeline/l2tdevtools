@@ -37,7 +37,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
           or None.
 
     Returns:
-      str: latest version number or None on error.
+      str: latest version number or None if not available.
     """
     if version_definition:
       earliest_version = version_definition.GetEarliestVersion()
@@ -51,7 +51,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     if self._project_name == 'pyparsing':
       # The format of the project download URL is:
@@ -71,7 +71,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
       matches = re.findall(expression_string, page_content)
 
     if not matches:
-      return
+      return None
 
     numeric_matches = [''.join(match.split('.')) for match in matches]
     return matches[numeric_matches.index(max(numeric_matches))]
@@ -84,7 +84,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
       project_version (str): version of the project.
 
     Returns:
-      The download URL of the project or None on error.
+      The download URL of the project or None if not available.
     """
     # TODO: make this more robust to detect different naming schemes.
     download_url = (
@@ -93,7 +93,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     download_url = None
     if self._project_name == 'pyparsing':

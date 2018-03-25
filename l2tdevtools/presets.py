@@ -49,7 +49,7 @@ class PresetDefinitionReader(object):
     try:
       return config_parser.get(section_name, value_name)
     except configparser.NoOptionError:
-      return
+      return None
 
   def Read(self, file_object):
     """Reads preset definitions.
