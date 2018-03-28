@@ -74,14 +74,14 @@ class GitRepositorySourceHelper(SourceHelper):
       str: name of the source directory or None on error.
     """
     if not self.project_name or not self._git_url:
-      return
+      return None
 
     command = 'git clone {0:s}'.format(self._git_url)
     exit_code = subprocess.call(
         '{0:s}'.format(command), shell=True)
     if exit_code != 0:
       logging.error('Running: "{0:s}" failed.'.format(command))
-      return
+      return None
 
     return self.project_name
 
@@ -92,7 +92,7 @@ class GitRepositorySourceHelper(SourceHelper):
       str: project identifier or None on error.
     """
     # TODO: determine project identifier based on git url.
-    return
+    return None
 
 
 class LibyalGitRepositorySourceHelper(GitRepositorySourceHelper):
@@ -105,14 +105,14 @@ class LibyalGitRepositorySourceHelper(GitRepositorySourceHelper):
       str: name of the source directory or None on error.
     """
     if not self.project_name or not self._git_url:
-      return
+      return None
 
     command = 'git clone {0:s}'.format(self._git_url)
     exit_code = subprocess.call(
         '{0:s}'.format(command), shell=True)
     if exit_code != 0:
       logging.error('Running: "{0:s}" failed.'.format(command))
-      return
+      return None
 
     source_directory = self.project_name
 
@@ -121,21 +121,21 @@ class LibyalGitRepositorySourceHelper(GitRepositorySourceHelper):
         '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
     if exit_code != 0:
       logging.error('Running: "{0:s}" failed.'.format(command))
-      return
+      return None
 
     command = './autogen.sh'
     exit_code = subprocess.call(
         '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
     if exit_code != 0:
       logging.error('Running: "{0:s}" failed.'.format(command))
-      return
+      return None
 
     command = './configure'
     exit_code = subprocess.call(
         '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
     if exit_code != 0:
       logging.error('Running: "{0:s}" failed.'.format(command))
-      return
+      return None
 
     return source_directory
 
@@ -196,7 +196,7 @@ class SourcePackageHelper(SourceHelper):
           logging.error(
               'Unsupported directory name in tar file: {0:s}'.format(
                   source_filename))
-          return
+          return None
         if os.path.exists(directory_name):
           break
         logging.info('Extracting: {0:s}'.format(source_filename))
@@ -240,9 +240,11 @@ class SourcePackageHelper(SourceHelper):
           logging.error(
               'Unsupported directory name in zip file: {0:s}'.format(
                   source_filename))
-          return
+          return None
+
         if os.path.exists(directory_name):
           break
+
         logging.info('Extracting: {0:s}'.format(source_filename))
 
       elif not filename.startswith(directory_name):
@@ -307,7 +309,7 @@ class SourcePackageHelper(SourceHelper):
       _ = self.Download()
 
     if not self._source_filename or not os.path.exists(self._source_filename):
-      return
+      return None
 
     directory_name = None
     if (self._source_filename.endswith('.tar.bz2') or
@@ -330,7 +332,7 @@ class SourcePackageHelper(SourceHelper):
     if not self._source_filename:
       project_version = self.GetProjectVersion()
       if not project_version:
-        return
+        return None
 
       self._source_filename = self._download_helper.Download(
           self.project_name, project_version)

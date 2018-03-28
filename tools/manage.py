@@ -74,18 +74,18 @@ class COPRProjectManager(object):
     page_content = self._download_helper.DownloadPageContent(download_url)
     if not page_content:
       logging.error('Unable to retrieve repomd.xml.')
-      return
+      return None
 
     repomd_xml = ElementTree.fromstring(page_content)
     xml_elements = repomd_xml.findall(self._PRIMARY_XML_XPATH)
     if not xml_elements or not xml_elements[0].items():
       logging.error('Primary data type missing from repomd.xml.')
-      return
+      return None
 
     href_value_tuple = xml_elements[0].items()[0]
     if not href_value_tuple[1]:
       logging.error('Primary data type missing from repomd.xml.')
-      return
+      return None
 
     download_url = '/'.join([copr_repo_url, href_value_tuple[1]])
     page_content = self._download_helper.DownloadPageContent(
@@ -93,7 +93,7 @@ class COPRProjectManager(object):
     if not page_content:
       _, _, download_url = download_url.rpartition('/')
       logging.error('Unable to retrieve primary.xml.gz.')
-      return
+      return None
 
     with gzip.GzipFile(fileobj=io.BytesIO(page_content)) as file_object:
       page_content = file_object.read()
@@ -103,7 +103,7 @@ class COPRProjectManager(object):
     # warning.
     if primary_xml is None:
       logging.error('Packages missing from primary.xml.')
-      return
+      return None
 
     packages = {}
     for project_xml in primary_xml:
@@ -160,10 +160,10 @@ class GithubRepoManager(object):
       use_api (Optional[bool]): True if the API should be used.
 
     Returns:
-      str: download URL or None.
+      str: download URL or None if sub directory is missing.
     """
     if not sub_directory:
-      return
+      return None
 
     if track == 'stable':
       branch = 'master'
@@ -194,16 +194,16 @@ class GithubRepoManager(object):
     """
     if not sub_directory:
       logging.info('Missing machine type sub directory.')
-      return
+      return None
 
     download_url = self._GetDownloadURL(sub_directory, track, use_api=use_api)
     if not download_url:
       logging.info('Missing download URL.')
-      return
+      return None
 
     page_content = self._download_helper.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     filenames = []
     if use_api:
@@ -309,7 +309,7 @@ class LaunchpadPPAManager(object):
         download_url, encoding=None)
     if not ppa_sources:
       logging.error('Unable to retrieve PPA sources list.')
-      return
+      return None
 
     ppa_sources = zlib.decompress(ppa_sources, 16 + zlib.MAX_WBITS)
 
@@ -319,7 +319,7 @@ class LaunchpadPPAManager(object):
       logging.error(
           'Unable to decode PPA sources list with error: {0!s}'.format(
               exception))
-      return
+      return None
 
     packages = {}
     for line in ppa_sources.split('\n'):
@@ -764,7 +764,8 @@ class PackagesManager(object):
           where None, which will auto-detect the current operating system.
 
     Returns:
-      str: machine type sub directory or None.
+      str: machine type sub directory or None if system configuration is not
+          supported.
     """
     if preferred_operating_system:
       operating_system = preferred_operating_system
@@ -783,7 +784,7 @@ class PackagesManager(object):
       if cpu_architecture != 'x86_64':
         logging.error('CPU architecture: {0:s} not supported.'.format(
             cpu_architecture))
-        return
+        return None
 
       sub_directory = 'macos'
 
@@ -801,7 +802,7 @@ class PackagesManager(object):
             'Use the gift PPA instead. For more info see: {0:s}'.format(
                 wiki_url))
 
-      return
+      return None
 
     elif operating_system == 'Windows':
       if cpu_architecture == 'x86':
@@ -813,12 +814,12 @@ class PackagesManager(object):
       else:
         logging.error('CPU architecture: {0:s} not supported.'.format(
             cpu_architecture))
-        return
+        return None
 
     else:
       logging.error('Operating system: {0:s} not supported.'.format(
           operating_system))
-      return
+      return None
 
     return sub_directory
 

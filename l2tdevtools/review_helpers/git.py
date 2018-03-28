@@ -164,7 +164,7 @@ class GitHelper(cli.CLIHelper):
     """Retrieves the active branch.
 
     Returns:
-      str: name of the active branch or None.
+      str: name of the active branch or None if not available.
     """
     exit_code, output, _ = self.RunCommand('git branch')
     if exit_code != 0:
@@ -175,7 +175,7 @@ class GitHelper(cli.CLIHelper):
       if line.startswith(b'* '):
         # Ignore the first 2 characters of the line.
         return line[2:]
-    return
+    return None
 
   def GetChangedFiles(self, diffbase=None):
     """Retrieves the changed files.
@@ -231,15 +231,15 @@ class GitHelper(cli.CLIHelper):
     """Retrieves the email address.
 
     Returns:
-      str: email address or None.
+      str: email address or None if not available.
     """
     exit_code, output, _ = self.RunCommand('git config user.email')
     if exit_code != 0:
-      return
+      return None
 
     output_lines = output.split(b'\n')
     if not output_lines:
-      return
+      return None
 
     return output_lines[0]
 
@@ -247,17 +247,17 @@ class GitHelper(cli.CLIHelper):
     """Retrieves the last commit message.
 
     Returns:
-      str: last commit message or None.
+      str: last commit message or None if not available.
     """
     exit_code, output, _ = self.RunCommand('git log -1')
     if exit_code != 0:
-      return
+      return None
 
     # Expecting 6 lines of output where the 5th line contains
     # the commit message.
     output_lines = output.split(b'\n')
     if len(output_lines) != 6:
-      return
+      return None
 
     return output_lines[4].strip()
 
@@ -265,7 +265,7 @@ class GitHelper(cli.CLIHelper):
     """Retrieves the remote origin.
 
     Returns:
-      str: git repository URL or None.
+      str: git repository URL or None if not available.
     """
     # Check for remote entries starting with origin.
     for remote in self._GetRemotes():

@@ -16,10 +16,10 @@ from l2tdevtools.download_helpers import pypi
 class PyPIDownloadHelperTest(unittest.TestCase):
   """Tests for the PyPi download helper."""
 
-  _DOWNLOAD_URL = 'https://pypi.python.org/pypi/construct'
+  _DOWNLOAD_URL = 'https://pypi.python.org/pypi/dfvfs'
 
-  _PROJECT_NAME = 'construct'
-  _PROJECT_VERSION = '2.9.40'
+  _PROJECT_NAME = 'dfvfs'
+  _PROJECT_VERSION = '20180326'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
