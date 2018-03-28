@@ -31,12 +31,15 @@ class OSCBuildHelper(interface.BuildHelper):
 
     Args:
       source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      bool: True if successful, False otherwise.
     """
     # Checkout the project if it does not exist otherwise make sure
     # the project files are up to date.
     if not os.path.exists(self._OSC_PROJECT):
       if not self._OSCCheckout():
-        return
+        return False
 
     else:
       if not self._OSCUpdate():

@@ -31,13 +31,13 @@ class ProjectDownloadHelper(interface.DownloadHelper):
 
     Returns:
       str: filename if successful also if the file was already downloaded
-          or None on error.
+          or None if not available.
     """
     download_url = self.GetDownloadURL(project_name, project_version)
     if not download_url:
       logging.warning('Unable to determine download URL for: {0:s}'.format(
           project_name))
-      return
+      return None
 
     filename = self.DownloadFile(download_url)
 

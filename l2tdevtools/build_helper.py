@@ -46,7 +46,7 @@ class BuildHelperFactory(object):
       l2tdevtools_path (str): path to the l2tdevtools directory.
 
     Returns:
-      BuildHelper: build helper or None.
+      BuildHelper: build helper or None if build system is not supported.
     """
     if project_definition.build_system == 'configure_make':
       build_helper_class = cls._CONFIGURE_MAKE_BUILD_HELPER_CLASSES.get(
@@ -60,6 +60,6 @@ class BuildHelperFactory(object):
       build_helper_class = None
 
     if not build_helper_class:
-      return
+      return None
 
     return build_helper_class(project_definition, l2tdevtools_path)

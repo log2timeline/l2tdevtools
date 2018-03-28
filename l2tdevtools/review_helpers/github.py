@@ -80,7 +80,7 @@ class GitHubHelper(object):
       username (str): github user name.
 
     Returns:
-      dict[str,object]: JSON response or None.
+      dict[str,object]: JSON response or None if not available.
     """
     github_url = 'https://api.github.com/users/{0:s}'.format(username)
 
@@ -89,7 +89,7 @@ class GitHubHelper(object):
 
     except errors.ConnectivityError as exception:
       logging.warning('{0!s}'.format(exception))
-      return
+      return None
 
     if response_data:
       return json.loads(response_data)

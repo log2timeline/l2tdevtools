@@ -40,7 +40,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
           or None.
 
     Returns:
-      str: latest version number or None on error.
+      str: latest version number or None if not available.
     """
     if version_definition:
       earliest_version = version_definition.GetEarliestVersion()
@@ -52,7 +52,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     versions = {}
     expression_string = (
@@ -90,7 +90,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       project_version (str): version of the project.
 
     Returns:
-      str: download URL of the project or None on error.
+      str: download URL of the project or None if not available.
     """
     download_url = (
         'https://pypi.python.org/pypi/{0:s}/{1!s}').format(
@@ -98,7 +98,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     # The format of the project download URL is:
     # https://pypi.python.org/packages/.*/{project name}-{version}.{extension}

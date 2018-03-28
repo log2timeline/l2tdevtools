@@ -46,7 +46,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
           or None.
 
     Returns:
-      str: latest version number or None on error.
+      str: latest version number or None if not available.
     """
     if version_definition:
       earliest_version = version_definition.GetEarliestVersion()
@@ -63,7 +63,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     # The format of the project download URL is:
     # /{organization}/{repository}/releases/download/{git tag}/
@@ -99,7 +99,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       # Make checks case insenstive.
 
     if not matches:
-      return
+      return None
 
     # Split the version string and convert every digit into an integer.
     # A string compare of both version strings will yield an incorrect result.
@@ -141,7 +141,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       project_version (str): version of the project.
 
     Returns:
-      str: download URL of the project or None on error.
+      str: download URL of the project or None if not available.
     """
     # TODO: add support for URL arguments '?after=release-2.2.0'
     download_url = 'https://github.com/{0:s}/{1:s}/releases'.format(
@@ -149,7 +149,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     # The format of the project download URL is:
     # /{organization}/{repository}/releases/download/{git tag}/
@@ -175,7 +175,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       return 'https://github.com{0:s}'.format(matches[0][:-1])
 
     if matches and len(matches) != 1:
-      return
+      return None
 
     # The format of the project archive download URL is:
     # /{organization}/{repository}/archive/{version}.tar.gz
@@ -220,8 +220,6 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     if matches and len(matches) == 1:
       return 'https://github.com{0:s}'.format(matches[0][:-1])
-
-    return
 
   def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.

@@ -42,7 +42,7 @@ class DownloadHelper(object):
 
     Returns:
       str: filename if successful also if the file was already downloaded
-          or None on error.
+          or None if not available.
     """
     _, _, filename = download_url.rpartition('/')
 
@@ -55,13 +55,13 @@ class DownloadHelper(object):
         logging.warning(
             'Unable to download URL: {0:s} with error: {1!s}'.format(
                 download_url, exception))
-        return
+        return None
 
       if url_object.code != 200:
         logging.warning(
             'Unable to download URL: {0:s} with status code: {1:d}'.format(
                 download_url, url_object.code))
-        return
+        return None
 
       with open(filename, 'wb') as file_object:
         file_object.write(url_object.read())
@@ -77,10 +77,10 @@ class DownloadHelper(object):
           represents no encoding (or binary data).
 
     Returns:
-      str: page content if successful, None otherwise.
+      str: page content if successful or None if not available.
     """
     if not download_url:
-      return
+      return None
 
     if self._cached_url != download_url:
       try:
@@ -89,10 +89,10 @@ class DownloadHelper(object):
         logging.warning(
             'Unable to download URL: {0:s} with error: {1!s}'.format(
                 download_url, exception))
-        return
+        return None
 
       if url_object.code != 200:
-        return
+        return None
 
       page_content = url_object.read()
 

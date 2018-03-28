@@ -36,13 +36,13 @@ class ZlibDownloadHelper(project.ProjectDownloadHelper):
           or None.
 
     Returns:
-      str: latest version number or None on error.
+      str: latest version number or None if not available.
     """
     download_url = 'http://www.zlib.net'
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
-      return
+      return None
 
     # The format of the project download URL is:
     # http://zlib.net/{project name}-{version}.tar.gz
@@ -52,7 +52,7 @@ class ZlibDownloadHelper(project.ProjectDownloadHelper):
     matches = re.findall(expression_string, page_content)
 
     if not matches:
-      return
+      return None
 
     numeric_matches = [''.join(match.split('.')) for match in matches]
     return matches[numeric_matches.index(max(numeric_matches))]
@@ -65,7 +65,7 @@ class ZlibDownloadHelper(project.ProjectDownloadHelper):
       project_version (str): version of the project.
 
     Returns:
-      The download URL of the project or None on error.
+      The download URL of the project or None if not available.
     """
     # The format of the project download URL is:
     # http://zlib.net/{project name}-{version}.tar.gz

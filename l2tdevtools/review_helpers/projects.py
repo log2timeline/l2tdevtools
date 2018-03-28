@@ -121,11 +121,11 @@ class ProjectsHelper(cli.CLIHelper):
       path (str): path of the file.
 
     Returns:
-      bytes: file content or None.
+      bytes: file content or None if not available.
     """
     if not os.path.exists(path):
       logging.error('Missing file: {0:s}'.format(path))
-      return
+      return None
 
     try:
       with open(path, 'rb') as file_object:
@@ -133,13 +133,13 @@ class ProjectsHelper(cli.CLIHelper):
 
     except IOError as exception:
       logging.error('Unable to read file with error: {0!s}'.format(exception))
-      return
+      return None
 
     try:
       file_contents = file_contents.decode('utf-8')
     except UnicodeDecodeError as exception:
       logging.error('Unable to read file with error: {0!s}'.format(exception))
-      return
+      return None
 
     return file_contents
 
@@ -195,11 +195,11 @@ class ProjectsHelper(cli.CLIHelper):
     """Retrieves the project version from the version file.
 
     Returns:
-      str: project version or None.
+      str: project version or None if not available.
     """
     version_file_contents = self._ReadFileContents(self.version_file_path)
     if not version_file_contents:
-      return
+      return None
 
     # The version is formatted as:
     # __version__ = 'VERSION'
@@ -209,8 +209,6 @@ class ProjectsHelper(cli.CLIHelper):
     for line in lines:
       if line.startswith(version_line_prefix):
         return line[len(version_line_prefix):-1]
-
-    return
 
   def UpdateDpkgChangelogFile(self):
     """Updates the dpkg changelog file.
