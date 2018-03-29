@@ -124,8 +124,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       l2tdevtools_path (str): path to the l2tdevtools directory.
 
     Raises:
-      RuntimeError: if the Visual Studio version could be determined or
-                    msvscpp-convert.py could not be found.
+      RuntimeError: if the Visual Studio version could not be determined.
     """
     super(ConfigureMakeMSIBuildHelper, self).__init__(
         project_definition, l2tdevtools_path)
@@ -155,13 +154,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     else:
       raise RuntimeError('Unable to determine Visual Studio version.')
-
-    if self.version != '2008':
-      self._msvscpp_convert = os.path.join(
-          l2tdevtools_path, 'tools', 'msvscpp-convert.py')
-
-      if not os.path.exists(self._msvscpp_convert):
-        raise RuntimeError('Unable to find msvscpp-convert.py')
 
   def _BuildMSBuild(self, source_helper_object, source_directory):
     """Builds using Visual Studio and MSBuild.
@@ -249,11 +241,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
         not os.path.exists(dokan_source_directory)):
       logging.error('Missing dependency: dokan.')
       return False
-
-    # For the Visual Studio builds later than 2008 the convert the 2008
-    # solution and project files need to be converted to the newer version.
-    if self.version in ('2010', '2012', '2013', '2015', '2017'):
-      self._ConvertSolutionFiles(source_directory)
 
     # Detect architecture based on Visual Studion Platform environment
     self._BuildPrepare(source_helper_object, source_directory)
@@ -401,41 +388,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       return False
 
     return True
-
-  def _ConvertSolutionFiles(self, source_directory):
-    """Converts the Visual Studio solution and project files.
-
-    Args:
-      source_directory (str): name of the source directory.
-    """
-    logging.info('Converting Visual Studio solution and project files.')
-    os.chdir(source_directory)
-
-    filenames_glob = os.path.join('msvscpp', '*.sln')
-    solution_filenames = glob.glob(filenames_glob)
-
-    if len(solution_filenames) != 1:
-      logging.error('Unable to find Visual Studio solution file')
-      return False
-
-    solution_filename = solution_filenames[0]
-
-    if not os.path.exists('vs2008'):
-      command = '\"{0:s}\" {1:s} --to {2:s} {3:s}'.format(
-          sys.executable, self._msvscpp_convert, self.version,
-          solution_filename)
-      exit_code = subprocess.call(command, shell=False)
-      if exit_code != 0:
-        logging.error('Running: "{0:s}" failed.'.format(command))
-        return False
-
-      # Note that setup.py needs the Visual Studio solution directory
-      # to be named: msvscpp. So replace the Visual Studio 2008 msvscpp
-      # solution directory with the converted one.
-      os.rename('msvscpp', 'vs2008')
-      os.rename('vs{0:s}'.format(self.version), 'msvscpp')
-
-    os.chdir('..')
 
   def _MoveMSI(self, python_module_name, build_directory):
     """Moves the MSI from the dist sub directory into the build directory.
