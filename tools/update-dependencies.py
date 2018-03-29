@@ -75,7 +75,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
 
   PATH = os.path.join('appveyor.yml')
 
-  _VERSION_SQLITE = '3180000'
+  _VERSION_SQLITE = '3220000'
 
   _UPGRADE_PIP = (
       '- cmd: "%PYTHON%\\\\python.exe -m pip install --upgrade pip"')
@@ -125,7 +125,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
 
   _DOWNLOAD_SQLITE = (
       '- ps: (new-object net.webclient).DownloadFile('
-      '\'https://www.sqlite.org/2017/sqlite-dll-win32-x86-{0:s}.zip\', '
+      '\'https://www.sqlite.org/2018/sqlite-dll-win32-x86-{0:s}.zip\', '
       '\'C:\\Projects\\sqlite-dll-win32-x86-{0:s}.zip\')').format(
           _VERSION_SQLITE)
 
