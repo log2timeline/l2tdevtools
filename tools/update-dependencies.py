@@ -201,6 +201,8 @@ class AppveyorYmlWriter(DependencyFileWriter):
 class DependenciesPyWriter(DependencyFileWriter):
   """Dependencies.py file writer."""
 
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'dependencies.py')
+
   PATH = os.path.join('plaso', 'dependencies.py')
 
   def Write(self):
@@ -228,8 +230,7 @@ class DependenciesPyWriter(DependencyFileWriter):
 
     template_mappings = {'python_dependencies': python_dependencies}
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, 'data', 'templates', 'dependencies.py')
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
@@ -600,6 +601,8 @@ class GIFTPPAInstallScriptWriter(DependencyFileWriter):
 class PylintRcWriter(DependencyFileWriter):
   """Pylint.rc file writer."""
 
+  _TEMPLATE_FILE = os.path.join('data', 'templates', '.pylintrc')
+
   PATH = '.pylintrc'
 
   def Write(self):
@@ -608,8 +611,7 @@ class PylintRcWriter(DependencyFileWriter):
 
     template_mappings = {'extension_pkg_whitelist': ','.join(dependencies)}
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, 'data', 'templates', '.pylintrc')
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
@@ -845,8 +847,30 @@ class TravisInstallScriptWriter(DependencyFileWriter):
       file_object.write(file_content)
 
 
+class TravisRunWithTimeoutScriptWriter(DependencyFileWriter):
+  """Travis-CI run_with_timeout.sh file writer."""
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_with_timeout.sh')
+
+  PATH = os.path.join('config', 'travis', 'run_with_timeout.sh')
+
+  def Write(self):
+    """Writes a _with_timeout.sh file."""
+    template_mappings = {}
+
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
 class TravisRunTestsScriptWriter(DependencyFileWriter):
   """Travis-CI runtests.sh file writer."""
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'runtests.sh')
 
   PATH = os.path.join('config', 'travis', 'runtests.sh')
 
@@ -865,8 +889,7 @@ class TravisRunTestsScriptWriter(DependencyFileWriter):
         'project_name': self._project_definition.name,
         'paths_to_lint': ' '.join(paths_to_lint)}
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, 'data', 'templates', 'runtests.sh')
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
@@ -878,14 +901,15 @@ class TravisRunTestsScriptWriter(DependencyFileWriter):
 class TravisYmlWriter(DependencyFileWriter):
   """Travis.yml file writer."""
 
+  _TEMPLATE_FILE = os.path.join('data', 'templates', '.travis.yml')
+
   PATH = '.travis.yml'
 
   def Write(self):
     """Writes a .travis.yml file."""
     template_mappings = {}
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, 'data', 'templates', '.travis.yml')
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
@@ -896,6 +920,8 @@ class TravisYmlWriter(DependencyFileWriter):
 
 class ToxIniWriter(DependencyFileWriter):
   """Tox.ini file writer."""
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'tox.ini')
 
   PATH = 'tox.ini'
 
@@ -912,8 +938,7 @@ class ToxIniWriter(DependencyFileWriter):
         'project_name': self._project_definition.name,
         'test_dependencies': test_dependencies}
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, 'data', 'templates', 'tox.ini')
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
@@ -939,8 +964,8 @@ if __name__ == '__main__':
 
   for writer_class in (
       AppveyorYmlWriter, PylintRcWriter, RequirementsWriter, SetupCfgWriter,
-      TravisInstallScriptWriter, TravisRunTestsScriptWriter, TravisYmlWriter,
-      ToxIniWriter):
+      TravisInstallScriptWriter, TravisRunWithTimeoutScriptWriter,
+      TravisRunTestsScriptWriter, TravisYmlWriter, ToxIniWriter):
     writer = writer_class(l2tdevtools_path, project_definition, helper)
     writer.Write()
 
