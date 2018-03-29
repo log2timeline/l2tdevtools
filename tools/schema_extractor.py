@@ -13,6 +13,7 @@ from __future__ import unicode_literals
 
 import argparse
 import os
+import sqlite
 import sys
 import textwrap
 
@@ -20,11 +21,6 @@ try:
   import pyperclip
 except ImportError:
   paperclip = None
-
-# Change PYTHONPATH to include plaso.
-sys.path.insert(0, '.')
-
-from plaso.parsers import sqlite  # pylint: disable=wrong-import-position
 
 
 class SQLiteSchemaExtractor(object):
