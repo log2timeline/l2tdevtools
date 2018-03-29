@@ -7,7 +7,7 @@
 # Exit on error.
 set -e
 
-# Usage: ./run.sh [TIMEOUT] [COMMAND] [OPTION] [...]
+# Usage: ./run_with_timeout.sh [TIMEOUT] [COMMAND] [OPTION] [...]
 
 TIMEOUT=$$1;
 shift
