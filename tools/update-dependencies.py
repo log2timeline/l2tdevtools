@@ -163,7 +163,7 @@ class AppveyorYmlWriter(DependencyFileWriter):
     file_content = []
     file_content.extend(self._FILE_HEADER)
 
-    if self._project_definition.name in ('dfvfs', 'plaso'):
+    if self._project_definition.name in ('dfvfs', 'l2tpreg', 'plaso'):
       file_content.extend(self._ALLOW_FAILURES)
 
     file_content.extend(self._INSTALL)
@@ -667,7 +667,7 @@ class SetupCfgWriter(DependencyFileWriter):
     """Writes a setup.cfg file."""
     file_content = []
 
-    if self._project_definition.name in ('dfvfs', 'plaso'):
+    if self._project_definition.name in ('dfvfs', 'l2tpreg', 'plaso'):
       file_content.extend(self._SDIST)
 
     file_content.extend(self._BDIST_RPM)
