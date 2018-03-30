@@ -398,7 +398,9 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
 
     if build_successful:
       self._MoveRPMs(project_name, project_version)
-      self._RemoveBuildDirectory(project_name, project_version)
+
+      setup_name = self._project_definition.setup_name or project_name
+      self._RemoveBuildDirectory(setup_name, project_version)
 
     # Change the source package filename back to the original.
     os.rename(rpm_source_package_filename, source_package_filename)
@@ -414,7 +416,9 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    self._RemoveOlderBuildDirectory(project_name, project_version)
+    setup_name = self._project_definition.setup_name or project_name
+    self._RemoveOlderBuildDirectory(setup_name, project_version)
+
     self._RemoveOlderRPMs(project_name, project_version)
 
 
@@ -530,7 +534,9 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
 
     if build_successful:
       self._MoveRPMs(project_name, project_version)
-      self._RemoveBuildDirectory(project_name, project_version)
+
+      setup_name = self._project_definition.setup_name or project_name
+      self._RemoveBuildDirectory(setup_name, project_version)
 
     return build_successful
 
@@ -550,7 +556,9 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    self._RemoveOlderBuildDirectory(project_name, project_version)
+    setup_name = self._project_definition.setup_name or project_name
+    self._RemoveOlderBuildDirectory(setup_name, project_version)
+
     self._RemoveOlderRPMs(project_name, project_version)
 
 
