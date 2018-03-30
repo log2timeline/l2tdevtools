@@ -19,7 +19,7 @@ else:
   import urllib.request as urllib_request
 
 # pylint: disable=wrong-import-position
-from l2tdevtools.helpers import projects
+from l2tdevtools.helpers import project
 from l2tdevtools.lib import upload as upload_tool
 from l2tdevtools.review_helpers import cli
 
@@ -151,9 +151,9 @@ class UploadHelper(cli.CLIHelper):
     Returns:
       int: codereview issue number or None if not available.
     """
-    reviewer = projects.ProjectsHelper.GetReviewer(
+    reviewer = project.ProjectHelper.GetReviewer(
         project_name, self._email_address)
-    reviewers_cc = projects.ProjectsHelper.GetReviewersOnCC(
+    reviewers_cc = project.ProjectHelper.GetReviewersOnCC(
         project_name, self._email_address, reviewer)
 
     command = '{0:s} {1:s} --oauth2'.format(
