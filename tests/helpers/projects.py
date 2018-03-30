@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-from l2tdevtools.review_helpers import projects
+from l2tdevtools.helpers import projects
 
 
 class ProjectsHelperTest(unittest.TestCase):

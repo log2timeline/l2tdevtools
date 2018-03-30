@@ -9,15 +9,14 @@ import re
 import subprocess
 import sys
 
+from l2tdevtools.helpers import projects
+from l2tdevtools.lib import netrcfile
+from l2tdevtools.lib import reviewfile
+from l2tdevtools.review_helpers import git
 from l2tdevtools.review_helpers import github
-from l2tdevtools.review_helpers import projects
 from l2tdevtools.review_helpers import pylint
 from l2tdevtools.review_helpers import upload
 from l2tdevtools.review_helpers import yapf
-
-from l2tdevtools.review_helpers import git
-from l2tdevtools.lib import netrcfile
-from l2tdevtools.lib import reviewfile
 
 
 class ReviewHelper(object):
