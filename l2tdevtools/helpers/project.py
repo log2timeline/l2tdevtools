@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Helper for interacting with projects."""
+"""Helper for interacting with a project."""
 
 from __future__ import unicode_literals
 
@@ -11,8 +11,8 @@ import time
 from l2tdevtools.review_helpers import cli
 
 
-class ProjectsHelper(cli.CLIHelper):
-  """Helper for interacting with projects.
+class ProjectHelper(cli.CLIHelper):
+  """Helper for interacting with a project.
 
   Attributes:
     project_name (str): name of the project.
@@ -85,7 +85,7 @@ class ProjectsHelper(cli.CLIHelper):
     Raises:
       ValueError: if the project name is not supported.
     """
-    super(ProjectsHelper, self).__init__()
+    super(ProjectHelper, self).__init__()
     self.project_name = self._GetProjectName(project_path)
 
   @property
