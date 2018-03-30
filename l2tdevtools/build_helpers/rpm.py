@@ -311,11 +311,11 @@ class RPMBuildHelper(BaseRPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    filenames_to_ignore = '{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
+    filenames_to_ignore = '*{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
         project_name, project_version, self.architecture)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    rpm_filenames_glob = '{0:s}-*-1.{1:s}.rpm'.format(
+    rpm_filenames_glob = '*{0:s}-*-1.{1:s}.rpm'.format(
         project_name, self.architecture)
     filenames = glob.glob(rpm_filenames_glob)
 
