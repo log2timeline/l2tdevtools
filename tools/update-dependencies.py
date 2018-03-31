@@ -10,6 +10,7 @@ import os
 
 from l2tdevtools import dependencies
 from l2tdevtools import project_config
+from l2tdevtools.helpers import project
 
 
 # pylint: disable=redefined-outer-name
@@ -952,9 +953,10 @@ if __name__ == '__main__':
   l2tdevtools_path = os.path.dirname(l2tdevtools_path)
   l2tdevtools_path = os.path.dirname(l2tdevtools_path)
 
-  project_file = os.getcwd()
-  project_file = os.path.basename(project_file)
-  project_file = '{0:s}.ini'.format(project_file)
+  project_path = os.getcwd()
+  projects_helper = project.ProjectHelper(project_path)
+
+  project_file = '{0:s}.ini'.format(projects_helper.project_name)
 
   project_reader = project_config.ProjectDefinitionReader()
   with open(project_file, 'rb') as file_object:
