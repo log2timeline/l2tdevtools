@@ -10,7 +10,7 @@ import os
 
 from l2tdevtools import dependencies
 from l2tdevtools import project_config
-from l2tdevtools.review_helpers import projects
+from l2tdevtools.helpers import project
 
 
 # pylint: disable=redefined-outer-name
@@ -955,7 +955,7 @@ if __name__ == '__main__':
 
   # TODO: refactor this script to take a project_path argument like review.py.
   project_path = os.getcwd()
-  projects_helper = projects.ProjectsHelper(project_path)
+  projects_helper = project.ProjectHelper(project_path)
 
   project_file = '{0:s}.ini'.format(projects_helper.project_name)
 
