@@ -69,11 +69,13 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
       _SET_TLS_VERSION, _DOWNLOAD_SQLITE, _EXTRACT_SQLITE, _INSTALL_SQLITE
   ]
 
-  _L2TDEVTOOLS_UPDATE = (
-      '- cmd: mkdir dependencies && set PYTHONPATH=..\\l2tdevtools && '
-      '"%PYTHON%\\\\python.exe" ..\\l2tdevtools\\tools\\update.py '
-      '--download-directory dependencies --machine-type x86 '
-      '--msi-targetdir "%PYTHON%" --track dev {0:s}')
+  _L2TDEVTOOLS_UPDATE = '\n'.join([
+      '- cmd: if [%TARGET%]==[{0:s}] (',
+      '    mkdir dependencies &&',
+      '    set PYTHONPATH=..\\l2tdevtools &&',
+      ('    "%PYTHON%\\\\python.exe" ..\\l2tdevtools\\tools\\update.py '
+       '--download-directory dependencies --machine-type x86 '
+       '--msi-targetdir "%PYTHON%" --track dev {1:s} )')])
 
   _FILE_FOOTER = [
       '', 'build: off', '', 'test_script:',
@@ -90,25 +92,41 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
 
     file_content.extend(self._INSTALL)
 
-    dependencies = self._dependency_helper.GetL2TBinaries()
-    dependencies.extend(['funcsigs', 'mock', 'pbr'])
+    python2_dependencies = self._dependency_helper.GetL2TBinaries(
+        python_version=2)
 
-    if 'six' not in dependencies:
-      dependencies.append('six')
-
-    if 'pysqlite' in dependencies:
+    if 'pysqlite' in python2_dependencies:
       file_content.extend(self._SQLITE)
-
-    if self._project_definition.name == 'artifacts':
-      dependencies.append('yapf')
-
-    if 'backports.lzma' in dependencies:
-      dependencies.remove('backports.lzma')
 
     file_content.extend(self._L2TDEVTOOLS)
 
-    dependencies = ' '.join(sorted(dependencies))
-    l2tdevtools_update = self._L2TDEVTOOLS_UPDATE.format(dependencies)
+    python2_dependencies.extend(['funcsigs', 'mock', 'pbr'])
+
+    if 'six' not in python2_dependencies:
+      python2_dependencies.append('six')
+
+    if self._project_definition.name == 'artifacts':
+      python2_dependencies.append('yapf')
+
+    if 'backports.lzma' in python2_dependencies:
+      python2_dependencies.remove('backports.lzma')
+
+    python2_dependencies = ' '.join(sorted(python2_dependencies))
+    l2tdevtools_update = self._L2TDEVTOOLS_UPDATE.format(
+        'python27', python2_dependencies)
+    file_content.append(l2tdevtools_update)
+
+    python3_dependencies = self._dependency_helper.GetL2TBinaries(
+        python_version=3)
+
+    python3_dependencies.extend(['funcsigs', 'mock', 'pbr'])
+
+    if 'six' not in python3_dependencies:
+      python3_dependencies.append('six')
+
+    python3_dependencies = ' '.join(sorted(python3_dependencies))
+    l2tdevtools_update = self._L2TDEVTOOLS_UPDATE.format(
+        'python36', python3_dependencies)
     file_content.append(l2tdevtools_update)
 
     file_content.extend(self._FILE_FOOTER)
