@@ -953,7 +953,6 @@ if __name__ == '__main__':
   l2tdevtools_path = os.path.dirname(l2tdevtools_path)
   l2tdevtools_path = os.path.dirname(l2tdevtools_path)
 
-  # TODO: refactor this script to take a project_path argument like review.py.
   project_path = os.getcwd()
   projects_helper = project.ProjectHelper(project_path)
 
