@@ -413,8 +413,11 @@ class DependencyHelper(object):
 
     return sorted(requires)
 
-  def GetL2TBinaries(self):
+  def GetL2TBinaries(self, python_version=2):
     """Retrieves the l2tbinaries requirements.
+
+    Args:
+      python_version (Optional[int]): Python major version.
 
     Returns:
       list[str]: dependency definitions for l2tbinaries.
@@ -422,6 +425,9 @@ class DependencyHelper(object):
     requires = []
     for dependency in sorted(
         self.dependencies.values(), key=lambda dependency: dependency.name):
+      if dependency.python2_only and python_version != 2:
+        continue
+
       module_name = dependency.l2tbinaries_name or dependency.name
 
       requires.append(module_name)
