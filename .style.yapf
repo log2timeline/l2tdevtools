@@ -5,3 +5,4 @@ coalesce_brackets = True
 join_multiple_lines = True
 split_before_first_argument = True
 split_penalty_after_opening_bracket = 0
+dedent_closing_brackets = False
