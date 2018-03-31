@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for run_with_timeout.sh files."""
+
 from __future__ import unicode_literals
 
 import os

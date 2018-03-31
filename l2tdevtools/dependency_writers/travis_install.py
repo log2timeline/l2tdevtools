@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for install.sh files."""
+
 from __future__ import unicode_literals
 
 import os

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for travis.yml files."""
+
 from __future__ import unicode_literals
 
 import os
