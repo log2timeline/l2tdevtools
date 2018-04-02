@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Writer for gift_copr_install.sh files."""
+"""Writer for GIFT COPR script files."""
 
 from __future__ import unicode_literals
 

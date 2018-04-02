@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Tests for the gift_copr_install.py writer."""
+"""Tests for the GIFT COPR script writer."""
 
 from __future__ import unicode_literals
 
 import unittest
 
 from l2tdevtools import dependencies
-from l2tdevtools.dependency_writers import gift_copr_install
+from l2tdevtools.dependency_writers import gift_copr
 from l2tdevtools.helpers import project
 from tests import test_lib
 
@@ -24,7 +24,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     dependency_helper = dependencies.DependencyHelper(
         configuration_file=configuration_file)
 
-    writer = gift_copr_install.GIFTCOPRInstallScriptWriter(
+    writer = gift_copr.GIFTCOPRInstallScriptWriter(
         l2tdevtools_path, project_definition, dependency_helper)
     self.assertIsNotNone(writer)
 

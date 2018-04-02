@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Tests for the appveyor.yml writer."""
+"""Tests for the Debian packaging (dpkg) writer."""
 
 from __future__ import unicode_literals
 
 import unittest
 
 from l2tdevtools import dependencies
-from l2tdevtools.dependency_writers import dpkg_control
+from l2tdevtools.dependency_writers import dpkg
 from l2tdevtools.helpers import project
 from tests import test_lib
 
 
-class AppveyorYMLTest(test_lib.BaseTestCase):
+class DPKGControlWriterTest(test_lib.BaseTestCase):
   """Tests the dpkg control writer."""
 
   def testInitialize(self):
@@ -24,7 +24,7 @@ class AppveyorYMLTest(test_lib.BaseTestCase):
     dependency_helper = dependencies.DependencyHelper(
         configuration_file=configuration_file)
 
-    writer = dpkg_control.DPKGControlWriter(
+    writer = dpkg.DPKGControlWriter(
         l2tdevtools_path, project_definition, dependency_helper)
     self.assertIsNotNone(writer)
 

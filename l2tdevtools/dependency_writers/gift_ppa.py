@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Writer for tox.ini files."""
+"""Writer for GIFT PPA script files."""
 
 from __future__ import unicode_literals
 
