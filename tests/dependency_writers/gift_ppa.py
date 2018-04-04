@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Tests for the gift_ppa_install.py writer."""
+"""Tests for the GIFT PPA script writer."""
 
 from __future__ import unicode_literals
 
 import unittest
 
 from l2tdevtools import dependencies
-from l2tdevtools.dependency_writers import gift_ppa_install
+from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.helpers import project
 from tests import test_lib
 
@@ -24,7 +24,7 @@ class GIFTPPAInstallTest(test_lib.BaseTestCase):
     dependency_helper = dependencies.DependencyHelper(
         configuration_file=configuration_file)
 
-    writer = gift_ppa_install.GIFTPPAInstallScriptWriter(
+    writer = gift_ppa.GIFTPPAInstallScriptWriter(
         l2tdevtools_path, project_definition, dependency_helper)
     self.assertIsNotNone(writer)
 
