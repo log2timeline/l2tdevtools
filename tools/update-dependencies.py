@@ -13,17 +13,17 @@ from l2tdevtools.helpers import project
 
 from l2tdevtools.dependency_writers import appveyor_yml
 from l2tdevtools.dependency_writers import dependencies_py
-from l2tdevtools.dependency_writers import dpkg_control
-from l2tdevtools.dependency_writers import gift_copr_install
+from l2tdevtools.dependency_writers import dpkg
+from l2tdevtools.dependency_writers import gift_copr
+from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.dependency_writers import pylint_rc
 from l2tdevtools.dependency_writers import requirements_txt
 from l2tdevtools.dependency_writers import setup_cfg
-from l2tdevtools.dependency_writers import travis_install
-from l2tdevtools.dependency_writers import travis_run_with_timeout
-from l2tdevtools.dependency_writers import travis_runtests
-from l2tdevtools.dependency_writers import travis_yml
-from l2tdevtools.dependency_writers import gift_ppa_install
 from l2tdevtools.dependency_writers import tox_ini
+from l2tdevtools.dependency_writers import travis_install
+from l2tdevtools.dependency_writers import travis_runtests
+from l2tdevtools.dependency_writers import travis_run_with_timeout
+from l2tdevtools.dependency_writers import travis_yml
 
 
 if __name__ == '__main__':
@@ -53,9 +53,9 @@ if __name__ == '__main__':
     writer.Write()
 
   for writer_class in (
-      dependencies_py.DependenciesPyWriter, dpkg_control.DPKGControlWriter,
-      gift_copr_install.GIFTCOPRInstallScriptWriter,
-      gift_ppa_install.GIFTPPAInstallScriptWriter):
+      dependencies_py.DependenciesPyWriter, dpkg.DPKGControlWriter,
+      gift_copr.GIFTCOPRInstallScriptWriter,
+      gift_ppa.GIFTPPAInstallScriptWriter):
     if not os.path.exists(writer_class.PATH):
       continue
 
