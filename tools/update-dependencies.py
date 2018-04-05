@@ -43,11 +43,11 @@ if __name__ == '__main__':
 
   for writer_class in (
       appveyor_yml.AppveyorYmlWriter, pylint_rc.PylintRcWriter,
-      requirements_txt.RequirementsWriter, setup_cfg.SetupCfgWriter,
-      tox_ini.ToxIniWriter, travis.TravisInstallScriptWriter,
-      travis.TravisRunTestsScriptWriter,
       travis.TravisRunWithTimeoutScriptWriter,
-      travis_yml.TravisYMLWriter):
+      requirements_txt.RequirementsWriter, setup.SetupCfgWriter,
+      setup.SetupPyWriter, tox_ini.ToxIniWriter,
+      travis.TravisInstallScriptWriter, travis.TravisRunTestsScriptWriter,
+      travis.TravisRunWithTimeoutScriptWriter, travis_yml.TravisYMLWriter):
     writer = writer_class(l2tdevtools_path, project_definition, helper)
     writer.Write()
 
