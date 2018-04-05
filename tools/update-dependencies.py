@@ -19,7 +19,7 @@ from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.dependency_writers import macos
 from l2tdevtools.dependency_writers import pylint_rc
 from l2tdevtools.dependency_writers import requirements_txt
-from l2tdevtools.dependency_writers import setup_cfg
+from l2tdevtools.dependency_writers import setup
 from l2tdevtools.dependency_writers import tox_ini
 from l2tdevtools.dependency_writers import travis
 from l2tdevtools.dependency_writers import travis_yml
@@ -43,11 +43,11 @@ if __name__ == '__main__':
 
   for writer_class in (
       appveyor_yml.AppveyorYmlWriter, pylint_rc.PylintRcWriter,
-      requirements_txt.RequirementsWriter, setup_cfg.SetupCfgWriter,
-      tox_ini.ToxIniWriter, travis.TravisInstallScriptWriter,
-      travis.TravisRunTestsScriptWriter,
       travis.TravisRunWithTimeoutScriptWriter,
-      travis_yml.TravisYMLWriter):
+      requirements_txt.RequirementsWriter, setup.SetupCfgWriter,
+      setup.SetupPyWriter, tox_ini.ToxIniWriter,
+      travis.TravisInstallScriptWriter, travis.TravisRunTestsScriptWriter,
+      travis.TravisRunWithTimeoutScriptWriter, travis_yml.TravisYMLWriter):
     writer = writer_class(l2tdevtools_path, project_definition, helper)
     writer.Write()
 
