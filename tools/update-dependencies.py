@@ -19,7 +19,7 @@ from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.dependency_writers import macos
 from l2tdevtools.dependency_writers import pylint_rc
 from l2tdevtools.dependency_writers import requirements_txt
-from l2tdevtools.dependency_writers import setup_cfg
+from l2tdevtools.dependency_writers import setup
 from l2tdevtools.dependency_writers import tox_ini
 from l2tdevtools.dependency_writers import travis
 from l2tdevtools.dependency_writers import travis_yml
