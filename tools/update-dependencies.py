@@ -54,7 +54,7 @@ if __name__ == '__main__':
   for writer_class in (
       dependencies_py.DependenciesPyWriter, dpkg.DPKGControlWriter,
       gift_copr.GIFTCOPRInstallScriptWriter,
-      gift_ppa.GIFTPPAInstallScriptWriter):
+      gift_ppa.GIFTPPAInstallScriptWriter,
       macos.MacOSInstallScriptWriter,
       macos.MacOSMakeDistScriptWriter, macos.MacOSUninstallScriptWriter):
     if not os.path.exists(writer_class.PATH):
