@@ -16,6 +16,7 @@ from l2tdevtools.dependency_writers import dependencies_py
 from l2tdevtools.dependency_writers import dpkg
 from l2tdevtools.dependency_writers import gift_copr
 from l2tdevtools.dependency_writers import gift_ppa
+from l2tdevtools.dependency_writers import macos
 from l2tdevtools.dependency_writers import pylint_rc
 from l2tdevtools.dependency_writers import requirements_txt
 from l2tdevtools.dependency_writers import setup_cfg
@@ -53,7 +54,9 @@ if __name__ == '__main__':
   for writer_class in (
       dependencies_py.DependenciesPyWriter, dpkg.DPKGControlWriter,
       gift_copr.GIFTCOPRInstallScriptWriter,
-      gift_ppa.GIFTPPAInstallScriptWriter):
+      gift_ppa.GIFTPPAInstallScriptWriter,
+      macos.MacOSInstallScriptWriter,
+      macos.MacOSMakeDistScriptWriter, macos.MacOSUninstallScriptWriter):
     if not os.path.exists(writer_class.PATH):
       continue
 
