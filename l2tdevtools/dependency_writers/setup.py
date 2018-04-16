@@ -90,6 +90,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
     template_mappings = {
         'description_long': description_long,
         'description_short': description_short,
+        'project_name_description': self._project_definition.name_description,
         'project_name': self._project_definition.name,
     }
 
