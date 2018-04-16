@@ -141,7 +141,7 @@ setup(
     long_description=${project_name}_long_description,
     license='Apache License, Version 2.0',
     url='https://github.com/log2timeline/${project_name}',
-    maintainer='dfDateTime development team',
+    maintainer='${project_name_description} development team',
     maintainer_email='log2timeline-dev@googlegroups.com',
     cmdclass={
         'bdist_msi': BdistMSICommand,
