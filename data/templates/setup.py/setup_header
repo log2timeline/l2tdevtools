@@ -1,0 +1,17 @@
+
+
+${project_name}_description = (
+${description_short})
+
+${project_name}_long_description = (
+${description_long})
+
+setup(
+    name='${project_name}',
+    version=${project_name}.__version__,
+    description=${project_name}_description,
+    long_description=${project_name}_long_description,
+    license='Apache License, Version 2.0',
+    url='https://github.com/log2timeline/${project_name}',
+    maintainer='${project_name_description} development team',
+    maintainer_email='log2timeline-dev@googlegroups.com',

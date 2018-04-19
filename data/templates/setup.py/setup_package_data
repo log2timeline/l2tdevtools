@@ -1,0 +1,4 @@
+    include_package_data=True,
+    package_data={
+        'dfvfs.lib': ['*.yaml'],
+    },

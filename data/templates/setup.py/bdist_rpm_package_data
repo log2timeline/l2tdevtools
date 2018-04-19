@@ -1,49 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Installation and deployment script."""
-
-from __future__ import print_function
-import sys
-
-try:
-  from setuptools import find_packages, setup
-except ImportError:
-  from distutils.core import find_packages, setup
-
-try:
-  from distutils.command.bdist_msi import bdist_msi
-except ImportError:
-  bdist_msi = None
-
-try:
-  from distutils.command.bdist_rpm import bdist_rpm
-except ImportError:
-  bdist_rpm = None
-
-if sys.version < '2.7':
-  print('Unsupported Python version: {0:s}.'.format(sys.version))
-  print('Supported Python versions are 2.7 or a later 2.x version.')
-  sys.exit(1)
-
-# Change PYTHONPATH to include ${project_name} so that we can get the version.
-sys.path.insert(0, '.')
-
-import ${project_name}  # pylint: disable=wrong-import-position
-
-
-if not bdist_msi:
-  BdistMSICommand = None
-else:
-  class BdistMSICommand(bdist_msi):
-    """Custom handler for the bdist_msi command."""
-
-    def run(self):
-      """Builds an MSI."""
-      # Command bdist_msi does not support the library version, neither a date
-      # as a version but if we suffix it with .1 everything is fine.
-      self.distribution.metadata.version += '.1'
-
-      bdist_msi.run(self)
 
 
 if not bdist_rpm:
@@ -95,6 +49,7 @@ else:
               '%defattr(644,root,root,755)',
               '%doc ACKNOWLEDGEMENTS AUTHORS LICENSE README',
               '%{_prefix}/lib/python*/site-packages/**/*.py',
+              '%{_prefix}/lib/python*/site-packages/**/*.yaml',
               '%{_prefix}/lib/python*/site-packages/${project_name}*.egg-info/*',
               '',
               '%exclude %{_prefix}/share/doc/*',
@@ -126,39 +81,3 @@ else:
         python_spec_file.append(line)
 
       return python_spec_file
-
-
-${project_name}_description = (
-${description_short})
-
-${project_name}_long_description = (
-${description_long})
-
-setup(
-    name='${project_name}',
-    version=${project_name}.__version__,
-    description=${project_name}_description,
-    long_description=${project_name}_long_description,
-    license='Apache License, Version 2.0',
-    url='https://github.com/log2timeline/${project_name}',
-    maintainer='${project_name_description} development team',
-    maintainer_email='log2timeline-dev@googlegroups.com',
-    cmdclass={
-        'bdist_msi': BdistMSICommand,
-        'bdist_rpm': BdistRPMCommand},
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Environment :: Console',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-    ],
-    packages=find_packages('.', exclude=[
-        'examples', 'tests', 'tests.*', 'utils']),
-    package_dir={
-        '${project_name}': '${project_name}'
-    },
-    data_files=[
-        ('share/doc/${project_name}', [
-            'ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README']),
-    ],
-)
