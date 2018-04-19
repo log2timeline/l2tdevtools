@@ -56,7 +56,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
     versions = {}
     expression_string = (
-        r'../../packages/.*/{0:s}-(?P<version>[\d\.\!]*)'
+        r'.*/packages/.*/{0:s}-(?P<version>[\d\.\!]*)'
         r'\.(tar\.bz2|tar\.gz|zip)#').format(self._project_name)
     for match in re.finditer(expression_string, page_content):
       version_string = match.group('version')

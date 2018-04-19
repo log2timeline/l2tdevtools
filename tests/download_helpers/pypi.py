@@ -19,7 +19,7 @@ class PyPIDownloadHelperTest(unittest.TestCase):
   _DOWNLOAD_URL = 'https://pypi.python.org/pypi/dfvfs'
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20180326'
+  _PROJECT_VERSION = '20180418'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
@@ -33,17 +33,14 @@ class PyPIDownloadHelperTest(unittest.TestCase):
     """Tests the GetDownloadURL functions."""
     download_helper = pypi.PyPIDownloadHelper(self._DOWNLOAD_URL)
 
+    expected_download_url = (
+        'https://pypi.python.org/packages/source/d/{0:s}/'
+        '{0:s}-{1:s}.tar.gz').format(self._PROJECT_NAME, self._PROJECT_VERSION)
+
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
-    test_regexp = (
-        r'/packages\/\w{{2}}\/\w{{2}}\/\w+\/{0:s}-{1:s}\.tar\.gz').format(
-            self._PROJECT_NAME, self._PROJECT_VERSION)
-
-    # pylint: disable=deprecated-method
-    # TODO: replace assertRegexpMatches by assertRegexp, check if compatible
-    # with Python 2 first.
-    self.assertRegexpMatches(download_url, test_regexp)
+    self.assertEqual(download_url, expected_download_url)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
