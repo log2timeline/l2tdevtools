@@ -47,6 +47,10 @@ class TravisYMLWriter(interface.DependencyFileWriter):
       template_data = self._GenerateFromTemplate('jenkins', template_mappings)
       file_content.append(template_data)
 
+      template_data = self._GenerateFromTemplate(
+          'allow_failures', template_mappings)
+      file_content.append(template_data)
+
     template_data = self._GenerateFromTemplate('footer', template_mappings)
     file_content.append(template_data)
 

@@ -1,5 +1,3 @@
-  allow_failures:
-  - env: TARGET="linux-python34"
 install:
 - ./config/travis/install.sh
 script:
