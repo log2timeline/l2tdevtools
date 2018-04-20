@@ -31,7 +31,7 @@ class TravisYMLWriter(interface.DependencyFileWriter):
     """
     template_filename = os.path.join(
         self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
-    super(SetupPyWriter, self)._GenerateFromTemplate(
+    super(TravisYMLWriter, self)._GenerateFromTemplate(
         template_filename, template_mappings)
 
   def Write(self):
