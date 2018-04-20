@@ -15,26 +15,39 @@ class TravisYMLWriter(interface.DependencyFileWriter):
 
   PATH = '.travis.yml'
 
+  def _GenerateFromTemplate(self, template_filename, template_mappings):
+    """Generates file context based on a template file.
+
+    Args:
+      template_filename (str): path of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+
+    Returns:
+      str: output based on the template string.
+
+    Raises:
+      RuntimeError: if the template cannot be formatted.
+    """
+    template_filename = os.path.join(
+        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
+    super(SetupPyWriter, self)._GenerateFromTemplate(
+        template_filename, template_mappings)
+
   def Write(self):
     """Writes a .travis.yml file."""
     template_mappings = {}
 
     file_content = []
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'header')
-    template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    template_data = self._GenerateFromTemplate('header', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in ('dfvfs', 'plaso'):
-      template_file = os.path.join(
-          self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'jenkins')
-      template_data = self._GenerateFromTemplate(template_file, template_mappings)
+      template_data = self._GenerateFromTemplate('jenkins', template_mappings)
       file_content.append(template_data)
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'footer')
-    template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    template_data = self._GenerateFromTemplate('footer', template_mappings)
     file_content.append(template_data)
 
     file_content = ''.join(file_content)

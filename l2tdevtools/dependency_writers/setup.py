@@ -72,6 +72,25 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
   PATH = os.path.join('setup.py')
 
+  def _GenerateFromTemplate(self, template_filename, template_mappings):
+    """Generates file context based on a template file.
+
+    Args:
+      template_filename (str): path of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+
+    Returns:
+      str: output based on the template string.
+
+    Raises:
+      RuntimeError: if the template cannot be formatted.
+    """
+    template_filename = os.path.join(
+        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
+    super(SetupPyWriter, self)._GenerateFromTemplate(
+        template_filename, template_mappings)
+
   def Write(self):
     """Writes a setup.py file."""
     # Width is 80 characters minus 4 spaces, 2 single quotes and 1 comma.
@@ -96,62 +115,50 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
     file_content = []
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'header')
-    template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    template_data = self._GenerateFromTemplate('header', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in ('dfvfs', 'plaso'):
-      template_file = os.path.join(
-          self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'import_sdist')
-      template_data = self._GenerateFromTemplate(template_file, template_mappings)
+      template_data = self._GenerateFromTemplate(
+          'import_sdist', template_mappings)
       file_content.append(template_data)
 
-    for template_filename in ('import_module', 'bdist_msi'):
-      template_file = os.path.join(
-          self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
-      template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    for template_file in ('import_module', 'bdist_msi'):
+      template_data = self._GenerateFromTemplate(
+          template_file, template_mappings)
       file_content.append(template_data)
 
     if self._project_definition.name in ('dfvfs', 'dfwinreg'):
-      template_filename = 'bdist_rpm_package_data'
+      template_file = 'bdist_rpm_package_data'
     else:
-      template_filename = 'bdist_rpm'
+      template_file = 'bdist_rpm'
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
     template_data = self._GenerateFromTemplate(template_file, template_mappings)
     file_content.append(template_data)
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'setup_header')
-    template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    template_data = self._GenerateFromTemplate(
+        'setup_header', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in ('dfvfs', 'plaso'):
-      template_filename = 'setup_cmdclass_sdist'
+      template_file = 'setup_cmdclass_sdist'
     else:
-      template_filename = 'setup_cmdclass'
+      template_file = 'setup_cmdclass'
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
     template_data = self._GenerateFromTemplate(template_file, template_mappings)
     file_content.append(template_data)
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'setup_classifiers')
-    template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    template_data = self._GenerateFromTemplate(
+        'setup_classifiers', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in ('dfvfs', 'dfwinreg'):
-      template_file = os.path.join(
-          self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'setup_package_data')
-      template_data = self._GenerateFromTemplate(template_file, template_mappings)
+      template_data = self._GenerateFromTemplate(
+          'setup_package_data', template_mappings)
       file_content.append(template_data)
 
-    template_file = os.path.join(
-        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, 'setup_footer')
-    template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    template_data = self._GenerateFromTemplate(
+        'setup_footer', template_mappings)
     file_content.append(template_data)
 
     file_content = ''.join(file_content)
