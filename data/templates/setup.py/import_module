@@ -7,4 +7,3 @@ if sys.version < '2.7':
 sys.path.insert(0, '.')
 
 import ${project_name}  # pylint: disable=wrong-import-position
-
