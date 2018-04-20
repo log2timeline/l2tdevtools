@@ -130,6 +130,10 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
     if self._project_definition.name in ('dfvfs', 'dfwinreg'):
       template_file = 'bdist_rpm_package_data'
+      if self._project_definition.name == 'dfvfs':
+        template_mappings['package_data_path'] = 'dfvfs.lib'
+      else:
+        template_mappings['package_data_path'] = 'dfwinreg'
     else:
       template_file = 'bdist_rpm'
 
