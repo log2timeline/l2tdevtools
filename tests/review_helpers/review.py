@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools.review_helpers import review
 
+from tests import test_lib
 
-class ReviewHelperTest(unittest.TestCase):
+
+class ReviewHelperTest(test_lib.BaseTestCase):
   """Tests the review helper"""
 
   def testInitialize(self):

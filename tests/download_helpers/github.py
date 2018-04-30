@@ -9,11 +9,13 @@ import unittest
 
 from l2tdevtools.download_helpers import github
 
+from tests import test_lib
+
 
 @unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
-class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
+class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the docopt github releases download helper."""
 
   _DOWNLOAD_URL = 'https://github.com/docopt/docopt/releases'
@@ -59,7 +61,7 @@ class DocoptGitHubReleasesDownloadHelperTest(unittest.TestCase):
 @unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
-class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
+class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the libyal github releases download helper."""
 
   _DOWNLOAD_URL = 'https://github.com/libyal/libevt/releases'
@@ -107,7 +109,7 @@ class LibyalGitHubReleasesDownloadHelperTest(unittest.TestCase):
 @unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
-class Log2TimelineGitHubReleasesDownloadHelperTest(unittest.TestCase):
+class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the log2timeline GitHub releases download helper."""
 
   _DOWNLOAD_URL = 'https://github.com/log2timeline/dfvfs/releases'

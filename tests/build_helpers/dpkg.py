@@ -6,32 +6,34 @@ from __future__ import unicode_literals
 
 import unittest
 
+from tests import test_lib
 
-class DPKGBuildHelperTest(unittest.TestCase):
+
+class DPKGBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build dpkg packages (.deb)."""
 
   # TODO: add tests.
 
 
-class ConfigureMakeDPKGBuildHelperTest(unittest.TestCase):
+class ConfigureMakeDPKGBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build dpkg packages (.deb)."""
 
   # TODO: add tests.
 
 
-class ConfigureMakeSourceDPKGBuildHelperTest(unittest.TestCase):
+class ConfigureMakeSourceDPKGBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build source dpkg packages (.deb)."""
 
   # TODO: add tests.
 
 
-class SetupPyDPKGBuildHelperTest(unittest.TestCase):
+class SetupPyDPKGBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build dpkg packages (.deb)."""
 
   # TODO: add tests.
 
 
-class SetupPySourceDPKGBuildHelperTest(unittest.TestCase):
+class SetupPySourceDPKGBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build source dpkg packages (.deb)."""
 
   # TODO: add tests.

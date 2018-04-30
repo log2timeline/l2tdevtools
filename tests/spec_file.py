@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools import spec_file
 
+from tests import test_lib
 
-class RPMSpecFileGeneratorTest(unittest.TestCase):
+
+class RPMSpecFileGeneratorTest(test_lib.BaseTestCase):
   """Tests for the RPM spec file generator."""
 
   def testGetBuildDefinition(self):

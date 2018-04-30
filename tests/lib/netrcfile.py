@@ -8,8 +8,10 @@ import unittest
 
 import l2tdevtools.lib.netrcfile as netrcfile_lib
 
+from tests import test_lib
 
-class UploadHelperTest(unittest.TestCase):
+
+class UploadHelperTest(test_lib.BaseTestCase):
   """Tests the upload helper"""
 
   def testInitialize(self):
