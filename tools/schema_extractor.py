@@ -12,8 +12,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
+import logging
 import os
-import sqlite
 import sys
 import textwrap
 
@@ -22,38 +22,21 @@ try:
 except ImportError:
   paperclip = None
 
+# pylint: disable=wrong-import-order
+try:
+  from pysqlite2 import dbapi2 as sqlite3
+except ImportError:
+  import sqlite3
+
 
 class SQLiteSchemaExtractor(object):
   """SQLite database file schema extractor."""
 
-  def GetDatabaseSchema(self, database_path, wal_path=None):
-    """Retrieves schema from given database.
-
-    Args:
-      database_path (str): file path to database.
-      wal_path (Optional[str]): file path to WAL file.
-
-    Returns:
-      dict[str, str]: schema as an SQL query per table name.
-    """
-    database = sqlite.SQLiteDatabase('database.db')
-
-    with open(database_path, 'rb') as file_object:
-      wal_file_object = None
-      if wal_path:
-        wal_file_object = open(wal_path, 'rb')
-
-      try:
-        database.Open(file_object, wal_file_object=wal_file_object)
-        schema = database.schema
-
-      finally:
-        database.Close()
-
-        if wal_file_object:
-          wal_file_object.close()
-
-    return schema
+  _SCHEMA_QUERY = (
+      'SELECT tbl_name, sql '
+      'FROM sqlite_master '
+      'WHERE type = "table" AND tbl_name != "xp_proc" '
+      'AND tbl_name != "sqlite_sequence"')
 
   def FormatSchema(self, schema):
     """Formats a schema into a word-wrapped string.
@@ -90,6 +73,38 @@ class SQLiteSchemaExtractor(object):
 
     return '\n'.join(lines)
 
+  def GetDatabaseSchema(self, database_path):
+    """Retrieves schema from given database.
+
+    Args:
+      database_path (str): file path to database.
+
+    Returns:
+      dict[str, str]: schema as an SQL query per table name or None if
+          the schema could not be retrieved.
+    """
+    schema = None
+
+    database = sqlite3.connect(database_path)
+    database.row_factory = sqlite3.Row
+
+    try:
+      cursor = database.cursor()
+
+      rows = cursor.execute(self._SCHEMA_QUERY)
+
+      schema = {
+          table_name: ' '.join(query.split()) for table_name, query in rows}
+
+    except sqlite3.DatabaseError as exception:
+      logging.error('Unable to query schema with error: {0!s}'.format(
+          exception))
+
+    finally:
+      database.close()
+
+    return schema
+
 
 def Main():
   """The main program function.
@@ -111,24 +126,19 @@ def Main():
       'database_path', type=str,
       help='path to the database file to extract schema from.')
 
-  argument_parser.add_argument(
-      'wal_path', type=str, nargs='?', default=None,
-      help='optional path to a WAL file to commit into the database.')
-
   options = argument_parser.parse_args()
 
   if not os.path.exists(options.database_path):
     print('No such database file: {0:s}'.format(options.database_path))
     return False
 
-  if options.wal_path and not os.path.exists(options.wal_path):
-    print('No such WAL file: {0:s}'.format(options.wal_path))
-    return False
-
   extractor = SQLiteSchemaExtractor()
 
-  database_schema = extractor.GetDatabaseSchema(
-      options.database_path, options.wal_path)
+  database_schema = extractor.GetDatabaseSchema(options.database_path)
+  if not database_schema:
+    print('Unable to determine schema from database file: {0:s}'.format(
+        options.database_path))
+    return False
 
   database_schema = extractor.FormatSchema(database_schema)
 
