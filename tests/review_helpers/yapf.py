@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools.review_helpers import yapf
 
+from tests import test_lib
 
-class YapfHelperTest(unittest.TestCase):
+
+class YapfHelperTest(test_lib.BaseTestCase):
   """Tests the yapf helper"""
 
   def testInitialize(self):

@@ -8,10 +8,11 @@ import unittest
 
 from l2tdevtools.review_helpers import github
 
+from tests import test_lib as shared_test_lib
 from tests.review_helpers import test_lib
 
 
-class GitHubHelperTest(unittest.TestCase):
+class GitHubHelperTest(shared_test_lib.BaseTestCase):
   """Tests the command line helper"""
 
   # pylint: disable=protected-access

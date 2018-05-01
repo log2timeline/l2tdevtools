@@ -9,8 +9,10 @@ import unittest
 
 from l2tdevtools import projects
 
+from tests import test_lib
 
-class ProjectDefinitionTest(unittest.TestCase):
+
+class ProjectDefinitionTest(test_lib.BaseTestCase):
   """Tests for the project definition."""
 
   def testIsPython2Only(self):
@@ -21,7 +23,7 @@ class ProjectDefinitionTest(unittest.TestCase):
     self.assertFalse(result)
 
 
-class ProjectVersionDefinitionTest(unittest.TestCase):
+class ProjectVersionDefinitionTest(test_lib.BaseTestCase):
   """Tests for the project version definition."""
 
   def testInitialize(self):
@@ -66,7 +68,7 @@ class ProjectVersionDefinitionTest(unittest.TestCase):
     self.assertEqual(earliest_version, ['>', '1', '0'])
 
 
-class ProjectDefinitionReaderTest(unittest.TestCase):
+class ProjectDefinitionReaderTest(test_lib.BaseTestCase):
   """Tests for the project definition reader."""
 
   # TODO: test _GetConfigValue function.

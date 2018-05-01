@@ -9,11 +9,13 @@ import unittest
 
 from l2tdevtools.download_helpers import pypi
 
+from tests import test_lib
+
 
 @unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'Test is flaky for macOS on Travis')
-class PyPIDownloadHelperTest(unittest.TestCase):
+class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the PyPi download helper."""
 
   _DOWNLOAD_URL = 'https://pypi.python.org/pypi/dfvfs'

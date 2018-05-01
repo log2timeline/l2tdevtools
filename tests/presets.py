@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools import presets
 
+from tests import test_lib
 
-class PresetDefinitionTest(unittest.TestCase):
+
+class PresetDefinitionTest(test_lib.BaseTestCase):
   """Tests for the preset definition."""
 
   def testInitialize(self):

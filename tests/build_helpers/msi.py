@@ -6,20 +6,22 @@ from __future__ import unicode_literals
 
 import unittest
 
+from tests import test_lib
 
-class MSIBuildHelperTest(unittest.TestCase):
+
+class MSIBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build Microsoft Installer packages (.msi)."""
 
   # TODO: add tests.
 
 
-class ConfigureMakeMSIBuildHelperTest(unittest.TestCase):
+class ConfigureMakeMSIBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build Microsoft Installer packages (.msi)."""
 
   # TODO: add tests.
 
 
-class SetupPyMSIBuildHelperTest(unittest.TestCase):
+class SetupPyMSIBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build Microsoft Installer packages (.msi)."""
 
   # TODO: add tests.

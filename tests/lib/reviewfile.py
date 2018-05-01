@@ -8,8 +8,10 @@ import unittest
 
 import l2tdevtools.lib.reviewfile as reviewfile_lib
 
+from tests import test_lib
 
-class ReviewFileTest(unittest.TestCase):
+
+class ReviewFileTest(test_lib.BaseTestCase):
   """Tests the review file implementation."""
 
   # pylint: disable=protected-access

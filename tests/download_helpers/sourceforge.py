@@ -9,13 +9,15 @@ import unittest
 
 from l2tdevtools.download_helpers import sourceforge
 
+from tests import test_lib
+
 
 @unittest.skipIf(
     os.environ.get('APPVEYOR', ''), 'Test is flaky for Windows on AppVeyor')
 @unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
-class SourceForgeDownloadHelperTest(unittest.TestCase):
+class SourceForgeDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the Source Forge download helper."""
 
   _DOWNLOAD_URL = 'https://sourceforge.net/projects/pyparsing/files'

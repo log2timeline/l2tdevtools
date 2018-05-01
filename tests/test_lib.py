@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 
 import os
 import sys
+import shutil
+import tempfile
 import unittest
 
 
@@ -53,3 +55,21 @@ class BaseTestCase(unittest.TestCase):
     # Note that we need to pass the individual path segments to os.path.join
     # and not a list.
     return os.path.join(self._TEST_DATA_PATH, *path_segments)
+
+
+class TempDirectory(object):
+  """A self cleaning temporary directory."""
+
+  def __init__(self):
+    """Initializes the temporary directory."""
+    super(TempDirectory, self).__init__()
+    self.name = ''
+
+  def __enter__(self):
+    """Make this work with the 'with' statement."""
+    self.name = tempfile.mkdtemp()
+    return self.name
+
+  def __exit__(self, unused_type, unused_value, unused_traceback):
+    """Make this work with the 'with' statement."""
+    shutil.rmtree(self.name, True)
