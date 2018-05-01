@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools.helpers import project
 
+from tests import test_lib
 
-class ProjectHelperTest(unittest.TestCase):
+
+class ProjectHelperTest(test_lib.BaseTestCase):
   """Tests the project helper"""
 
   # pylint: disable=protected-access

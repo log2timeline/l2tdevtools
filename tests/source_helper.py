@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools import source_helper
 
+from tests import test_lib
 
-class SourceHelperTest(unittest.TestCase):
+
+class SourceHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to manager project source code."""
 
   def testInitialize(self):

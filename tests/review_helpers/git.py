@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools.review_helpers import git
 
+from tests import test_lib
 
-class GitHelperTest(unittest.TestCase):
+
+class GitHelperTest(test_lib.BaseTestCase):
   """Tests the git helper"""
 
   def testInitialize(self):

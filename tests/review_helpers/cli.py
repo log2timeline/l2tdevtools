@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools.review_helpers import cli
 
+from tests import test_lib
 
-class CLIHelperTest(unittest.TestCase):
+
+class CLIHelperTest(test_lib.BaseTestCase):
   """Tests the command line helper"""
 
   def testRunCommand(self):

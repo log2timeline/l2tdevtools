@@ -10,11 +10,13 @@ import unittest
 
 from tools import update
 
+from tests import test_lib
+
 
 @unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
-class GithubRepoDownloadHelperTest(unittest.TestCase):
+class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the github repo download helper class."""
 
   _DOWNLOAD_URL = 'https://github.com/ForensicArtifacts/artifacts/releases'
@@ -49,7 +51,7 @@ class GithubRepoDownloadHelperTest(unittest.TestCase):
 @unittest.skipIf(
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
-class DependencyUpdaterTest(unittest.TestCase):
+class DependencyUpdaterTest(test_lib.BaseTestCase):
   """Tests for the dependency updater class."""
 
   # pylint: disable=protected-access

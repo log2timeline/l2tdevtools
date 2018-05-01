@@ -9,8 +9,10 @@ import unittest
 from l2tdevtools.build_helpers import interface
 from l2tdevtools import projects
 
+from tests import test_lib
 
-class BuildHelperTest(unittest.TestCase):
+
+class BuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build projects from source."""
 
   def testCheckBuildDependencies(self):

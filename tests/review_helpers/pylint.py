@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools.review_helpers import pylint
 
+from tests import test_lib
 
-class PylintHelperTest(unittest.TestCase):
+
+class PylintHelperTest(test_lib.BaseTestCase):
   """Tests the pylint helper"""
 
   def testInitialize(self):

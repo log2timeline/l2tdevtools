@@ -8,8 +8,10 @@ import unittest
 
 from l2tdevtools import dpkg_files
 
+from tests import test_lib
 
-class DPKGBuildFilesGeneratorTest(unittest.TestCase):
+
+class DPKGBuildFilesGeneratorTest(test_lib.BaseTestCase):
   """Tests for the dpkg build files generator."""
 
   def testGenerateChangelogFile(self):

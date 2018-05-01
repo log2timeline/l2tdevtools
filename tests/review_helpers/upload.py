@@ -9,8 +9,10 @@ import unittest
 
 from l2tdevtools.review_helpers import upload
 
+from tests import test_lib
 
-class UploadHelperTest(unittest.TestCase):
+
+class UploadHelperTest(test_lib.BaseTestCase):
   """Tests the upload helper"""
 
   def testInitialize(self):

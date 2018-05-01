@@ -6,20 +6,22 @@ from __future__ import unicode_literals
 
 import unittest
 
+from tests import test_lib
 
-class OSCBuildHelperTest(unittest.TestCase):
+
+class OSCBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the build with osc for the openSUSE build service."""
 
   # TODO: add tests.
 
 
-class ConfigureMakeOSCBuildHelperTest(unittest.TestCase):
+class ConfigureMakeOSCBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the build with osc for the openSUSE build service."""
 
   # TODO: add tests.
 
 
-class SetupPyOSCBuildHelperTest(unittest.TestCase):
+class SetupPyOSCBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the build with osc for the openSUSE build service."""
 
   # TODO: add tests.
