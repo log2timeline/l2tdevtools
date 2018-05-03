@@ -48,7 +48,6 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     Returns:
       str: latest version number or None if not available.
     """
-    return '5.5.1'
     if version_definition:
       earliest_version = version_definition.GetEarliestVersion()
       if earliest_version and earliest_version[0] == '==':
