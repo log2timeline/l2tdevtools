@@ -80,7 +80,7 @@ if __name__ == '__main__':
   os.chdir(compile_dir)
 
   if not os.path.isfile('sqlite3.c'):
-    url = 'https://www.sqlite.org/2017/sqlite-amalgamation-3220000.zip'
+    url = 'https://www.sqlite.org/2018/sqlite-amalgamation-3230100.zip'
 
     sqlite_filename = DownloadFile(url)
     if not sqlite_filename:
