@@ -1,4 +1,4 @@
-  - env: [TARGET="jenkins", JOB_NAME="travis"]
+  - env: TARGET="jenkins"
     os: linux
     dist: trusty
     sudo: required
