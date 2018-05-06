@@ -1,12 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""Script to extract the database schema from SQLite database files.
-
-The resulting schema will be placed into your clipboard which can then
-be pasted directly into your plugin.
-
-This script requires the pyperclip Python module.
-"""
+"""Script to extract the database schema from SQLite database files."""
 
 from __future__ import print_function
 from __future__ import unicode_literals
