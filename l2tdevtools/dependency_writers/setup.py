@@ -68,9 +68,28 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 class SetupPyWriter(interface.DependencyFileWriter):
   """Setup script file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'setup.py')
+  _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.py')
 
   PATH = os.path.join('setup.py')
+
+  def _GenerateFromTemplate(self, template_filename, template_mappings):
+    """Generates file context based on a template file.
+
+    Args:
+      template_filename (str): path of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+
+    Returns:
+      str: output based on the template string.
+
+    Raises:
+      RuntimeError: if the template cannot be formatted.
+    """
+    template_filename = os.path.join(
+        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
+    return super(SetupPyWriter, self)._GenerateFromTemplate(
+        template_filename, template_mappings)
 
   def Write(self):
     """Writes a setup.py file."""
@@ -94,8 +113,59 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'project_name': self._project_definition.name,
     }
 
-    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
-    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+    file_content = []
+
+    template_data = self._GenerateFromTemplate('header', template_mappings)
+    file_content.append(template_data)
+
+    if self._project_definition.name in ('dfvfs', 'plaso'):
+      template_data = self._GenerateFromTemplate(
+          'import_sdist', template_mappings)
+      file_content.append(template_data)
+
+    for template_file in ('import_module', 'bdist_msi'):
+      template_data = self._GenerateFromTemplate(
+          template_file, template_mappings)
+      file_content.append(template_data)
+
+    if self._project_definition.name in ('dfvfs', 'dfwinreg'):
+      template_file = 'bdist_rpm_package_data'
+      if self._project_definition.name == 'dfvfs':
+        template_mappings['package_data_path'] = 'dfvfs.lib'
+      else:
+        template_mappings['package_data_path'] = 'dfwinreg'
+    else:
+      template_file = 'bdist_rpm'
+
+    template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate(
+        'setup_header', template_mappings)
+    file_content.append(template_data)
+
+    if self._project_definition.name in ('dfvfs', 'plaso'):
+      template_file = 'setup_cmdclass_sdist'
+    else:
+      template_file = 'setup_cmdclass'
+
+    template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate(
+        'setup_classifiers', template_mappings)
+    file_content.append(template_data)
+
+    if self._project_definition.name in ('dfvfs', 'dfwinreg'):
+      template_data = self._GenerateFromTemplate(
+          'setup_package_data', template_mappings)
+      file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate(
+        'setup_footer', template_mappings)
+    file_content.append(template_data)
+
+    file_content = ''.join(file_content)
 
     file_content = file_content.encode('utf-8')
 

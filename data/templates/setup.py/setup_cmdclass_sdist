@@ -1,0 +1,4 @@
+    cmdclass={
+        'bdist_msi': BdistMSICommand,
+        'bdist_rpm': BdistRPMCommand,
+        'sdist_test_data': sdist},

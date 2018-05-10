@@ -1,0 +1,9 @@
+if sys.version < '2.7':
+  print('Unsupported Python version: {0:s}.'.format(sys.version))
+  print('Supported Python versions are 2.7 or a later 2.x version.')
+  sys.exit(1)
+
+# Change PYTHONPATH to include ${project_name} so that we can get the version.
+sys.path.insert(0, '.')
+
+import ${project_name}  # pylint: disable=wrong-import-position

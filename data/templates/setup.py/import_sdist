@@ -1,0 +1,5 @@
+try:
+  from setuptools.commands.sdist import sdist
+except ImportError:
+  from distutils.command.sdist import sdist
+
