@@ -1,0 +1,5 @@
+    data_files=[
+        ('share/doc/${project_name}', [
+            'ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README']),
+    ],
+)
