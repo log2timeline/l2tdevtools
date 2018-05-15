@@ -56,12 +56,12 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
     versions = {}
     expression_string = (
-        r'.*/packages/.*/{0:s}-(?P<version>[\d\.\!]*)'
+        r'.*/packages/.*/{0:s}-(?P<version>[\d\.\!]*(post\d+)?)'
         r'\.(tar\.bz2|tar\.gz|zip)#').format(self._project_name)
     for match in re.finditer(expression_string, page_content):
       version_string = match.group('version')
       if version_string:
-        # We need to support PEP440 epoch versioning, which only newly versions
+        # We need to support PEP440 epoch versioning, which only newer versions
         # of setuptools support. So this is a bit of hack to handle epochs
         # but still use setuptools to handle most of the version matching.
         epoch, _, epoch_version_string = version_string.partition('!')
@@ -103,7 +103,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     # The format of the project download URL is:
     # https://pypi.python.org/packages/.*/{project name}-{version}.{extension}
     expression_string = (
-        '(https://pypi.python.org/packages/.*/'
+        '(https://(pypi.python.org|files.pythonhosted.org)/packages/.*/'
         '{0:s}-{1!s}[.](tar[.]bz2|tar[.]gz|zip))').format(
             self._project_name, project_version)
     matches = re.findall(expression_string, page_content)
