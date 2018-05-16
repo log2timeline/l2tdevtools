@@ -71,10 +71,11 @@ class ProjectHelper(cli.CLIHelper):
 
   # yapf: enable
 
+  # Note that review is submodule name of l2tdevtools not a stand-alone project.
   SUPPORTED_PROJECTS = frozenset([
       'acstore', 'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs', 'dfwinreg',
       'dftimewolf', 'dtfabric', 'dtformats', 'esedb-kb', 'l2tdevtools',
-      'l2tdocs', 'l2tpreg', 'plaso', 'winevt-kb', 'winreg-kb'])
+      'l2tdocs', 'l2tpreg', 'plaso', 'review', 'winevt-kb', 'winreg-kb'])
 
   def __init__(self, project_path):
     """Initializes a project helper.
