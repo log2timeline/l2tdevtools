@@ -6,6 +6,7 @@
 from __future__ import unicode_literals
 
 import os
+import sys
 
 from l2tdevtools import dependencies
 from l2tdevtools import project_config
@@ -25,7 +26,12 @@ from l2tdevtools.dependency_writers import travis
 from l2tdevtools.dependency_writers import travis_yml
 
 
-if __name__ == '__main__':
+def Main():
+  """The main program function.
+
+  Returns:
+    bool: True if successful or False if not.
+  """
   l2tdevtools_path = os.path.abspath(__file__)
   l2tdevtools_path = os.path.dirname(l2tdevtools_path)
   l2tdevtools_path = os.path.dirname(l2tdevtools_path)
@@ -78,3 +84,12 @@ if __name__ == '__main__':
   path = os.path.join('utils', 'dependencies.py')
   with open(path, 'wb') as file_object:
     file_object.write(file_data)
+
+  return True
+
+
+if __name__ == '__main__':
+  if not Main():
+    sys.exit(1)
+  else:
+    sys.exit(0)
