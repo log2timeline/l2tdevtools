@@ -37,8 +37,8 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
     download_helper = pypi.PyPIDownloadHelper(self._DOWNLOAD_URL)
 
     expected_download_url_regexp = re.compile(
-        'https://files.pythonhosted.org/packages/'
-        '[\da-f/]+{0:s}-\d{{8}}.tar.gz'.format(self._PROJECT_NAME))
+        r'https://files.pythonhosted.org/packages/'
+        r'[\da-f/]+{0:s}-\d{{8}}.tar.gz'.format(self._PROJECT_NAME))
 
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
