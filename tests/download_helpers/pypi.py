@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import os
+import re
 import unittest
 
 from l2tdevtools.download_helpers import pypi
@@ -35,14 +36,14 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
     """Tests the GetDownloadURL functions."""
     download_helper = pypi.PyPIDownloadHelper(self._DOWNLOAD_URL)
 
-    expected_download_url = (
-        'https://pypi.python.org/packages/source/d/{0:s}/'
-        '{0:s}-{1:s}.tar.gz').format(self._PROJECT_NAME, self._PROJECT_VERSION)
+    expected_download_url_regexp = re.compile(
+        'https://files.pythonhosted.org/packages/'
+        '[\da-f/]+{0:s}-\d{{8}}.tar.gz'.format(self._PROJECT_NAME))
 
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
-    self.assertEqual(download_url, expected_download_url)
+    self.assertRegexpMatches(download_url, expected_download_url_regexp)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
