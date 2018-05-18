@@ -211,6 +211,8 @@ class ProjectHelper(cli.CLIHelper):
       if line.startswith(version_line_prefix):
         return line[len(version_line_prefix):-1]
 
+    return None
+
   def UpdateDpkgChangelogFile(self):
     """Updates the dpkg changelog file.
 

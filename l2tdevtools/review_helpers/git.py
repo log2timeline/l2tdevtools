@@ -274,6 +274,8 @@ class GitHelper(cli.CLIHelper):
         if len(values) == 3:
           return values[1]
 
+    return None
+
   def PullFromFork(self, git_repo_url, branch):
     """Pulls changes from a feature branch on a fork.
 

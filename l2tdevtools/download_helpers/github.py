@@ -221,6 +221,8 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     if matches and len(matches) == 1:
       return 'https://github.com{0:s}'.format(matches[0][:-1])
 
+    return None
+
   def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
 
