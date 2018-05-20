@@ -13,7 +13,8 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
 
   PATH = os.path.join('appveyor.yml')
 
-  _VERSION_SQLITE = '3220000'
+  _YEAR_SQLITE = '2018'
+  _VERSION_SQLITE = '3230100'
 
   _UPGRADE_PIP = (
       '- cmd: "%PYTHON%\\\\python.exe -m pip install --upgrade pip"')
@@ -52,9 +53,9 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
 
   _DOWNLOAD_SQLITE = (
       '- ps: (new-object net.webclient).DownloadFile('
-      '\'https://www.sqlite.org/2018/sqlite-dll-win32-x86-{0:s}.zip\', '
-      '\'C:\\Projects\\sqlite-dll-win32-x86-{0:s}.zip\')').format(
-          _VERSION_SQLITE)
+      '\'https://www.sqlite.org/{0:s}/sqlite-dll-win32-x86-{1:s}.zip\', '
+      '\'C:\\Projects\\sqlite-dll-win32-x86-{1:s}.zip\')').format(
+          _YEAR_SQLITE, _VERSION_SQLITE)
 
   _EXTRACT_SQLITE = (
       '- ps: $Output = Invoke-Expression -Command '
