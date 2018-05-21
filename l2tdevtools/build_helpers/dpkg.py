@@ -183,7 +183,9 @@ class DPKGBuildHelper(interface.BuildHelper):
       with tarfile.open(name=orig_source_filename, mode='w:gz') as tar_file:
         for filename in zip_file.namelist():
           with zip_file.open(filename) as file_object:
+            zip_info = zip_file.getinfo(filename)
             tar_info = tarfile.TarInfo(filename)
+            tar_info.size = zip_info.file_size
             tar_file.addfile(tar_info, fileobj=file_object)
 
   def _CreatePackagingFiles(
