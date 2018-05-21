@@ -43,6 +43,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
+    # pylint: disable=deprecated-method
     self.assertRegexpMatches(download_url, expected_download_url_regexp)
 
   def testGetProjectIdentifier(self):
