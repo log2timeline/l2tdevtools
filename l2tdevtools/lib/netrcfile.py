@@ -31,17 +31,17 @@ class NetRCFile(object):
     Returns:
       list[str]: .netrc values for github.com or None.
     """
-    if not self._contents:
-      return
+    if self._contents:
+      # Note that according to GNU's manual on .netrc file, the credential
+      # tokens "may be separated by spaces, tabs, or new-lines".
+      if not self._values:
+        self._values = self._NETRC_SEPARATOR_RE.findall(self._contents)
 
-    # Note that according to GN's manual on .netrc file, the credential
-    # tokens "may be separated by spaces, tabs, or new-lines".
-    if not self._values:
-      self._values = self._NETRC_SEPARATOR_RE.findall(self._contents)
+      for value_index, value in enumerate(self._values):
+        if value == 'github.com' and self._values[value_index - 1] == 'machine':
+          return self._values[value_index + 1:]
 
-    for value_index, value in enumerate(self._values):
-      if value == 'github.com' and self._values[value_index - 1] == 'machine':
-        return self._values[value_index + 1:]
+    return None
 
   def GetGitHubAccessToken(self):
     """Retrieves the github access token.
@@ -51,11 +51,13 @@ class NetRCFile(object):
     """
     values = self._GetGitHubValues()
     if not values:
-      return
+      return None
 
     for value_index, value in enumerate(values):
       if value == 'password':
         return values[value_index + 1]
+
+    return None
 
   def GetGitHubUsername(self):
     """Retrieves the github username.
@@ -65,7 +67,7 @@ class NetRCFile(object):
     """
     values = self._GetGitHubValues()
     if not values:
-      return
+      return None
 
     login_value = None
     for value_index, value in enumerate(values):
@@ -75,3 +77,5 @@ class NetRCFile(object):
       # If the next field is 'password' we assume the login field is empty.
       if login_value != 'password':
         return login_value
+
+    return None
