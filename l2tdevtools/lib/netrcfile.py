@@ -31,17 +31,15 @@ class NetRCFile(object):
     Returns:
       list[str]: .netrc values for github.com or None.
     """
-    if not self._contents:
-      return None
+    if self._contents:
+      # Note that according to GNU's manual on .netrc file, the credential
+      # tokens "may be separated by spaces, tabs, or new-lines".
+      if not self._values:
+        self._values = self._NETRC_SEPARATOR_RE.findall(self._contents)
 
-    # Note that according to GN's manual on .netrc file, the credential
-    # tokens "may be separated by spaces, tabs, or new-lines".
-    if not self._values:
-      self._values = self._NETRC_SEPARATOR_RE.findall(self._contents)
-
-    for value_index, value in enumerate(self._values):
-      if value == 'github.com' and self._values[value_index - 1] == 'machine':
-        return self._values[value_index + 1:]
+      for value_index, value in enumerate(self._values):
+        if value == 'github.com' and self._values[value_index - 1] == 'machine':
+          return self._values[value_index + 1:]
 
     return None
 

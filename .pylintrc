@@ -1,4 +1,4 @@
-# Pylint 1.9.x configuration file
+# Pylint 1.7.x - 1.9.x  configuration file
 [MASTER]
 
 # A comma-separated list of package or module names from where C extensions may
