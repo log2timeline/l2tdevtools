@@ -22,6 +22,8 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
   _BDIST_RPM = ['[bdist_rpm]', 'release = 1', 'packager = {maintainer:s}']
 
+  _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
+
   def Write(self):
     """Writes a setup.cfg file."""
     file_content = []
@@ -31,10 +33,8 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
     file_content.extend(self._BDIST_RPM)
 
-    doc_files = ['AUTHORS', 'LICENSE', 'README']
-
-    if os.path.isfile('ACKNOWLEDGEMENTS'):
-      doc_files.append('ACKNOWLEDGEMENTS')
+    doc_files = [
+        doc_file for doc_file in self._DOC_FILES if os.path.isfile(doc_file)]
 
     for index, doc_file in enumerate(sorted(doc_files)):
       if index == 0:
@@ -68,9 +68,13 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 class SetupPyWriter(interface.DependencyFileWriter):
   """Setup script file writer."""
 
-  _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.py')
-
   PATH = os.path.join('setup.py')
+
+  _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
+
+  _PROJECTS_WITH_PACKAGE_DATA = ('dfvfs', 'dfwinreg', 'dtformats', 'winreg-kb')
+
+  _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.py')
 
   def _GenerateFromTemplate(self, template_filename, template_mappings):
     """Generates file context based on a template file.
@@ -106,11 +110,27 @@ class SetupPyWriter(interface.DependencyFileWriter):
     description_long = '\n'.join([
         '    \'{0:s}\''.format(line) for line in description_long])
 
+    doc_files = [
+        doc_file for doc_file in self._DOC_FILES if os.path.isfile(doc_file)]
+
+    maintainer = self._project_definition.maintainer
+    maintainer, _, maintainer_email = maintainer.rpartition('<')
+    maintainer_email, _, _ = maintainer_email.rpartition('>')
+
+    # TODO: add support for data files
+    # TODO: add support for scripts
+
     template_mappings = {
+        'doc_files': ', '.join([
+            '\'{0:s}\''.format(doc_file) for doc_file in doc_files]),
         'description_long': description_long,
         'description_short': description_short,
+        'homepage_url': self._project_definition.homepage_url,
+        'maintainer': maintainer.strip(),
+        'maintainer_email': maintainer_email.strip(),
         'project_name_description': self._project_definition.name_description,
         'project_name': self._project_definition.name,
+        'rpm_doc_files': ' '.join(doc_files),
     }
 
     file_content = []
@@ -128,12 +148,14 @@ class SetupPyWriter(interface.DependencyFileWriter):
           template_file, template_mappings)
       file_content.append(template_data)
 
-    if self._project_definition.name in ('dfvfs', 'dfwinreg'):
+    if self._project_definition.name in self._PROJECTS_WITH_PACKAGE_DATA:
       template_file = 'bdist_rpm_package_data'
       if self._project_definition.name == 'dfvfs':
         template_mappings['package_data_path'] = 'dfvfs.lib'
+      elif self._project_definition.name == 'winreg-kb':
+        template_mappings['package_data_path'] = 'winregrc'
       else:
-        template_mappings['package_data_path'] = 'dfwinreg'
+        template_mappings['package_data_path'] = self._project_definition.name
     else:
       template_file = 'bdist_rpm'
 
@@ -156,7 +178,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'setup_classifiers', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name in ('dfvfs', 'dfwinreg'):
+    if self._project_definition.name in self._PROJECTS_WITH_PACKAGE_DATA:
       template_data = self._GenerateFromTemplate(
           'setup_package_data', template_mappings)
       file_content.append(template_data)
