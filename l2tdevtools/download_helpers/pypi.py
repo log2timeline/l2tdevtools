@@ -66,15 +66,18 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
         # but still use setuptools to handle most of the version matching.
         epoch, _, epoch_version_string = version_string.partition('!')
         if not epoch_version_string:
-          # Per PEP440, if there's no epoch specified, the epoch is 0.
+          # Per PEP440, if there is no epoch specified, the epoch is 0.
           epoch_version_string = epoch
           epoch = 0
         else:
           epoch = int(epoch, 10)
-        version = list(pkg_resources.parse_version(epoch_version_string))
+
+        # Note that pkg_resources.parse_version() returns an instance of
+        # pkg_resources.SetuptoolsVersion.
+        version_object = pkg_resources.parse_version(epoch_version_string)
+
         # Add the epoch to the version string for comparison.
-        version.insert(0, epoch)
-        version_tuple = (tuple(version), version_string)
+        version_tuple = ((epoch, version_object), version_string)
         versions[version_tuple] = version_string
 
     latest_version = max(versions.keys())
