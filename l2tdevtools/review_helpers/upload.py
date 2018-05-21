@@ -196,6 +196,8 @@ class UploadHelper(cli.CLIHelper):
         except ValueError:
           pass
 
+    return None
+
   def GetAccessToken(self):
     """Retrieves the OAuth access token.
 

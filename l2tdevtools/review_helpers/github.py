@@ -93,3 +93,5 @@ class GitHubHelper(object):
 
     if response_data:
       return json.loads(response_data)
+
+    return None

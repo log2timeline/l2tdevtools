@@ -34,9 +34,6 @@ class ReviewFile(object):
 
     Args:
       codereview_issue_number (int|str): codereview issue number.
-
-    Returns:
-      bool: True if the review file was created.
     """
     if not os.path.exists('.review'):
       os.mkdir('.review')
@@ -55,15 +52,16 @@ class ReviewFile(object):
     """Retrieves the codereview issue number.
 
     Returns:
-      int: codereview issue number.
+      int: codereview issue number or None if the issue number could not be
+          retrieved.
     """
     if not self._contents:
-      return
+      return None
 
     try:
       return int(self._contents, 10)
     except ValueError:
-      pass
+      return None
 
   def Remove(self):
     """Removes the review file."""

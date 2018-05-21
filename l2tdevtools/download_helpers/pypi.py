@@ -85,6 +85,8 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       # Return the original string that defined the version
       return versions[latest_version]
 
+    return None
+
   def GetDownloadURL(self, unused_project_name, project_version):
     """Retrieves the download URL for a given project name and version.
 
