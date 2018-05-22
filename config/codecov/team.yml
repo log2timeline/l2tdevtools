@@ -1,0 +1,8 @@
+# This codecov configuration YAML file is checked for review purposes only,
+# and must be manually set at https://codecov.io/account/gh/log2timeline/yaml
+# after being changed.
+comment:
+  require_changes: true  # Only post a comment if coverage changes.
+coverage:
+  status:
+    threshold: 1  # Allow coverage to drop by up to 1% in a PR before marking it failed.
