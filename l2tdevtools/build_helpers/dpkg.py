@@ -188,9 +188,11 @@ class DPKGBuildHelper(interface.BuildHelper):
             tar_info = tarfile.TarInfo(filename)
             tar_info.size = zip_info.file_size
             date_time = zip_info.date_time
-            tar_info.mtime = datetime.datetime(
+            mtime = datetime.datetime(
                 date_time[0], date_time[1], date_time[2], date_time[3],
                 date_time[4], date_time[5])
+            mtime = int((mtime - datetime.datetime(1970,1,1)).total_seconds())
+            tar_file.mtime = mtime
             tar_file.addfile(tar_info, fileobj=file_object)
 
   def _CreatePackagingFiles(
