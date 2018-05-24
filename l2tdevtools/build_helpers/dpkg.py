@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import datetime
 import glob
 import logging
 import os
@@ -186,7 +187,10 @@ class DPKGBuildHelper(interface.BuildHelper):
             zip_info = zip_file.getinfo(filename)
             tar_info = tarfile.TarInfo(filename)
             tar_info.size = zip_info.file_size
-            tar_info.mtime = zip_info.date_time
+            date_time = zip_info.date_time
+            tar_info.mtime = datetime.datetime(
+                date_time[0], date_time[1], date_time[2], date_time[3],
+                date_time[4], date_time[5])
             tar_file.addfile(tar_info, fileobj=file_object)
 
   def _CreatePackagingFiles(
