@@ -32,7 +32,7 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
         organization='test', project='test_project')
     helper._url_lib_helper = test_lib.TestURLLibHelper()
 
-    expected_url = u'https://github.com/test_user/test_project.git'
+    expected_url = 'https://github.com/test_user/test_project.git'
     url = helper.GetForkGitRepoUrl('test_user')
     self.assertEqual(url, expected_url)
 
@@ -47,6 +47,15 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
     result = helper.QueryUser('test_user')
     self.assertIsNone(result)
 
+  def testRequestPRReview(self):
+    """Tests the RequestPullReview function."""
+    helper = github.GitHubHelper(
+        organization='test', project='test_project')
+    helper._url_lib_helper = test_lib.TestURLLibHelper()
+
+    result = helper.CreatePullRequestReview(4, 'TOKEN', ['Onager'])
+
+    self.assertTrue(result)
 
 if __name__ == '__main__':
   unittest.main()
