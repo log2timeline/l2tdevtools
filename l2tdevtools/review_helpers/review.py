@@ -276,7 +276,7 @@ class ReviewHelper(object):
     create_github_origin = '{0:s}:{1:s}'.format(git_origin, self._active_branch)
     try:
       self._github_helper.CreatePullRequest(
-        github_access_token, create_github_origin, title, body)
+          github_access_token, create_github_origin, title, body)
     except errors.ConnectivityError:
       print('Unable to create pull request.')
       return False
