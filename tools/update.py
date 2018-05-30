@@ -111,7 +111,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
           None, which will auto-detect the current machine type.
       preferred_operating_system (Optional[str]): preferred operating system,
           where None, which will auto-detect the current operating system.
-      use_api (Optional[bool]): True if the github API should be used to
+      use_api (Optional[bool]): True if the GitHub API should be used to
           determine the download URL.
 
     Returns:
@@ -144,7 +144,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
           None, which will auto-detect the current machine type.
       preferred_operating_system (Optional[str]): preferred operating system,
           where None, which will auto-detect the current operating system.
-      use_api (Optional[bool]): True if the github API should be used to
+      use_api (Optional[bool]): True if the GitHub API should be used to
           determine the download URL.
 
     Returns:

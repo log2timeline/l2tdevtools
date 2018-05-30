@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Script to retrieve github project statistics."""
+"""Script to retrieve GitHub project statistics."""
 
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -161,7 +161,7 @@ class DownloadHelper(object):
 
 
 class GithubContributionsHelper(DownloadHelper):
-  """Class that defines a github contributions helper."""
+  """Class that defines a GitHub contributions helper."""
 
   def _ListContributionsForProject(
       self, organization, project_name, output_writer):
@@ -487,7 +487,7 @@ class StdoutWriter(object):
     """Initializes a stdout output writer.
 
     Args:
-      user_mappings (dict[str, str]): mapping between github username and
+      user_mappings (dict[str, str]): mapping between GitHub username and
           another username.
       output_format (Optional[str]): output format.
     """
