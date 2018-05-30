@@ -38,7 +38,7 @@ class ReviewHelper(object):
     Args:
       command (str): user provided command, for example "create", "lint".
       project_path (str): path to the project being reviewed.
-      github_origin (str): github origin.
+      github_origin (str): GitHub origin.
       feature_branch (str): feature branch.
       diffbase (str): diffbase.
       all_files (Optional[bool]): True if the command should apply to all
@@ -281,7 +281,7 @@ class ReviewHelper(object):
     return True
 
   def CreatePullRequest(self):
-    """Creates a github pull request.
+    """Creates a GitHub pull request.
 
     Returns:
       bool: True if the create was successful.

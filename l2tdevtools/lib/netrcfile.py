@@ -26,7 +26,7 @@ class NetRCFile(object):
       self._contents = file_object.read()
 
   def _GetGitHubValues(self):
-    """Retrieves the github values.
+    """Retrieves the GitHub values.
 
     Returns:
       list[str]: .netrc values for github.com or None.
@@ -44,10 +44,10 @@ class NetRCFile(object):
     return None
 
   def GetGitHubAccessToken(self):
-    """Retrieves the github access token.
+    """Retrieves the GitHub access token.
 
     Returns:
-      str: github access token or None.
+      str: GitHub access token or None.
     """
     values = self._GetGitHubValues()
     if not values:
@@ -60,10 +60,10 @@ class NetRCFile(object):
     return None
 
   def GetGitHubUsername(self):
-    """Retrieves the github username.
+    """Retrieves the GitHub username.
 
     Returns:
-      str: github username or None.
+      str: GitHub username or None.
     """
     values = self._GetGitHubValues()
     if not values:
