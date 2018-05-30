@@ -138,7 +138,7 @@ class COPRProjectManager(object):
 
 
 class GithubRepoManager(object):
-  """Defines a github repository manager."""
+  """Defines a GitHub repository manager."""
 
   _GITHUB_REPO_API_URL = (
       'https://api.github.com/repos/log2timeline/l2tbinaries')
@@ -147,7 +147,7 @@ class GithubRepoManager(object):
       'https://github.com/log2timeline/l2tbinaries')
 
   def __init__(self):
-    """Initializes a github repository manager."""
+    """Initializes a GitHub repository manager."""
     super(GithubRepoManager, self).__init__()
     self._download_helper = interface.DownloadHelper('')
 
@@ -581,7 +581,7 @@ class PackagesManager(object):
 
   def CompareDirectoryWithGithubRepo(
       self, reference_directory, sub_directory, track):
-    """Compares a directory containing msi or dmg packages with a github repo.
+    """Compares a directory containing msi or dmg packages with a GitHub repo.
 
     Args:
       reference_directory (str): path of the reference directory that contains
@@ -676,7 +676,7 @@ class PackagesManager(object):
     return self._ComparePackages(reference_packages, packages)
 
   def CompareGithubRepos(self, sub_directory, reference_track, track):
-    """Compares two github repos PPA tracks.
+    """Compares two GitHub repos PPA tracks.
 
     Args:
       sub_directory (str): name of the machine type sub directory.
