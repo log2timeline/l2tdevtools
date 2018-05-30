@@ -185,7 +185,7 @@ class ProjectHelper(cli.CLIHelper):
       str: github username of the reviewer, or None there is no GitHub username
           associated with the email address.
     """
-    cls._REVIEWER_GITHUB_USERNAMES.get(reviewer_email_address, None)
+    return cls._REVIEWER_GITHUB_USERNAMES.get(reviewer_email_address, None)
 
   @classmethod
   def GetReviewersOnCC(cls, project_name, author, reviewer):

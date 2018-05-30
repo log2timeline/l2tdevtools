@@ -78,17 +78,12 @@ class GitHubHelper(object):
     Returns:
       bool: True if the review was created.
     """
-
-    post_data = (
-      '{{\n'
-      '  "reviewers: [{0:s}]',
-      '}}\n'
-    ).__format__(', '.join(reviewers))
+    post_data = json.dumps({"reviewers": reviewers})
 
     github_url = (
-      'https://api.github.com/repos/{0:s}/{1:s}/{2:s}/requested_reviewers?'
-      'access_token{3:s}').format(
-        self._organization, self._project, pull_request_number, access_token)
+      'https://api.github.com/repos/{0:s}/{1:s}/pulls/{2:d}/'
+      'requested_reviewers?access_token={3:s}').format(
+          self._organization, self._project, pull_request_number, access_token)
 
     try:
        self._url_lib_helper.Request(github_url, post_data=post_data)
