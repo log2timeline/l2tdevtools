@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+import json
 import unittest
 
 from l2tdevtools.review_helpers import github
@@ -19,12 +20,14 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
 
   def testCreatePullRequest(self):
     """Tests the CreatePullRequest function."""
+    create_result = json.dumps({"number": 1})
+
     helper = github.GitHubHelper(
         organization='test', project='test_project')
-    helper._url_lib_helper = test_lib.TestURLLibHelper()
+    helper._url_lib_helper = test_lib.TestURLLibHelper(result=create_result)
 
     result = helper.CreatePullRequest('TOKEN', 'origin', 'title', 'body')
-    self.assertTrue(result)
+    self.assertEqual(result, 1)
 
   def testGetForkGitRepoUrl(self):
     """Tests the GetForkGitRepoUrl function."""

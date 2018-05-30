@@ -5,11 +5,11 @@
 class TestURLLibHelper(object):
   """URL library (urllib) helper for testing."""
 
-  def __init__(self, result=True):
+  def __init__(self, result=b''):
     """Initializes an URL library (urllib) helper.
 
     Args:
-      result (bool): result that should be returned.
+      result (str): result that should be returned.
     """
     super(TestURLLibHelper, self).__init__()
     self._result = result
@@ -27,4 +27,4 @@ class TestURLLibHelper(object):
     Raises:
       ConnectivityError: if the request failed.
     """
-    return b''
+    return self._result

@@ -81,12 +81,13 @@ class GitHubHelper(object):
     post_data = json.dumps({"reviewers": reviewers})
 
     github_url = (
-      'https://api.github.com/repos/{0:s}/{1:s}/pulls/{2:d}/'
-      'requested_reviewers?access_token={3:s}').format(
-          self._organization, self._project, pull_request_number, access_token)
+        'https://api.github.com/repos/{0:s}/{1:s}/pulls/{2:d}/'
+        'requested_reviewers?access_token={3:s}').format(
+            self._organization, self._project, pull_request_number,
+            access_token)
 
     try:
-       self._url_lib_helper.Request(github_url, post_data=post_data)
+      self._url_lib_helper.Request(github_url, post_data=post_data)
 
     except errors.ConnectivityError:
       return False
