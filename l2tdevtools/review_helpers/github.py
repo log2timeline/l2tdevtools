@@ -14,11 +14,11 @@ class GitHubHelper(object):
   """Github helper."""
 
   def __init__(self, organization, project):
-    """Initializes a github helper.
+    """Initializes a GitHub helper.
 
     Args:
-      organization (str): github organization name.
-      project (str): github project name.
+      organization (str): GitHub organization name.
+      project (str): GitHub project name.
     """
     super(GitHubHelper, self).__init__()
     self._organization = organization
@@ -29,7 +29,7 @@ class GitHubHelper(object):
     """Creates a pull request.
 
     Args:
-      access_token (str): github access token.
+      access_token (str): GitHub access token.
       origin (str): origin of the pull request, formatted as:
           "username:feature".
       title (str): title of the pull request.
@@ -66,7 +66,7 @@ class GitHubHelper(object):
     """Retrieves the git repository URL of a fork.
 
     Args:
-      username (str): github username of the fork.
+      username (str): GitHub username of the fork.
 
     Returns:
       str: git repository URL or None.
@@ -74,10 +74,10 @@ class GitHubHelper(object):
     return 'https://github.com/{0:s}/{1:s}.git'.format(username, self._project)
 
   def QueryUser(self, username):
-    """Queries a github user.
+    """Queries a GitHub user.
 
     Args:
-      username (str): github user name.
+      username (str): GitHub user name.
 
     Returns:
       dict[str,object]: JSON response or None if not available.

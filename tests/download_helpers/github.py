@@ -16,7 +16,7 @@ from tests import test_lib
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
 class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
-  """Tests for the docopt github releases download helper."""
+  """Tests for the docopt GitHub releases download helper."""
 
   _DOWNLOAD_URL = 'https://github.com/docopt/docopt/releases'
 
@@ -62,7 +62,7 @@ class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
 class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
-  """Tests for the libyal github releases download helper."""
+  """Tests for the libyal GitHub releases download helper."""
 
   _DOWNLOAD_URL = 'https://github.com/libyal/libevt/releases'
 

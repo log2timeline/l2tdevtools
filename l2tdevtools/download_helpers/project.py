@@ -41,7 +41,7 @@ class ProjectDownloadHelper(interface.DownloadHelper):
 
     filename = self.DownloadFile(download_url)
 
-    # github archive package filenames can be:
+    # GitHub archive package filenames can be:
     # {project version}.tar.gz
     # release-{project version}.tar.gz
     # v{project version}.tar.gz

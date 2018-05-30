@@ -17,7 +17,7 @@ from tests import test_lib
     os.environ.get('TRAVIS_OS_NAME') == 'osx',
     'TLS 1.2 not supported by macOS on Travis')
 class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
-  """Tests for the github repo download helper class."""
+  """Tests for the GitHub repo download helper class."""
 
   _DOWNLOAD_URL = 'https://github.com/ForensicArtifacts/artifacts/releases'
 
