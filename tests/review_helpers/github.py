@@ -60,5 +60,6 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
 
     self.assertTrue(result)
 
+    
 if __name__ == '__main__':
   unittest.main()
