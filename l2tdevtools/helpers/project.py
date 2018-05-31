@@ -69,6 +69,13 @@ class ProjectHelper(cli.CLIHelper):
       'kiddi@kiddaland.net',
       'log2timeline-dev@googlegroups.com'])
 
+  _REVIEWER_GITHUB_USERNAMES = {
+      'joachim.metz@gmail.com': 'joachimmetz',
+      'onager@deerpie.com': 'Onager',
+      'romaing@google.com': 'rgayon',
+      'someguyiknow@google.com': 'someguyiknow',
+      'tomchop@gmail.com': 'tomchop'}
+
   # yapf: enable
 
   # Note that review is submodule name of l2tdevtools not a stand-alone project.
@@ -150,7 +157,7 @@ class ProjectHelper(cli.CLIHelper):
 
     Args:
       project_name (str): name of the project.
-      email_address (str): email address of the author.
+      author (str): email address of the author.
 
     Returns:
       str: email address of the reviewer that is used on codereview.
@@ -166,6 +173,19 @@ class ProjectHelper(cli.CLIHelper):
     random.shuffle(reviewers)
 
     return reviewers[0]
+
+  @classmethod
+  def GetReviewerUsername(cls, reviewer_email_address):
+    """Determines the GitHub username.
+
+    Args:
+      reviewer_email_address (str): email address of the reviewer.
+
+    Returns:
+      str: github username of the reviewer, or None there is no GitHub username
+          associated with the email address.
+    """
+    return cls._REVIEWER_GITHUB_USERNAMES.get(reviewer_email_address, None)
 
   @classmethod
   def GetReviewersOnCC(cls, project_name, author, reviewer):
