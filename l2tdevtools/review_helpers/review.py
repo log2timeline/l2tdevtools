@@ -10,6 +10,7 @@ import subprocess
 import sys
 
 from l2tdevtools.helpers import project
+from l2tdevtools.lib import errors
 from l2tdevtools.lib import netrcfile
 from l2tdevtools.lib import reviewfile
 from l2tdevtools.review_helpers import git
@@ -273,9 +274,12 @@ class ReviewHelper(object):
             codereview_issue_number, description)
 
     create_github_origin = '{0:s}:{1:s}'.format(git_origin, self._active_branch)
-    if not self._github_helper.CreatePullRequest(
-        github_access_token, create_github_origin, title, body):
+    try:
+      self._github_helper.CreatePullRequest(
+          github_access_token, create_github_origin, title, body)
+    except errors.ConnectivityError:
       print('Unable to create pull request.')
+      return False
 
     # yapf: enable
     return True
@@ -324,14 +328,32 @@ class ReviewHelper(object):
       body = user_input
 
     create_github_origin = '{0:s}:{1:s}'.format(git_origin, self._active_branch)
-    if not self._github_helper.CreatePullRequest(
-        github_access_token, create_github_origin, title, body):
+    try:
+      pull_request_number = self._github_helper.CreatePullRequest(
+          github_access_token, create_github_origin, title, body)
+
+    except errors.ConnectivityError:
       print('Unable to create pull request.')
+      return False
+
+    author_email_address = self._git_helper.GetEmailAddress()
+
+    reviewer_email_address = project.ProjectHelper.GetReviewer(
+        self._project_name, author_email_address)
+
+    reviewer = project.ProjectHelper.GetReviewerUsername(reviewer_email_address)
+
+    try:
+      self._github_helper.CreatePullRequestReview(
+          pull_request_number, github_access_token, [reviewer])
+
+    except errors.ConnectivityError:
+      print('Unable to request review of pull request.')
 
     return True
 
   def InitializeHelpers(self):
-    """Initializes the helper.
+    """Initializes the helpers.
 
     Returns:
       bool: True if the helper initialization was successful.

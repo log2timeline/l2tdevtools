@@ -21,6 +21,7 @@ class GitHubHelper(object):
       project (str): GitHub project name.
     """
     super(GitHubHelper, self).__init__()
+
     self._organization = organization
     self._project = project
     self._url_lib_helper = url_lib.URLLibHelper()
@@ -36,7 +37,10 @@ class GitHubHelper(object):
       body (str): body of the pull request.
 
     Returns:
-      bool: True if the pull request was created.
+      int: GitHub issue number of the pull request.
+
+    Raises:
+      ConnectivityError: if there's an error communicating with GitHub.
     """
     post_data = (
         '{{\n'
@@ -51,13 +55,39 @@ class GitHubHelper(object):
         'access_token={2:s}').format(
             self._organization, self._project, access_token)
 
+    response_data = self._url_lib_helper.Request(
+        github_url, post_data=post_data)
+
+    response_data = json.loads(response_data)
+
+    pull_request_number = response_data.get('number')
+
+    return pull_request_number
+
+  def CreatePullRequestReview(
+      self, pull_request_number, access_token, reviewers):
+    """Requests a GitHub review of a pull request.
+
+    Args:
+      pull_request_number (int): GitHub issue number of the pull request.
+      access_token (str): github access token.
+      reviewers (list[str]): github usernames to assign as reviewers.
+
+    Returns:
+      bool: True if the review was created.
+    """
+    post_data = json.dumps({"reviewers": reviewers})
+
+    github_url = (
+        'https://api.github.com/repos/{0:s}/{1:s}/pulls/{2:d}/'
+        'requested_reviewers?access_token={3:s}').format(
+            self._organization, self._project, pull_request_number,
+            access_token)
+
     try:
       self._url_lib_helper.Request(github_url, post_data=post_data)
 
-    except errors.ConnectivityError as exception:
-      # Handle existing PR HTTP status code 422.
-      # Also see: https://github.com/log2timeline/l2tdevtools/issues/205
-      logging.warning('{0!s}'.format(exception))
+    except errors.ConnectivityError:
       return False
 
     return True
