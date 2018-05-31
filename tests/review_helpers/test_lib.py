@@ -9,7 +9,7 @@ class TestURLLibHelper(object):
     """Initializes an URL library (urllib) helper.
 
     Args:
-      result (str): result that should be returned.
+      result (bytes): result that should be returned.
     """
     super(TestURLLibHelper, self).__init__()
     self._result = result
