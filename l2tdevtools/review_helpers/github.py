@@ -55,7 +55,6 @@ class GitHubHelper(object):
         'access_token={2:s}').format(
             self._organization, self._project, access_token)
 
-
     response_data = self._url_lib_helper.Request(
         github_url, post_data=post_data)
 
