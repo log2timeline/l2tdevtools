@@ -65,7 +65,6 @@ class GitHubHelper(object):
 
     return pull_request_number
 
-
   def CreatePullRequestReview(
       self, pull_request_number, access_token, reviewers):
     """Requests a GitHub review of a pull request.
