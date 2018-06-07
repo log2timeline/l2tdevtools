@@ -14,7 +14,7 @@ import textwrap
 try:
   import pyperclip
 except ImportError:
-  paperclip = None
+  pyperclip = None
 
 # pylint: disable=wrong-import-order
 try:
@@ -109,7 +109,7 @@ def Main():
   argument_parser = argparse.ArgumentParser(description=(
       'Extract the database schema from a SQLite database file.'))
 
-  if paperclip:
+  if pyperclip:
     argument_parser.add_argument(
         '--to-clipboard', '--to_clipboard', dest='to_clipboard',
         action='store_true', default=False, help=(
@@ -136,7 +136,7 @@ def Main():
 
   database_schema = extractor.FormatSchema(database_schema)
 
-  if paperclip and options.to_clipboard:
+  if pyperclip and options.to_clipboard:
     pyperclip.copy(database_schema)
   else:
     print(database_schema)
