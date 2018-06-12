@@ -368,13 +368,21 @@ class ReviewHelper(object):
           self._command.title()))  # yapf: disable
       return False
 
-    self._git_repo_url = b'https://github.com/log2timeline/{0:s}.git'.format(
-        self._project_name)
+    if self._project_name in ('artifacts', 'artifacts-kb'):
+      github_organization = 'ForensicArtifacts'
+    elif self._project_name in (
+        'dtfabric', 'dtformats', 'esedb-kb', 'winevt-kb', 'winreg-kb'):
+      github_organization = 'libyal'
+    else:
+      github_organization = 'log2timeline'
+
+    self._git_repo_url = b'https://github.com/{0:s}/{1:s}.git'.format(
+        github_organization, self._project_name)
 
     self._git_helper = git.GitHelper(self._git_repo_url)
 
     self._github_helper = github.GitHubHelper(
-        'log2timeline', self._project_name)
+        github_organization, self._project_name)
 
     if self._command in ('close', 'create', 'merge', 'update'):
       email_address = self._git_helper.GetEmailAddress()
