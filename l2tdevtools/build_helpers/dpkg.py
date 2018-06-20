@@ -194,7 +194,7 @@ class DPKGBuildHelper(interface.BuildHelper):
             mtime = datetime.datetime(
                 date_time[0], date_time[1], date_time[2], date_time[3],
                 date_time[4], date_time[5])
-            mtime = int((mtime - datetime.datetime(1970,1,1)).total_seconds())
+            mtime = int((mtime - datetime.datetime(1970, 1, 1)).total_seconds())
             tar_info.mtime = mtime
             tar_file.addfile(tar_info, fileobj=file_object)
 
