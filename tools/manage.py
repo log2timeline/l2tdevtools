@@ -303,6 +303,7 @@ class LaunchpadPPAManager(object):
           the packages cannot be determined.
     """
     kwargs = {
+        'distribution': self._distribution,
         'name': self._name,
         'track': track}
     download_url = self._LAUNCHPAD_URL.format(**kwargs)
