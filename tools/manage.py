@@ -865,7 +865,7 @@ def Main():
 
   argument_parser.add_argument(
       '--distribution', action='store', metavar='NAME', dest='distribution',
-      type=str, default='build', help='The name of the distribution.')
+      type=str, default='trusty', help='The name of the distribution.')
 
   argument_parser.add_argument(
       '--machine-type', '--machine_type', action='store', metavar='TYPE',
