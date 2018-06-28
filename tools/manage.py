@@ -271,15 +271,17 @@ class LaunchpadPPAManager(object):
 
   _LAUNCHPAD_URL = (
       'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
-      '/trusty/main/source/Sources.gz')
+      '/{distribution:s}/main/source/Sources.gz')
 
-  def __init__(self, name):
+  def __init__(self, name, distribution='trusty'):
     """Initializes a Launchpad PPA manager.
 
     Args:
       name (str): name of the PPA.
+      distribution (Optional[str]): name of the distribution.
     """
     super(LaunchpadPPAManager, self).__init__()
+    self._distribution = distribution
     self._download_helper = interface.DownloadHelper('')
     self._name = name
 
@@ -461,12 +463,17 @@ class PyPIManager(object):
 class PackagesManager(object):
   """Manages packages across various repositories."""
 
-  def __init__(self):
-    """Initializes a packages manager."""
+  def __init__(self, distribution='trusty'):
+    """Initializes a packages manager.
+
+    Args:
+      distribution (Optional[str]): name of the distribution.
+    """
     super(PackagesManager, self).__init__()
     self._copr_project_manager = COPRProjectManager('gift')
     self._github_repo_manager = GithubRepoManager()
-    self._launchpad_ppa_manager = LaunchpadPPAManager('gift')
+    self._launchpad_ppa_manager = LaunchpadPPAManager(
+        'gift', distribution=distribution)
     self._pypi_manager = PyPIManager()
 
   def _ComparePackages(self, reference_packages, packages):
@@ -641,8 +648,9 @@ class PackagesManager(object):
     for directory_entry in os.listdir(reference_directory):
       # The directory contains various files and we are only interested
       # in the source dpkg packages that use the naming convention:
-      # package_version-#ppa1~trusty_source.changes
-      if not directory_entry.endswith('ppa1~trusty_source.changes'):
+      # package_version-#ppa1~distribution_source.changes
+      name_suffix = 'ppa1~{0:s}_source.changes'.format(self._distribution)
+      if not directory_entry.endswith(name_suffix):
         continue
 
       name, _, _ = directory_entry.rpartition('-')
@@ -854,6 +862,10 @@ def Main():
           'The location of the CSV file.'))
 
   argument_parser.add_argument(
+      '--distribution', action='store', metavar='NAME', dest='distribution',
+      type=str, default='build', help='The name of the distribution.')
+
+  argument_parser.add_argument(
       '--machine-type', '--machine_type', action='store', metavar='TYPE',
       dest='machine_type', type=str, default=None, help=(
           'Manually sets the machine type instead of using the value returned '
@@ -874,7 +886,7 @@ def Main():
   # TODO: add action to copy files between PPA tracks.
   # TODO: add pypi support.
 
-  packages_manager = PackagesManager()
+  packages_manager = PackagesManager(distribution=options.distribution)
 
   action_tuple = options.action.split('-')
 
