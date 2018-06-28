@@ -471,6 +471,7 @@ class PackagesManager(object):
     """
     super(PackagesManager, self).__init__()
     self._copr_project_manager = COPRProjectManager('gift')
+    self._distribution = distribution
     self._github_repo_manager = GithubRepoManager()
     self._launchpad_ppa_manager = LaunchpadPPAManager(
         'gift', distribution=distribution)
