@@ -8,7 +8,7 @@ Summary: Extensions to the standard Python datetime module
 Name: %{{name}}
 Version: %{{version}}
 Release: %{{release}}
-Source0: %{{unmangled_name}}-%{{unmangled_version}}.tar.gz
+Source0: python-%{{unmangled_name}}-%{{unmangled_version}}.tar.gz
 License: Simplified BSD
 Group: Development/Libraries
 BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-buildroot
@@ -37,7 +37,7 @@ The dateutil module provides powerful extensions to the
 datetime module available in the Python standard library.
 
 %prep
-%autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
+%autosetup -n python-%{{unmangled_name}}-%{{unmangled_version}}
 
 %build
 python2 setup.py build
