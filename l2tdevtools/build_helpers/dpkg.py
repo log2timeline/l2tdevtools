@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import datetime
 import glob
 import logging
 import os
@@ -161,6 +162,9 @@ class DPKGBuildHelper(interface.BuildHelper):
 
     deb_orig_source_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, project_version)
+    if self.version_suffix and self.distribution:
+      deb_orig_source_filename = '{0:s}_{1!s}{2:s}~{3:s}.orig.tar.gz'.format(
+          project_name, project_version, self.version_suffix, self.distribution)
     if os.path.exists(deb_orig_source_filename):
       return
 
@@ -186,11 +190,18 @@ class DPKGBuildHelper(interface.BuildHelper):
             zip_info = zip_file.getinfo(filename)
             tar_info = tarfile.TarInfo(filename)
             tar_info.size = zip_info.file_size
+            # Populate modification times from zip file into tar archive,
+            # as launchpad refuses to build packages containing files with
+            # timestamps too far in the past.
+            date_time = zip_info.date_time
+            mtime = datetime.datetime(*date_time)
+            mtime = int((mtime - datetime.datetime(1970, 1, 1)).total_seconds())
+            tar_info.mtime = mtime
             tar_file.addfile(tar_info, fileobj=file_object)
 
   def _CreatePackagingFiles(
       self, source_helper_object, source_directory, project_version):
-    """Creates packacking files.
+    """Creates packaging files.
 
     Args:
       source_helper_object (SourceHelper): source helper.
@@ -265,20 +276,34 @@ class DPKGBuildHelper(interface.BuildHelper):
         logging.info('Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-  def _RemoveOlderOriginalSourcePackage(self, project_name, project_version):
+  def _RemoveOlderOriginalSourcePackage(
+      self, project_name, project_version, version_suffix=None,
+      distribution=None):
     """Removes previous versions of original source package.
 
     Args:
       project_name (str): name of the project.
       project_version (str): version of the project.
+      version_suffix (str): version suffix.
+      distribution (str): distribution.
     """
-    filenames_to_ignore = '^{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
+    if version_suffix and distribution:
+      filenames_to_ignore = '{0:s}_{1:s}{2:s}~{3:s}.orig.tar.gz'.format(
+          project_name, project_version, version_suffix, distribution)
+    else:
+      filenames_to_ignore = '^{0:s}_{1!s}.orig.tar.gz'.format(
+          project_name, project_version)
+
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project_version.orig.tar.gz
-    filenames_glob = '{0:s}_*.orig.tar.gz'.format(project_name)
+    if version_suffix and distribution:
+      filenames_glob = '{0:s}_*{1:s}~{2:s}.orig.tar.gz'.format(
+          project_name, version_suffix, distribution)
+    else:
+      filenames_glob = '{0:s}_*.orig.tar.gz'.format(project_name)
+
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -492,8 +517,6 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
     project_version = source_helper_object.GetProjectVersion()
 
-    # debuild wants an source package filename without
-    # the status indication and orig indication.
     self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
@@ -525,7 +548,9 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(
+          'Failed to run: "(cd {0:s} && {1:s}" with exit code {2:d}.'.format(
+              source_directory, command, exit_code))
       return False
 
     if not self._BuildFinalize(
@@ -668,7 +693,9 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(
+          'Failed to run: "(cd {0:s} && {1:s}" with exit code {2:d}.'.format(
+              source_directory, command, exit_code))
       return False
 
     if not self._BuildFinalize(
@@ -777,8 +804,6 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    # debuild wants an source package filename without
-    # the status indication and orig indication.
     self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
 
@@ -810,8 +835,9 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
-      return False
+      logging.error(
+          'Failed to run: "(cd {0:s} && {1:s}" with exit code {2:d}.'.format(
+              source_directory, command, exit_code))
 
     if not self._BuildFinalize(
         source_directory, project_name, project_version, self.version_suffix,
@@ -847,7 +873,8 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     project_version = source_helper_object.GetProjectVersion()
 
     self._RemoveOlderOriginalSourcePackage(
-        source_helper_object.project_name, project_version)
+        source_helper_object.project_name, project_version,
+        version_suffix=self.version_suffix, distribution=self.distribution)
 
     self._RemoveOlderSourceDPKGPackages(
         source_helper_object.project_name, project_version)
