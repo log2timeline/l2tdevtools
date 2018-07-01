@@ -527,6 +527,8 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     else:
       python_module_name, _, _ = source_directory.partition('-')
+      project_version = source_helper_object.GetProjectVersion()
+
       msi_filename = '{0:s}-python-{1!s}.1.{2:s}-{3:s}.msi'.format(
         python_module_name, project_version, self.architecture,
         self._python_version_suffix)
