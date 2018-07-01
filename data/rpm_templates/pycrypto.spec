@@ -4,7 +4,7 @@
 %define unmangled_version {version}
 %define release 1
 
-%global debug_package %{nil}
+%global debug_package %{{nil}}
 
 Summary: Cryptographic modules for Python.
 Name: %{{name}}
