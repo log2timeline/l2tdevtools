@@ -261,24 +261,6 @@ def Main():
 
   project_builder = ProjectBuilder(options.build_target)
 
-  # TODO: package ipython.
-
-  # TODO:
-  # ('protobuf', ProjectBuilder.PROJECT_TYPE_GOOGLE_CODE_WIKI),
-  # ./configure
-  # make
-  # cd python
-  # python setup.py build
-  # python setup.py install --root $PWD/tmp
-  #
-  # Build of rpm fails:
-  # python setup.py bdist_rpm
-  #
-  # Solution: use protobuf-python.spec to build
-
-  # TODO: rpm build of psutil is broken, fix upstream or add patching.
-  # ('psutil', ProjectBuilder.PROJECT_TYPE_PYPI),
-
   project_names = []
   if options.preset:
     with io.open(presets_file, 'r', encoding='utf-8') as file_object:
@@ -300,13 +282,15 @@ def Main():
   with io.open(projects_file, 'r', encoding='utf-8') as file_object:
     project_definition_reader = projects.ProjectDefinitionReader()
     for project_definition in project_definition_reader.Read(file_object):
+      if project_definition.name not in project_names:
+        continue
+
       is_disabled = False
       if (options.build_target in project_definition.disabled or
           'all' in project_definition.disabled):
-        if project_definition.name not in project_names:
+        if options.preset:
           is_disabled = True
-
-        elif not options.preset:
+        else:
           # If a project is manually specified ignore the disabled status.
           logging.info('Ignoring disabled status for: {0:s}'.format(
               project_definition.name))
