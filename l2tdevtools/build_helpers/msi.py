@@ -46,7 +46,7 @@ class MSIBuildHelper(interface.BuildHelper):
       l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(MSIBuildHelper, self).__init__(project_definition, l2tdevtools_path)
-    self._python_version_suffix = 'py{0:d}.{1:s}'.format(
+    self._python_version_suffix = 'py{0:d}.{1:d}'.format(
         sys.version_info[0], sys.version_info[1])
     self.architecture = platform.machine()
 
