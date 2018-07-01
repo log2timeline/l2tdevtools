@@ -534,7 +534,10 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
           self._python_version_suffix)
       msi_path = os.path.join(source_directory, 'dist', msi_filename)
 
-      if not os.path.exists(msi_path):
+      if os.path.exists(msi_path):
+        logging.warning('MSI file already exists.')
+        result = True
+      else:
         build_directory = os.path.join('..')
 
         os.chdir(source_directory)
