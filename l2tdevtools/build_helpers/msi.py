@@ -46,6 +46,8 @@ class MSIBuildHelper(interface.BuildHelper):
       l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(MSIBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    self._python_version_suffix = 'py{0:d}.{1:d}'.format(
+        sys.version_info[0], sys.version_info[1])
     self.architecture = platform.machine()
 
     if self.architecture == 'x86':
@@ -525,9 +527,17 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     else:
       python_module_name, _, _ = source_directory.partition('-')
-      python_module_dist_directory = os.path.join(source_directory, 'dist')
+      project_version = source_helper_object.GetProjectVersion()
 
-      if not os.path.exists(python_module_dist_directory):
+      msi_filename = '{0:s}-python-{1!s}.1.{2:s}-{3:s}.msi'.format(
+          python_module_name, project_version, self.architecture,
+          self._python_version_suffix)
+      msi_path = os.path.join(source_directory, 'dist', msi_filename)
+
+      if os.path.exists(msi_path):
+        logging.warning('MSI file already exists.')
+        result = True
+      else:
         build_directory = os.path.join('..')
 
         os.chdir(source_directory)
@@ -551,8 +561,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """
     project_version = source_helper_object.GetProjectVersion()
 
-    msi_filename = '{0:s}-python-{1!s}.1.{2:s}-py2.7.msi'.format(
-        source_helper_object.project_name, project_version, self.architecture)
+    msi_filename = '{0:s}-python-{1!s}.1.{2:s}-{3:s}.msi'.format(
+        source_helper_object.project_name, project_version, self.architecture,
+        self._python_version_suffix)
 
     return not os.path.exists(msi_filename)
 
@@ -565,13 +576,14 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     project_version = source_helper_object.GetProjectVersion()
 
     # Remove previous versions of MSIs.
-    filenames_to_ignore = 'py{0:s}-.*{1!s}.1.{2:s}-py2.7.msi'.format(
+    filenames_to_ignore = 'py{0:s}-.*{1!s}.1.{2:s}-{3:s}'.format(
         source_helper_object.project_name[3:], project_version,
-        self.architecture)
+        self.architecture, self._python_version_suffix)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    filenames_glob = 'py{0:s}-*.1.{1:s}-py2.7.msi'.format(
-        source_helper_object.project_name[3:], self.architecture)
+    filenames_glob = 'py{0:s}-*.1.{1:s}-{2:s}.msi'.format(
+        source_helper_object.project_name[3:], self.architecture,
+        self._python_version_suffix)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -579,12 +591,14 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
         logging.info('Removing: {0:s}'.format(filename))
         os.remove(filename)
 
-    filenames_to_ignore = '{0:s}-python-.*{1!s}.1.{2:s}-py2.7.msi'.format(
-        source_helper_object.project_name, project_version, self.architecture)
+    filenames_to_ignore = '{0:s}-python-.*{1!s}.1.{2:s}-{3:s}.msi'.format(
+        source_helper_object.project_name, project_version, self.architecture,
+        self._python_version_suffix)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    filenames_glob = '{0:s}-python-*.1.{1:s}-py2.7.msi'.format(
-        source_helper_object.project_name, self.architecture)
+    filenames_glob = '{0:s}-python-*.1.{1:s}-{2:s}.msi'.format(
+        source_helper_object.project_name, self.architecture,
+        self._python_version_suffix)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -720,7 +734,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     # Check if it is architecture dependent on other platforms.
     if (self._project_definition.architecture_dependent and
         project_name != 'coverage'):
-      suffix = '-py2.7'
+      suffix = '-{0:s}'.format(self._python_version_suffix)
     else:
       suffix = ''
 
@@ -760,7 +774,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
         source_helper_object)
 
     if self._project_definition.architecture_dependent:
-      suffix = '-py2.7'
+      suffix = '-{0:s}'.format(self._python_version_suffix)
     else:
       suffix = ''
 
