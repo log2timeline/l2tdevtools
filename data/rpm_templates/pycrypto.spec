@@ -4,6 +4,8 @@
 %define unmangled_version {version}
 %define release 1
 
+%global debug_package %{{nil}}
+
 Summary: Cryptographic modules for Python.
 Name: %{{name}}
 Version: %{{version}}
@@ -50,6 +52,7 @@ rm -rf %{{buildroot}}
 %doc README
 %{{_libdir}}/python2*/site-packages/Crypto/
 %{{_libdir}}/python2*/site-packages/pycrypto*.egg-info
+
 %files -n python3-crypto
 %doc README
 %{{_libdir}}/python3*/site-packages/Crypto/
