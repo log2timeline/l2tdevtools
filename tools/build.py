@@ -244,6 +244,11 @@ def Main():
     config_path = os.path.dirname(config_path)
     config_path = os.path.join(config_path, 'data')
 
+  if not options.preset and not options.projects:
+    print('Please define a preset or projects to build.')
+    print('')
+    return False
+
   presets_file = os.path.join(config_path, 'presets.ini')
   if options.preset and not os.path.exists(presets_file):
     print('No such config file: {0:s}.'.format(presets_file))
