@@ -117,7 +117,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   _PROJECT_ORGANIZATION = 'log2timeline'
   _PROJECT_NAME = 'dfvfs'
   # Hard-coded version to check parsing of GitHub page.
-  _PROJECT_VERSION = '20180510'
+  _PROJECT_VERSION = '20180703'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
