@@ -60,6 +60,16 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
 
     self.assertTrue(result)
 
+  def testAssignPullRequest(self):
+    """Tests the RequestPullReview function."""
+    helper = github.GitHubHelper(
+        organization='test', project='test_project')
+    helper._url_lib_helper = test_lib.TestURLLibHelper()
+
+    result = helper.AssignPullRequest(4, 'TOKEN', ['Onager'])
+
+    self.assertTrue(result)
+
 
 if __name__ == '__main__':
   unittest.main()

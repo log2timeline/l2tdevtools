@@ -92,6 +92,34 @@ class GitHubHelper(object):
 
     return True
 
+  def AssignPullRequest(
+      self, pull_request_number, access_token, assignees):
+    """Assigns a GitHub pull request.
+
+    Args:
+      pull_request_number (int): GitHub issue number of the pull request.
+      access_token (str): github access token.
+      assignees (list[str]): github usernames to assign.
+
+    Returns:
+      bool: True if the review was created.
+    """
+    post_data = json.dumps({"assignees": assignees})
+
+    github_url = (
+        'https://api.github.com/repos/{0:s}/{1:s}/issues/{2:d}/'
+        'assignees?access_token={3:s}').format(
+            self._organization, self._project, pull_request_number,
+            access_token)
+
+    try:
+      self._url_lib_helper.Request(github_url, post_data=post_data)
+
+    except errors.ConnectivityError:
+      return False
+
+    return True
+
   def GetForkGitRepoUrl(self, username):
     """Retrieves the git repository URL of a fork.
 
