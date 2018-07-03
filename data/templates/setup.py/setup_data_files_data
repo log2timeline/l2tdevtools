@@ -1,0 +1,2 @@
+        ('share/${project_name}/data', glob.glob(
+            os.path.join('data', '*'))),

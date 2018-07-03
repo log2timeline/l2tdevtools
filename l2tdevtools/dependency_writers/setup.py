@@ -117,8 +117,6 @@ class SetupPyWriter(interface.DependencyFileWriter):
     maintainer, _, maintainer_email = maintainer.rpartition('<')
     maintainer_email, _, _ = maintainer_email.rpartition('>')
 
-    # TODO: add support for data files
-
     packages_exclude = ['tests', 'tests.*', 'utils']
     scripts_directory = None
 
@@ -210,6 +208,15 @@ class SetupPyWriter(interface.DependencyFileWriter):
     if scripts_directory:
       template_data = self._GenerateFromTemplate(
           'setup_scripts', template_mappings)
+      file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate(
+        'setup_data_files', template_mappings)
+    file_content.append(template_data)
+
+    if os.path.isdir('data'):
+      template_data = self._GenerateFromTemplate(
+          'setup_data_files_data', template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
