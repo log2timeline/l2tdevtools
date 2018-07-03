@@ -5,7 +5,7 @@
         'Programming Language :: Python',
     ],
     packages=find_packages('.', exclude=[
-        'examples', 'tests', 'tests.*', 'utils']),
+        ${packages_exclude}]),
     package_dir={
         '${project_name}': '${project_name}'
     },

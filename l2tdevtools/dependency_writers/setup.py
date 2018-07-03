@@ -118,7 +118,20 @@ class SetupPyWriter(interface.DependencyFileWriter):
     maintainer_email, _, _ = maintainer_email.rpartition('>')
 
     # TODO: add support for data files
-    # TODO: add support for scripts
+
+    packages_exclude = ['tests', 'tests.*', 'utils']
+    scripts_directory = None
+
+    if os.path.isdir('scripts'):
+      scripts_directory = 'scripts'
+    elif os.path.isdir('tools'):
+      scripts_directory = 'tools'
+
+    if scripts_directory:
+      packages_exclude.append(scripts_directory)
+
+    packages_exclude = ', '.join([
+        '\'{0:s}\''.format(exclude) for exclude in sorted(packages_exclude)])
 
     template_mappings = {
         'doc_files': ', '.join([
@@ -128,14 +141,25 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'homepage_url': self._project_definition.homepage_url,
         'maintainer': maintainer.strip(),
         'maintainer_email': maintainer_email.strip(),
+        'packages_exclude': packages_exclude,
         'project_name_description': self._project_definition.name_description,
         'project_name': self._project_definition.name,
         'rpm_doc_files': ' '.join(doc_files),
+        'scripts_directory': scripts_directory,
     }
 
     file_content = []
 
-    template_data = self._GenerateFromTemplate('header', template_mappings)
+    if scripts_directory:
+      template_data = self._GenerateFromTemplate(
+          'header_scripts', template_mappings)
+    else:
+      template_data = self._GenerateFromTemplate(
+          'header', template_mappings)
+    file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate(
+        'header_setuptools', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in ('dfvfs', 'plaso'):
@@ -181,6 +205,11 @@ class SetupPyWriter(interface.DependencyFileWriter):
     if self._project_definition.name in self._PROJECTS_WITH_PACKAGE_DATA:
       template_data = self._GenerateFromTemplate(
           'setup_package_data', template_mappings)
+      file_content.append(template_data)
+
+    if scripts_directory:
+      template_data = self._GenerateFromTemplate(
+          'setup_scripts', template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
