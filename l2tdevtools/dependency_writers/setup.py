@@ -72,7 +72,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
   _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
 
-  _PROJECTS_WITH_PACKAGE_DATA = ('dfvfs', 'dfwinreg', 'dtformats', 'winreg-kb')
+  _PROJECTS_WITH_PACKAGE_DATA = (
+      'dfvfs', 'dfwinreg', 'dtformats', 'plaso', 'winregrc')
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.py')
 
