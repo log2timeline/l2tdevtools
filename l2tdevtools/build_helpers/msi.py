@@ -681,7 +681,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
       # https://stackoverflow.com/questions/41843266/microsoft-windows-python-3-6-pycrypto-installation-error
       include_path = (
           '%VCINSTALLDIR%\\VC\\Tools\\MSVC\\14.14.26428\\include\\stdint.h')
-      os.eviron['CL'] = '-FI"{0:s}"'.format(include_path)
+      os.environ['CL'] = '-FI"{0:s}"'.format(include_path)
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     command = '\"{0:s}\" setup.py bdist_msi > {1:s} 2>&1'.format(
