@@ -1,0 +1,15 @@
+try:
+  from setuptools import find_packages, setup
+except ImportError:
+  from distutils.core import find_packages, setup
+
+try:
+  from distutils.command.bdist_msi import bdist_msi
+except ImportError:
+  bdist_msi = None
+
+try:
+  from distutils.command.bdist_rpm import bdist_rpm
+except ImportError:
+  bdist_rpm = None
+

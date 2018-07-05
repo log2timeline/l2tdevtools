@@ -2,3 +2,4 @@
     package_data={
         '${package_data_path}': ['*.yaml'],
     },
+    zip_safe=False,
