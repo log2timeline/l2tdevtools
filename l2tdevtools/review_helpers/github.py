@@ -70,8 +70,8 @@ class GitHubHelper(object):
 
     Args:
       pull_request_number (int): GitHub issue number of the pull request.
-      access_token (str): github access token.
-      reviewers (list[str]): github usernames to assign as reviewers.
+      access_token (str): GitHub access token.
+      reviewers (list[str]): GitHub usernames to assign as reviewers.
 
     Returns:
       bool: True if the review was created.
@@ -81,6 +81,36 @@ class GitHubHelper(object):
     github_url = (
         'https://api.github.com/repos/{0:s}/{1:s}/pulls/{2:d}/'
         'requested_reviewers?access_token={3:s}').format(
+            self._organization, self._project, pull_request_number,
+            access_token)
+
+    try:
+      self._url_lib_helper.Request(github_url, post_data=post_data)
+
+    except errors.ConnectivityError:
+      return False
+
+    return True
+
+  def AssignPullRequest(
+      self, pull_request_number, access_token, assignees):
+    """Adds assignees to a GitHub pull request.
+
+    Assignees are responsible that a pull request is closed or merged.
+
+    Args:
+      pull_request_number (int): GitHub issue number of the pull request.
+      access_token (str): GitHub access token.
+      assignees (list[str]): GitHub usernames to assign.
+
+    Returns:
+      bool: True if the assignees were successfully added.
+    """
+    post_data = json.dumps({"assignees": assignees})
+
+    github_url = (
+        'https://api.github.com/repos/{0:s}/{1:s}/issues/{2:d}/'
+        'assignees?access_token={3:s}').format(
             self._organization, self._project, pull_request_number,
             access_token)
 

@@ -350,6 +350,13 @@ class ReviewHelper(object):
     except errors.ConnectivityError:
       print('Unable to request review of pull request.')
 
+    try:
+      self._github_helper.AssignPullRequest(
+          pull_request_number, github_access_token, [reviewer])
+
+    except errors.ConnectivityError:
+      print('Unable to assign pull request.')
+
     return True
 
   def InitializeHelpers(self):
