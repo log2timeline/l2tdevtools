@@ -10,7 +10,7 @@ EXIT_FAILURE=1;
 
 DEPENDENCIES="${dependencies}";
 
-SCRIPT_NAME=`basename $$0`;
+SCRIPT_NAME=$$(basename $$0);
 DEPENDENCIES_ONLY=0;
 SHOW_HELP=0;
 
@@ -74,16 +74,20 @@ echo "Installing dependencies.";
 
 for PACKAGE_NAME in $${DEPENDENCIES};
 do
-  sudo installer -target / -pkg "$${VOLUME_NAME}/packages/$${PACKAGE_NAME}";
+  for PACKAGE in $$(find $${VOLUME_NAME} -name "$${PACKAGE_NAME}-*.pkg");
+  do
+    FILENAME=$$(basename $${PACKAGE});
+    sudo installer -target / -pkg "$${VOLUME_NAME}/packages/$${FILENAME}";
+  done
 done
 
 # If the --only-dependencies option was passed to the installer script
 # the ${project_name} package is not installed.
-if && test $${DEPENDENCIES_ONLY} -ne 0;
+if test $${DEPENDENCIES_ONLY} -eq 0;
 then
   echo "Installing ${project_name}.";
 
-  sudo installer -target / -pkg "$${VOLUME_NAME}/packages/${project_name}-@VERSION@.pkg";
+  sudo installer -target / -pkg "$${VOLUME_NAME}/packages/python-${project_name}-@VERSION@.pkg";
 fi
 
 echo "Done.";
