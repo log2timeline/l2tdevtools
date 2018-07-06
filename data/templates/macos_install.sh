@@ -10,7 +10,7 @@ EXIT_FAILURE=1;
 
 DEPENDENCIES="${dependencies}";
 
-SCRIPT_NAME=$(basename $$0);
+SCRIPT_NAME=$$(basename $$0);
 DEPENDENCIES_ONLY=0;
 SHOW_HELP=0;
 
@@ -74,9 +74,9 @@ echo "Installing dependencies.";
 
 for PACKAGE_NAME in $${DEPENDENCIES};
 do
-  for PACKAGE in $(find $${VOLUME_NAME} -name "$${PACKAGE_NAME}-*.pkg");
+  for PACKAGE in $$(find $${VOLUME_NAME} -name "$${PACKAGE_NAME}-*.pkg");
   do
-    FILENAME=$(basename $${PACKAGE})
+    FILENAME=$$(basename $${PACKAGE})
     sudo installer -target / -pkg "$${VOLUME_NAME}/packages/$${FILENAME}-*.pkg";
 done
 
