@@ -76,7 +76,7 @@ for PACKAGE_NAME in $${DEPENDENCIES};
 do
   for PACKAGE in $$(find $${VOLUME_NAME} -name "$${PACKAGE_NAME}-*.pkg");
   do
-    FILENAME=$$(basename $${PACKAGE})
+    FILENAME=$$(basename $${PACKAGE});
     sudo installer -target / -pkg "$${VOLUME_NAME}/packages/$${FILENAME}.pkg";
   done
 done
