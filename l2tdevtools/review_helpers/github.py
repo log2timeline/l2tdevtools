@@ -100,7 +100,7 @@ class GitHubHelper(object):
 
     Args:
       pull_request_number (int): GitHub issue number of the pull request.
-      access_token (str): github access token.
+      access_token (str): GitHub access token.
       assignees (list[str]): GitHub usernames to assign.
 
     Returns:
