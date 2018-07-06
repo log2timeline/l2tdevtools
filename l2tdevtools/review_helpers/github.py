@@ -70,8 +70,8 @@ class GitHubHelper(object):
 
     Args:
       pull_request_number (int): GitHub issue number of the pull request.
-      access_token (str): github access token.
-      reviewers (list[str]): github usernames to assign as reviewers.
+      access_token (str): GitHub access token.
+      reviewers (list[str]): GitHub usernames to assign as reviewers.
 
     Returns:
       bool: True if the review was created.
