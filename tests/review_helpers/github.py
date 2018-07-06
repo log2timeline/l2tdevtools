@@ -61,7 +61,7 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
     self.assertTrue(result)
 
   def testAssignPullRequest(self):
-    """Tests the RequestPullReview function."""
+    """Tests the AssignPullReview function."""
     helper = github.GitHubHelper(
         organization='test', project='test_project')
     helper._url_lib_helper = test_lib.TestURLLibHelper()

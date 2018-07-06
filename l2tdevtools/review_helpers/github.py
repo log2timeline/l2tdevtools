@@ -94,15 +94,17 @@ class GitHubHelper(object):
 
   def AssignPullRequest(
       self, pull_request_number, access_token, assignees):
-    """Assigns a GitHub pull request.
+    """Adds assignees to a GitHub pull request.
+
+    Assignees are responsible that a pull request is closed or merged.
 
     Args:
       pull_request_number (int): GitHub issue number of the pull request.
       access_token (str): github access token.
-      assignees (list[str]): github usernames to assign.
+      assignees (list[str]): GitHub usernames to assign.
 
     Returns:
-      bool: True if the review was created.
+      bool: True if the assignees were successfully added.
     """
     post_data = json.dumps({"assignees": assignees})
 
