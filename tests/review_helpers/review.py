@@ -24,13 +24,10 @@ class ReviewHelperTest(test_lib.BaseTestCase):
   # TODO: test CheckLocalGitState.
   # TODO: test CheckRemoteGitState.
   # TODO: test Close.
-  # TODO: test Create.
   # TODO: test CreatePullRequest.
   # TODO: test InitializeHelpers.
   # TODO: test Lint.
   # TODO: test Merge.
-  # TODO: test Open.
-  # TODO: test PrepareMerge.
   # TODO: test PrepareUpdate.
   # TODO: test PullChangesFromFork.
   # TODO: test Test.

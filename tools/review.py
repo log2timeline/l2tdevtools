@@ -73,17 +73,10 @@ def Main():
       'branch', action='store', metavar='BRANCH', default=None,
       help='name of the corresponding feature branch.')
 
-  commands_parser.add_parser('create')
   commands_parser.add_parser('create-pr')
   commands_parser.add_parser('create_pr')
 
   merge_command_parser = commands_parser.add_parser('merge')
-
-  # TODO: add this to help output.
-  merge_command_parser.add_argument(
-      'codereview_issue_number', action='store',
-      metavar='CODEREVIEW_ISSUE_NUMBER', default=None,
-      help='the codereview issue number to be merged.')
 
   # TODO: add this to help output.
   merge_command_parser.add_argument(
@@ -112,18 +105,6 @@ def Main():
   commands_parser.add_parser('lint-test')
   commands_parser.add_parser('lint_test')
 
-  open_command_parser = commands_parser.add_parser('open')
-
-  # TODO: add this to help output.
-  open_command_parser.add_argument(
-      'codereview_issue_number', action='store',
-      metavar='CODEREVIEW_ISSUE_NUMBER', default=None,
-      help='the codereview issue number to be opened.')
-
-  # TODO: add this to help output.
-  open_command_parser.add_argument(
-      'branch', action='store', metavar='BRANCH', default=None,
-      help='name of the corresponding feature branch.')
   # yapf: enable
 
   # TODO: add submit option?
@@ -143,12 +124,11 @@ def Main():
 
   options = argument_parser.parse_args()
 
-  codereview_issue_number = None
   feature_branch = None
   github_origin = None
 
   print_help_on_error = False
-  if options.command in ('close', 'open'):
+  if options.command == 'close':
     feature_branch = getattr(options, 'branch', None)
     if not feature_branch:
       print('Feature branch value is missing.')
@@ -157,12 +137,6 @@ def Main():
       # Support "username:branch" notation.
       if ':' in feature_branch:
         _, _, feature_branch = feature_branch.rpartition(':')
-
-  if options.command in ('merge', 'open'):
-    codereview_issue_number = getattr(options, 'codereview_issue_number', None)
-    if not codereview_issue_number:
-      print('Codereview issue number value is missing.')
-      print_help_on_error = True
 
   if options.command in ('merge', 'merge-edit', 'merge_edit'):
     github_origin = getattr(options, 'github_origin', None)
@@ -210,15 +184,11 @@ def Main():
     return False
 
   if options.command == 'merge':
-    if not review_helper.PrepareMerge(codereview_issue_number):
-      return False
+    # TODO: merge disabled until re-implementation.
+    return False
 
   if options.command in ('merge', 'merge-edit', 'merge_edit'):
     if not review_helper.PullChangesFromFork():
-      return False
-
-  if options.command == 'update':
-    if not review_helper.PrepareUpdate():
       return False
 
   if not review_helper.Lint():
@@ -232,10 +202,7 @@ def Main():
     return False
 
   result = False
-  if options.command == 'create':
-    result = review_helper.Create()
-
-  elif options.command in ('create-pr', 'create_pr'):
+  if options.command in ('create-pr', 'create_pr'):
     result = review_helper.CreatePullRequest()
 
   elif options.command == 'close':
@@ -245,10 +212,7 @@ def Main():
     result = True
 
   elif options.command == 'merge':
-    result = review_helper.Merge(codereview_issue_number)
-
-  elif options.command == 'open':
-    result = review_helper.Open(codereview_issue_number)
+    result = review_helper.Merge(pull_request_issue_number)
 
   elif options.command == 'update':
     result = review_helper.Update()
