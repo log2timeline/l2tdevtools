@@ -313,8 +313,8 @@ def Main():
   os.chdir(options.build_directory)
 
   undefined_packages = list(project_names)
-  if disabled_packages:
-    undefined_packages.remove(disabled_packages)
+  for disabled_package in disabled_packages:
+    undefined_packages.remove(disabled_package)
 
   failed_builds = []
   for project_definition in builds:
