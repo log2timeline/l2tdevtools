@@ -31,7 +31,6 @@ class ReviewHelperTest(test_lib.BaseTestCase):
   # TODO: test PrepareUpdate.
   # TODO: test PullChangesFromFork.
   # TODO: test Test.
-  # TODO: test Update.
   # TODO: test UpdateAuthors.
   # TODO: test UpdateVersion.
 

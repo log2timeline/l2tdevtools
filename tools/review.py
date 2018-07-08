@@ -114,8 +114,6 @@ def Main():
   # TODO: add dry-run option to run merge without commit.
   # useful to test pending CLs.
 
-  commands_parser.add_parser('update')
-
   commands_parser.add_parser('update-authors')
   commands_parser.add_parser('update_authors')
 
@@ -212,10 +210,8 @@ def Main():
     result = True
 
   elif options.command == 'merge':
-    result = review_helper.Merge(pull_request_issue_number)
-
-  elif options.command == 'update':
-    result = review_helper.Update()
+    # result = review_helper.Merge(pull_request_issue_number)
+    pass
 
   elif options.command in ('update-authors', 'update_authors'):
     result = review_helper.UpdateAuthors()

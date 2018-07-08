@@ -187,31 +187,6 @@ class ProjectHelper(cli.CLIHelper):
     """
     return cls._REVIEWER_GITHUB_USERNAMES.get(reviewer_email_address, None)
 
-  @classmethod
-  def GetReviewersOnCC(cls, project_name, author, reviewer):
-    """Determines the reviewers on CC.
-
-    Args:
-      project_name (str): name of the project.
-      author (str): email address of the author.
-      reviewer (str): email address of the reviewer that is used on codereview.
-
-    Returns:
-      str: comma separated email addresses.
-    """
-    reviewers_cc = set(
-        cls._REVIEWERS_PER_PROJECT.get(project_name, cls._REVIEWERS_DEFAULT))
-    reviewers_cc.update(cls._REVIEWERS_CC)
-
-    reviewers_cc.remove(reviewer)
-
-    try:
-      reviewers_cc.remove(author)
-    except KeyError:
-      pass
-
-    return ','.join(reviewers_cc)
-
   def GetVersion(self):
     """Retrieves the project version from the version file.
 

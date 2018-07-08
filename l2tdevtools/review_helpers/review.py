@@ -12,11 +12,9 @@ import sys
 from l2tdevtools.helpers import project
 from l2tdevtools.lib import errors
 from l2tdevtools.lib import netrcfile
-from l2tdevtools.lib import reviewfile
 from l2tdevtools.review_helpers import git
 from l2tdevtools.review_helpers import github
 from l2tdevtools.review_helpers import pylint
-from l2tdevtools.review_helpers import upload
 from l2tdevtools.review_helpers import yapf
 
 
@@ -29,8 +27,7 @@ class ReviewHelper(object):
 
   # Commands that trigger inspection (pylint, yapf) of changed files.
   _CODE_INSPECTION_COMMANDS = frozenset([
-      'create-pr', 'create_pr', 'merge', 'lint', 'lint-test', 'lint_test',
-      'update'])
+      'create-pr', 'create_pr', 'merge', 'lint', 'lint-test', 'lint_test'])
 
   def __init__(
       self, command, project_path, github_origin, feature_branch, diffbase,
@@ -82,8 +79,7 @@ class ReviewHelper(object):
       bool: True if the state of the local git repository is sane.
     """
     if self._command in (
-        'close', 'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test',
-        'update'):
+        'close', 'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test'):
       if not self._git_helper.CheckHasProjectUpstream():
         print('{0:s} aborted - missing project upstream.'.format(
             self._command.title()))
@@ -106,7 +102,7 @@ class ReviewHelper(object):
         return False
 
     self._active_branch = self._git_helper.GetActiveBranch()
-    if self._command in ('create-pr', 'create_pr', 'update'):
+    if self._command in ('create-pr', 'create_pr'):
       if self._active_branch == 'master':
         print('{0:s} aborted - active branch is master.'.format(
             self._command.title()))
@@ -139,7 +135,7 @@ class ReviewHelper(object):
             'upstream/master.').format(self._command.title()))
         return False
 
-    elif self._command in ('create-pr', 'create_pr', 'update'):
+    elif self._command in ('create-pr', 'create_pr'):
       if not self._git_helper.CheckSynchronizedWithUpstream():
         if not self._git_helper.SynchronizeWithUpstream():
           print((
@@ -237,6 +233,7 @@ class ReviewHelper(object):
 
     author_email_address = self._git_helper.GetEmailAddress()
 
+    # TODO: merge GetReviewer and GetReviewerUsername.
     reviewer_email_address = project.ProjectHelper.GetReviewer(
         self._project_name, author_email_address)
 
@@ -384,6 +381,7 @@ class ReviewHelper(object):
       bool: True if the merge was successful.
     """
     # TODO: re-implement.
+    _ = pull_request_issue_number
     return False
 
   def PullChangesFromFork(self):
@@ -406,6 +404,7 @@ class ReviewHelper(object):
     return True
 
   # yapf: disable
+
   def Test(self):
     """Tests a review.
 
@@ -416,8 +415,7 @@ class ReviewHelper(object):
       return True
 
     if self._command not in (
-        'create-pr', 'create_pr', 'lint-test', 'lint_test', 'merge', 'test',
-        'update'):
+        'create-pr', 'create_pr', 'lint-test', 'lint_test', 'merge', 'test'):
       return True
 
     # TODO: determine why this alters the behavior of argparse.
@@ -435,40 +433,6 @@ class ReviewHelper(object):
     return True
 
   # yapf: enable
-
-  def Update(self):
-    """Updates a review.
-
-    Returns:
-      bool: True if the update was successful.
-    """
-    last_commit_message = self._git_helper.GetLastCommitMessage()
-    print('Automatic generated description of the update:')
-    print(last_commit_message)
-    print('')
-
-    if self._no_confirm:
-      user_input = None
-    else:
-      print('Enter a description for the update or hit enter to use the')
-      print('automatic generated one:')
-      user_input = sys.stdin.readline()
-      user_input = user_input.strip()
-
-    if not user_input:
-      description = last_commit_message
-    else:
-      description = user_input
-
-    # yapf: disable
-    if not self._codereview_helper.UpdateIssue(
-        self._codereview_issue_number, self._diffbase, description):
-      print('Unable to update code review: {0!s}'.format(
-          self._codereview_issue_number))
-      return False
-
-    return True
-    # yapf: enable
 
   def UpdateAuthors(self):
     """Updates the authors.

@@ -128,33 +128,6 @@ class GitHelper(cli.CLIHelper):
         'git log HEAD..upstream/master --oneline')
     return exit_code == 0 and not output
 
-  def CommitToOriginInNameOf(
-      self, codereview_issue_number, author, description):
-    """Commits changes in name of an author to the master branch of origin.
-
-    Args:
-      codereview_issue_number (int|str): codereview issue number.
-      author (str): full name and email address of the author, formatted as:
-          "Full Name <email.address@example.com>".
-      description (str): description of the commit.
-
-    Returns:
-      bool: True if the changes were committed to the git repository.
-    """
-    command = (
-        'git commit -a --author="{0:s}" '
-        '-m "Code review: {1:s}: {2:s}"').format(
-            author, codereview_issue_number, description)
-    exit_code, _, _ = self.RunCommand(command)
-    if exit_code != 0:
-      return False
-
-    exit_code, _, _ = self.RunCommand(u'git push origin master')
-    if exit_code != 0:
-      return False
-
-    return True
-
   def DropUncommittedChanges(self):
     """Drops the uncommitted changes."""
     self.RunCommand('git stash')
