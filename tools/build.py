@@ -312,8 +312,11 @@ def Main():
   current_working_directory = os.getcwd()
   os.chdir(options.build_directory)
 
+  undefined_packages = list(project_names)
+  if disabled_packages:
+    undefined_packages.remove(disabled_packages)
+
   failed_builds = []
-  undefined_packages = list(project_names).remove(disabled_packages)
   for project_definition in builds:
     if project_names and project_definition.name not in project_names:
       continue
