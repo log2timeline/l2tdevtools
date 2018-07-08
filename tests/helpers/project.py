@@ -27,10 +27,8 @@ class ProjectHelperTest(test_lib.BaseTestCase):
 
   def testGetReviewer(self):
     """Tests the GetReviewer function."""
-    author = 'test@example.com'
-
-    reviewer = project.ProjectHelper.GetReviewer('l2tdevtools', author)
-    self.assertNotEqual(reviewer, author)
+    reviewer = project.ProjectHelper.GetReviewer('l2tdevtools', 'test')
+    self.assertNotEqual(reviewer, 'test')
     self.assertIn(reviewer, project.ProjectHelper._REVIEWERS_DEFAULT)
 
   # TODO: add test for GetReviewerUsername

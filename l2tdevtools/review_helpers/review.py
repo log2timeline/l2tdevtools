@@ -231,13 +231,15 @@ class ReviewHelper(object):
       print('Unable to create pull request.')
       return False
 
-    author_email_address = self._git_helper.GetEmailAddress()
+    try:
+      github_username = self._github_helper.GetUsername(github_access_token)
 
-    # TODO: merge GetReviewer and GetReviewerUsername.
-    reviewer_email_address = project.ProjectHelper.GetReviewer(
-        self._project_name, author_email_address)
+    except errors.ConnectivityError:
+      print('Unable to determine GitHub username.')
+      return False
 
-    reviewer = project.ProjectHelper.GetReviewerUsername(reviewer_email_address)
+    reviewer = project.ProjectHelper.GetReviewer(
+        self._project_name, github_username)
 
     try:
       self._github_helper.CreatePullRequestReview(
@@ -245,6 +247,7 @@ class ReviewHelper(object):
 
     except errors.ConnectivityError:
       print('Unable to request review of pull request.')
+      return False
 
     try:
       self._github_helper.AssignPullRequest(
@@ -252,6 +255,7 @@ class ReviewHelper(object):
 
     except errors.ConnectivityError:
       print('Unable to assign pull request.')
+      return False
 
     return True
 

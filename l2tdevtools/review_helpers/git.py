@@ -200,22 +200,6 @@ class GitHelper(cli.CLIHelper):
 
     return python_files
 
-  def GetEmailAddress(self):
-    """Retrieves the email address.
-
-    Returns:
-      str: email address or None if not available.
-    """
-    exit_code, output, _ = self.RunCommand('git config user.email')
-    if exit_code != 0:
-      return None
-
-    output_lines = output.split(b'\n')
-    if not output_lines:
-      return None
-
-    return output_lines[0]
-
   def GetLastCommitMessage(self):
     """Retrieves the last commit message.
 
