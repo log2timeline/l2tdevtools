@@ -284,6 +284,7 @@ def Main():
     project_names = options.projects.split(',')
 
   builds = []
+  disabled_packages = []
   with io.open(projects_file, 'r', encoding='utf-8') as file_object:
     project_definition_reader = projects.ProjectDefinitionReader()
     for project_definition in project_definition_reader.Read(file_object):
@@ -300,7 +301,9 @@ def Main():
           logging.info('Ignoring disabled status for: {0:s}'.format(
               project_definition.name))
 
-      if not is_disabled:
+      if is_disabled:
+        disabled_packages.append(project_definition.name)
+      else:
         builds.append(project_definition)
 
   if not os.path.exists(options.build_directory):
@@ -310,7 +313,7 @@ def Main():
   os.chdir(options.build_directory)
 
   failed_builds = []
-  undefined_packages = list(project_names)
+  undefined_packages = list(project_names).remove(disabled_packages)
   for project_definition in builds:
     if project_names and project_definition.name not in project_names:
       continue
