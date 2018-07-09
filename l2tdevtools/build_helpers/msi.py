@@ -675,6 +675,15 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
       if not result:
         return False
 
+    if (sys.version_info[0] >= 3 and
+        source_helper_object.project_name == 'pycrypto'):
+      # Work-around for compilation issue with Visual Studio 2017. Also see:
+      # https://stackoverflow.com/questions/41843266/microsoft-windows-python-3-6-pycrypto-installation-error
+      include_path = os.path.join(
+          os.environ['VCINSTALLDIR'], 'Tools', 'MSVC', '14.14.26428',
+          'include', 'stdint.h')
+      os.environ['CL'] = '-FI"{0:s}"'.format(include_path)
+
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     command = '\"{0:s}\" setup.py bdist_msi > {1:s} 2>&1'.format(
         sys.executable, log_file_path)
