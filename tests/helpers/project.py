@@ -27,23 +27,11 @@ class ProjectHelperTest(test_lib.BaseTestCase):
 
   def testGetReviewer(self):
     """Tests the GetReviewer function."""
-    author = 'test@example.com'
-
-    reviewer = project.ProjectHelper.GetReviewer('l2tdevtools', author)
-    self.assertNotEqual(reviewer, author)
+    reviewer = project.ProjectHelper.GetReviewer('l2tdevtools', 'test')
+    self.assertNotEqual(reviewer, 'test')
     self.assertIn(reviewer, project.ProjectHelper._REVIEWERS_DEFAULT)
 
-  def testGetReviewersOnCC(self):
-    """Tests the GetReviewersOnCC function."""
-    author = 'test@example.com'
-    reviewer = 'joachim.metz@gmail.com'
-
-    reviewers_cc = project.ProjectHelper.GetReviewersOnCC(
-        'l2tdevtools', author, reviewer)
-    self.assertNotIn(author, reviewers_cc)
-    self.assertNotIn(reviewer, reviewers_cc)
-    self.assertIn('log2timeline-dev@googlegroups.com', reviewers_cc)
-
+  # TODO: add test for GetReviewerUsername
   # TODO: add test for GetVersion
   # TODO: add test for UpdateDpkgChangelogFile
   # TODO: add test for UpdateAuthorsFile

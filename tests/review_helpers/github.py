@@ -18,6 +18,16 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
 
   # pylint: disable=protected-access
 
+  def testAssignPullRequest(self):
+    """Tests the AssignPullReview function."""
+    helper = github.GitHubHelper(
+        organization='test', project='test_project')
+    helper._url_lib_helper = test_lib.TestURLLibHelper()
+
+    result = helper.AssignPullRequest(4, 'TOKEN', ['Onager'])
+
+    self.assertTrue(result)
+
   def testCreatePullRequest(self):
     """Tests the CreatePullRequest function."""
     create_result = json.dumps({"number": 1})
@@ -29,6 +39,16 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
     result = helper.CreatePullRequest('TOKEN', 'origin', 'title', 'body')
     self.assertEqual(result, 1)
 
+  def testCreatePullRequestReview(self):
+    """Tests the CreatePullRequestReview function."""
+    helper = github.GitHubHelper(
+        organization='test', project='test_project')
+    helper._url_lib_helper = test_lib.TestURLLibHelper()
+
+    result = helper.CreatePullRequestReview(4, 'TOKEN', ['Onager'])
+
+    self.assertTrue(result)
+
   def testGetForkGitRepoUrl(self):
     """Tests the GetForkGitRepoUrl function."""
     helper = github.GitHubHelper(
@@ -39,7 +59,7 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
     url = helper.GetForkGitRepoUrl('test_user')
     self.assertEqual(url, expected_url)
 
-  # TODO: add tests for SetReviewer.
+  # TODO: add tests for GetUsername.
 
   def testQueryUser(self):
     """Tests the QueryUser function."""
@@ -49,26 +69,6 @@ class GitHubHelperTest(shared_test_lib.BaseTestCase):
 
     result = helper.QueryUser('test_user')
     self.assertIsNone(result)
-
-  def testRequestPRReview(self):
-    """Tests the RequestPullReview function."""
-    helper = github.GitHubHelper(
-        organization='test', project='test_project')
-    helper._url_lib_helper = test_lib.TestURLLibHelper()
-
-    result = helper.CreatePullRequestReview(4, 'TOKEN', ['Onager'])
-
-    self.assertTrue(result)
-
-  def testAssignPullRequest(self):
-    """Tests the AssignPullReview function."""
-    helper = github.GitHubHelper(
-        organization='test', project='test_project')
-    helper._url_lib_helper = test_lib.TestURLLibHelper()
-
-    result = helper.AssignPullRequest(4, 'TOKEN', ['Onager'])
-
-    self.assertTrue(result)
 
 
 if __name__ == '__main__':

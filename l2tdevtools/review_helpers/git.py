@@ -128,33 +128,6 @@ class GitHelper(cli.CLIHelper):
         'git log HEAD..upstream/master --oneline')
     return exit_code == 0 and not output
 
-  def CommitToOriginInNameOf(
-      self, codereview_issue_number, author, description):
-    """Commits changes in name of an author to the master branch of origin.
-
-    Args:
-      codereview_issue_number (int|str): codereview issue number.
-      author (str): full name and email address of the author, formatted as:
-          "Full Name <email.address@example.com>".
-      description (str): description of the commit.
-
-    Returns:
-      bool: True if the changes were committed to the git repository.
-    """
-    command = (
-        'git commit -a --author="{0:s}" '
-        '-m "Code review: {1:s}: {2:s}"').format(
-            author, codereview_issue_number, description)
-    exit_code, _, _ = self.RunCommand(command)
-    if exit_code != 0:
-      return False
-
-    exit_code, _, _ = self.RunCommand(u'git push origin master')
-    if exit_code != 0:
-      return False
-
-    return True
-
   def DropUncommittedChanges(self):
     """Drops the uncommitted changes."""
     self.RunCommand('git stash')
@@ -226,22 +199,6 @@ class GitHelper(cli.CLIHelper):
       python_files.append(changed_file)
 
     return python_files
-
-  def GetEmailAddress(self):
-    """Retrieves the email address.
-
-    Returns:
-      str: email address or None if not available.
-    """
-    exit_code, output, _ = self.RunCommand('git config user.email')
-    if exit_code != 0:
-      return None
-
-    output_lines = output.split(b'\n')
-    if not output_lines:
-      return None
-
-    return output_lines[0]
 
   def GetLastCommitMessage(self):
     """Retrieves the last commit message.
