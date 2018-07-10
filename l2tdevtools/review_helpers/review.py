@@ -12,11 +12,9 @@ import sys
 from l2tdevtools.helpers import project
 from l2tdevtools.lib import errors
 from l2tdevtools.lib import netrcfile
-from l2tdevtools.lib import reviewfile
 from l2tdevtools.review_helpers import git
 from l2tdevtools.review_helpers import github
 from l2tdevtools.review_helpers import pylint
-from l2tdevtools.review_helpers import upload
 from l2tdevtools.review_helpers import yapf
 
 
@@ -28,8 +26,8 @@ class ReviewHelper(object):
           '|'.join(project.ProjectHelper.SUPPORTED_PROJECTS)))
 
   # Commands that trigger inspection (pylint, yapf) of changed files.
-  _CODE_INSPECTION_COMMANDS = frozenset(
-      ['create', 'merge', 'lint', 'lint-test', 'lint_test', 'update'])
+  _CODE_INSPECTION_COMMANDS = frozenset([
+      'create-pr', 'create_pr', 'merge', 'lint', 'lint-test', 'lint_test'])
 
   def __init__(
       self, command, project_path, github_origin, feature_branch, diffbase,
@@ -52,8 +50,6 @@ class ReviewHelper(object):
     super(ReviewHelper, self).__init__()
     self._active_branch = None
     self._all_files = all_files
-    self._codereview_helper = None
-    self._codereview_issue_number = None
     self._command = command
     self._diffbase = diffbase
     self._feature_branch = feature_branch
@@ -83,8 +79,7 @@ class ReviewHelper(object):
       bool: True if the state of the local git repository is sane.
     """
     if self._command in (
-        'close', 'create', 'create-pr', 'create_pr', 'lint', 'lint-test',
-        'lint_test', 'update'):
+        'close', 'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test'):
       if not self._git_helper.CheckHasProjectUpstream():
         print('{0:s} aborted - missing project upstream.'.format(
             self._command.title()))
@@ -107,7 +102,7 @@ class ReviewHelper(object):
         return False
 
     self._active_branch = self._git_helper.GetActiveBranch()
-    if self._command in ('create', 'create-pr', 'create_pr', 'update'):
+    if self._command in ('create-pr', 'create_pr'):
       if self._active_branch == 'master':
         print('{0:s} aborted - active branch is master.'.format(
             self._command.title()))
@@ -140,7 +135,7 @@ class ReviewHelper(object):
             'upstream/master.').format(self._command.title()))
         return False
 
-    elif self._command in ('create', 'create-pr', 'create_pr', 'update'):
+    elif self._command in ('create-pr', 'create_pr'):
       if not self._git_helper.CheckSynchronizedWithUpstream():
         if not self._git_helper.SynchronizeWithUpstream():
           print((
@@ -182,106 +177,6 @@ class ReviewHelper(object):
     else:
       self._git_helper.RemoveFeatureBranch(self._feature_branch)
 
-    review_file = reviewfile.ReviewFile(self._feature_branch)
-    if not review_file.Exists():
-      print('Review file missing for branch: {0:s}'.format(
-          self._feature_branch))  # yapf: disable
-
-    else:
-      codereview_issue_number = review_file.GetCodeReviewIssueNumber()
-
-      review_file.Remove()
-
-      if codereview_issue_number:
-        if not self._codereview_helper.CloseIssue(codereview_issue_number):
-          print('Unable to close code review: {0!s}'.format(
-              codereview_issue_number))  # yapf: disable
-          print(
-              ('Close it manually on: https://codereview.appspot.com/'
-               '{0!s}').format(codereview_issue_number))
-
-    return True
-
-  def Create(self):
-    """Creates a review.
-
-    Returns:
-      bool: True if the create was successful.
-    """
-    # yapf: disable
-    review_file = reviewfile.ReviewFile(self._active_branch)
-    if review_file.Exists():
-      print('Review file already exists for branch: {0:s}'.format(
-          self._active_branch))
-      return False
-
-    git_origin = self._git_helper.GetRemoteOrigin()
-    if not git_origin.startswith('https://github.com/'):
-      print('{0:s} aborted - unsupported git remote origin: {1:s}'.format(
-          self._command.title(), git_origin))
-      print('Make sure the git remote origin is hosted on github.com')
-      return False
-
-    git_origin, _, _ = git_origin[len('https://github.com/'):].rpartition('/')
-
-    netrc_file = netrcfile.NetRCFile()
-    github_access_token = netrc_file.GetGitHubAccessToken()
-    if not github_access_token:
-      print('{0:s} aborted - unable to determine github access token.'.format(
-          self._command.title()))
-      print('Make sure .netrc is configured with a github access token.')
-      return False
-
-    last_commit_message = self._git_helper.GetLastCommitMessage()
-    print('Automatic generated description of code review:')
-    print(last_commit_message)
-    print('')
-
-    if self._no_confirm:
-      user_input = None
-    else:
-      print('Enter a description for the code review or hit enter to use the')
-      print('automatic generated one:')
-      user_input = sys.stdin.readline()
-      user_input = user_input.strip()
-
-    if not user_input:
-      description = last_commit_message
-    else:
-      description = user_input
-
-    # Prefix the description with the project name for code review to make it
-    # easier to distinguish between projects.
-    code_review_description = '[{0:s}] {1:s}'.format(
-        self._project_name, description)
-
-    codereview_issue_number = self._codereview_helper.CreateIssue(
-        self._project_name, self._diffbase, code_review_description)
-    if not codereview_issue_number:
-      print('{0:s} aborted - unable to create codereview issue.'.format(
-          self._command.title()))
-      return False
-
-    if not os.path.isdir('.review'):
-      os.mkdir('.review')
-
-    review_file.Create(codereview_issue_number)
-
-    title = '{0!s}: {1:s}'.format(codereview_issue_number, description)
-    body = (
-        '[Code review: {0!s}: {1:s}]'
-        '(https://codereview.appspot.com/{0!s}/)').format(
-            codereview_issue_number, description)
-
-    create_github_origin = '{0:s}:{1:s}'.format(git_origin, self._active_branch)
-    try:
-      self._github_helper.CreatePullRequest(
-          github_access_token, create_github_origin, title, body)
-    except errors.ConnectivityError:
-      print('Unable to create pull request.')
-      return False
-
-    # yapf: enable
     return True
 
   def CreatePullRequest(self):
@@ -336,12 +231,15 @@ class ReviewHelper(object):
       print('Unable to create pull request.')
       return False
 
-    author_email_address = self._git_helper.GetEmailAddress()
+    try:
+      github_username = self._github_helper.GetUsername(github_access_token)
 
-    reviewer_email_address = project.ProjectHelper.GetReviewer(
-        self._project_name, author_email_address)
+    except errors.ConnectivityError:
+      print('Unable to determine GitHub username.')
+      return False
 
-    reviewer = project.ProjectHelper.GetReviewerUsername(reviewer_email_address)
+    reviewer = project.ProjectHelper.GetReviewer(
+        self._project_name, github_username)
 
     try:
       self._github_helper.CreatePullRequestReview(
@@ -349,6 +247,7 @@ class ReviewHelper(object):
 
     except errors.ConnectivityError:
       print('Unable to request review of pull request.')
+      return False
 
     try:
       self._github_helper.AssignPullRequest(
@@ -356,6 +255,7 @@ class ReviewHelper(object):
 
     except errors.ConnectivityError:
       print('Unable to assign pull request.')
+      return False
 
     return True
 
@@ -390,11 +290,6 @@ class ReviewHelper(object):
 
     self._github_helper = github.GitHubHelper(
         github_organization, self._project_name)
-
-    if self._command in ('close', 'create', 'merge', 'update'):
-      email_address = self._git_helper.GetEmailAddress()
-      self._codereview_helper = upload.UploadHelper(
-          email_address, no_browser=self._no_browser)
 
     return True
 
@@ -480,135 +375,18 @@ class ReviewHelper(object):
     return True
   # yapf: enable
 
-  def Merge(self, codereview_issue_number):
+  def Merge(self, pull_request_issue_number):
     """Merges a review.
 
     Args:
-      codereview_issue_number (int|str): codereview issue number.
+      pull_request_issue_number (int|str): GitHub pull request issue number.
 
     Returns:
       bool: True if the merge was successful.
     """
-    if not self._project_helper.UpdateVersionFile():
-      print('Unable to update version file.')
-      self._git_helper.DropUncommittedChanges()
-      return False
-
-    if not self._project_helper.UpdateDpkgChangelogFile():
-      print('Unable to update dpkg changelog file.')
-      self._git_helper.DropUncommittedChanges()
-      return False
-
-    if not self._git_helper.CommitToOriginInNameOf(
-        codereview_issue_number, self._merge_author, self._merge_description):
-      print('Unable to commit changes.')
-      self._git_helper.DropUncommittedChanges()
-      return False
-
-    commit_message = (
-        'Changes have been merged with master branch. '
-        'To close the review and clean up the feature branch you can run: '
-        'review.py close {0:s}').format(self._fork_feature_branch)
-    self._codereview_helper.AddMergeMessage(
-        codereview_issue_number, commit_message)
-
-    return True
-
-  def Open(self, codereview_issue_number):
-    """Opens a review.
-
-    Args:
-      codereview_issue_number (int|str): codereview issue number.
-
-    Returns:
-      bool: True if the open was successful.
-    """
-    # TODO: implement.
-    # * check if feature branch exists
-    # * check if review file exists
-    # * check if issue number corresponds to branch by checking PR?
-    # * create feature branch and pull changes from origin
-    # * create review file
-    _ = codereview_issue_number
-
+    # TODO: re-implement.
+    _ = pull_request_issue_number
     return False
-
-  def PrepareMerge(self, codereview_issue_number):
-    """Prepares a merge.
-
-    Args:
-      codereview_issue_number (int|str): codereview issue number.
-
-    Returns:
-      bool: True if the prepare were successful.
-    """
-    codereview_information = self._codereview_helper.QueryIssue(
-        codereview_issue_number)
-    if not codereview_information:
-      print((
-          '{0:s} aborted - unable to retrieve code review: {1!s} '
-          'information.').format(
-              self._command.title(), codereview_issue_number))
-      return False
-
-    self._merge_description = codereview_information.get('subject', None)
-    if not self._merge_description:
-      print((
-          '{0:s} aborted - unable to determine description of code review: '
-          '{1!s}.').format(self._command.title(), codereview_issue_number))
-      return False
-
-    # When merging remove the project name ("[project]") prefix from
-    # the code review description.
-    self._merge_description = self._PROJECT_NAME_PREFIX_REGEX.sub(
-        '', self._merge_description)
-
-    merge_email_address = codereview_information.get('owner_email', None)
-    if not merge_email_address:
-      print((
-          '{0:s} aborted - unable to determine email address of owner of '
-          'code review: {1!s}.').format(
-              self._command.title(), codereview_issue_number))
-      return False
-
-    github_user_information = self._github_helper.QueryUser(self._fork_username)
-    if not github_user_information:
-      print((
-          '{0:s} aborted - unable to retrieve github user: {1:s} '
-          'information.').format(self._command.title(), self._fork_username))
-      return False
-
-    merge_fullname = github_user_information.get('name', None)
-    if not merge_fullname:
-      merge_fullname = codereview_information.get('owner', None)
-    if not merge_fullname:
-      merge_fullname = github_user_information.get('company', None)
-    if not merge_fullname:
-      print((
-          '{0:s} aborted - unable to determine full name.').format(
-              self._command.title()))  # yapf: disable
-      return False
-
-    self._merge_author = '{0:s} <{1:s}>'.format(
-        merge_fullname, merge_email_address)
-
-    return True
-
-  def PrepareUpdate(self):
-    """Prepares to update a review.
-
-    Returns:
-      bool: True if the preparations were successful.
-    """
-    review_file = reviewfile.ReviewFile(self._active_branch)
-    if not review_file.Exists():
-      print('Review file missing for branch: {0:s}'.format(
-          self._active_branch))  # yapf: disable
-      return False
-
-    self._codereview_issue_number = review_file.GetCodeReviewIssueNumber()
-
-    return True
 
   def PullChangesFromFork(self):
     """Pulls changes from a feature branch on a fork.
@@ -630,6 +408,7 @@ class ReviewHelper(object):
     return True
 
   # yapf: disable
+
   def Test(self):
     """Tests a review.
 
@@ -640,8 +419,7 @@ class ReviewHelper(object):
       return True
 
     if self._command not in (
-        'create', 'create-pr', 'create_pr', 'lint-test', 'lint_test', 'merge',
-        'test', 'update'):
+        'create-pr', 'create_pr', 'lint-test', 'lint_test', 'merge', 'test'):
       return True
 
     # TODO: determine why this alters the behavior of argparse.
@@ -659,40 +437,6 @@ class ReviewHelper(object):
     return True
 
   # yapf: enable
-
-  def Update(self):
-    """Updates a review.
-
-    Returns:
-      bool: True if the update was successful.
-    """
-    last_commit_message = self._git_helper.GetLastCommitMessage()
-    print('Automatic generated description of the update:')
-    print(last_commit_message)
-    print('')
-
-    if self._no_confirm:
-      user_input = None
-    else:
-      print('Enter a description for the update or hit enter to use the')
-      print('automatic generated one:')
-      user_input = sys.stdin.readline()
-      user_input = user_input.strip()
-
-    if not user_input:
-      description = last_commit_message
-    else:
-      description = user_input
-
-    # yapf: disable
-    if not self._codereview_helper.UpdateIssue(
-        self._codereview_issue_number, self._diffbase, description):
-      print('Unable to update code review: {0!s}'.format(
-          self._codereview_issue_number))
-      return False
-
-    return True
-    # yapf: enable
 
   def UpdateAuthors(self):
     """Updates the authors.

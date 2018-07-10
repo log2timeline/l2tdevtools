@@ -35,46 +35,35 @@ class ProjectHelper(cli.CLIHelper):
 
   _REVIEWERS_PER_PROJECT = {
       'dfdatetime': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
+          'joachimmetz',
+          'Onager']),
       'dfkinds': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
+          'joachimmetz',
+          'Onager']),
       'dfvfs': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
+          'joachimmetz',
+          'Onager']),
       'dfwinreg': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
+          'joachimmetz',
+          'Onager']),
       'dftimewolf': frozenset([
-          'onager@deerpie.com',
-          'someguyiknow@google.com',
-          'tomchop@gmail.com']),
+          'Onager',
+          'someguyiknow',
+          'tomchop']),
       'l2tpreg': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com']),
+          'joachimmetz',
+          'Onager']),
       'plaso': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com',
-          'romaing@google.com']),
+          'joachimmetz',
+          'Onager',
+          'rgayon']),
       'PlasoScaffolder': frozenset([
-          'joachim.metz@gmail.com',
-          'onager@deerpie.com'])}
+          'joachimmetz',
+          'Onager'])}
 
   _REVIEWERS_DEFAULT = frozenset([
-      'joachim.metz@gmail.com',
-      'onager@deerpie.com'])
-
-  _REVIEWERS_CC = frozenset([
-      'kiddi@kiddaland.net',
-      'log2timeline-dev@googlegroups.com'])
-
-  _REVIEWER_GITHUB_USERNAMES = {
-      'joachim.metz@gmail.com': 'joachimmetz',
-      'onager@deerpie.com': 'Onager',
-      'romaing@google.com': 'rgayon',
-      'someguyiknow@google.com': 'someguyiknow',
-      'tomchop@gmail.com': 'tomchop'}
+      'joachimmetz',
+      'Onager'])
 
   # yapf: enable
 
@@ -153,14 +142,14 @@ class ProjectHelper(cli.CLIHelper):
 
   @classmethod
   def GetReviewer(cls, project_name, author):
-    """Determines the reviewer.
+    """Determines the GitHub username of the reviewer.
 
     Args:
       project_name (str): name of the project.
-      author (str): email address of the author.
+      author (str): GitHub username of the author.
 
     Returns:
-      str: email address of the reviewer that is used on codereview.
+      str: GitHub username of the reviewer.
     """
     reviewers = list(
         cls._REVIEWERS_PER_PROJECT.get(project_name, cls._REVIEWERS_DEFAULT))
@@ -173,44 +162,6 @@ class ProjectHelper(cli.CLIHelper):
     random.shuffle(reviewers)
 
     return reviewers[0]
-
-  @classmethod
-  def GetReviewerUsername(cls, reviewer_email_address):
-    """Determines the GitHub username.
-
-    Args:
-      reviewer_email_address (str): email address of the reviewer.
-
-    Returns:
-      str: github username of the reviewer, or None there is no GitHub username
-          associated with the email address.
-    """
-    return cls._REVIEWER_GITHUB_USERNAMES.get(reviewer_email_address, None)
-
-  @classmethod
-  def GetReviewersOnCC(cls, project_name, author, reviewer):
-    """Determines the reviewers on CC.
-
-    Args:
-      project_name (str): name of the project.
-      author (str): email address of the author.
-      reviewer (str): email address of the reviewer that is used on codereview.
-
-    Returns:
-      str: comma separated email addresses.
-    """
-    reviewers_cc = set(
-        cls._REVIEWERS_PER_PROJECT.get(project_name, cls._REVIEWERS_DEFAULT))
-    reviewers_cc.update(cls._REVIEWERS_CC)
-
-    reviewers_cc.remove(reviewer)
-
-    try:
-      reviewers_cc.remove(author)
-    except KeyError:
-      pass
-
-    return ','.join(reviewers_cc)
 
   def GetVersion(self):
     """Retrieves the project version from the version file.

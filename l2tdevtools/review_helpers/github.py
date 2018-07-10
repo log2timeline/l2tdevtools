@@ -26,6 +26,36 @@ class GitHubHelper(object):
     self._project = project
     self._url_lib_helper = url_lib.URLLibHelper()
 
+  def AssignPullRequest(
+      self, pull_request_number, access_token, assignees):
+    """Adds assignees to a GitHub pull request.
+
+    Assignees are responsible that a pull request is closed or merged.
+
+    Args:
+      pull_request_number (int): GitHub issue number of the pull request.
+      access_token (str): GitHub access token.
+      assignees (list[str]): GitHub usernames to assign.
+
+    Returns:
+      bool: True if the assignees were successfully added.
+    """
+    post_data = json.dumps({"assignees": assignees})
+
+    github_url = (
+        'https://api.github.com/repos/{0:s}/{1:s}/issues/{2:d}/'
+        'assignees?access_token={3:s}').format(
+            self._organization, self._project, pull_request_number,
+            access_token)
+
+    try:
+      self._url_lib_helper.Request(github_url, post_data=post_data)
+
+    except errors.ConnectivityError:
+      return False
+
+    return True
+
   def CreatePullRequest(self, access_token, origin, title, body):
     """Creates a pull request.
 
@@ -92,36 +122,6 @@ class GitHubHelper(object):
 
     return True
 
-  def AssignPullRequest(
-      self, pull_request_number, access_token, assignees):
-    """Adds assignees to a GitHub pull request.
-
-    Assignees are responsible that a pull request is closed or merged.
-
-    Args:
-      pull_request_number (int): GitHub issue number of the pull request.
-      access_token (str): GitHub access token.
-      assignees (list[str]): GitHub usernames to assign.
-
-    Returns:
-      bool: True if the assignees were successfully added.
-    """
-    post_data = json.dumps({"assignees": assignees})
-
-    github_url = (
-        'https://api.github.com/repos/{0:s}/{1:s}/issues/{2:d}/'
-        'assignees?access_token={3:s}').format(
-            self._organization, self._project, pull_request_number,
-            access_token)
-
-    try:
-      self._url_lib_helper.Request(github_url, post_data=post_data)
-
-    except errors.ConnectivityError:
-      return False
-
-    return True
-
   def GetForkGitRepoUrl(self, username):
     """Retrieves the git repository URL of a fork.
 
@@ -132,6 +132,30 @@ class GitHubHelper(object):
       str: git repository URL or None.
     """
     return 'https://github.com/{0:s}/{1:s}.git'.format(username, self._project)
+
+  def GetUsername(self, access_token):
+    """Retrieves a GitHub user.
+
+    Args:
+      access_token (str): GitHub access token.
+
+    Returns:
+      str: GitHub user name or None if not available.
+    """
+    github_url = (
+        'https://api.github.com/user?access_token={0:s}').format(
+            access_token)
+
+    try:
+      response_data = self._url_lib_helper.Request(github_url)
+    except errors.ConnectivityError:
+      return None
+
+    if not response_data:
+      return None
+
+    response_data = json.loads(response_data)
+    return response_data.get('login', None)
 
   def QueryUser(self, username):
     """Queries a GitHub user.
