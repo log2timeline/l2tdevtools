@@ -108,7 +108,8 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       return None
 
     # The format of the project download URL is:
-    # https://files.pythonhosted.org/packages/.*/.*/.*/{project name}-{version}.{extension}
+    # https://files.pythonhosted.org/packages/.*/.*/.*/
+    #     {project name}-{version}.{extension}
     expression_string = (
         '(https://files.pythonhosted.org/packages/.*/.*/.*/'
         '{0:s}-{1!s}[.](tar[.]bz2|tar[.]gz|zip))').format(
