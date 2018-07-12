@@ -21,7 +21,7 @@ def Main():
   argument_parser = argparse.ArgumentParser(
       description='Script to manage code reviews.')
 
-  # TODO: add option to directly pass code review issue number.
+  # TODO: add option to directly pass pull request issue number.
 
   # yapf: disable
   argument_parser.add_argument(
