@@ -260,8 +260,9 @@ class ReviewHelper(object):
       print('Unable to assign pull request.')
       result = False
 
-    pull_request_url = 'https://github.com/log2timeline/{0:s}/pull/{1:d}'.format(
-        self._project_name, pull_request_number)
+    pull_request_url = (
+        'https://github.com/log2timeline/{0:s}/pull/{1:d}').format(
+            self._project_name, pull_request_number)
     print('Pull request created: {0:s}'.format(pull_request_url))
     print('Review assigned to: {0:s}'.format(reviewer))
     print('')
