@@ -32,7 +32,7 @@ class DownloadHelperFactory(object):
     # Remove URL arguments.
     download_url, _, _ = download_url.partition('?')
 
-    if download_url.startswith('http://pypi.python.org/pypi/'):
+    if download_url.startswith('http://pypi.org/project/'):
       download_helper_class = pypi.PyPIDownloadHelper
 
     elif (download_url.startswith('http://sourceforge.net/projects/') and

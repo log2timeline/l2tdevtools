@@ -242,6 +242,7 @@ class DependencyUpdater(object):
       'com.github.sleuthkit.',
       'com.google.code.p.',
       'org.samba.',
+      'org.pypi.',
       'org.python.pypi.',
       'net.sourceforge.projects.']
 

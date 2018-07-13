@@ -15,7 +15,7 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Benjamin Peterson <benjamin@python.org>
-Url: http://pypi.python.org/pypi/six/
+Url: http://pypi.org/project/six/
 BuildRequires: python2-setuptools, python3-setuptools
 
 %description
