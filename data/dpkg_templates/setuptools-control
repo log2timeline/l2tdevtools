@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Matthias Klose <doko@debian.org>
 Build-Depends: debhelper (>= 9), dh-python, python-all, python3-all
 Standards-Version: 3.9.7
-Homepage: https://pypi.python.org/pypi/setuptools
+Homepage: https://pypi.org/project/setuptools
 
 Package: python-pkg-resources
 Suggests: python-setuptools

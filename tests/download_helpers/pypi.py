@@ -19,7 +19,7 @@ from tests import test_lib
 class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the PyPi download helper."""
 
-  _DOWNLOAD_URL = 'https://pypi.python.org/pypi/dfvfs'
+  _DOWNLOAD_URL = 'https://pypi.org/project/dfvfs'
 
   _PROJECT_NAME = 'dfvfs'
   _PROJECT_VERSION = '20180703'
@@ -52,7 +52,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
 
     project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = 'org.python.pypi.{0:s}'.format(
+    expected_project_identifier = 'org.pypi.{0:s}'.format(
         self._PROJECT_NAME)
 
     self.assertEqual(project_identifier, expected_project_identifier)

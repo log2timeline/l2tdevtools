@@ -71,7 +71,8 @@ class ProjectHelper(cli.CLIHelper):
   SUPPORTED_PROJECTS = frozenset([
       'acstore', 'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs', 'dfwinreg',
       'dftimewolf', 'dtfabric', 'dtformats', 'esedb-kb', 'l2tdevtools',
-      'l2tdocs', 'l2tpreg', 'plaso', 'review', 'winevt-kb', 'winreg-kb'])
+      'l2tdocs', 'l2tpreg', 'plaso', 'PlasoScaffolder', 'review', 'winevt-kb',
+      'winreg-kb'])
 
   def __init__(self, project_path):
     """Initializes a project helper.
