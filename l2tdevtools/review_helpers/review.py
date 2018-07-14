@@ -183,7 +183,8 @@ class ReviewHelper(object):
     """Creates a GitHub pull request.
 
     Returns:
-      bool: True if the pull request was created successfully.
+      bool: True if the pull request was created, assigned and requested to
+          review successfully.
     """
     git_origin = self._git_helper.GetRemoteOrigin()
     if not git_origin.startswith('https://github.com/'):

@@ -21,8 +21,6 @@ def Main():
   argument_parser = argparse.ArgumentParser(
       description='Script to manage code reviews.')
 
-  # TODO: add option to directly pass pull request issue number.
-
   # yapf: disable
   argument_parser.add_argument(
       '--project-path', '--project_path', '-p', dest='project_path',
