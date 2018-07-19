@@ -48,18 +48,18 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     Returns:
       str: latest version number or None if not available.
     """
+    earliest_version = None
+    latest_version = None
+
     if version_definition:
       earliest_version = version_definition.GetEarliestVersion()
       if earliest_version and earliest_version[0] == '==':
         return '.'.join(earliest_version[1:])
 
+      latest_version = version_definition.GetLatestVersion()
+
     download_url = 'https://github.com/{0:s}/{1:s}/releases'.format(
         self._organization, self._repository)
-
-    # TODO: add support for URL arguments '?after=release-2.2.0'
-    # if earliest_version:
-    #   download_url = '{0:s}?after={1:s}'.format(
-    #       download_url, earliest_version)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -122,7 +122,34 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       comparable_matches[match] = comparable_match
 
     # Find the latest version number and transform it back into a string.
-    latest_match = [digit for digit in max(comparable_matches.values())]
+    comparable_earliest_version = None
+    if earliest_version:
+      comparable_earliest_version = [
+          int(digit) for digit in earliest_version[1:]]
+
+    comparable_latest_version = None
+    if latest_version:
+      comparable_latest_version = [
+          int(digit) for digit in latest_version[1:]]
+
+    latest_match = None
+    for match in comparable_matches.values():
+      if earliest_version is not None:
+        if earliest_version[0] == '>' and match <= comparable_earliest_version:
+          continue
+
+        if earliest_version[0] == '>=' and match < comparable_earliest_version:
+          continue
+
+      if latest_version is not None:
+        if latest_version[0] == '<' and match >= comparable_latest_version:
+          continue
+
+        if latest_version[0] == '<=' and match > comparable_latest_version:
+          continue
+
+      if latest_match is None or match > latest_match:
+        latest_match = match
 
     # Map the latest match value to its index within the dictionary.
     # Convert the result of dict.values() into a list for Python 3.
