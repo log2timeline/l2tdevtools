@@ -121,7 +121,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       comparable_match = list(map(int, comparable_match.split('.')))
       comparable_matches[match] = comparable_match
 
-    # Find the latest version number and transform it back into a string.
+    # Find the latest version number.
     comparable_earliest_version = None
     if earliest_version:
       comparable_earliest_version = [
