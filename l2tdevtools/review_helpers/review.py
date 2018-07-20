@@ -183,7 +183,8 @@ class ReviewHelper(object):
     """Creates a GitHub pull request.
 
     Returns:
-      bool: True if the create was successful.
+      bool: True if the pull request was created, assigned and requested to
+          review successfully.
     """
     git_origin = self._git_helper.GetRemoteOrigin()
     if not git_origin.startswith('https://github.com/'):
@@ -238,6 +239,9 @@ class ReviewHelper(object):
       print('Unable to determine GitHub username.')
       return False
 
+    result = True
+
+    # When a pull request is created try to assign a reviewer.
     reviewer = project.ProjectHelper.GetReviewer(
         self._project_name, github_username)
 
@@ -247,7 +251,7 @@ class ReviewHelper(object):
 
     except errors.ConnectivityError:
       print('Unable to request review of pull request.')
-      return False
+      result = False
 
     try:
       self._github_helper.AssignPullRequest(
@@ -255,9 +259,16 @@ class ReviewHelper(object):
 
     except errors.ConnectivityError:
       print('Unable to assign pull request.')
-      return False
+      result = False
 
-    return True
+    pull_request_url = (
+        'https://github.com/log2timeline/{0:s}/pull/{1:d}').format(
+            self._project_name, pull_request_number)
+    print('Pull request created: {0:s}'.format(pull_request_url))
+    print('Review assigned to: {0:s}'.format(reviewer))
+    print('')
+
+    return result
 
   def InitializeHelpers(self):
     """Initializes the helpers.
