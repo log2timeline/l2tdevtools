@@ -170,6 +170,17 @@ class ProjectVersionDefinition(object):
 
     return self._version_string_parts[0]
 
+  def GetLatestVersion(self):
+    """Retrieves the latest version.
+
+    Returns:
+      str: latest version or None if version string parts are missing.
+    """
+    if not self._version_string_parts or len(self._version_string_parts) == 1:
+      return None
+
+    return self._version_string_parts[1]
+
 
 class ProjectDefinitionReader(object):
   """Project definition reader."""
