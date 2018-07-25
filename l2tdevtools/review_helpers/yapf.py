@@ -57,13 +57,13 @@ class YapfHelper(cli.CLIHelper):
       return False
 
     version_tuple = (0, 0, 0)
-    for line in output.split(b'\n'):
-      if line.startswith(b'yapf '):
-        _, _, version = line.partition(b' ')
+    for line in output.split('\n'):
+      if line.startswith('yapf '):
+        _, _, version = line.partition(' ')
         # Remove a trailing comma.
-        version, _, _ = version.partition(b',')
+        version, _, _ = version.partition(',')
 
-        version_tuple = tuple([int(digit) for digit in version.split(b'.')])
+        version_tuple = tuple([int(digit) for digit in version.split('.')])
 
     return version_tuple >= self._MINIMUM_VERSION_TUPLE
 

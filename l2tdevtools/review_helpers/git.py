@@ -30,7 +30,7 @@ class GitHelper(cli.CLIHelper):
     if not self._remotes:
       exit_code, output, _ = self.RunCommand('git remote -v')
       if exit_code == 0:
-        self._remotes = list(filter(None, output.split(b'\n')))
+        self._remotes = list(filter(None, output.split('\n')))
 
     return self._remotes
 
@@ -61,7 +61,7 @@ class GitHelper(cli.CLIHelper):
       return False
 
     # Check for remote entries starting with upstream.
-    for line in output.split(b'\n'):
+    for line in output.split('\n'):
       # Ignore the first 2 characters of the line.
       if line[2:] == branch:
         return True
@@ -89,7 +89,7 @@ class GitHelper(cli.CLIHelper):
     """
     # Check for remote entries starting with upstream.
     for remote in self._GetRemotes():
-      if remote.startswith(b'upstream\t{0:s}'.format(self._git_repo_url)):
+      if remote.startswith('upstream\t{0:s}'.format(self._git_repo_url)):
         return True
     return False
 
@@ -144,8 +144,8 @@ class GitHelper(cli.CLIHelper):
       return False
 
     # Check for remote entries starting with upstream.
-    for line in output.split(b'\n'):
-      if line.startswith(b'* '):
+    for line in output.split('\n'):
+      if line.startswith('* '):
         # Ignore the first 2 characters of the line.
         return line[2:]
     return None
@@ -168,7 +168,7 @@ class GitHelper(cli.CLIHelper):
     if exit_code != 0:
       return []
 
-    return output.split(b'\n')
+    return output.split('\n')
 
   def GetChangedPythonFiles(self, diffbase=None):
     """Retrieves the changed Python files.
@@ -226,7 +226,7 @@ class GitHelper(cli.CLIHelper):
     """
     # Check for remote entries starting with origin.
     for remote in self._GetRemotes():
-      if remote.startswith(b'origin\t'):
+      if remote.startswith('origin\t'):
         values = remote.split()
         if len(values) == 3:
           return values[1]
