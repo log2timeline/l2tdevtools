@@ -132,8 +132,14 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       comparable_latest_version = [
           int(digit) for digit in latest_version[1:]]
 
+    comparable_matching_versions = list(comparable_matches.values())
+
     latest_match = None
-    for match in comparable_matches.values():
+    for match in comparable_matching_versions:
+      if latest_match is None:
+        latest_match = match
+        continue
+
       if earliest_version is not None:
         if earliest_version[0] == '>' and match <= comparable_earliest_version:
           continue
@@ -148,12 +154,12 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
         if latest_version[0] == '<=' and match > comparable_latest_version:
           continue
 
-      if latest_match is None or match > latest_match:
+      if match > latest_match:
         latest_match = match
 
     # Map the latest match value to its index within the dictionary.
     # Convert the result of dict.values() into a list for Python 3.
-    latest_match = list(comparable_matches.values()).index(latest_match)
+    latest_match = comparable_matching_versions.index(latest_match)
 
     # Return the original version string which is stored as the key in within
     # the dictionary.
