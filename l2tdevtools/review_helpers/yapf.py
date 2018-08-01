@@ -63,7 +63,7 @@ class YapfHelper(cli.CLIHelper):
         # Remove a trailing comma.
         version, _, _ = version.partition(',')
 
-        version_tuple = tuple([int(digit) for digit in version.split('.')])
+        version_tuple = tuple([int(digit, 10) for digit in version.split('.')])
 
     return version_tuple >= self._MINIMUM_VERSION_TUPLE
 
