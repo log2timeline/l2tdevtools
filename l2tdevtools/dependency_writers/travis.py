@@ -19,7 +19,8 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes an install.sh file."""
-    l2tbinaries_dependencies = self._dependency_helper.GetL2TBinaries()
+    l2tbinaries_dependencies = self._dependency_helper.GetL2TBinaries(
+        platform='macos')
 
     l2tbinaries_test_dependencies = ['funcsigs', 'mock', 'pbr']
     if 'six' not in l2tbinaries_dependencies:
