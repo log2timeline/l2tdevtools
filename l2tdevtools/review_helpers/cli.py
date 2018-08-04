@@ -14,7 +14,7 @@ class CLIHelper(object):
   """Command line interface (CLI) helper.
 
   Attributes:
-    mock_responses (dict[str, str]): mapping of commands to responses.
+    mock_responses (dict[str, str]): mappings of commands to responses.
     preferred_encoding (str): preferred encoding of output.
   """
 
