@@ -36,7 +36,8 @@ class CLIHelper(object):
       command (str): command to run.
 
     Returns:
-      tuple[int, str, str]: exit code, output that was written to stdout and stderr.
+      tuple[int, str, str]: exit code, output that was written to stdout
+          and stderr.
     """
     if self.mock_responses:
       return_values = self.mock_responses.get(command, None)
