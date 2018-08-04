@@ -15,7 +15,8 @@ class PylintHelper(cli.CLIHelper):
 
   MINIMUM_VERSION = '1.7.0'
 
-  _MINIMUM_VERSION_TUPLE = MINIMUM_VERSION.split('.')
+  _MINIMUM_VERSION_TUPLE = tuple(
+      [int(digit, 10) for digit in MINIMUM_VERSION.split('.')])
 
   _RCFILE_NAME = '.pylintrc'
 
@@ -57,13 +58,13 @@ class PylintHelper(cli.CLIHelper):
       return False
 
     version_tuple = (0, 0, 0)
-    for line in output.split(b'\n'):
-      if line.startswith(b'pylint '):
-        _, _, version = line.partition(b' ')
+    for line in output.split('\n'):
+      if line.startswith('pylint '):
+        _, _, version = line.partition(' ')
         # Remove a trailing comma.
-        version, _, _ = version.partition(b',')
+        version, _, _ = version.partition(',')
 
-        version_tuple = tuple([int(digit) for digit in version.split(b'.')])
+        version_tuple = tuple([int(digit, 10) for digit in version.split('.')])
 
     return version_tuple >= self._MINIMUM_VERSION_TUPLE
 

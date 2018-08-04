@@ -294,7 +294,7 @@ class ReviewHelper(object):
     else:
       github_organization = 'log2timeline'
 
-    self._git_repo_url = b'https://github.com/{0:s}/{1:s}.git'.format(
+    self._git_repo_url = 'https://github.com/{0:s}/{1:s}.git'.format(
         github_organization, self._project_name)
 
     self._git_helper = git.GitHelper(self._git_repo_url)
