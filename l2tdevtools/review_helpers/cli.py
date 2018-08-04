@@ -11,14 +11,19 @@ import subprocess
 
 
 class CLIHelper(object):
-  """Command line interface (CLI) helper."""
+  """Command line interface (CLI) helper.
+
+  Attributes:
+    mock_responses (dict[str, str]): mapping of commands to responses.
+    preferred_encoding (str): preferred encoding of output.
+  """
 
   def __init__(self, mock_responses=None):
     """Initializes a CLI helper.
 
     Args:
-      mock_responses(Optional[dict[str, str]): dict mapping commands to
-          responses, used for testing.
+      mock_responses (Optional[dict[str, str]]): mappings of commands to
+          responses, for testing.
     """
     super(CLIHelper, self).__init__()
     self.mock_responses = mock_responses
