@@ -57,5 +57,4 @@ class CLIHelper(object):
       logging.error(
           'Running: "{0:s}" failed with error: {1!s}.'.format(command, error))
 
-
     return process.returncode, output, error
