@@ -18,6 +18,8 @@ class DependencyDefinition(object):
   Attributes:
     dpkg_name (str): name of the dpkg package that provides the dependency.
     is_optional (bool): True if the dependency is optional.
+    l2tbinaries_macos_name (str): name of the l2tbinaries macos package that
+        provides the dependency.
     l2tbinaries_name (str): name of the l2tbinaries package that provides
         the dependency.
     maximum_version (str): maximum supported version.
@@ -38,6 +40,7 @@ class DependencyDefinition(object):
     super(DependencyDefinition, self).__init__()
     self.dpkg_name = None
     self.is_optional = False
+    self.l2tbinaries_macos_name = None
     self.l2tbinaries_name = None
     self.maximum_version = None
     self.minimum_version = None
@@ -54,6 +57,7 @@ class DependencyDefinitionReader(object):
   _VALUE_NAMES = frozenset([
       'dpkg_name',
       'is_optional',
+      'l2tbinaries_macos_name',
       'l2tbinaries_name',
       'maximum_version',
       'minimum_version',
@@ -413,10 +417,12 @@ class DependencyHelper(object):
 
     return sorted(requires)
 
-  def GetL2TBinaries(self, python_version=2):
+  def GetL2TBinaries(self, platform='win32', python_version=2):
     """Retrieves the l2tbinaries requirements.
 
     Args:
+      platform (Optional[str]): identifier of the l2tbinaries target platform,
+          which currently are: 'macos', 'win32' or 'win64'.
       python_version (Optional[int]): Python major version.
 
     Returns:
@@ -428,7 +434,12 @@ class DependencyHelper(object):
       if dependency.python2_only and python_version != 2:
         continue
 
-      module_name = dependency.l2tbinaries_name or dependency.name
+      if platform == 'macos' and dependency.l2tbinaries_macos_name:
+        module_name = dependency.l2tbinaries_macos_name
+      elif dependency.l2tbinaries_name:
+        module_name = dependency.l2tbinaries_name
+      else:
+        module_name = dependency.name
 
       requires.append(module_name)
 
