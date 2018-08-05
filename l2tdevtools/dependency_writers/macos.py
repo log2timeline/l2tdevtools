@@ -17,7 +17,8 @@ class MacOSInstallScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes an install.sh file."""
-    dependencies = self._dependency_helper.GetL2TBinaries(python_version=2)
+    dependencies = self._dependency_helper.GetL2TBinaries(
+        platform='macos', python_version=2)
 
     template_mappings = {
         'dependencies': ' '.join(dependencies),
@@ -42,7 +43,8 @@ class MacOSMakeDistScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a make_dist.sh file."""
-    dependencies = self._dependency_helper.GetL2TBinaries(python_version=2)
+    dependencies = self._dependency_helper.GetL2TBinaries(
+        platform='macos', python_version=2)
 
     template_mappings = {
         'dependencies': ' '.join(dependencies),
@@ -67,7 +69,8 @@ class MacOSUninstallScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes an uninstall.sh file."""
-    dependencies = self._dependency_helper.GetL2TBinaries(python_version=2)
+    dependencies = self._dependency_helper.GetL2TBinaries(
+        platform='macos', python_version=2)
 
     template_mappings = {
         'dependencies': ' '.join(dependencies),
