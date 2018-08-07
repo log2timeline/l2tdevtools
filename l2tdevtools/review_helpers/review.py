@@ -56,6 +56,7 @@ class ReviewHelper(object):
     self._git_helper = None
     self._git_repo_url = None
     self._github_helper = None
+    self._github_organization = None
     self._github_origin = github_origin
     self._fork_feature_branch = None
     self._fork_username = None
@@ -262,8 +263,8 @@ class ReviewHelper(object):
       result = False
 
     pull_request_url = (
-        'https://github.com/log2timeline/{0:s}/pull/{1:d}').format(
-            self._project_name, pull_request_number)
+        'https://github.com/{0:s}/{1:s}/pull/{2:d}').format(
+            self._github_organization, self._project_name, pull_request_number)
     print('Pull request created: {0:s}'.format(pull_request_url))
     print('Review assigned to: {0:s}'.format(reviewer))
     print('')
@@ -287,20 +288,20 @@ class ReviewHelper(object):
       return False
 
     if self._project_name in ('artifacts', 'artifacts-kb'):
-      github_organization = 'ForensicArtifacts'
+      self._github_organization = 'ForensicArtifacts'
     elif self._project_name in (
         'dtfabric', 'dtformats', 'esedb-kb', 'winevt-kb', 'winreg-kb'):
-      github_organization = 'libyal'
+      self._github_organization = 'libyal'
     else:
-      github_organization = 'log2timeline'
+      self._github_organization = 'log2timeline'
 
     self._git_repo_url = 'https://github.com/{0:s}/{1:s}.git'.format(
-        github_organization, self._project_name)
+        self._github_organization, self._project_name)
 
     self._git_helper = git.GitHelper(self._git_repo_url)
 
     self._github_helper = github.GitHubHelper(
-        github_organization, self._project_name)
+        self._github_organization, self._project_name)
 
     return True
 
