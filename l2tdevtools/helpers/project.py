@@ -248,7 +248,7 @@ class ProjectHelper(cli.CLIHelper):
 
     Returns:
       bool: True if the dpkg changelog file was updated or if the dpkg
-          changelog file does not exists.
+          changelog file does not exist.
     """
     project_definition = self.ReadDefinitionFile()
 
