@@ -60,6 +60,7 @@ class ReviewHelper(object):
     self._github_origin = github_origin
     self._fork_feature_branch = None
     self._fork_username = None
+    self._maintainer = None
     self._merge_author = None
     self._merge_description = None
     self._no_browser = no_browser
@@ -287,13 +288,19 @@ class ReviewHelper(object):
           self._command.title()))  # yapf: disable
       return False
 
-    if self._project_name in ('artifacts', 'artifacts-kb'):
-      self._github_organization = 'ForensicArtifacts'
-    elif self._project_name in (
-        'dtfabric', 'dtformats', 'esedb-kb', 'winevt-kb', 'winreg-kb'):
-      self._github_organization = 'libyal'
-    else:
-      self._github_organization = 'log2timeline'
+    project_definition = self._project_helper.ReadDefinitionFile()
+
+    self._github_organization = None
+    if project_definition.homepage_url.startswith('https://github.com/'):
+      self._github_organization = project_definition.homepage_url[
+          len('https://github.com/'):]
+
+      self._github_organization, _, _ = self._github_organization.partition('/')
+
+    if not self._github_organization:
+      print('{0:s} aborted - unable to determine GitHub organization.'.format(
+          self._command.title()))
+      return False
 
     self._git_repo_url = 'https://github.com/{0:s}/{1:s}.git'.format(
         self._github_organization, self._project_name)
