@@ -212,7 +212,7 @@ class GitHelper(cli.CLIHelper):
 
     # Expecting 6 lines of output where the 5th line contains
     # the commit message.
-    output_lines = output.split(b'\n')
+    output_lines = output.split('\n')
     if len(output_lines) != 6:
       return None
 
