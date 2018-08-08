@@ -188,19 +188,19 @@ class ProjectHelper(cli.CLIHelper):
     return None
 
   def ReadDefinitionFile(self):
-   """Reads the project definitions file (project_name.ini).
+    """Reads the project definitions file (project_name.ini).
 
-   Returns:
-     ProjectDefinition: project definition.
-   """
-   if self._project_definition is None:
-     project_file = '{0:s}.ini'.format(self.project_name)
+    Returns:
+      ProjectDefinition: project definition.
+    """
+    if self._project_definition is None:
+      project_file = '{0:s}.ini'.format(self.project_name)
 
-     project_reader = project_config.ProjectDefinitionReader()
-     with open(project_file, 'rb') as file_object:
-       self._project_definition = project_reader.Read(file_object)
+      project_reader = project_config.ProjectDefinitionReader()
+      with open(project_file, 'rb') as file_object:
+        self._project_definition = project_reader.Read(file_object)
 
-   return self._project_definition
+    return self._project_definition
 
   def UpdateAuthorsFile(self):
     """Updates the AUTHORS file.
