@@ -104,7 +104,7 @@ class GitHelper(cli.CLIHelper):
       return False
 
     # Check if 'git status -s' yielded any output.
-    for line in output.split(b'\n'):
+    for line in output.split('\n'):
       if line:
         return True
     return False
