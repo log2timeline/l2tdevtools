@@ -8,6 +8,7 @@ import os
 import random
 import time
 
+from l2tdevtools import project_config
 from l2tdevtools.review_helpers import cli
 
 
@@ -84,6 +85,7 @@ class ProjectHelper(cli.CLIHelper):
       ValueError: if the project name is not supported.
     """
     super(ProjectHelper, self).__init__()
+    self._project_definition = None
     self.project_name = self._GetProjectName(project_path)
 
   @property
@@ -185,47 +187,20 @@ class ProjectHelper(cli.CLIHelper):
 
     return None
 
-  def UpdateDpkgChangelogFile(self):
-    """Updates the dpkg changelog file.
+  def ReadDefinitionFile(self):
+    """Reads the project definitions file (project_name.ini).
 
     Returns:
-      bool: True if the dpkg changelog file was updated or if the dpkg
-          changelog file does not exists.
+      ProjectDefinition: project definition.
     """
-    project_version = self.GetVersion()
+    if self._project_definition is None:
+      project_file = '{0:s}.ini'.format(self.project_name)
 
-    dpkg_changelog_path = os.path.join('config', 'dpkg', 'changelog')
-    if not os.path.exists(dpkg_changelog_path):
-      return True
+      project_reader = project_config.ProjectDefinitionReader()
+      with open(project_file, 'rb') as file_object:
+        self._project_definition = project_reader.Read(file_object)
 
-    dpkg_maintainter = 'Log2Timeline <log2timeline-dev@googlegroups.com>'
-    dpkg_date = time.strftime('%a, %d %b %Y %H:%M:%S %z')
-    dpkg_changelog_content = '\n'.join([
-        '{0:s} ({1:s}-1) unstable; urgency=low'.format(
-            self.project_name, project_version),
-        '',
-        '  * Auto-generated',
-        '',
-        ' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)]) #yapf: disable
-
-    try:
-      dpkg_changelog_content = dpkg_changelog_content.encode('utf-8')
-    except UnicodeEncodeError as exception:
-      logging.error(
-          'Unable to write dpkg changelog file with error: {0!s}'.format(
-              exception))
-      return False
-
-    try:
-      with open(dpkg_changelog_path, 'wb') as file_object:
-        file_object.write(dpkg_changelog_content)
-    except IOError as exception:
-      logging.error(
-          'Unable to write dpkg changelog file with error: {0!s}'.format(
-              exception))
-      return False
-
-    return True
+    return self._project_definition
 
   def UpdateAuthorsFile(self):
     """Updates the AUTHORS file.
@@ -265,6 +240,53 @@ class ProjectHelper(cli.CLIHelper):
 
     with open('AUTHORS', 'wb') as file_object:
       file_object.write(file_content)
+
+    return True
+
+  def UpdateDpkgChangelogFile(self):
+    """Updates the dpkg changelog file.
+
+    Returns:
+      bool: True if the dpkg changelog file was updated or if the dpkg
+          changelog file does not exist.
+    """
+    project_definition = self.ReadDefinitionFile()
+
+    project_version = self.GetVersion()
+
+    dpkg_changelog_path = os.path.join('config', 'dpkg', 'changelog')
+    if not os.path.exists(dpkg_changelog_path):
+      return True
+
+    dpkg_maintainter = project_definition.maintainer
+    if not dpkg_maintainter:
+      dpkg_maintainter = 'Log2Timeline <log2timeline-dev@googlegroups.com>'
+
+    dpkg_date = time.strftime('%a, %d %b %Y %H:%M:%S %z')
+    dpkg_changelog_content = '\n'.join([
+        '{0:s} ({1:s}-1) unstable; urgency=low'.format(
+            self.project_name, project_version),
+        '',
+        '  * Auto-generated',
+        '',
+        ' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)]) #yapf: disable
+
+    try:
+      dpkg_changelog_content = dpkg_changelog_content.encode('utf-8')
+    except UnicodeEncodeError as exception:
+      logging.error(
+          'Unable to write dpkg changelog file with error: {0!s}'.format(
+              exception))
+      return False
+
+    try:
+      with open(dpkg_changelog_path, 'wb') as file_object:
+        file_object.write(dpkg_changelog_content)
+    except IOError as exception:
+      logging.error(
+          'Unable to write dpkg changelog file with error: {0!s}'.format(
+              exception))
+      return False
 
     return True
 

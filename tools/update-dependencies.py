@@ -9,7 +9,6 @@ import os
 import sys
 
 from l2tdevtools import dependencies
-from l2tdevtools import project_config
 from l2tdevtools.helpers import project
 
 from l2tdevtools.dependency_writers import appveyor_yml
@@ -38,12 +37,7 @@ def Main():
 
   project_path = os.getcwd()
   projects_helper = project.ProjectHelper(project_path)
-
-  project_file = '{0:s}.ini'.format(projects_helper.project_name)
-
-  project_reader = project_config.ProjectDefinitionReader()
-  with open(project_file, 'rb') as file_object:
-    project_definition = project_reader.Read(file_object)
+  project_definition = projects_helper.ReadDefinitionFile()
 
   helper = dependencies.DependencyHelper()
 
