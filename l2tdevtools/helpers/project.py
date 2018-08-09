@@ -57,10 +57,9 @@ class ProjectHelper(cli.CLIHelper):
       'plaso': frozenset([
           'joachimmetz',
           'Onager',
-          'kiddinn',
           'rgayon']),
       'PlasoScaffolder': frozenset([
-          'kiddinn',
+          'joachimmetz',
           'Onager'])}
 
   _REVIEWERS_DEFAULT = frozenset([
