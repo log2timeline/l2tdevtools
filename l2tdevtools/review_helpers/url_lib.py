@@ -39,7 +39,7 @@ class URLLibHelper(object):
         request.add_data(post_data)
       else:
         # add_data has been removed from the urllib API.
-        request.data = post_data
+        request.data = post_data.encode('utf-8')
 
     try:
       url_object = urllib_request.urlopen(request)
