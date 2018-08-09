@@ -80,19 +80,20 @@ class ReviewHelper(object):
     Returns:
       bool: True if the state of the local git repository is sane.
     """
-    if self._command in (
-        'close', 'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test'):
-      if not self._git_helper.CheckHasProjectUpstream():
-        print('{0:s} aborted - missing project upstream.'.format(
-            self._command.title()))
-        print('Run: git remote add upstream {0:s}'.format(self._git_repo_url))
-        return False
+    if self._github_organization in ('ForensicArtifacts', 'log2timeline'):
+      if self._command in (
+          'close', 'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test'):
+        if not self._git_helper.CheckHasProjectUpstream():
+          print('{0:s} aborted - missing project upstream.'.format(
+              self._command.title()))
+          print('Run: git remote add upstream {0:s}'.format(self._git_repo_url))
+          return False
 
-    elif self._command == 'merge':
-      if not self._git_helper.CheckHasProjectOrigin():
-        print('{0:s} aborted - missing project origin.'.format(
-            self._command.title()))
-        return False
+      elif self._command == 'merge':
+        if not self._git_helper.CheckHasProjectOrigin():
+          print('{0:s} aborted - missing project origin.'.format(
+              self._command.title()))
+          return False
 
     if self._command not in (
         'lint', 'lint-test', 'lint_test', 'test', 'update-version',
@@ -103,22 +104,23 @@ class ReviewHelper(object):
         print('Run: git commit')
         return False
 
-    self._active_branch = self._git_helper.GetActiveBranch()
-    if self._command in ('create-pr', 'create_pr'):
-      if self._active_branch == 'master':
-        print('{0:s} aborted - active branch is master.'.format(
-            self._command.title()))
-        return False
+    if self._github_organization in ('ForensicArtifacts', 'log2timeline'):
+      self._active_branch = self._git_helper.GetActiveBranch()
+      if self._command in ('create-pr', 'create_pr'):
+        if self._active_branch == 'master':
+          print('{0:s} aborted - active branch is master.'.format(
+              self._command.title()))
+          return False
 
-    elif self._command == 'close':
-      if self._feature_branch == 'master':
-        print('{0:s} aborted - feature branch cannot be master.'.format(
-            self._command.title()))
-        return False
+      elif self._command == 'close':
+        if self._feature_branch == 'master':
+          print('{0:s} aborted - feature branch cannot be master.'.format(
+              self._command.title()))
+          return False
 
-      if self._active_branch != 'master':
-        self._git_helper.SwitchToMasterBranch()
-        self._active_branch = 'master'
+        if self._active_branch != 'master':
+          self._git_helper.SwitchToMasterBranch()
+          self._active_branch = 'master'
 
     return True
   # yapf: enable
@@ -130,40 +132,42 @@ class ReviewHelper(object):
     Returns:
       bool: True if the state of the remote git repository is sane.
     """
-    if self._command == 'close':
-      if not self._git_helper.SynchronizeWithUpstream():
-        print((
-            '{0:s} aborted - unable to synchronize with '
-            'upstream/master.').format(self._command.title()))
-        return False
-
-    elif self._command in ('create-pr', 'create_pr'):
-      if not self._git_helper.CheckSynchronizedWithUpstream():
+    if self._github_organization in ('ForensicArtifacts', 'log2timeline'):
+      if self._command == 'close':
         if not self._git_helper.SynchronizeWithUpstream():
           print((
               '{0:s} aborted - unable to synchronize with '
               'upstream/master.').format(self._command.title()))
           return False
 
-        force_push = True
-      else:
-        force_push = False
+      elif self._command in ('create-pr', 'create_pr'):
+        if not self._git_helper.CheckSynchronizedWithUpstream():
+          if not self._git_helper.SynchronizeWithUpstream():
+            print((
+                '{0:s} aborted - unable to synchronize with '
+                'upstream/master.').format(self._command.title()))
+            return False
 
-      if not self._git_helper.PushToOrigin(
-          self._active_branch, force=force_push):
-        print('{0:s} aborted - unable to push updates to origin/{1:s}.'.format(
-            self._command.title(), self._active_branch))
-        return False
+          force_push = True
+        else:
+          force_push = False
 
-    elif self._command in ('lint', 'lint-test', 'lint_test'):
-      self._git_helper.CheckSynchronizedWithUpstream()
+        if not self._git_helper.PushToOrigin(
+            self._active_branch, force=force_push):
+          print((
+              '{0:s} aborted - unable to push updates to origin/{1:s}.').format(
+                  self._command.title(), self._active_branch))
+          return False
 
-    elif self._command == 'merge':
-      if not self._git_helper.SynchronizeWithOrigin():
-        print(
-            ('{0:s} aborted - unable to synchronize with '
-             'origin/master.').format(self._command.title()))
-        return False
+      elif self._command in ('lint', 'lint-test', 'lint_test'):
+        self._git_helper.CheckSynchronizedWithUpstream()
+
+      elif self._command == 'merge':
+        if not self._git_helper.SynchronizeWithOrigin():
+          print((
+              '{0:s} aborted - unable to synchronize with '
+              'origin/master.').format(self._command.title()))
+          return False
 
     return True
   # yapf: enable
