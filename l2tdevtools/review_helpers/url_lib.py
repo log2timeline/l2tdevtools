@@ -35,7 +35,11 @@ class URLLibHelper(object):
 
     if post_data is not None:
       # This will change the request into a POST.
-      request.add_data(post_data)
+      if hasattr(request, 'add_data'):
+        request.add_data(post_data)
+      else:
+        # add_data has been removed from the urllib API.
+        request.data = post_data
 
     try:
       url_object = urllib_request.urlopen(request)
