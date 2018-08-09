@@ -88,7 +88,7 @@ class GitHubHelper(object):
     response_data = self._url_lib_helper.Request(
         github_url, post_data=post_data)
 
-    if type(response_data) == bytes:
+    if isinstance(response_data, bytes):
       response_data = response_data.decode('utf-8')
 
     response_data = json.loads(response_data)
