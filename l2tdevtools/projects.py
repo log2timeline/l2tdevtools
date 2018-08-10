@@ -37,6 +37,7 @@ class ProjectDefinition(object):
     dpkg_name (str): dpkg package name.
     dpkg_source_name (str): dpkg source package name.
     dpkg_template_control (str): name of the dpkg control template file.
+    dpkg_template_install (list[str]): names of the dpkg install template files.
     dpkg_template_install_python2 (list[str]): names of the dpkg Python 2
         install template files.
     dpkg_template_install_python3 (list[str]): names of the dpkg Python 3
@@ -81,6 +82,7 @@ class ProjectDefinition(object):
     self.dpkg_name = None
     self.dpkg_source_name = None
     self.dpkg_template_control = None
+    self.dpkg_template_install = None
     self.dpkg_template_install_python2 = None
     self.dpkg_template_install_python3 = None
     self.dpkg_template_rules = None
@@ -258,6 +260,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'dpkg_source_name')
       project_definition.dpkg_template_control = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_control')
+      project_definition.dpkg_template_install = self._GetConfigValue(
+          config_parser, section_name, 'dpkg_template_install')
       project_definition.dpkg_template_install_python2 = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_install_python2')
       project_definition.dpkg_template_install_python3 = self._GetConfigValue(
@@ -344,6 +348,14 @@ class ProjectDefinitionReader(object):
           project_definition.dpkg_dependencies, py2to3.STRING_TYPES):
         project_definition.dpkg_dependencies = (
             project_definition.dpkg_dependencies.split(','))
+
+      if project_definition.dpkg_template_install is None:
+        project_definition.dpkg_template_install = []
+      elif isinstance(
+          project_definition.dpkg_template_install,
+          py2to3.STRING_TYPES):
+        project_definition.dpkg_template_install = (
+            project_definition.dpkg_template_install.split(','))
 
       if project_definition.dpkg_template_install_python2 is None:
         project_definition.dpkg_template_install_python2 = []

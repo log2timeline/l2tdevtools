@@ -607,94 +607,25 @@ class DPKGBuildFilesGenerator(object):
     package_name = self._GetPackageName()
 
     # TODO: add support for configure_make
+    if self._project_definition.build_system == 'configure_make':
+      template_files = (
+          self._project_definition.dpkg_template_install or [])
 
-    if self._project_definition.build_system == 'setup_py':
-      python2_package_name, python3_package_name = self._GetPythonPackageNames()
+      for template_file in template_files:
+        output_filename = os.path.join(dpkg_path, template_file)
+        self._GenerateFile(template_file, '', {}, output_filename)
 
+    elif self._project_definition.build_system == 'setup_py':
       # Python modules names contain "_" instead of "-"
       package_name = package_name.replace('-', '_')
 
       template_values = {'package_name': package_name}
 
       if not self._project_definition.IsPython3Only():
-        template_files = (
-            self._project_definition.dpkg_template_install_python2 or [None])
-
-        for template_file in template_files:
-          if template_file:
-            output_filename = template_file
-            template_data = None
-          else:
-            output_filename = '{0:s}.install'.format(python2_package_name)
-            if not self._build_configuration:
-              template_data = self._INSTALL_TEMPLATE_PYTHON2
-            else:
-              template_data = []
-
-              if self._build_configuration.has_module_source_files:
-                template_data.append('usr/lib/python2*/dist-packages/*.py')
-              if self._build_configuration.has_module_shared_object:
-                template_data.append('usr/lib/python2*/dist-packages/*.so')
-
-              module_directories = self._build_configuration.module_directories
-              template_data.extend([
-                  'usr/lib/python2*/dist-packages/{0:s}'.format(
-                      module_directory)
-                  for module_directory in module_directories])
-
-              if self._build_configuration.has_egg_info_directory:
-                template_data.append(
-                    'usr/lib/python2*/dist-packages/*.egg-info/*')
-
-              elif self._build_configuration.has_egg_info_file:
-                template_data.append(
-                    'usr/lib/python2*/dist-packages/*.egg-info')
-
-              template_data = '\n'.join(template_data)
-
-          output_filename = os.path.join(dpkg_path, output_filename)
-          self._GenerateFile(
-              template_file, template_data, template_values, output_filename)
+        self._GeneratePython2ModuleInstallFile(dpkg_path, template_values)
 
       if not self._project_definition.IsPython2Only():
-        template_files = (
-            self._project_definition.dpkg_template_install_python3 or [None])
-
-        for template_file in template_files:
-          if template_file:
-            output_filename = template_file
-            template_data = None
-          else:
-            output_filename = '{0:s}.install'.format(python3_package_name)
-            if not self._build_configuration:
-              template_data = self._INSTALL_TEMPLATE_PYTHON3
-            else:
-              template_data = []
-
-              if self._build_configuration.has_module_source_files:
-                template_data.append('usr/lib/python3*/dist-packages/*.py')
-              if self._build_configuration.has_module_shared_object:
-                template_data.append('usr/lib/python3*/dist-packages/*.so')
-
-              module_directories = self._build_configuration.module_directories
-              template_data.extend([
-                  'usr/lib/python3*/dist-packages/{0:s}'.format(
-                      module_directory)
-                  for module_directory in module_directories])
-
-              if self._build_configuration.has_egg_info_directory:
-                template_data.append(
-                    'usr/lib/python3*/dist-packages/*.egg-info/*')
-
-              elif self._build_configuration.has_egg_info_file:
-                template_data.append(
-                    'usr/lib/python3*/dist-packages/*.egg-info')
-
-              template_data = '\n'.join(template_data)
-
-          output_filename = os.path.join(dpkg_path, output_filename)
-          self._GenerateFile(
-              template_file, template_data, template_values, output_filename)
+        self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
 
       if os.path.isdir('scripts') or os.path.isdir('tools'):
         output_filename = '{0:s}-tools.install'.format(package_name)
@@ -704,6 +635,102 @@ class DPKGBuildFilesGenerator(object):
             output_filename)
 
       # TODO: add support for data install files.
+
+  def _GeneratePython2ModuleInstallFile(self, dpkg_path, template_values):
+    """Generates the dpkg build Python 2 module .install file.
+
+    Args:
+      dpkg_path (str): path to the dpkg files.
+      template_values (dict[str, str]): template values or None if not defined.
+    """
+    python2_package_name, _ = self._GetPythonPackageNames()
+
+    template_files = (
+        self._project_definition.dpkg_template_install_python2 or [None])
+
+    for template_file in template_files:
+      if template_file:
+        output_filename = template_file
+        template_data = None
+      else:
+        output_filename = '{0:s}.install'.format(python2_package_name)
+        if not self._build_configuration:
+          template_data = self._INSTALL_TEMPLATE_PYTHON2
+        else:
+          template_data = []
+
+          if self._build_configuration.has_module_source_files:
+            template_data.append('usr/lib/python2*/dist-packages/*.py')
+          if self._build_configuration.has_module_shared_object:
+            template_data.append('usr/lib/python2*/dist-packages/*.so')
+
+          module_directories = self._build_configuration.module_directories
+          template_data.extend([
+              'usr/lib/python2*/dist-packages/{0:s}'.format(
+                  module_directory)
+              for module_directory in module_directories])
+
+          if self._build_configuration.has_egg_info_directory:
+            template_data.append(
+                'usr/lib/python2*/dist-packages/*.egg-info/*')
+
+          elif self._build_configuration.has_egg_info_file:
+            template_data.append(
+                'usr/lib/python2*/dist-packages/*.egg-info')
+
+          template_data = '\n'.join(template_data)
+
+      output_filename = os.path.join(dpkg_path, output_filename)
+      self._GenerateFile(
+          template_file, template_data, template_values, output_filename)
+
+  def _GeneratePython3ModuleInstallFile(self, dpkg_path, template_values):
+    """Generates the dpkg build Python 3 module .install file.
+
+    Args:
+      dpkg_path (str): path to the dpkg files.
+      template_values (dict[str, str]): template values or None if not defined.
+    """
+    _, python3_package_name = self._GetPythonPackageNames()
+
+    template_files = (
+        self._project_definition.dpkg_template_install_python3 or [None])
+
+    for template_file in template_files:
+      if template_file:
+        output_filename = template_file
+        template_data = None
+      else:
+        output_filename = '{0:s}.install'.format(python3_package_name)
+        if not self._build_configuration:
+          template_data = self._INSTALL_TEMPLATE_PYTHON3
+        else:
+          template_data = []
+
+          if self._build_configuration.has_module_source_files:
+            template_data.append('usr/lib/python3*/dist-packages/*.py')
+          if self._build_configuration.has_module_shared_object:
+            template_data.append('usr/lib/python3*/dist-packages/*.so')
+
+          module_directories = self._build_configuration.module_directories
+          template_data.extend([
+              'usr/lib/python3*/dist-packages/{0:s}'.format(
+                  module_directory)
+              for module_directory in module_directories])
+
+          if self._build_configuration.has_egg_info_directory:
+            template_data.append(
+                'usr/lib/python3*/dist-packages/*.egg-info/*')
+
+          elif self._build_configuration.has_egg_info_file:
+            template_data.append(
+                'usr/lib/python3*/dist-packages/*.egg-info')
+
+          template_data = '\n'.join(template_data)
+
+      output_filename = os.path.join(dpkg_path, output_filename)
+      self._GenerateFile(
+          template_file, template_data, template_values, output_filename)
 
   def _GenerateRulesFile(self, dpkg_path):
     """Generates the dpkg build rules file.

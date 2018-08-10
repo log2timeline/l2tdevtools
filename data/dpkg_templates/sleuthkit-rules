@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment for debhelper verbose output.
+# export DH_VERBOSE=1
+
+%:
+	dh $@ --with autoreconf
+
+.PHONY: override_dh_auto_configure
+override_dh_auto_configure:
+	dh_auto_configure -- --disable-java --without-afflib --without-libewf --without-libpq --without-libvhdi --without-libvmdk CFLAGS="-g"
+
+.PHONY: override_dh_install
+override_dh_install:
+	dh_install --fail-missing -X.la
+
+.PHONY: override_dh_auto_test
+override_dh_auto_test:
+
+.PHONY: override_dh_strip
+override_dh_strip:
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip -plibtsk --dbg-package=libtsk-dbg
+endif
+
