@@ -347,6 +347,15 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
           logging.error('Running: "{0:s}" failed.'.format(command))
           return False
 
+      if source_helper_object.project_name == 'idna':
+        # Fix permissions so that PKG-INFO is readable as a user.
+        command = 'chmod -R a+r ./tmp'
+        exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
+            source_directory, command), shell=True)
+        if exit_code != 0:
+          logging.error('Running: "{0:s}" failed.'.format(command))
+          return False
+
       project_identifier = source_helper_object.GetProjectIdentifier()
       if not self._BuildPKG(
           source_directory, project_identifier, project_version, pkg_filename):
