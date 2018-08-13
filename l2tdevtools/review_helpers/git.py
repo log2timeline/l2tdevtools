@@ -104,7 +104,7 @@ class GitHelper(cli.CLIHelper):
       return False
 
     # Check if 'git status -s' yielded any output.
-    for line in output.split(b'\n'):
+    for line in output.split('\n'):
       if line:
         return True
     return False
@@ -212,7 +212,7 @@ class GitHelper(cli.CLIHelper):
 
     # Expecting 6 lines of output where the 5th line contains
     # the commit message.
-    output_lines = output.split(b'\n')
+    output_lines = output.split('\n')
     if len(output_lines) != 6:
       return None
 
