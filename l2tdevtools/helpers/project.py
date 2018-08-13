@@ -197,7 +197,7 @@ class ProjectHelper(cli.CLIHelper):
       project_file = '{0:s}.ini'.format(self.project_name)
 
       project_reader = project_config.ProjectDefinitionReader()
-      with open(project_file, 'rb') as file_object:
+      with open(project_file, 'r') as file_object:
         self._project_definition = project_reader.Read(file_object)
 
     return self._project_definition

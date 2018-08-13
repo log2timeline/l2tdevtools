@@ -27,6 +27,7 @@ class DependencyDefinition(object):
     name (str): name of (the Python module that provides) the dependency.
     pypi_name (str): name of the PyPI package that provides the dependency.
     python2_only (bool): True if the dependency is only supported by Python 2.
+    python3_only (bool): True if the dependency is only supported by Python 3.
     rpm_name (str): name of the rpm package that provides the dependency.
     version_property (str): name of the version attribute or function.
   """
@@ -47,6 +48,7 @@ class DependencyDefinition(object):
     self.name = name
     self.pypi_name = None
     self.python2_only = False
+    self.python3_only = False
     self.rpm_name = None
     self.version_property = None
 
@@ -63,6 +65,7 @@ class DependencyDefinitionReader(object):
       'minimum_version',
       'pypi_name',
       'python2_only',
+      'python3_only',
       'rpm_name',
       'version_property'])
 
@@ -403,6 +406,9 @@ class DependencyHelper(object):
       if dependency.python2_only and python_version != 2:
         continue
 
+      if dependency.python3_only and python_version != 3:
+        continue
+
       module_name = dependency.dpkg_name or dependency.name
       if python_version == 3:
         module_name = module_name.replace('python', 'python3')
@@ -432,6 +438,9 @@ class DependencyHelper(object):
     for dependency in sorted(
         self.dependencies.values(), key=lambda dependency: dependency.name):
       if dependency.python2_only and python_version != 2:
+        continue
+
+      if dependency.python3_only and python_version != 3:
         continue
 
       if platform == 'macos' and dependency.l2tbinaries_macos_name:
@@ -481,6 +490,14 @@ class DependencyHelper(object):
         # http://pip.readthedocs.io/en/stable/reference/pip_install/
         #     #requirement-specifiers
         requires_string = '{0:s} ; python_version < \'3.0\''.format(
+            requires_string)
+
+      if dependency.python3_only:
+        # Also see:
+        # https://www.python.org/dev/peps/pep-0508/#environment-markers
+        # http://pip.readthedocs.io/en/stable/reference/pip_install/
+        #     #requirement-specifiers
+        requires_string = '{0:s} ; python_version > \'3.0\''.format(
             requires_string)
 
       install_requires.append(requires_string)
@@ -546,6 +563,9 @@ class DependencyHelper(object):
     for dependency in sorted(
         self.dependencies.values(), key=lambda dependency: dependency.name):
       if dependency.python2_only and python_version != 2:
+        continue
+
+      if dependency.python3_only and python_version != 3:
         continue
 
       module_name = dependency.rpm_name or dependency.name
