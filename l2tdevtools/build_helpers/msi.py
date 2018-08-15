@@ -283,9 +283,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       return False
 
     python_module_name, _, _ = source_directory.partition('-')
-    logging.info('module name: {0:s}'.format(python_module_name))
     python_module_name = 'py{0:s}'.format(python_module_name[3:])
-    logging.info('module name: {0:s}'.format(python_module_name))
     python_module_directory = os.path.join(
         source_directory, python_module_name)
     python_module_dist_directory = os.path.join(
@@ -529,7 +527,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
     else:
       python_module_name, _, _ = source_directory.partition('-')
-      logging.info('module name: {0:s}'.format(python_module_name))
       project_version = source_helper_object.GetProjectVersion()
 
       msi_filename = '{0:s}-python-{1!s}.1.{2:s}-{3:s}.msi'.format(
@@ -547,7 +544,6 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
 
         result = self._BuildSetupPy()
         if result:
-          logging.info('module name: {0:s}'.format(python_module_name))
           result = self._MoveMSI(python_module_name, build_directory)
 
         os.chdir(build_directory)
@@ -700,7 +696,6 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     # Move the msi to the build directory.
     project_name, _ = self._GetFilenameSafeProjectInformation(
         source_helper_object)
-    logging.info('project name: {0:s}'.format(project_name))
 
     filenames_glob = os.path.join(
         source_directory, 'dist', '{0:s}-*.msi'.format(project_name))
