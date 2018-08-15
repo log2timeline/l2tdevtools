@@ -283,7 +283,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       return False
 
     python_module_name, _, _ = source_directory.partition('-')
+    print('module name: {0:s}'.format(python_module_name))
     python_module_name = 'py{0:s}'.format(python_module_name[3:])
+    print('module name: {0:s}'.format(python_module_name))
     python_module_directory = os.path.join(
         source_directory, python_module_name)
     python_module_dist_directory = os.path.join(
