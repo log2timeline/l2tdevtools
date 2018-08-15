@@ -700,6 +700,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     # Move the msi to the build directory.
     project_name, _ = self._GetFilenameSafeProjectInformation(
         source_helper_object)
+    logging.info('project name: {0:s}'.format(project_name))
 
     filenames_glob = os.path.join(
         source_directory, 'dist', '{0:s}-*.msi'.format(project_name))
