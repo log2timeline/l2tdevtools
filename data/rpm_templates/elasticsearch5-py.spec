@@ -1,6 +1,6 @@
 %define name elasticsearch5-py
 %define version {version}
-%define unmangled_name elasticsearch5-py
+%define unmangled_name elasticsearch5
 %define unmangled_version {version}
 %define release 1
 
@@ -8,7 +8,7 @@ Summary: Python client for Elasticsearch
 Name: %{{name}}
 Version: %{{version}}
 Release: %{{release}}
-Source0: %{{name}}-%{{unmangled_version}}.tar.gz
+Source0: %{{unmangled_name}}-%{{unmangled_version}}.tar.gz
 License: Apache License, Version 2.0
 Group: Development/Libraries
 BuildRoot: %{{_tmppath}}/%{{name}}-%{{version}}-%{{release}}-buildroot
@@ -21,7 +21,7 @@ BuildRequires: python2-setuptools, python3-setuptools
 %description
 Python client for Elasticsearch5.
 
-%package -n python-elasticsearc5h
+%package -n python-elasticsearch5
 Summary: Python client for Elasticsearch5
 Requires: python-urllib3
 
@@ -50,13 +50,13 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-elasticsearch
-/usr/lib/python2*/site-packages/elasticsearch/
-/usr/lib/python2*/site-packages/elasticsearch*.egg-info
+%files -n python-elasticsearch5
+/usr/lib/python2*/site-packages/elasticsearch5/
+/usr/lib/python2*/site-packages/elasticsearch5*.egg-info
 
-%files -n python3-elasticsearch
-/usr/lib/python3*/site-packages/elasticsearch/
-/usr/lib/python3*/site-packages/elasticsearch*.egg-info
+%files -n python3-elasticsearch5
+/usr/lib/python3*/site-packages/elasticsearch5/
+/usr/lib/python3*/site-packages/elasticsearch5*.egg-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1
