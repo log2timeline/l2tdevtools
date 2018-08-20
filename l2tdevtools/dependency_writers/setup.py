@@ -118,9 +118,23 @@ class SetupPyWriter(interface.DependencyFileWriter):
     maintainer, _, maintainer_email = maintainer.rpartition('<')
     maintainer_email, _, _ = maintainer_email.rpartition('>')
 
-    packages_exclude = ['tests', 'tests.*', 'utils']
-    scripts_directory = None
+    if self._project_definition.status == 'experimental':
+      development_status = 'Development Status :: 2 - Pre-Alpha'
+    elif self._project_definition.status == 'alpha':
+      development_status = 'Development Status :: 3 - Alpha'
+    elif self._project_definition.status == 'beta':
+      development_status = 'Development Status :: 4 - Beta'
+    elif self._project_definition.status == 'stable':
+      development_status = 'Development Status :: 5 - Production/Stable'
+    else:
+      development_status = ''
 
+    packages_exclude = ['tests', 'tests.*', 'utils']
+
+    if os.path.isdir('docs'):
+      packages_exclude.append('docs')
+
+    scripts_directory = None
     if os.path.isdir('scripts'):
       scripts_directory = 'scripts'
     elif os.path.isdir('tools'):
@@ -137,6 +151,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
             '\'{0:s}\''.format(doc_file) for doc_file in doc_files]),
         'description_long': description_long,
         'description_short': description_short,
+        'development_status': development_status,
         'homepage_url': self._project_definition.homepage_url,
         'maintainer': maintainer.strip(),
         'maintainer_email': maintainer_email.strip(),
@@ -146,6 +161,22 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'rpm_doc_files': ' '.join(doc_files),
         'scripts_directory': scripts_directory,
     }
+
+    if self._project_definition.name in self._PROJECTS_WITH_PACKAGE_DATA:
+      if self._project_definition.name == 'dfvfs':
+        package_data_paths = ['dfvfs.lib']
+      elif self._project_definition.name == 'plaso':
+        package_data_paths = [
+            'plaso.parsers', 'plaso.parsers.olecf_plugins',
+            'plaso.parsers.winreg_plugins']
+      elif self._project_definition.name == 'winreg-kb':
+        package_data_paths = ['winregrc']
+      else:
+        package_data_paths = [self._project_definition.name]
+
+      template_mappings['package_data_paths'] = ',\n'.join([
+          '        \'{0:s}\': [\'*.yaml\']'.format(path)
+          for path in package_data_paths])
 
     file_content = []
 
@@ -173,12 +204,6 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
     if self._project_definition.name in self._PROJECTS_WITH_PACKAGE_DATA:
       template_file = 'bdist_rpm_package_data'
-      if self._project_definition.name == 'dfvfs':
-        template_mappings['package_data_path'] = 'dfvfs.lib'
-      elif self._project_definition.name == 'winreg-kb':
-        template_mappings['package_data_path'] = 'winregrc'
-      else:
-        template_mappings['package_data_path'] = self._project_definition.name
     else:
       template_file = 'bdist_rpm'
 
