@@ -21,6 +21,7 @@ class ProjectDefinition(object):
     name (str): name of the project.
     name_description (str): name of the project to use in descriptions.
     python2_only (bool): True if the project is only supported by Python 2.
+    status (str): development status of the projects, such as "alpha" or "beta".
   """
 
   def __init__(self):
@@ -33,6 +34,7 @@ class ProjectDefinition(object):
     self.name = None
     self.name_description = None
     self.python2_only = False
+    self.status = 'alpha'
 
 
 class ProjectDefinitionReader(object):
@@ -45,7 +47,8 @@ class ProjectDefinitionReader(object):
       'maintainer',
       'name',
       'name_description',
-      'python2_only'])
+      'python2_only',
+      'status'])
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
     """Retrieves a value from the config parser.

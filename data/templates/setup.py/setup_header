@@ -1,5 +1,19 @@
 
 
+if version_tuple[0] == 2:
+  encoding = sys.stdin.encoding  # pylint: disable=invalid-name
+
+  # Note that sys.stdin.encoding can be None.
+  if not encoding:
+    encoding = locale.getpreferredencoding()
+
+  # Make sure the default encoding is set correctly otherwise on Python 2
+  # setup.py sdist will fail to include filenames with Unicode characters.
+  reload(sys)  # pylint: disable=undefined-variable
+
+  sys.setdefaultencoding(encoding)  # pylint: disable=no-member
+
+
 ${project_name}_description = (
 ${description_short})
 

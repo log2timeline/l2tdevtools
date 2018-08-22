@@ -1,5 +1,5 @@
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        '${development_status}',
         'Environment :: Console',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
