@@ -89,19 +89,31 @@ def _CheckPythonModule(
       map(int, _VERSION_SPLIT_REGEX.split(minimum_version)))
 
   if module_version_map < minimum_version_map:
-    print((
-        '[FAILURE]\t{0:s} version: {1!s} is too old, {2!s} or later '
-        'required.').format(module_name, module_version, minimum_version))
-    return False
+    if is_required:
+      print((
+          '[FAILURE]\t{0:s} version: {1!s} is too old, {2!s} or later '
+          'required.').format(module_name, module_version, minimum_version))
+      return False
+    else:
+      print((
+          '[OPTIONAL]\t{0:s} version: {1!s} is too old, {2!s} or later '
+          'required.').format(module_name, module_version, minimum_version))
+      return True
 
   if maximum_version:
     maximum_version_map = list(
         map(int, _VERSION_SPLIT_REGEX.split(maximum_version)))
     if module_version_map > maximum_version_map:
-      print((
-          '[FAILURE]\t{0:s} version: {1!s} is too recent, {2!s} or earlier '
-          'required.').format(module_name, module_version, maximum_version))
-      return False
+      if is_required:
+        print((
+            '[FAILURE]\t{0:s} version: {1!s} is too recent, {2!s} or earlier '
+            'required.').format(module_name, module_version, maximum_version))
+        return False
+      else:
+        print((
+            '[OPTIONAL]\t{0:s} version: {1!s} is too recent, {2!s} or earlier '
+            'required.').format(module_name, module_version, minimum_version))
+        return True
 
   if verbose_output:
     print('[OK]\t\t{0:s} version: {1!s}'.format(module_name, module_version))
