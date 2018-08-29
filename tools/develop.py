@@ -19,6 +19,7 @@ except ImportError:
 
 from pathlib import Path
 
+UTF8 = 'utf-8'
 docker_base_url = (
     'npipe:////./pipe/docker_engine' if platform.system() == 'Windows'
     else 'unix://var/run/docker.sock')
@@ -55,7 +56,7 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
         tag=docker_image_name,
         nocache=nocache,
         custom_context=True):
-      parts = line.decode('utf-8').split('\r\n')
+      parts = line.decode(UTF8).split('\r\n')
       for part in parts:
         if part == '':
           continue
@@ -90,7 +91,7 @@ def RunCommand(image_name, command, plaso_src):
       volumes={plaso_src: {'bind': '/root/plaso', 'mode': 'rw'}})
 
   for line in container.logs(stdout=True, stderr=True, stream=True):
-    print(line.decode('utf-8'), end='')
+    print(line.decode(UTF8), end='')
 
 def StartContainer(image_name, plaso_src):
   """Starts a Plaso development container.
