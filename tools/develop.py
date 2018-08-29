@@ -37,14 +37,16 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
   """
   print('Building docker image...')
 
-  root_repo_location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+  root_repo_location = os.path.dirname(os.path.dirname(
+      os.path.abspath(__file__)))
   dockerfile_location = os.path.join(str(root_repo_location),
                                      'config', 'docker', 'plaso_dev_dockerfile')
   ppa_installer_location = os.path.join(plaso_src, 'config', 'linux',
                                         'gift_ppa_install.sh')
 
   # Add the installer file and dockerfile to the same build context
-  context_tarball_location = tempfile.NamedTemporaryFile(delete=False, suffix='.tar').name
+  context_tarball_location = tempfile.NamedTemporaryFile(
+      delete=False, suffix='.tar').name
   tar = tarfile.open(context_tarball_location, 'w')
   tar.add(ppa_installer_location, arcname='gift_ppa_install.sh')
   tar.add(dockerfile_location, arcname='Dockerfile')
