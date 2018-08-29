@@ -3,6 +3,7 @@
 """Tool to build, run and manage dockerized development environments."""
 
 from __future__ import unicode_literals
+from __future__ import print_function
 
 import argparse
 import json
@@ -16,8 +17,6 @@ try:
 except ImportError:
   print('Please install docker-py and try again')
   sys.exit(1)
-
-from pathlib import Path
 
 UTF8 = 'utf-8'
 docker_base_url = (
@@ -37,7 +36,7 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
   """
   print('Building docker image...')
 
-  root_repo_location = Path(os.path.realpath(__file__)).parents[1]
+  root_repo_location = os.path.dirname(os.path.abspath(__file__))
   dockerfile_location = os.path.join(str(root_repo_location),
                                      'config', 'docker', 'plaso_dev_dockerfile')
   ppa_installer_location = os.path.join(plaso_src, 'config', 'linux',
@@ -71,8 +70,8 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
           stream = '{0:s}:{1:s}'.format(part_json['status'], part_json['id'])
         else:
           continue
-        if 'Step' in stream and not verbose:
-          print(stream)
+        if 'Step' in st'utf-8'e:
+          print(stream)'utf-8'
         elif verbose:
           print(stream.strip())
 
