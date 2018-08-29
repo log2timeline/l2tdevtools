@@ -9,6 +9,7 @@ import json
 import os
 import platform
 import sys
+import tarfile
 
 try:
   import docker
@@ -29,53 +30,65 @@ docker_base_url = (
     else 'unix://var/run/docker.sock')
 docker_build_client = docker.APIClient(base_url=docker_base_url)
 docker_client = docker.from_env()
-docker_image_name = "plaso-dev-environment"
+docker_image_name = 'plaso-dev-environment'
 
-def GetPlasoRevision(plaso_src):
-  """Gets the current head commit SHA for the repo in plaso_src.
+def BuildDevImage(plaso_src, verbose=False, nocache=False):
+  """Builds a docker image to be used for Plaso development.
 
-  Returns:
-    string: the head commit SHA
+  Args:
+    plaso_src (str): absolute location of the plaso source directory.
+    verbose (bool): print all output of docker build steps.
+    nocache (bool): don't use cached layers from a previous build.
   """
-  plaso_repo = Repo(plaso_src)
-  return str(plaso_repo.head.commit)
-
-def BuildDevImage(plaso_revision, verbose=False, nocache=False):
-  """Builds a docker image to be used for Plaso development."""
-  print("Building docker image...")
+  print('Building docker image...')
 
   root_repo_location = Path(os.path.realpath(__file__)).parents[1]
   dockerfile_location = os.path.join(str(root_repo_location),
-                                     "config", "docker")
+                                     'config', 'docker', 'plaso_dev_dockerfile')
+  ppa_installer_location = os.path.join(plaso_src, 'config', 'linux',
+      'gift_ppa_install.sh')
 
-  for line in docker_build_client.build(
-      path=dockerfile_location,
-      buildargs={"PLASO_REVISION": plaso_revision},
-      tag=docker_image_name,
-      nocache=nocache
-  ):
-    parts = line.decode('utf-8').split('\r\n')
-    for part in parts:
-      if part == "":
-        continue
-      part_json = json.loads(part)
-      if 'stream' in part_json:
-        stream = part_json['stream']
-      elif 'aux' in part_json:
-        sha_id = part_json["aux"]["ID"]
-        print('Built image with SHA: {0:s}'.format(sha_id))
-        continue
-      elif 'status' in part_json and 'id' in part_json:
-        stream = '{0:s}:{1:s}'.format(part_json['status'], part_json['id'])
-      else:
-        continue
-      if "Step" in stream and not verbose:
-        print(stream)
-      elif verbose:
-        print(stream.strip())
+  # Add the installer file and dockerfile to the same build context
+  context_tarball_location = '/tmp/plaso_dev_docker_build_context.tar'
+  tar = tarfile.open(context_tarball_location, 'w')
+  tar.add(ppa_installer_location, arcname='gift_ppa_install.sh')
+  tar.add(dockerfile_location, arcname='Dockerfile')
+  tar.close()
+
+  with open(context_tarball_location, 'rb') as f:
+    for line in docker_build_client.build(
+        fileobj=f,
+        tag=docker_image_name,
+        nocache=nocache,
+        custom_context=True):
+      parts = line.decode('utf-8').split('\r\n')
+      for part in parts:
+        if part == '':
+          continue
+        part_json = json.loads(part)
+        if 'stream' in part_json:
+          stream = part_json['stream']
+        elif 'aux' in part_json:
+          sha_id = part_json['aux']['ID']
+          print('Built image with SHA: {0:s}'.format(sha_id))
+          continue
+        elif 'status' in part_json and 'id' in part_json:
+          stream = '{0:s}:{1:s}'.format(part_json['status'], part_json['id'])
+        else:
+          continue
+        if 'Step' in stream and not verbose:
+          print(stream)
+        elif verbose:
+          print(stream.strip())
 
 def RunCommand(image_name, command, plaso_src):
-  """Runs a command inside a Plaso development container, prints the output."""
+  """Runs a command inside a Plaso development container, prints the output.
+
+  Args:
+    image_name (str): name of the docker image to start the container with.
+    command (str): command to run inside the docker container.
+    plaso_src (string): absolute location of the plaso source directory.
+  """
   print('Running command: {0:s}'.format(command))
 
   container = docker_client.containers.run(
@@ -88,10 +101,14 @@ def RunCommand(image_name, command, plaso_src):
 def StartContainer(image_name, plaso_src):
   """Starts a Plaso development container.
 
+  Args:
+    image_name (str): name of the docker image to start the container with.
+    plaso_src (string): absolute location of the plaso source directory.
+
   Returns:
     docker.containers.Container: a container object.
   """
-  print("Starting container with image {0:s}".format(image_name))
+  print('Starting container with image {0:s}'.format(image_name))
 
   columns, rows = os.get_terminal_size(0)
   container = docker_client.containers.run(
@@ -122,12 +139,11 @@ def Main():
           'show all docker output'))
 
   argument_parser.add_argument(
-      "--nocache", action='store_true', default=False, help=(
+      '--nocache', action='store_true', default=False, help=(
           'don\'t use cached build steps'))
 
   if 'PLASO_SRC' in os.environ:
     plaso_src = os.environ['PLASO_SRC']
-    plaso_revision = GetPlasoRevision(plaso_src)
   else:
     print('Please set the PLASO_SRC environment variable')
     return False
@@ -135,9 +151,16 @@ def Main():
   options = argument_parser.parse_args()
   command = options.action
 
+  # Check to ensure that docker is installed & working
+  try:
+    docker_client.info()
+  except docker.errors.APIError:
+    print('Please ensure Docker is installed and running')
+    return 1
+
   if command == 'build':
     BuildDevImage(
-        plaso_revision,
+        plaso_src,
         verbose=options.verbose,
         nocache=options.nocache)
   elif command == 'check_dependencies':
