@@ -70,8 +70,8 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
           stream = '{0:s}:{1:s}'.format(part_json['status'], part_json['id'])
         else:
           continue
-        if 'Step' in st'utf-8'e:
-          print(stream)'utf-8'
+        if 'Step' in stream and not verbose:
+          print(stream)
         elif verbose:
           print(stream.strip())
 
