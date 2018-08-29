@@ -17,12 +17,6 @@ except ImportError:
   print('Please install docker-py and try again')
   sys.exit(1)
 
-try:
-  from git import Repo
-except ImportError:
-  print('Please install GitPython and try again')
-  sys.exit(1)
-
 from pathlib import Path
 
 docker_base_url = (
@@ -46,7 +40,7 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
   dockerfile_location = os.path.join(str(root_repo_location),
                                      'config', 'docker', 'plaso_dev_dockerfile')
   ppa_installer_location = os.path.join(plaso_src, 'config', 'linux',
-      'gift_ppa_install.sh')
+                                        'gift_ppa_install.sh')
 
   # Add the installer file and dockerfile to the same build context
   context_tarball_location = '/tmp/plaso_dev_docker_build_context.tar'
