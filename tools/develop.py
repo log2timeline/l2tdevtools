@@ -106,10 +106,9 @@ def StartContainer(image_name, plaso_src):
     docker.containers.Container: a container object.
   """
   print('Starting container with image {0:s}'.format(image_name))
-  # pylint: disable=no-member
   # since this method is only called for python >= 3.0 but linter complains that
-  # os.get_terminal_size doesn't exist (in 2.7).
-  columns, rows = os.get_terminal_size(0)
+  # os.get_terminal_size doesn't exist (in 2.7), disable no-member for now
+  columns, rows = os.get_terminal_size(0) # pylint: disable=no-member
   container = docker_client.containers.run(
       image_name, detach=True, tty=True,
       # Setting COLUMNS and ROWS avoids an issue where the container's terminal
@@ -183,9 +182,9 @@ def Main():
               container.name))
     else:
       print(
-        """To start the development environment, run:
-        docker run -v {0:s}:/root/plaso -it {1:s} /bin/bash
-        """.format(plaso_src, docker_image_name))
+          """To start the development environment, run:
+          docker run -v {0:s}:/root/plaso -it {1:s} /bin/bash
+          """.format(plaso_src, docker_image_name))
   else:
     print('Command {0:s} not supported'.format(command))
     return False
