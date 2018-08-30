@@ -106,7 +106,9 @@ def StartContainer(image_name, plaso_src):
     docker.containers.Container: a container object.
   """
   print('Starting container with image {0:s}'.format(image_name))
-
+  # pylint: disable=no-member
+  # since this method is only called for python >= 3.0 but linter complains that
+  # os.get_terminal_size doesn't exist (in 2.7).
   columns, rows = os.get_terminal_size(0)
   container = docker_client.containers.run(
       image_name, detach=True, tty=True,
