@@ -14,7 +14,7 @@ from l2tdevtools.lib import errors
 from l2tdevtools.lib import netrcfile
 from l2tdevtools.review_helpers import git
 from l2tdevtools.review_helpers import github
-from l2tdevtools.review_helpers import pylint
+from l2tdevtools.review_helpers import linter
 from l2tdevtools.review_helpers import yapf
 
 
@@ -332,7 +332,7 @@ class ReviewHelper(object):
 
     if not yapf_helper.CheckUpToDateVersion():
       message = '{0:s} aborted - yapf version {1:s} or later required.'.format(
-          self._command.title(), pylint.PylintHelper.MINIMUM_VERSION)
+          self._command.title(), linter.PylintHelper.MINIMUM_VERSION)
       print(message)
       return False
 
@@ -370,10 +370,10 @@ class ReviewHelper(object):
     if self._command not in self._CODE_INSPECTION_COMMANDS:
       return True
 
-    pylint_helper = pylint.PylintHelper()
+    pylint_helper = linter.PylintHelper()
     if not pylint_helper.CheckUpToDateVersion():
       print('{0:s} aborted - pylint version {1:s} or later required.'.format(
-          self._command.title(), pylint.PylintHelper.MINIMUM_VERSION))
+          self._command.title(), linter.PylintHelper.MINIMUM_VERSION))
       return False
 
     if self._all_files:

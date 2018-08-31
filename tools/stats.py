@@ -421,7 +421,8 @@ class CodeReviewIssuesHelper(DownloadHelper):
     results_list_json = reviews_json.get('results', None)
     if results_list_json is None:
       logging.error('Missing results JSON list.')
-      return None
+      yield []
+      return
 
     for review_json in results_list_json:
       issue_number = review_json.get('issue', None)

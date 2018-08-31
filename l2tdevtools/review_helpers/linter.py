@@ -5,7 +5,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import subprocess
+
+from pylint import epylint
 
 from l2tdevtools.review_helpers import cli
 
@@ -32,12 +33,13 @@ class PylintHelper(cli.CLIHelper):
     """
     print('Running linter on changed files.')
     failed_filenames = []
+
     for filename in filenames:
       print('Checking: {0:s}'.format(filename))
 
-      command = 'pylint --rcfile="{0:s}" {1:s}'.format(rcfile, filename)
-      exit_code = subprocess.call(command, shell=True)
-      if exit_code != 0:
+      return_code = epylint.lint(filename, ['--rcfile={0:s}'.format(rcfile)])
+
+      if return_code:
         failed_filenames.append(filename)
 
     if failed_filenames:
