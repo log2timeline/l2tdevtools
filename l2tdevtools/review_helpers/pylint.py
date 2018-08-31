@@ -5,7 +5,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import subprocess
+
+from pylint import epylint
 
 from l2tdevtools.review_helpers import cli
 
@@ -34,11 +35,13 @@ class PylintHelper(cli.CLIHelper):
     failed_filenames = []
     for filename in filenames:
       print('Checking: {0:s}'.format(filename))
+      (pylint_std, pylint_stderr) = epylint.py_run(filename, return_std=True)
 
-      command = 'pylint --rcfile="{0:s}" {1:s}'.format(rcfile, filename)
-      exit_code = subprocess.call(command, shell=True)
-      if exit_code != 0:
+      if not pylint_std.getvalue().startswith('\n ------'):
         failed_filenames.append(filename)
+
+      print(pylint_std.getvalue())
+      print(pylint_stderr.getvalue())
 
     if failed_filenames:
       print('\nFiles with linter errors:\n{0:s}\n'.format(
