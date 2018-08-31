@@ -34,19 +34,21 @@ class COPRProjectManager(object):
 
   _COPR_REPO_URL = (
       'https://copr-be.cloud.fedoraproject.org/results/%40{name:s}/'
-      '{project:s}/fedora-26-i386')
+      '{project:s}/fedora-{fedora_version:s}-i386')
 
   _PRIMARY_XML_XPATH = (
       './{http://linux.duke.edu/metadata/repo}data[@type="primary"]/'
       '{http://linux.duke.edu/metadata/repo}location')
 
-  def __init__(self, name):
+  def __init__(self, name, distribution='28'):
     """Initializes a COPR manager.
 
     Args:
       name (str): name of the group.
+      distribution (Optional[str]): name of the distribution.
     """
     super(COPRProjectManager, self).__init__()
+    self._distribution = distribution
     self._download_helper = interface.DownloadHelper('')
     self._name = name
 
@@ -66,6 +68,7 @@ class COPRProjectManager(object):
     # to find primary.xml.gz or primary.sqlite.bz2
 
     kwargs = {
+        'fedora_version': self._distribution,
         'name': self._name,
         'project': project}
     copr_repo_url = self._COPR_REPO_URL.format(**kwargs)
@@ -464,18 +467,22 @@ class PyPIManager(object):
 class PackagesManager(object):
   """Manages packages across various repositories."""
 
-  def __init__(self, distribution='trusty'):
+  def __init__(self, distribution=None):
     """Initializes a packages manager.
 
     Args:
       distribution (Optional[str]): name of the distribution.
     """
+    fedora_distribution = distribution or '28'
+    ubuntu_distribution = distribution or 'trusty'
+
     super(PackagesManager, self).__init__()
-    self._copr_project_manager = COPRProjectManager('gift')
+    self._copr_project_manager = COPRProjectManager(
+        'gift', distribution=fedora_distribution)
     self._distribution = distribution
     self._github_repo_manager = GithubRepoManager()
     self._launchpad_ppa_manager = LaunchpadPPAManager(
-        'gift', distribution=distribution)
+        'gift', distribution=ubuntu_distribution)
     self._pypi_manager = PyPIManager()
 
   def _ComparePackages(self, reference_packages, packages):
@@ -865,7 +872,7 @@ def Main():
 
   argument_parser.add_argument(
       '--distribution', action='store', metavar='NAME', dest='distribution',
-      type=str, default='trusty', help='The name of the distribution.')
+      type=str, default=None, help='The name or version of the distribution.')
 
   argument_parser.add_argument(
       '--machine-type', '--machine_type', action='store', metavar='TYPE',
