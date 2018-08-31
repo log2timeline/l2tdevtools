@@ -26,6 +26,7 @@ matrix:
     osx_image: xcode9.2
     language: generic
 install:
+- pip install -r requirements.txt
 - ./config/travis/install.sh
 script:
 - ./config/travis/runtests.sh
