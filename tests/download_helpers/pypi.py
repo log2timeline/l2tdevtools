@@ -22,7 +22,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   _DOWNLOAD_URL = 'https://pypi.org/project/dfvfs'
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20180703'
+  _PROJECT_VERSION = '20180827'
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
