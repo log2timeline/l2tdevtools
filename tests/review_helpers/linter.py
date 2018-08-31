@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-from l2tdevtools.review_helpers import pylint
+from l2tdevtools.review_helpers import linter
 
 from tests import test_lib
 
@@ -16,7 +16,7 @@ class PylintHelperTest(test_lib.BaseTestCase):
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""
-    helper = pylint.PylintHelper()
+    helper = linter.PylintHelper()
     self.assertIsNotNone(helper)
 
 
