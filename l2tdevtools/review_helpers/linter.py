@@ -33,15 +33,14 @@ class PylintHelper(cli.CLIHelper):
     """
     print('Running linter on changed files.')
     failed_filenames = []
+
     for filename in filenames:
       print('Checking: {0:s}'.format(filename))
-      (pylint_std, pylint_stderr) = epylint.py_run(filename, return_std=True)
 
-      if not pylint_std.getvalue().startswith('\n ------'):
+      return_code = epylint.lint(filename, ['--rcfile={0:s}'.format(rcfile)])
+
+      if return_code:
         failed_filenames.append(filename)
-
-      print(pylint_std.getvalue())
-      print(pylint_stderr.getvalue())
 
     if failed_filenames:
       print('\nFiles with linter errors:\n{0:s}\n'.format(
