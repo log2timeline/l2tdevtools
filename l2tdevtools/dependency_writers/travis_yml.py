@@ -43,10 +43,11 @@ class TravisYMLWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('header', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name in ('l2tpreg', 'plaso'):
+    if self._project_definition.name in ('dfvfs', 'plaso'):
       template_data = self._GenerateFromTemplate('jenkins', template_mappings)
       file_content.append(template_data)
 
+    if self._project_definition.name in ('l2tpreg', 'plaso'):
       template_data = self._GenerateFromTemplate(
           'allow_failures', template_mappings)
       file_content.append(template_data)
