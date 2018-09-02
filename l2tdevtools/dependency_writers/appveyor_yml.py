@@ -112,7 +112,7 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     file_content = []
     file_content.extend(self._FILE_HEADER)
 
-    if self._project_definition.name in ('dfvfs', 'l2tpreg', 'plaso'):
+    if self._project_definition.name in ('l2tpreg', 'plaso'):
       file_content.extend(self._ALLOW_FAILURES)
 
     file_content.extend(self._INSTALL)
