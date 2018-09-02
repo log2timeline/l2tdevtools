@@ -21,10 +21,10 @@ BuildRequires: python2-setuptools, python-devel, xz-devel
 Backport of Python 3.3's 'lzma' module for XZ/LZMA
 compressed files.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
 Summary: Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 Backport of Python 3.3's 'lzma' module for XZ/LZMA
 compressed files.
 
@@ -41,7 +41,7 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE
 %{{_libdir}}/python2*/site-packages/backports/__init__.py
 %{{_libdir}}/python2*/site-packages/backports/lzma
