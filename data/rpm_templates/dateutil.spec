@@ -16,16 +16,16 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Paul Ganssle <dateutil@python.org>
 Url: https://dateutil.readthedocs.io
-BuildRequires: python2-setuptools, python3-setuptools
+BuildRequires: python2-setuptools, python2-setuptools_scm, python3-setuptools, python3-setuptools_scm
 
 %description
 The dateutil module provides powerful extensions to the
 datetime module available in the Python standard library.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
 Summary: Extensions to the standard Python datetime module
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 The dateutil module provides powerful extensions to the
 datetime module available in the Python standard library.
 
@@ -51,7 +51,7 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE
 /usr/lib/python2*/site-packages/dateutil/
 /usr/lib/python2*/site-packages/python_dateutil*.egg-info
