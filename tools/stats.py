@@ -421,52 +421,51 @@ class CodeReviewIssuesHelper(DownloadHelper):
     results_list_json = reviews_json.get('results', None)
     if results_list_json is None:
       logging.error('Missing results JSON list.')
-      return None
+    else:
+      for review_json in results_list_json:
+        issue_number = review_json.get('issue', None)
+        if issue_number is None:
+          logging.error('Missing issue number.')
+          continue
 
-    for review_json in results_list_json:
-      issue_number = review_json.get('issue', None)
-      if issue_number is None:
-        logging.error('Missing issue number.')
-        continue
+        subject = review_json.get('subject', None)
+        if subject is None:
+          logging.error('Missing subject.')
+          continue
 
-      subject = review_json.get('subject', None)
-      if subject is None:
-        logging.error('Missing subject.')
-        continue
+        subject = subject.strip()
 
-      subject = subject.strip()
+        creation_time = review_json.get('created', None)
+        owner_email = review_json.get('owner_email', None)
+        is_closed = review_json.get('closed', False)
 
-      creation_time = review_json.get('created', None)
-      owner_email = review_json.get('owner_email', None)
-      is_closed = review_json.get('closed', False)
+        reviewers_list_json = review_json.get('reviewers', None)
+        if not reviewers_list_json:
+          logging.error('Missing reviewers JSON list.')
+          continue
 
-      reviewers_list_json = review_json.get('reviewers', None)
-      if not reviewers_list_json:
-        logging.error('Missing reviewers JSON list.')
-        continue
+        reviewers = set()
+        messages_list_json = review_json.get('messages', None)
+        # Note that the messages_list_json will be absent if the CL has not
+        # yet been reviewed.
+        if messages_list_json:
+          for message_json in messages_list_json:
+            sender_value = message_json.get('sender', None)
+            if not sender_value:
+              logging.error('Missing sender JSON value.')
+              continue
 
-      reviewers = set()
-      messages_list_json = review_json.get('messages', None)
-      # Note that the messages_list_json will be absent if the CL has not
-      # yet been reviewed.
-      if messages_list_json:
-        for message_json in messages_list_json:
-          sender_value = message_json.get('sender', None)
-          if not sender_value:
-            logging.error('Missing sender JSON value.')
-            continue
+            reviewers.add(sender_value)
 
-          reviewers.add(sender_value)
+        reviewers.discard(owner_email)
 
-      reviewers.discard(owner_email)
+        yield (
+            creation_time, owner_email, issue_number, subject, reviewers,
+            is_closed)
 
-      yield (
-          creation_time, owner_email, issue_number, subject, reviewers,
-          is_closed)
+      # TODO: map email address to username
 
-    # TODO: map email address to username
-
-    # TODO: get project from: "subject" e.g. "[plaso] ..."
+      # TODO: get project from: "subject" e.g. "[plaso] ..."
 
   def ListIssues(self, usernames, output_writer):
     """Lists the code review issues of users.
