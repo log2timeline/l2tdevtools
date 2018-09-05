@@ -506,7 +506,12 @@ class PackagesManager(object):
     for name, version in iter(reference_packages.items()):
       if not packages or name not in packages:
         new_packages[name] = version
-      elif version != packages[name]:
+        continue
+
+      new_version_tuple = packages[name].split('.')
+      version_tuple = version.split('.')
+
+      if new_version_tuple > version_tuple:
         new_versions[name] = version
 
     return new_packages, new_versions
