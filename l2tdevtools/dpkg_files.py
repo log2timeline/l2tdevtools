@@ -54,7 +54,7 @@ class DPKGBuildFilesGenerator(object):
       'Section: python',
       'Priority: extra',
       'Maintainer: {upstream_maintainer:s}',
-      ('Build-Depends: debhelper (>= 7){build_depends:s}'),
+      'Build-Depends: debhelper (>= 7){build_depends:s}',
       'Standards-Version: 3.9.5',
       'X-Python-Version: >= 2.7',
       'Homepage: {upstream_homepage:s}',
@@ -71,7 +71,7 @@ class DPKGBuildFilesGenerator(object):
       'Section: python',
       'Priority: extra',
       'Maintainer: {upstream_maintainer:s}',
-      ('Build-Depends: debhelper (>= 7){build_depends:s}'),
+      'Build-Depends: debhelper (>= 7){build_depends:s}',
       'Standards-Version: 3.9.5',
       'X-Python-Version: >= 2.7',
       'X-Python3-Version: >= 3.4',
@@ -395,6 +395,7 @@ class DPKGBuildFilesGenerator(object):
     elif self._project_definition.build_system == 'setup_py':
       build_depends.append('python-all (>= 2.7~)')
       build_depends.append('python-setuptools')
+      build_depends.append('dh-python')
 
       if self._project_definition.architecture_dependent:
         build_depends.append('python-all-dev')
