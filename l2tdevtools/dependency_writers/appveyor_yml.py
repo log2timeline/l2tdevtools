@@ -16,11 +16,13 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
   _YEAR_SQLITE = '2018'
   _VERSION_SQLITE = '3230100'
 
+  # yapf: disable
+
   _UPGRADE_PIP = (
       '- cmd: "%PYTHON%\\\\python.exe -m pip install --upgrade pip"')
 
   _INSTALL_PYWIN32_WMI = (
-      '- cmd: "%PYTHON%\\\\Scripts\\\\pip.exe install pywin32 WMI"')
+      '- cmd: "%PYTHON%\\\\python.exe -m pip install pywin32 WMI"')
 
   _POST_INSTALL_PYWIN32 = (
       '- cmd: "%PYTHON%\\\\python.exe %PYTHON%\\\\Scripts\\\\'
@@ -36,16 +38,32 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
       _DOWNLOAD_L2TDEVTOOLS]
 
   _FILE_HEADER = [
-      'environment:', '  matrix:', '  - TARGET: python27',
-      '    PYTHON: "C:\\\\Python27"', '  - TARGET: python36',
-      '    PYTHON: "C:\\\\Python36"', '']
+      'environment:',
+      '  matrix:',
+      '  - TARGET: python27',
+      '    MACHINE_TYPE: "x86"',
+      '    PYTHON: "C:\\\\Python27"',
+      '  - TARGET: python27',
+      '    MACHINE_TYPE: "amd64"',
+      '    PYTHON: "C:\\\\Python27-x64"',
+      '  - TARGET: python36',
+      '    MACHINE_TYPE: "x86"',
+      '    PYTHON: "C:\\\\Python36"',
+      '  - TARGET: python36',
+      '    MACHINE_TYPE: "amd64"',
+      '    PYTHON: "C:\\\\Python36-x64"',
+      '']
 
-  _ALLOW_FAILURES = ['matrix:', '  allow_failures:', '  - TARGET: python36', '']
+  _ALLOW_FAILURES = [
+      'matrix:',
+      '  allow_failures:',
+      '  - TARGET: python36',
+      '']
 
   _INSTALL = [
-      'install:', (
-          '- cmd: \'"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\'
-          'SetEnv.cmd" /x86 /release\'')]
+      'install:',
+      ('- cmd: \'"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\'
+       'SetEnv.cmd" /x86 /release\'')]
 
   _SET_TLS_VERSION = (
       '- ps: "[System.Net.ServicePointManager]::SecurityProtocol = '
@@ -75,20 +93,26 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
       '    mkdir dependencies &&',
       '    set PYTHONPATH=..\\l2tdevtools &&',
       ('    "%PYTHON%\\\\python.exe" ..\\l2tdevtools\\tools\\update.py '
-       '--download-directory dependencies --machine-type x86 '
+       '--download-directory dependencies --machine-type %MACHINE_TYPE% '
        '--msi-targetdir "%PYTHON%" --track dev {1:s} )')])
 
   _FILE_FOOTER = [
-      '', 'build: off', '', 'test_script:',
-      '- "%PYTHON%\\\\python.exe run_tests.py"', ''
+      '',
+      'build: off',
+      '',
+      'test_script:',
+      '- "%PYTHON%\\\\python.exe run_tests.py"',
+      ''
   ]
+
+  # yapf: enable
 
   def Write(self):
     """Writes an appveyor.yml file."""
     file_content = []
     file_content.extend(self._FILE_HEADER)
 
-    if self._project_definition.name in ('dfvfs', 'l2tpreg', 'plaso'):
+    if self._project_definition.name in ('l2tpreg', 'plaso'):
       file_content.extend(self._ALLOW_FAILURES)
 
     file_content.extend(self._INSTALL)
