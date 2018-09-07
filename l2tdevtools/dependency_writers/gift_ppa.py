@@ -88,18 +88,27 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
       else:
         file_content.append('                      {0:s}'.format(dependency))
 
-      if dependency.startswith('lib') and dependency.endswith('-python'):
-        dependency, _, _ = dependency.partition('-')
-        libyal_dependencies.append(dependency)
+      if python_version_string == 'PYTHON2':
+        if dependency.startswith('lib') and dependency.endswith('-python'):
+          dependency, _, _ = dependency.partition('-')
+          libyal_dependencies.append(dependency)
+      else:
+        if dependency.startswith('lib') and dependency.endswith('-python3'):
+          dependency, _, _ = dependency.partition('-')
+          libyal_dependencies.append(dependency)
 
     file_content.extend(self._ADDITIONAL_DEPENDENCIES)
 
     debug_dependencies = []
     for index, dependency in enumerate(libyal_dependencies):
       debug_dependencies.append('{0:s}-dbg'.format(dependency))
-      debug_dependencies.append('{0:s}-python-dbg'.format(dependency))
+      if python_version_string == 'PYTHON2':
+        debug_dependencies.append('{0:s}-python-dbg'.format(dependency))
+      else:
+        debug_dependencies.append('{0:s}-python3-dbg'.format(dependency))
 
-    if self._project_definition.name == 'plaso':
+    if (python_version_string == 'PYTHON2' and
+        self._project_definition.name == 'plaso'):
       debug_dependencies.append('python-guppy')
 
     if debug_dependencies:
