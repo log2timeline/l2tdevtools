@@ -157,18 +157,18 @@ class GIFTPPAInstallScriptPY2Writer(GIFTPPAInstallScriptWriter):
 
 
 class GIFTPPAInstallScriptPY3Writer(GIFTPPAInstallScriptWriter):
-    """GIFT PPA installation script file writer for Python 3."""
+  """GIFT PPA installation script file writer for Python 3."""
 
-    PATH = os.path.join('config', 'linux', 'gift_ppa_install_py3.sh')
+  PATH = os.path.join('config', 'linux', 'gift_ppa_install_py3.sh')
 
-    _FILE_FOOTER = [
+  _FILE_FOOTER = [
       '',
       'sudo add-apt-repository ppa:gift/dev -y',
       'sudo apt-get update -q',
       'sudo apt-get install -y ${{PYTHON3_DEPENDENCIES}}']  # yapf: disable
 
-    def Write(self):
-      """Writes a gift_ppa_install.sh file."""
-      python2_dependencies = self._dependency_helper.GetDPKGDepends(
-          exclude_version=True, python_version=3)
-      self._Write(python2_dependencies, python_version_string='PYTHON3')
+  def Write(self):
+    """Writes a gift_ppa_install.sh file."""
+    python2_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=3)
+    self._Write(python2_dependencies, python_version_string='PYTHON3')
