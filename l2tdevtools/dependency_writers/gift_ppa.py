@@ -7,11 +7,11 @@ import os
 
 from l2tdevtools.dependency_writers import interface
 
-
 class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
-  """GIFT PPA installation script file writer."""
+  """GIFT PPA installation script file writer for Python 2."""
 
-  PATH = os.path.join('config', 'linux', 'gift_ppa_install.sh')
+  # Path to GIFT PPA installation script.
+  PATH = ''
 
   _FILE_HEADER = [
       '#!/usr/bin/env bash',
@@ -47,11 +47,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
        'alphabetized,'),
       '# one per line.']  # yapf: disable
 
-  _FILE_FOOTER = [
-      '',
-      'sudo add-apt-repository ppa:gift/dev -y',
-      'sudo apt-get update -q',
-      'sudo apt-get install -y ${{PYTHON2_DEPENDENCIES}}']  # yapf: disable
+  _FILE_FOOTER = []
 
   _FILE_FOOTER_DEBUG_DEPENDENCIES = [
       '',
@@ -72,19 +68,22 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
       'fi',
       '']  # yapf: disable
 
-  def Write(self):
-    """Writes a gift_ppa_install.sh file."""
+  def _Write(self, python_dependencies, python_version_string='PYTHON2'):
+    """Writes a gift_ppa_install.sh file.
+
+    Args:
+      python_dependencies (list[str]): list of names of python dependencies.
+      python_version_string (Optional[str]): Python version.
+    """
     file_content = []
     file_content.extend(self._FILE_HEADER)
 
-    python2_dependencies = self._dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=2)
-
     libyal_dependencies = []
-    for index, dependency in enumerate(python2_dependencies):
+    for index, dependency in enumerate(python_dependencies):
       if index == 0:
-        file_content.append('PYTHON2_DEPENDENCIES="{0:s}'.format(dependency))
-      elif index + 1 == len(python2_dependencies):
+        file_content.append('{0:s}_DEPENDENCIES="{1:s}'.format(
+            python_version_string, dependency))
+      elif index + 1 == len(python_dependencies):
         file_content.append('                      {0:s}";'.format(dependency))
       else:
         file_content.append('                      {0:s}'.format(dependency))
@@ -131,3 +130,45 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
+
+  def Write(self):
+    """Writes a gift_ppa_install.sh file."""
+    raise NotImplementedError
+
+
+class GIFTPPAInstallScriptPY2Writer(GIFTPPAInstallScriptWriter):
+  """GIFT PPA installation script file writer for Python 2."""
+
+  PATH = os.path.join('config', 'linux', 'gift_ppa_install.sh')
+
+
+  _FILE_FOOTER = [
+      '',
+      'sudo add-apt-repository ppa:gift/dev -y',
+      'sudo apt-get update -q',
+      'sudo apt-get install -y ${{PYTHON2_DEPENDENCIES}}']  # yapf: disable
+
+
+  def Write(self):
+    """Writes a gift_ppa_install.sh file."""
+    python2_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=2)
+    self._Write(python2_dependencies, python_version_string='PYTHON2')
+
+
+class GIFTPPAInstallScriptPY3Writer(GIFTPPAInstallScriptWriter):
+    """GIFT PPA installation script file writer for Python 3."""
+
+    PATH = os.path.join('config', 'linux', 'gift_ppa_install_py3.sh')
+
+    _FILE_FOOTER = [
+      '',
+      'sudo add-apt-repository ppa:gift/dev -y',
+      'sudo apt-get update -q',
+      'sudo apt-get install -y ${{PYTHON3_DEPENDENCIES}}']  # yapf: disable
+
+    def Write(self):
+      """Writes a gift_ppa_install.sh file."""
+      python2_dependencies = self._dependency_helper.GetDPKGDepends(
+          exclude_version=True, python_version=3)
+      self._Write(python2_dependencies, python_version_string='PYTHON3')
