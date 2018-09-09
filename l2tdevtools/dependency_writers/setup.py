@@ -167,8 +167,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
         package_data_paths = ['dfvfs.lib']
       elif self._project_definition.name == 'plaso':
         package_data_paths = [
-            'plaso.parsers', 'plaso.parsers.olecf_plugins',
-            'plaso.parsers.winreg_plugins']
+            'plaso.parsers', 'plaso.parsers.esedb_plugins',
+            'plaso.parsers.olecf_plugins', 'plaso.parsers.winreg_plugins']
       elif self._project_definition.name == 'winreg-kb':
         package_data_paths = ['winregrc']
       else:
