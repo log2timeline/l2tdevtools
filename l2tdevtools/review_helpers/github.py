@@ -157,6 +157,9 @@ class GitHubHelper(object):
     if not response_data:
       return None
 
+    if isinstance(response_data, bytes):
+      response_data = response_data.decode('utf-8')
+
     response_data = json.loads(response_data)
     return response_data.get('login', None)
 
@@ -177,6 +180,9 @@ class GitHubHelper(object):
     except errors.ConnectivityError as exception:
       logging.warning('{0!s}'.format(exception))
       return None
+
+    if isinstance(response_data, bytes):
+      response_data = response_data.decode('utf-8')
 
     if response_data:
       return json.loads(response_data)
