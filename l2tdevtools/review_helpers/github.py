@@ -11,7 +11,7 @@ from l2tdevtools.lib import errors
 
 
 # Python3 linter complains, need to keep for python2.
-class GitHubHelper(object): # pylint disable=useless-object-inheritance
+class GitHubHelper(object): # pylint: disable=useless-object-inheritance
   """Github helper."""
 
   def __init__(self, organization, project):
