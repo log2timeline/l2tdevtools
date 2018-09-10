@@ -10,6 +10,8 @@ from l2tdevtools.review_helpers import url_lib
 from l2tdevtools.lib import errors
 
 
+# Python3 linter complains, need to keep for python2.
+# pylint disable=useless-object-inheritance
 class GitHubHelper(object):
   """Github helper."""
 
