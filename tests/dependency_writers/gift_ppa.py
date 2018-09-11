@@ -32,7 +32,7 @@ class GIFTPPAInstallPY2Test(test_lib.BaseTestCase):
 
 
 class GIFTPPAInstallPY3Test(test_lib.BaseTestCase):
-  """Tests the GIFT PPA installation script file writer for Python 2."""
+  """Tests the GIFT PPA installation script file writer for Python 3."""
 
   def testInitialize(self):
     """Tests that the writer can be initialized."""
