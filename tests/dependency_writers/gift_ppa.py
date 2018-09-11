@@ -13,7 +13,7 @@ from tests import test_lib
 
 
 class GIFTPPAInstallPY2Test(test_lib.BaseTestCase):
-  """Tests the gift_ppa_install.py writer."""
+  """Tests the GIFT PPA installation script file writer for Python 2."""
 
   def testInitialize(self):
     """Tests that the writer can be initialized."""
@@ -32,7 +32,7 @@ class GIFTPPAInstallPY2Test(test_lib.BaseTestCase):
 
 
 class GIFTPPAInstallPY3Test(test_lib.BaseTestCase):
-  """Tests the gift_ppa_install_py3.py writer."""
+  """Tests the GIFT PPA installation script file writer for Python 2."""
 
   def testInitialize(self):
     """Tests that the writer can be initialized."""
