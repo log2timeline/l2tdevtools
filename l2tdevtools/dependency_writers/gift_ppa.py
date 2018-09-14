@@ -3,12 +3,13 @@
 
 from __future__ import unicode_literals
 
+import abc
 import os
 
 from l2tdevtools.dependency_writers import interface
 
 class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
-  """GIFT PPA installation script file writer for Python 2."""
+  """Shared functionality for GIFT PPA installation script writer."""
 
   # Path to GIFT PPA installation script.
   PATH = ''
@@ -68,46 +69,47 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
       'fi',
       '']  # yapf: disable
 
-  def _Write(self, python_dependencies, python_version_string='PYTHON2'):
+  def _Write(self, python_dependencies, python_version=2):
     """Writes a gift_ppa_install.sh file.
 
     Args:
       python_dependencies (list[str]): list of names of python dependencies.
-      python_version_string (Optional[str]): Python version.
+      python_version (Optional[int]): Python version.
     """
     file_content = []
     file_content.extend(self._FILE_HEADER)
 
+    if python_version == 3:
+      python_version_string = 'python3'
+    else:
+      python_version_string = 'python'
+
     libyal_dependencies = []
     for index, dependency in enumerate(python_dependencies):
       if index == 0:
-        file_content.append('{0:s}_DEPENDENCIES="{1:s}'.format(
-            python_version_string, dependency))
+        file_content.append('PYTHON{0:d}_DEPENDENCIES="{1:s}'.format(
+            python_version, dependency))
       elif index + 1 == len(python_dependencies):
         file_content.append('                      {0:s}";'.format(dependency))
       else:
         file_content.append('                      {0:s}'.format(dependency))
 
-      if python_version_string == 'PYTHON2':
-        if dependency.startswith('lib') and dependency.endswith('-python'):
-          dependency, _, _ = dependency.partition('-')
-          libyal_dependencies.append(dependency)
-      else:
-        if dependency.startswith('lib') and dependency.endswith('-python3'):
-          dependency, _, _ = dependency.partition('-')
-          libyal_dependencies.append(dependency)
+
+      if dependency.startswith('lib') and dependency.endswith(
+            python_version_string):
+        dependency, _, _ = dependency.partition('-')
+        libyal_dependencies.append(dependency)
 
     file_content.extend(self._ADDITIONAL_DEPENDENCIES)
 
     debug_dependencies = []
     for index, dependency in enumerate(libyal_dependencies):
       debug_dependencies.append('{0:s}-dbg'.format(dependency))
-      if python_version_string == 'PYTHON2':
-        debug_dependencies.append('{0:s}-python-dbg'.format(dependency))
-      else:
-        debug_dependencies.append('{0:s}-python3-dbg'.format(dependency))
+      debug_dependencies.append(
+          '{0:s}-{1:s}-dbg'.format(dependency, python_version_string))
 
-    if (python_version_string == 'PYTHON2' and
+
+    if (python_version == 2  and
         self._project_definition.name == 'plaso'):
       debug_dependencies.append('python-guppy')
 
@@ -140,9 +142,9 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
     with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
 
+  @abc.abstractmethod
   def Write(self):
     """Writes a gift_ppa_install.sh file."""
-    raise NotImplementedError
 
 
 class GIFTPPAInstallScriptPY2Writer(GIFTPPAInstallScriptWriter):
@@ -150,19 +152,17 @@ class GIFTPPAInstallScriptPY2Writer(GIFTPPAInstallScriptWriter):
 
   PATH = os.path.join('config', 'linux', 'gift_ppa_install.sh')
 
-
   _FILE_FOOTER = [
       '',
       'sudo add-apt-repository ppa:gift/dev -y',
       'sudo apt-get update -q',
       'sudo apt-get install -y ${{PYTHON2_DEPENDENCIES}}']  # yapf: disable
 
-
   def Write(self):
     """Writes a gift_ppa_install.sh file."""
     python2_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True, python_version=2)
-    self._Write(python2_dependencies, python_version_string='PYTHON2')
+    self._Write(python2_dependencies, python_version=2)
 
 
 class GIFTPPAInstallScriptPY3Writer(GIFTPPAInstallScriptWriter):
@@ -180,4 +180,4 @@ class GIFTPPAInstallScriptPY3Writer(GIFTPPAInstallScriptWriter):
     """Writes a gift_ppa_install.sh file."""
     python2_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True, python_version=3)
-    self._Write(python2_dependencies, python_version_string='PYTHON3')
+    self._Write(python2_dependencies, python_version=3)
