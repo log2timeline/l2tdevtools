@@ -96,7 +96,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
 
       if dependency.startswith('lib') and dependency.endswith(
-            python_version_string):
+          python_version_string):
         dependency, _, _ = dependency.partition('-')
         libyal_dependencies.append(dependency)
 
