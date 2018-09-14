@@ -41,20 +41,21 @@ class ProjectDefinition(object):
         install template files.
     dpkg_template_install_python3 (list[str]): names of the dpkg Python 3
         install template files.
-    dpkg_template_rules (str): name of the dpkg rules template file.
     download_url (str): source package download URL.
+    dpkg_template_rules (str): name of the dpkg rules template file.
     git_url (str): git repository URL.
     homepage_url (str): project homepage URL.
     maintainer (str): name and email address of the maintainer.
     msi_name (str): MSI package name.
     name (str): name of the project.
-    setup_name (str): project name used in setup.py.
+    patches (list[str]): patch file names.
+    pkg_configure_options (list[str]): configure options when building a pkg.
+    pypi_name (str): name of the project on PyPI.
     rpm_build_dependencies (list[str]): rpm build dependencies.
     rpm_name (str): RPM package name.
     rpm_python2_prefix (str): Python 2 RPM package prefix.
     rpm_template_spec (str): name of the rpm spec file.
-    patches (list[str]): patch file names.
-    pkg_configure_options (list[str]): configure options when building a pkg.
+    setup_name (str): project name used in setup.py.
     version (ProjectVersionDefinition): version requirements.
   """
 
@@ -96,6 +97,7 @@ class ProjectDefinition(object):
     self.rpm_template_spec = None
     self.patches = None
     self.pkg_configure_options = None
+    self.pypi_name = None
     self.setup_name = None
     self.version = None
 
@@ -282,6 +284,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'patches')
       project_definition.pkg_configure_options = self._GetConfigValue(
           config_parser, section_name, 'pkg_configure_options')
+      project_definition.pypi_name = self._GetConfigValue(
+          config_parser, section_name, 'pypi_name')
       project_definition.setup_name = self._GetConfigValue(
           config_parser, section_name, 'setup_name')
       project_definition.version = self._GetConfigValue(

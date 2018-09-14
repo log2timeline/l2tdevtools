@@ -19,6 +19,7 @@ import zlib
 
 from xml.etree import ElementTree
 
+from l2tdevtools import projects
 from l2tdevtools import versions
 from l2tdevtools.download_helpers import interface
 
@@ -349,70 +350,30 @@ class OpenSuseBuildServiceManager(object):
 
 
 class PyPIManager(object):
-  """Defines a PyPI manager object."""
+  """Defines a PyPI manager."""
 
   _PYPI_URL = 'https://pypi.python.org/pypi/{package_name:s}'
 
-  # TODO: move to projects.ini configuration.
-  _PYPI_PACKAGE_NAMES = {
-      'artifacts': 'artifacts',
-      'astroid': 'astroid',
-      'bencode': 'bencode',
-      'binplist': 'binplist',
-      'dfdatetime': 'dfdatetime',
-      'dfvfs': 'dfvfs',
-      'dfwinreg': 'dfwinreg',
-      'dpkt': 'dpkt',
-      'efilter': 'efilter',
-      'google-apputils': 'google-apputils',
-      'hachoir-core': 'hachoir-core',
-      'hachoir-metadata': 'hachoir-metadata',
-      'hachoir-parser': 'hachoir-parser',
-      'lazy-object-proxy': 'lazy-object-proxy',
-      'libbde-python': 'libbde',
-      'libcaes-python': 'libcaes',
-      'libcreg-python': 'libcreg',
-      'libesedb-python': 'libesedb',
-      'libevt-python': 'libevt',
-      'libevtx-python': 'libevtx',
-      'libewf-python': 'libewf',
-      'libexe-python': 'libexe',
-      'libfsntfs-python': 'libfsntfs',
-      'libfwps-python': 'libfwps',
-      'libfwsi-python': 'libfwsi',
-      'liblnk-python': 'liblnk',
-      'libmsiecf-python': 'libmsiecf',
-      'libolecf-python': 'libolecf',
-      'libqcow-python': 'libqcow',
-      'libregf-python': 'libregf',
-      'libscca-python': 'libscca',
-      'libsigscan-python': 'libsigscan',
-      'libsmdev-python': 'libsmdev',
-      'libsmraw-python': 'libsmraw',
-      'libvhdi-python': 'libvhdi',
-      'libvmdk-python': 'libvmdk',
-      'libvshadow-python': 'libvshadow',
-      'libvslvm-python': 'libvslvm',
-      'logilab-common': 'logilab-common',
-      'pefile': 'pefile',
-      'pycrypto': 'pycrypto',
-      'pylint': 'pylint',
-      'pyparsing': 'pyparsing',
-      'pysqlite': 'pysqlite',
-      'python-dateutil': 'dateutil',
-      'python-gflags': 'python-gflags',
-      'pytsk3': 'pytsk3',
-      'pytz': 'pytz',
-      'PyYAML': 'PyYAML',
-      'requests': 'requests',
-      'six': 'six',
-      'wrapt': 'wrapt',
-      'XlsxWriter': 'XlsxWriter'}
+  def __init__(self, projects_file):
+    """Initializes a PyPI manager.
 
-  def __init__(self):
-    """Initializes a PyPI manager object."""
+    Args:
+      projects_file (str): path to the projects.ini file.
+    """
     super(PyPIManager, self).__init__()
     self._download_helper = interface.DownloadHelper('')
+    self._package_names = []
+    self._pypi_package_names = {}
+
+    if projects_file:
+      with io.open(projects_file, 'r', encoding='utf-8') as file_object:
+        project_definition_reader = projects.ProjectDefinitionReader()
+        for project_definition in project_definition_reader.Read(file_object):
+          self._package_names.append(project_definition.name)
+
+          if project_definition.pypi_name:
+            self._pypi_package_names[project_definition.pypi_name] = (
+                project_definition.name)
 
   def CopyPackages(self):
     """Copies packages."""
@@ -429,14 +390,17 @@ class PyPIManager(object):
           the packages cannot be determined.
     """
     packages = {}
-    for package_name in iter(self._PYPI_PACKAGE_NAMES.keys()):
-      kwargs = {'package_name': package_name}
+    for package_name in self._package_names:
+      pypi_package_name = self._pypi_package_names.get(
+          package_name, package_name)
+
+      kwargs = {'package_name': pypi_package_name}
       download_url = self._PYPI_URL.format(**kwargs)
 
       page_content = self._download_helper.DownloadPageContent(download_url)
       if not page_content:
         logging.error('Unable to retrieve PyPI package: {0:s} page.'.format(
-            package_name))
+            pypi_package_name))
         continue
 
       try:
@@ -444,20 +408,19 @@ class PyPIManager(object):
       except UnicodeDecodeError as exception:
         logging.error((
             'Unable to decode PyPI package: {0:s} page with error: '
-            '{1:s}').format(package_name, exception))
+            '{1:s}').format(pypi_package_name, exception))
         continue
 
       expression_string = (
           '<title>{0:s} ([^ ]*) : Python Package Index</title>'.format(
-              package_name))
+              pypi_package_name))
       matches = re.findall(expression_string, page_content)
       if not matches or len(matches) != 1:
         logging.warning(
             'Unable to determine PyPI package: {0:s} information.'.format(
-                package_name))
+                pypi_package_name))
         continue
 
-      package_name = self._PYPI_PACKAGE_NAMES[package_name]
       packages[package_name] = matches
 
     return packages
@@ -466,10 +429,11 @@ class PyPIManager(object):
 class PackagesManager(object):
   """Manages packages across various repositories."""
 
-  def __init__(self, distribution=None):
+  def __init__(self, projects_file, distribution=None):
     """Initializes a packages manager.
 
     Args:
+      projects_file (str): path to the projects.ini file.
       distribution (Optional[str]): name of the distribution.
     """
     fedora_distribution = distribution or '28'
@@ -482,7 +446,7 @@ class PackagesManager(object):
     self._github_repo_manager = GithubRepoManager()
     self._launchpad_ppa_manager = LaunchpadPPAManager(
         'gift', distribution=ubuntu_distribution)
-    self._pypi_manager = PyPIManager()
+    self._pypi_manager = PyPIManager(projects_file)
 
   def _ComparePackages(self, reference_packages, packages):
     """Compares the packages.
@@ -870,6 +834,12 @@ def Main():
       default='build', help='The location of the build directory.')
 
   argument_parser.add_argument(
+      '-c', '--config', dest='config_path', action='store',
+      metavar='CONFIG_PATH', default=None, help=(
+          'path of the directory containing the build configuration '
+          'files e.g. projects.ini.'))
+
+  argument_parser.add_argument(
       '--csv-file', '--csv_file', action='store', metavar='FILE',
       dest='csv_file', type=str, default='', help=(
           'The location of the CSV file.'))
@@ -895,11 +865,27 @@ def Main():
     print('')
     return False
 
+  config_path = options.config_path
+  if not config_path:
+    config_path = os.path.dirname(__file__)
+    config_path = os.path.dirname(config_path)
+    config_path = os.path.join(config_path, 'data')
+
+  projects_file = os.path.join(config_path, 'projects.ini')
+  if not os.path.exists(projects_file):
+    print('No such config file: {0:s}.'.format(projects_file))
+    print('')
+    return False
+
+  logging.basicConfig(
+      level=logging.INFO, format='[%(levelname)s] %(message)s')
+
   # TODO: add action to upload files to PPA.
   # TODO: add action to copy files between PPA tracks.
   # TODO: add pypi support.
 
-  packages_manager = PackagesManager(distribution=options.distribution)
+  packages_manager = PackagesManager(
+      projects_file, distribution=options.distribution)
 
   action_tuple = options.action.split('-')
 
