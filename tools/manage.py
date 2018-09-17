@@ -359,7 +359,6 @@ class PyPIManager(object):
       'astroid': 'astroid',
       'bencode': 'bencode',
       'binplist': 'binplist',
-      'construct': 'construct',
       'dfdatetime': 'dfdatetime',
       'dfvfs': 'dfvfs',
       'dfwinreg': 'dfwinreg',
