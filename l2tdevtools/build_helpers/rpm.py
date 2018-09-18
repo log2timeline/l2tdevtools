@@ -361,8 +361,10 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
+    rpm_name = self._project_definition.rpm_name or project_name
+
     filenames_glob = '{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture)
+        rpm_name, project_version, self.architecture)
     filenames_glob = os.path.join(
         self._rpmbuild_rpms_path, self.architecture, filenames_glob)
 
@@ -487,15 +489,20 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
+    rpm_name = self._project_definition.rpm_name or project_name
+    if rpm_name.startswith('python-') or rpm_name.startswith('python2-'):
+      _, _, rpm_name = rpm_name.partition('-')
+
+    # TODO: add support for rpm_python_prefix.
     filenames_glob = 'python*-{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture)
+        rpm_name, project_version, self.architecture)
     filenames_glob = os.path.join(
         self._rpmbuild_rpms_path, self.architecture, filenames_glob)
 
     self._MoveFilesToCurrentDirectory(filenames_glob)
 
     filenames_glob = '{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture)
+        rpm_name, project_version, self.architecture)
     filenames_glob = os.path.join(
         self._rpmbuild_rpms_path, self.architecture, filenames_glob)
 
@@ -572,8 +579,11 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    filenames_glob = '{0:s}-*{1!s}-1.src.rpm'.format(
-        project_name, project_version)
+    rpm_name = self._project_definition.rpm_name or project_name
+    if rpm_name.startswith('python-') or rpm_name.startswith('python2-'):
+      _, _, rpm_name = rpm_name.partition('-')
+
+    filenames_glob = '{0:s}-*{1!s}-1.src.rpm'.format(rpm_name, project_version)
     filenames_glob = os.path.join(self._rpmbuild_srpms_path, filenames_glob)
 
     self._MoveFilesToCurrentDirectory(filenames_glob)

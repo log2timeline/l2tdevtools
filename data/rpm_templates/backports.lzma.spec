@@ -1,4 +1,4 @@
-%define name backports.lzma
+%define name backports-lzma
 %define version {version}
 %define unmangled_name backports.lzma
 %define unmangled_version {version}
