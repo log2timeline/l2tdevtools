@@ -68,8 +68,6 @@ else:
               '%{python3_sitelib}/${project_name}*.egg-info/*',
               '',
               '%exclude %{_prefix}/share/doc/*',
-              '%exclude %{python3_sitelib}/**/*.pyc',
-              '%exclude %{python3_sitelib}/**/*.pyo',
               '%exclude %{python3_sitelib}/**/__pycache__/*'])
 
           else:
@@ -79,8 +77,7 @@ else:
               '',
               '%exclude %{_prefix}/share/doc/*',
               '%exclude %{python2_sitelib}/**/*.pyc',
-              '%exclude %{python2_sitelib}/**/*.pyo',
-              '%exclude %{python2_sitelib}/**/__pycache__/*'])
+              '%exclude %{python2_sitelib}/**/*.pyo'])
 
           python_spec_file.extend(lines)
           break
