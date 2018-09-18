@@ -1,4 +1,4 @@
-%define name backports.lzma
+%define name backports-lzma
 %define version {version}
 %define unmangled_name backports.lzma
 %define unmangled_version {version}
@@ -22,7 +22,10 @@ Backport of Python 3.3's 'lzma' module for XZ/LZMA
 compressed files.
 
 %package -n python2-%{{name}}
+Obsoletes: python-backports-lzma < %{version}
+Provides: python-backports-lzma = %{version}
 Summary: Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
+Requires: python2-backports
 
 %description -n python2-%{{name}}
 Backport of Python 3.3's 'lzma' module for XZ/LZMA
@@ -36,6 +39,7 @@ env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
+rm -f %{{buildroot}}/%{{_libdir}}/python2*/site-packages/backports/__init__.py*
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -43,7 +47,6 @@ rm -rf %{{buildroot}}
 
 %files -n python2-%{{name}}
 %license LICENSE
-%{{_libdir}}/python2*/site-packages/backports/__init__.py
 %{{_libdir}}/python2*/site-packages/backports/lzma
 %{{_libdir}}/python2*/site-packages/backports.lzma*.egg-info
 %exclude %{{_bindir}}/*
