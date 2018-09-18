@@ -44,6 +44,18 @@ else:
         elif line.startswith('%description'):
           in_description = True
 
+        elif line.startswith('python setup.py build'):
+          if python_package == 'python3':
+            line = '%py3_build'
+          else:
+            line = '%py2_build'
+
+        elif line.startswith('python setup.py install'):
+          if python_package == 'python3':
+            line = '%py3_install'
+          else:
+            line = '%py2_install'
+
         elif line.startswith('%files'):
           lines = [
               '%files -n {0:s}-%{{name}}'.format(python_package),
