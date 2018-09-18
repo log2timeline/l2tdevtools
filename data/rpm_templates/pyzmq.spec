@@ -15,7 +15,7 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Brian E. Granger, Min Ragan-Kelley <zeromq-dev@lists.zeromq.org>
 Url: https://pyzmq.readthedocs.org
-BuildRequires: python2-setuptools, python-devel, python3-setuptools, python3-devel
+BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 PyZMQ is the official Python binding for the ZeroMQ
@@ -39,11 +39,12 @@ Messaging Library (http://www.zeromq.org).
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-env CFLAGS="$RPM_OPT_FLAGS" python setup.py build --zmq=bundled
+env CFLAGS="$RPM_OPT_FLAGS" %py2_build --zmq=bundled
+env CFLAGS="$RPM_OPT_FLAGS" %py3_build --zmq=bundled
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install -O1 --root=%{{buildroot}}
+%py3_install -O1 --root=%{{buildroot}}
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

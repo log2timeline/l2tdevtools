@@ -16,7 +16,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Dean Gardiner <me@dgardiner.net>
 Url: https://github.com/fuzeman/bencode.py
-BuildRequires: python2-setuptools, python2-pbr, python3-setuptools, python3-pbr
+BuildRequires: python2-setuptools, python2-devel, python2-pbr, python3-setuptools, python3-devel, python3-pbr
 
 %description
 Simple bencode parser, forked from the bencode package
@@ -40,12 +40,12 @@ by Thomas Rampelberg.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-python2 setup.py build
-python3 setup.py build
+%py2_build
+%py3_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install -O1 --root=%{{buildroot}}
+%py3_install -O1 --root=%{{buildroot}}
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

@@ -15,7 +15,7 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Victor M. Alvarez <plusvic@gmail.com;vmalvarez@virustotal.com>
 Url: https://github.com/VirusTotal/yara-python
-BuildRequires: python2-setuptools, python-devel, python3-setuptools, python3-devel
+BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 This is a library for using YARA from Python. You can use
@@ -39,11 +39,12 @@ it to compile, save and load YARA rules, and to scan files or data strings.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
+env CFLAGS="$RPM_OPT_FLAGS" %py2_build
+env CFLAGS="$RPM_OPT_FLAGS" %py3_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install -O1 --root=%{{buildroot}}
+%py3_install -O1 --root=%{{buildroot}}
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

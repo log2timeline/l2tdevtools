@@ -16,7 +16,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Paul Ganssle <dateutil@python.org>
 Url: https://dateutil.readthedocs.io
-BuildRequires: python2-setuptools, python2-setuptools_scm, python3-setuptools, python3-setuptools_scm
+BuildRequires: python2-setuptools, python2-setuptools_scm, python2-devel, python3-setuptools, python3-setuptools_scm, python3-devel
 
 %description
 The dateutil module provides powerful extensions to the
@@ -40,12 +40,12 @@ datetime module available in the Python standard library.
 %autosetup -n python-%{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-python2 setup.py build
-python3 setup.py build
+%py2_build
+%py3_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install -O1 --root=%{{buildroot}}
+%py3_install -O1 --root=%{{buildroot}}
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

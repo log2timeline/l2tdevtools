@@ -43,9 +43,9 @@ class RPMSpecFileGenerator(object):
     Returns:
       str: build definition.
     """
-    lines = [b'python2 setup.py build']
+    lines = [b'%py2_build']
     if not python2_only:
-      lines.append(b'python3 setup.py build')
+      lines.append(b'%py3_build')
 
     lines.append(b'')
     return b'\n'.join(lines)
@@ -82,9 +82,9 @@ class RPMSpecFileGenerator(object):
     Returns:
       str: install definition.
     """
-    lines = [b'python2 setup.py install -O1 --root=%{buildroot}']
+    lines = [b'%py2_install install -O1 --root=%{buildroot}']
     if not python2_only:
-      lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
+      lines.append(b'%py3_install install -O1 --root=%{buildroot}')
 
     lines.extend([
         b'rm -rf %{buildroot}/usr/share/doc/%{name}/'])
@@ -605,18 +605,13 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    rpm_build_dependencies = ['python2-setuptools']
-    if project_definition.architecture_dependent:
-      rpm_build_dependencies.append('python-devel')
+    rpm_build_dependencies = ['python2-setuptools', 'python2-devel']
 
     if project_definition.rpm_build_dependencies:
-      rpm_build_dependencies.extend(
-          project_definition.rpm_build_dependencies)
+      rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
 
     if not python2_only:
-      rpm_build_dependencies.append('python3-setuptools')
-      if project_definition.architecture_dependent:
-        rpm_build_dependencies.append('python3-devel')
+      rpm_build_dependencies.extend(['python3-setuptools', 'python3-devel'])
 
       if project_definition.rpm_build_dependencies:
         for dependency in project_definition.rpm_build_dependencies:
@@ -665,15 +660,13 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    rpm_build_dependencies = ['python-devel', 'python-setuptools']
+    rpm_build_dependencies = ['python2-devel', 'python2-setuptools']
 
     if not python2_only:
-      rpm_build_dependencies.append('python3-devel')
-      rpm_build_dependencies.append('python3-setuptools')
+      rpm_build_dependencies.extend(['python3-devel', 'python3-setuptools'])
 
     if project_definition.rpm_build_dependencies:
-      rpm_build_dependencies.extend(
-          project_definition.rpm_build_dependencies)
+      rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
 
     # TODO: check if already prefixed with python-
 
