@@ -185,7 +185,7 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'/usr/lib/python2*/site-packages/\n').format(
+          b'%{{python2_sitelib}}/\n').format(
               name, license_line, doc_line))
 
     elif project_name == 'pytsk3':
@@ -193,8 +193,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python2*/site-packages/{3:s}*.so\n'
-          b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
+          b'%{{python2_sitelib}}/{3:s}*.so\n'
+          b'%{{python2_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
     elif project_definition.architecture_dependent:
@@ -202,8 +202,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python2*/site-packages/{3:s}\n'
-          b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
+          b'%{{python2_sitelib}}/{3:s}\n'
+          b'%{{python2_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
     else:
@@ -211,8 +211,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'/usr/lib/python2*/site-packages/{3:s}\n'
-          b'/usr/lib/python2*/site-packages/{3:s}*.egg-info\n').format(
+          b'%{{python2_sitelib}}/{3:s}\n'
+          b'%{{python2_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
   def _WritePython3PackageDefinition(
@@ -263,7 +263,7 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'/usr/lib/python3*/site-packages/\n').format(
+          b'%{{python3_sitelib}}/\n').format(
               name, license_line, doc_line))
 
     elif project_name == 'pytsk3':
@@ -271,8 +271,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python3*/site-packages/{3:s}*.so\n'
-          b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
+          b'%{{python3_sitelib}}/{3:s}*.so\n'
+          b'%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
     elif project_definition.architecture_dependent:
@@ -280,8 +280,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{_libdir}}/python3*/site-packages/{3:s}\n'
-          b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
+          b'%{{python3_sitelib}}/{3:s}\n'
+          b'%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
     else:
@@ -290,8 +290,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'/usr/lib/python3*/site-packages/{3:s}\n'
-          b'/usr/lib/python3*/site-packages/{3:s}*.egg-info\n').format(
+          b'%{{python3_sitelib}}/{3:s}\n'
+          b'%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
   def GenerateWithSetupPy(self, source_directory, build_log_file):
