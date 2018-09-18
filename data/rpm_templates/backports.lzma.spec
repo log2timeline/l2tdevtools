@@ -39,7 +39,7 @@ env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
-rm -f %{{_libdir}}/python2*/site-packages/backports/__init__.py*
+rm -f %{{buildroot}}/%{{_libdir}}/python2*/site-packages/backports/__init__.py*
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
