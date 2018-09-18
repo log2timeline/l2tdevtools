@@ -358,6 +358,13 @@ class ProjectDefinitionReader(object):
         project_definition.rpm_build_dependencies = (
             project_definition.rpm_build_dependencies.split(','))
 
+      if (project_definition.rpm_python2_prefix is None and
+          project_definition.rpm_name is not None):
+        if (project_definition.rpm_name.startswith('python-') or
+            project_definition.rpm_name.startswith('python2-')):
+          project_definition.rpm_python2_prefix, _, _ = (
+              project_definition.rpm_name.partition('-'))
+
       if project_definition.patches is None:
         project_definition.patches = []
       elif isinstance(project_definition.patches, py2to3.STRING_TYPES):
