@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import json
 import logging
 
+from l2tdevtools import py2to3
 from l2tdevtools.review_helpers import url_lib
 from l2tdevtools.lib import errors
 
@@ -88,7 +89,7 @@ class GitHubHelper(object):
     response_data = self._url_lib_helper.Request(
         github_url, post_data=post_data)
 
-    if isinstance(response_data, bytes):
+    if isinstance(response_data, py2to3.BYTES_TYPE):
       response_data = response_data.decode('utf-8')
 
     response_data = json.loads(response_data)
@@ -157,6 +158,9 @@ class GitHubHelper(object):
     if not response_data:
       return None
 
+    if isinstance(response_data, py2to3.BYTES_TYPE):
+      response_data = response_data.decode('utf-8')
+
     response_data = json.loads(response_data)
     return response_data.get('login', None)
 
@@ -177,6 +181,9 @@ class GitHubHelper(object):
     except errors.ConnectivityError as exception:
       logging.warning('{0!s}'.format(exception))
       return None
+
+    if isinstance(response_data, py2to3.BYTES_TYPE):
+      response_data = response_data.decode('utf-8')
 
     if response_data:
       return json.loads(response_data)
