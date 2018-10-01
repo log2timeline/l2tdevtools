@@ -471,8 +471,8 @@ class PackagesManager(object):
         new_packages[name] = version
         continue
 
-      new_version_tuple = packages[name].split('.')
-      version_tuple = version.split('.')
+      version_tuple = packages[name].split('.')
+      new_version_tuple = version.split('.')
 
       if new_version_tuple > version_tuple:
         new_versions[name] = version
