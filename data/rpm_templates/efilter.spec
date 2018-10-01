@@ -31,7 +31,7 @@ EFILTER is a general-purpose destructuring and search language implemented in Py
 
 %package -n python3-%{{name}}
 Summary: EFILTER query language
-Requires: python3-dateutil, python3-size >= 1.4.0, python3-pytz
+Requires: python3-dateutil, python3-six >= 1.4.0, python3-pytz
 
 %description -n python3-%{{name}}
 EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
