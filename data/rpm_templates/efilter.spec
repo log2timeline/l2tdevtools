@@ -17,28 +17,23 @@ BuildArch: noarch
 Vendor: Adam Sindelar <adam.sindelar@gmail.com>
 Packager: Adam Sindelar <adam.sindelar@gmail.com>
 Url: https://github.com/google/dotty/
-BuildRequires: python2-setuptools, python3-setuptools
+BuildRequires: python2-devel, python2-setuptools, python3-devel, python3-setuptools
 
 %description
 EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
 
 %package -n python-%{{name}}
 Summary: EFILTER query language
+Requires: python2-dateutil, python2-six >= 1.4.0, python2-pytz
 
 %description -n python-%{{name}}
 EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
 
 %package -n python3-%{{name}}
 Summary: EFILTER query language
-Requires: python-dateutil python-six >= 1.4.0 python-tz
+Requires: python3-dateutil, python3-size >= 1.4.0, python3-pytz
 
 %description -n python3-%{{name}}
-EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
-
-%package -n %{{name}}-data
-Summary: EFILTER query language
-Requires: python-dateutil, python-six >= 1.4.0, pytz
-%description -n %{{name}}-data
 EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
 
 %prep
