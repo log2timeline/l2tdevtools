@@ -82,9 +82,9 @@ class RPMSpecFileGenerator(object):
     Returns:
       str: install definition.
     """
-    lines = [b'%py2_install install -O1 --root=%{buildroot}']
+    lines = [b'%py2_install']
     if not python2_only:
-      lines.append(b'%py3_install install -O1 --root=%{buildroot}')
+      lines.append(b'%py3_install')
 
     lines.extend([
         b'rm -rf %{buildroot}/usr/share/doc/%{name}/'])
@@ -446,6 +446,13 @@ class RPMSpecFileGenerator(object):
 
           has_python2_package = True
 
+          if line.startswith(b'%package -n python2-'):
+            if python2_package_prefix == 'python-':
+              logging.warning(
+                  'rpm_python_package prefix is: "python" but spec file '
+                  'defines: "python2"')
+            python2_package_prefix = 'python2-'
+
         elif line.startswith(b'%package -n python3-'):
           has_python3_package = True
 
@@ -492,10 +499,14 @@ class RPMSpecFileGenerator(object):
           else:
             line = b'%autosetup -n %{unmangled_name}-%{unmangled_version}\n'
 
-        elif line.startswith(b'python setup.py build'):
+        elif (line.startswith(b'python setup.py build') or
+            line.startswith(b'python2 setup.py build') or
+            line.startswith(b'%py2_build')):
           line = self._GetBuildDefinition(python2_only)
 
-        elif line.startswith(b'python setup.py install'):
+        elif (line.startswith(b'python setup.py install') or
+            line.startswith(b'python2 setup.py install') or
+            line.startswith(b'%py2_install')):
           line = self._GetInstallDefinition(project_name, python2_only)
 
         elif line == b'rm -rf $RPM_BUILD_ROOT\n':
