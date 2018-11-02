@@ -23,6 +23,8 @@ The dateutil module provides powerful extensions to the
 datetime module available in the Python standard library.
 
 %package -n python2-%{{name}}
+Obsoletes: python-dateutil < %{{version}}
+Provides: python-dateutil = %{{version}}
 Summary: Extensions to the standard Python datetime module
 
 %description -n python2-%{{name}}
@@ -44,8 +46,8 @@ datetime module available in the Python standard library.
 %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

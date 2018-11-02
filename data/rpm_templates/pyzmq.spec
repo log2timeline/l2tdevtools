@@ -22,6 +22,8 @@ PyZMQ is the official Python binding for the ZeroMQ
 Messaging Library (http://www.zeromq.org).
 
 %package -n python2-zmq
+Obsoletes: python-zmq < %{{version}}
+Provides: python-zmq = %{{version}}
 Summary: Python bindings for 0MQ
 
 %description -n python2-zmq
@@ -43,8 +45,8 @@ env CFLAGS="$RPM_OPT_FLAGS" %py2_build --zmq=bundled
 env CFLAGS="$RPM_OPT_FLAGS" %py3_build --zmq=bundled
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

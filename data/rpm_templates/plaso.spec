@@ -49,7 +49,7 @@ Plaso (log2timeline) is a framework to create super timelines. Its purpose is to
 %py2_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
+%py2_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

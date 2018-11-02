@@ -22,6 +22,8 @@ This is a library for using YARA from Python. You can use
 it to compile, save and load YARA rules, and to scan files or data strings.
 
 %package -n python2-yara
+Obsoletes: python-yara < %{{version}}
+Provides: python-yara = %{{version}}
 Summary: Python interface for YARA
 
 %description -n python2-yara
@@ -43,8 +45,8 @@ env CFLAGS="$RPM_OPT_FLAGS" %py2_build
 env CFLAGS="$RPM_OPT_FLAGS" %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

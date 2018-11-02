@@ -22,10 +22,12 @@ BuildRequires: python2-setuptools, python2-devel, python2-pbr, python3-setuptool
 Simple bencode parser, forked from the bencode package
 by Thomas Rampelberg.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-bencode < %{{version}}
+Provides: python-bencode = %{{version}}
 Summary: Simple bencode parser (for Python 2, Python 3 and PyPy)
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 Simple bencode parser, forked from the bencode package
 by Thomas Rampelberg.
 
@@ -44,14 +46,14 @@ by Thomas Rampelberg.
 %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 /usr/lib/python2*/site-packages/bencode/
 /usr/lib/python2*/site-packages/bencode.py*.egg-info
 

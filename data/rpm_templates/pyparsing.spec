@@ -26,6 +26,8 @@ of classes that client code uses to construct the grammar directly
 in Python code.
 
 %package -n python2-%{{name}}
+Obsoletes: python-pyparsing < %{{version}}
+Provides: python-pyparsing = %{{version}}
 Summary: Python parsing module
 
 %description -n python2-%{{name}}
@@ -53,8 +55,8 @@ in Python code.
 %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

@@ -23,10 +23,12 @@ future is the missing compatibility layer between Python 2
 and Python 3. It allows you to use a single, clean Python 3.x-compatible
 codebase to support both Python 2 and Python 3 with minimal overhead.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-future < %{{version}}
+Provides: python-future = %{{version}}
 Summary: Clean single-source support for Python 3 and 2
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 future is the missing compatibility layer between Python 2
 and Python 3. It allows you to use a single, clean Python 3.x-compatible
 codebase to support both Python 2 and Python 3 with minimal overhead.
@@ -48,15 +50,15 @@ rm -rf %{{_builddir}}/%{{unmangled_name}}-%{{unmangled_version}}/build
 %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
+%py2_install
 rm -rf %{{_builddir}}/%{{unmangled_name}}-%{{unmangled_version}}/build
-%py3_install -O1 --root=%{{buildroot}}
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE.txt
 /usr/lib/python2*/site-packages/*
 

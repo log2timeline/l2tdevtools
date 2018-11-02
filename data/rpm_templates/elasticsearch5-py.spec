@@ -21,11 +21,13 @@ BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-de
 %description
 Python client for Elasticsearch5.
 
-%package -n python-elasticsearch5
+%package -n python2-elasticsearch5
+Obsoletes: python-elasticsearch5 < %{{version}}
+Provides: python-elasticsearch5 = %{{version}}
 Summary: Python client for Elasticsearch5
-Requires: python-urllib3
+Requires: python2-urllib3
 
-%description -n python-elasticsearch5
+%description -n python2-elasticsearch5
 Python client for Elasticsearch.
 
 %package -n python3-elasticsearch5
@@ -43,14 +45,14 @@ Python client for Elasticsearch5.
 %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-elasticsearch5
+%files -n python2-elasticsearch5
 /usr/lib/python2*/site-packages/elasticsearch5/
 /usr/lib/python2*/site-packages/elasticsearch5*.egg-info
 

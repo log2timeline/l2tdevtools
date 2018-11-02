@@ -22,11 +22,13 @@ BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-de
 %description
 EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-efilter < %{{version}}
+Provides: python-efilter = %{{version}}
 Summary: EFILTER query language
 Requires: python2-dateutil, python2-six >= 1.4.0, python2-pytz
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
 
 %package -n python3-%{{name}}
@@ -44,14 +46,14 @@ EFILTER is a general-purpose destructuring and search language implemented in Py
 %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE.txt
 /usr/lib/python2*/site-packages/efilter/
 /usr/lib/python2*/site-packages/efilter*.egg-info

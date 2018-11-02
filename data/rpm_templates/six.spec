@@ -24,10 +24,12 @@ utility functions for smoothing over the differences between the Python
 versions with the goal of writing Python code that is compatible on both
 Python versions.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-six < %{{version}}
+Provides: python-six = %{{version}}
 Summary: Python 2 and 3 compatibility utilities
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 Six is a Python 2 and 3 compatibility library. It provides
 utility functions for smoothing over the differences between the Python
 versions with the goal of writing Python code that is compatible on both
@@ -50,14 +52,14 @@ Python versions.
 %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE
 %doc CHANGES
 /usr/lib/python2*/site-packages/

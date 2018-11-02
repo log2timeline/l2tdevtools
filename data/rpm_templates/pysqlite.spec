@@ -21,10 +21,12 @@ BuildRequires: python2-setuptools, python2-devel, sqlite-devel
 pysqlite is a DB-API 2.0-compliant database interface
 for SQLite.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-pysqlite < %{{version}}
+Provides: python-pysqlite = %{{version}}
 Summary: DB-API 2.0 interface for SQLite 3.x
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 pysqlite is a DB-API 2.0-compliant database interface
 for SQLite.
 
@@ -35,13 +37,13 @@ for SQLite.
 env CFLAGS="$RPM_OPT_FLAGS" %py2_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
+%py2_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE
 %{{_libdir}}/python2*/site-packages/pysqlite2/
 %{{_libdir}}/python2*/site-packages/pysqlite*.egg-info

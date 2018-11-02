@@ -24,10 +24,12 @@ XlsxWriter is a Python module for writing files in the Excel
 formulas and hyperlinks to multiple worksheets and it supports features
 such as formatting and many more.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-XlsxWriter < %{{version}}
+Provides: python-XlsxWriter = %{{version}}
 Summary: A Python module for creating Excel XLSX files.
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 XlsxWriter is a Python module for writing files in the Excel
 2007+ XLSX file format. XlsxWriter can be used to write text, numbers,
 formulas and hyperlinks to multiple worksheets and it supports features
@@ -50,14 +52,14 @@ such as formatting and many more.
 %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE.txt
 /usr/lib/python2*/site-packages/xlsxwriter/
 /usr/lib/python2*/site-packages/XlsxWriter*.egg-info

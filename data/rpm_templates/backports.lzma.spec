@@ -22,8 +22,8 @@ Backport of Python 3.3's 'lzma' module for XZ/LZMA
 compressed files.
 
 %package -n python2-%{{name}}
-Obsoletes: python-backports-lzma < %{version}
-Provides: python-backports-lzma = %{version}
+Obsoletes: python-backports-lzma < %{{version}}
+Provides: python-backports-lzma = %{{version}}
 Summary: Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
 Requires: python2-backports
 
@@ -38,7 +38,7 @@ compressed files.
 env CFLAGS="$RPM_OPT_FLAGS" %py2_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
+%py2_install
 rm -f %{{buildroot}}/%{{_libdir}}/python2*/site-packages/backports/__init__.py*
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 

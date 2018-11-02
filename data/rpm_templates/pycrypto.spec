@@ -22,10 +22,12 @@ BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-de
 %description
 Cryptographic modules for Python
 
-%package -n python-crypto
+%package -n python2-crypto
+Obsoletes: python-crypto < %{{version}}
+Provides: python-crypto = %{{version}}
 Summary: Cryptographic modules for Python.
 
-%description -n python-crypto
+%description -n python2-crypto
 Cryptographic modules for Python
 
 %package -n python3-crypto
@@ -42,14 +44,14 @@ env CFLAGS="$RPM_OPT_FLAGS" %py2_build
 env CFLAGS="$RPM_OPT_FLAGS" %py3_build
 
 %install
-%py2_install -O1 --root=%{{buildroot}}
-%py3_install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-crypto
+%files -n python2-crypto
 %doc README
 %{{_libdir}}/python2*/site-packages/Crypto/
 %{{_libdir}}/python2*/site-packages/pycrypto*.egg-info
