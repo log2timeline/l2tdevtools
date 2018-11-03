@@ -15,14 +15,14 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Peter Cock <p.j.a.cock@googlemail.com>
 Url: https://github.com/peterjc/backports.lzma
-BuildRequires: python2-setuptools, python2-devel, xz-devel
+BuildRequires: gcc, python2-setuptools, python2-devel, xz-devel
 
 %description
 Backport of Python 3.3's 'lzma' module for XZ/LZMA
 compressed files.
 
 %package -n python2-%{{name}}
-Obsoletes: python-backports-lzma < %{{version}}
+Obsoletes: python-backports-lzma <= %{{version}}
 Provides: python-backports-lzma = %{{version}}
 Summary: Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
 Requires: python2-backports

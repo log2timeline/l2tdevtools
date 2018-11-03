@@ -4,7 +4,7 @@
 %define unmangled_version {version}
 %define release 1
 
-Summary: Simple bencode parser (for Python 2, Python 3 and PyPy)
+Summary: Simple bencode parser
 Name: %{{name}}
 Version: %{{version}}
 Release: %{{release}}
@@ -23,16 +23,16 @@ Simple bencode parser, forked from the bencode package
 by Thomas Rampelberg.
 
 %package -n python2-%{{name}}
-Obsoletes: python-bencode < %{{version}}
+Obsoletes: python-bencode <= %{{version}}
 Provides: python-bencode = %{{version}}
-Summary: Simple bencode parser (for Python 2, Python 3 and PyPy)
+Summary: Simple bencode parser for Python 2
 
 %description -n python2-%{{name}}
 Simple bencode parser, forked from the bencode package
 by Thomas Rampelberg.
 
 %package -n python3-%{{name}}
-Summary: Simple bencode parser (for Python 2, Python 3 and PyPy)
+Summary: Simple bencode parser for Python 3
 
 %description -n python3-%{{name}}
 Simple bencode parser, forked from the bencode package

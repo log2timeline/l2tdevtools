@@ -17,13 +17,13 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Dwayne C. Litzenberger <dlitz@dlitz.net>
 Url: http://www.pycrypto.org/
-BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
+BuildRequires: gcc, python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 Cryptographic modules for Python
 
 %package -n python2-crypto
-Obsoletes: python-crypto < %{{version}}
+Obsoletes: python-crypto <= %{{version}}
 Provides: python-crypto = %{{version}}
 Summary: Cryptographic modules for Python.
 
