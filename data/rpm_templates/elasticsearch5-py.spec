@@ -53,12 +53,12 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 rm -rf %{{buildroot}}
 
 %files -n python2-elasticsearch5
-/usr/lib/python2*/site-packages/elasticsearch5/
-/usr/lib/python2*/site-packages/elasticsearch5*.egg-info
+%{{python2_sitelib}}/elasticsearch5/
+%{{python2_sitelib}}/elasticsearch5*.egg-info
 
 %files -n python3-elasticsearch5
-/usr/lib/python3*/site-packages/elasticsearch5/
-/usr/lib/python3*/site-packages/elasticsearch5*.egg-info
+%{{python3_sitelib}}/elasticsearch5/
+%{{python3_sitelib}}/elasticsearch5*.egg-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

@@ -61,13 +61,13 @@ rm -rf %{{buildroot}}
 
 %files -n python2-%{{name}}
 %license LICENSE.txt
-/usr/lib/python2*/site-packages/xlsxwriter/
-/usr/lib/python2*/site-packages/XlsxWriter*.egg-info
+%{{python2_sitelib}}/xlsxwriter/
+%{{python2_sitelib}}/XlsxWriter*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE.txt
-/usr/lib/python3*/site-packages/xlsxwriter/
-/usr/lib/python3*/site-packages/XlsxWriter*.egg-info
+%{{python3_sitelib}}/xlsxwriter/
+%{{python3_sitelib}}/XlsxWriter*.egg-info
 
 %exclude %{{_bindir}}/*
 

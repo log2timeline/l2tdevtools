@@ -65,15 +65,15 @@ rm -rf %{{buildroot}}
 %files -n python2-%{{name}}
 %license LICENSE
 %doc CHANGES README
-/usr/lib/python2*/site-packages/pyparsing.*
-/usr/lib/python2*/site-packages/pyparsing*.egg-info
+%{{python2_sitelib}}/pyparsing.*
+%{{python2_sitelib}}/pyparsing*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE
 %doc CHANGES README
-/usr/lib/python3*/site-packages/pyparsing.*
-/usr/lib/python3*/site-packages/__pycache__/
-/usr/lib/python3*/site-packages/pyparsing*.egg-info
+%{{python3_sitelib}}/pyparsing.*
+%{{python3_sitelib}}/__pycache__/
+%{{python3_sitelib}}/pyparsing*.egg-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

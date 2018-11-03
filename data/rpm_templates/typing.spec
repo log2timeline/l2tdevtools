@@ -56,12 +56,12 @@ rm -rf %{{buildroot}}
 %files -n python2-%{{name}}
 %license LICENSE
 %doc CHANGES
-/usr/lib/python2*/site-packages/
+%{{python2_sitelib}}/
 
 %files -n python3-%{{name}}
 %license LICENSE
 %doc CHANGES
-/usr/lib/python3*/site-packages/
+%{{python3_sitelib}}/
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

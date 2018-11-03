@@ -54,12 +54,12 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 rm -rf %{{buildroot}}
 
 %files -n python2-%{{name}}
-/usr/lib/python2*/site-packages/bencode/
-/usr/lib/python2*/site-packages/bencode.py*.egg-info
+%{{python2_sitelib}}/bencode/
+%{{python2_sitelib}}/bencode.py*.egg-info
 
 %files -n python3-%{{name}}
-/usr/lib/python3*/site-packages/bencode/
-/usr/lib/python3*/site-packages/bencode.py*.egg-info
+%{{python3_sitelib}}/bencode/
+%{{python3_sitelib}}/bencode.py*.egg-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

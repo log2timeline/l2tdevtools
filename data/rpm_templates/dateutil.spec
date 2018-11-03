@@ -55,13 +55,13 @@ rm -rf %{{buildroot}}
 
 %files -n python2-%{{name}}
 %license LICENSE
-/usr/lib/python2*/site-packages/dateutil/
-/usr/lib/python2*/site-packages/python_dateutil*.egg-info
+%{{python2_sitelib}}/dateutil/
+%{{python2_sitelib}}/python_dateutil*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE
-/usr/lib/python3*/site-packages/dateutil/
-/usr/lib/python3*/site-packages/python_dateutil*.egg-info
+%{{python3_sitelib}}/dateutil/
+%{{python3_sitelib}}/python_dateutil*.egg-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

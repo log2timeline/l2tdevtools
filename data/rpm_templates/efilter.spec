@@ -55,16 +55,16 @@ rm -rf %{{buildroot}}
 
 %files -n python2-%{{name}}
 %license LICENSE.txt
-/usr/lib/python2*/site-packages/efilter/
-/usr/lib/python2*/site-packages/efilter*.egg-info
+%{{python2_sitelib}/efilter/
+%{{python2_sitelib}/efilter*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE.txt
-/usr/lib/python3*/site-packages/efilter/
-/usr/lib/python3*/site-packages/efilter*.egg-info
+%{{python3_sitelib}}/efilter/
+%{{python3_sitelib}}/efilter*.egg-info
 
-%exclude /usr/lib/python2*/site-packages/sample_projects
-%exclude /usr/lib/python3*/site-packages/sample_projects
+%exclude %{{python2_sitelib}}/sample_projects
+%exclude %{{python3_sitelib}}/sample_projects
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1
