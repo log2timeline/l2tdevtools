@@ -193,8 +193,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{python2_sitelib}}/{3:s}*.so\n'
-          b'%{{python2_sitelib}}/{3:s}*.egg-info\n').format(
+          b'%{{_libdir}}/python2*/site-packages/{3:s}*.so\n'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
     elif project_definition.architecture_dependent:
@@ -202,8 +202,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{python2_sitelib}}/{3:s}\n'
-          b'%{{python2_sitelib}}/{3:s}*.egg-info\n').format(
+          b'%{{_libdir}}/python2*/site-packages/{3:s}\n'
+          b'%{{_libdir}}/python2*/site-packages/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
     else:
@@ -260,6 +260,7 @@ class RPMSpecFileGenerator(object):
     # TODO: replace hard coding one-offs with templates.
     if project_name == 'pefile':
       output_file_object.write((
+          b'\n'
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
@@ -268,20 +269,22 @@ class RPMSpecFileGenerator(object):
 
     elif project_name == 'pytsk3':
       output_file_object.write((
+          b'\n'
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{python3_sitelib}}/{3:s}*.so\n'
-          b'%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
+          b'%{{_libdir}}/python3*/site-packages/{3:s}*.so\n'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
     elif project_definition.architecture_dependent:
       output_file_object.write((
+          b'\n'
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'%{{python3_sitelib}}/{3:s}\n'
-          b'%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
+          b'%{{_libdir}}/python3*/site-packages/{3:s}\n'
+          b'%{{_libdir}}/python3*/site-packages/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
     else:
@@ -501,7 +504,8 @@ class RPMSpecFileGenerator(object):
 
         elif (line.startswith(b'python setup.py build') or
             line.startswith(b'python2 setup.py build') or
-            line.startswith(b'%py2_build')):
+            line.startswith(b'%py2_build') or line.startswith(
+                b'env CFLAGS="$RPM_OPT_FLAGS" python setup.py build')):
           line = self._GetBuildDefinition(python2_only)
 
         elif (line.startswith(b'python setup.py install') or
