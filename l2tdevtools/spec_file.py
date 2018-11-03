@@ -150,6 +150,8 @@ class RPMSpecFileGenerator(object):
     """
     output_file_object.write((
         b'%package -n {0:s}\n'
+        b'Obsoletes: python-%{{name}} < %{{version}}\n'
+        b'Provides: python-%{{name}} = %{{version}}\n'
         b'{1:s}'
         b'{2:s}'
         b'\n'
