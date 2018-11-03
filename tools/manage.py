@@ -442,11 +442,11 @@ class PackagesManager(object):
     super(PackagesManager, self).__init__()
     self._copr_project_manager = COPRProjectManager(
         'gift', distribution=fedora_distribution)
-    self._distribution = distribution
     self._github_repo_manager = GithubRepoManager()
     self._launchpad_ppa_manager = LaunchpadPPAManager(
         'gift', distribution=ubuntu_distribution)
     self._pypi_manager = PyPIManager(projects_file)
+    self._ubuntu_distribution = ubuntu_distribution
 
   def _ComparePackages(self, reference_packages, packages):
     """Compares the packages.
@@ -626,7 +626,8 @@ class PackagesManager(object):
       # The directory contains various files and we are only interested
       # in the source dpkg packages that use the naming convention:
       # package_version-#ppa1~distribution_source.changes
-      name_suffix = 'ppa1~{0:s}_source.changes'.format(self._distribution)
+      name_suffix = 'ppa1~{0:s}_source.changes'.format(
+          self._ubuntu_distribution)
       if not directory_entry.endswith(name_suffix):
         continue
 
