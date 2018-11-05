@@ -6,7 +6,7 @@
 # Exit on error.
 set -e
 
-# Dependencies for running plaso, alphabetized, one per line.
+# Dependencies for running ${project_name}, alphabetized, one per line.
 # This should not include packages only required for testing or development.
 ${python_dependencies}
 
