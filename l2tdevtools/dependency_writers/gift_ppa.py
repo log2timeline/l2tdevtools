@@ -32,7 +32,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
     formatted_python_dependencies = []
 
     libyal_dependencies = []
-    for index, dependency in enumerate(python_dependencies):
+    for index, dependency in enumerate(sorted(python_dependencies)):
       if index == 0:
         line = 'PYTHON{0:d}_DEPENDENCIES="{1:s}'.format(
             python_version, dependency)
@@ -53,20 +53,23 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     test_dependencies = ['python-mock']
 
-    development_dependencies = ['python-sphinx', 'pylint']
+    development_dependencies = ['pylint']
+
+    if self._project_definition.name == 'plaso':
+      development_dependencies.append('python-sphinx')
 
     debug_dependencies = []
-    for index, dependency in enumerate(libyal_dependencies):
-      debug_dependencies.append('{0:s}-dbg'.format(dependency))
-      debug_dependencies.append(
-          '{0:s}-{1:s}-dbg'.format(dependency, python_version_string))
+    for index, dependency in enumerate(sorted(libyal_dependencies)):
+      debug_dependencies.extend([
+          '{0:s}-dbg'.format(dependency),
+          '{0:s}-{1:s}-dbg'.format(dependency, python_version_string)])
 
     if python_version == 2 and self._project_definition.name == 'plaso':
       debug_dependencies.append('python-guppy')
 
     formatted_test_dependencies = []
     if test_dependencies:
-      for index, dependency in enumerate(test_dependencies):
+      for index, dependency in enumerate(sorted(test_dependencies)):
         if index == 0:
           line = 'TEST_DEPENDENCIES="{0:s}'.format(dependency)
         else:
@@ -81,7 +84,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     formatted_development_dependencies = []
     if development_dependencies:
-      for index, dependency in enumerate(development_dependencies):
+      for index, dependency in enumerate(sorted(development_dependencies)):
         if index == 0:
           line = 'DEVELOPMENT_DEPENDENCIES="{0:s}'.format(dependency)
         else:
@@ -97,7 +100,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     formatted_debug_dependencies = []
     if debug_dependencies:
-      for index, dependency in enumerate(debug_dependencies):
+      for index, dependency in enumerate(sorted(debug_dependencies)):
         if index == 0:
           line = 'DEBUG_DEPENDENCIES="{0:s}'.format(dependency)
         else:
