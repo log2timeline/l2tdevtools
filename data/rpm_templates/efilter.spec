@@ -55,8 +55,8 @@ rm -rf %{{buildroot}}
 
 %files -n python2-%{{name}}
 %license LICENSE.txt
-%{{python2_sitelib}/efilter/
-%{{python2_sitelib}/efilter*.egg-info
+%{{python2_sitelib}}/efilter/
+%{{python2_sitelib}}/efilter*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE.txt
