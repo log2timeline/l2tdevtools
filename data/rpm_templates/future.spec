@@ -16,7 +16,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Ed Schofield <ed@pythoncharmers.com>
 Url: https://python-future.org
-BuildRequires: python2-setuptools, python3-setuptools
+BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 future is the missing compatibility layer between Python 2

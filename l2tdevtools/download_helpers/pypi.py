@@ -43,7 +43,6 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     Returns:
       str: latest version number or None if not available.
     """
-    return "0.16.0"
     if version_definition:
       earliest_version = version_definition.GetEarliestVersion()
       if earliest_version and earliest_version[0] == '==':
