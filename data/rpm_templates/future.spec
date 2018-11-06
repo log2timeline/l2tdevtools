@@ -16,7 +16,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Ed Schofield <ed@pythoncharmers.com>
 Url: https://python-future.org
-BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
+BuildRequires: python2-setuptools, python3-setuptools
 
 %description
 future is the missing compatibility layer between Python 2
@@ -50,9 +50,9 @@ rm -rf %{{_builddir}}/%{{unmangled_name}}-%{{unmangled_version}}/build
 %py3_build
 
 %install
-%py2_install
+python2 setup.py install -O1 --root=%{{buildroot}}
 rm -rf %{{_builddir}}/%{{unmangled_name}}-%{{unmangled_version}}/build
-%py3_install
+python3 setup.py install -O1 --root=%{{buildroot}}
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
