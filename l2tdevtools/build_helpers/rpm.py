@@ -579,11 +579,11 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    rpm_name = self._project_definition.rpm_name or project_name
-    if rpm_name.startswith('python-') or rpm_name.startswith('python2-'):
-      _, _, rpm_name = rpm_name.partition('-')
+    srpm_name = self._project_definition.srpm_name or project_name
+    if srpm_name.startswith('python-') or srpm_name.startswith('python2-'):
+      _, _, srpm_name = srpm_name.partition('-')
 
-    filenames_glob = '{0:s}-*{1!s}-1.src.rpm'.format(rpm_name, project_version)
+    filenames_glob = '{0:s}-*{1!s}-1.src.rpm'.format(srpm_name, project_version)
     filenames_glob = os.path.join(self._rpmbuild_srpms_path, filenames_glob)
 
     self._MoveFilesToCurrentDirectory(filenames_glob)

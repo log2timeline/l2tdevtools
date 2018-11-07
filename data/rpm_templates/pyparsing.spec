@@ -16,7 +16,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Paul McGuire <ptmcg@users.sourceforge.net>
 Url: http://pyparsing.wikispaces.com/
-BuildRequires: python2-setuptools, python3-setuptools
+BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 The parsing module is an alternative approach to creating
@@ -26,6 +26,8 @@ of classes that client code uses to construct the grammar directly
 in Python code.
 
 %package -n python2-%{{name}}
+Obsoletes: python-pyparsing < %{{version}}
+Provides: python-pyparsing = %{{version}}
 Summary: Python parsing module
 
 %description -n python2-%{{name}}
@@ -49,12 +51,12 @@ in Python code.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-python2 setup.py build
-python3 setup.py build
+%py2_build
+%py3_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -62,16 +64,16 @@ rm -rf %{{buildroot}}
 
 %files -n python2-%{{name}}
 %license LICENSE
-%doc CHANGES README
-/usr/lib/python2*/site-packages/pyparsing.*
-/usr/lib/python2*/site-packages/pyparsing*.egg-info
+%doc CHANGES README.md
+%{{python2_sitelib}}/pyparsing.*
+%{{python2_sitelib}}/pyparsing*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE
-%doc CHANGES README
-/usr/lib/python3*/site-packages/pyparsing.*
-/usr/lib/python3*/site-packages/__pycache__/
-/usr/lib/python3*/site-packages/pyparsing*.egg-info
+%doc CHANGES README.md
+%{{python3_sitelib}}/pyparsing.*
+%{{python3_sitelib}}/__pycache__/
+%{{python3_sitelib}}/pyparsing*.egg-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

@@ -16,16 +16,18 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Honza Král <honza.kral@gmail.com>
 Url: https://github.com/elastic/elasticsearch-py
-BuildRequires: python2-setuptools, python3-setuptools
+BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 Python client for Elasticsearch5.
 
-%package -n python-elasticsearch5
+%package -n python2-elasticsearch5
+Obsoletes: python-elasticsearch5 < %{{version}}
+Provides: python-elasticsearch5 = %{{version}}
 Summary: Python client for Elasticsearch5
-Requires: python-urllib3
+Requires: python2-urllib3
 
-%description -n python-elasticsearch5
+%description -n python2-elasticsearch5
 Python client for Elasticsearch.
 
 %package -n python3-elasticsearch5
@@ -39,24 +41,24 @@ Python client for Elasticsearch5.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-python2 setup.py build
-python3 setup.py build
+%py2_build
+%py3_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-elasticsearch5
-/usr/lib/python2*/site-packages/elasticsearch5/
-/usr/lib/python2*/site-packages/elasticsearch5*.egg-info
+%files -n python2-elasticsearch5
+%{{python2_sitelib}}/elasticsearch5/
+%{{python2_sitelib}}/elasticsearch5*.egg-info
 
 %files -n python3-elasticsearch5
-/usr/lib/python3*/site-packages/elasticsearch5/
-/usr/lib/python3*/site-packages/elasticsearch5*.egg-info
+%{{python3_sitelib}}/elasticsearch5/
+%{{python3_sitelib}}/elasticsearch5*.egg-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import glob
 import os
 import textwrap
 
@@ -77,6 +78,31 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.py')
 
+  def _DetermineSubmoduleLevels(self, project_name):
+    """Determines the number of submodule levels.
+
+    Args:
+      project_name (str): name of the project.
+
+    Return:
+      int: number of submodule levels.
+    """
+    submodule_glob = project_name
+    submodule_levels = 0
+
+    while submodule_levels < 10:
+      submodule_glob = '{0:s}/*'.format(submodule_glob)
+      submodule_paths = [
+          path for path in glob.glob(submodule_glob)
+          if os.path.isdir(path) and os.path.basename(path) != '__pycache__']
+
+      if not submodule_paths:
+        break
+
+      submodule_levels += 1
+
+    return submodule_levels
+
   def _GenerateFromTemplate(self, template_filename, template_mappings):
     """Generates file context based on a template file.
 
@@ -146,6 +172,77 @@ class SetupPyWriter(interface.DependencyFileWriter):
     packages_exclude = ', '.join([
         '\'{0:s}\''.format(exclude) for exclude in sorted(packages_exclude)])
 
+    submodule_levels = self._DetermineSubmoduleLevels(
+        self._project_definition.name)
+
+    python2_package_module_prefix = '%{{{{python2_sitelib}}}}/{0:s}'.format(
+        self._project_definition.name)
+    python2_package_files = [
+        '{0:s}/*.py'.format(python2_package_module_prefix)]
+
+    for _ in range(submodule_levels):
+      python2_package_module_prefix = '{0:s}/*'.format(
+          python2_package_module_prefix)
+      python2_package_files.append(
+          '{0:s}/*.py'.format(python2_package_module_prefix))
+
+    python2_package_files.extend([
+        '%{{python2_sitelib}}/{0:s}*.egg-info/*',
+        '',
+        '%exclude %{{_prefix}}/share/doc/*'])
+
+    python2_package_module_prefix = '%{{{{python2_sitelib}}}}/{0:s}'.format(
+        self._project_definition.name)
+    python2_package_files.extend([
+        '%exclude {0:s}/*.pyc'.format(python2_package_module_prefix),
+        '%exclude {0:s}/*.pyo'.format(python2_package_module_prefix)])
+
+    for _ in range(submodule_levels):
+      python2_package_module_prefix = '{0:s}/*'.format(
+          python2_package_module_prefix)
+      python2_package_files.extend([
+          '%exclude {0:s}/*.pyc'.format(python2_package_module_prefix),
+          '%exclude {0:s}/*.pyo'.format(python2_package_module_prefix)])
+
+    python2_package_files = ',\n'.join([
+        '                \'{0:s}\''.format(package_file)
+        for package_file in python2_package_files])
+    python2_package_files = python2_package_files.format(
+        self._project_definition.name)
+
+    python3_package_module_prefix = '%{{{{python3_sitelib}}}}/{0:s}'.format(
+        self._project_definition.name)
+    python3_package_files = [
+        '{0:s}/*.py'.format(python3_package_module_prefix)]
+
+    for _ in range(submodule_levels):
+      python3_package_module_prefix = '{0:s}/*'.format(
+          python3_package_module_prefix)
+      python3_package_files.append(
+          '{0:s}/*.py'.format(python3_package_module_prefix))
+
+    python3_package_files.extend([
+        '%{{python3_sitelib}}/{0:s}*.egg-info/*',
+        '',
+        '%exclude %{{_prefix}}/share/doc/*'])
+
+    python3_package_module_prefix = '%{{{{python3_sitelib}}}}/{0:s}'.format(
+        self._project_definition.name)
+    python3_package_files.append(
+        '%exclude {0:s}/__pycache__/*'.format(python3_package_module_prefix))
+
+    for _ in range(submodule_levels):
+      python3_package_module_prefix = '{0:s}/*'.format(
+          python3_package_module_prefix)
+      python3_package_files.append(
+          '%exclude {0:s}/__pycache__/*'.format(python3_package_module_prefix))
+
+    python3_package_files = ',\n'.join([
+        '                \'{0:s}\''.format(package_file)
+        for package_file in python3_package_files])
+    python3_package_files = python3_package_files.format(
+        self._project_definition.name)
+
     template_mappings = {
         'doc_files': ', '.join([
             '\'{0:s}\''.format(doc_file) for doc_file in doc_files]),
@@ -158,6 +255,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'packages_exclude': packages_exclude,
         'project_name_description': self._project_definition.name_description,
         'project_name': self._project_definition.name,
+        'python2_package_files': python2_package_files,
+        'python3_package_files': python3_package_files,
         'rpm_doc_files': ' '.join(doc_files),
         'scripts_directory': scripts_directory,
     }
