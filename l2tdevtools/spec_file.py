@@ -622,7 +622,7 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    if project_name == 'psutil':
+    if project_name == 'pyzmq':
       rpm_build_dependencies = ['gcc']
     else:
       rpm_build_dependencies = []
