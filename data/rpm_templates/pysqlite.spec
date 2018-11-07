@@ -15,16 +15,18 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Gerhard Haering <gh@ghaering.de>
 Url: http://github.com/ghaering/pysqlite
-BuildRequires: python2-setuptools, python-devel, sqlite-devel
+BuildRequires: python2-setuptools, python2-devel, sqlite-devel
 
 %description
 pysqlite is a DB-API 2.0-compliant database interface
 for SQLite.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-pysqlite < %{{version}}
+Provides: python-pysqlite = %{{version}}
 Summary: DB-API 2.0 interface for SQLite 3.x
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 pysqlite is a DB-API 2.0-compliant database interface
 for SQLite.
 
@@ -32,16 +34,16 @@ for SQLite.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
+env CFLAGS="$RPM_OPT_FLAGS" %py2_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
+%py2_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE
 %{{_libdir}}/python2*/site-packages/pysqlite2/
 %{{_libdir}}/python2*/site-packages/pysqlite*.egg-info

@@ -56,6 +56,7 @@ class ProjectDefinition(object):
     rpm_python2_prefix (str): Python 2 RPM package prefix.
     rpm_template_spec (str): name of the rpm spec file.
     setup_name (str): project name used in setup.py.
+    srpm_name (str): source RPM package name.
     version (ProjectVersionDefinition): version requirements.
   """
 
@@ -99,6 +100,7 @@ class ProjectDefinition(object):
     self.pkg_configure_options = None
     self.pypi_name = None
     self.setup_name = None
+    self.srpm_name = None
     self.version = None
 
   def IsPython2Only(self):
@@ -288,6 +290,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'pypi_name')
       project_definition.setup_name = self._GetConfigValue(
           config_parser, section_name, 'setup_name')
+      project_definition.srpm_name = self._GetConfigValue(
+          config_parser, section_name, 'srpm_name')
       project_definition.version = self._GetConfigValue(
           config_parser, section_name, 'version')
 

@@ -16,17 +16,19 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Ed Schofield <ed@pythoncharmers.com>
 Url: https://python-future.org
-BuildRequires: python2-setuptools, python3-setuptools
+BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 future is the missing compatibility layer between Python 2
 and Python 3. It allows you to use a single, clean Python 3.x-compatible
 codebase to support both Python 2 and Python 3 with minimal overhead.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-future < %{{version}}
+Provides: python-future = %{{version}}
 Summary: Clean single-source support for Python 3 and 2
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 future is the missing compatibility layer between Python 2
 and Python 3. It allows you to use a single, clean Python 3.x-compatible
 codebase to support both Python 2 and Python 3 with minimal overhead.
@@ -43,9 +45,9 @@ codebase to support both Python 2 and Python 3 with minimal overhead.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-python2 setup.py build
+%py2_build
 rm -rf %{{_builddir}}/%{{unmangled_name}}-%{{unmangled_version}}/build
-python3 setup.py build
+%py3_build
 
 %install
 python2 setup.py install -O1 --root=%{{buildroot}}
@@ -56,13 +58,13 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE.txt
-/usr/lib/python2*/site-packages/*
+%{{python2_sitelib}}/*
 
 %files -n python3-%{{name}}
 %license LICENSE.txt
-/usr/lib/python3*/site-packages/*
+%{{python3_sitelib}}/*
 
 %exclude %{{_bindir}}/*
 

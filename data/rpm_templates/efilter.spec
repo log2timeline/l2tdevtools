@@ -17,16 +17,18 @@ BuildArch: noarch
 Vendor: Adam Sindelar <adam.sindelar@gmail.com>
 Packager: Adam Sindelar <adam.sindelar@gmail.com>
 Url: https://github.com/google/dotty/
-BuildRequires: python2-devel, python2-setuptools, python3-devel, python3-setuptools
+BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-efilter < %{{version}}
+Provides: python-efilter = %{{version}}
 Summary: EFILTER query language
 Requires: python2-dateutil, python2-six >= 1.4.0, python2-pytz
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 EFILTER is a general-purpose destructuring and search language implemented in Python, and suitable for integration with any Python project that requires a search function for some of its data.
 
 %package -n python3-%{{name}}
@@ -40,29 +42,29 @@ EFILTER is a general-purpose destructuring and search language implemented in Py
 %autosetup -n dotty-%{{unmangled_version}}
 
 %build
-python2 setup.py build
-python3 setup.py build
+%py2_build
+%py3_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE.txt
-/usr/lib/python2*/site-packages/efilter/
-/usr/lib/python2*/site-packages/efilter*.egg-info
+%{{python2_sitelib}}/efilter/
+%{{python2_sitelib}}/efilter*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE.txt
-/usr/lib/python3*/site-packages/efilter/
-/usr/lib/python3*/site-packages/efilter*.egg-info
+%{{python3_sitelib}}/efilter/
+%{{python3_sitelib}}/efilter*.egg-info
 
-%exclude /usr/lib/python2*/site-packages/sample_projects
-%exclude /usr/lib/python3*/site-packages/sample_projects
+%exclude %{{python2_sitelib}}/sample_projects
+%exclude %{{python3_sitelib}}/sample_projects
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

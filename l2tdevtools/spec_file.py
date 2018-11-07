@@ -43,9 +43,9 @@ class RPMSpecFileGenerator(object):
     Returns:
       str: build definition.
     """
-    lines = [b'python2 setup.py build']
+    lines = [b'%py2_build']
     if not python2_only:
-      lines.append(b'python3 setup.py build')
+      lines.append(b'%py3_build')
 
     lines.append(b'')
     return b'\n'.join(lines)
@@ -82,9 +82,9 @@ class RPMSpecFileGenerator(object):
     Returns:
       str: install definition.
     """
-    lines = [b'python2 setup.py install -O1 --root=%{buildroot}']
+    lines = [b'%py2_install']
     if not python2_only:
-      lines.append(b'python3 setup.py install -O1 --root=%{buildroot}')
+      lines.append(b'%py3_install')
 
     lines.extend([
         b'rm -rf %{buildroot}/usr/share/doc/%{name}/'])
@@ -150,6 +150,8 @@ class RPMSpecFileGenerator(object):
     """
     output_file_object.write((
         b'%package -n {0:s}\n'
+        b'Obsoletes: python-%{{name}} < %{{version}}\n'
+        b'Provides: python-%{{name}} = %{{version}}\n'
         b'{1:s}'
         b'{2:s}'
         b'\n'
@@ -185,7 +187,7 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'/usr/lib/python2*/site-packages/\n').format(
+          b'%{{python2_sitelib}}/\n').format(
               name, license_line, doc_line))
 
     elif project_name == 'pytsk3':
@@ -211,8 +213,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'/usr/lib/python2*/site-packages/{3:s}\n'
-          b'/usr/lib/python2*/site-packages/{3:s}*.egg-info\n').format(
+          b'%{{python2_sitelib}}/{3:s}\n'
+          b'%{{python2_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
   def _WritePython3PackageDefinition(
@@ -260,14 +262,16 @@ class RPMSpecFileGenerator(object):
     # TODO: replace hard coding one-offs with templates.
     if project_name == 'pefile':
       output_file_object.write((
+          b'\n'
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'/usr/lib/python3*/site-packages/\n').format(
+          b'%{{python3_sitelib}}/\n').format(
               name, license_line, doc_line))
 
     elif project_name == 'pytsk3':
       output_file_object.write((
+          b'\n'
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
@@ -277,6 +281,7 @@ class RPMSpecFileGenerator(object):
 
     elif project_definition.architecture_dependent:
       output_file_object.write((
+          b'\n'
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
@@ -290,8 +295,8 @@ class RPMSpecFileGenerator(object):
           b'%files -n {0:s}\n'
           b'{1:s}'
           b'{2:s}'
-          b'/usr/lib/python3*/site-packages/{3:s}\n'
-          b'/usr/lib/python3*/site-packages/{3:s}*.egg-info\n').format(
+          b'%{{python3_sitelib}}/{3:s}\n'
+          b'%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
   def GenerateWithSetupPy(self, source_directory, build_log_file):
@@ -446,6 +451,13 @@ class RPMSpecFileGenerator(object):
 
           has_python2_package = True
 
+          if line.startswith(b'%package -n python2-'):
+            if python2_package_prefix == 'python-':
+              logging.warning(
+                  'rpm_python_package prefix is: "python" but spec file '
+                  'defines: "python2"')
+            python2_package_prefix = 'python2-'
+
         elif line.startswith(b'%package -n python3-'):
           has_python3_package = True
 
@@ -492,10 +504,15 @@ class RPMSpecFileGenerator(object):
           else:
             line = b'%autosetup -n %{unmangled_name}-%{unmangled_version}\n'
 
-        elif line.startswith(b'python setup.py build'):
+        elif (line.startswith(b'python setup.py build') or
+              line.startswith(b'python2 setup.py build') or
+              line.startswith(b'%py2_build') or line.startswith(
+                  b'env CFLAGS="$RPM_OPT_FLAGS" python setup.py build')):
           line = self._GetBuildDefinition(python2_only)
 
-        elif line.startswith(b'python setup.py install'):
+        elif (line.startswith(b'python setup.py install') or
+              line.startswith(b'python2 setup.py install') or
+              line.startswith(b'%py2_install')):
           line = self._GetInstallDefinition(project_name, python2_only)
 
         elif line == b'rm -rf $RPM_BUILD_ROOT\n':
@@ -605,18 +622,18 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    rpm_build_dependencies = ['python2-setuptools']
-    if project_definition.architecture_dependent:
-      rpm_build_dependencies.append('python-devel')
+    if project_name in ('psutil', 'pytsk3', 'pyzmq'):
+      rpm_build_dependencies = ['gcc']
+    else:
+      rpm_build_dependencies = []
+
+    rpm_build_dependencies.extend(['python2-setuptools', 'python2-devel'])
 
     if project_definition.rpm_build_dependencies:
-      rpm_build_dependencies.extend(
-          project_definition.rpm_build_dependencies)
+      rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
 
     if not python2_only:
-      rpm_build_dependencies.append('python3-setuptools')
-      if project_definition.architecture_dependent:
-        rpm_build_dependencies.append('python3-devel')
+      rpm_build_dependencies.extend(['python3-setuptools', 'python3-devel'])
 
       if project_definition.rpm_build_dependencies:
         for dependency in project_definition.rpm_build_dependencies:
@@ -665,15 +682,13 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    rpm_build_dependencies = ['python-devel', 'python-setuptools']
+    rpm_build_dependencies = ['python2-devel', 'python2-setuptools']
 
     if not python2_only:
-      rpm_build_dependencies.append('python3-devel')
-      rpm_build_dependencies.append('python3-setuptools')
+      rpm_build_dependencies.extend(['python3-devel', 'python3-setuptools'])
 
     if project_definition.rpm_build_dependencies:
-      rpm_build_dependencies.extend(
-          project_definition.rpm_build_dependencies)
+      rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
 
     # TODO: check if already prefixed with python-
 

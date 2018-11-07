@@ -17,15 +17,17 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Dwayne C. Litzenberger <dlitz@dlitz.net>
 Url: http://www.pycrypto.org/
-BuildRequires: python2-setuptools, python-devel, python3-setuptools, python3-devel
+BuildRequires: gcc, python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 Cryptographic modules for Python
 
-%package -n python-crypto
+%package -n python2-crypto
+Obsoletes: python-crypto <= %{{version}}
+Provides: python-crypto = %{{version}}
 Summary: Cryptographic modules for Python.
 
-%description -n python-crypto
+%description -n python2-crypto
 Cryptographic modules for Python
 
 %package -n python3-crypto
@@ -38,17 +40,18 @@ Cryptographic modules for Python
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
+env CFLAGS="$RPM_OPT_FLAGS" %py2_build
+env CFLAGS="$RPM_OPT_FLAGS" %py3_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-crypto
+%files -n python2-crypto
 %doc README
 %{{_libdir}}/python2*/site-packages/Crypto/
 %{{_libdir}}/python2*/site-packages/pycrypto*.egg-info

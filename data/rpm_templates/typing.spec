@@ -16,16 +16,18 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Jukka Lehtosalo <jukka.lehtosalo@iki.fi>
 Url: http://pypi.org/project/typing/
-BuildRequires: python2-setuptools, python3-setuptools
+BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 Backport of the standard library typing module to Python versions older
 than 3.5.
 
-%package -n python-%{{name}}
+%package -n python2-%{{name}}
+Obsoletes: python-typing < %{{version}}
+Provides: python-typing = %{{version}}
 Summary: Type Hints for Python
 
-%description -n python-%{{name}}
+%description -n python2-%{{name}}
 Backport of the standard library typing module to Python versions older
 than 3.5.
 
@@ -40,26 +42,26 @@ than 3.5.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-python2 setup.py build
-python3 setup.py build
+%py2_build
+%py3_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
-python3 setup.py install -O1 --root=%{{buildroot}}
+%py2_install
+%py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python-%{{name}}
+%files -n python2-%{{name}}
 %license LICENSE
 %doc CHANGES
-/usr/lib/python2*/site-packages/
+%{{python2_sitelib}}/
 
 %files -n python3-%{{name}}
 %license LICENSE
 %doc CHANGES
-/usr/lib/python3*/site-packages/
+%{{python3_sitelib}}/
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

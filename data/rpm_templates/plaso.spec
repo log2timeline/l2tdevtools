@@ -17,7 +17,7 @@ BuildArch: noarch
 Vendor: Log2Timeline maintainers <log2timeline-maintainers@googlegroups.com>
 Packager: Log2Timeline maintainers <log2timeline-maintainers@googlegroups.com>
 Url: https://github.com/log2timeline/plaso
-BuildRequires: python2-setuptools
+BuildRequires: python2-setuptools, python2-devel
 
 %description
 Plaso (log2timeline) is a framework to create super timelines. Its purpose is to extract timestamps from various files found on typical computer systems and aggregate them.
@@ -46,10 +46,10 @@ Plaso (log2timeline) is a framework to create super timelines. Its purpose is to
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-python2 setup.py build
+%py2_build
 
 %install
-python2 setup.py install -O1 --root=%{{buildroot}}
+%py2_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
