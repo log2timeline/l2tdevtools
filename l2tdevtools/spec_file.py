@@ -625,7 +625,7 @@ class RPMSpecFileGenerator(object):
     if project_name in ('psutil', 'pysqlite', 'pyzmq'):
       rpm_build_dependencies = ['gcc']
 
-    else if project_name == 'pytsk3':
+    elif project_name == 'pytsk3':
       rpm_build_dependencies = ['gcc', 'libstdc++-devel']
 
     else:
