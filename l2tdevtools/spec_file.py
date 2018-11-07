@@ -505,14 +505,14 @@ class RPMSpecFileGenerator(object):
             line = b'%autosetup -n %{unmangled_name}-%{unmangled_version}\n'
 
         elif (line.startswith(b'python setup.py build') or
-            line.startswith(b'python2 setup.py build') or
-            line.startswith(b'%py2_build') or line.startswith(
-                b'env CFLAGS="$RPM_OPT_FLAGS" python setup.py build')):
+              line.startswith(b'python2 setup.py build') or
+              line.startswith(b'%py2_build') or line.startswith(
+                  b'env CFLAGS="$RPM_OPT_FLAGS" python setup.py build')):
           line = self._GetBuildDefinition(python2_only)
 
         elif (line.startswith(b'python setup.py install') or
-            line.startswith(b'python2 setup.py install') or
-            line.startswith(b'%py2_install')):
+              line.startswith(b'python2 setup.py install') or
+              line.startswith(b'%py2_install')):
           line = self._GetInstallDefinition(project_name, python2_only)
 
         elif line == b'rm -rf $RPM_BUILD_ROOT\n':

@@ -88,14 +88,18 @@ class SetupPyWriter(interface.DependencyFileWriter):
       int: number of submodule levels.
     """
     submodule_glob = project_name
+    submodule_levels = 0
 
-    for submodule_levels in range(0, 10):
+    while submodule_levels < 10:
       submodule_glob = '{0:s}/*'.format(submodule_glob)
-      submodule_paths = set([
+      submodule_paths = [
           path for path in glob.glob(submodule_glob)
-          if os.path.isdir(path) and os.path.basename(path) != '__pycache__'])
+          if os.path.isdir(path) and os.path.basename(path) != '__pycache__']
+
       if not submodule_paths:
         break
+
+      submodule_levels += 1
 
     return submodule_levels
 
@@ -176,7 +180,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
     python2_package_files = [
         '{0:s}/*.py'.format(python2_package_module_prefix)]
 
-    for submodule_level in range(submodule_levels):
+    for _ in range(submodule_levels):
       python2_package_module_prefix = '{0:s}/*'.format(
           python2_package_module_prefix)
       python2_package_files.append(
@@ -193,7 +197,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         '%exclude {0:s}/*.pyc'.format(python2_package_module_prefix),
         '%exclude {0:s}/*.pyo'.format(python2_package_module_prefix)])
 
-    for submodule_level in range(submodule_levels):
+    for _ in range(submodule_levels):
       python2_package_module_prefix = '{0:s}/*'.format(
           python2_package_module_prefix)
       python2_package_files.extend([
@@ -211,7 +215,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
     python3_package_files = [
         '{0:s}/*.py'.format(python3_package_module_prefix)]
 
-    for submodule_level in range(submodule_levels):
+    for _ in range(submodule_levels):
       python3_package_module_prefix = '{0:s}/*'.format(
           python3_package_module_prefix)
       python3_package_files.append(
@@ -227,7 +231,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
     python3_package_files.append(
         '%exclude {0:s}/__pycache__/*'.format(python3_package_module_prefix))
 
-    for submodule_level in range(submodule_levels):
+    for _ in range(submodule_levels):
       python3_package_module_prefix = '{0:s}/*'.format(
           python3_package_module_prefix)
       python3_package_files.append(
