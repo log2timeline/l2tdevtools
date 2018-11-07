@@ -64,13 +64,13 @@ rm -rf %{{buildroot}}
 
 %files -n python2-%{{name}}
 %license LICENSE
-%doc CHANGES README
+%doc CHANGES README.md
 %{{python2_sitelib}}/pyparsing.*
 %{{python2_sitelib}}/pyparsing*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE
-%doc CHANGES README
+%doc CHANGES README.md
 %{{python3_sitelib}}/pyparsing.*
 %{{python3_sitelib}}/__pycache__/
 %{{python3_sitelib}}/pyparsing*.egg-info

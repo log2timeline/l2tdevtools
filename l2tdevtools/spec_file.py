@@ -622,7 +622,12 @@ class RPMSpecFileGenerator(object):
     """
     python2_only = project_definition.IsPython2Only()
 
-    rpm_build_dependencies = ['python2-setuptools', 'python2-devel']
+    if project_name == 'psutil':
+      rpm_build_dependencies = ['gcc']
+    else:
+      rpm_build_dependencies = []
+
+    rpm_build_dependencies.extend(['python2-setuptools', 'python2-devel'])
 
     if project_definition.rpm_build_dependencies:
       rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
