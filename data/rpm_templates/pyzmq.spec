@@ -3,6 +3,7 @@
 %define unmangled_name pyzmq
 %define unmangled_version {version}
 %define release 1
+%define py_setup_args --zmq=bundled
 
 Summary: Python bindings for 0MQ
 Name: %{{name}}
@@ -41,8 +42,8 @@ Messaging Library (http://www.zeromq.org).
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-env CFLAGS="$RPM_OPT_FLAGS" %py2_build --zmq=bundled
-env CFLAGS="$RPM_OPT_FLAGS" %py3_build --zmq=bundled
+%py2_build
+%py3_build
 
 %install
 %py2_install
