@@ -15,7 +15,7 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Gerhard Haering <gh@ghaering.de>
 Url: http://github.com/ghaering/pysqlite
-BuildRequires: python2-setuptools, python2-devel, sqlite-devel
+BuildRequires: gcc, sqlite-devel, python2-setuptools, python2-devel
 
 %description
 pysqlite is a DB-API 2.0-compliant database interface
