@@ -412,7 +412,7 @@ class DependencyUpdater(object):
       return self._InstallPackagesMacOS(
           package_filenames, package_versions)
 
-    elif self.operating_system == 'Windows':
+    if self.operating_system == 'Windows':
       return self._InstallPackagesWindows(
           package_filenames, package_versions)
 
@@ -524,7 +524,7 @@ class DependencyUpdater(object):
     if self.operating_system == 'Darwin':
       return self._UninstallPackagesMacOSX(package_versions)
 
-    elif self.operating_system == 'Windows':
+    if self.operating_system == 'Windows':
       return self._UninstallPackagesWindows(package_versions)
 
     return False
