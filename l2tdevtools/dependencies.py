@@ -518,6 +518,7 @@ class DependencyHelper(object):
         'pyevt',
         'pyevtx',
         'pyewf',
+        'pyfsapfs',
         'pyfsntfs',
         'pyfvde',
         'pyfwnt',
