@@ -381,7 +381,7 @@ class DPKGBuildFilesGenerator(object):
 
     architecture = self._GetArchitecture()
 
-    python2_only = self._IsPython2Only()
+    python2_only = self._project_definition.IsPython2Only()
 
     build_depends = []
     python3_build_depends = []
@@ -544,7 +544,7 @@ class DPKGBuildFilesGenerator(object):
             template_file, self._INSTALL_TEMPLATE_PYTHON2, template_values,
             output_filename)
 
-      if not self._IsPython2Only():
+      if not self._project_definition.IsPython2Only():
         template_files = (
             self._project_definition.dpkg_template_install_python3 or [None])
 
@@ -647,7 +647,7 @@ class DPKGBuildFilesGenerator(object):
         'setup_name': setup_name,
         'with_quilt': with_quilt}
 
-    if self._IsPython2Only():
+    if self._project_definition.IsPython2Only():
       rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON2_ONLY
     else:
       rules_template = self._RULES_TEMPLATE_SETUP_PY
@@ -759,18 +759,6 @@ class DPKGBuildFilesGenerator(object):
       return self._project_definition.dpkg_source_name
 
     return self._project_name
-
-  def _IsPython2Only(self):
-    """Determines if the project only supports Python version 2.
-
-    Note that Python 3 is supported as of 3.4 any earlier version is not
-    seen as compatible.
-
-    Returns:
-      bool: True if the project only support Python version 2.
-    """
-    return (self._project_definition.IsPython2Only() or
-            self._distribution == 'precise')
 
   def GenerateFiles(self, dpkg_path):
     """Generates the dpkg build files.

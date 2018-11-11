@@ -22,8 +22,9 @@ class ProjectDefinition(object):
     architecture_dependent (bool): True if the project is architecture
         dependent.
     build_dependencies (list[str]): build dependencies.
-    build_options (list[str]): build options. Current supported build options
-        are: python2_only (to only build for Python version 2).
+    build_options (list[str]): build options. Supported build options are:
+        * "python2_only", build support only for Python 2;
+        * "python3_only", build support only for Python 3.
     build_system (str): build system.
     configure_options (list[str]): configure options.
     description_long (str): long description of the project.
@@ -104,15 +105,20 @@ class ProjectDefinition(object):
     self.version = None
 
   def IsPython2Only(self):
-    """Determines if the project only supports Python version 2.
-
-    Note that Python 3 is supported as of 3.4 any earlier version is not
-    seen as compatible.
+    """Determines if the project only supports Python 2.
 
     Returns:
-      bool: True if the project only support Python version 2.
+      bool: True if the project only support Python 2.
     """
     return self.build_options and 'python2_only' in self.build_options
+
+  def IsPython3Only(self):
+    """Determines if the project only supports Python 3.
+
+    Returns:
+      bool: True if the project only support Python 3.
+    """
+    return self.build_options and 'python3_only' in self.build_options
 
 
 class ProjectVersionDefinition(object):

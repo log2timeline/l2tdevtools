@@ -912,6 +912,16 @@ def Main():
           project_name))
       continue
 
+    if sys.version_info[0] != 2 and project_definition.IsPython2Only():
+      logging.info('Skipping: {0:s} because it only supports Python 2'.format(
+          project_name))
+      continue
+
+    elif sys.version_info[0] != 3 and project_definition.IsPython3Only():
+      logging.info('Skipping: {0:s} because it only supports Python 3'.format(
+          project_name))
+      continue
+
     package_name = project_name
     if (dependency_updater.operating_system == 'Windows' and
         project_definition.msi_name):
