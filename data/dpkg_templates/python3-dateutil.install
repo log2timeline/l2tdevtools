@@ -1,1 +1,3 @@
 usr/lib/python3*/dist-packages/dateutil/*.py
+usr/lib/python3*/dist-packages/dateutil/*/*.py
+usr/lib/python3*/dist-packages/dateutil/*/*.tar.gz
