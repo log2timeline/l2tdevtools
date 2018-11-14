@@ -412,7 +412,7 @@ class DependencyUpdater(object):
       return self._InstallPackagesMacOS(
           package_filenames, package_versions)
 
-    elif self.operating_system == 'Windows':
+    if self.operating_system == 'Windows':
       return self._InstallPackagesWindows(
           package_filenames, package_versions)
 
@@ -524,7 +524,7 @@ class DependencyUpdater(object):
     if self.operating_system == 'Darwin':
       return self._UninstallPackagesMacOSX(package_versions)
 
-    elif self.operating_system == 'Windows':
+    if self.operating_system == 'Windows':
       return self._UninstallPackagesWindows(package_versions)
 
     return False
@@ -909,6 +909,16 @@ def Main():
     project_definition = project_definitions.get(project_name, None)
     if not project_definition:
       logging.error('Missing definition for project: {0:s}'.format(
+          project_name))
+      continue
+
+    if sys.version_info[0] != 2 and project_definition.IsPython2Only():
+      logging.info('Skipping: {0:s} because it only supports Python 2'.format(
+          project_name))
+      continue
+
+    elif sys.version_info[0] != 3 and project_definition.IsPython3Only():
+      logging.info('Skipping: {0:s} because it only supports Python 3'.format(
           project_name))
       continue
 
