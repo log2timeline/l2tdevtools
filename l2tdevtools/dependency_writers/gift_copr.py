@@ -22,14 +22,9 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
     python_dependencies = self._dependency_helper.GetRPMRequires(
         exclude_version=True, python_version=python_version)
 
-    if python_version == 3:
-      python_version_string = 'python3'
-    else:
-      python_version_string = 'python'
-
     formatted_python_dependencies = []
 
-    libyal_dependencies = []
+    pyyal_dependencies = []
     for index, dependency in enumerate(sorted(python_dependencies)):
       if index == 0:
         line = 'PYTHON{0:d}_DEPENDENCIES="{1:s}'.format(
@@ -42,10 +37,10 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
 
       formatted_python_dependencies.append(line)
 
-      if dependency.startswith('lib') and dependency.endswith(
-          python_version_string):
-        dependency, _, _ = dependency.partition('-')
-        libyal_dependencies.append(dependency)
+      if dependency.startswith('lib') and (
+          dependency.endswith('python') or dependency.endswith('python2') or
+          dependency.endswith('python3')):
+        pyyal_dependencies.append(dependency)
 
     formatted_python_dependencies = '\n'.join(formatted_python_dependencies)
 
@@ -57,10 +52,11 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
       development_dependencies.append('python-sphinx')
 
     debug_dependencies = []
-    for index, dependency in enumerate(sorted(libyal_dependencies)):
+    for pyyal_dependency in sorted(pyyal_dependencies):
+      libyal_dependency, _, _ = pyyal_dependency.partition('-')
       debug_dependencies.extend([
-          '{0:s}-debuginfo'.format(dependency),
-          '{0:s}-{1:s}-debuginfo'.format(dependency, python_version_string)])
+          '{0:s}-debuginfo'.format(libyal_dependency),
+          '{0:s}-debuginfo'.format(pyyal_dependency)])
 
     if python_version == 2 and self._project_definition.name == 'plaso':
       debug_dependencies.append('python-guppy')
