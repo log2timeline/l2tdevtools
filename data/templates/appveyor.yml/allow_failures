@@ -1,0 +1,4 @@
+matrix:
+  allow_failures:
+  - TARGET: python36
+
