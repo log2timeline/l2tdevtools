@@ -71,6 +71,9 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
     file_content = []
 
+    template_data = self._GenerateFromTemplate('metadata', template_mappings)
+    file_content.append(template_data)
+
     if self._project_definition.name in ('dfvfs', 'l2tpreg', 'plaso'):
       template_data = self._GenerateFromTemplate(
           'sdist_test_data', template_mappings)
