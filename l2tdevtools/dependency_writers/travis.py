@@ -61,7 +61,8 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
     template_mappings = {
         'l2tbinaries_dependencies': ' '.join(l2tbinaries_dependencies),
-        'l2tbinaries_test_dependencies': ' '.join(l2tbinaries_test_dependencies),
+        'l2tbinaries_test_dependencies': ' '.join(
+            l2tbinaries_test_dependencies),
         'python2_dependencies': ' '.join(python2_dependencies),
         'python2_test_dependencies': ' '.join(python2_test_dependencies),
         'python3_dependencies': ' '.join(python3_dependencies),
