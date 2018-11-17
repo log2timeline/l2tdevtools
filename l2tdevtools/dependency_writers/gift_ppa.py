@@ -53,7 +53,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     formatted_python_dependencies = '\n'.join(formatted_python_dependencies)
 
-    test_python_dependencies = self._test_dependency_helper.GetDPKGDepends(
+    test_dependencies = self._test_dependency_helper.GetDPKGDepends(
         exclude_version=True, python_version=python_version)
 
     # TODO: replace by dev_dependencies.ini or equiv.

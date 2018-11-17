@@ -25,7 +25,7 @@ class GIFTPPAInstallPY2Test(test_lib.BaseTestCase):
         configuration_file=configuration_file)
 
     writer = gift_ppa.GIFTPPAInstallScriptPY2Writer(
-        l2tdevtools_path, project_definition, dependency_helper)
+        l2tdevtools_path, project_definition, dependency_helper, None)
     self.assertIsNotNone(writer)
 
   # TODO: Add test for the Write method.
@@ -44,7 +44,7 @@ class GIFTPPAInstallPY3Test(test_lib.BaseTestCase):
         configuration_file=configuration_file)
 
     writer = gift_ppa.GIFTPPAInstallScriptPY3Writer(
-        l2tdevtools_path, project_definition, dependency_helper)
+        l2tdevtools_path, project_definition, dependency_helper, None)
     self.assertIsNotNone(writer)
 
   # TODO: Add test for the Write method.
