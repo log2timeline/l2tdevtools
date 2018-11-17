@@ -43,7 +43,7 @@ def Main():
   dependencies_helper = dependencies.DependencyHelper()
 
   test_dependencies_helper = None
-  is os.path.exists('test_dependencies.ini'):
+  if os.path.exists('test_dependencies.ini'):
     test_dependencies_helper = dependencies.DependencyHelper(
         'test_dependencies.ini')
 
