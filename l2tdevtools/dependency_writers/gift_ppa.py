@@ -17,17 +17,19 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
   # Path to GIFT PPA installation script.
   PATH = ''
 
-  def _Write(self, python_dependencies, python_version=2):
+  def _Write(self, python_version=2):
     """Writes a gift_ppa_install.sh file.
 
     Args:
-      python_dependencies (list[str]): list of names of python dependencies.
       python_version (Optional[int]): Python version.
     """
     if python_version == 3:
       python_version_string = 'python3'
     else:
       python_version_string = 'python'
+
+    python_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=python_version)
 
     formatted_python_dependencies = []
 
@@ -51,8 +53,10 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     formatted_python_dependencies = '\n'.join(formatted_python_dependencies)
 
-    test_dependencies = ['python-mock']
+    test_python_dependencies = self._test_dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=python_version)
 
+    # TODO: replace by dev_dependencies.ini or equiv.
     development_dependencies = ['pylint']
 
     if self._project_definition.name == 'plaso':
@@ -142,9 +146,7 @@ class GIFTPPAInstallScriptPY2Writer(GIFTPPAInstallScriptWriter):
 
   def Write(self):
     """Writes a gift_ppa_install.sh file."""
-    python2_dependencies = self._dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=2)
-    self._Write(python2_dependencies, python_version=2)
+    self._Write(python_version=2)
 
 
 class GIFTPPAInstallScriptPY3Writer(GIFTPPAInstallScriptWriter):
@@ -154,6 +156,4 @@ class GIFTPPAInstallScriptPY3Writer(GIFTPPAInstallScriptWriter):
 
   def Write(self):
     """Writes a gift_ppa_install.sh file."""
-    python2_dependencies = self._dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=3)
-    self._Write(python2_dependencies, python_version=3)
+    self._Write(python_version=3)

@@ -40,7 +40,12 @@ def Main():
   projects_helper = project.ProjectHelper(project_path)
   project_definition = projects_helper.ReadDefinitionFile()
 
-  helper = dependencies.DependencyHelper()
+  dependencies_helper = dependencies.DependencyHelper()
+
+  test_dependencies_helper = None
+  is os.path.exists('test_dependencies.ini'):
+    test_dependencies_helper = dependencies.DependencyHelper(
+        'test_dependencies.ini')
 
   for writer_class in (
       appveyor_yml.AppveyorYmlWriter, pylint_rc.PylintRcWriter,
@@ -49,7 +54,9 @@ def Main():
       setup.SetupPyWriter, tox_ini.ToxIniWriter,
       travis.TravisInstallScriptWriter, travis.TravisRunTestsScriptWriter,
       travis.TravisRunWithTimeoutScriptWriter, travis_yml.TravisYMLWriter):
-    writer = writer_class(l2tdevtools_path, project_definition, helper)
+    writer = writer_class(
+        l2tdevtools_path, project_definition, dependencies_helper,
+        test_dependencies_helper)
     writer.Write()
 
   for writer_class in (
@@ -63,7 +70,9 @@ def Main():
     if not os.path.exists(writer_class.PATH):
       continue
 
-    writer = writer_class(l2tdevtools_path, project_definition, helper)
+    writer = writer_class(
+        l2tdevtools_path, project_definition, dependencies_helper,
+        test_dependencies_helper)
     writer.Write()
 
   path = os.path.join(l2tdevtools_path, 'l2tdevtools', 'dependencies.py')

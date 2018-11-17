@@ -44,8 +44,10 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
 
     formatted_python_dependencies = '\n'.join(formatted_python_dependencies)
 
-    test_dependencies = ['python-mock']
+    test_dependencies = self._test_dependency_helper.GetRPMRequires(
+        exclude_version=True, python_version=python_version)
 
+    # TODO: replace by dev_dependencies.ini or equiv.
     development_dependencies = ['pylint']
 
     if self._project_definition.name == 'plaso':

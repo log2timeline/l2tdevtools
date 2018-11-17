@@ -22,43 +22,47 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
     l2tbinaries_dependencies = self._dependency_helper.GetL2TBinaries(
         platform='macos')
 
-    l2tbinaries_test_dependencies = ['funcsigs', 'mock', 'pbr']
-    if 'six' not in l2tbinaries_dependencies:
-      l2tbinaries_test_dependencies.append('six')
+    l2tbinaries_test_dependencies = self._test_dependency_helper.GetL2TBinaries(
+        platform='macos')
 
+    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
     if self._project_definition.name == 'artifacts':
       l2tbinaries_test_dependencies.append('yapf')
+      l2tbinaries_test_dependencies = sorted(l2tbinaries_test_dependencies)
 
     python2_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True, python_version=2)
 
-    python2_test_dependencies = ['python-coverage', 'python-mock', 'python-tox']
+    python2_test_dependencies = self._test_dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=2)
+
+    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
+    python2_test_dependencies.extend(['python-coverage', 'python-tox'])
     if self._project_definition.name == 'artifacts':
       # Note that the artifacts tests will use the Python 2 version of yapf.
-      python2_test_dependencies.append('python-yapf')
-      python2_test_dependencies.append('yapf')
+      python2_test_dependencies.extend(['python-yapf', 'yapf'])
+      python2_test_dependencies = sorted(python2_test_dependencies)
 
     python3_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True, python_version=3)
 
-    python3_test_dependencies = [
-        'python3-mock', 'python3-setuptools', 'python3-tox']
+    python3_test_dependencies = self._test_dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=3)
+
+    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
+    python3_test_dependencies.extend(['python3-setuptools', 'python3-tox'])
     if self._project_definition.name == 'artifacts':
       # Note that the artifacts tests will use the Python 2 version of yapf.
-      python3_test_dependencies.append('python-yapf')
-      python3_test_dependencies.append('yapf')
+      python3_test_dependencies.extend(['python-yapf', 'yapf'])
+      python3_test_dependencies = sorted(python3_test_dependencies)
 
     template_mappings = {
         'l2tbinaries_dependencies': ' '.join(l2tbinaries_dependencies),
-        'l2tbinaries_test_dependencies': ' '.join(sorted(
-            l2tbinaries_test_dependencies)),
+        'l2tbinaries_test_dependencies': ' '.join(l2tbinaries_test_dependencies),
         'python2_dependencies': ' '.join(python2_dependencies),
-        'python2_test_dependencies': ' '.join(sorted(
-            python2_test_dependencies)),
+        'python2_test_dependencies': ' '.join(python2_test_dependencies),
         'python3_dependencies': ' '.join(python3_dependencies),
-        'python3_test_dependencies': ' '.join(sorted(
-            python3_test_dependencies)),
-    }
+        'python3_test_dependencies': ' '.join(python3_test_dependencies)}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
