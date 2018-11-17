@@ -455,8 +455,12 @@ class DependencyHelper(object):
 
     return sorted(requires)
 
-  def GetInstallRequires(self):
+  def GetInstallRequires(self, exclude_version=False):
     """Retrieves the setup.py installation requirements.
+
+    Args:
+      exclude_version (Optional[bool]): True if the version should be excluded
+          from the dependency definitions.
 
     Returns:
       list[str]: dependency definitions for install_requires in setup.py.
@@ -476,7 +480,7 @@ class DependencyHelper(object):
       if module_name == 'pysqlite':
         continue
 
-      if not dependency.minimum_version:
+      if exclude_version or not dependency.minimum_version:
         requires_string = module_name
       elif not dependency.maximum_version:
         requires_string = '{0:s} >= {1!s}'.format(

@@ -17,10 +17,11 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a tox.ini file."""
-    test_dependencies = self._test_dependency_helper.GetInstallRequires()
+    test_dependencies = self._test_dependency_helper.GetInstallRequires(
+        exclude_version=True)
 
     # TODO: replace by test_dependencies.ini
-    test_dependencies.append(['pytest'])
+    test_dependencies.append('pytest')
     if self._project_definition.name == 'artifacts':
       test_dependencies.append('yapf')
 
