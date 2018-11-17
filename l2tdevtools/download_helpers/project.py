@@ -14,13 +14,72 @@ class ProjectDownloadHelper(interface.DownloadHelper):
   """Helps in downloading a project."""
 
   def __init__(self, download_url):
-    """Initializes the download helper.
+    """Initializes a download helper.
 
     Args:
       download_url (str): download URL.
     """
     super(ProjectDownloadHelper, self).__init__(download_url)
     self._project_name = None
+
+  def _GetLatestVersion(
+      self, earliest_version, latest_version, available_versions):
+    """Determines the latest version from a list of available versions.
+
+    Args:
+      earliest_version (str): earliest version in the project version definition
+          or None if not set.
+      latest_version (str): latest version in the project version definition
+          or None if not set.
+      available_versions (dict[str, [int]]): available versions where
+          the key is the original version string and the value the individual
+          integers of the digits in the version string.
+
+    Returns:
+      str: download URL of the project or None if not available.
+    """
+    comparable_earliest_version = None
+    if earliest_version:
+      comparable_earliest_version = [
+          int(digit) for digit in earliest_version[1:]]
+
+    comparable_latest_version = None
+    if latest_version:
+      comparable_latest_version = [
+          int(digit) for digit in latest_version[1:]]
+
+    comparable_available_versions = list(available_versions.values())
+
+    latest_match = None
+    for match in comparable_available_versions:
+      if latest_match is None:
+        latest_match = match
+        continue
+
+      if earliest_version is not None:
+        if earliest_version[0] == '>' and match <= comparable_earliest_version:
+          continue
+
+        if earliest_version[0] == '>=' and match < comparable_earliest_version:
+          continue
+
+      if latest_version is not None:
+        if latest_version[0] == '<' and match >= comparable_latest_version:
+          continue
+
+        if latest_version[0] == '<=' and match > comparable_latest_version:
+          continue
+
+      if match > latest_match:
+        latest_match = match
+
+    # Map the latest match value to its index within the dictionary and return
+    # the version string which is stored as the key in within the available
+    # versions dictionary.
+    latest_match = comparable_available_versions.index(latest_match)
+
+    # Convert the result of dict.keys() into a list for Python 3.
+    return list(available_versions.keys())[latest_match]
 
   def Download(self, project_name, project_version):
     """Downloads the project for a given project name and version.

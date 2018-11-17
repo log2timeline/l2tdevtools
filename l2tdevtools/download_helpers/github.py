@@ -37,13 +37,52 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     self._organization = url_segments[3]
     self._repository = url_segments[4]
 
+  def _GetAvailableVersions(self, version_strings):
+    """Determines the available versions from version string matched.
+
+    This function will split the version string and convert every digit into
+    an integer. These lists of integers allow us to reliable compare versions.
+    A string compare of version strings will yield an incorrect result.
+
+    Args:
+      version_strings (list[str]): version strings.
+
+    Returns:
+      dict[str, [int]]: available versions where the key is the original
+          version string and the value the individual integers of
+          the digits in the version string.
+    """
+    available_versions = {}
+
+    for version_string in version_strings:
+      if not version_string:
+        continue
+
+      # Remove a leading 'release-'.
+      if version_string.startswith('release-'):
+        version_string = version_string[8:]
+
+      # Remove a leading 'v'.
+      elif version_string.startswith('v'):
+        version_string = version_string[1:]
+
+      # Some versions contain '-' as the release number separator for the split
+      # we want this to be '.'.
+      comparable_version = version_string.replace('-', '.')
+
+      # Convert the result of map() into a list for Python 3.
+      comparable_version = list(map(int, comparable_version.split('.')))
+      available_versions[version_string] = comparable_version
+
+    return available_versions
+
   def GetLatestVersion(self, project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
     Args:
       project_name (str): name of the project.
       version_definition (ProjectVersionDefinition): project version definition
-          or None.
+          or None if not set.
 
     Returns:
       str: latest version number or None if not available.
@@ -101,70 +140,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     if not matches:
       return None
 
-    # Split the version string and convert every digit into an integer.
-    # A string compare of both version strings will yield an incorrect result.
-    comparable_matches = {}
-
-    for match in matches:
-      # Remove a leading 'release-'.
-      if match.startswith('release-'):
-        match = match[8:]
-      # Remove a leading 'v'.
-      elif match.startswith('v'):
-        match = match[1:]
-
-      # Some versions contain '-' as the release number separator for the split
-      # we want this to be '.'.
-      comparable_match = match.replace('-', '.')
-
-      # Convert the result of map() into a list for Python 3.
-      comparable_match = list(map(int, comparable_match.split('.')))
-      comparable_matches[match] = comparable_match
-
-    # Find the latest version number.
-    comparable_earliest_version = None
-    if earliest_version:
-      comparable_earliest_version = [
-          int(digit) for digit in earliest_version[1:]]
-
-    comparable_latest_version = None
-    if latest_version:
-      comparable_latest_version = [
-          int(digit) for digit in latest_version[1:]]
-
-    comparable_matching_versions = list(comparable_matches.values())
-
-    latest_match = None
-    for match in comparable_matching_versions:
-      if latest_match is None:
-        latest_match = match
-        continue
-
-      if earliest_version is not None:
-        if earliest_version[0] == '>' and match <= comparable_earliest_version:
-          continue
-
-        if earliest_version[0] == '>=' and match < comparable_earliest_version:
-          continue
-
-      if latest_version is not None:
-        if latest_version[0] == '<' and match >= comparable_latest_version:
-          continue
-
-        if latest_version[0] == '<=' and match > comparable_latest_version:
-          continue
-
-      if match > latest_match:
-        latest_match = match
-
-    # Map the latest match value to its index within the dictionary.
-    # Convert the result of dict.values() into a list for Python 3.
-    latest_match = comparable_matching_versions.index(latest_match)
-
-    # Return the original version string which is stored as the key in within
-    # the dictionary.
-    # Convert the result of dict.keys() into a list for Python 3.
-    return list(comparable_matches.keys())[latest_match]
+    available_versions = self._GetAvailableVersions(matches)
+    return self._GetLatestVersion(
+        earliest_version, latest_version, available_versions)
 
   def GetDownloadURL(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
