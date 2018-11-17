@@ -28,7 +28,8 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
     # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
     if self._project_definition.name == 'artifacts':
       l2tbinaries_test_dependencies.append('yapf')
-      l2tbinaries_test_dependencies = sorted(l2tbinaries_test_dependencies)
+
+    l2tbinaries_test_dependencies = sorted(l2tbinaries_test_dependencies)
 
     python2_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True, python_version=2)
@@ -41,7 +42,8 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
     if self._project_definition.name == 'artifacts':
       # Note that the artifacts tests will use the Python 2 version of yapf.
       python2_test_dependencies.extend(['python-yapf', 'yapf'])
-      python2_test_dependencies = sorted(python2_test_dependencies)
+
+    python2_test_dependencies = sorted(python2_test_dependencies)
 
     python3_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True, python_version=3)
@@ -54,7 +56,8 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
     if self._project_definition.name == 'artifacts':
       # Note that the artifacts tests will use the Python 2 version of yapf.
       python3_test_dependencies.extend(['python-yapf', 'yapf'])
-      python3_test_dependencies = sorted(python3_test_dependencies)
+
+    python3_test_dependencies = sorted(python3_test_dependencies)
 
     template_mappings = {
         'l2tbinaries_dependencies': ' '.join(l2tbinaries_dependencies),
