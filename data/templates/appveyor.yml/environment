@@ -1,0 +1,15 @@
+environment:
+  matrix:
+  - TARGET: windows_python27
+    MACHINE_TYPE: "x86"
+    PYTHON: "C:\\Python27"
+  - TARGET: windows_python27
+    MACHINE_TYPE: "amd64"
+    PYTHON: "C:\\Python27-x64"
+  - TARGET: windows_python36
+    MACHINE_TYPE: "x86"
+    PYTHON: "C:\\Python36"
+  - TARGET: windows_python36
+    MACHINE_TYPE: "amd64"
+    PYTHON: "C:\\Python36-x64"
+

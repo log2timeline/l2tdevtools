@@ -1,0 +1,4 @@
+- cmd: "%PYTHON%\\python.exe -m pip install --upgrade pip"
+- cmd: "%PYTHON%\\python.exe -m pip install pywin32 WMI"
+- cmd: "%PYTHON%\\python.exe %PYTHON%\\Scripts\\pywin32_postinstall.py -install"
+- cmd: git clone https://github.com/log2timeline/l2tdevtools.git ..\l2tdevtools
