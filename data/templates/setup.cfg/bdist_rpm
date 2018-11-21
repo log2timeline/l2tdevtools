@@ -1,0 +1,6 @@
+[bdist_rpm]
+release = 1
+packager = ${maintainer}
+${doc_files}
+build_requires = python-setuptools
+${requires}

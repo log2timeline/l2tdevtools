@@ -15,51 +15,78 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
   PATH = 'setup.cfg'
 
-  _SDIST = [
-      '[sdist]', 'template = MANIFEST.in', 'manifest = MANIFEST', '',
-      '[sdist_test_data]', 'template = MANIFEST.test_data.in',
-      'manifest = MANIFEST.test_data', ''
-  ]  # yapf: disable
-
-  _BDIST_RPM = ['[bdist_rpm]', 'release = 1', 'packager = {maintainer:s}']
-
   _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
+
+  _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.cfg')
+
+  def _GenerateFromTemplate(self, template_filename, template_mappings):
+    """Generates file context based on a template file.
+
+    Args:
+      template_filename (str): path of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+
+    Returns:
+      str: output based on the template string.
+
+    Raises:
+      RuntimeError: if the template cannot be formatted.
+    """
+    template_filename = os.path.join(
+        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
+    return super(SetupCfgWriter, self)._GenerateFromTemplate(
+        template_filename, template_mappings)
 
   def Write(self):
     """Writes a setup.cfg file."""
-    file_content = []
-
-    if self._project_definition.name in ('dfvfs', 'l2tpreg', 'plaso'):
-      file_content.extend(self._SDIST)
-
-    file_content.extend(self._BDIST_RPM)
-
     doc_files = [
         doc_file for doc_file in self._DOC_FILES if os.path.isfile(doc_file)]
 
+    formatted_doc_files = []
     for index, doc_file in enumerate(sorted(doc_files)):
       if index == 0:
-        file_content.append('doc_files = {0:s}'.format(doc_file))
+        line = 'doc_files = {0:s}'.format(doc_file)
       else:
-        file_content.append('            {0:s}'.format(doc_file))
-
-    file_content.append('build_requires = python-setuptools')
+        line = '            {0:s}'.format(doc_file)
+      formatted_doc_files.append(line)
 
     python2_dependencies = self._dependency_helper.GetRPMRequires(
         python_version=2)
 
+    formatted_requires = []
     for index, dependency in enumerate(python2_dependencies):
       if index == 0:
-        file_content.append('requires = {0:s}'.format(dependency))
+        line = 'requires = {0:s}'.format(dependency)
       else:
-        file_content.append('           {0:s}'.format(dependency))
+        line = '           {0:s}'.format(dependency)
+      formatted_requires.append(line)
 
-    file_content.append('')
+    formatted_requires.append('')
 
-    template_mappings = {'maintainer': self._project_definition.maintainer}
+    template_mappings = {
+        'doc_files': '\n'.join(formatted_doc_files),
+        'maintainer': self._project_definition.maintainer,
+        'requires': '\n'.join(formatted_requires)}
 
-    file_content = '\n'.join(file_content)
-    file_content = file_content.format(**template_mappings)
+    file_content = []
+
+    template_data = self._GenerateFromTemplate('metadata', template_mappings)
+    file_content.append(template_data)
+
+    if self._project_definition.name in ('dfvfs', 'l2tpreg', 'plaso'):
+      template_data = self._GenerateFromTemplate(
+          'sdist_test_data', template_mappings)
+      file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate('bdist_rpm', template_mappings)
+    file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate('bdist_wheel', template_mappings)
+    file_content.append(template_data)
+
+    file_content = ''.join(file_content)
+
     file_content = file_content.encode('utf-8')
 
     with open(self.PATH, 'wb') as file_object:
