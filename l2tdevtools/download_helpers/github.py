@@ -41,7 +41,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     """Determines the available versions from version string matched.
 
     This function will split the version string and convert every digit into
-    an integer. These lists of integers allow us to reliable compare versions.
+    an integer. These lists of integers allow us to reliably compare versions.
     A string compare of version strings will yield an incorrect result.
 
     Args:
