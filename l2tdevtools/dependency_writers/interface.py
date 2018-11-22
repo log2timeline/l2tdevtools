@@ -10,18 +10,23 @@ import string
 class DependencyFileWriter(object):
   """Base class for dependency file writers."""
 
-  def __init__(self, l2tdevtools_path, project_definition, dependency_helper):
+  def __init__(
+      self, l2tdevtools_path, project_definition, dependency_helper,
+      test_dependency_helper):
     """Initializes a dependency file writer.
 
     Args:
       l2tdevtools_path (str): path to l2tdevtools.
       project_definition (ProjectDefinition): project definition.
       dependency_helper (DependencyHelper): dependency helper.
+      test_dependency_helper (DependencyHelper): test dependency helper
+          or None if not available.
     """
     super(DependencyFileWriter, self).__init__()
     self._dependency_helper = dependency_helper
     self._l2tdevtools_path = l2tdevtools_path
     self._project_definition = project_definition
+    self._test_dependency_helper = test_dependency_helper
 
   def _ReadTemplateFile(self, filename):
     """Reads a template string from file.

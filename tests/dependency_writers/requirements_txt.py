@@ -25,7 +25,7 @@ class RequirementsTest(test_lib.BaseTestCase):
         configuration_file=configuration_file)
 
     writer = requirements_txt.RequirementsWriter(
-        l2tdevtools_path, project_definition, dependency_helper)
+        l2tdevtools_path, project_definition, dependency_helper, None)
     self.assertIsNotNone(writer)
 
   # TODO: Add test for the Write method.

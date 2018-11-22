@@ -39,24 +39,21 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     python2_dependencies = self._dependency_helper.GetL2TBinaries(
         python_version=2)
 
+    python2_dependencies.extend(self._test_dependency_helper.GetL2TBinaries(
+        python_version=2))
+
     if 'backports.lzma' in python2_dependencies:
       python2_dependencies.remove('backports.lzma')
 
-    python2_dependencies.extend(['funcsigs', 'mock', 'pbr'])
-
+    # TODO: replace by dev_dependencies.ini or equiv.
     if self._project_definition.name == 'artifacts':
       python2_dependencies.append('yapf')
-
-    if 'six' not in python2_dependencies:
-      python2_dependencies.append('six')
 
     python3_dependencies = self._dependency_helper.GetL2TBinaries(
         python_version=3)
 
-    python3_dependencies.extend(['funcsigs', 'mock', 'pbr'])
-
-    if 'six' not in python3_dependencies:
-      python3_dependencies.append('six')
+    python3_dependencies.extend(self._test_dependency_helper.GetL2TBinaries(
+        python_version=3))
 
     template_mappings = {
         'python2_dependencies': ' '.join(sorted(python2_dependencies)),
