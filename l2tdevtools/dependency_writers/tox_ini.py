@@ -17,17 +17,20 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a tox.ini file."""
-    test_dependencies = ['mock', 'pytest']
+    test_dependencies = self._test_dependency_helper.GetInstallRequires(
+        exclude_version=True)
+
+    # TODO: replace by test_dependencies.ini
+    test_dependencies.append('pytest')
     if self._project_definition.name == 'artifacts':
       test_dependencies.append('yapf')
 
-    test_dependencies = '\n'.join(
-        ['    {0:s}'.format(dependency) for dependency in test_dependencies])
+    test_dependencies = '\n'.join([
+        '    {0:s}'.format(dependency) for dependency in test_dependencies])
 
     template_mappings = {
         'project_name': self._project_definition.name,
-        'test_dependencies': test_dependencies
-    }
+        'test_dependencies': test_dependencies}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
