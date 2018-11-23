@@ -2,7 +2,7 @@
     "[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12"
     $$SQLiteReleaseYear = 2018
     $$SQLiteVersion = 3250300
-    If ($$env:MACHINE_TYPE -eq "x86") { 
+    If ($$env:MACHINE_TYPE -eq "x86") {
       $$SQLitePlatform = "win32-x86"
     } Else {
       $$SQLitePlatform = "win64-x64"
