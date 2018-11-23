@@ -58,7 +58,8 @@ class ProjectHelper(cli.CLIHelper):
           'joachimmetz',
           'Onager',
           'rgayon']),
-      'PlasoScaffolder': frozenset([
+      'L2tScaffolder': frozenset([
+          'kiddinn',
           'joachimmetz',
           'Onager'])}
 
@@ -72,7 +73,7 @@ class ProjectHelper(cli.CLIHelper):
   SUPPORTED_PROJECTS = frozenset([
       'acstore', 'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs', 'dfwinreg',
       'dftimewolf', 'dtfabric', 'dtformats', 'esedb-kb', 'l2tdevtools',
-      'l2tdocs', 'l2tpreg', 'plaso', 'PlasoScaffolder', 'review', 'vstools',
+      'l2tdocs', 'l2tpreg', 'plaso', 'L2tScaffolder', 'review', 'vstools',
       'winevt-kb', 'winreg-kb'])
 
   def __init__(self, project_path):
