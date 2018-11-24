@@ -60,7 +60,6 @@ class ProjectHelper(cli.CLIHelper):
           'rgayon']),
       'L2tScaffolder': frozenset([
           'kiddinn',
-          'joachimmetz',
           'Onager'])}
 
   _REVIEWERS_DEFAULT = frozenset([
