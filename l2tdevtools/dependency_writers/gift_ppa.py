@@ -56,6 +56,10 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
     test_dependencies = self._test_dependency_helper.GetDPKGDepends(
         exclude_version=True, python_version=python_version)
 
+    test_dependencies = [
+        test_dependency for test_dependency in test_dependencies
+        if test_dependency not in python_dependencies]
+
     # TODO: replace by dev_dependencies.ini or equiv.
     development_dependencies = ['pylint']
 

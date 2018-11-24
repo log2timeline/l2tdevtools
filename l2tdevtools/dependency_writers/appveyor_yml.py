@@ -56,8 +56,8 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
         python_version=3))
 
     template_mappings = {
-        'python2_dependencies': ' '.join(sorted(python2_dependencies)),
-        'python3_dependencies': ' '.join(sorted(python3_dependencies))
+        'python2_dependencies': ' '.join(sorted(set(python2_dependencies))),
+        'python3_dependencies': ' '.join(sorted(set(python3_dependencies)))
     }
 
     file_content = []

@@ -17,7 +17,7 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a tox.ini file."""
-    dependencies = self._dependency_helper.GetInstallRequires(
+    python_dependencies = self._dependency_helper.GetInstallRequires(
         exclude_version=True)
 
     test_dependencies = self._test_dependency_helper.GetInstallRequires(
@@ -26,7 +26,7 @@ class ToxIniWriter(interface.DependencyFileWriter):
     # Tox will fail when trying to install the same dependency more than once.
     test_dependencies = [
         test_dependency for test_dependency in test_dependencies
-        if test_dependency not in dependencies]
+        if test_dependency not in python_dependencies]
 
     # TODO: replace by test_dependencies.ini
     test_dependencies.append('pytest')
