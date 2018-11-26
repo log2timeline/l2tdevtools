@@ -57,7 +57,7 @@ class GitHubHelper(object):
 
     return True
 
-  def CreatePullRequest(self, access_token, origin, title, body):
+  def CreatePullRequest(self, access_token, origin, title, body, no_edit=False):
     """Creates a pull request.
 
     Args:
@@ -66,6 +66,8 @@ class GitHubHelper(object):
           "username:feature".
       title (str): title of the pull request.
       body (str): body of the pull request.
+      no_edit (Optional[bool]): True if maintainers should not be allowed to
+          edit the pull request.
 
     Returns:
       int: GitHub issue number of the pull request.
@@ -73,13 +75,19 @@ class GitHubHelper(object):
     Raises:
       ConnectivityError: if there's an error communicating with GitHub.
     """
+    if no_edit:
+      maintainer_can_modify = 'false'
+    else:
+      maintainer_can_modify = 'true'
+
     post_data = (
         '{{\n'
         '  "title": "{0:s}",\n'
         '  "body": "{1:s}",\n'
         '  "head": "{2:s}",\n'
-        '  "base": "master"\n'
-        '}}\n').format(title, body, origin)
+        '  "base": "master",\n'
+        '  "maintainer_can_modify": "{3:s}"\n'
+        '}}\n').format(title, body, origin, maintainer_can_modify)
 
     github_url = (
         'https://api.github.com/repos/{0:s}/{1:s}/pulls?'
