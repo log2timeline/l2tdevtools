@@ -80,13 +80,14 @@ class GitHubHelper(object):
     else:
       maintainer_can_modify = 'true'
 
+    # Note that the maintainer_can_modify is a JSON boolean value.
     post_data = (
         '{{\n'
         '  "title": "{0:s}",\n'
         '  "body": "{1:s}",\n'
         '  "head": "{2:s}",\n'
         '  "base": "master",\n'
-        '  "maintainer_can_modify": "{3:s}"\n'
+        '  "maintainer_can_modify": {3:s}\n'
         '}}\n').format(title, body, origin, maintainer_can_modify)
 
     github_url = (
