@@ -11,15 +11,22 @@ from l2tdevtools.dependency_writers import interface
 class CheckDependenciesWriter(interface.DependencyFileWriter):
   """Check dependencies script writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'check_dependencies.py')
+  _TEMPLATE_DIRECTORY = os.path.join('data', 'templates')
 
   PATH = os.path.join('utils', 'check_dependencies.py')
 
   def Write(self):
     """Writes a check_dependencies.py file."""
-    template_mappings = {}
+    template_mappings = {
+        'project_name': self._project_definition.name}
 
-    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    if self._project_definition.name in ('l2tpreg', 'plaso'):
+      template_file = 'check_dependencies-with_url.py'
+    else:
+      template_file = 'check_dependencies.py'
+
+    template_file = os.path.join(
+        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_file)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')
