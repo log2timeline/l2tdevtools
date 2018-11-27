@@ -31,7 +31,8 @@ class ReviewHelper(object):
 
   def __init__(
       self, command, project_path, github_origin, feature_branch, diffbase,
-      all_files=False, no_browser=False, no_confirm=False):  # yapf: disable
+      all_files=False, no_browser=False, no_confirm=False,
+      no_edit=False):  # yapf: disable
     """Initializes a review helper.
 
     Args:
@@ -46,6 +47,8 @@ class ReviewHelper(object):
           webbrowser to get the OAuth token should be disabled.
       no_confirm (Optional[bool]): True if the defaults should be applied
           without confirmation.
+      no_edit (Optional[bool]): True if maintainers should not be allowed to
+          edit the pull request.
     """
     super(ReviewHelper, self).__init__()
     self._active_branch = None
@@ -65,6 +68,7 @@ class ReviewHelper(object):
     self._merge_description = None
     self._no_browser = no_browser
     self._no_confirm = no_confirm
+    self._no_edit = no_edit
     self._project_helper = None
     self._project_name = None
     self._project_path = project_path
@@ -232,10 +236,12 @@ class ReviewHelper(object):
     create_github_origin = '{0:s}:{1:s}'.format(git_origin, self._active_branch)
     try:
       pull_request_number = self._github_helper.CreatePullRequest(
-          github_access_token, create_github_origin, title, body)
+          github_access_token, create_github_origin, title, body,
+          no_edit=self._no_edit)
 
-    except errors.ConnectivityError:
-      print('Unable to create pull request.')
+    except errors.ConnectivityError as exception:
+      print('Unable to create pull request with error: {0!s}.'.format(
+          exception))
       return False
 
     try:

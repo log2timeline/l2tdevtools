@@ -53,6 +53,12 @@ def Main():
           'WARNING: only use this when you are familiar with the defaults.'))
 
   argument_parser.add_argument(
+      '--noedit', '--no-edit', '--no_edit', dest='no_edit', action='store_true',
+      default=False, help=(
+          'Do not allow edits from maintainers on the pull request.\n'
+          'Changing this can result in a more tedious code review.'))
+
+  argument_parser.add_argument(
       '--offline', dest='offline', action='store_true', default=False, help=(
           'The review script is running offline and any online check is '
           'skipped.'))
@@ -168,7 +174,8 @@ def Main():
       options.diffbase,
       all_files=options.all_files,
       no_browser=options.no_browser,
-      no_confirm=options.no_confirm)
+      no_confirm=options.no_confirm,
+      no_edit=options.no_edit)
 
   if not review_helper.InitializeHelpers():
     return False
