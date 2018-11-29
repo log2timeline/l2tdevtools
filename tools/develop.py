@@ -27,7 +27,7 @@ docker_build_client = docker.APIClient(base_url=docker_base_url)
 docker_client = docker.from_env()
 docker_image_name = 'plaso-dev-environment'
 
-def BuildDevImage(plaso_src, verbose=False, nocache=False):
+def BuildDevelopmentImage(plaso_src, verbose=False, nocache=False):
   """Builds a docker image to be used for Plaso development.
 
   Args:
@@ -39,10 +39,11 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
 
   root_repo_location = os.path.dirname(os.path.dirname(
       os.path.abspath(__file__)))
-  dockerfile_location = os.path.join(str(root_repo_location),
-                                     'config', 'docker', 'plaso_dev_dockerfile')
-  ppa_installer_location = os.path.join(plaso_src, 'config', 'linux',
-                                        'gift_ppa_install.sh')
+  root_repo_location = str(root_repo_location)
+  dockerfile_location = os.path.join(
+      root_repo_location, 'config', 'docker', 'plaso_dev_dockerfile')
+  ppa_installer_location = os.path.join(
+      plaso_src, 'config', 'linux', 'gift_ppa_install.sh')
 
   # Add the installer file and dockerfile to the same build context
   context_tarball_location = tempfile.NamedTemporaryFile(
@@ -52,9 +53,9 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
   tar.add(dockerfile_location, arcname='Dockerfile')
   tar.close()
 
-  with open(context_tarball_location, 'rb') as f:
+  with open(context_tarball_location, 'rb') as tarball:
     for line in docker_build_client.build(
-        fileobj=f,
+        fileobj=tarball,
         tag=docker_image_name,
         nocache=nocache,
         custom_context=True):
@@ -78,19 +79,19 @@ def BuildDevImage(plaso_src, verbose=False, nocache=False):
         elif verbose:
           print(stream.strip())
 
-def RunCommand(image_name, command, plaso_src):
+def RunCommand(image_name, command, plaso_source):
   """Runs a command inside a Plaso development container, prints the output.
 
   Args:
     image_name (str): name of the docker image to start the container with.
     command (str): command to run inside the docker container.
-    plaso_src (string): absolute location of the plaso source directory.
+    plaso_source (string): absolute location of the plaso source directory.
   """
   print('Running command: {0:s}'.format(command))
 
   container = docker_client.containers.run(
       image_name, command, detach=True,
-      volumes={plaso_src: {'bind': '/root/plaso', 'mode': 'rw'}})
+      volumes={plaso_source: {'bind': '/root/plaso', 'mode': 'rw'}})
 
   for line in container.logs(stdout=True, stderr=True, stream=True):
     print(line.decode(UTF8), end='')
@@ -106,7 +107,7 @@ def StartContainer(image_name, plaso_src):
     docker.containers.Container: a container object.
   """
   print('Starting container with image {0:s}'.format(image_name))
-  # since this method is only called for python >= 3.0 but linter complains that
+  # This method is only called for python >= 3.0 but linter complains that
   # os.get_terminal_size doesn't exist (in 2.7), disable no-member for now
   columns, rows = os.get_terminal_size(0) # pylint: disable=no-member
   container = docker_client.containers.run(
@@ -143,7 +144,9 @@ def Main():
   if 'PLASO_SRC' in os.environ:
     plaso_src = os.environ['PLASO_SRC']
   else:
-    print('Please set the PLASO_SRC environment variable')
+    print(
+        'Please set the PLASO_SRC environment variable to the path to your '
+        'Plaso source tree')
     return False
 
   options = argument_parser.parse_args()
@@ -157,7 +160,7 @@ def Main():
     return 1
 
   if command == 'build':
-    BuildDevImage(
+    BuildDevelopmentImage(
         plaso_src,
         verbose=options.verbose,
         nocache=options.nocache)

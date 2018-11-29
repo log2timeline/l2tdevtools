@@ -1,7 +1,7 @@
 FROM ubuntu:xenial
 
 ######################
-# Install basic deps #
+# Install basic dependencies #
 ######################
 RUN apt-get clean
 RUN apt-get update
@@ -29,7 +29,6 @@ RUN apt-get install --no-install-recommends -y build-essential \
 ####################
 # Add GIFT dev PPA #
 ####################
-RUN add-apt-repository ppa:gift/dev
 RUN mkdir /root/install
 WORKDIR /root/install
 ADD ./gift_ppa_install.sh .
