@@ -16,7 +16,7 @@ import tempfile
 try:
   import docker
 except ImportError:
-  print('Please install docker-py and try again')
+  print('Please install docker and try again')
   sys.exit(1)
 
 UTF8 = 'utf-8'
@@ -26,6 +26,7 @@ docker_base_url = (
 docker_build_client = docker.APIClient(base_url=docker_base_url)
 docker_client = docker.from_env()
 docker_image_name = 'plaso-dev-environment'
+
 
 def BuildDevelopmentImage(plaso_src, verbose=False, nocache=False):
   """Builds a docker image to be used for Plaso development.
@@ -79,6 +80,7 @@ def BuildDevelopmentImage(plaso_src, verbose=False, nocache=False):
         elif verbose:
           print(stream.strip())
 
+
 def RunCommand(image_name, command, plaso_source):
   """Runs a command inside a Plaso development container, prints the output.
 
@@ -96,12 +98,13 @@ def RunCommand(image_name, command, plaso_source):
   for line in container.logs(stdout=True, stderr=True, stream=True):
     print(line.decode(UTF8), end='')
 
+
 def StartContainer(image_name, plaso_src):
   """Starts a Plaso development container.
 
   Args:
     image_name (str): name of the docker image to start the container with.
-    plaso_src (string): absolute location of the plaso source directory.
+    plaso_src (string): absolute path to the plaso source directory.
 
   Returns:
     docker.containers.Container: a container object.
@@ -109,7 +112,7 @@ def StartContainer(image_name, plaso_src):
   print('Starting container with image {0:s}'.format(image_name))
   # This method is only called for python >= 3.0 but linter complains that
   # os.get_terminal_size doesn't exist (in 2.7), disable no-member for now
-  columns, rows = os.get_terminal_size(0) # pylint: disable=no-member
+  columns, rows = os.get_terminal_size(0)  # pylint: disable=no-member
   container = docker_client.containers.run(
       image_name, detach=True, tty=True,
       # Setting COLUMNS and ROWS avoids an issue where the container's terminal
@@ -117,6 +120,7 @@ def StartContainer(image_name, plaso_src):
       environment=['COLUMNS={0:d}'.format(columns), 'ROWS={0:d}'.format(rows)],
       volumes={plaso_src: {'bind': '/root/plaso', 'mode': 'rw'}})
   return container
+
 
 def Main():
   """The main program function.
@@ -130,7 +134,8 @@ def Main():
       'development environment'))
 
   argument_parser.add_argument(
-      'action', action='store', metavar='ACTION', type=str, help=(
+      'action', action='store', metavar='ACTION',
+      choices=['build', 'check_dependencies', 'test', 'start'], help=(
           'the command to run'))
 
   argument_parser.add_argument(
@@ -145,8 +150,8 @@ def Main():
     plaso_src = os.environ['PLASO_SRC']
   else:
     print(
-        'Please set the PLASO_SRC environment variable to the path to your '
-        'Plaso source tree')
+        'Please set the PLASO_SRC environment variable to the absolute path '
+        'to your Plaso source tree')
     return False
 
   options = argument_parser.parse_args()
@@ -193,6 +198,7 @@ def Main():
     return False
 
   return True
+
 
 if __name__ == '__main__':
   if not Main():
