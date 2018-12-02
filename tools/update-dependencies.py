@@ -15,6 +15,7 @@ from l2tdevtools.dependency_writers import appveyor_yml
 from l2tdevtools.dependency_writers import check_dependencies
 from l2tdevtools.dependency_writers import dependencies_py
 from l2tdevtools.dependency_writers import dpkg
+from l2tdevtools.dependency_writers import end_to_end_tests
 from l2tdevtools.dependency_writers import gift_copr
 from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.dependency_writers import macos
@@ -62,6 +63,7 @@ def Main():
   for writer_class in (
       check_dependencies.CheckDependenciesWriter,
       dependencies_py.DependenciesPyWriter, dpkg.DPKGControlWriter,
+      end_to_end_tests.RunEndToEndTestsScriptWriter,
       gift_copr.GIFTCOPRInstallScriptWriter,
       gift_ppa.GIFTPPAInstallScriptPY2Writer,
       gift_ppa.GIFTPPAInstallScriptPY3Writer,
