@@ -17,7 +17,16 @@ class RunEndToEndTestsScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a run_end_to_end_tests.sh file."""
-    template_mappings = {}
+    if self._project_definition.name == 'plaso':
+      scripts_directory_option = '--scripts-directory ./examples'
+    elif self._project_definition.name == 'plaso':
+      scripts_directory_option = '--tools-directory ./tools'
+    else:
+      scripts_directory_option = '--scripts-directory ./scripts'
+
+    template_mappings = {
+        'project_name': self._project_definition.name,
+        'scripts_directory_option': scripts_directory_option}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
