@@ -17,7 +17,7 @@ class RunEndToEndTestsScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a run_end_to_end_tests.sh file."""
-    if self._project_definition.name == 'plaso':
+    if self._project_definition.name == 'dfvfs':
       scripts_directory_option = '--scripts-directory ./examples'
     elif self._project_definition.name == 'plaso':
       scripts_directory_option = '--tools-directory ./tools'
