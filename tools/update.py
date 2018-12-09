@@ -26,6 +26,32 @@ if platform.system() == 'Windows':
   import wmi  # pylint: disable=import-error
 
 
+class PackageDownload(object):
+  """Information about a package download.
+
+  Attributes:
+    filename (str): name of the package file.
+    name (str): name of the package.
+    url (str): download URL of the package file.
+    version (str): version of the package.
+  """
+
+  def __init__(self, name, version, filename, url):
+    """Initializes a package download.
+
+    Args:
+      name (str): name of the package.
+      version (str): version of the package.
+      filename (str): name of the package file.
+      url (str): download URL of the package file.
+    """
+    super(PackageDownload, self).__init__()
+    self.filename = filename
+    self.name = name
+    self.version = version
+    self.url = url
+
+
 class GithubRepoDownloadHelper(interface.DownloadHelper):
   """Helps in downloading from a GitHub repository."""
 
@@ -250,7 +276,8 @@ class DependencyUpdater(object):
       self, download_directory='build', download_only=False,
       download_track='stable', exclude_packages=False, force_install=False,
       msi_targetdir=None, preferred_machine_type=None,
-      preferred_operating_system=None, verbose_output=False):
+      preferred_operating_system=None, projects_file=None,
+      verbose_output=False):
     """Initializes the dependency updater.
 
     Args:
@@ -267,6 +294,7 @@ class DependencyUpdater(object):
           None, which will auto-detect the current machine type.
       preferred_operating_system (Optional[str]): preferred operating system,
           where None, which will auto-detect the current operating system.
+      projects_file (Optional[str]): path to the projects.ini configurationfile.
       verbose_output (Optional[bool]): True more verbose output should be
           provided.
     """
@@ -281,6 +309,7 @@ class DependencyUpdater(object):
     self._exclude_packages = exclude_packages
     self._force_install = force_install
     self._msi_targetdir = msi_targetdir
+    self._project_definitions = {}
     self._verbose_output = verbose_output
 
     if preferred_operating_system:
@@ -293,21 +322,18 @@ class DependencyUpdater(object):
     else:
       self._preferred_machine_type = None
 
-  def _GetPackageFilenamesAndVersions(self, package_names):
-    """Determines the package filenames and versions.
+    if projects_file:
+      with io.open(projects_file, 'r', encoding='utf-8') as file_object:
+        project_definition_reader = projects.ProjectDefinitionReader()
+        for project_definition in project_definition_reader.Read(file_object):
+          self._project_definitions[project_definition.name] = (
+              project_definition)
+
+  def _GetAvailablePackages(self):
+    """Determines the package available for download.
 
     Args:
-      package_names (list[str]): package names that should be updated
-          if an update is available. An empty list represents all available
-          packages.
-
-    Args:
-      tuple: contains:
-
-        dict[str, str]: filenames per package or None if no filenames could
-           be determined.
-        dict[str, str]: versions per package or None if no version could
-           be determined.
+      list[PackageDownload]: packages available for download.
     """
     python_version_indicator = '-py{0:d}.{1:d}'.format(
         sys.version_info[0], sys.version_info[1])
@@ -325,19 +351,17 @@ class DependencyUpdater(object):
 
     os.chdir(self._download_directory)
 
-    package_filenames = {}
+    available_packages = {}
     package_versions = {}
     for package_url in package_urls:
       _, _, package_filename = package_url.rpartition('/')
       if package_filename.endswith('.dmg'):
         # Strip off the trailing part starting with '.dmg'.
         package_name, _, _ = package_filename.partition('.dmg')
-        package_suffix = '.dmg'
 
       elif package_filename.endswith('.msi'):
         # Strip off the trailing part starting with '.win'.
         package_name, _, package_version = package_filename.partition('.win')
-        package_suffix = '.msi'
 
         if ('-py' in package_version and
             python_version_indicator not in package_version):
@@ -357,19 +381,11 @@ class DependencyUpdater(object):
         # name and the version, since name can contain the '-' character.
         name, _, version = package_name.rpartition('-')
 
-      package_prefix = name
       version = version.split('.')
 
       if package_name.startswith('pefile-1.'):
         last_part = version.pop()
         version.extend(last_part.split('-'))
-
-      # Ignore package names if defined.
-      if package_names and (
-          (not self._exclude_packages and name not in package_names) or
-          (self._exclude_packages and name in package_names)):
-        logging.info('Skipping: {0:s} because it was excluded'.format(name))
-        continue
 
       if name not in package_versions:
         compare_result = 1
@@ -378,25 +394,15 @@ class DependencyUpdater(object):
             version, package_versions[name])
 
       if compare_result > 0:
-        package_filenames[name] = package_filename
         package_versions[name] = version
 
-      if not os.path.exists(package_filename):
-        filenames = glob.glob('{0:s}*{1:s}'.format(
-            package_prefix, package_suffix))
-        for filename in filenames:
-          if os.path.isdir(filename):
-            continue
-
-          logging.info('Removing: {0:s}'.format(filename))
-          os.remove(filename)
-
-        logging.info('Downloading: {0:s}'.format(package_filename))
-        self._download_helper.DownloadFile(package_url)
+        package_download = PackageDownload(
+            name, version, package_filename, package_url)
+        available_packages[name] = package_download
 
     os.chdir('..')
 
-    return package_filenames, package_versions
+    return available_packages.values()
 
   def _InstallPackages(self, package_filenames, package_versions):
     """Installs packages.
@@ -742,22 +748,86 @@ class DependencyUpdater(object):
 
     return True
 
-  def UpdatePackages(self, package_names):
+  def UpdatePackages(self, user_defined_project_names):
     """Updates packages.
 
     Args:
-      package_names (list[str]): package names that should be updated
-          if an update is available. An empty list represents all available
-          packages.
+      user_defined_project_names (list[str]): user specified names or project
+          that should be updated if an update is available. An empty list
+          represents all available projects.
 
     Returns:
       bool: True if the update was successful.
     """
-    package_filenames, package_versions = self._GetPackageFilenamesAndVersions(
-        package_names)
-    if not package_filenames:
+    user_defined_package_names = []
+    for project_name in user_defined_project_names:
+      project_definition = project_definitions.get(project_name, None)
+      if not project_definition:
+        logging.error('Missing definition for project: {0:s}'.format(
+            project_name))
+        continue
+
+      user_defined_package_names.append(package_name)
+
+    # Maps a package name to a project definition.
+    project_per_package = {}
+    for project_name, project_definition in project_definitions.items():
+      package_name = project_name
+      if (dependency_updater.operating_system == 'Windows' and
+          project_definition.msi_name):
+        package_name = project_definition.msi_name
+
+      project_per_package[package_name] = project_definition
+
+    available_packages = self._GetAvailablePackages()
+    if not available_packages:
       logging.error('No packages found.')
       return False
+
+    package_filenames = {}
+    package_versions = {}
+    for package_download in available_packages:
+      package_name = package_download.name
+      package_filename = package_download.filename
+
+      # Ignore package names if defined.
+      if user_defined_package_names:
+        in_package_names = package_name in user_defined_package_names
+        if ((self._exclude_packages and in_package_names) or
+            (not self._exclude_packages and not in_package_names)):
+          logging.info('Skipping: {0:s} because it was excluded'.format(name))
+          continue
+
+      # Remove previous versions of a package.
+      filenames = glob.glob('{0:s}*{1:s}'.format(
+          package_name, package_filename[:-4]))
+      for filename in filenames:
+        if filename != package_filename and os.path.isfile(filename):
+          logging.info('Removing: {0:s}'.format(filename))
+          os.remove(filename)
+
+      project_definition = project_per_package.get(package_name, None)
+      if not project_definition:
+        logging.error('Missing project definition for package: {0:s}'.format(
+            package_name))
+        continue
+
+      if sys.version_info[0] != 2 and project_definition.IsPython2Only():
+        logging.info('Skipping: {0:s} because it only supports Python 2'.format(
+            package_name))
+        continue
+
+      elif sys.version_info[0] != 3 and project_definition.IsPython3Only():
+        logging.info('Skipping: {0:s} because it only supports Python 3'.format(
+            package_name))
+        continue
+
+      if not os.path.exists(package_filename):
+        logging.info('Downloading: {0:s}'.format(package_filename))
+        self._download_helper.DownloadFile(package_url)
+
+      package_filenames[package_name] = package_filename
+      package_versions[package_name] = package_download.version
 
     if self._download_only:
       return True
@@ -896,40 +966,10 @@ def Main():
       force_install=options.force_install,
       msi_targetdir=options.msi_targetdir,
       preferred_machine_type=options.machine_type,
+      projects_file=projects_file,
       verbose_output=options.verbose)
 
-  project_definitions = {}
-  with io.open(projects_file, 'r', encoding='utf-8') as file_object:
-    project_definition_reader = projects.ProjectDefinitionReader()
-    for project_definition in project_definition_reader.Read(file_object):
-      project_definitions[project_definition.name] = project_definition
-
-  package_names = []
-  for project_name in project_names:
-    project_definition = project_definitions.get(project_name, None)
-    if not project_definition:
-      logging.error('Missing definition for project: {0:s}'.format(
-          project_name))
-      continue
-
-    if sys.version_info[0] != 2 and project_definition.IsPython2Only():
-      logging.info('Skipping: {0:s} because it only supports Python 2'.format(
-          project_name))
-      continue
-
-    elif sys.version_info[0] != 3 and project_definition.IsPython3Only():
-      logging.info('Skipping: {0:s} because it only supports Python 3'.format(
-          project_name))
-      continue
-
-    package_name = project_name
-    if (dependency_updater.operating_system == 'Windows' and
-        project_definition.msi_name):
-      package_name = project_definition.msi_name
-
-    package_names.append(package_name)
-
-  return dependency_updater.UpdatePackages(package_names)
+  return dependency_updater.UpdatePackages(project_names)
 
 
 if __name__ == '__main__':
