@@ -336,11 +336,6 @@ class DependencyUpdater(object):
       logging.error('Unable to determine package download URLs.')
       return []
 
-    if not os.path.exists(self._download_directory):
-      os.mkdir(self._download_directory)
-
-    os.chdir(self._download_directory)
-
     available_packages = {}
     package_versions = {}
     for package_url in package_urls:
@@ -389,8 +384,6 @@ class DependencyUpdater(object):
         package_download = PackageDownload(
             name, version, package_filename, package_url)
         available_packages[name] = package_download
-
-    os.chdir('..')
 
     return available_packages.values()
 
@@ -783,6 +776,9 @@ class DependencyUpdater(object):
 
       project_per_package[package_name] = project_definition
 
+    if not os.path.exists(self._download_directory):
+      os.mkdir(self._download_directory)
+
     available_packages = self._GetAvailablePackages()
     if not available_packages:
       logging.error('No packages found.')
@@ -793,6 +789,8 @@ class DependencyUpdater(object):
     for package_download in available_packages:
       package_name = package_download.name
       package_filename = package_download.filename
+      package_download_path = os.path.join(
+          self._download_directory, package_filename)
 
       # Ignore package names if defined.
       if user_defined_package_names:
@@ -804,10 +802,11 @@ class DependencyUpdater(object):
           continue
 
       # Remove previous versions of a package.
-      filenames = glob.glob('{0:s}*{1:s}'.format(
-          package_name, package_filename[:-4]))
+      filenames_glob = '{0:s}*{1:s}'.format(package_name, package_filename[:-4])
+      filenames = glob.glob(os.path.join(
+          self._download_directory, filenames_glob)
       for filename in filenames:
-        if filename != package_filename and os.path.isfile(filename):
+        if filename != package_download_path and os.path.isfile(filename):
           logging.info('Removing: {0:s}'.format(filename))
           os.remove(filename)
 
@@ -826,8 +825,8 @@ class DependencyUpdater(object):
         logging.info('Skipping: {0:s} because it only supports Python 3'.format(
             package_name))
         continue
-
-      if not os.path.exists(package_filename):
+ 
+      if not os.path.exists(package_download_path):
         logging.info('Downloading: {0:s}'.format(package_filename))
         self._download_helper.DownloadFile(package_download.url)
 
