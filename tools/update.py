@@ -334,7 +334,7 @@ class DependencyUpdater(object):
         preferred_operating_system=self.operating_system)
     if not package_urls:
       logging.error('Unable to determine package download URLs.')
-      return None, None
+      return []
 
     if not os.path.exists(self._download_directory):
       os.mkdir(self._download_directory)

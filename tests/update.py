@@ -59,8 +59,8 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
   _PROJECT_NAME = 'dfvfs'
   _PROJECT_VERSION = '20181202'
 
-  def testGetPackageFilenamesAndVersions(self):
-    """Tests the GetPackageFilenamesAndVersions function."""
+  def testGetAvailablePackages(self):
+    """Tests the _GetAvailablePackages function."""
     dependency_updater = update.DependencyUpdater(
         preferred_machine_type='x86', preferred_operating_system='Windows')
 
