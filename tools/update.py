@@ -804,7 +804,7 @@ class DependencyUpdater(object):
       # Remove previous versions of a package.
       filenames_glob = '{0:s}*{1:s}'.format(package_name, package_filename[:-4])
       filenames = glob.glob(os.path.join(
-          self._download_directory, filenames_glob)
+          self._download_directory, filenames_glob))
       for filename in filenames:
         if filename != package_download_path and os.path.isfile(filename):
           logging.info('Removing: {0:s}'.format(filename))
@@ -825,10 +825,14 @@ class DependencyUpdater(object):
         logging.info('Skipping: {0:s} because it only supports Python 3'.format(
             package_name))
         continue
- 
+
       if not os.path.exists(package_download_path):
         logging.info('Downloading: {0:s}'.format(package_filename))
-        self._download_helper.DownloadFile(package_download.url)
+        os.chdir(self._download_directory)
+        try:
+          self._download_helper.DownloadFile(package_download.url)
+        finally:
+          os.chdir('..')
 
       package_filenames[package_name] = package_filename
       package_versions[package_name] = package_download.version
