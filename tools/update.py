@@ -765,7 +765,8 @@ class DependencyUpdater(object):
         continue
 
       if self.operating_system == 'Windows':
-        package_name = getattr(project_definition, 'msi_name', project_name)
+        package_name = getattr(
+            project_definition, 'msi_name', None) or project_name
       else:
         package_name = project_name
 
@@ -775,7 +776,8 @@ class DependencyUpdater(object):
     project_per_package = {}
     for project_name, project_definition in project_definitions.items():
       if self.operating_system == 'Windows':
-        package_name = getattr(project_definition, 'msi_name', project_name)
+        package_name = getattr(
+            project_definition, 'msi_name', None) or project_name
       else:
         package_name = project_name
 
@@ -827,7 +829,7 @@ class DependencyUpdater(object):
 
       if not os.path.exists(package_filename):
         logging.info('Downloading: {0:s}'.format(package_filename))
-        self._download_helper.DownloadFile(package_download.package_url)
+        self._download_helper.DownloadFile(package_download.url)
 
       package_filenames[package_name] = package_filename
       package_versions[package_name] = package_download.version
