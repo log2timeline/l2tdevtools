@@ -48,8 +48,8 @@ class PackageDownload(object):
     super(PackageDownload, self).__init__()
     self.filename = filename
     self.name = name
-    self.version = version
     self.url = url
+    self.version = version
 
 
 class GithubRepoDownloadHelper(interface.DownloadHelper):
