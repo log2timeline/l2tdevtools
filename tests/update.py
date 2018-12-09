@@ -57,36 +57,33 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
   # pylint: disable=protected-access
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20180831'
+  _PROJECT_VERSION = '20181202'
 
   def testGetPackageFilenamesAndVersions(self):
     """Tests the GetPackageFilenamesAndVersions function."""
     dependency_updater = update.DependencyUpdater(
         preferred_machine_type='x86', preferred_operating_system='Windows')
 
-    package_filenames, package_versions = (
-        dependency_updater._GetPackageFilenamesAndVersions([]))
+    available_packages = dependency_updater._GetAvailablePackages()
 
     if (sys.version_info[0] not in (2, 3) or
         (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
         (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
 
       # Python versions other than 2.7 and 3.6 are not supported.
-      self.assertIsNone(package_filenames)
-      self.assertIsNone(package_versions)
+      self.assertEqual(available_packages, [])
 
     else:
-      self.assertIsNotNone(package_filenames)
-      self.assertIsNotNone(package_versions)
+      self.assertNotEqual(available_packages, [])
 
-      self.assertEqual(
-          package_filenames.get(self._PROJECT_NAME, None),
-          '{0:s}-{1:s}.1.win32.msi'.format(
-              self._PROJECT_NAME, self._PROJECT_VERSION))
+      for package_download in available_packages:
+        if package_download.name == self._PROJECT_NAME:
+          expected_package_filename = '{0:s}-{1:s}.1.win32.msi'.format(
+              self._PROJECT_NAME, self._PROJECT_VERSION)
+          self.assertEqual(package_download.filename, expected_package_filename)
 
-      self.assertEqual(
-          package_versions.get(self._PROJECT_NAME, None),
-          [self._PROJECT_VERSION, '1'])
+          expected_package_version = [self._PROJECT_VERSION, '1']
+          self.assertEqual(package_download.version, expected_package_version)
 
 
 if __name__ == '__main__':

@@ -276,8 +276,7 @@ class DependencyUpdater(object):
       self, download_directory='build', download_only=False,
       download_track='stable', exclude_packages=False, force_install=False,
       msi_targetdir=None, preferred_machine_type=None,
-      preferred_operating_system=None, projects_file=None,
-      verbose_output=False):
+      preferred_operating_system=None, verbose_output=False):
     """Initializes the dependency updater.
 
     Args:
@@ -294,7 +293,6 @@ class DependencyUpdater(object):
           None, which will auto-detect the current machine type.
       preferred_operating_system (Optional[str]): preferred operating system,
           where None, which will auto-detect the current operating system.
-      projects_file (Optional[str]): path to the projects.ini configurationfile.
       verbose_output (Optional[bool]): True more verbose output should be
           provided.
     """
@@ -309,7 +307,6 @@ class DependencyUpdater(object):
     self._exclude_packages = exclude_packages
     self._force_install = force_install
     self._msi_targetdir = msi_targetdir
-    self._project_definitions = {}
     self._verbose_output = verbose_output
 
     if preferred_operating_system:
@@ -321,13 +318,6 @@ class DependencyUpdater(object):
       self._preferred_machine_type = preferred_machine_type.lower()
     else:
       self._preferred_machine_type = None
-
-    if projects_file:
-      with io.open(projects_file, 'r', encoding='utf-8') as file_object:
-        project_definition_reader = projects.ProjectDefinitionReader()
-        for project_definition in project_definition_reader.Read(file_object):
-          self._project_definitions[project_definition.name] = (
-              project_definition)
 
   def _GetAvailablePackages(self):
     """Determines the package available for download.
@@ -748,10 +738,11 @@ class DependencyUpdater(object):
 
     return True
 
-  def UpdatePackages(self, user_defined_project_names):
+  def UpdatePackages(self, projects_file, user_defined_project_names):
     """Updates packages.
 
     Args:
+      projects_file (str): path to the projects.ini configuration file.
       user_defined_project_names (list[str]): user specified names or project
           that should be updated if an update is available. An empty list
           represents all available projects.
@@ -759,6 +750,12 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the update was successful.
     """
+    project_definitions = {}
+    with io.open(projects_file, 'r', encoding='utf-8') as file_object:
+      project_definition_reader = projects.ProjectDefinitionReader()
+      for project_definition in project_definition_reader.Read(file_object):
+        project_definitions[project_definition.name] = project_definition
+
     user_defined_package_names = []
     for project_name in user_defined_project_names:
       project_definition = project_definitions.get(project_name, None)
@@ -767,15 +764,20 @@ class DependencyUpdater(object):
             project_name))
         continue
 
+      if self.operating_system == 'Windows':
+        package_name = getattr(project_definition, 'msi_name', project_name)
+      else:
+        package_name = project_name
+
       user_defined_package_names.append(package_name)
 
     # Maps a package name to a project definition.
     project_per_package = {}
     for project_name, project_definition in project_definitions.items():
-      package_name = project_name
-      if (dependency_updater.operating_system == 'Windows' and
-          project_definition.msi_name):
-        package_name = project_definition.msi_name
+      if self.operating_system == 'Windows':
+        package_name = getattr(project_definition, 'msi_name', project_name)
+      else:
+        package_name = project_name
 
       project_per_package[package_name] = project_definition
 
@@ -795,7 +797,8 @@ class DependencyUpdater(object):
         in_package_names = package_name in user_defined_package_names
         if ((self._exclude_packages and in_package_names) or
             (not self._exclude_packages and not in_package_names)):
-          logging.info('Skipping: {0:s} because it was excluded'.format(name))
+          logging.info('Skipping: {0:s} because it was excluded'.format(
+              package_name))
           continue
 
       # Remove previous versions of a package.
@@ -824,7 +827,7 @@ class DependencyUpdater(object):
 
       if not os.path.exists(package_filename):
         logging.info('Downloading: {0:s}'.format(package_filename))
-        self._download_helper.DownloadFile(package_url)
+        self._download_helper.DownloadFile(package_download.package_url)
 
       package_filenames[package_name] = package_filename
       package_versions[package_name] = package_download.version
@@ -941,22 +944,22 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format='[%(levelname)s] %(message)s')
 
-  project_names = []
+  user_defined_project_names = []
   if options.preset:
     with io.open(presets_file, 'r', encoding='utf-8') as file_object:
       preset_definition_reader = presets.PresetDefinitionReader()
       for preset_definition in preset_definition_reader.Read(file_object):
         if preset_definition.name == options.preset:
-          project_names = preset_definition.project_names
+          user_defined_project_names = preset_definition.project_names
           break
 
-    if not project_names:
+    if not user_defined_project_names:
       print('Undefined preset: {0:s}'.format(options.preset))
       print('')
       return False
 
   elif options.project_names:
-    project_names = options.project_names
+    user_defined_project_names = options.project_names
 
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
@@ -966,10 +969,10 @@ def Main():
       force_install=options.force_install,
       msi_targetdir=options.msi_targetdir,
       preferred_machine_type=options.machine_type,
-      projects_file=projects_file,
       verbose_output=options.verbose)
 
-  return dependency_updater.UpdatePackages(project_names)
+  return dependency_updater.UpdatePackages(
+      projects_file, user_defined_project_names)
 
 
 if __name__ == '__main__':
