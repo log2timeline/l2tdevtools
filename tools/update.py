@@ -739,7 +739,7 @@ class DependencyUpdater(object):
 
     Args:
       projects_file (str): path to the projects.ini configuration file.
-      user_defined_project_names (list[str]): user specified names or projects,
+      user_defined_project_names (list[str]): user specified names of projects,
           that should be updated if an update is available. An empty list
           represents all available projects.
 
