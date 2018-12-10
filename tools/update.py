@@ -320,7 +320,7 @@ class DependencyUpdater(object):
       self._preferred_machine_type = None
 
   def _GetAvailablePackages(self):
-    """Determines the package available for download.
+    """Determines the packages available for download.
 
     Args:
       list[PackageDownload]: packages available for download.
@@ -336,7 +336,10 @@ class DependencyUpdater(object):
       logging.error('Unable to determine package download URLs.')
       return []
 
+    # Use a dictionary so we can more efficiently set a newer version of
+    # a package that was set previously.
     available_packages = {}
+
     package_versions = {}
     for package_url in package_urls:
       _, _, package_filename = package_url.rpartition('/')
@@ -736,7 +739,7 @@ class DependencyUpdater(object):
 
     Args:
       projects_file (str): path to the projects.ini configuration file.
-      user_defined_project_names (list[str]): user specified names or project
+      user_defined_project_names (list[str]): user specified names or projects,
           that should be updated if an update is available. An empty list
           represents all available projects.
 
