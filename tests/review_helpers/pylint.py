@@ -14,10 +14,23 @@ from tests import test_lib
 class PylintHelperTest(test_lib.BaseTestCase):
   """Tests the pylint helper"""
 
+  # pylint: disable=protected-access
+
   def testInitialize(self):
-    """Tests that the helper can be initialized."""
+    """Tests the __init__ function."""
     helper = pylint.PylintHelper()
     self.assertIsNotNone(helper)
+
+  def testGetVersion(self):
+    """Tests the _GetVersion function."""
+    helper = pylint.PylintHelper()
+
+    version_tuple = helper._GetVersion()
+    self.assertNotEqual(version_tuple, (0, 0, 0))
+
+  # TODO: add tests for CheckFiles
+  # TODO: add tests for CheckUpToDateVersion
+  # TODO: add tests for GetRCFile
 
 
 if __name__ == '__main__':
