@@ -63,7 +63,8 @@ class PylintHelper(cli.CLIHelper):
       # For now disable pylint 2.1.1 and later specific checks.
       if version_tuple >= (2, 1, 1):
         additional_checks = [
-            'assignment-from-none', 'useless-object-inheritance']
+            'assignment-from-none', 'chained-comparison',
+            'useless-object-inheritance']
         command = '{0:s} --disable={1:s}'.format(
             command, ','.join(additional_checks))
 
