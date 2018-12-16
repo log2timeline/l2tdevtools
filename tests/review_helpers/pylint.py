@@ -25,8 +25,7 @@ class PylintHelperTest(test_lib.BaseTestCase):
     """Tests the _GetVersion function."""
     helper = pylint.PylintHelper()
 
-    version_tuple = helper._GetVersion()
-    self.assertNotEqual(version_tuple, (0, 0, 0))
+    helper._GetVersion()
 
   # TODO: add tests for CheckFiles
   # TODO: add tests for CheckUpToDateVersion
