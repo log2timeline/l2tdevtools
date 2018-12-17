@@ -48,11 +48,15 @@ class MSIBuildHelper(interface.BuildHelper):
     super(MSIBuildHelper, self).__init__(project_definition, l2tdevtools_path)
     self._python_version_suffix = 'py{0:d}.{1:d}'.format(
         sys.version_info[0], sys.version_info[1])
-    self.architecture = platform.machine()
+    self.architecture = None
 
-    if self.architecture == 'x86':
+    # Note that platform.machine() does not indicate if a 32-bit version of
+    # Python is running on a 64-bit machine, hence we need to use
+    # platform.architecture() instead.
+    architecture = platform.architecture()[0]
+    if architecture == '32bit':
       self.architecture = 'win32'
-    elif self.architecture == 'AMD64':
+    elif architecture == '64bit':
       self.architecture = 'win-amd64'
 
   def _ApplyPatches(self, patches):
