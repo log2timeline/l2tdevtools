@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import json
 import re
 
 from l2tdevtools.download_helpers import project
@@ -75,6 +76,47 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       available_versions[version_string] = comparable_version
 
     return available_versions
+
+  def GetLatestVersionWithAPI(self, version_definition):
+    """Uses the GitHub API to retrieve the latest version number for a project.
+
+    This method is intended for use in tests only, due to the API rate-limit.
+
+    Args:
+      version_definition (ProjectVersionDefinition): project version definition
+          or None if not set.
+
+    Returns:
+      str: latest version number or None if not available.
+    """
+    earliest_version = None
+    latest_version = None
+
+    if version_definition:
+      earliest_version = version_definition.GetEarliestVersion()
+      if earliest_version and earliest_version[0] == '==':
+        return '.'.join(earliest_version[1:])
+
+      latest_version = version_definition.GetLatestVersion()
+
+    github_url = 'https://api.github.com/repos/{0:s}/{1:s}/releases'.format(
+        self._organization, self._repository)
+    page_content = self.DownloadPageContent(github_url)
+    if not page_content:
+      return None
+
+    api_response = json.loads(page_content)
+    release_names = [release['name'] for release in api_response]
+
+    expression_string = '({0:s})'.format('|'.join(self._VERSION_EXPRESSIONS))
+    versions = []
+    for release in release_names:
+      version_strings = re.findall(expression_string, release)
+      versions.extend(version_strings)
+
+    available_versions = self._GetAvailableVersions(versions)
+    return self._GetLatestVersion(
+        earliest_version, latest_version, available_versions)
 
   def GetLatestVersion(self, project_name, version_definition):
     """Retrieves the latest version number for a given project name.
