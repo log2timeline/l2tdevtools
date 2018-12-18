@@ -86,7 +86,7 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     """Tests the GetDownloadURL functions."""
     download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    project_version =  download_helper.GetLatestVersionWithAPI(None)
+    project_version = download_helper.GetLatestVersionWithAPI(None)
 
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, project_version)
