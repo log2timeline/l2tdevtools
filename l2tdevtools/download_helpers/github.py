@@ -108,11 +108,16 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     api_response = json.loads(page_content)
     release_names = [release['name'] for release in api_response]
 
-    expression_string = '({0:s})'.format('|'.join(self._VERSION_EXPRESSIONS))
+    version_expressions = [
+        '({0:s})$'.format(version_expression)
+        for version_expression
+        in self._VERSION_EXPRESSIONS]
+
     versions = []
     for release in release_names:
-      version_strings = re.findall(expression_string, release)
-      versions.extend(version_strings)
+      for version_expression in version_expressions:
+        version_strings = re.findall(version_expression, release)
+        versions.extend(version_strings)
 
     available_versions = self._GetAvailableVersions(versions)
     return self._GetLatestVersion(
