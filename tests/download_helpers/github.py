@@ -78,8 +78,7 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
     latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
-    latest_version_api = download_helper.GetLatestVersionWithAPI(
-        self._PROJECT_NAME, None)
+    latest_version_api = download_helper.GetLatestVersionWithAPI(None)
 
     self.assertEqual(latest_version, latest_version_api)
 
@@ -87,8 +86,7 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     """Tests the GetDownloadURL functions."""
     download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    project_version =  download_helper.GetLatestVersionWithAPI(
-        self._PROJECT_NAME, None)
+    project_version =  download_helper.GetLatestVersionWithAPI(None)
 
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, project_version)
@@ -129,8 +127,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
     latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
-    latest_version_api = download_helper.GetLatestVersionWithAPI(
-        self._PROJECT_NAME, None)
+    latest_version_api = download_helper.GetLatestVersionWithAPI(None)
 
 
     self.assertEqual(latest_version, latest_version_api)
@@ -139,8 +136,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     """Tests the GetDownloadURL functions."""
     download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    project_version = download_helper.GetLatestVersionWithAPI(
-        self._PROJECT_NAME, None)
+    project_version = download_helper.GetLatestVersionWithAPI(None)
 
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, project_version)
