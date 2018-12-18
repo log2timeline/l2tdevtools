@@ -15,8 +15,6 @@ cls
 compat
 config
 configparser
-configuation
-contibution
 copr
 crypto
 csv
@@ -35,9 +33,7 @@ docopt
 dokan
 dpkg
 elif
-elper
 exe
-exensions
 filename
 filenames
 finalizations

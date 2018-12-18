@@ -357,7 +357,7 @@ class DependencyUpdater(object):
           continue
 
       else:
-        # Ignore all other file exensions.
+        # Ignore all other file extensions.
         continue
 
       if package_name.startswith('pefile-1.'):

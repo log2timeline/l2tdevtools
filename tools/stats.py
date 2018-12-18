@@ -521,8 +521,8 @@ class StdoutWriter(object):
     """Writes a contribution to stdout.
 
     Args:
-      year (int): year of the contibution.
-      week_number (int): week number of the contibution.
+      year (int): year of the contribution.
+      week_number (int): week number of the contribution.
       login_name (str): log-in name.
       project_name (str): project name.
       number_of_contributions (int): number of contributed CLs.
