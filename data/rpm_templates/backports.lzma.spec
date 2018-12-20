@@ -18,8 +18,7 @@ Url: https://github.com/peterjc/backports.lzma
 BuildRequires: gcc, python2-setuptools, python2-devel, xz-devel
 
 %description
-Backport of Python 3.3's 'lzma' module for XZ/LZMA
-compressed files.
+Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
 
 %package -n python2-%{{name}}
 Obsoletes: python-backports-lzma <= %{{version}}
@@ -28,8 +27,7 @@ Summary: Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
 Requires: python2-backports
 
 %description -n python2-%{{name}}
-Backport of Python 3.3's 'lzma' module for XZ/LZMA
-compressed files.
+Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
 
 %prep
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
@@ -49,6 +47,7 @@ rm -rf %{{buildroot}}
 %license LICENSE
 %{{_libdir}}/python2*/site-packages/backports/lzma
 %{{_libdir}}/python2*/site-packages/backports.lzma*.egg-info
+
 %exclude %{{_bindir}}/*
 %exclude %{{_libdir}}/python2*/site-packages/backports/*.pyc
 %exclude %{{_libdir}}/python2*/site-packages/backports/*.pyo

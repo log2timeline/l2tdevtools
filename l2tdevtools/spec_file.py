@@ -148,15 +148,26 @@ class RPMSpecFileGenerator(object):
       requires (str): package requires definition.
       description (str): package description.
     """
-    output_file_object.write((
-        b'%package -n {0:s}\n'
-        b'Obsoletes: python-%{{name}} < %{{version}}\n'
-        b'Provides: python-%{{name}} = %{{version}}\n'
-        b'{1:s}'
-        b'{2:s}'
-        b'\n'
-        b'%description -n {0:s}\n'
-        b'{3:s}').format(name, summary, requires, description))
+    if name == 'pytz':
+      output_file_object.write((
+          b'%package -n {0:s}\n'
+          b'Obsoletes: %{{name}} < %{{version}}\n'
+          b'Provides: %{{name}} = %{{version}}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'\n'
+          b'%description -n {0:s}\n'
+          b'{3:s}').format(name, summary, requires, description))
+    else:
+      output_file_object.write((
+          b'%package -n {0:s}\n'
+          b'Obsoletes: python-%{{name}} < %{{version}}\n'
+          b'Provides: python-%{{name}} = %{{version}}\n'
+          b'{1:s}'
+          b'{2:s}'
+          b'\n'
+          b'%description -n {0:s}\n'
+          b'{3:s}').format(name, summary, requires, description))
 
   def _WritePython2PackageFiles(
       self, output_file_object, project_definition, project_name, name,
