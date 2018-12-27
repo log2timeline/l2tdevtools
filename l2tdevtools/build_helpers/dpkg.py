@@ -255,10 +255,12 @@ class DPKGBuildHelper(interface.BuildHelper):
       str: Debian/Ubuntu distribution name or None if the value could not
           be determined.
     """
-    lsb_release_path = '/etc/lsb-release'
+    distribution_name = None
 
-    lsb_release = {}
+    lsb_release_path = '/etc/lsb-release'
     if os.path.exists(lsb_release_path):
+      lsb_release = {}
+
       with open(lsb_release_path, 'rb') as file_object:
         for line in file_object.readlines():
           line = line.decode('utf-8').strip()
@@ -267,7 +269,18 @@ class DPKGBuildHelper(interface.BuildHelper):
             key, _, value = line.partition('=')
             lsb_release[key] = value
 
-    return lsb_release.get('distrib_codename', None)
+      distribution_name = lsb_release.get('distrib_codename', None)
+
+    lsb_release_path = '/usr/bin/lsb_release'
+    if not distribution_name and os.path.exists(lsb_release_path):
+      arguments = [lsb_release_path, '-sc']
+      process = subprocess.Popen(
+          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+      if process and process.returncode == 0:
+        output, _ = process.communicate()
+        distribution_name = output.strip()
+
+    return distribution_name or None
 
   def _RemoveOlderDPKGPackages(self, project_name, project_version):
     """Removes previous versions of dpkg packages.
