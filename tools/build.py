@@ -32,7 +32,7 @@ class ProjectBuilder(object):
 
   # The distributions to build dpkg-source packages for.
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
-      'trusty', 'xenial', 'bionic'])
+      'xenial', 'bionic'])
 
   def __init__(self, build_target):
     """Initializes the project builder.

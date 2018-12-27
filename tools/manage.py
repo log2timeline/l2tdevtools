@@ -277,7 +277,7 @@ class LaunchpadPPAManager(object):
       'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
       '/{distribution:s}/main/source/Sources.gz')
 
-  def __init__(self, name, distribution='trusty'):
+  def __init__(self, name, distribution='xenial'):
     """Initializes a Launchpad PPA manager.
 
     Args:
@@ -437,7 +437,7 @@ class PackagesManager(object):
       distribution (Optional[str]): name of the distribution.
     """
     fedora_distribution = distribution or '28'
-    ubuntu_distribution = distribution or 'trusty'
+    ubuntu_distribution = distribution or 'xenial'
 
     super(PackagesManager, self).__init__()
     self._copr_project_manager = COPRProjectManager(
