@@ -76,7 +76,7 @@ def Main():
         continue
       globbed_paths.append(path)
 
-    if not len(globbed_paths) == 1:
+    if len(globbed_paths) != 1:
       print('Unable to determine source directory.')
       print('')
       return False

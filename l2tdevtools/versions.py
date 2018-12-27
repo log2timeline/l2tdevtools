@@ -31,7 +31,7 @@ def CompareVersions(first_version_list, second_version_list):
 
     if first_version_part > second_version_part:
       return 1
-    elif first_version_part < second_version_part:
+    if first_version_part < second_version_part:
       return -1
 
   if first_version_list_length < second_version_list_length:

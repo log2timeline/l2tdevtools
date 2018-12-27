@@ -135,7 +135,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       matches = re.findall(expression_string, page_content)
 
       # TODO: this check will fail if the case in the URL is different.
-      # Make checks case insenstive.
+      # Make checks case insensitive.
 
     if not matches:
       return None

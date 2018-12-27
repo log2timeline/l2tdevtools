@@ -357,7 +357,7 @@ class DependencyUpdater(object):
           continue
 
       else:
-        # Ignore all other file exensions.
+        # Ignore all other file extensions.
         continue
 
       if package_name.startswith('pefile-1.'):
@@ -670,7 +670,7 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the uninstall was successful.
     """
-    # Tuple of packge name suffix, machine type, Python version
+    # Tuple of package name suffix, machine type, Python version.
     package_info = (
         ('.win32.msi', 'x86', None),
         ('.win32-py2.7.msi', 'x86', 2),

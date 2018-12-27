@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Tests for the elper for managing project source code."""
+"""Tests for the helper for managing project source code."""
 
 from __future__ import unicode_literals
 
