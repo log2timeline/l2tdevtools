@@ -523,6 +523,7 @@ class DependencyHelper(object):
         'pyevt',
         'pyevtx',
         'pyewf',
+        'pyexe',
         'pyfsapfs',
         'pyfsntfs',
         'pyfvde',
@@ -542,6 +543,7 @@ class DependencyHelper(object):
         'pyvmdk',
         'pyvshadow',
         'pyvslvm',
+        'pywrc',
         'yara')
 
     extension_packages = []
