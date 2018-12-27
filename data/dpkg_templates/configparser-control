@@ -2,7 +2,7 @@ Source: configparser
 Section: python
 Priority: extra
 Maintainer: Łukasz Langa <lukasz@langa.pl>
-Build-Depends: debhelper (>= 7), dh-python, python-all (>= 2.7~), python-setuptools
+Build-Depends: debhelper (>= 9), dh-python, python-all (>= 2.7~), python-setuptools
 Standards-Version: 3.9.5
 X-Python-Version: >= 2.7
 Homepage: http://docs.python.org/3/library/configparser.html
