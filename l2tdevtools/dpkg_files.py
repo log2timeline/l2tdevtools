@@ -253,11 +253,7 @@ class DPKGBuildFilesGenerator(object):
       '\tdone;',
       ''])
 
-  _SOURCE_FORMAT_NATIVE_TEMPLATE = '\n'.join([
-      '3.0 (native)',
-      ''])
-
-  _SOURCE_FORMAT_QUILT_TEMPLATE = '\n'.join([
+  _SOURCE_FORMAT_TEMPLATE = '\n'.join([
       '3.0 (quilt)',
       ''])
 
@@ -677,10 +673,7 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
-    if self._project_definition.dpkg_source_format == 'native':
-      template_file = self._SOURCE_FORMAT_NATIVE_TEMPLATE
-    else:
-      template_file = self._SOURCE_FORMAT_QUILT_TEMPLATE
+    template_file = self._SOURCE_FORMAT_TEMPLATE
 
     output_filename = os.path.join(dpkg_path, 'source', 'format')
 
