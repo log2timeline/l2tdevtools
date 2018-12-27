@@ -25,7 +25,7 @@ class ProjectDefinition(object):
   """
 
   def __init__(self):
-    """Initializes a project configuation."""
+    """Initializes a project configuration."""
     super(ProjectDefinition, self).__init__()
     self.description_long = None
     self.description_short = None

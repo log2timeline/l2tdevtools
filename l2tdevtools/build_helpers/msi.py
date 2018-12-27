@@ -248,7 +248,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
       logging.error('Missing dependency: dokan.')
       return False
 
-    # Detect architecture based on Visual Studion Platform environment
+    # Detect architecture based on Visual Studio Platform environment
     self._BuildPrepare(source_helper_object, source_directory)
 
     # variable. If not set the platform with default to Win32.
