@@ -35,7 +35,6 @@ class ProjectDefinition(object):
     dpkg_configure_options (list[str]): configure options when building a deb.
     dpkg_dependencies (list[str]): dpkg dependencies.
     dpkg_name (str): dpkg package name.
-    dpkg_source_format (str): dpkg source format, either "native" or "quilt".
     dpkg_source_name (str): dpkg source package name.
     dpkg_template_control (str): name of the dpkg control template file.
     dpkg_template_install_python2 (list[str]): names of the dpkg Python 2
@@ -80,7 +79,6 @@ class ProjectDefinition(object):
     self.dpkg_configure_options = None
     self.dpkg_dependencies = None
     self.dpkg_name = None
-    self.dpkg_source_format = None
     self.dpkg_source_name = None
     self.dpkg_template_control = None
     self.dpkg_template_install_python2 = None
@@ -256,8 +254,6 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'dpkg_dependencies')
       project_definition.dpkg_name = self._GetConfigValue(
           config_parser, section_name, 'dpkg_name')
-      project_definition.dpkg_source_format = self._GetConfigValue(
-          config_parser, section_name, 'dpkg_source_format')
       project_definition.dpkg_source_name = self._GetConfigValue(
           config_parser, section_name, 'dpkg_source_name')
       project_definition.dpkg_template_control = self._GetConfigValue(
