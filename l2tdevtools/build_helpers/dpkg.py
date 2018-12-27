@@ -69,6 +69,7 @@ class DPKGBuildHelper(interface.BuildHelper):
       l2tdevtools_path (str): path to the l2tdevtools directory.
     """
     super(DPKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    self._build_host_distribution = self._GetBuildHostDistribution()
     self._prep_script = 'prep-dpkg.sh'
     self._post_script = 'post-dpkg.sh'
 
@@ -160,11 +161,14 @@ class DPKGBuildHelper(interface.BuildHelper):
     if self._project_definition.dpkg_source_name:
       project_name = self._project_definition.dpkg_source_name
 
-    deb_orig_source_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
-    if self.version_suffix and self.distribution:
+    if (self._build_host_distribution == 'bionic' and self.distribution and
+        self.version_suffix):
       deb_orig_source_filename = '{0:s}_{1!s}{2:s}~{3:s}.orig.tar.gz'.format(
           project_name, project_version, self.version_suffix, self.distribution)
+    else:
+      deb_orig_source_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
+          project_name, project_version)
+
     if os.path.exists(deb_orig_source_filename):
       return
 
@@ -243,6 +247,27 @@ class DPKGBuildHelper(interface.BuildHelper):
       return False
 
     return True
+
+  def _GetBuildHostDistribution(self):
+    """Determines the Debian/Ubuntu distribution name of the build host.
+
+    Returns:
+      str: Debian/Ubuntu distribution name or None if the value could not
+          be determined.
+    """
+    lsb_release_path = '/etc/lsb-release'
+
+    lsb_release = {}
+    if os.path.exists(lsb_release_path):
+      with open(lsb_release_path, 'rb') as file_object:
+        for line in file_object.readlines():
+          line = line.decode('utf-8').strip()
+          if not line.startswith('#') and '=' in line:
+            line = line.lower()
+            key, _, value = line.partition('=')
+            lsb_release[key] = value
+
+    return lsb_release.get('distrib_codename', None)
 
   def _RemoveOlderDPKGPackages(self, project_name, project_version):
     """Removes previous versions of dpkg packages.
