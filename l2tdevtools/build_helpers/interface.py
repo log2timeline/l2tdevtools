@@ -54,3 +54,11 @@ class BuildHelper(object):
       bool: True if a build is required, False otherwise.
     """
     return True
+
+  def CheckProjectConfiguration(self):
+    """Checks if the project configuration.
+
+    Returns:
+      bool: True if the project configuration is correct, False otherwise.
+    """
+    return True

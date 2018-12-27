@@ -42,77 +42,10 @@ class ProjectBuilder(object):
       l2tdevtools_path (str): path to l2tdevtools.
     """
     super(ProjectBuilder, self).__init__()
+    self._build_helpers = {}
     self._build_target = build_target
     self._l2tdevtools_path = l2tdevtools_path
-
-  def _BuildProject(self, download_helper_object, project_definition):
-    """Builds a project.
-
-    Args:
-      download_helper_object (DownloadHelper): download helper.
-      project_definition (ProjectDefinition): project definition.
-
-    Returns:
-      bool: True if the build is successful or False on error.
-    """
-    project_name = project_definition.name
-
-    source_helper_object = source_helper.SourcePackageHelper(
-        project_name, project_definition, download_helper_object)
-
-    source_helper_object.Clean()
-
-    # TODO: add a step to make sure build environment is sane
-    # e.g. _CheckStatusIsClean()
-
-    # Unify http:// and https:// URLs for the download helper check.
-    download_url = project_definition.download_url
-    if download_url.startswith('https://'):
-      download_url = 'http://{0:s}'.format(download_url[8:])
-
-    if self._build_target == 'download':
-      source_filename = source_helper_object.Download()
-
-      # If available run the script post-download.sh after download.
-      if os.path.exists('post-download.sh'):
-        command = 'sh ./post-download.sh {0:s}'.format(source_filename)
-        exit_code = subprocess.call(command, shell=True)
-        if exit_code != 0:
-          logging.error('Running: "{0:s}" failed.'.format(command))
-          return False
-
-      return True
-
-    build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
-        project_definition, self._build_target, self._l2tdevtools_path)
-    if not build_helper_object:
-      logging.warning('Unable to determine how to build: {0:s}'.format(
-          project_definition.name))
-      return False
-
-    build_dependencies = build_helper_object.CheckBuildDependencies()
-    if build_dependencies:
-      logging.warning(
-          'Missing build dependencies: {0:s}'.format(
-              ' '.join(build_dependencies)))
-      return False
-
-    if self._build_target == 'dpkg-source':
-      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
-    else:
-      distributions = [None]
-
-    for distribution in distributions:
-      if not self._BuildProjectForDistribution(
-          build_helper_object, source_helper_object, distribution):
-        return False
-
-    if os.path.exists(build_helper_object.LOG_FILENAME):
-      logging.info('Removing: {0:s}'.format(
-          build_helper_object.LOG_FILENAME))
-      os.remove(build_helper_object.LOG_FILENAME)
-
-    return True
+    self._source_helpers = {}
 
   def _BuildProjectForDistribution(
       self, build_helper_object, source_helper_object, distribution):
@@ -166,9 +99,90 @@ class ProjectBuilder(object):
 
     Returns:
       bool: True if the build is successful or False on error.
+    """
+    build_helper_object = self._build_helpers.get(
+        project_definition.name, None)
+    if not build_helper_object:
+      logging.warning('Missing build helper.')
+      return False
+
+    source_helper_object = self._source_helpers.get(
+        project_definition.name, None)
+    if not source_helper_object:
+      logging.warning('Missing source helper.')
+      return False
+
+    if self._build_target == 'dpkg-source':
+      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
+    else:
+      distributions = [None]
+
+    for distribution in distributions:
+      if not self._BuildProjectForDistribution(
+          build_helper_object, source_helper_object, distribution):
+        return False
+
+    if os.path.exists(build_helper_object.LOG_FILENAME):
+      logging.info('Removing: {0:s}'.format(
+          build_helper_object.LOG_FILENAME))
+      os.remove(build_helper_object.LOG_FILENAME)
+
+    return True
+
+  def CheckBuildDependencies(self, project_definition):
+    """Checks if the build dependencies a project are met.
+
+    Args:
+      project_definition (ProjectDefinition): project definition.
+
+    Returns:
+      list[str]: build dependency names that are not met or an empty list.
+    """
+    source_helper_object = self._source_helpers.get(
+        project_definition.name, None)
+    if not source_helper_object:
+      logging.warning('Missing source helper.')
+      return []
+
+    build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
+        project_definition, self._build_target, self._l2tdevtools_path)
+    if not build_helper_object:
+      logging.warning('Unable to determine how to build: {0:s}'.format(
+          project_definition.name))
+      return []
+
+    self._build_helpers[project_definition.name] = build_helper_object
+
+    return build_helper_object.CheckBuildDependencies()
+
+  def CheckProjectConfiguration(self, project_definition):
+    """Checks if the project configuration.
+
+    Args:
+      project_definition (ProjectDefinition): project definition.
+
+    Returns:
+      bool: True if the project configuration is correct, False otherwise.
+    """
+    build_helper_object = self._build_helpers.get(
+        project_definition.name, None)
+    if not build_helper_object:
+      logging.warning('Missing build helper.')
+      return False
+
+    return build_helper_object.CheckProjectConfiguration()
+
+  def Download(self, project_definition):
+    """Downloads the source package of a project.
+
+    Args:
+      project_definition (ProjectDefinition): project definition.
+
+    Returns:
+      bool: True if the download is successful or False on error.
 
     Raises:
-      ValueError: if the project type is unsupported.
+      ValueError: if the project download URL is not supported.
     """
     download_helper_object = (
         download_helper.DownloadHelperFactory.NewDownloadHelper(
@@ -178,7 +192,29 @@ class ProjectBuilder(object):
       raise ValueError('Unsupported download URL: {0:s}.'.format(
           project_definition.download_url))
 
-    return self._BuildProject(download_helper_object, project_definition)
+    # TODO: implement
+    source_helper_object = source_helper.SourcePackageHelper(
+        project_definition.name, project_definition, download_helper_object)
+
+    source_helper_object.Clean()
+
+    # TODO: add a step to make sure build environment is sane
+    # e.g. _CheckStatusIsClean()
+
+    source_filename = source_helper_object.Download()
+
+    if self._build_target == 'download':
+      # If available run the script post-download.sh after download.
+      if os.path.exists('post-download.sh'):
+        command = 'sh ./post-download.sh {0:s}'.format(source_filename)
+        exit_code = subprocess.call(command, shell=True)
+        if exit_code != 0:
+          logging.error('Running: "{0:s}" failed.'.format(command))
+          return False
+
+    self._source_helpers[project_definition.name] = source_helper_object
+
+    return True
 
 
 def Main():
@@ -292,7 +328,7 @@ def Main():
     project_names = options.projects.split(',')
 
   builds = []
-  disabled_packages = []
+  disabled_projects = []
   with io.open(projects_file, 'r', encoding='utf-8') as file_object:
     project_definition_reader = projects.ProjectDefinitionReader()
     for project_definition in project_definition_reader.Read(file_object):
@@ -310,52 +346,102 @@ def Main():
               project_definition.name))
 
       if is_disabled:
-        disabled_packages.append(project_definition.name)
+        disabled_projects.append(project_definition.name)
       else:
         builds.append(project_definition)
 
   if not os.path.exists(options.build_directory):
     os.mkdir(options.build_directory)
 
+  undefined_projects = set(project_names)
+  for disabled_package in disabled_projects:
+    undefined_projects.remove(disabled_package)
+
+  check_configuration = set()
+  failed_builds = set()
+  failed_downloads = set()
+  missing_build_dependencies = set()
+
   current_working_directory = os.getcwd()
   os.chdir(options.build_directory)
 
-  undefined_packages = list(project_names)
-  for disabled_package in disabled_packages:
-    undefined_packages.remove(disabled_package)
+  try:
+    for project_definition in list(builds):
+      if project_names and project_definition.name not in project_names:
+        builds.remove(project_definition)
+        continue
 
-  failed_builds = []
-  for project_definition in builds:
-    if project_names and project_definition.name not in project_names:
-      continue
+      undefined_projects.remove(project_definition.name)
 
-    if undefined_packages:
-      project_index = undefined_packages.index(project_definition.name)
-      del undefined_packages[project_index]
+      if not project_builder.Download(project_definition):
+        builds.remove(project_definition)
 
-    logging.info('Processing: {0:s}'.format(project_definition.name))
+        print('Failed downloading: {0:s}'.format(project_definition.name))
+        failed_downloads.add(project_definition.name)
 
-    # TODO: add support for dokan, bzip2
-    # TODO: setup sqlite in build directory.
-    if not project_builder.Build(project_definition):
-      print('Failed building: {0:s}'.format(project_definition.name))
-      failed_builds.append(project_definition.name)
+    if options.build_target != 'download':
+      for project_definition in list(builds):
+        dependencies = project_builder.CheckBuildDependencies(
+            project_definition)
 
-  os.chdir(current_working_directory)
+        if dependencies:
+          builds.remove(project_definition)
 
-  if undefined_packages:
+          print(
+              'Unable to build: {0:s} missing build dependencies: {1:s}'.format(
+                  project_definition.name, ', '.join(dependencies)))
+          missing_build_dependencies.update(dependencies)
+
+        if not project_builder.CheckProjectConfiguration(project_definition):
+          print('Detected inconsistency in configuration of: {0:s}'.format(
+              project_definition.name))
+          check_configuration.add(project_definition.name)
+
+      for project_definition in list(builds):
+        logging.info('Building: {0:s}'.format(project_definition.name))
+
+        # TODO: add support for dokan, bzip2
+        # TODO: setup sqlite in build directory.
+        if not project_builder.Build(project_definition):
+          print('Failed building: {0:s}'.format(project_definition.name))
+          failed_builds.add(project_definition.name)
+
+  finally:
+    os.chdir(current_working_directory)
+
+  if undefined_projects:
     print('')
-    print('Undefined packages:')
-    for undefined_package in undefined_packages:
-      print('\t{0:s}'.format(undefined_package))
+    print('Undefined projects:')
+    for name in undefined_projects:
+      print('\t{0:s}'.format(name))
+
+  if check_configuration:
+    print('')
+    print('Check configuration of projects:')
+    for name in check_configuration:
+      print('\t{0:s}'.format(name))
+
+  if failed_downloads:
+    print('')
+    print('Failed downloading:')
+    for name in failed_downloads:
+      print('\t{0:s}'.format(name))
+
+  if missing_build_dependencies:
+    print('')
+    print('Missing build dependencies:')
+    for dependency in missing_build_dependencies:
+      print('\t{0:s}'.format(dependency))
 
   if failed_builds:
     print('')
     print('Failed building:')
-    for failed_build in failed_builds:
-      print('\t{0:s}'.format(failed_build))
+    for name in failed_builds:
+      print('\t{0:s}'.format(name))
 
-  return not failed_builds
+  return (
+      not failed_downloads and not missing_build_dependencies and
+      not failed_builds)
 
 
 if __name__ == '__main__':

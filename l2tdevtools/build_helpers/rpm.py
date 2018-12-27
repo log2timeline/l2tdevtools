@@ -379,9 +379,9 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_package_filename = source_helper_object.Download()
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
     if not source_package_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
@@ -440,14 +440,14 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       self.architecture = 'noarch'
 
   def _GenerateSpecFile(
-      self, project_name, project_version, source_filename,
+      self, project_name, project_version, source_package_filename,
       source_helper_object):
     """Generates the rpm spec file.
 
     Args:
       project_name (str): name of the project.
       project_version (str): version of the project.
-      source_filename (str): name of the source package file.
+      source_package_filename (str): name of the source package file.
       source_helper_object (SourceHelper): source helper.
 
     Returns:
@@ -455,8 +455,8 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     """
     source_directory = source_helper_object.Create()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
+      logging.error('Extraction of source package: {0:s} failed'.format(
+          source_package_filename))
       return None
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
@@ -476,7 +476,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
-        self._project_definition, source_directory, source_filename,
+        self._project_definition, source_directory, source_package_filename,
         project_name, project_version, input_file_path, output_file_path):
       return None
 
@@ -517,21 +517,22 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
-    if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    if not source_package_filename:
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
-    logging.info('Building rpm of: {0:s}'.format(source_filename))
+    logging.info('Building rpm of: {0:s}'.format(source_package_filename))
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    self._CopySourcePackageToRPMBuildSources(source_filename)
+    self._CopySourcePackageToRPMBuildSources(source_package_filename)
 
     rpm_spec_file_path = self._GenerateSpecFile(
-        project_name, project_version, source_filename, source_helper_object)
+        project_name, project_version, source_package_filename,
+        source_helper_object)
     if not rpm_spec_file_path:
       logging.error('Unable to generate rpm spec file.')
       return False
@@ -657,9 +658,9 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_package_filename = source_helper_object.Download()
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
     if not source_package_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
@@ -704,14 +705,14 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
       self.architecture = 'noarch'
 
   def _GenerateSpecFile(
-      self, project_name, project_version, source_filename,
+      self, project_name, project_version, source_package_filename,
       source_helper_object):
     """Generates the rpm spec file.
 
     Args:
       project_name (str): name of the project.
       project_version (str): version of the project.
-      source_filename (str): name of the source package file.
+      source_package_filename (str): name of the source package file.
       source_helper_object (SourceHelper): source helper.
 
     Returns:
@@ -719,8 +720,8 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     """
     source_directory = source_helper_object.Create()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
+      logging.error('Extraction of source package: {0:s} failed'.format(
+          source_package_filename))
       return None
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
@@ -740,7 +741,7 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
-        self._project_definition, source_directory, source_filename,
+        self._project_definition, source_directory, source_package_filename,
         project_name, project_version, input_file_path, output_file_path):
       return None
 
@@ -755,21 +756,23 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
-    if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    if not source_package_filename:
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
-    logging.info('Building source rpm of: {0:s}'.format(source_filename))
+    logging.info('Building source rpm of: {0:s}'.format(
+        source_package_filename))
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    self._CopySourcePackageToRPMBuildSources(source_filename)
+    self._CopySourcePackageToRPMBuildSources(source_package_filename)
 
     rpm_spec_file_path = self._GenerateSpecFile(
-        project_name, project_version, source_filename, source_helper_object)
+        project_name, project_version, source_package_filename,
+        source_helper_object)
     if not rpm_spec_file_path:
       logging.error('Unable to generate rpm spec file.')
       return False
