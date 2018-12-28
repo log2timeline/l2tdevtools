@@ -14,8 +14,9 @@ import subprocess
 import tarfile
 import zipfile
 
-from l2tdevtools.build_helpers import interface
 from l2tdevtools import dpkg_files
+from l2tdevtools import py2to3
+from l2tdevtools.build_helpers import interface
 
 
 class DPKGBuildHelper(interface.BuildHelper):
@@ -251,6 +252,10 @@ class DPKGBuildHelper(interface.BuildHelper):
   def _GetBuildHostDistribution(self):
     """Determines the Debian/Ubuntu distribution name of the build host.
 
+    This information can be found in the configuration file "/etc/lsb-release"
+    if preset. Otherwise this information can be obtained by invoking
+    "/usr/bin/lsb_release -sc".
+
     Returns:
       str: Debian/Ubuntu distribution name or None if the value could not
           be determined.
@@ -259,28 +264,43 @@ class DPKGBuildHelper(interface.BuildHelper):
 
     lsb_release_path = '/etc/lsb-release'
     if os.path.exists(lsb_release_path):
-      lsb_release = {}
-
-      with open(lsb_release_path, 'rb') as file_object:
-        for line in file_object.readlines():
-          line = line.decode('utf-8').strip()
-          if not line.startswith('#') and '=' in line:
-            line = line.lower()
-            key, _, value = line.partition('=')
-            lsb_release[key] = value
-
+      lsb_release = self._ReadLSBReleaseConfigurationFile(lsb_release_path)
       distribution_name = lsb_release.get('distrib_codename', None)
 
-    lsb_release_path = '/usr/bin/lsb_release'
-    if not distribution_name and os.path.exists(lsb_release_path):
-      arguments = [lsb_release_path, '-sc']
-      process = subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-      if process and process.returncode == 0:
-        output, _ = process.communicate()
-        distribution_name = output.strip()
+    if not distribution_name:
+      output = self._RunLSBReleaseCommand(option='-sc')
+      if output:
+        distribution_name = output.strip() or None
 
-    return distribution_name or None
+    return distribution_name
+
+  def _ReadLSBReleaseConfigurationFile(self, path):
+    """Reads a lsb-release configuration (/etc/lsb-release) file.
+
+    This functions ignores comment lines, lines that are not UTF-8 formatted
+    and lines that do not consist of "key=value".
+
+    Args:
+      path (str): path of the lsb-release configuration file.
+
+    Returns:
+      dict[str, str]: key value pairs that are stored in the lsb-release
+          configuration file.
+    """
+    lsb_release_values = {}
+    with open(path, 'rb') as file_object:
+      for line in file_object.readlines():
+        try:
+          line = line.decode('utf-8').strip()
+        except UnicodeDecodeError:
+          continue
+
+        if not line.startswith('#') and '=' in line:
+          line = line.lower()
+          key, _, value = line.partition('=')
+          lsb_release_values[key.strip()] = value.strip() or None
+
+    return lsb_release_values
 
   def _RemoveOlderDPKGPackages(self, project_name, project_version):
     """Removes previous versions of dpkg packages.
@@ -381,6 +401,39 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
         os.remove(filename)
+
+  def _RunLSBReleaseCommand(self, option='-a'):
+    """Runs the lsb-release command (/usr/bin/lsb_release).
+
+    This functions ignores comment lines, lines that are not UTF-8 formatted
+    and lines that do not consist of "key=value".
+
+    Args:
+      option (Optional[str]): option to pass to the lsb-release command.
+
+    Returns:
+      str: output of the command or None if there is no lsb-release command
+          available, or running the command failed, or the output cannot be
+          decoded.
+    """
+    output = None
+    path = '/usr/bin/lsb_release'
+
+    if os.path.exists(path):
+      process = subprocess.Popen(
+          [path, option], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+      output, _ = process.communicate()
+      if not process or process.returncode != 0:
+        output = None
+
+      elif isinstance(output, py2to3.BYTES_TYPE):
+        try:
+          output = output.decode('utf-8')
+        except UnicodeDecodeError:
+          output = None
+
+    return output
 
   def CheckBuildDependencies(self):
     """Checks if the build dependencies are met.
