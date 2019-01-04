@@ -277,7 +277,7 @@ class DPKGBuildHelper(interface.BuildHelper):
   def _ReadLSBReleaseConfigurationFile(self, path):
     """Reads a lsb-release configuration (/etc/lsb-release) file.
 
-    This functions ignores comment lines, lines that are not UTF-8 formatted
+    This function ignores comment lines, lines that are not UTF-8 formatted
     and lines that do not consist of "key=value".
 
     Args:
@@ -404,9 +404,6 @@ class DPKGBuildHelper(interface.BuildHelper):
 
   def _RunLSBReleaseCommand(self, option='-a'):
     """Runs the lsb-release command (/usr/bin/lsb_release).
-
-    This functions ignores comment lines, lines that are not UTF-8 formatted
-    and lines that do not consist of "key=value".
 
     Args:
       option (Optional[str]): option to pass to the lsb-release command.
