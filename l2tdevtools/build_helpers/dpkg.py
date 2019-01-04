@@ -455,7 +455,10 @@ class DPKGBuildHelper(interface.BuildHelper):
     return missing_packages
 
   def CheckProjectConfiguration(self):
-    """Checks if the project configuration.
+    """Checks if the project configuration is correct.
+
+    This functions checks if all build dependencies are defined as dpkg build
+    dependencies.
 
     Returns:
       bool: True if the project configuration is correct, False otherwise.
