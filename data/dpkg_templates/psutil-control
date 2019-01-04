@@ -1,0 +1,25 @@
+Source: psutil
+Section: python
+Priority: extra
+Maintainer: Giampaolo Rodola <g.rodola@gmail.com>
+Build-Depends: debhelper (>= 9), python-all (>= 2.7~), python-setuptools (>= 28.0), dh-python, python-all-dev, python3-all (>= 3.4~), python3-setuptools (>= 28.0), python3-all-dev
+Standards-Version: 3.9.5
+X-Python-Version: >= 2.7
+X-Python3-Version: >= 3.4
+Homepage: https://github.com/giampaolo/psutil
+
+Package: python-psutil
+Architecture: any
+Depends: ${{python:Depends}}, ${{misc:Depends}}
+Description: Python 2 module of psutil
+ psutil is a cross-platform library for retrieving information
+ on running processes and system utilization (CPU, memory, disks, network)
+ in Python.
+
+Package: python3-psutil
+Architecture: any
+Depends: ${{python3:Depends}}, ${{misc:Depends}}
+Description: Python 3 module of psutil
+ psutil is a cross-platform library for retrieving information
+ on running processes and system utilization (CPU, memory, disks, network)
+ in Python.
