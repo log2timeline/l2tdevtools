@@ -445,7 +445,7 @@ class RPMSpecFileGenerator(object):
 
         elif (line.startswith(b'%package -n python-') or
               line.startswith(b'%package -n python2-')):
-          if project_name in ('artifacts', 'plaso'):
+          if project_name == 'plaso':
             in_python_package = True
             continue
 
@@ -462,7 +462,7 @@ class RPMSpecFileGenerator(object):
           has_python3_package = True
 
         elif line.startswith(b'%prep'):
-          if project_name in ('artifacts', 'plaso'):
+          if project_name == 'plaso':
             requires = b'{0:s}, {1:s}-data\n'.format(
                 requires[:-1], project_name)
 
@@ -490,7 +490,7 @@ class RPMSpecFileGenerator(object):
                 output_file_object, python_package_name, summary, requires,
                 description)
 
-          if project_name in ('artifacts', 'plaso'):
+          if project_name == 'plaso':
             output_file_object.write((
                 b'%package -n %{{name}}-data\n'
                 b'{0:s}'
@@ -518,7 +518,8 @@ class RPMSpecFileGenerator(object):
         elif line == b'rm -rf $RPM_BUILD_ROOT\n':
           line = b'rm -rf %{buildroot}\n'
 
-        elif line.startswith(b'%files'):
+        elif (line.startswith(b'%files') and
+              not line.startswith(b'%files -n %{name}-data')):
           break
 
         elif in_description:
@@ -555,7 +556,7 @@ class RPMSpecFileGenerator(object):
           output_file_object, project_definition, project_name,
           python_package_name, license_line, doc_line)
 
-    if project_name in ('artifacts', 'plaso'):
+    if project_name == 'plaso':
       output_file_object.write(
           b'\n'
           b'%files -n %{name}-data\n'
@@ -563,6 +564,7 @@ class RPMSpecFileGenerator(object):
 
     # TODO: add bindir support.
     output_file_object.write((
+        b'\n'
         b'%exclude %{_bindir}/*\n'))
 
     # TODO: add shared data support.
