@@ -1,0 +1,60 @@
+
+
+if not bdist_rpm:
+  BdistRPMCommand = None
+else:
+  class BdistRPMCommand(bdist_rpm):
+    """Custom handler for the bdist_rpm command."""
+
+    def _make_spec_file(self):
+      """Generates the text of an RPM spec file.
+
+      Returns:
+        list[str]: lines of the RPM spec file.
+      """
+      # Note that bdist_rpm can be an old style class.
+      if issubclass(BdistRPMCommand, object):
+        spec_file = super(BdistRPMCommand, self)._make_spec_file()
+      else:
+        spec_file = bdist_rpm._make_spec_file(self)
+
+      if sys.version_info[0] < 3:
+        python_package = 'python2'
+      else:
+        python_package = 'python3'
+
+      description = []
+      requires = ''
+      summary = ''
+      in_description = False
+
+      python_spec_file = []
+      for line in iter(spec_file):
+        if line.startswith('Summary: '):
+          summary = line
+
+        elif line.startswith('BuildRequires: '):
+          line = 'BuildRequires: {0:s}-setuptools, {0:s}-devel'.format(
+              python_package)
+
+        elif line.startswith('Requires: '):
+          requires = line[10:]
+          if python_package == 'python3':
+            requires = requires.replace('python-', 'python3-')
+            requires = requires.replace('python2-', 'python3-')
+
+        elif line.startswith('%description'):
+          in_description = True
+
+        elif line.startswith('python setup.py build'):
+          if python_package == 'python3':
+            line = '%py3_build'
+          else:
+            line = '%py2_build'
+
+        elif line.startswith('python setup.py install'):
+          if python_package == 'python3':
+            line = '%py3_install'
+          else:
+            line = '%py2_install'
+

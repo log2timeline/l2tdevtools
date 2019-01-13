@@ -164,6 +164,13 @@ class SetupPyWriter(interface.DependencyFileWriter):
     description_long = '\n'.join([
         '    \'{0:s}\''.format(line) for line in description_long])
 
+    if self._project_definition.name == 'artifacts':
+      data_files_path = 'share/{0:s}'.format(
+          self._project_definition.name)
+    else:
+      data_files_path = 'share/{0:s}/data'.format(
+          self._project_definition.name)
+
     doc_files = [
         doc_file for doc_file in self._DOC_FILES if os.path.isfile(doc_file)]
 
@@ -231,6 +238,9 @@ class SetupPyWriter(interface.DependencyFileWriter):
           '%exclude {0:s}/*.pyc'.format(python2_package_module_prefix),
           '%exclude {0:s}/*.pyo'.format(python2_package_module_prefix)])
 
+    if scripts_directory:
+      python2_package_files.append('%exclude %{{_bindir}}/*.py')
+
     python2_package_files = ',\n'.join([
         '                \'{0:s}\''.format(package_file)
         for package_file in python2_package_files])
@@ -264,13 +274,21 @@ class SetupPyWriter(interface.DependencyFileWriter):
       python3_package_files.append(
           '%exclude {0:s}/__pycache__/*'.format(python3_package_module_prefix))
 
+    if scripts_directory:
+      python3_package_files.append('%exclude %{{_bindir}}/*.py')
+
     python3_package_files = ',\n'.join([
         '                \'{0:s}\''.format(package_file)
         for package_file in python3_package_files])
     python3_package_files = python3_package_files.format(
         self._project_definition.name)
 
+    rpm_doc_files = [
+        doc_file for doc_file in doc_files if doc_file != 'LICENSE']
+    rpm_license_file = 'LICENSE'
+
     template_mappings = {
+        'data_files_path': data_files_path,
         'doc_files': ', '.join([
             '\'{0:s}\''.format(doc_file) for doc_file in doc_files]),
         'description_long': description_long,
@@ -284,7 +302,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'project_name': self._project_definition.name,
         'python2_package_files': python2_package_files,
         'python3_package_files': python3_package_files,
-        'rpm_doc_files': ' '.join(doc_files),
+        'rpm_doc_files': ' '.join(rpm_doc_files),
+        'rpm_license_file': rpm_license_file,
         'scripts_directory': scripts_directory,
     }
 
@@ -324,13 +343,13 @@ class SetupPyWriter(interface.DependencyFileWriter):
           'import_sdist', template_mappings)
       file_content.append(template_data)
 
-    for template_file in ('import_module', 'bdist_msi'):
+    for template_file in ('import_module', 'bdist_msi', 'bdist_rpm-start'):
       template_data = self._GenerateFromTemplate(
           template_file, template_mappings)
       file_content.append(template_data)
 
-    if self._project_definition.name in self._PROJECTS_WITH_PACKAGE_DATA:
-      template_file = 'bdist_rpm_package_data'
+    if os.path.isdir('data'):
+      template_file = 'bdist_rpm-with_data'
     else:
       template_file = 'bdist_rpm'
 
@@ -369,7 +388,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
     if os.path.isdir('data'):
       template_data = self._GenerateFromTemplate(
-          'setup_data_files_data', template_mappings)
+          'setup_data_files-with_data', template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(

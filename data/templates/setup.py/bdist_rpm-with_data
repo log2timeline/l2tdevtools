@@ -1,5 +1,11 @@
         elif line.startswith('%files'):
           lines = [
+              '%files -n %{name}-data',
+              '%defattr(644,root,root,755)',
+              '%license ${rpm_license_file}',
+              '%doc ${rpm_doc_files}',
+              '%{_datadir}/%{name}/*',
+              '',
               '%files -n {0:s}-%{{name}}'.format(python_package),
               '%defattr(644,root,root,755)',
               '%license ${rpm_license_file}',
@@ -19,6 +25,14 @@ ${python2_package_files}])
         elif line.startswith('%prep'):
           in_description = False
 
+          python_spec_file.extend([
+              '%package -n %{name}-data',
+              'Summary: Data files for {0:s}'.format(summary),
+              '',
+              '%description -n %{name}-data'])
+
+          python_spec_file.extend(description)
+
           python_spec_file.append(
               '%package -n {0:s}-%{{name}}'.format(python_package))
           if python_package == 'python2':
@@ -27,7 +41,7 @@ ${python2_package_files}])
                 'Provides: python-${project_name} = %{version}'])
 
           python_spec_file.extend([
-              'Requires: {0:s}'.format(requires),
+              'Requires: %{{name}}-data, {0:s}'.format(requires),
               '{0:s}'.format(summary),
               '',
               '%description -n {0:s}-%{{name}}'.format(python_package)])

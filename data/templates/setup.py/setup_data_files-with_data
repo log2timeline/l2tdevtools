@@ -1,0 +1,2 @@
+        ('${data_files_path}', glob.glob(
+            os.path.join('data', '*'))),
