@@ -156,6 +156,7 @@ class SourcePackageHelper(SourceHelper):
     super(SourcePackageHelper, self).__init__(project_name, project_definition)
     self._download_helper = download_helper_object
     self._project_version = None
+    self._source_directory_path = None
     self._source_package_filename = None
 
   def _CreateFromTar(self, source_filename):
@@ -303,12 +304,12 @@ class SourcePackageHelper(SourceHelper):
     """Creates the source directory from the source package.
 
     Returns:
-      str: name of the source directory or None on error.
+      bool: True if the source directory was created successfully.
     """
     if (not self._source_package_filename or
         not os.path.exists(self._source_package_filename)):
       logging.info('Missing source package of: {0:s}'.format(self.project_name))
-      return None
+      return False
 
     directory_name = None
     if (self._source_package_filename.endswith('.tar.bz2') or
@@ -319,7 +320,9 @@ class SourcePackageHelper(SourceHelper):
     elif self._source_package_filename.endswith('.zip'):
       directory_name = self._CreateFromZip(self._source_package_filename)
 
-    return directory_name
+    self._source_directory_path = directory_name
+
+    return bool(directory_name)
 
   def Download(self):
     """Downloads the source package.
@@ -358,6 +361,14 @@ class SourcePackageHelper(SourceHelper):
           self.project_name, version_definition)
 
     return self._project_version
+
+  def GetSourceDirectoryPath(self):
+    """Retrieves the path of the source directory.
+
+    Returns:
+      str: path of the source directory or None if not available.
+    """
+    return self._source_directory_path
 
   def GetSourcePackageFilename(self):
     """Retrieves the filename of the source package.

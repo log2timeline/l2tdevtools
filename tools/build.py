@@ -144,6 +144,33 @@ class ProjectBuilder(object):
       logging.warning('Missing source helper.')
       return []
 
+    source_filename = source_helper_object.GetSourcePackageFilename()
+    if not source_filename:
+      logging.info('Missing source package of: {0:s}'.format(
+          source_helper_object.project_name))
+      return []
+
+    if not source_helper_object.Create():
+      logging.error('Extraction of source package: {0:s} failed'.format(
+          source_filename))
+      return []
+
+    source_directory = source_helper_object.GetSourceDirectoryPath()
+    if not source_directory:
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
+      return []
+
+    if not project_definition.build_system:
+      if os.path.exists(os.path.join(source_directory, 'configure')):
+        project_definition.build_system = 'configure_make'
+      elif os.path.exists(os.path.join(source_directory, 'setup.py')):
+        project_definition.build_system = 'setup_py'
+      else:
+        logging.warning('Unable to determine build system of: {0:s}'.format(
+            project_definition.name))
+        return []
+
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
         project_definition, self._build_target, self._l2tdevtools_path)
     if not build_helper_object:

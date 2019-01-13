@@ -165,10 +165,10 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
           source_helper_object.project_name))
       return False
 
-    source_directory = source_helper_object.Create()
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return False
 
     project_version = source_helper_object.GetProjectVersion()
@@ -294,10 +294,10 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
           source_helper_object.project_name))
       return False
 
-    source_directory = source_helper_object.Create()
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return False
 
     project_version = source_helper_object.GetProjectVersion()

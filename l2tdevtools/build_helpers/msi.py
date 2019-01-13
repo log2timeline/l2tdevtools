@@ -457,11 +457,15 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
           source_helper_object.project_name))
       return False
 
-    source_directory = source_helper_object.Create()
+    if not source_helper_object.Create():
+      logging.error('Extraction of source package: {0:s} failed'.format(
+          source_filename))
+      return False
+
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(
-              source_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return False
 
     if not os.path.exists('zlib'):
@@ -506,10 +510,10 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
           source_helper_object.project_name))
       return False
 
-    source_directory = source_helper_object.Create()
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return False
 
     logging.info('Building: {0:s} with Visual Studio {1:s}'.format(
@@ -655,10 +659,10 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
           source_helper_object.project_name))
       return False
 
-    source_directory = source_helper_object.Create()
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return False
 
     logging.info('Building msi of: {0:s}'.format(source_filename))

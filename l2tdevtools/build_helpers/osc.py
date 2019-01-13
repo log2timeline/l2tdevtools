@@ -360,6 +360,12 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           source_helper_object.project_name))
       return False
 
+    source_directory = source_helper_object.GetSourceDirectoryPath()
+    if not source_directory:
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
+      return False
+
     logging.info('Preparing osc build of: {0:s}'.format(source_filename))
 
     if not self._BuildPrepare(source_helper_object):
@@ -377,12 +383,6 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           source_helper_object.project_name, source_filename)
       if not self._OSCAdd(osc_source_path):
         return False
-
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
-      return False
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
 

@@ -33,10 +33,10 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
           source_helper_object.project_name))
       return False
 
-    source_directory = source_helper_object.Create()
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return False
 
     logging.info('Building source of: {0:s}'.format(source_filename))
@@ -90,10 +90,10 @@ class SetupPySourceBuildHelper(SourceBuildHelper):
           source_helper_object.project_name))
       return False
 
-    source_directory = source_helper_object.Create()
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return False
 
     logging.info('Building source of: {0:s}'.format(source_filename))
