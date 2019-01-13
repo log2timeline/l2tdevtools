@@ -11,6 +11,7 @@ import platform
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import zipfile
 
@@ -230,14 +231,20 @@ class DPKGBuildHelper(interface.BuildHelper):
       shutil.copytree(dpkg_directory, debian_directory)
 
     else:
+      build_configuration = self._DetermineBuildConfiguration(source_directory)  # pylint: disable=assignment-from-none
+
       os.chdir(source_directory)
 
-      build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-          source_helper_object.project_name, project_version,
-          self._project_definition, self._data_path)
-      build_files_generator.GenerateFiles('debian')
+      try:
+        build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
+            source_helper_object.project_name, project_version,
+            self._project_definition, self._data_path,
+            build_configuration=build_configuration)
 
-      os.chdir('..')
+        build_files_generator.GenerateFiles('debian')
+
+      finally:
+        os.chdir('..')
 
     if not os.path.exists(debian_directory):
       logging.error('Missing debian sub directory in: {0:s}'.format(
@@ -245,6 +252,19 @@ class DPKGBuildHelper(interface.BuildHelper):
       return False
 
     return True
+
+  # pylint: disable=unused-argument
+  def _DetermineBuildConfiguration(self, source_directory):
+    """Determines the build configuration of a project.
+
+    Args:
+      source_directory (str): path of the source directory.
+
+    Returns:
+      DPKGBuildConfiguration: dpkg build configuration or None if the build
+          configuration could not be determed.
+    """
+    return None
 
   def _GetBuildHostDistribution(self):
     """Determines the Debian/Ubuntu distribution name of the build host.
@@ -705,8 +725,63 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
         source_helper_object.project_name, project_version)
 
 
-class SetupPyDPKGBuildHelper(DPKGBuildHelper):
-  """Helper to build dpkg packages (.deb)."""
+class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
+  """Shared functionality for setup.py build system dpkg build helpers."""
+
+  def _DetermineBuildConfiguration(self, source_directory):
+    """Determines the build configuration of a project that has setup.py
+
+    Args:
+      source_directory (str): path of the source directory.
+
+    Returns:
+      DPKGBuildConfiguration: dpkg build configuration or None if the build
+          configuration could not be determed.
+    """
+    command = (
+        '{0:s} setup.py install --root=installroot > /dev/null 2>&1').format(
+            sys.executable)
+    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error('Running: "{0:s}" failed.'.format(command))
+      build_configuration = None
+
+    else:
+      build_configuration = dpkg_files.DPKGBuildConfiguration()
+      dist_packages = os.path.join(
+          source_directory, 'installroot', 'usr', 'local', 'lib', 'python2.7',
+          'dist-packages')
+
+      for directory_entry in os.listdir(dist_packages):
+        directory_entry_path = os.path.join(dist_packages, directory_entry)
+
+        if directory_entry.endswith('.egg-info'):
+          # pylint: disable=simplifiable-if-statement
+          if os.path.isdir(directory_entry_path):
+            build_configuration.has_egg_info_directory = True
+          else:
+            build_configuration.has_egg_info_file = True
+
+        elif os.path.isdir(directory_entry_path):
+          if directory_entry != '__pycache__':
+            build_configuration.module_directories.append(directory_entry)
+
+            # TODO: determine depth of module directories.
+
+        elif directory_entry.endswith('.py'):
+          build_configuration.has_module_source_files = True
+
+        elif directory_entry.endswith('.so'):
+          build_configuration.has_module_shared_object = True
+
+    shutil.rmtree(os.path.join(source_directory, 'installroot'))
+
+    return build_configuration
+
+
+class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
+  """Helper to build dpkg packages (.deb) using setup.py build system."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.
@@ -855,8 +930,8 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
       self._RemoveOlderDPKGPackages(project_name, project_version)
 
 
-class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
-  """Helper to build source dpkg packages (.deb)."""
+class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
+  """Helper to build source dpkg packages using setup.py build system."""
 
   def __init__(self, project_definition, l2tdevtools_path):
     """Initializes a build helper.

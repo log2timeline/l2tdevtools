@@ -10,6 +10,32 @@ import stat
 import time
 
 
+class DPKGBuildConfiguration(object):
+  """Dpkg build configuation.
+
+  Attributes:
+    has_egg_info_directory (bool): True if the Python module has
+        an .egg_info directory in the dist-packages directory.
+    has_egg_info_file (bool): True if the Python module has
+        an .egg_info file in the dist-packages directory.
+    has_module_source_files (bool): True if the Python module has
+        one or more source (*.py) files in the dist-packages directory.
+    has_module_shared_object (bool): True if the Python module has
+        one or more shared object (*.so) files in the dist-packages directory.
+    module_directories (list[str]): module directories in the dist-packages
+        directory.
+  """
+
+  def __init__(self):
+    """Initializes a dpkg build configuration."""
+    super(DPKGBuildConfiguration, self).__init__()
+    self.has_egg_info_directory = False
+    self.has_egg_info_file = False
+    self.has_module_source_files = False
+    self.has_module_shared_object = False
+    self.module_directories = []
+
+
 class DPKGBuildFilesGenerator(object):
   """Dpkg build files generator."""
 
@@ -297,20 +323,28 @@ class DPKGBuildFilesGenerator(object):
       '3.0 (quilt)',
       ''])
 
+  _SOURCE_OPTIONS_TEMPLATE = '\n'.join([
+      ('extend-diff-ignore = "(^|/)(\\.eggs|config\\.h|config\\.log|'
+       'config\\.status|.*\\.egg-info|.*\\.egg-info/.*|Makefile)$"'),
+      ''])
+
   def __init__(
       self, project_name, project_version, project_definition, data_path,
-      distribution='unstable'):
-    """Initializes the dpkg build files generator.
+      build_configuration=None, distribution='unstable'):
+    """Initializes a dpkg build files generator.
 
     Args:
       project_name (str): name of the project.
       project_version (str): version of the project.
       project_definition (ProjectDefinition): project definition.
-      data_path (str): path to the data directory which contains the DPKG
+      data_path (str): path to the data directory which contains the dpkg
           templates and patches sub directories.
+      build_configuration (Optional[DPKGBuildConfiguration]): the dpgk build
+          configuration.
       distribution (Optional[str]): name of the distribution.
     """
     super(DPKGBuildFilesGenerator, self).__init__()
+    self._build_configuration = build_configuration
     self._data_path = data_path
     self._distribution = distribution
     self._project_definition = project_definition
@@ -574,7 +608,7 @@ class DPKGBuildFilesGenerator(object):
     # TODO: add support for configure_make
 
     if self._project_definition.build_system == 'setup_py':
-      python_package_name, python3_package_name = self._GetPythonPackageNames()
+      python2_package_name, python3_package_name = self._GetPythonPackageNames()
 
       # Python modules names contain "_" instead of "-"
       package_name = package_name.replace('-', '_')
@@ -586,30 +620,84 @@ class DPKGBuildFilesGenerator(object):
             self._project_definition.dpkg_template_install_python2 or [None])
 
         for template_file in template_files:
-          install_file = (
-              template_file or '{0:s}.install'.format(python_package_name))
+          if template_file:
+            output_filename = template_file
+            template_data = None
+          else:
+            output_filename = '{0:s}.install'.format(python2_package_name)
+            if not self._build_configuration:
+              template_data = self._INSTALL_TEMPLATE_PYTHON2
+            else:
+              template_data = []
 
-          output_filename = os.path.join(dpkg_path, install_file)
+              if self._build_configuration.has_module_source_files:
+                template_data.append('usr/lib/python2*/dist-packages/*.py')
+              if self._build_configuration.has_module_shared_object:
+                template_data.append('usr/lib/python2*/dist-packages/*.so')
+
+              module_directories = self._build_configuration.module_directories
+              template_data.extend([
+                  'usr/lib/python2*/dist-packages/{0:s}'.format(
+                      module_directory)
+                  for module_directory in module_directories])
+
+              if self._build_configuration.has_egg_info_directory:
+                template_data.append(
+                    'usr/lib/python2*/dist-packages/*.egg-info/*')
+
+              elif self._build_configuration.has_egg_info_file:
+                template_data.append(
+                    'usr/lib/python2*/dist-packages/*.egg-info')
+
+              template_data = '\n'.join(template_data)
+
+          output_filename = os.path.join(dpkg_path, output_filename)
           self._GenerateFile(
-              template_file, self._INSTALL_TEMPLATE_PYTHON2, template_values,
-              output_filename)
+              template_file, template_data, template_values, output_filename)
 
       if not self._project_definition.IsPython2Only():
         template_files = (
             self._project_definition.dpkg_template_install_python3 or [None])
 
         for template_file in template_files:
-          install_file = (
-              template_file or '{0:s}.install'.format(python3_package_name))
+          if template_file:
+            output_filename = template_file
+            template_data = None
+          else:
+            output_filename = '{0:s}.install'.format(python3_package_name)
+            if not self._build_configuration:
+              template_data = self._INSTALL_TEMPLATE_PYTHON3
+            else:
+              template_data = []
 
-          output_filename = os.path.join(dpkg_path, install_file)
+              if self._build_configuration.has_module_source_files:
+                template_data.append('usr/lib/python3*/dist-packages/*.py')
+              if self._build_configuration.has_module_shared_object:
+                template_data.append('usr/lib/python3*/dist-packages/*.so')
+
+              module_directories = self._build_configuration.module_directories
+              template_data.extend([
+                  'usr/lib/python3*/dist-packages/{0:s}'.format(
+                      module_directory)
+                  for module_directory in module_directories])
+
+              if self._build_configuration.has_egg_info_directory:
+                template_data.append(
+                    'usr/lib/python3*/dist-packages/*.egg-info/*')
+
+              elif self._build_configuration.has_egg_info_file:
+                template_data.append(
+                    'usr/lib/python3*/dist-packages/*.egg-info')
+
+              template_data = '\n'.join(template_data)
+
+          output_filename = os.path.join(dpkg_path, output_filename)
           self._GenerateFile(
-              template_file, self._INSTALL_TEMPLATE_PYTHON3, template_values,
-              output_filename)
+              template_file, template_data, template_values, output_filename)
 
       if os.path.isdir('scripts') or os.path.isdir('tools'):
-        install_file = '{0:s}-tools.install'.format(package_name)
-        output_filename = os.path.join(dpkg_path, install_file)
+        output_filename = '{0:s}-tools.install'.format(package_name)
+        output_filename = os.path.join(dpkg_path, output_filename)
         self._GenerateFile(
             None, self._INSTALL_TEMPLATE_PYTHON_TOOLS, template_values,
             output_filename)
@@ -729,6 +817,18 @@ class DPKGBuildFilesGenerator(object):
 
     self._GenerateFile(None, template_file, None, output_filename)
 
+  def _GenerateSourceOptionsFile(self, dpkg_path):
+    """Generates the dpkg build source/options file.
+
+    Args:
+      dpkg_path (str): path to the dpkg files.
+    """
+    template_file = self._SOURCE_OPTIONS_TEMPLATE
+
+    output_filename = os.path.join(dpkg_path, 'source', 'options')
+
+    self._GenerateFile(None, template_file, None, output_filename)
+
   def _GetArchitecture(self):
     """Retrieves the architecture.
 
@@ -820,6 +920,7 @@ class DPKGBuildFilesGenerator(object):
 
     os.mkdir(os.path.join(dpkg_path, 'source'))
     self._GenerateSourceFormatFile(dpkg_path)
+    self._GenerateSourceOptionsFile(dpkg_path)
 
     if self._project_definition.patches:
       patches_directory = os.path.join(dpkg_path, 'patches')
