@@ -114,7 +114,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
         '[.]tar[.]gz[^.]').format(
             self._organization, self._repository, project_name,
             '|'.join(self._VERSION_EXPRESSIONS))
-    matches = re.findall(expression_string, page_content)
+    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
       # The format of the project archive download URL is:
@@ -123,7 +123,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
           '/{0:s}/{1:s}/archive/({2:s})[.]tar[.]gz[^.]').format(
               self._organization, self._repository,
               '|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content)
+      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
       # The format of the project archive download URL is:
@@ -132,7 +132,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
           '/{0:s}/{1:s}/archive/{2:s}[-]({3:s})[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               '|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content)
+      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
       # TODO: this check will fail if the case in the URL is different.
       # Make checks case insensitive.
@@ -170,7 +170,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
         '/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*{3!s}'
         '[.]tar[.]gz[^.]').format(
             self._organization, self._repository, project_name, project_version)
-    matches = re.findall(expression_string, page_content)
+    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if len(matches) != 1:
       # Try finding a match without the status in case the project provides
@@ -180,7 +180,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
           '[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               project_version)
-      matches = re.findall(expression_string, page_content)
+      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if matches and len(matches) == 1:
       return 'https://github.com{0:s}'.format(matches[0][:-1])
@@ -193,7 +193,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     expression_string = (
         '/{0:s}/{1:s}/archive/{2!s}[.]tar[.]gz[^.]').format(
             self._organization, self._repository, project_version)
-    matches = re.findall(expression_string, page_content)
+    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if matches and len(matches) == 1:
       return 'https://github.com{0:s}'.format(matches[0][:-1])
@@ -204,7 +204,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       expression_string = (
           '/{0:s}/{1:s}/archive/release-{2!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_version)
-      matches = re.findall(expression_string, page_content)
+      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if matches and len(matches) == 1:
       return 'https://github.com{0:s}'.format(matches[0][:-1])
@@ -215,7 +215,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       expression_string = (
           '/{0:s}/{1:s}/archive/v{2!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_version)
-      matches = re.findall(expression_string, page_content)
+      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if matches and len(matches) == 1:
       return 'https://github.com{0:s}'.format(matches[0][:-1])
@@ -227,7 +227,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
           '/{0:s}/{1:s}/archive/{2:s}[-]{3!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               project_version)
-      matches = re.findall(expression_string, page_content)
+      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if matches and len(matches) == 1:
       return 'https://github.com{0:s}'.format(matches[0][:-1])

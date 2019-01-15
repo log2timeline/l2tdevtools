@@ -111,7 +111,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
         r'{0:s}-([\d\.\!]*(post\d+)?)\.(tar\.bz2|tar\.gz|zip)"').format(
             self._project_name)
 
-    matches = re.findall(expression_string, page_content)
+    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
     if not matches:
       return None
 
@@ -144,7 +144,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
         '(https://files.pythonhosted.org/packages/.*/.*/.*/'
         '{0:s}-{1!s}[.](tar[.]bz2|tar[.]gz|zip))').format(
             self._project_name, project_version)
-    matches = re.findall(expression_string, page_content)
+    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
       return None
