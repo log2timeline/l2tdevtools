@@ -49,7 +49,7 @@ class ZlibDownloadHelper(project.ProjectDownloadHelper):
     expression_string = (
         '<A HREF="{0:s}-([0-9]+.[0-9]+.[0-9]+).tar.gz"').format(
             self._project_name)
-    matches = re.findall(expression_string, page_content)
+    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
       return None
