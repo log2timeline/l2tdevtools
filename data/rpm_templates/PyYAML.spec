@@ -24,10 +24,22 @@ algorithm is simple enough to be a reference for YAML parser implementors.
 A simple extension API is also provided. The package is built using libyaml
 for improved speed.
 
-%package -n python3-%{{name}}
+%package -n python2-pyyaml
+Obsoletes: PyYAML < %{{version}}
+Provides: PyYAML = %{{version}}
 Summary: YAML parser and emitter for Python
 
-%description -n python3-%{{name}}
+%description -n python2-pyyaml
+Python-yaml is a complete YAML 1.1 parser and emitter
+for Python. It can parse all examples from the specification. The parsing
+algorithm is simple enough to be a reference for YAML parser implementors.
+A simple extension API is also provided. The package is built using libyaml
+for improved speed.
+
+%package -n python3-pyyaml
+Summary: YAML parser and emitter for Python
+
+%description -n python3-pyyaml
 Python-yaml is a complete YAML 1.1 parser and emitter
 for Python. It can parse all examples from the specification. The parsing
 algorithm is simple enough to be a reference for YAML parser implementors.
@@ -51,13 +63,13 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 %clean
 rm -rf %{{buildroot}}
 
-%files -n %{{name}}
+%files -n python2-pyyaml
 %license LICENSE
 %doc CHANGES README
 %{{_libdir}}/python2*/site-packages/yaml/
 %{{_libdir}}/python2*/site-packages/PyYAML*.egg-info
 
-%files -n python3-%{{name}}
+%files -n python3-pyyaml
 %license LICENSE
 %doc CHANGES README
 %{{_libdir}}/python3*/site-packages/yaml/
