@@ -34,15 +34,16 @@ class ProjectBuilder(object):
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
       'xenial', 'bionic'])
 
-  def __init__(self, build_target):
+  def __init__(self, build_target, l2tdevtools_path):
     """Initializes the project builder.
 
     Args:
       build_target (str): build target.
+      l2tdevtools_path (str): path to l2tdevtools.
     """
     super(ProjectBuilder, self).__init__()
     self._build_target = build_target
-    self._l2tdevtools_path = os.path.dirname(os.path.dirname(__file__))
+    self._l2tdevtools_path = l2tdevtools_path
 
   def _BuildProject(self, download_helper_object, project_definition):
     """Builds a project.
@@ -240,9 +241,9 @@ def Main():
 
   config_path = options.config_path
   if not config_path:
-    config_path = os.path.dirname(__file__)
-    config_path = os.path.dirname(config_path)
-    config_path = os.path.join(config_path, 'data')
+    l2tdevtools_path = os.path.dirname(__file__)
+    l2tdevtools_path = os.path.dirname(l2tdevtools_path)
+    config_path = os.path.join(l2tdevtools_path, 'data')
 
   if not options.preset and not options.projects:
     print('Please define a preset or projects to build.')
@@ -261,10 +262,17 @@ def Main():
     print('')
     return False
 
+  if os.path.abspath(options.build_directory).startswith(l2tdevtools_path):
+    print(
+        'Build directory cannot be within l2tdevtools directory due to usage '
+        'of pbr')
+    print('')
+    return False
+
   logging.basicConfig(
       level=logging.INFO, format='[%(levelname)s] %(message)s')
 
-  project_builder = ProjectBuilder(options.build_target)
+  project_builder = ProjectBuilder(options.build_target, l2tdevtools_path)
 
   project_names = []
   if options.preset:
