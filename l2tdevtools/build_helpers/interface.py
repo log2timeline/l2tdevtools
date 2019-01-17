@@ -56,7 +56,7 @@ class BuildHelper(object):
     return True
 
   def CheckProjectConfiguration(self):
-    """Checks if the project configuration.
+    """Checks if the project configuration is correct.
 
     Returns:
       bool: True if the project configuration is correct, False otherwise.

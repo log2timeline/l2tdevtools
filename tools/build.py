@@ -357,7 +357,7 @@ def Main():
   for disabled_package in disabled_projects:
     undefined_projects.remove(disabled_package)
 
-  check_configuration = set()
+  configuration_errors = set()
   failed_builds = set()
   failed_downloads = set()
   missing_build_dependencies = set()
@@ -393,9 +393,9 @@ def Main():
           missing_build_dependencies.update(dependencies)
 
         if not project_builder.CheckProjectConfiguration(project_definition):
-          print('Detected inconsistency in configuration of: {0:s}'.format(
+          print('Detected error in configuration of: {0:s}'.format(
               project_definition.name))
-          check_configuration.add(project_definition.name)
+          configuration_errors.add(project_definition.name)
 
       for project_definition in list(builds):
         logging.info('Building: {0:s}'.format(project_definition.name))
@@ -415,10 +415,10 @@ def Main():
     for name in undefined_projects:
       print('\t{0:s}'.format(name))
 
-  if check_configuration:
+  if configuration_errors:
     print('')
-    print('Check configuration of projects:')
-    for name in check_configuration:
+    print('Projects with configuration errors:')
+    for name in configuration_errors:
       print('\t{0:s}'.format(name))
 
   if failed_downloads:

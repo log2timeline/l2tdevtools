@@ -362,6 +362,8 @@ class SourcePackageHelper(SourceHelper):
   def GetSourcePackageFilename(self):
     """Retrieves the filename of the source package.
 
+    This function downloads the source package if not done so previously.
+
     Returns:
       str: filename of the source package or None if not available.
     """
