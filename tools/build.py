@@ -47,14 +47,14 @@ class ProjectBuilder(object):
     self._l2tdevtools_path = l2tdevtools_path
     self._source_helpers = {}
 
-  def _BuildProjectForDistribution(
+  def _BuildProject(
       self, build_helper_object, source_helper_object, distribution):
-    """Builds a project for a specific distribution.
+    """Builds a project.
 
     Args:
       build_helper_object (BuildHelper): build helper.
       source_helper_object (SourceHelper): source helper.
-      distribution (str): name of the distribution.
+      distribution (str): name of the distribution or None if not available.
 
     Returns:
       bool: True if the build is successful or False on error.
@@ -118,7 +118,7 @@ class ProjectBuilder(object):
       distributions = [None]
 
     for distribution in distributions:
-      if not self._BuildProjectForDistribution(
+      if not self._BuildProject(
           build_helper_object, source_helper_object, distribution):
         return False
 
@@ -130,7 +130,7 @@ class ProjectBuilder(object):
     return True
 
   def CheckBuildDependencies(self, project_definition):
-    """Checks if the build dependencies a project are met.
+    """Checks if the build dependencies of a project are met.
 
     Args:
       project_definition (ProjectDefinition): project definition.
@@ -156,7 +156,7 @@ class ProjectBuilder(object):
     return build_helper_object.CheckBuildDependencies()
 
   def CheckProjectConfiguration(self, project_definition):
-    """Checks if the project configuration.
+    """Checks if the project configuration is correct.
 
     Args:
       project_definition (ProjectDefinition): project definition.
@@ -192,7 +192,6 @@ class ProjectBuilder(object):
       raise ValueError('Unsupported download URL: {0:s}.'.format(
           project_definition.download_url))
 
-    # TODO: implement
     source_helper_object = source_helper.SourcePackageHelper(
         project_definition.name, project_definition, download_helper_object)
 
