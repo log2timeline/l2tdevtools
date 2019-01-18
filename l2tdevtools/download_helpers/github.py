@@ -102,8 +102,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     github_url = 'https://api.github.com/repos/{0:s}/{1:s}/releases'.format(
         self._organization, self._repository)
     page_content = self.DownloadPageContent(github_url)
-    if not page_content:
-      return None
+
 
     api_response = json.loads(page_content)
     release_names = [release['name'] for release in api_response]
