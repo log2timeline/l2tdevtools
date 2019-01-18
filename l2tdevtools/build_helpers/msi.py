@@ -451,9 +451,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     source_helper_object = source_helper.SourcePackageHelper(
         'zlib', None, download_helper)
 
-    source_filename = source_helper_object.Download()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
@@ -500,9 +500,9 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
@@ -649,9 +649,9 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 

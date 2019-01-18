@@ -443,18 +443,36 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
-    for package_name in self._project_definition.build_dependencies:
-      package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
-          package_name, [package_name])
+    for name in self._project_definition.build_dependencies:
+      package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(name, name)
+      if package_name not in self._project_definition.dpkg_build_dependencies:
+        self._project_definition.dpkg_build_dependencies.append(package_name)
+
+    for package_name in self._project_definition.dpkg_build_dependencies:
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
-      if package_name not in (
-          self._project_definition.dpkg_build_dependencies):
-        self._project_definition.dpkg_build_dependencies.append(
-            package_name)
-
     return missing_packages
+
+  def CheckProjectConfiguration(self):
+    """Checks if the project configuration is correct.
+
+    This functions checks if all build dependencies are defined as dpkg build
+    dependencies.
+
+    Returns:
+      bool: True if the project configuration is correct, False otherwise.
+    """
+    result = True
+    for name in self._project_definition.build_dependencies:
+      package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(name, name)
+      if package_name not in self._project_definition.dpkg_build_dependencies:
+        logging.warning((
+            'Build dependency: {0:s} not defined as dpkg build '
+            'dependency: {1:s}.').format(name, package_name))
+        result = False
+
+    return result
 
 
 class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
@@ -487,9 +505,9 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
@@ -597,9 +615,9 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
@@ -738,9 +756,9 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
@@ -883,9 +901,9 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.Download()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
-      logging.info('Download of: {0:s} failed'.format(
+      logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 

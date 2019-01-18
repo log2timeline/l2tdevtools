@@ -156,7 +156,7 @@ class SourcePackageHelper(SourceHelper):
     super(SourcePackageHelper, self).__init__(project_name, project_definition)
     self._download_helper = download_helper_object
     self._project_version = None
-    self._source_filename = None
+    self._source_package_filename = None
 
   def _CreateFromTar(self, source_filename):
     """Creates the source directory from a .tar source package.
@@ -305,20 +305,19 @@ class SourcePackageHelper(SourceHelper):
     Returns:
       str: name of the source directory or None on error.
     """
-    if not self._source_filename:
-      _ = self.Download()
-
-    if not self._source_filename or not os.path.exists(self._source_filename):
+    if (not self._source_package_filename or
+        not os.path.exists(self._source_package_filename)):
+      logging.info('Missing source package of: {0:s}'.format(self.project_name))
       return None
 
     directory_name = None
-    if (self._source_filename.endswith('.tar.bz2') or
-        self._source_filename.endswith('.tar.gz') or
-        self._source_filename.endswith('.tgz')):
-      directory_name = self._CreateFromTar(self._source_filename)
+    if (self._source_package_filename.endswith('.tar.bz2') or
+        self._source_package_filename.endswith('.tar.gz') or
+        self._source_package_filename.endswith('.tgz')):
+      directory_name = self._CreateFromTar(self._source_package_filename)
 
-    elif self._source_filename.endswith('.zip'):
-      directory_name = self._CreateFromZip(self._source_filename)
+    elif self._source_package_filename.endswith('.zip'):
+      directory_name = self._CreateFromZip(self._source_package_filename)
 
     return directory_name
 
@@ -329,15 +328,15 @@ class SourcePackageHelper(SourceHelper):
       str: filename of the source package if the download was successful or
           if the file was already downloaded or None on error.
     """
-    if not self._source_filename:
+    if not self._source_package_filename:
       project_version = self.GetProjectVersion()
       if not project_version:
         return None
 
-      self._source_filename = self._download_helper.Download(
+      self._source_package_filename = self._download_helper.Download(
           self.project_name, project_version)
 
-    return self._source_filename
+    return self._source_package_filename
 
   def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
@@ -359,3 +358,16 @@ class SourcePackageHelper(SourceHelper):
           self.project_name, version_definition)
 
     return self._project_version
+
+  def GetSourcePackageFilename(self):
+    """Retrieves the filename of the source package.
+
+    This function downloads the source package if not done so previously.
+
+    Returns:
+      str: filename of the source package or None if not available.
+    """
+    if not self._source_package_filename:
+      self.Download()
+
+    return self._source_package_filename
