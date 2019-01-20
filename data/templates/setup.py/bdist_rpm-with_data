@@ -41,8 +41,8 @@ ${python2_package_files}])
                 'Provides: python-${project_name} = %{version}'])
 
           python_spec_file.extend([
-              'Requires: %{{name}}-data, {0:s}'.format(requires),
-              '{0:s}'.format(summary),
+              'Requires: %{{name}}-data {0:s}'.format(requires),
+              'Summary: {0:s}'.format(summary),
               '',
               '%description -n {0:s}-%{{name}}'.format(python_package)])
 

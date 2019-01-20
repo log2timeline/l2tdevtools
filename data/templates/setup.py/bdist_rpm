@@ -26,9 +26,11 @@ ${python2_package_files}])
                 'Obsoletes: python-${project_name} < %{version}',
                 'Provides: python-${project_name} = %{version}'])
 
+          if requires:
+            python_spec_file.append('Requires: {0:s}'.format(requires))
+
           python_spec_file.extend([
-              'Requires: {0:s}'.format(requires),
-              '{0:s}'.format(summary),
+              'Summary: {0:s}'.format(summary),
               '',
               '%description -n {0:s}-%{{name}}'.format(python_package)])
 
