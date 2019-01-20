@@ -842,7 +842,7 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
 
     self._RemoveOlderDPKGPackages(project_name, project_version)
 
-    if not self._IsPython2Only():
+    if not self._IsPython2Only() and project_name.startswith('python-'):
       project_name = 'python3-{0:s}'.format(project_name[7])
 
       self._RemoveOlderDPKGPackages(project_name, project_version)

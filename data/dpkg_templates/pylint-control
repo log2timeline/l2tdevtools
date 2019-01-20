@@ -1,0 +1,16 @@
+Source: pylint
+Section: python
+Priority: extra
+Maintainer: Logilab <contact@logilab.fr>
+Build-Depends: debhelper (>= 9), dh-python, python3-all (>= 3.4~), python3-setuptools, python3-pytest-runner
+Standards-Version: 3.9.5
+X-Python3-Version: >= 3.4
+Homepage: https://github.com/PyCQA/pylint
+
+Package: pylint
+Architecture: all
+Depends: python3-astroid, python3-backports.functools-lru-cache, python3-configparser, python3-isort, python3-mccabe, python3-setuptools, python3-singledispatch, python3-six, ${{python3:Depends}}, ${{misc:Depends}}
+Description: Python code static checker
+ Pylint is a Python source code analyzer which looks for
+ programming errors, helps enforcing a coding standard and sniffs for some
+ code smells.
