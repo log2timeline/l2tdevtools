@@ -11,17 +11,24 @@ from l2tdevtools.dependency_writers import interface
 class PylintRcWriter(interface.DependencyFileWriter):
   """Pylint.rc file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', '.pylintrc')
-
   PATH = '.pylintrc'
 
+  _PROJECTS_WITH_PYLINT2_SUPPORT = (
+      'dfdatetime', 'dfvfs', 'dfwinreg', 'dtfabric', 'dtformats', 'plaso')
+
   def Write(self):
-    """Writes a .travis.yml file."""
+    """Writes a .pylintrc file."""
     dependencies = self._dependency_helper.GetPylintRcExtensionPkgs()
 
     template_mappings = {'extension_pkg_whitelist': ','.join(dependencies)}
 
-    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    if self._project_definition.name in self._PROJECTS_WITH_PYLINT2_SUPPORT:
+      template_file = '.pylintrc2'
+    else:
+      template_file = '.pylintrc1'
+
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', template_file)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     file_content = file_content.encode('utf-8')

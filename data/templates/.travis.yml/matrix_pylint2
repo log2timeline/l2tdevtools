@@ -1,0 +1,9 @@
+  - env: TARGET="pylint"
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+    language: python
+    python: 2.7
+    virtualenv:
+      system_site_packages: true
