@@ -66,6 +66,23 @@ class DPKGBuildFilesGenerator(object):
       ' {description_long:s}',
       '']
 
+  _CONTROL_TEMPLATE_SETUP_PY_PYTHON3_ONLY = [
+      'Source: {source_package_name:s}',
+      'Section: python',
+      'Priority: extra',
+      'Maintainer: {upstream_maintainer:s}',
+      'Build-Depends: debhelper (>= 9){build_depends:s}',
+      'Standards-Version: 3.9.5',
+      'X-Python3-Version: >= 3.4',
+      'Homepage: {upstream_homepage:s}',
+      '',
+      'Package: {python_package_name:s}',
+      'Architecture: {architecture:s}',
+      'Depends: {python3_depends:s}',
+      'Description: {description_short:s}',
+      ' {description_long:s}',
+      '']
+
   _CONTROL_TEMPLATE_SETUP_PY = [
       'Source: {source_package_name:s}',
       'Section: python',
@@ -218,10 +235,34 @@ class DPKGBuildFilesGenerator(object):
       '\tdh_auto_install --destdir $(CURDIR)',
       ''])
 
-  _RULES_SETUP_PY_PYTHON2_OVERRIDE = '\n'.join([
-      '.PHONY: override_dh_python2',
-      'override_dh_python2:',
-      '\tdh_python2 -V 2.7 setup.py',
+  # Force the build system to setup.py here in case the package ships
+  # a Makefile or equivalent.
+  _RULES_TEMPLATE_SETUP_PY_PYTHON3_ONLY = '\n'.join([
+      '#!/usr/bin/make -f',
+      '',
+      '%:',
+      '\tdh $@ --buildsystem=python_distutils --with=python3{with_quilt:s}',
+      '',
+      '.PHONY: override_dh_auto_clean',
+      'override_dh_auto_clean:',
+      '\tset -ex; for python in $(shell py3versions -r); do \\',
+      '\t\t$$python setup.py clean -a; \\',
+      '\tdone;',
+      ('\trm -rf build {setup_name:s}.egg-info/requires.txt '
+       '{setup_name:s}.egg-info/SOURCES.txt '
+       '{setup_name:s}.egg-info/PKG-INFO'),
+      '',
+      '.PHONY: override_dh_auto_build',
+      'override_dh_auto_build:',
+      '\tset -ex; for python in $(shell py3versions -r); do \\',
+      '\t\t$$python setup.py build; \\',
+      '\tdone;',
+      '',
+      '.PHONY: override_dh_auto_install',
+      'override_dh_auto_install:',
+      '\tset -ex; for python in $(shell py3versions -r); do \\',
+      '\t\t$$python setup.py install --root=$(CURDIR) --install-layout=deb; \\',
+      '\tdone;',
       ''])
 
   _RULES_TEMPLATE_SETUP_PY = '\n'.join([
@@ -377,8 +418,10 @@ class DPKGBuildFilesGenerator(object):
     architecture = self._GetArchitecture()
 
     python2_only = self._project_definition.IsPython2Only()
+    python3_only = self._project_definition.IsPython3Only()
 
     build_depends = []
+    python2_build_depends = []
     python3_build_depends = []
 
     if self._project_definition.patches:
@@ -388,12 +431,13 @@ class DPKGBuildFilesGenerator(object):
       build_depends.append('autotools-dev')
 
     elif self._project_definition.build_system == 'setup_py':
-      build_depends.append('python-all (>= 2.7~)')
-      build_depends.append('python-setuptools')
       build_depends.append('dh-python')
 
+      python2_build_depends.append('python-all (>= 2.7~)')
+      python2_build_depends.append('python-setuptools')
+
       if self._project_definition.architecture_dependent:
-        build_depends.append('python-all-dev')
+        python2_build_depends.append('python-all-dev')
 
       python3_build_depends.append('python3-all (>= 3.4~)')
       python3_build_depends.append('python3-setuptools')
@@ -402,12 +446,20 @@ class DPKGBuildFilesGenerator(object):
         python3_build_depends.append('python3-all-dev')
 
     for dependency in self._project_definition.dpkg_build_dependencies:
-      build_depends.append(dependency)
-
       if self._project_definition.build_system == 'setup_py':
         if dependency.startswith('python-'):
+          python2_build_depends.append(dependency)
+
           dependency = 'python3-{0:s}'.format(dependency[7:])
           python3_build_depends.append(dependency)
+
+          continue
+
+      build_depends.append(dependency)
+
+    if (self._project_definition.build_system == 'setup_py' and
+        not python3_only):
+      build_depends.extend(python2_build_depends)
 
     if (self._project_definition.build_system == 'setup_py' and
         not python2_only):
@@ -473,6 +525,8 @@ class DPKGBuildFilesGenerator(object):
     elif self._project_definition.build_system == 'setup_py':
       if python2_only:
         control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY)
+      elif python3_only:
+        control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON3_ONLY)
       else:
         control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY)
 
@@ -527,17 +581,18 @@ class DPKGBuildFilesGenerator(object):
 
       template_values = {'package_name': package_name}
 
-      template_files = (
-          self._project_definition.dpkg_template_install_python2 or [None])
+      if not self._project_definition.IsPython3Only():
+        template_files = (
+            self._project_definition.dpkg_template_install_python2 or [None])
 
-      for template_file in template_files:
-        install_file = (
-            template_file or '{0:s}.install'.format(python_package_name))
+        for template_file in template_files:
+          install_file = (
+              template_file or '{0:s}.install'.format(python_package_name))
 
-        output_filename = os.path.join(dpkg_path, install_file)
-        self._GenerateFile(
-            template_file, self._INSTALL_TEMPLATE_PYTHON2, template_values,
-            output_filename)
+          output_filename = os.path.join(dpkg_path, install_file)
+          self._GenerateFile(
+              template_file, self._INSTALL_TEMPLATE_PYTHON2, template_values,
+              output_filename)
 
       if not self._project_definition.IsPython2Only():
         template_files = (
@@ -629,8 +684,6 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
-    package_name = self._GetPackageName()
-
     setup_name = self._GetPythonSetupName()
 
     if self._project_definition.patches:
@@ -644,6 +697,8 @@ class DPKGBuildFilesGenerator(object):
 
     if self._project_definition.IsPython2Only():
       rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON2_ONLY
+    elif self._project_definition.IsPython3Only():
+      rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON3_ONLY
     else:
       rules_template = self._RULES_TEMPLATE_SETUP_PY
 
@@ -661,10 +716,6 @@ class DPKGBuildFilesGenerator(object):
     with open(output_filename, 'wb') as file_object:
       data = rules_template.format(**template_values)
       file_object.write(data.encode('utf-8'))
-
-      if package_name in ('astroid', 'pylint'):
-        data = self._RULES_SETUP_PY_PYTHON2_OVERRIDE
-        file_object.write(data.encode('utf-8'))
 
   def _GenerateSourceFormatFile(self, dpkg_path):
     """Generates the dpkg build source/format file.

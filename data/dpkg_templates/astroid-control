@@ -1,0 +1,25 @@
+Source: astroid
+Section: python
+Priority: extra
+Maintainer: Logilab <contact@logilab.fr>
+Build-Depends: debhelper (>= 9), dh-python, python-all (>= 2.7~), python-setuptools, python-pytest, python-pytest-runner, python3-all (>= 3.4~), python3-setuptools, python3-pytest, python3-pytest-runner
+Standards-Version: 3.9.5
+X-Python-Version: >= 2.7
+X-Python3-Version: >= 3.4
+Homepage: https://www.astroid.org
+
+Package: python-astroid
+Architecture: all
+Depends: python-backports.functools-lru-cache, python-enum34, python-lazy-object-proxy, python-logilab-common, python-six, python-typing, python-wrapt, ${{python:Depends}}, ${{misc:Depends}}
+Description: Python 2 module of astroid
+ The aim of this module is to provide a common base
+ representation of python source code for projects such as pychecker,
+ pyreverse, pylint.
+
+Package: python3-astroid
+Architecture: all
+Depends: python3-backports.functools-lru-cache, python3-enum34, python3-lazy-object-proxy, python3-logilab-common, python3-six, python3-typing, python3-wrapt, ${{python3:Depends}}, ${{misc:Depends}}
+Description: Python 3 module of astroid
+ The aim of this module is to provide a common base
+ representation of python source code for projects such as pychecker,
+ pyreverse, pylint.

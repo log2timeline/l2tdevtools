@@ -10,14 +10,14 @@ Homepage: https://github.com/pytest-dev/pytest-runner
 
 Package: python-pytest-runner
 Architecture: all
-Depends: python-pytest, ${python:Depends}, ${misc:Depends}
+Depends: python-pytest, ${{python:Depends}}, ${{misc:Depends}}
 Description: Python 2 module of pytest-runner
  Setup scripts can use pytest-runner to add setup.py test
  support for pytest runner.
 
 Package: python3-pytest-runner
 Architecture: all
-Depends: python3-pytest, ${python3:Depends}, ${misc:Depends}
+Depends: python3-pytest, ${{python3:Depends}}, ${{misc:Depends}}
 Description: Python 3 module of pytest-runner
  Setup scripts can use pytest-runner to add setup.py test
  support for pytest runner.
