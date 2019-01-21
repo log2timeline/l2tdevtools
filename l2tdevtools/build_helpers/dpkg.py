@@ -48,9 +48,6 @@ class DPKGBuildHelper(interface.BuildHelper):
       'python-all',
       'python-all-dev',
       'python-setuptools',
-      'python3-all',
-      'python3-all-dev',
-      'python3-setuptools',
   ])
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
@@ -443,6 +440,11 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
+      if not self._IsPython2Only() and 'python' in package_name:
+        package_name = package_name.replace('python', 'python3')
+        if not self._CheckIsInstalled(package_name):
+          missing_packages.append(package_name)
+
     for name in self._project_definition.build_dependencies:
       package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(name, name)
       if package_name not in self._project_definition.dpkg_build_dependencies:
@@ -451,6 +453,11 @@ class DPKGBuildHelper(interface.BuildHelper):
     for package_name in self._project_definition.dpkg_build_dependencies:
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
+
+      if not self._IsPython2Only() and 'python' in package_name:
+        package_name = package_name.replace('python', 'python3')
+        if not self._CheckIsInstalled(package_name):
+          missing_packages.append(package_name)
 
     return missing_packages
 
