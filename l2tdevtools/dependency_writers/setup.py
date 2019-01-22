@@ -164,12 +164,10 @@ class SetupPyWriter(interface.DependencyFileWriter):
     description_long = '\n'.join([
         '    \'{0:s}\''.format(line) for line in description_long])
 
-    if self._project_definition.name == 'artifacts':
-      data_files_path = 'share/{0:s}'.format(
-          self._project_definition.name)
+    if self._project_definition.name in ('artifacts', 'plaso'):
+      data_files_path = 'share/{0:s}'.format(self._project_definition.name)
     else:
-      data_files_path = 'share/{0:s}/data'.format(
-          self._project_definition.name)
+      data_files_path = 'share/{0:s}/data'.format(self._project_definition.name)
 
     doc_files = [
         doc_file for doc_file in self._DOC_FILES if os.path.isfile(doc_file)]
@@ -193,6 +191,10 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
     if os.path.isdir('docs'):
       packages_exclude.append('docs')
+
+    data_directory = None
+    if os.path.isdir('data'):
+      data_directory = 'data'
 
     scripts_directory = None
     if os.path.isdir('scripts'):
@@ -348,7 +350,9 @@ class SetupPyWriter(interface.DependencyFileWriter):
           template_file, template_mappings)
       file_content.append(template_data)
 
-    if os.path.isdir('data'):
+    if data_directory and scripts_directory:
+      template_file = 'bdist_rpm-with_data_and_tools'
+    elif data_directory:
       template_file = 'bdist_rpm-with_data'
     else:
       template_file = 'bdist_rpm'
@@ -386,7 +390,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'setup_data_files', template_mappings)
     file_content.append(template_data)
 
-    if os.path.isdir('data'):
+    if data_directory:
       template_data = self._GenerateFromTemplate(
           'setup_data_files-with_data', template_mappings)
       file_content.append(template_data)

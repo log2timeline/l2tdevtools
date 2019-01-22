@@ -25,12 +25,15 @@ ${python2_package_files}])
             python_spec_file.extend([
                 'Obsoletes: python-${project_name} < %{version}',
                 'Provides: python-${project_name} = %{version}'])
+            python_summary = 'Python 2 module of {0:s}'.format(summary)
+          else:
+            python_summary = 'Python 3 module of {0:s}'.format(summary)
 
           if requires:
             python_spec_file.append('Requires: {0:s}'.format(requires))
 
           python_spec_file.extend([
-              'Summary: {0:s}'.format(summary),
+              'Summary: {0:s}'.format(python_summary),
               '',
               '%description -n {0:s}-%{{name}}'.format(python_package)])
 
