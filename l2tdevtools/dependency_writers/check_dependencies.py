@@ -20,7 +20,7 @@ class CheckDependenciesWriter(interface.DependencyFileWriter):
     template_mappings = {
         'project_name': self._project_definition.name}
 
-    if self._project_definition.name in ('l2tpreg', 'plaso'):
+    if self._project_definition.name == 'plaso':
       template_file = 'check_dependencies-with_url.py'
     else:
       template_file = 'check_dependencies.py'
