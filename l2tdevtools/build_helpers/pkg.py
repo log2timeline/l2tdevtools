@@ -159,7 +159,7 @@ class ConfigureMakePKGBuildHelper(PKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourceFilename()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
@@ -288,7 +288,7 @@ class SetupPyPKGBuildHelper(PKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourceFilename()
+    source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
