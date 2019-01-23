@@ -51,9 +51,6 @@ class ProjectHelper(cli.CLIHelper):
           'Onager',
           'someguyiknow',
           'tomchop']),
-      'l2tpreg': frozenset([
-          'joachimmetz',
-          'Onager']),
       'plaso': frozenset([
           'joachimmetz',
           'Onager',
@@ -72,8 +69,8 @@ class ProjectHelper(cli.CLIHelper):
   SUPPORTED_PROJECTS = frozenset([
       'acstore', 'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs', 'dfwinreg',
       'dftimewolf', 'dtfabric', 'dtformats', 'esedb-kb', 'l2tdevtools',
-      'l2tdocs', 'l2tpreg', 'plaso', 'l2tscaffolder', 'review', 'vstools',
-      'winevt-kb', 'winreg-kb'])
+      'l2tdocs', 'plaso', 'l2tscaffolder', 'review', 'vstools', 'winevt-kb',
+      'winreg-kb'])
 
   def __init__(self, project_path):
     """Initializes a project helper.
