@@ -55,6 +55,17 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       '{description_long:s}',
       '']  # yapf: disable
 
+  _PYTHON2_PACKAGE_PLASO = [
+      'Package: python-{project_name:s}',
+      'Architecture: all',
+      ('Depends: {python2_dependencies:s}'
+       '${{python:Depends}}, ${{misc:Depends}}'),
+      'Conflicts: {project_name:s}',
+      'Replaces: {project_name:s}',
+      'Description: Python 2 module of {name_description:s}',
+      '{description_long:s}',
+      '']  # yapf: disable
+
   _PYTHON3_PACKAGE = [
       'Package: python3-{project_name:s}',
       'Architecture: all',
@@ -67,8 +78,8 @@ class DPKGControlWriter(interface.DependencyFileWriter):
   _TOOLS_PACKAGE = [
       'Package: {project_name:s}-tools',
       'Architecture: all',
-      ('Depends: python-{project_name:s}, python (>= 2.7~), '
-       '${{python:Depends}}, ${{misc:Depends}}'),
+      ('Depends: python3-{project_name:s}, ${{python3:Depends}}, '
+       '${{misc:Depends}}'),
       'Description: Tools of {name_description:s}',
       '{description_long:s}',
       '']  # yapf: disable
@@ -88,7 +99,10 @@ class DPKGControlWriter(interface.DependencyFileWriter):
 
       file_content.extend(self._DATA_PACKAGE)
 
-    file_content.extend(self._PYTHON2_PACKAGE)
+    if self._project_definition.name == 'plaso':
+      file_content.extend(self._PYTHON2_PACKAGE_PLASO)
+    else:
+      file_content.extend(self._PYTHON2_PACKAGE)
 
     if not self._project_definition.python2_only:
       file_content.extend(self._PYTHON3_PACKAGE)
