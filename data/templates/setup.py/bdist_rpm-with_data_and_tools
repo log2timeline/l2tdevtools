@@ -1,6 +1,7 @@
         elif line.startswith('%files'):
           python_spec_file.extend([
               '%package -n %{name}-tools',
+              'Requires: python-${project_name}',
               'Summary: Tools for {0:s}'.format(summary),
               '',
               '%description -n %{name}-tools'])
@@ -21,34 +22,11 @@
 
           if python_package == 'python3':
             lines.extend([
-                '%{python3_sitelib}/plaso/*.py',
-                '%{python3_sitelib}/plaso/*/*.py',
-                '%{python3_sitelib}/plaso/*/*.yaml',
-                '%{python3_sitelib}/plaso/*/*/*.py',
-                '%{python3_sitelib}/plaso/*/*/*.yaml',
-                '%{python3_sitelib}/plaso*.egg-info/*',
-                '',
-                '%exclude %{_prefix}/share/doc/*',
-                '%exclude %{python3_sitelib}/plaso/__pycache__/*',
-                '%exclude %{python3_sitelib}/plaso/*/__pycache__/*',
-                '%exclude %{python3_sitelib}/plaso/*/*/__pycache__/*'])
+${python3_package_files}])
 
           else:
             lines.extend([
-                '%{python2_sitelib}/plaso/*.py',
-                '%{python2_sitelib}/plaso/*/*.py',
-                '%{python2_sitelib}/plaso/*/*.yaml',
-                '%{python2_sitelib}/plaso/*/*/*.py',
-                '%{python2_sitelib}/plaso/*/*/*.yaml',
-                '%{python2_sitelib}/plaso*.egg-info/*',
-                '',
-                '%exclude %{_prefix}/share/doc/*',
-                '%exclude %{python2_sitelib}/plaso/*.pyc',
-                '%exclude %{python2_sitelib}/plaso/*.pyo',
-                '%exclude %{python2_sitelib}/plaso/*/*.pyc',
-                '%exclude %{python2_sitelib}/plaso/*/*.pyo',
-                '%exclude %{python2_sitelib}/plaso/*/*/*.pyc',
-                '%exclude %{python2_sitelib}/plaso/*/*/*.pyo'])
+${python2_package_files}])
 
           python_spec_file.extend(lines)
           break
@@ -68,8 +46,8 @@
               '%package -n {0:s}-%{{name}}'.format(python_package))
           if python_package == 'python2':
             python_spec_file.extend([
-                'Obsoletes: python-plaso < %{version}',
-                'Provides: python-plaso = %{version}'])
+                'Obsoletes: python-${project_name} < %{version}',
+                'Provides: python-${project_name} = %{version}'])
             python_summary = 'Python 2 module of {0:s}'.format(summary)
           else:
             python_summary = 'Python 3 module of {0:s}'.format(summary)

@@ -78,7 +78,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
   _TOOLS_PACKAGE = [
       'Package: {project_name:s}-tools',
       'Architecture: all',
-      ('Depends: python3-{project_name:s}, ${{python3:Depends}}, '
+      ('Depends: python-{project_name:s}, ${{python:Depends}}, '
        '${{misc:Depends}}'),
       'Description: Tools of {name_description:s}',
       '{description_long:s}',
