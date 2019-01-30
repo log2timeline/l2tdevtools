@@ -240,7 +240,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
           '%exclude {0:s}/*.pyc'.format(python2_package_module_prefix),
           '%exclude {0:s}/*.pyo'.format(python2_package_module_prefix)])
 
-    if scripts_directory:
+    if not data_directory and scripts_directory:
       python2_package_files.append('%exclude %{{_bindir}}/*.py')
 
     python2_package_files = ',\n'.join([
@@ -276,7 +276,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
       python3_package_files.append(
           '%exclude {0:s}/__pycache__/*'.format(python3_package_module_prefix))
 
-    if scripts_directory:
+    if not data_directory and scripts_directory:
       python3_package_files.append('%exclude %{{_bindir}}/*.py')
 
     python3_package_files = ',\n'.join([
