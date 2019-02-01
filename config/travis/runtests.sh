@@ -22,14 +22,22 @@ then
 
 elif test "${TRAVIS_OS_NAME}" = "linux";
 then
+	COVERAGE="/usr/bin/coverage";
+
+	if ! test -x "${COVERAGE}";
+	then
+		# Ubuntu has renamed coverage.
+		COVERAGE="/usr/bin/python-coverage";
+	fi
+
 	if test -n "${TOXENV}";
 	then
 		tox --sitepackages ${TOXENV};
 
 	elif test "${TRAVIS_PYTHON_VERSION}" = "2.7";
 	then
-		coverage erase
-		coverage run --source=l2tdevtools --omit="*_test*,*__init__*,*test_lib*" ./run_tests.py
+		${COVERAGE} erase
+		${COVERAGE} run --source=dfdatetime --omit="*_test*,*__init__*,*test_lib*" ./run_tests.py
 	else
 		python ./run_tests.py
 	fi
