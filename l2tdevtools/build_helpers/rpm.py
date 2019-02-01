@@ -453,10 +453,10 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     Returns:
       str: path of the generated rpm spec file or None if not available.
     """
-    source_directory = source_helper_object.Create()
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error('Extraction of source package: {0:s} failed'.format(
-          source_package_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return None
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
@@ -718,10 +718,10 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     Returns:
       str: path of the generated rpm spec file or None if not available.
     """
-    source_directory = source_helper_object.Create()
+    source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.error('Extraction of source package: {0:s} failed'.format(
-          source_package_filename))
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
       return None
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)

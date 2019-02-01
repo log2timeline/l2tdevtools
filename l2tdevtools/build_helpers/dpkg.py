@@ -518,18 +518,18 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
           source_helper_object.project_name))
       return False
 
+    source_directory = source_helper_object.GetSourceDirectoryPath()
+    if not source_directory:
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
+      return False
+
     project_version = source_helper_object.GetProjectVersion()
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
-
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
-      return False
 
     logging.info('Building deb of: {0:s}'.format(source_filename))
 
@@ -628,16 +628,16 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
           source_helper_object.project_name))
       return False
 
+    source_directory = source_helper_object.GetSourceDirectoryPath()
+    if not source_directory:
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
+      return False
+
     project_version = source_helper_object.GetProjectVersion()
 
     self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
-
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
-      return False
 
     logging.info('Building source deb of: {0:s}'.format(source_filename))
 
@@ -769,6 +769,12 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
           source_helper_object.project_name))
       return False
 
+    source_directory = source_helper_object.GetSourceDirectoryPath()
+    if not source_directory:
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
+      return False
+
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
@@ -776,12 +782,6 @@ class SetupPyDPKGBuildHelper(DPKGBuildHelper):
     # the status indication and orig indication.
     self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
-
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
-      return False
 
     logging.info('Building deb of: {0:s}'.format(source_filename))
 
@@ -914,17 +914,17 @@ class SetupPySourceDPKGBuildHelper(DPKGBuildHelper):
           source_helper_object.project_name))
       return False
 
+    source_directory = source_helper_object.GetSourceDirectoryPath()
+    if not source_directory:
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
+      return False
+
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
     self._CreateOriginalSourcePackage(
         source_filename, source_helper_object.project_name, project_version)
-
-    source_directory = source_helper_object.Create()
-    if not source_directory:
-      logging.error(
-          'Extraction of source package: {0:s} failed'.format(source_filename))
-      return False
 
     logging.info('Building source deb of: {0:s}'.format(source_filename))
 
