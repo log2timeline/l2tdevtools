@@ -3,27 +3,33 @@ virtualenv:
   system_site_packages: true
 matrix:
   include:
-  - name: "pylint"
-    env: TARGET="pylint"
+  - env: TARGET="pylint"
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
-    python: 2.7
+    language: python
+    python: 3.5
+    virtualenv:
+      system_site_packages: true
   - name: "Linux with Python 2.7"
     env: TARGET="linux-python27"
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
     python: 2.7
-  - name: "Linux with Python 3.3"
-    env: TARGET="linux-python34"
+    virtualenv:
+      system_site_packages: true
+  - name: "Linux with Python 3.5"
+    env: TARGET="linux-python35"
     os: linux
-    dist: trusty
+    dist: xenial
     sudo: required
     group: edge
-    python: 3.4
+    python: 3.5
+    virtualenv:
+      system_site_packages: true
   - name: "MacOS with Python 2.7.10"
     env: [TARGET="macos-python27", PYTHONPATH="/Library/Python/2.7/site-packages/"]
     os: osx
@@ -34,6 +40,7 @@ install:
 script:
 - ./config/travis/runtests.sh
 after_success:
+- if ! test -f /usr/bin/coverage; then sudo ln -s /usr/bin/python-coverage /usr/bin/coverage; fi
 - if test ${TARGET} = "linux-python27"; then
     curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh;
   fi

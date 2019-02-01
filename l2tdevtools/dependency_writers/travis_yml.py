@@ -16,9 +16,6 @@ class TravisYMLWriter(interface.DependencyFileWriter):
   _PROJECTS_WITH_JENKINS_SUPPORT = (
       'dfvfs', 'plaso')
 
-  _PROJECTS_WITH_PYLINT2_SUPPORT = (
-      'dfdatetime', 'dfvfs', 'dfwinreg', 'dtfabric', 'dtformats', 'plaso')
-
   PATH = '.travis.yml'
 
   def _GenerateFromTemplate(self, template_filename, template_mappings):
@@ -49,13 +46,8 @@ class TravisYMLWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('header', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name in self._PROJECTS_WITH_PYLINT2_SUPPORT:
-      template_filename = 'matrix_pylint3'
-    else:
-      template_filename = 'matrix_pylint2'
-
     template_data = self._GenerateFromTemplate(
-        template_filename, template_mappings)
+        'matrix_pylint3', template_mappings)
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
@@ -65,11 +57,6 @@ class TravisYMLWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate(
         'matrix_macos', template_mappings)
     file_content.append(template_data)
-
-    if self._project_definition.name not in self._PROJECTS_WITH_PYLINT2_SUPPORT:
-      template_data = self._GenerateFromTemplate(
-          'matrix_trusty', template_mappings)
-      file_content.append(template_data)
 
     if self._project_definition.name in self._PROJECTS_WITH_JENKINS_SUPPORT:
       template_data = self._GenerateFromTemplate('jenkins', template_mappings)
