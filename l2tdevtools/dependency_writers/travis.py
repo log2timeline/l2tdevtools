@@ -25,10 +25,6 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
     l2tbinaries_test_dependencies = self._test_dependency_helper.GetL2TBinaries(
         platform='macos')
 
-    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
-    if self._project_definition.name == 'artifacts':
-      l2tbinaries_test_dependencies.append('yapf')
-
     l2tbinaries_test_dependencies = sorted(l2tbinaries_test_dependencies)
 
     python2_dependencies = self._dependency_helper.GetDPKGDepends(
@@ -39,9 +35,6 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
     # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
     python2_test_dependencies.extend(['python-coverage', 'python-tox'])
-    if self._project_definition.name == 'artifacts':
-      # Note that the artifacts tests will use the Python 2 version of yapf.
-      python2_test_dependencies.extend(['python-yapf', 'yapf'])
 
     python2_test_dependencies = sorted(python2_test_dependencies)
 
@@ -53,9 +46,6 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
     # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
     python3_test_dependencies.extend(['python3-setuptools', 'python3-tox'])
-    if self._project_definition.name == 'artifacts':
-      # Note that the artifacts tests will use the Python 2 version of yapf.
-      python3_test_dependencies.extend(['python-yapf', 'yapf'])
 
     python3_test_dependencies = sorted(python3_test_dependencies)
 
