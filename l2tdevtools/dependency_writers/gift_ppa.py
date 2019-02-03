@@ -17,95 +17,15 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
   # Path to GIFT PPA installation script.
   PATH = ''
 
-  def _Write(self, python_version=2):
-    """Writes a gift_ppa_install.sh file.
+  def _FormatDPKGDebugDependencies(self, debug_dependencies):
+    """Formats DPKG debug dependencies for the template.
 
     Args:
-      python_version (Optional[int]): Python version.
+      debug_dependencies (list[str]): DPKG package names of debug dependencies.
+
+    Returns:
+      str: formatted DPKG debug dependencies.
     """
-    if python_version == 3:
-      python_version_string = 'python3'
-    else:
-      python_version_string = 'python'
-
-    python_dependencies = self._dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=python_version)
-
-    formatted_python_dependencies = []
-
-    libyal_dependencies = []
-    for index, dependency in enumerate(sorted(python_dependencies)):
-      if index == 0:
-        line = 'PYTHON{0:d}_DEPENDENCIES="{1:s}'.format(
-            python_version, dependency)
-      else:
-        line = '                      {0:s}'.format(dependency)
-
-      if index + 1 == len(python_dependencies):
-        line = '{0:s}";'.format(line)
-
-      formatted_python_dependencies.append(line)
-
-      if dependency.startswith('lib') and dependency.endswith(
-          python_version_string):
-        dependency, _, _ = dependency.partition('-')
-        libyal_dependencies.append(dependency)
-
-    formatted_python_dependencies = '\n'.join(formatted_python_dependencies)
-
-    test_dependencies = self._test_dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=python_version)
-
-    test_dependencies = [
-        test_dependency for test_dependency in test_dependencies
-        if test_dependency not in python_dependencies]
-
-    # TODO: replace by dev_dependencies.ini or equiv.
-    development_dependencies = ['pylint']
-
-    if self._project_definition.name == 'plaso':
-      development_dependencies.append('python-sphinx')
-
-    debug_dependencies = []
-    for index, dependency in enumerate(sorted(libyal_dependencies)):
-      debug_dependencies.extend([
-          '{0:s}-dbg'.format(dependency),
-          '{0:s}-{1:s}-dbg'.format(dependency, python_version_string)])
-
-    if python_version == 2 and self._project_definition.name == 'plaso':
-      debug_dependencies.append('python-guppy')
-
-    formatted_test_dependencies = []
-    if test_dependencies:
-      for index, dependency in enumerate(sorted(test_dependencies)):
-        if index == 0:
-          line = 'TEST_DEPENDENCIES="{0:s}'.format(dependency)
-        else:
-          line = '                   {0:s}'.format(dependency)
-
-        if index + 1 == len(test_dependencies):
-          line = '{0:s}";'.format(line)
-
-        formatted_test_dependencies.append(line)
-
-    formatted_test_dependencies = '\n'.join(formatted_test_dependencies)
-
-    formatted_development_dependencies = []
-    if development_dependencies:
-      for index, dependency in enumerate(sorted(development_dependencies)):
-        if index == 0:
-          line = 'DEVELOPMENT_DEPENDENCIES="{0:s}'.format(dependency)
-        else:
-          line = '                          {0:s}'.format(dependency)
-
-        if index + 1 == len(development_dependencies):
-          line = '{0:s}";'.format(line)
-
-        formatted_development_dependencies.append(line)
-
-    formatted_development_dependencies = '\n'.join(
-        formatted_development_dependencies)
-
     formatted_debug_dependencies = []
     if debug_dependencies:
       for index, dependency in enumerate(sorted(debug_dependencies)):
@@ -119,7 +39,147 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
         formatted_debug_dependencies.append(line)
 
-    formatted_debug_dependencies = '\n'.join(formatted_debug_dependencies)
+    return '\n'.join(formatted_debug_dependencies)
+
+  def _FormatDPKGDevelopmentDependencies(self, development_dependencies):
+    """Formats DPKG development dependencies for the template.
+
+    Args:
+      development_dependencies (list[str]): DPKG package names of development
+          dependencies.
+
+    Returns:
+      str: formatted DPKG development dependencies.
+    """
+    formatted_development_dependencies = []
+    if development_dependencies:
+      for index, dependency in enumerate(sorted(development_dependencies)):
+        if index == 0:
+          line = 'DEVELOPMENT_DEPENDENCIES="{0:s}'.format(dependency)
+        else:
+          line = '                          {0:s}'.format(dependency)
+
+        if index + 1 == len(development_dependencies):
+          line = '{0:s}";'.format(line)
+
+        formatted_development_dependencies.append(line)
+
+    return '\n'.join(formatted_development_dependencies)
+
+  def _FormatDPKGPythonDependencies(
+      self, python_dependencies, python_version=2):
+    """Formats DPKG Python dependencies for the template.
+
+    Args:
+      python_dependencies (list[str]): DPKG package names of Python
+          dependencies.
+      python_version (Optional[int]): Python major version.
+
+    Returns:
+      str: formatted DPKG Python dependencies.
+    """
+    formatted_python_dependencies = []
+
+    for index, dependency in enumerate(sorted(python_dependencies)):
+      if index == 0:
+        line = 'PYTHON{0:d}_DEPENDENCIES="{1:s}'.format(
+            python_version, dependency)
+      else:
+        line = '                      {0:s}'.format(dependency)
+
+      if index + 1 == len(python_dependencies):
+        line = '{0:s}";'.format(line)
+
+      formatted_python_dependencies.append(line)
+
+    return '\n'.join(formatted_python_dependencies)
+
+  def _FormatDPKGTestDependencies(self, test_dependencies):
+    """Formats DPKG test dependencies for the template.
+
+    Args:
+      test_dependencies (list[str]): DPKG package names of test dependencies.
+
+    Returns:
+      str: formatted DPKG test dependencies.
+    """
+    formatted_test_dependencies = []
+    if test_dependencies:
+      for index, dependency in enumerate(sorted(test_dependencies)):
+        if index == 0:
+          line = 'TEST_DEPENDENCIES="{0:s}'.format(dependency)
+        else:
+          line = '                   {0:s}'.format(dependency)
+
+        if index + 1 == len(test_dependencies):
+          line = '{0:s}";'.format(line)
+
+        formatted_test_dependencies.append(line)
+
+    return '\n'.join(formatted_test_dependencies)
+
+  def _GetDPKGDebugDependencies(self, python_dependencies, python_version=2):
+    """Retrieves DPKG debug dependencies.
+
+    Args:
+      python_dependencies (list[str]): DPKG package names of Python
+          dependencies.
+      python_version (Optional[int]): Python major version.
+
+    Returns:
+      list[str]: DPKG package names of Python debug dependencies.
+    """
+    if python_version == 3:
+      python_version_string = 'python3'
+    else:
+      python_version_string = 'python'
+
+    debug_dependencies = []
+    for dependency in sorted(python_dependencies):
+      if dependency.startswith('lib') and dependency.endswith(
+          python_version_string):
+        dependency, _, _ = dependency.partition('-')
+        debug_dependencies.extend([
+            '{0:s}-dbg'.format(dependency),
+            '{0:s}-{1:s}-dbg'.format(dependency, python_version_string)])
+
+    if python_version == 2 and self._project_definition.name == 'plaso':
+      debug_dependencies.append('python-guppy')
+
+    return debug_dependencies
+
+  def _Write(self, python_version=2):
+    """Writes a gift_ppa_install.sh file.
+
+    Args:
+      python_version (Optional[int]): Python version.
+    """
+    python_dependencies = self._GetDPKGPythonDependencies(
+        python_version=python_version)
+
+    test_dependencies = self._GetDPKGTestDependencies(
+        python_dependencies, python_version=python_version)
+
+    # TODO: replace by dev_dependencies.ini or equiv.
+    development_dependencies = ['pylint']
+
+    if self._project_definition.name == 'plaso':
+      development_dependencies.append('python-sphinx')
+
+    debug_dependencies = self._GetDPKGDebugDependencies(
+        python_dependencies, python_version=python_version)
+
+    formatted_python_dependencies = self._FormatDPKGPythonDependencies(
+        python_dependencies, python_version=python_version)
+
+    formatted_test_dependencies = self._FormatDPKGTestDependencies(
+        test_dependencies)
+
+    formatted_development_dependencies = (
+        self._FormatDPKGDevelopmentDependencies(development_dependencies))
+
+    formatted_debug_dependencies = self._FormatDPKGDebugDependencies(
+        debug_dependencies)
 
     pylint_ppa = 'ppa:gift/pylint{0:d}'.format(python_version)
 
