@@ -49,7 +49,8 @@ class BuildHelper(object):
       build_dependencies = []
     return list(build_dependencies)
 
-  def CheckBuildRequired(self, unused_source_helper_object):
+  # pylint: disable=unused-argument
+  def CheckBuildRequired(self, source_helper_object):
     """Checks if a build is required.
 
     Args:

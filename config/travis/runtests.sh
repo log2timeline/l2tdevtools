@@ -20,6 +20,19 @@ elif test "${TRAVIS_OS_NAME}" = "osx";
 then
 	PYTHONPATH=/Library/Python/2.7/site-packages/ /usr/bin/python ./run_tests.py;
 
+elif test -n "${FEDORA_VERSION}";
+then
+	CONTAINER_NAME="fedora${FEDORA_VERSION}";
+
+	docker exec "${CONTAINER_NAME}" sh -c "git clone https://github.com/log2timeline/l2tdevtools.git";
+
+	if test ${TRAVIS_PYTHON_VERSION} = "2.7";
+	then
+		docker exec "${CONTAINER_NAME}" sh -c "cd l2tdevtools && python2 run_tests.py";
+	else
+		docker exec "${CONTAINER_NAME}" sh -c "cd l2tdevtools && python3 run_tests.py";
+	fi
+
 elif test "${TRAVIS_OS_NAME}" = "linux";
 then
 	COVERAGE="/usr/bin/coverage";
@@ -37,7 +50,7 @@ then
 	elif test "${TRAVIS_PYTHON_VERSION}" = "2.7";
 	then
 		${COVERAGE} erase
-		${COVERAGE} run --source=dfdatetime --omit="*_test*,*__init__*,*test_lib*" ./run_tests.py
+		${COVERAGE} run --source=l2tdevtools --omit="*_test*,*__init__*,*test_lib*" ./run_tests.py
 	else
 		python ./run_tests.py
 	fi

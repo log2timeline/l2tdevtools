@@ -14,12 +14,12 @@ class TestURLLibHelper(object):
     super(TestURLLibHelper, self).__init__()
     self._result = result
 
-  def Request(self, unused_url, **unused_kwargs):
+  # pylint: disable=unused-argument
+  def Request(self, url, **unused_kwargs):
     """Sends a request to an URL.
 
     Args:
       url (str): URL to send the request.
-      data (Optional[bytes]): data to send.
 
     Returns:
       bytes: response data.

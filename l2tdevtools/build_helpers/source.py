@@ -62,7 +62,8 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
 
     return True
 
-  def Clean(self, unused_source_helper_object):
+  # pylint: disable=unused-argument
+  def Clean(self, source_helper_object):
     """Cleans the source.
 
     Args:

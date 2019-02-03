@@ -20,7 +20,7 @@ def Main():
   """The main program function.
 
   Returns:
-    A boolean containing True if successful or False if not.
+    bool: True if successful or False if not.
   """
   argument_parser = argparse.ArgumentParser(description=(
       'Generates dpkg packaging files for a project.'))

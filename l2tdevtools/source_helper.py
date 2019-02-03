@@ -85,6 +85,7 @@ class GitRepositorySourceHelper(SourceHelper):
 
     return self.project_name
 
+  # pylint: disable=redundant-returns-doc
   def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
 
