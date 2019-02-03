@@ -16,6 +16,7 @@ class ProjectDefinition(object):
   Attributes:
     description_long (str): long description.
     description_short (str): short description.
+    git_url (str): URL of the git repository.
     homepage_url (str): URL of the homepage.
     maintainer (str): maintainer.
     name (str): name of the project.
@@ -29,6 +30,7 @@ class ProjectDefinition(object):
     super(ProjectDefinition, self).__init__()
     self.description_long = None
     self.description_short = None
+    self.git_url = None
     self.homepage_url = None
     self.maintainer = None
     self.name = None
@@ -43,6 +45,7 @@ class ProjectDefinitionReader(object):
   _VALUE_NAMES = frozenset([
       'description_long',
       'description_short',
+      'git_url',
       'homepage_url',
       'maintainer',
       'name',

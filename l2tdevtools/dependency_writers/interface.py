@@ -28,20 +28,6 @@ class DependencyFileWriter(object):
     self._project_definition = project_definition
     self._test_dependency_helper = test_dependency_helper
 
-  def _ReadTemplateFile(self, filename):
-    """Reads a template string from file.
-
-    Args:
-      filename (str): name of the file containing the template string.
-
-    Returns:
-      string.Template: template string.
-    """
-    with open(filename, 'rb') as file_object:
-      file_data = file_object.read()
-
-    return string.Template(file_data)
-
   def _GenerateFromTemplate(self, template_filename, template_mappings):
     """Generates file context based on a template file.
 
@@ -65,6 +51,85 @@ class DependencyFileWriter(object):
       raise RuntimeError(
           'Unable to format template: {0:s} with error: {1!s}'.format(
               template_filename, exception))
+
+  def _GetDPKGPythonDependencies(self, python_version=2):
+    """Retrieves DPKG Python dependencies.
+
+    Args:
+      python_version (Optional[int]): Python major version.
+
+    Returns:
+      list[str]: DPKG package names of Python dependencies.
+    """
+    return self._dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=python_version)
+
+  def _GetDPKGTestDependencies(self, python_dependencies, python_version=2):
+    """Retrieves DPKG test dependencies.
+
+    Args:
+      python_dependencies (list[str]): DPKG package names of Python
+          dependencies.
+      python_version (Optional[int]): Python major version.
+
+    Returns:
+      list[str]: DPKG package names of test dependencies.
+    """
+    test_dependencies = self._test_dependency_helper.GetDPKGDepends(
+        exclude_version=True, python_version=python_version)
+
+    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
+    if python_version == 2:
+      test_dependencies.extend(['python-coverage', 'python-tox'])
+    else:
+      test_dependencies.extend(['python3-setuptools', 'python3-tox'])
+
+    return [
+        test_dependency for test_dependency in sorted(test_dependencies)
+        if test_dependency not in python_dependencies]
+
+  def _GetRPMPythonDependencies(self, python_version=2):
+    """Retrieves RPM Python dependencies.
+
+    Args:
+      python_version (Optional[int]): Python major version.
+
+    Returns:
+      list[str]: RPM package names of Python dependencies.
+    """
+    return self._dependency_helper.GetRPMRequires(
+        exclude_version=True, python_version=python_version)
+
+  def _GetRPMTestDependencies(self, python_dependencies, python_version=2):
+    """Retrieves RPM test dependencies.
+
+    Args:
+      python_dependencies (list[str]): RPM package names of Python dependencies.
+      python_version (Optional[int]): Python major version.
+
+    Returns:
+      list[str]: RPM package names of test dependencies.
+    """
+    test_dependencies = self._test_dependency_helper.GetRPMRequires(
+        exclude_version=True, python_version=python_version)
+
+    return [
+        test_dependency for test_dependency in test_dependencies
+        if test_dependency not in python_dependencies]
+
+  def _ReadTemplateFile(self, filename):
+    """Reads a template string from file.
+
+    Args:
+      filename (str): name of the file containing the template string.
+
+    Returns:
+      string.Template: template string.
+    """
+    with open(filename, 'rb') as file_object:
+      file_data = file_object.read()
+
+    return string.Template(file_data)
 
   @abc.abstractmethod
   def Write(self):
