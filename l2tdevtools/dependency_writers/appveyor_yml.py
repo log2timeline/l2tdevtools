@@ -45,10 +45,6 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     if 'backports.lzma' in python2_dependencies:
       python2_dependencies.remove('backports.lzma')
 
-    # TODO: replace by dev_dependencies.ini or equiv.
-    if self._project_definition.name == 'artifacts':
-      python2_dependencies.append('yapf')
-
     python3_dependencies = self._dependency_helper.GetL2TBinaries(
         python_version=3)
 

@@ -14,7 +14,8 @@ class PylintRcWriter(interface.DependencyFileWriter):
   PATH = '.pylintrc'
 
   _PROJECTS_WITH_PYLINT2_SUPPORT = (
-      'dfdatetime', 'dfvfs', 'dfwinreg', 'dtfabric', 'dtformats', 'plaso')
+      'artifacts', 'dfdatetime', 'dfvfs', 'dfwinreg', 'dtfabric', 'dtformats',
+      'plaso')
 
   def Write(self):
     """Writes a .pylintrc file."""

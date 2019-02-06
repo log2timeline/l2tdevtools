@@ -30,8 +30,6 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
     # TODO: replace by test_dependencies.ini
     test_dependencies.append('pytest')
-    if self._project_definition.name == 'artifacts':
-      test_dependencies.append('yapf')
 
     test_dependencies = '\n'.join([
         '    {0:s}'.format(dependency) for dependency in test_dependencies])
