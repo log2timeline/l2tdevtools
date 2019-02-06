@@ -1,9 +1,7 @@
-language: python
-virtualenv:
-  system_site_packages: true
 matrix:
   include:
-  - env: TARGET="pylint"
+  - name: "Pylint on Ubuntu Xenial (16.04) with Python 3.5"
+    env: TARGET="pylint"
     os: linux
     dist: xenial
     sudo: required
@@ -12,21 +10,23 @@ matrix:
     python: 3.5
     virtualenv:
       system_site_packages: true
-  - name: "Linux with Python 2.7"
+  - name: "Ubuntu Xenial (16.04) with Python 2.7"
     env: TARGET="linux-python27"
     os: linux
     dist: xenial
     sudo: required
     group: edge
+    language: python
     python: 2.7
     virtualenv:
       system_site_packages: true
-  - name: "Linux with Python 3.5"
+  - name: "Ubuntu Xenial (16.04) with Python 3.5"
     env: TARGET="linux-python35"
     os: linux
     dist: xenial
     sudo: required
     group: edge
+    language: python
     python: 3.5
     virtualenv:
       system_site_packages: true

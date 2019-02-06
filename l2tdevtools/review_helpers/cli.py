@@ -38,6 +38,9 @@ class CLIHelper(object):
     Returns:
       tuple[int, str, str]: exit code, output that was written to stdout
           and stderr.
+
+    Raises:
+      AttributeError: if the command is not recognized.
     """
     if self.mock_responses:
       return_values = self.mock_responses.get(command, None)

@@ -63,7 +63,6 @@ class MSIBuildHelper(interface.BuildHelper):
     """Applies patches.
 
     Args:
-      source_directory (str): name of the source directory.
       patches (list[str]): patch file names.
 
     Returns:

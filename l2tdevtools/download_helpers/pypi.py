@@ -78,7 +78,8 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
     return available_versions
 
-  def GetLatestVersion(self, unused_project_name, version_definition):
+  # pylint: disable=unused-argument
+  def GetLatestVersion(self, project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
     Args:
@@ -120,7 +121,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     return self._GetLatestVersion(
         earliest_version, latest_version, available_versions)
 
-  def GetDownloadURL(self, unused_project_name, project_version):
+  def GetDownloadURL(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
 
     Args:

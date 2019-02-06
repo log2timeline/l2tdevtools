@@ -28,7 +28,8 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
     super(SourceForgeDownloadHelper, self).__init__(download_url)
     self._project_name = url_segments[4]
 
-  def GetLatestVersion(self, unused_project_name, version_definition):
+  # pylint: disable=unused-argument
+  def GetLatestVersion(self, project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
     Args:
@@ -76,7 +77,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
     numeric_matches = [''.join(match.split('.')) for match in matches]
     return matches[numeric_matches.index(max(numeric_matches))]
 
-  def GetDownloadURL(self, unused_project_name, project_version):
+  def GetDownloadURL(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
 
     Args:
@@ -84,7 +85,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
       project_version (str): version of the project.
 
     Returns:
-      The download URL of the project or None if not available.
+      str: download URL of the project or None if not available.
     """
     # TODO: make this more robust to detect different naming schemes.
     download_url = (

@@ -322,7 +322,7 @@ class DependencyUpdater(object):
   def _GetAvailablePackages(self):
     """Determines the packages available for download.
 
-    Args:
+    Returns:
       list[PackageDownload]: packages available for download.
     """
     python_version_indicator = '-py{0:d}.{1:d}'.format(
