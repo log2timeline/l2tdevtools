@@ -80,9 +80,9 @@ class DependencyFileWriter(object):
 
     # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
     if python_version == 2:
-      test_dependencies.extend(['python-coverage', 'python-tox'])
+      test_dependencies.extend(['python-coverage', 'tox'])
     else:
-      test_dependencies.extend(['python3-setuptools', 'python3-tox'])
+      test_dependencies.extend(['python3-setuptools', 'tox'])
 
     return [
         test_dependency for test_dependency in sorted(test_dependencies)
