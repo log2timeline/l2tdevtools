@@ -797,7 +797,12 @@ class DependencyUpdater(object):
 
       # Ignore package names if defined.
       if user_defined_package_names:
-        in_package_names = package_name in user_defined_package_names
+        # Some projects have different names than their module names.
+        if package_name == 'lz4':
+          in_package_names = 'python-lz4' in user_defined_package_names
+        else:
+          in_package_names = package_name in user_defined_package_names
+
         if ((self._exclude_packages and in_package_names) or
             (not self._exclude_packages and not in_package_names)):
           logging.info('Skipping: {0:s} because it was excluded'.format(
