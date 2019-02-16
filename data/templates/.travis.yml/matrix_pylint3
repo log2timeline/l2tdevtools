@@ -1,4 +1,5 @@
-  - env: TARGET="pylint"
+  - name: "Pylint on Ubuntu Xenial (16.04) with Python 3.5"
+    env: TARGET="pylint"
     os: linux
     dist: xenial
     sudo: required

@@ -9,13 +9,21 @@ L2TBINARIES_DEPENDENCIES="${l2tbinaries_dependencies}";
 
 L2TBINARIES_TEST_DEPENDENCIES="${l2tbinaries_test_dependencies}";
 
-PYTHON2_DEPENDENCIES="${python2_dependencies}";
+DPKG_PYTHON2_DEPENDENCIES="${dpkg_python2_dependencies}";
 
-PYTHON2_TEST_DEPENDENCIES="${python2_test_dependencies}";
+DPKG_PYTHON2_TEST_DEPENDENCIES="${dpkg_python2_test_dependencies}";
 
-PYTHON3_DEPENDENCIES="${python3_dependencies}";
+DPKG_PYTHON3_DEPENDENCIES="${dpkg_python3_dependencies}";
 
-PYTHON3_TEST_DEPENDENCIES="${python3_test_dependencies}";
+DPKG_PYTHON3_TEST_DEPENDENCIES="${dpkg_python3_test_dependencies}";
+
+RPM_PYTHON2_DEPENDENCIES="${rpm_python2_dependencies}";
+
+RPM_PYTHON2_TEST_DEPENDENCIES="${rpm_python2_test_dependencies}";
+
+RPM_PYTHON3_DEPENDENCIES="${rpm_python3_dependencies}";
+
+RPM_PYTHON3_TEST_DEPENDENCIES="${rpm_python3_test_dependencies}";
 
 # Exit on error.
 set -e;
@@ -42,18 +50,32 @@ then
 		sudo /usr/bin/hdiutil detach /Volumes/$${PACKAGE}-*.pkg
 	done
 
+elif test -n "$${FEDORA_VERSION}";
+then
+	CONTAINER_NAME="fedora$${FEDORA_VERSION}";
+
+	docker pull registry.fedoraproject.org/fedora:$${FEDORA_VERSION};
+
+	docker run --name=$${CONTAINER_NAME} --detach -i registry.fedoraproject.org/fedora:$${FEDORA_VERSION};
+
+	docker exec $${CONTAINER_NAME} dnf install -y dnf-plugins-core;
+
+	docker exec $${CONTAINER_NAME} dnf copr -y enable @gift/dev;
+
+	if test $${TRAVIS_PYTHON_VERSION} = "2.7";
+	then
+		docker exec $${CONTAINER_NAME} dnf install -y git python2 $${RPM_PYTHON2_DEPENDENCIES} $${RPM_PYTHON2_TEST_DEPENDENCIES};
+	else
+		docker exec $${CONTAINER_NAME} dnf install -y git python3 $${RPM_PYTHON3_DEPENDENCIES} $${RPM_PYTHON3_TEST_DEPENDENCIES};
+	fi
+
 elif test $${TRAVIS_OS_NAME} = "linux" && test $${TARGET} != "jenkins";
 then
 	sudo rm -f /etc/apt/sources.list.d/travis_ci_zeromq3-source.list;
 
 	if test $${TARGET} = "pylint";
 	then
-		if test $${TRAVIS_PYTHON_VERSION} = "2.7";
-		then
-			sudo add-apt-repository ppa:gift/pylint2 -y;
-		else
-			sudo add-apt-repository ppa:gift/pylint3 -y;
-		fi
+		sudo add-apt-repository ppa:gift/pylint3 -y;
 	fi
 
 	sudo add-apt-repository ppa:gift/dev -y;
@@ -61,9 +83,9 @@ then
 
 	if test $${TRAVIS_PYTHON_VERSION} = "2.7";
 	then
-		sudo apt-get install -y $${PYTHON2_DEPENDENCIES} $${PYTHON2_TEST_DEPENDENCIES};
+		sudo apt-get install -y $${DPKG_PYTHON2_DEPENDENCIES} $${DPKG_PYTHON2_TEST_DEPENDENCIES};
 	else
-		sudo apt-get install -y $${PYTHON3_DEPENDENCIES} $${PYTHON3_TEST_DEPENDENCIES};
+		sudo apt-get install -y $${DPKG_PYTHON3_DEPENDENCIES} $${DPKG_PYTHON3_TEST_DEPENDENCIES};
 	fi
 	if test $${TARGET} = "pylint";
 	then

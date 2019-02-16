@@ -27,36 +27,44 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
     l2tbinaries_test_dependencies = sorted(l2tbinaries_test_dependencies)
 
-    python2_dependencies = self._dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=2)
+    dpkg_python2_dependencies = self._GetDPKGPythonDependencies(
+        python_version=2)
 
-    python2_test_dependencies = self._test_dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=2)
+    dpkg_python2_test_dependencies = self._GetDPKGTestDependencies(
+        dpkg_python2_dependencies, python_version=2)
 
-    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
-    python2_test_dependencies.extend(['python-coverage', 'python-tox'])
+    dpkg_python3_dependencies = self._GetDPKGPythonDependencies(
+        python_version=3)
 
-    python2_test_dependencies = sorted(python2_test_dependencies)
+    dpkg_python3_test_dependencies = self._GetDPKGTestDependencies(
+        dpkg_python3_dependencies, python_version=3)
 
-    python3_dependencies = self._dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=3)
+    rpm_python2_dependencies = self._GetRPMPythonDependencies(python_version=2)
 
-    python3_test_dependencies = self._test_dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=3)
+    rpm_python2_test_dependencies = self._GetRPMTestDependencies(
+        rpm_python2_dependencies, python_version=2)
 
-    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
-    python3_test_dependencies.extend(['python3-setuptools', 'python3-tox'])
+    rpm_python3_dependencies = self._GetRPMPythonDependencies(python_version=3)
 
-    python3_test_dependencies = sorted(python3_test_dependencies)
+    rpm_python3_test_dependencies = self._GetRPMTestDependencies(
+        rpm_python3_dependencies, python_version=3)
 
     template_mappings = {
         'l2tbinaries_dependencies': ' '.join(l2tbinaries_dependencies),
         'l2tbinaries_test_dependencies': ' '.join(
             l2tbinaries_test_dependencies),
-        'python2_dependencies': ' '.join(python2_dependencies),
-        'python2_test_dependencies': ' '.join(python2_test_dependencies),
-        'python3_dependencies': ' '.join(python3_dependencies),
-        'python3_test_dependencies': ' '.join(python3_test_dependencies)}
+        'dpkg_python2_dependencies': ' '.join(dpkg_python2_dependencies),
+        'dpkg_python2_test_dependencies': ' '.join(
+            dpkg_python2_test_dependencies),
+        'dpkg_python3_dependencies': ' '.join(dpkg_python3_dependencies),
+        'dpkg_python3_test_dependencies': ' '.join(
+            dpkg_python3_test_dependencies),
+        'rpm_python2_dependencies': ' '.join(rpm_python2_dependencies),
+        'rpm_python2_test_dependencies': ' '.join(
+            rpm_python2_test_dependencies),
+        'rpm_python3_dependencies': ' '.join(rpm_python3_dependencies),
+        'rpm_python3_test_dependencies': ' '.join(
+            rpm_python3_test_dependencies)}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
@@ -84,6 +92,7 @@ class TravisRunTestsScriptWriter(interface.DependencyFileWriter):
       paths_to_lint.insert(0, 'setup.py')
 
     template_mappings = {
+        'git_url': self._project_definition.git_url,
         'project_name': self._project_definition.name,
         'paths_to_lint': ' '.join(paths_to_lint)
     }

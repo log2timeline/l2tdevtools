@@ -8,27 +8,110 @@ import unittest
 
 from l2tdevtools import dependencies
 from l2tdevtools.dependency_writers import gift_copr
-from l2tdevtools.helpers import project
+from l2tdevtools import projects
 from tests import test_lib
 
 
 class GIFTCOPRInstallTest(test_lib.BaseTestCase):
   """Tests the gift_copr_install.py writer."""
 
-  def testInitialize(self):
-    """Tests that the writer can be initialized."""
+  # pylint: disable=protected-access
 
-    l2tdevtools_path = '/fake/l2tdevtools/'
-    project_definition = project.ProjectHelper(l2tdevtools_path)
+  def _CreateTestWriter(self):
+    """Creates a dependency file writer for testing.
+
+    Returns:
+      GIFTCOPRInstallScriptWriter: dependency file writer for testing.
+    """
+    project_definition = projects.ProjectDefinition('test')
+
     configuration_file = self._GetTestFilePath(['dependencies.ini'])
     dependency_helper = dependencies.DependencyHelper(
         configuration_file=configuration_file)
 
-    writer = gift_copr.GIFTCOPRInstallScriptWriter(
-        l2tdevtools_path, project_definition, dependency_helper, None)
-    self.assertIsNotNone(writer)
+    configuration_file = self._GetTestFilePath(['test_dependencies.ini'])
+    test_dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
 
-  # TODO: Add test for the Write method.
+    return gift_copr.GIFTCOPRInstallScriptWriter(
+        '/fake/l2tdevtools/', project_definition, dependency_helper,
+        test_dependency_helper)
+
+  def testFormatRPMDebugDependencies(self):
+    """Tests the _FormatRPMDebugDependencies function."""
+    test_writer = self._CreateTestWriter()
+
+    expected_formatted_debug_dependencies = ''
+
+    python_dependencies = test_writer._GetRPMPythonDependencies(
+        python_version=2)
+    debug_dependencies = test_writer._GetRPMDebugDependencies(
+        python_dependencies, python_version=2)
+    formatted_debug_dependencies = test_writer._FormatRPMDebugDependencies(
+        debug_dependencies)
+    self.assertEqual(
+        formatted_debug_dependencies, expected_formatted_debug_dependencies)
+
+  def testFormatRPMDevelopmentDependencies(self):
+    """Tests the _FormatRPMDevelopmentDependencies function."""
+    test_writer = self._CreateTestWriter()
+
+    expected_formatted_development_dependencies = (
+        'DEVELOPMENT_DEPENDENCIES="pylint";')
+
+    development_dependencies = ['pylint']
+    formatted_development_dependencies = (
+        test_writer._FormatRPMDevelopmentDependencies(development_dependencies))
+    self.assertEqual(
+        formatted_development_dependencies,
+        expected_formatted_development_dependencies)
+
+  def testFormatRPMPythonDependencies(self):
+    """Tests the _FormatRPMPythonDependencies function."""
+    test_writer = self._CreateTestWriter()
+
+    expected_formatted_python_dependencies = (
+        'PYTHON2_DEPENDENCIES="python2-pyyaml";')
+
+    python_dependencies = test_writer._GetRPMPythonDependencies(
+        python_version=2)
+    formatted_python_dependencies = test_writer._FormatRPMPythonDependencies(
+        python_dependencies)
+    self.assertEqual(
+        formatted_python_dependencies, expected_formatted_python_dependencies)
+
+  def testFormatRPMTestDependencies(self):
+    """Tests the _FormatRPMTestDependencies function."""
+    test_writer = self._CreateTestWriter()
+
+    expected_formatted_test_dependencies = (
+        'TEST_DEPENDENCIES="python2-funcsigs\n'
+        '                   python2-mock\n'
+        '                   python2-pbr\n'
+        '                   python2-six";')
+
+    python_dependencies = test_writer._GetRPMPythonDependencies(
+        python_version=2)
+    test_dependencies = test_writer._GetRPMTestDependencies(
+        python_dependencies, python_version=2)
+    formatted_test_dependencies = test_writer._FormatRPMTestDependencies(
+        test_dependencies)
+    self.assertEqual(
+        formatted_test_dependencies, expected_formatted_test_dependencies)
+
+  def testGetRPMDebugDependencies(self):
+    """Tests the _GetRPMDebugDependencies function."""
+    test_writer = self._CreateTestWriter()
+
+    expected_debug_dependencies = []
+
+    python_dependencies = test_writer._GetRPMPythonDependencies(
+        python_version=2)
+    debug_dependencies = test_writer._GetRPMDebugDependencies(
+        python_dependencies, python_version=2)
+    self.assertEqual(debug_dependencies, expected_debug_dependencies)
+
+  # TODO: Add tests for the Write method.
 
 
 if __name__ == '__main__':
