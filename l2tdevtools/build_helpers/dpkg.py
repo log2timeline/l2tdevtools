@@ -253,7 +253,7 @@ class DPKGBuildHelper(interface.BuildHelper):
 
     return True
 
-  # pylint: disable=unused-argument
+  # pylint: disable=redundant-returns-doc,unused-argument
   def _DetermineBuildConfiguration(self, source_directory):
     """Determines the build configuration of a project.
 
