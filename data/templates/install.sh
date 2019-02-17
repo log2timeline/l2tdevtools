@@ -62,7 +62,11 @@ then
 
 	docker exec $${CONTAINER_NAME} dnf copr -y enable @gift/dev;
 
-	if test $${TRAVIS_PYTHON_VERSION} = "2.7";
+	if test -n "$${TOXENV}";
+	then
+		docker exec $${CONTAINER_NAME} dnf install -y python3-tox;
+
+	elif test $${TRAVIS_PYTHON_VERSION} = "2.7";
 	then
 		docker exec $${CONTAINER_NAME} dnf install -y git python2 $${RPM_PYTHON2_DEPENDENCIES} $${RPM_PYTHON2_TEST_DEPENDENCIES};
 	else
@@ -84,7 +88,16 @@ then
 
 	docker exec $${CONTAINER_NAME} add-apt-repository ppa:gift/dev -y;
 
-	if test $${TRAVIS_PYTHON_VERSION} = "2.7";
+	if test -n "$${TOXENV}";
+	then
+		docker exec $${CONTAINER_NAME} add-apt-repository universe;
+		docker exec $${CONTAINER_NAME} add-apt-repository ppa:deadsnakes/ppa -y;
+
+		DPKG_PYTHON="python$${TRAVIS_PYTHON_VERSION}";
+
+		docker exec $${CONTAINER_NAME} sh -c "DEBIAN_FRONTEND=noninteractive apt-get install -y $${DPKG_PYTHON} tox";
+
+	elif test $${TRAVIS_PYTHON_VERSION} = "2.7";
 	then
 		docker exec $${CONTAINER_NAME} sh -c "DEBIAN_FRONTEND=noninteractive apt-get install -y git python $${DPKG_PYTHON2_DEPENDENCIES} $${DPKG_PYTHON2_TEST_DEPENDENCIES}";
 	else
