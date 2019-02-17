@@ -564,6 +564,7 @@ class DPKGBuildFilesGenerator(object):
       else:
         control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY)
 
+      # TODO: add configuration setting to indicate tools should be packaged.
       if package_name not in ('idna', 'mock', 'psutil'):
         if os.path.isdir('scripts') or os.path.isdir('tools'):
           control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_TOOLS)

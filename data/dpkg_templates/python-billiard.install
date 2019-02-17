@@ -1,0 +1,3 @@
+usr/lib/python2*/dist-packages/*.so
+usr/lib/python2*/dist-packages/billiard
+usr/lib/python2*/dist-packages/*.egg-info/*

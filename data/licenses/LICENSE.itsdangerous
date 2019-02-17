@@ -1,6 +1,6 @@
 BSD 3-Clause <https://opensource.org/licenses/BSD-3-Clause>
 
-Copyright © 2010 by the Pallets team.
+Copyright © 2011 by the Pallets team.
 
 Some rights reserved.
 
@@ -19,6 +19,12 @@ met:
     contributors may be used to endorse or promote products derived from
     this software without specific prior written permission.
 
+We kindly ask you to use these themes in an unmodified manner only with
+Pallets and Pallets-related projects, not for unrelated projects. If you
+like the visual style and want to use it for your own projects, please
+consider making some larger changes to the themes (such as changing font
+faces, sizes, colors or margins).
+
 THIS SOFTWARE AND DOCUMENTATION IS PROVIDED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
 BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
@@ -31,3 +37,11 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE AND DOCUMENTATION, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
+
+----
+
+The initial implementation of itsdangerous was inspired by Django's
+signing module.
+
+Copyright © Django Software Foundation and individual contributors.
+All rights reserved.
