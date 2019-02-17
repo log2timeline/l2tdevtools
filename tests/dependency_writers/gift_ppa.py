@@ -7,8 +7,9 @@ from __future__ import unicode_literals
 import unittest
 
 from l2tdevtools import dependencies
-from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools import projects
+from l2tdevtools.dependency_writers import gift_ppa
+
 from tests import test_lib
 
 

@@ -63,6 +63,29 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
         python_dependencies, python_version=2)
     self.assertEqual(test_dependencies, expected_test_dependencies)
 
+  def testGetPyPIPythonDependencies(self):
+    """Tests the _GetPyPIPythonDependencies function."""
+    test_writer = self._CreateTestWriter()
+
+    expected_python_dependencies = ['PyYAML']
+
+    python_dependencies = test_writer._GetPyPIPythonDependencies(
+        exclude_version=True)
+    self.assertEqual(python_dependencies, expected_python_dependencies)
+
+  def testGetPyPITestDependencies(self):
+    """Tests the _GetPyPITestDependencies function."""
+    test_writer = self._CreateTestWriter()
+
+    expected_test_dependencies = [
+        'funcsigs ; python_version < \'3.0\'', 'mock', 'pbr', 'six']
+
+    python_dependencies = test_writer._GetPyPIPythonDependencies(
+        exclude_version=True)
+    test_dependencies = test_writer._GetPyPITestDependencies(
+        python_dependencies, exclude_version=True)
+    self.assertEqual(test_dependencies, expected_test_dependencies)
+
   def testGetRPMPythonDependencies(self):
     """Tests the _GetRPMPythonDependencies function."""
     test_writer = self._CreateTestWriter()

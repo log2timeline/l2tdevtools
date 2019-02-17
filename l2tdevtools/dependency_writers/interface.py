@@ -88,6 +88,39 @@ class DependencyFileWriter(object):
         test_dependency for test_dependency in sorted(test_dependencies)
         if test_dependency not in python_dependencies]
 
+  def _GetPyPIPythonDependencies(self, exclude_version=False):
+    """Retrieves PyPI Python dependencies.
+
+    Args:
+      exclude_version (Optional[bool]): True if the version should be excluded
+          from the dependency definitions.
+
+    Returns:
+      list[str]: PyPI package names of Python dependencies.
+    """
+    return self._dependency_helper.GetInstallRequires(
+        exclude_version=exclude_version)
+
+  def _GetPyPITestDependencies(
+      self, python_dependencies, exclude_version=False):
+    """Retrieves PyPI test dependencies.
+
+    Args:
+      python_dependencies (list[str]): PyPI package names of Python
+          dependencies.
+      exclude_version (Optional[bool]): True if the version should be excluded
+          from the dependency definitions.
+
+    Returns:
+      list[str]: PyPI package names of test dependencies.
+    """
+    test_dependencies = self._test_dependency_helper.GetInstallRequires(
+        exclude_version=exclude_version)
+
+    return [
+        test_dependency for test_dependency in test_dependencies
+        if test_dependency not in python_dependencies]
+
   def _GetRPMPythonDependencies(self, python_version=2):
     """Retrieves RPM Python dependencies.
 
