@@ -59,6 +59,7 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
         'dpkg_python3_dependencies': ' '.join(dpkg_python3_dependencies),
         'dpkg_python3_test_dependencies': ' '.join(
             dpkg_python3_test_dependencies),
+        'project_name': self._project_definition.name,
         'rpm_python2_dependencies': ' '.join(rpm_python2_dependencies),
         'rpm_python2_test_dependencies': ' '.join(
             rpm_python2_test_dependencies),
@@ -92,7 +93,6 @@ class TravisRunTestsScriptWriter(interface.DependencyFileWriter):
       paths_to_lint.insert(0, 'setup.py')
 
     template_mappings = {
-        'git_url': self._project_definition.git_url,
         'project_name': self._project_definition.name,
         'paths_to_lint': ' '.join(paths_to_lint)
     }

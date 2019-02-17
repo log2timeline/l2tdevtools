@@ -92,7 +92,7 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
         '                   python-mock\n'
         '                   python-pbr\n'
         '                   python-six\n'
-        '                   python-tox";')
+        '                   tox";')
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
         python_version=2)
