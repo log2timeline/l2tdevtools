@@ -65,12 +65,11 @@ class ProjectHelper(cli.CLIHelper):
 
   # yapf: enable
 
-  # Note that review is submodule name of l2tdevtools not a stand-alone project.
   SUPPORTED_PROJECTS = frozenset([
-      'acstore', 'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs', 'dfwinreg',
-      'dftimewolf', 'dtfabric', 'dtformats', 'esedb-kb', 'l2tdevtools',
-      'l2tdocs', 'plaso', 'l2tscaffolder', 'review', 'vstools', 'winevt-kb',
-      'winreg-kb'])
+      'acstore', 'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs',
+      'dfvfs-snippets', 'dfwinreg', 'dftimewolf', 'dtfabric', 'dtformats',
+      'esedb-kb', 'l2tdevtools', 'l2tdocs', 'plaso', 'l2tscaffolder', 'vstools',
+      'winevt-kb', 'winreg-kb'])
 
   def __init__(self, project_path):
     """Initializes a project helper.
@@ -105,11 +104,12 @@ class ProjectHelper(cli.CLIHelper):
     project_name = os.path.abspath(project_path)
     project_name = os.path.basename(project_name)
 
-    for supported_project_name in self.SUPPORTED_PROJECTS:
-      if supported_project_name in project_name:
-        return supported_project_name
+    # The review.py check is needed for the l2tdevtools tests.
+    if (project_name != 'review.py' and
+        project_name not in self.SUPPORTED_PROJECTS):
+      raise ValueError('Unsupported project name: {0:s}.'.format(project_name))
 
-    raise ValueError('Unsupported project name: {0:s}.'.format(project_name))
+    return project_name
 
   def _ReadFileContents(self, path):
     """Reads the contents of a file.
