@@ -55,7 +55,7 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
 
     expected_test_dependencies = [
         'python-coverage', 'python-funcsigs', 'python-mock', 'python-pbr',
-        'python-six', 'tox']
+        'python-six']
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
         python_version=2)
