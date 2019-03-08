@@ -145,10 +145,6 @@ class DPKGBuildFilesGenerator(object):
   _COPYRIGHT_TEMPLATE = '\n'.join([
       ''])
 
-  _INSTALL_TEMPLATE_PYTHON_TOOLS = '\n'.join([
-      'data/* usr/share/{package_name:s}',
-      ''])
-
   _INSTALL_TEMPLATE_PYTHON2 = '\n'.join([
       'usr/lib/python2*/dist-packages/{package_name:s}/',
       'usr/lib/python2*/dist-packages/{package_name:s}*.egg-info/*',
