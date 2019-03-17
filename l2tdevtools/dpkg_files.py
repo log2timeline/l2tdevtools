@@ -136,8 +136,8 @@ class DPKGBuildFilesGenerator(object):
   _CONTROL_TEMPLATE_SETUP_PY_TOOLS = [
       'Package: {source_package_name:s}-tools',
       'Architecture: all',
-      ('Depends: {python_package_name:s}, python (>= 2.7~), '
-       '${{python:Depends}}, ${{misc:Depends}}'),
+      ('Depends: {python_package_name:s} (>= ${{binary:Version}}), '
+       'python (>= 2.7~), ${{python:Depends}}, ${{misc:Depends}}'),
       'Description: Tools of {description_name:s}',
       ' {description_long:s}',
       '']
@@ -145,7 +145,7 @@ class DPKGBuildFilesGenerator(object):
   _COPYRIGHT_TEMPLATE = '\n'.join([
       ''])
 
-  _INSTALL_TEMPLATE_PYTHON_TOOLS = '\n'.join([
+  _INSTALL_TEMPLATE_PYTHON_DATA = '\n'.join([
       'data/* usr/share/{package_name:s}',
       ''])
 

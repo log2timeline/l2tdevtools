@@ -78,8 +78,8 @@ class DPKGControlWriter(interface.DependencyFileWriter):
   _TOOLS_PACKAGE = [
       'Package: {project_name:s}-tools',
       'Architecture: all',
-      ('Depends: python-{project_name:s}, ${{python:Depends}}, '
-       '${{misc:Depends}}'),
+      ('Depends: python-{project_name:s} (>= ${{binary:Version}}), '
+       '${{python:Depends}}, ${{misc:Depends}}'),
       'Description: Tools of {name_description:s}',
       '{description_long:s}',
       '']  # yapf: disable
@@ -95,7 +95,8 @@ class DPKGControlWriter(interface.DependencyFileWriter):
 
     data_dependency = ''
     if os.path.isdir('data'):
-      data_dependency = '{0:s}-data'.format(self._project_definition.name)
+      data_dependency = '{0:s}-data (>= ${{binary:Version}})'.format(
+          self._project_definition.name)
 
       file_content.extend(self._DATA_PACKAGE)
 
