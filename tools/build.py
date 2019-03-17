@@ -263,7 +263,8 @@ def Main():
   argument_parser.add_argument(
       '--build-directory', '--build_directory', action='store',
       metavar='DIRECTORY', dest='build_directory', type=str,
-      default='build', help='The location of the build directory.')
+      default=os.path.join('..', 'l2tbuilds'), help=(
+          'The location of the build directory.'))
 
   argument_parser.add_argument(
       '-c', '--config', dest='config_path', action='store',
