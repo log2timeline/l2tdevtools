@@ -1,7 +1,8 @@
         elif line.startswith('%files'):
           python_spec_file.extend([
               '%package -n %{name}-tools',
-              'Requires: {0:s}-${project_name}'.format(python_package),
+              'Requires: {0:s}-${project_name} >= %{{version}}'.format(
+                  python_package),
               'Summary: Tools for {0:s}'.format(summary),
               '',
               '%description -n %{name}-tools'])
@@ -53,7 +54,8 @@ ${python2_package_files}])
             python_summary = 'Python 3 module of {0:s}'.format(summary)
 
           python_spec_file.extend([
-              'Requires: ${project_name}-data {0:s}'.format(requires),
+              'Requires: ${project_name}-data >= %{{version}} {0:s}'.format(
+                  requires),
               'Summary: {0:s}'.format(python_summary),
               '',
               '%description -n {0:s}-%{{name}}'.format(python_package)])
