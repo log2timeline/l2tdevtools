@@ -19,10 +19,6 @@ ${development_dependencies}
 # Additional dependencies for debugging, alphabetized, one per line.
 ${debug_dependencies}
 
-if [[ "$$*" =~ "include-development" ]]; then
-  sudo add-apt-repository ${pylint_ppa} -y
-fi
-
 sudo add-apt-repository ppa:gift/dev -y
 sudo apt-get update -q
 sudo apt-get install -y $${PYTHON${python_version}_DEPENDENCIES}

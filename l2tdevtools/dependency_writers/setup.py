@@ -216,11 +216,21 @@ class SetupPyWriter(interface.DependencyFileWriter):
     python2_package_files = [
         '{0:s}/*.py'.format(python2_package_module_prefix)]
 
+    yaml_glob = os.path.join(python2_package_module_prefix[21:], '*.yaml')
+    if glob.glob(yaml_glob):
+      python2_package_files.append(
+          '{0:s}/*.yaml'.format(python2_package_module_prefix))
+
     for _ in range(submodule_levels):
       python2_package_module_prefix = '{0:s}/*'.format(
           python2_package_module_prefix)
       python2_package_files.append(
           '{0:s}/*.py'.format(python2_package_module_prefix))
+
+      yaml_glob = os.path.join(python2_package_module_prefix[21:], '*.yaml')
+      if glob.glob(yaml_glob):
+        python2_package_files.append(
+            '{0:s}/*.yaml'.format(python2_package_module_prefix))
 
     python2_package_files.extend([
         '%{{python2_sitelib}}/{0:s}*.egg-info/*',
@@ -254,11 +264,21 @@ class SetupPyWriter(interface.DependencyFileWriter):
     python3_package_files = [
         '{0:s}/*.py'.format(python3_package_module_prefix)]
 
+    yaml_glob = os.path.join(python3_package_module_prefix[21:], '*.yaml')
+    if glob.glob(yaml_glob):
+      python3_package_files.append(
+          '{0:s}/*.yaml'.format(python3_package_module_prefix))
+
     for _ in range(submodule_levels):
       python3_package_module_prefix = '{0:s}/*'.format(
           python3_package_module_prefix)
       python3_package_files.append(
           '{0:s}/*.py'.format(python3_package_module_prefix))
+
+      yaml_glob = os.path.join(python3_package_module_prefix[21:], '*.yaml')
+      if glob.glob(yaml_glob):
+        python3_package_files.append(
+            '{0:s}/*.yaml'.format(python3_package_module_prefix))
 
     python3_package_files.extend([
         '%{{python3_sitelib}}/{0:s}*.egg-info/*',
