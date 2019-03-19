@@ -66,10 +66,25 @@ class ProjectHelper(cli.CLIHelper):
   # yapf: enable
 
   SUPPORTED_PROJECTS = frozenset([
-      'acstore', 'artifacts', 'dfdatetime', 'dfkinds', 'dfvfs',
-      'dfvfs-snippets', 'dfwinreg', 'dftimewolf', 'dtfabric', 'dtformats',
-      'esedb-kb', 'l2tdevtools', 'l2tdocs', 'plaso', 'l2tscaffolder', 'vstools',
-      'winevt-kb', 'winreg-kb'])
+      'acstore',
+      'artifacts',
+      'dfdatetime',
+      'dfkinds',
+      'dftimewolf',
+      'dfvfs',
+      'dfvfs-snippets',
+      'dfwinreg',
+      'dtfabric',
+      'dtformats',
+      'esedb-kb',
+      'l2tdevtools',
+      'l2tdocs',
+      'l2tscaffolder',
+      'plaso',
+      'timesketch',
+      'vstools',
+      'winevt-kb',
+      'winreg-kb'])
 
   def __init__(self, project_path):
     """Initializes a project helper.
