@@ -697,7 +697,8 @@ class DPKGBuildFilesGenerator(object):
               template_file, template_data, template_values, output_filename)
 
       if os.path.isdir('scripts') or os.path.isdir('tools'):
-        output_filename = '{0:s}-tools.install'.format(self._GetPackageName())
+        install_package_name = self._GetPackageName()
+        output_filename = '{0:s}-tools.install'.format(install_package_name)
         output_filename = os.path.join(dpkg_path, output_filename)
         self._GenerateFile(
             None, self._INSTALL_TEMPLATE_PYTHON_TOOLS, template_values,
