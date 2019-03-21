@@ -775,7 +775,9 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
         elif directory_entry.endswith('.so'):
           build_configuration.has_module_shared_object = True
 
-    shutil.rmtree(os.path.join(source_directory, 'installroot'))
+    installroot_path = os.path.join(source_directory, 'installroot')
+    if os.path.exists(installroot_path):
+      shutil.rmtree(installroot_path)
 
     return build_configuration
 
