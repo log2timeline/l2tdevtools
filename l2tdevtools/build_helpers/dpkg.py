@@ -682,7 +682,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
         source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(
-          'Failed to run: "(cd {0:s} && {1:s}" with exit code {2:d}.'.format(
+          'Failed to run: "(cd {0:s} && {1:s})" with exit code {2:d}.'.format(
               source_directory, command, exit_code))
       return False
 
@@ -884,7 +884,7 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
         source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(
-          'Failed to run: "(cd {0:s} && {1:s}" with exit code {2:d}.'.format(
+          'Failed to run: "(cd {0:s} && {1:s})" with exit code {2:d}.'.format(
               source_directory, command, exit_code))
       return False
 
@@ -1026,7 +1026,7 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
         source_directory, command), shell=True)
     if exit_code != 0:
       logging.error(
-          'Failed to run: "(cd {0:s} && {1:s}" with exit code {2:d}.'.format(
+          'Failed to run: "(cd {0:s} && {1:s})" with exit code {2:d}.'.format(
               source_directory, command, exit_code))
 
     if not self._BuildFinalize(
