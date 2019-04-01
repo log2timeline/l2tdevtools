@@ -22,7 +22,7 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
   _DOWNLOAD_URL = 'https://github.com/ForensicArtifacts/artifacts/releases'
 
   _PROJECT_NAME = 'artifacts'
-  _PROJECT_VERSION = '20190113'
+  _PROJECT_VERSION = '20190320'
 
   def testGetPackageDownloadURLs(self):
     """Tests the GetPackageDownloadURLs function."""
