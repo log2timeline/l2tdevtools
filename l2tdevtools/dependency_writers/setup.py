@@ -17,6 +17,9 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
   _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
 
+  _PROJECTS_WITH_SDIST_TEST_DATA = (
+      'dfvfs', 'dfwinreg', 'plaso')
+
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.cfg')
 
   def _GenerateFromTemplate(self, template_filename, template_mappings):
@@ -74,7 +77,7 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('metadata', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name in ('dfvfs', 'plaso'):
+    if self._project_definition.name in self._PROJECTS_WITH_SDIST_TEST_DATA:
       template_data = self._GenerateFromTemplate(
           'sdist_test_data', template_mappings)
       file_content.append(template_data)
@@ -102,6 +105,9 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
   _PROJECTS_WITH_PACKAGE_DATA = (
       'dfvfs', 'dfwinreg', 'dtformats', 'plaso', 'winregrc')
+
+  _PROJECTS_WITH_SDIST_TEST_DATA = (
+      'dfvfs', 'dfwinreg', 'plaso')
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.py')
 
@@ -360,7 +366,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'header_setuptools', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name in ('dfvfs', 'plaso'):
+    if self._project_definition.name in self._PROJECTS_WITH_SDIST_TEST_DATA:
       template_data = self._GenerateFromTemplate(
           'import_sdist', template_mappings)
       file_content.append(template_data)
@@ -384,7 +390,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'setup_header', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name in ('dfvfs', 'plaso'):
+    if self._project_definition.name in self._PROJECTS_WITH_SDIST_TEST_DATA:
       template_file = 'setup_cmdclass_sdist'
     else:
       template_file = 'setup_cmdclass'
