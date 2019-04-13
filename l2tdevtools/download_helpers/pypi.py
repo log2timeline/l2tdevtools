@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-import json
 import re
 
 # pylint: disable=wrong-import-position
@@ -78,38 +77,6 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       available_versions[version_string] = comparable_version
 
     return available_versions
-
-  def GetLatestVersionWithAPI(self, project_name, version_definition):
-    """Retrieves the latest version for a given project using the PyPi API.
-
-    Args:
-      project_name (str): name of the project.
-      version_definition (ProjectVersionDefinition): project version definition
-          or None.
-
-    Returns:
-      str: latest version number or None if not available.
-    """
-    earliest_version = None
-    latest_version = None
-
-    if version_definition:
-      earliest_version = version_definition.GetEarliestVersion()
-      if earliest_version and earliest_version[0] == '==':
-        return '.'.join(earliest_version[1:])
-
-      latest_version = version_definition.GetLatestVersion()
-
-    pypi_url = 'https://pypi.org/pypi/{0:s}/json'.format(project_name)
-    page_content = self.DownloadPageContent(pypi_url)
-
-    api_data = json.loads(page_content)
-    releases = api_data.get('releases', {})
-    version_strings = releases.keys()
-    available_versions = self._GetAvailableVersions(version_strings)
-
-    return self._GetLatestVersion(
-        earliest_version, latest_version, available_versions)
 
   # pylint: disable=unused-argument
   def GetLatestVersion(self, project_name, version_definition):

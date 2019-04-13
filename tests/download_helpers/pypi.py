@@ -30,10 +30,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
 
     latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
 
-    latest_version_with_api = download_helper.GetLatestVersionWithAPI(
-        self._PROJECT_NAME, None)
-
-    self.assertEqual(latest_version, latest_version_with_api)
+    self.assertEqual(latest_version, self._PROJECT_VERSION)
 
   def testGetDownloadURL(self):
     """Tests the GetDownloadURL functions."""
