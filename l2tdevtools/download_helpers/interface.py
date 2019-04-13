@@ -103,3 +103,30 @@ class DownloadHelper(object):
       self._cached_url = download_url
 
     return self._cached_page_content
+
+  def DownloadAPIPageContent(self, download_url, encoding='utf-8'):
+    """Download content from a github API url"""
+    if not download_url:
+      return None
+
+    if self._cached_url != download_url:
+      try:
+        url_object = urllib_request.urlopen(download_url)
+      except urllib_error.URLError as exception:
+        logging.warning(
+            'Unable to download URL: {0:s} with error: {1!s}'.format(
+                download_url, exception))
+        return None
+
+      if url_object.code != 403:
+        return None
+
+      page_content = url_object.read()
+
+      if encoding and isinstance(page_content, py2to3.BYTES_TYPE):
+        page_content = page_content.decode(encoding)
+
+      self._cached_page_content = page_content
+      self._cached_url = download_url
+
+    return self._cached_page_content
