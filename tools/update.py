@@ -272,6 +272,10 @@ class DependencyUpdater(object):
       'org.python.pypi.',
       'net.sourceforge.projects.']
 
+  # Some projects have different names than their module names.
+  _ALTERNATE_NAMES = {
+      'lz4': 'python-lz4'}
+
   def __init__(
       self, download_directory='build', download_only=False,
       download_track='stable', exclude_packages=False, force_install=False,
@@ -756,6 +760,11 @@ class DependencyUpdater(object):
     for project_name in user_defined_project_names:
       project_definition = project_definitions.get(project_name, None)
       if not project_definition:
+        alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
+        if alternate_name:
+          project_definition = project_definitions.get(alternate_name, None)
+
+      if not project_definition:
         logging.error('Missing definition for project: {0:s}'.format(
             project_name))
         continue
@@ -797,11 +806,7 @@ class DependencyUpdater(object):
 
       # Ignore package names if defined.
       if user_defined_package_names:
-        # Some projects have different names than their module names.
-        if package_name == 'lz4':
-          in_package_names = 'python-lz4' in user_defined_package_names
-        else:
-          in_package_names = package_name in user_defined_package_names
+        in_package_names = package_name in user_defined_package_names
 
         if ((self._exclude_packages and in_package_names) or
             (not self._exclude_packages and not in_package_names)):
