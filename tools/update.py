@@ -765,7 +765,7 @@ class DependencyUpdater(object):
           project_definition = project_definitions.get(alternate_name, None)
 
       if not project_definition:
-        logging.error('Missing definition for project: {0:s}'.format(
+        logging.error('Missing project definition for package: {0:s}'.format(
             project_name))
         continue
 
@@ -823,7 +823,12 @@ class DependencyUpdater(object):
           logging.info('Removing: {0:s}'.format(filename))
           os.remove(filename)
 
-      project_definition = project_per_package.get(package_name, None)
+      project_definition = project_definitions.get(project_name, None)
+      if not project_definition:
+        alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
+        if alternate_name:
+          project_definition = project_definitions.get(alternate_name, None)
+
       if not project_definition:
         logging.error('Missing project definition for package: {0:s}'.format(
             package_name))
