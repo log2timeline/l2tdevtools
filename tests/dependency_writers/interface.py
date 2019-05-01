@@ -54,8 +54,8 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_test_dependencies = [
-        'python-coverage', 'python-funcsigs', 'python-mock', 'python-pbr',
-        'python-six']
+        'python-coverage', 'python-funcsigs', 'python-mock',
+        'python-pbr', 'python-setuptools', 'python-six']
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
         python_version=2)
@@ -101,7 +101,8 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_test_dependencies = [
-        'python2-funcsigs', 'python2-mock', 'python2-pbr', 'python2-six']
+        'python2-funcsigs', 'python2-mock', 'python2-pbr', 'python2-setuptools',
+        'python2-six']
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
         python_version=2)

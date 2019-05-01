@@ -80,9 +80,9 @@ class DependencyFileWriter(object):
 
     # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
     if python_version == 2:
-      test_dependencies.extend(['python-coverage'])
+      test_dependencies.extend(['python-coverage', 'python-setuptools'])
     else:
-      test_dependencies.extend(['python3-setuptools'])
+      test_dependencies.extend(['python3-distutils', 'python3-setuptools'])
 
     return [
         test_dependency for test_dependency in sorted(test_dependencies)
@@ -146,8 +146,14 @@ class DependencyFileWriter(object):
     test_dependencies = self._test_dependency_helper.GetRPMRequires(
         exclude_version=True, python_version=python_version)
 
+    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
+    if python_version == 2:
+      test_dependencies.extend(['python2-setuptools'])
+    else:
+      test_dependencies.extend(['python3-setuptools'])
+
     return [
-        test_dependency for test_dependency in test_dependencies
+        test_dependency for test_dependency in sorted(test_dependencies)
         if test_dependency not in python_dependencies]
 
   def _ReadTemplateFile(self, filename):
