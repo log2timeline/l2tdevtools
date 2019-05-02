@@ -41,7 +41,7 @@ class COPRProjectManager(object):
       './{http://linux.duke.edu/metadata/repo}data[@type="primary"]/'
       '{http://linux.duke.edu/metadata/repo}location')
 
-  def __init__(self, name, distribution='28'):
+  def __init__(self, name, distribution='29'):
     """Initializes a COPR manager.
 
     Args:
@@ -277,7 +277,7 @@ class LaunchpadPPAManager(object):
       'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
       '/{distribution:s}/main/source/Sources.gz')
 
-  def __init__(self, name, distribution='xenial'):
+  def __init__(self, name, distribution='bionic'):
     """Initializes a Launchpad PPA manager.
 
     Args:
@@ -436,8 +436,8 @@ class PackagesManager(object):
       projects_file (str): path to the projects.ini file.
       distribution (Optional[str]): name of the distribution.
     """
-    fedora_distribution = distribution or '28'
-    ubuntu_distribution = distribution or 'xenial'
+    fedora_distribution = distribution or '29'
+    ubuntu_distribution = distribution or 'bionic'
 
     super(PackagesManager, self).__init__()
     self._copr_project_manager = COPRProjectManager(

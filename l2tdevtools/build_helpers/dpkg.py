@@ -630,7 +630,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'
     self.architecture = 'source'
-    self.distribution = 'xenial'
+    self.distribution = 'bionic'
     self.version_suffix = 'ppa1'
 
   def Build(self, source_helper_object):
@@ -947,7 +947,7 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'
     self.architecture = 'source'
-    self.distribution = 'xenial'
+    self.distribution = 'bionic'
     self.version_suffix = 'ppa1'
 
   def _GetFilenameSafeProjectInformation(self, source_helper_object):
