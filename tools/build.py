@@ -31,8 +31,7 @@ class ProjectBuilder(object):
   """Class that helps in building projects."""
 
   # The distributions to build dpkg-source packages for.
-  _DPKG_SOURCE_DISTRIBUTIONS = frozenset([
-      'xenial', 'bionic'])
+  _DPKG_SOURCE_DISTRIBUTIONS = frozenset(['bionic'])
 
   def __init__(self, build_target, l2tdevtools_path):
     """Initializes the project builder.
