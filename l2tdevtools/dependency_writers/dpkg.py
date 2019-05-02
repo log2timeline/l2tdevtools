@@ -18,8 +18,8 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       'Section: python',
       'Priority: extra',
       'Maintainer: {maintainer:s}',
-      ('Build-Depends: debhelper (>= 9), python-all (>= 2.7~), '
-       'python-setuptools'),
+      ('Build-Depends: debhelper (>= 9), dh-python, '
+       'python-all (>= 2.7~), python-setuptools'),
       'Standards-Version: 3.9.5',
       'X-Python-Version: >= 2.7',
       'Homepage: {homepage_url:s}',
@@ -30,8 +30,9 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       'Section: python',
       'Priority: extra',
       'Maintainer: {maintainer:s}',
-      ('Build-Depends: debhelper (>= 9), python-all (>= 2.7~), '
-       'python-setuptools, python3-all (>= 3.4~), python3-setuptools'),
+      ('Build-Depends: debhelper (>= 9), dh-python, '
+       'python-all (>= 2.7~), python-setuptools, '
+       'python3-all (>= 3.4~), python3-setuptools'),
       'Standards-Version: 3.9.5',
       'X-Python-Version: >= 2.7',
       'X-Python3-Version: >= 3.4',
