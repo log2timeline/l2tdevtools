@@ -1,6 +1,12 @@
-  - env: TARGET="jenkins"
+  - env: TARGET="jenkins2"
     os: linux
     dist: xenial
     sudo: required
     group: edge
     python: 2.7
+  - env: TARGET="jenkins3"
+    os: linux
+    dist: xenial
+    sudo: required
+    group: edge
+    python: 3.5

@@ -12,7 +12,7 @@ from l2tdevtools.helpers import project
 from tests import test_lib
 
 
-class RunEndToEndTestsScriptWriterTest(test_lib.BaseTestCase):
+class RunPython2EndToEndTestsScriptWriterTest(test_lib.BaseTestCase):
   """Tests the run end-to-end test script file writer."""
 
   def testInitialize(self):
@@ -23,7 +23,25 @@ class RunEndToEndTestsScriptWriterTest(test_lib.BaseTestCase):
     dependency_helper = dependencies.DependencyHelper(
         configuration_file=configuration_file)
 
-    writer = end_to_end_tests.RunEndToEndTestsScriptWriter(
+    writer = end_to_end_tests.RunPython2EndToEndTestsScriptWriter(
+        l2tdevtools_path, project_definition, dependency_helper, None)
+    self.assertIsNotNone(writer)
+
+  # TODO: Add test for the Write method.
+
+
+class RunPython3EndToEndTestsScriptWriterTest(test_lib.BaseTestCase):
+  """Tests the run end-to-end test script file writer."""
+
+  def testInitialize(self):
+    """Tests the __init__ function."""
+    l2tdevtools_path = '/fake/l2tdevtools/'
+    project_definition = project.ProjectHelper(l2tdevtools_path)
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    writer = end_to_end_tests.RunPython3EndToEndTestsScriptWriter(
         l2tdevtools_path, project_definition, dependency_helper, None)
     self.assertIsNotNone(writer)
 
