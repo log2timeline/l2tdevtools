@@ -74,6 +74,28 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
       file_object.write(file_content)
 
 
+class TravisRunCoverageScriptWriter(interface.DependencyFileWriter):
+  """Travis-CI run_coverage.sh file writer."""
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_coverage.sh')
+
+  PATH = os.path.join('config', 'travis', 'run_coverage.sh')
+
+  def Write(self):
+    """Writes a runtests.sh file."""
+    template_mappings = {
+        'project_name': self._project_definition.name,
+    }
+
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
 class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
   """Travis-CI run_pylint.sh file writer."""
 
@@ -95,6 +117,46 @@ class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
     template_mappings = {
         'paths_to_lint': ' '.join(paths_to_lint)
     }
+
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
+class TravisRunPython2ScriptWriter(interface.DependencyFileWriter):
+  """Travis-CI run_python2.sh file writer."""
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_python2.sh')
+
+  PATH = os.path.join('config', 'travis', 'run_python2.sh')
+
+  def Write(self):
+    """Writes a runtests.sh file."""
+    template_mappings = {}
+
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
+class TravisRunPython3ScriptWriter(interface.DependencyFileWriter):
+  """Travis-CI run_python3.sh file writer."""
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_python3.sh')
+
+  PATH = os.path.join('config', 'travis', 'run_python3.sh')
+
+  def Write(self):
+    """Writes a runtests.sh file."""
+    template_mappings = {}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)

@@ -96,7 +96,7 @@ then
 
 	# Install add-apt-repository and locale-gen.
 	docker exec $${CONTAINER_NAME} apt-get update -q;
-	docker exec $${CONTAINER_NAME} sh -c "DEBIAN_FRONTEND=noninteractive apt-get install -y locales software-properties-common";
+	docker exec -e "DEBIAN_FRONTEND=noninteractive" $${CONTAINER_NAME} sh -c "apt-get install -y locales software-properties-common";
 
 	# Add additional apt repositories.
 	if test -n "$${TOXENV}";
@@ -123,7 +123,11 @@ then
 	else
 		DPKG_PACKAGES="";
 
-		if test $${TARGET} = "pylint";
+		if test "$${TARGET}" = "coverage";
+		then
+			DPKG_PACKAGES="$${DPKG_PACKAGES} curl git";
+
+		elif test $${TARGET} = "pylint";
 		then
 			DPKG_PACKAGES="$${DPKG_PACKAGES} python3-distutils pylint";
 		fi
@@ -134,19 +138,7 @@ then
 			DPKG_PACKAGES="$${DPKG_PACKAGES} python3 $${DPKG_PYTHON3_DEPENDENCIES} $${DPKG_PYTHON3_TEST_DEPENDENCIES}";
 		fi
 	fi
-	docker exec $${CONTAINER_NAME} sh -c "DEBIAN_FRONTEND=noninteractive apt-get install -y $${DPKG_PACKAGES}";
+	docker exec -e "DEBIAN_FRONTEND=noninteractive" $${CONTAINER_NAME} sh -c "apt-get install -y $${DPKG_PACKAGES}";
 
 	docker cp ../${project_name} $${CONTAINER_NAME}:/
-
-elif test $${TRAVIS_OS_NAME} = "linux" && test $${TARGET} != "jenkins";
-then
-	sudo add-apt-repository ppa:gift/dev -y;
-	sudo apt-get update -q;
-
-	if test $${TRAVIS_PYTHON_VERSION} = "2.7";
-	then
-		sudo apt-get install -y $${DPKG_PYTHON2_DEPENDENCIES} $${DPKG_PYTHON2_TEST_DEPENDENCIES};
-	else
-		sudo apt-get install -y $${DPKG_PYTHON3_DEPENDENCIES} $${DPKG_PYTHON3_TEST_DEPENDENCIES};
-	fi
 fi

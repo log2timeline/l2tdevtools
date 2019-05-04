@@ -53,8 +53,9 @@ def Main():
       travis.TravisRunWithTimeoutScriptWriter,
       requirements.RequirementsWriter, requirements.TestRequirementsWriter,
       setup.SetupCfgWriter, setup.SetupPyWriter, tox_ini.ToxIniWriter,
-      travis.TravisInstallScriptWriter, travis.TravisRunPylintScriptWriter,
-      travis.TravisRunTestsScriptWriter,
+      travis.TravisInstallScriptWriter, travis.TravisRunCoverageScriptWriter,
+      travis.TravisRunPylintScriptWriter, travis.TravisRunPython2ScriptWriter,
+      travis.TravisRunPython3ScriptWriter, travis.TravisRunTestsScriptWriter,
       travis.TravisRunWithTimeoutScriptWriter, travis_yml.TravisYMLWriter):
     writer = writer_class(
         l2tdevtools_path, project_definition, dependencies_helper,

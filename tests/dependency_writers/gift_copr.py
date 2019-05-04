@@ -89,6 +89,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
         'TEST_DEPENDENCIES="python2-funcsigs\n'
         '                   python2-mock\n'
         '                   python2-pbr\n'
+        '                   python2-setuptools\n'
         '                   python2-six";')
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
