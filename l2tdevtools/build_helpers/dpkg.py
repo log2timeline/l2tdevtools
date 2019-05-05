@@ -160,14 +160,8 @@ class DPKGBuildHelper(interface.BuildHelper):
     if self._project_definition.dpkg_source_name:
       project_name = self._project_definition.dpkg_source_name
 
-    if (self._build_host_distribution == 'bionic' and self.distribution and
-        self.version_suffix):
-      deb_orig_source_filename = '{0:s}_{1!s}{2:s}~{3:s}.orig.tar.gz'.format(
-          project_name, project_version, self.version_suffix, self.distribution)
-    else:
-      deb_orig_source_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
-          project_name, project_version)
-
+    deb_orig_source_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
+        project_name, project_version)
     if os.path.exists(deb_orig_source_filename):
       return
 
@@ -362,12 +356,8 @@ class DPKGBuildHelper(interface.BuildHelper):
       version_suffix (str): version suffix.
       distribution (str): distribution.
     """
-    if version_suffix and distribution:
-      filenames_to_ignore = '{0:s}_{1:s}{2:s}~{3:s}.orig.tar.gz'.format(
-          project_name, project_version, version_suffix, distribution)
-    else:
-      filenames_to_ignore = '^{0:s}_{1!s}.orig.tar.gz'.format(
-          project_name, project_version)
+    filenames_to_ignore = '^{0:s}_{1!s}.orig.tar.gz'.format(
+        project_name, project_version)
 
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
