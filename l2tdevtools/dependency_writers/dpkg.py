@@ -8,6 +8,23 @@ import os
 from l2tdevtools.dependency_writers import interface
 
 
+class DPKGCompatWriter(interface.DependencyFileWriter):
+  """Dpkg compat file writer."""
+
+  PATH = os.path.join('config', 'dpkg', 'compat')
+
+  def Write(self):
+    """Writes a dpkg control file."""
+    file_content = ['9']
+
+    file_content = '\n'.join(file_content)
+
+    file_content = file_content.encode('utf-8')
+
+    with open(self.PATH, 'wb') as file_object:
+      file_object.write(file_content)
+
+
 class DPKGControlWriter(interface.DependencyFileWriter):
   """Dpkg control file writer."""
 
