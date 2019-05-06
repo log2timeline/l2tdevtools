@@ -109,7 +109,8 @@ class DPKGControlWriter(interface.DependencyFileWriter):
     if not self._project_definition.python2_only:
       file_content.extend(self._PYTHON3_PACKAGE)
 
-    if os.path.isdir('scripts') or os.path.isdir('tools'):
+    if (os.path.isdir('scripts') or os.path.isdir('tools') or
+        self._project_definition.name == 'timesketch'):
       file_content.extend(self._TOOLS_PACKAGE)
 
     description_long = self._project_definition.description_long

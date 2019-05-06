@@ -49,10 +49,9 @@ def Main():
         'test_dependencies.ini')
 
   for writer_class in (
-      appveyor_yml.AppveyorYmlWriter, pylint_rc.PylintRcWriter,
-      travis.TravisRunWithTimeoutScriptWriter,
+      pylint_rc.PylintRcWriter, travis.TravisRunWithTimeoutScriptWriter,
       requirements.RequirementsWriter, requirements.TestRequirementsWriter,
-      setup.SetupCfgWriter, setup.SetupPyWriter, tox_ini.ToxIniWriter,
+      setup.SetupCfgWriter, setup.SetupPyWriter,
       travis.TravisInstallScriptWriter, travis.TravisRunCoverageScriptWriter,
       travis.TravisRunPylintScriptWriter, travis.TravisRunPython2ScriptWriter,
       travis.TravisRunPython3ScriptWriter, travis.TravisRunTestsScriptWriter,
@@ -63,14 +62,15 @@ def Main():
     writer.Write()
 
   for writer_class in (
+      appveyor_yml.AppveyorYmlWriter,
       check_dependencies.CheckDependenciesWriter,
       dependencies_py.DependenciesPyWriter, dpkg.DPKGControlWriter,
       end_to_end_tests.RunEndToEndTestsScriptWriter,
       gift_copr.GIFTCOPRInstallScriptWriter,
       gift_ppa.GIFTPPAInstallScriptPY2Writer,
       gift_ppa.GIFTPPAInstallScriptPY3Writer,
-      macos.MacOSInstallScriptWriter,
-      macos.MacOSMakeDistScriptWriter, macos.MacOSUninstallScriptWriter):
+      macos.MacOSInstallScriptWriter, macos.MacOSMakeDistScriptWriter,
+      macos.MacOSUninstallScriptWriter, tox_ini.ToxIniWriter):
     if not os.path.exists(writer_class.PATH):
       continue
 
@@ -79,21 +79,23 @@ def Main():
         test_dependencies_helper)
     writer.Write()
 
-  path = os.path.join(l2tdevtools_path, 'l2tdevtools', 'dependencies.py')
-  file_data = []
-  with open(path, 'rb') as file_object:
-    for line in file_object.readlines():
-      if 'GetDPKGDepends' in line:
-        break
+  output_path = os.path.join('utils', 'dependencies.py')
+  if os.path.exists(output_path):
+    input_path = os.path.join(
+        l2tdevtools_path, 'l2tdevtools', 'dependencies.py')
+    file_data = []
+    with open(input_path, 'rb') as file_object:
+      for line in file_object.readlines():
+        if 'GetDPKGDepends' in line:
+          break
 
-      file_data.append(line)
+        file_data.append(line)
 
-  file_data.pop()
-  file_data = ''.join(file_data)
+    file_data.pop()
+    file_data = ''.join(file_data)
 
-  path = os.path.join('utils', 'dependencies.py')
-  with open(path, 'wb') as file_object:
-    file_object.write(file_data)
+    with open(output_path, 'wb') as file_object:
+      file_object.write(file_data)
 
   return True
 
