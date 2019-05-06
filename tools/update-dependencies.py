@@ -64,8 +64,8 @@ def Main():
   for writer_class in (
       appveyor_yml.AppveyorYmlWriter,
       check_dependencies.CheckDependenciesWriter,
-      dependencies_py.DependenciesPyWriter, dpkg.DPKGControlWriter,
-      end_to_end_tests.RunEndToEndTestsScriptWriter,
+      dependencies_py.DependenciesPyWriter, dpkg.DPKGCompatWriter,
+      dpkg.DPKGControlWriter, end_to_end_tests.RunEndToEndTestsScriptWriter,
       gift_copr.GIFTCOPRInstallScriptWriter,
       gift_ppa.GIFTPPAInstallScriptPY2Writer,
       gift_ppa.GIFTPPAInstallScriptPY3Writer,
