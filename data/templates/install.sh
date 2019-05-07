@@ -118,7 +118,7 @@ then
 	# Install packages.
 	if test -n "$${TOXENV}";
 	then
-		DPKG_PACKAGES="build-essential python$${TRAVIS_PYTHON_VERSION} python$${TRAVIS_PYTHON_VERSION}-dev tox";
+		DPKG_PACKAGES="${dpkg_build_dependencies} python$${TRAVIS_PYTHON_VERSION} python$${TRAVIS_PYTHON_VERSION}-dev tox";
 	else
 		DPKG_PACKAGES="";
 

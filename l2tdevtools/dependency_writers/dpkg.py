@@ -13,13 +13,11 @@ class DPKGCompatWriter(interface.DependencyFileWriter):
 
   PATH = os.path.join('config', 'dpkg', 'compat')
 
+  _FILE_CONTENT = '9\n'
+
   def Write(self):
     """Writes a dpkg control file."""
-    file_content = ['9']
-
-    file_content = '\n'.join(file_content)
-
-    file_content = file_content.encode('utf-8')
+    file_content = self._FILE_CONTENT.encode('utf-8')
 
     with open(self.PATH, 'wb') as file_object:
       file_object.write(file_content)
