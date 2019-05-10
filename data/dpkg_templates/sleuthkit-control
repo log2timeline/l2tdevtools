@@ -12,7 +12,7 @@ Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
 Description: Library to support analyzing disk images
  Library to support analyzing disk images.
 
-Package: libtsk-dbg
+Package: libtsk13-dbg
 Architecture: any
 Section: debug
 Depends: libtsk13 (= ${{binary:Version}}), ${{misc:Depends}}
@@ -32,4 +32,11 @@ Architecture: any
 Depends: libtsk13 (= ${{binary:Version}}), ${{shlibs:Depends}}, ${{misc:Depends}}
 Description: Collection of command line tools that allow you to analyzing disk images
  Collection of command line tools that allow you to analyzing disk images.
+
+Package: sleuthkit-dbg
+Architecture: any
+Section: debug
+Depends: sleuthkit (= ${{binary:Version}}), ${{misc:Depends}}
+Description: Debugging symbols for sleuthkit
+ Debugging symbols for sleuthkit.
 
