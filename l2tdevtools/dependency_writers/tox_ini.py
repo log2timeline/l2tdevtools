@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -22,7 +23,5 @@ class ToxIniWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    file_content = file_content.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)

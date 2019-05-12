@@ -5,6 +5,7 @@
 
 from __future__ import unicode_literals
 
+import io
 import os
 import sys
 
@@ -86,7 +87,7 @@ def Main():
     input_path = os.path.join(
         l2tdevtools_path, 'l2tdevtools', 'dependencies.py')
     file_data = []
-    with open(input_path, 'rb') as file_object:
+    with io.open(input_path, 'r', encoding='utf-8') as file_object:
       for line in file_object.readlines():
         if 'GetDPKGDepends' in line:
           break
@@ -96,7 +97,7 @@ def Main():
     file_data.pop()
     file_data = ''.join(file_data)
 
-    with open(output_path, 'wb') as file_object:
+    with io.open(output_path, 'w', encoding='utf-8') as file_object:
       file_object.write(file_data)
 
   return True

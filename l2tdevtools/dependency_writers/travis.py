@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -76,7 +77,7 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -96,9 +97,7 @@ class TravisRunCoverageScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    file_content = file_content.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -127,9 +126,7 @@ class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    file_content = file_content.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -147,9 +144,7 @@ class TravisRunPython2ScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    file_content = file_content.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -167,9 +162,7 @@ class TravisRunPython3ScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    file_content = file_content.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -189,9 +182,7 @@ class TravisRunTestsScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    file_content = file_content.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -209,7 +200,5 @@ class TravisRunWithTimeoutScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    file_content = file_content.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)

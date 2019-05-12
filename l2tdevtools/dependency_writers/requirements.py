@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 
+import io
+
 from l2tdevtools.dependency_writers import interface
 
 
@@ -26,9 +28,8 @@ class RequirementsWriter(interface.DependencyFileWriter):
     file_content.append('')
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.encode('utf-8')
 
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -48,7 +49,6 @@ class TestRequirementsWriter(interface.DependencyFileWriter):
     file_content.append('')
 
     file_content = '\n'.join(file_content)
-    file_content = file_content.encode('utf-8')
 
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
