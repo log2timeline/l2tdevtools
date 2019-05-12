@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 
+import io
 import os
 import unittest
 
@@ -78,7 +79,7 @@ class ProjectDefinitionReaderTest(test_lib.BaseTestCase):
     config_file = os.path.join('data', 'projects.ini')
 
     project_definitions = {}
-    with open(config_file) as file_object:
+    with io.open(config_file, 'r', encoding='utf-8') as file_object:
       project_definition_reader = projects.ProjectDefinitionReader()
       for project_definition in project_definition_reader.Read(
           file_object):
