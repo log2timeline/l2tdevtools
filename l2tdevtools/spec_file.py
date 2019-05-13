@@ -148,26 +148,24 @@ class RPMSpecFileGenerator(object):
       requires (str): package requires definition.
       description (str): package description.
     """
+    output_file_object.write(b'%package -n {0:s}\n'.format(name))
     if name == 'pytz':
-      output_file_object.write((
-          b'%package -n {0:s}\n'
+      output_file_object.write(
           b'Obsoletes: %{{name}} < %{{version}}\n'
-          b'Provides: %{{name}} = %{{version}}\n'
-          b'{1:s}'
-          b'{2:s}'
-          b'\n'
-          b'%description -n {0:s}\n'
-          b'{3:s}').format(name, summary, requires, description))
+          b'Provides: %{{name}} = %{{version}}\n')
     else:
-      output_file_object.write((
-          b'%package -n {0:s}\n'
+      output_file_object.write(
           b'Obsoletes: python-%{{name}} < %{{version}}\n'
-          b'Provides: python-%{{name}} = %{{version}}\n'
-          b'{1:s}'
-          b'{2:s}'
-          b'\n'
-          b'%description -n {0:s}\n'
-          b'{3:s}').format(name, summary, requires, description))
+          b'Provides: python-%{{name}} = %{{version}}\n')
+
+    if requires:
+      output_file_object.write(b'{0:s}'.format(requires))
+
+    output_file_object.write((
+        b'{0:s}'
+        b'\n'
+        b'%description -n {1:s}\n'
+        b'{2:s}').format(summary, name, description))
 
   def _WritePython2PackageFiles(
       self, output_file_object, project_definition, project_name, name,
@@ -239,13 +237,16 @@ class RPMSpecFileGenerator(object):
       requires (str): package requires definition.
       description (str): package description.
     """
+    output_file_object.write(b'%package -n {0:s}\n'.format(name))
+
+    if requires:
+      output_file_object.write(b'{0:s}'.format(requires))
+
     output_file_object.write((
-        b'%package -n {0:s}\n'
-        b'{1:s}'
-        b'{2:s}'
+        b'{0:s}'
         b'\n'
-        b'%description -n {0:s}\n'
-        b'{3:s}').format(name, summary, requires, description))
+        b'%description -n {1:s}\n'
+        b'{2:s}').format(summary, name, description))
 
   def _WritePython3PackageFiles(
       self, output_file_object, project_definition, project_name, name,
@@ -353,6 +354,7 @@ class RPMSpecFileGenerator(object):
     requires = b''
     summary = b''
     version = b''
+    python_requires = b''
 
     in_description = False
     in_python_package = False
@@ -387,7 +389,7 @@ class RPMSpecFileGenerator(object):
         if line.startswith(b'%prep') and in_python_package:
           in_python_package = False
 
-        if in_python_package:
+        if in_python_package and project_name == 'plaso':
           continue
 
         if line.startswith(b'%define name '):
@@ -437,6 +439,10 @@ class RPMSpecFileGenerator(object):
           requires = line
           continue
 
+        elif (in_python_package and not python_requires and
+              line.startswith(b'Requires: ')):
+          python_requires = line
+
         elif line.startswith(b'BuildArch: noarch'):
           if project_definition.architecture_dependent:
             continue
@@ -456,10 +462,7 @@ class RPMSpecFileGenerator(object):
 
         elif (line.startswith(b'%package -n python-') or
               line.startswith(b'%package -n python2-')):
-          if project_name == 'plaso':
-            in_python_package = True
-            continue
-
+          in_python_package = True
           has_python2_package = True
 
           if line.startswith(b'%package -n python2-'):
@@ -496,10 +499,20 @@ class RPMSpecFileGenerator(object):
             else:
               python_package_name = b'python3-%{name}'
 
-            # TODO: convert python 2 package names to python 3
+            python3_requires = python_requires
+            if not python3_requires:
+              python3_requires = requires
+
+            python3_requires = python3_requires.replace(
+                '-python2 ', '-python3 ')
+            python3_requires = python3_requires.replace('-python ', '-python3 ')
+            python3_requires = python3_requires.replace(
+                ' python2-', ' python3-')
+            python3_requires = python3_requires.replace(' python-', ' python3-')
+
             self._WritePython3PackageDefinition(
-                output_file_object, python_package_name, summary, requires,
-                description)
+                output_file_object, python_package_name, summary,
+                python3_requires, description)
 
           if project_name == 'plaso':
             output_file_object.write((
