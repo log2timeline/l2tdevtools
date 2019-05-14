@@ -326,159 +326,6 @@ class GithubContributionsHelper(DownloadHelper):
             organization, project_name, output_writer)
 
 
-class CodeReviewIssuesHelper(DownloadHelper):
-  """Class that defines a Rietveld code review issues helper."""
-
-  def __init__(self, include_closed=False):
-    """Initializes a code review issue helper.
-
-    Args:
-      include_closed (bool): True if closed code reviews should be included.
-    """
-    super(CodeReviewIssuesHelper, self).__init__()
-    self._include_closed = include_closed
-
-  def _ListReviewsForEmailAddress(self, email_address, output_writer):
-    """Lists the reviews of a specific email address.
-
-    Args:
-      email_address (str): email address of the reviewer.
-      output_writer (OutputWriter): output writer.
-    """
-    issue_numbers = set()
-
-    cursor = None
-    while True:
-      download_url = (
-          'https://codereview.appspot.com/search?reviewer={0:s}'
-          '&format=json&keys_only=False&with_messages=True').format(
-              email_address)
-
-
-      # TODO: for now only search open issues.
-      # 1 => Unknown
-      # 2 => Yes
-      # 3 => No
-      if not self._include_closed:
-        download_url = '{0:s}&closed=3'.format(download_url)
-
-      if cursor:
-        download_url = '{0:s}&cursor={1:s}'.format(download_url, cursor)
-
-      reviews_data, response = self._DownloadPageContent(download_url)
-      if not reviews_data:
-        break
-
-      # TODO: check if response is not None
-      _ = response
-
-      try:
-        reviews_json = json.loads(reviews_data)
-      except ValueError:
-        logging.error('Unable to decode JSON for: {0:s}'.format(email_address))
-        break
-
-      for review_values in self._ParserReviewsJSON(reviews_json):
-        if review_values[0] in issue_numbers:
-          # Skip issues numbers we've already processed.
-          return
-
-        issue_numbers.add(review_values[0])
-
-        # TODO: add in review status.
-        if review_values[5]:
-          status = 'closed'
-        elif review_values[4]:
-          status = 'in review'
-        else:
-          status = 'new'
-
-        if not self._include_closed:
-          reviewers = ', '.join(review_values[4])
-          output_writer.WriteReview(
-              review_values[0], review_values[1], review_values[2],
-              review_values[3], reviewers, status)
-
-        else:
-          # Create a row per reviewer.
-          for reviewer in review_values[4]:
-            output_writer.WriteReview(
-                review_values[0], review_values[1], review_values[2],
-                review_values[3], reviewer, status)
-
-      cursor = reviews_json.get('cursor', None)
-
-  def _ParserReviewsJSON(self, reviews_json):
-    """Parser the reviews JSON data.
-
-    Args:
-      reviews_json (dict[str, object]): JSON reviews object.
-
-    Yield:
-      tuple[str, str, int, str, set[str], bool]: creation time, owner email
-          address, issue number, reviewers, is closed.
-    """
-    results_list_json = reviews_json.get('results', None)
-    if results_list_json is None:
-      logging.error('Missing results JSON list.')
-    else:
-      for review_json in results_list_json:
-        issue_number = review_json.get('issue', None)
-        if issue_number is None:
-          logging.error('Missing issue number.')
-          continue
-
-        subject = review_json.get('subject', None)
-        if subject is None:
-          logging.error('Missing subject.')
-          continue
-
-        subject = subject.strip()
-
-        creation_time = review_json.get('created', None)
-        owner_email = review_json.get('owner_email', None)
-        is_closed = review_json.get('closed', False)
-
-        reviewers_list_json = review_json.get('reviewers', None)
-        if not reviewers_list_json:
-          logging.error('Missing reviewers JSON list.')
-          continue
-
-        reviewers = set()
-        messages_list_json = review_json.get('messages', None)
-        # Note that the messages_list_json will be absent if the CL has not
-        # yet been reviewed.
-        if messages_list_json:
-          for message_json in messages_list_json:
-            sender_value = message_json.get('sender', None)
-            if not sender_value:
-              logging.error('Missing sender JSON value.')
-              continue
-
-            reviewers.add(sender_value)
-
-        reviewers.discard(owner_email)
-
-        yield (
-            creation_time, owner_email, issue_number, subject, reviewers,
-            is_closed)
-
-      # TODO: map email address to username
-
-      # TODO: get project from: "subject" e.g. "[plaso] ..."
-
-  def ListIssues(self, usernames, output_writer):
-    """Lists the code review issues of users.
-
-    Args:
-      usernames (dict[str, str]): usernames with corresponding email addresses
-          of the reviewers.
-      output_writer (OutputWriter): output writer.
-    """
-    for email_address in iter(usernames.values()):
-      self._ListReviewsForEmailAddress(email_address, output_writer)
-
-
 class StdoutWriter(object):
   """Class that defines a stdout output writer."""
 
@@ -604,8 +451,7 @@ def Main():
   Returns:
     bool: True if successful or False if not.
   """
-  statistics_types = frozenset([
-      'codereviews', 'codereviews-history', 'contributions'])
+  statistics_types = frozenset(['contributions'])
 
   argument_parser = argparse.ArgumentParser(description=(
       'Generates an overview of project statistics of github projects.'))
@@ -661,20 +507,7 @@ def Main():
     print('')
     return False
 
-  if options.statistics_type.startswith('codereviews'):
-    usernames = {}
-    with open(stats_file) as file_object:
-      stats_definition_reader = StatsDefinitionReader()
-      usernames = stats_definition_reader.ReadUsernames(file_object)
-
-    include_closed = False
-    if options.statistics_type == 'codereviews-history':
-      include_closed = True
-
-    codereviews_helper = CodeReviewIssuesHelper(include_closed=include_closed)
-    codereviews_helper.ListIssues(usernames, output_writer)
-
-  elif options.statistics_type == 'contributions':
+  if options.statistics_type == 'contributions':
     projects_per_organization = {}
     with open(stats_file) as file_object:
       stats_definition_reader = StatsDefinitionReader()
