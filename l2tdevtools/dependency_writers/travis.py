@@ -27,6 +27,8 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
     l2tbinaries_test_dependencies = sorted(l2tbinaries_test_dependencies)
 
+    dpkg_build_dependencies = ['build-essential']
+
     dpkg_python2_dependencies = self._GetDPKGPythonDependencies(
         python_version=2)
 
@@ -38,6 +40,9 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
     dpkg_python3_test_dependencies = self._GetDPKGTestDependencies(
         dpkg_python3_dependencies, python_version=3)
+
+    if 'python-backports.lzma' in dpkg_python2_dependencies:
+      dpkg_build_dependencies.append('liblzma-dev')
 
     rpm_python2_dependencies = self._GetRPMPythonDependencies(python_version=2)
 
@@ -53,6 +58,7 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
         'l2tbinaries_dependencies': ' '.join(l2tbinaries_dependencies),
         'l2tbinaries_test_dependencies': ' '.join(
             l2tbinaries_test_dependencies),
+        'dpkg_build_dependencies': ' '.join(dpkg_build_dependencies),
         'dpkg_python2_dependencies': ' '.join(dpkg_python2_dependencies),
         'dpkg_python2_test_dependencies': ' '.join(
             dpkg_python2_test_dependencies),
