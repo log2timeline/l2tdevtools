@@ -5,10 +5,6 @@ environment:
   - TARGET: python36
     PYTHON: "C:\\Python36"
 
-matrix:
-  allow_failures:
-  - TARGET: python36
-
 install:
 - cmd: '"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x86 /release'
 - cmd: "%PYTHON%\\python.exe -m pip install --upgrade pip"
