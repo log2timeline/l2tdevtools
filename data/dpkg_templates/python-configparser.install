@@ -1,4 +1,3 @@
-usr/lib/python2*/dist-packages/*.pth
 usr/lib/python2*/dist-packages/*.py
 usr/lib/python2*/dist-packages/backports/configparser/*
 usr/lib/python2*/dist-packages/configparser*.egg-info/*
