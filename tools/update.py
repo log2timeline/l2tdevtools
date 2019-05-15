@@ -679,9 +679,11 @@ class DependencyUpdater(object):
         ('.win32.msi', 'x86', None),
         ('.win32-py2.7.msi', 'x86', 2),
         ('.win32-py3.6.msi', 'x86', 3),
+        ('.win32-py3.7.msi', 'x86', 3),
         ('.win-amd64.msi', 'amd64', None),
         ('.win-amd64-py2.7.msi', 'amd64', 2),
-        ('.win-amd64-py3.6.msi', 'amd64', 3))
+        ('.win-amd64-py3.6.msi', 'amd64', 3),
+        ('.win-amd64-py3.7.msi', 'amd64', 3))
 
     connection = wmi.WMI()
 
