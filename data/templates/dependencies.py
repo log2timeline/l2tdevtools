@@ -89,6 +89,12 @@ def _CheckPythonModule(
       map(int, _VERSION_SPLIT_REGEX.split(minimum_version)))
 
   if module_version_map < minimum_version_map:
+    if not is_required:
+      print((
+          '[OPTIONAL]\t{0:s} version: {1!s} is too old, {2!s} or later '
+          'required.').format(module_name, module_version, minimum_version))
+      return True
+
     print((
         '[FAILURE]\t{0:s} version: {1!s} is too old, {2!s} or later '
         'required.').format(module_name, module_version, minimum_version))
@@ -98,6 +104,12 @@ def _CheckPythonModule(
     maximum_version_map = list(
         map(int, _VERSION_SPLIT_REGEX.split(maximum_version)))
     if module_version_map > maximum_version_map:
+      if not is_required:
+        print((
+            '[OPTIONAL]\t{0:s} version: {1!s} is too recent, {2!s} or earlier '
+            'required.').format(module_name, module_version, minimum_version))
+        return True
+
       print((
           '[FAILURE]\t{0:s} version: {1!s} is too recent, {2!s} or earlier '
           'required.').format(module_name, module_version, maximum_version))
@@ -105,6 +117,38 @@ def _CheckPythonModule(
 
   if verbose_output:
     print('[OK]\t\t{0:s} version: {1!s}'.format(module_name, module_version))
+
+  return True
+
+
+def _CheckLZMA(verbose_output=True):
+  """Checks the availability of lzma.
+
+  Args:
+    verbose_output (Optional[bool]): True if output should be verbose.
+
+  Returns:
+    bool: True if the lzma Python module is available, False otherwise.
+  """
+  # For Python 2 lzma can be both provided as lzma and backports.lzma.
+  module_name = 'lzma'
+
+  module_object = _ImportPythonModule(module_name)
+  if not module_object:
+    module_name = 'backports.lzma'
+
+    module_object = _ImportPythonModule(module_name)
+    if not module_object:
+      print('[FAILURE]\tmissing: lzma and backports.lzma.')
+      return False
+
+  if verbose_output:
+    # Note that the Python 3 lzma module had no __version__ attribute.
+    module_version = getattr(module_object, '__version__', None)
+    if module_version:
+      print('[OK]\t\t{0:s} version: {1!s}'.format(module_name, module_version))
+    else:
+      print('[OK]\t\t{0:s}'.format(module_name))
 
   return True
 
@@ -130,10 +174,10 @@ def _CheckSQLite3(verbose_output=True):
   if not module_object:
     module_name = 'sqlite3'
 
-  module_object = _ImportPythonModule(module_name)
-  if not module_object:
-    print('[FAILURE]\tmissing: {0:s}.'.format(module_name))
-    return False
+    module_object = _ImportPythonModule(module_name)
+    if not module_object:
+      print('[FAILURE]\tmissing: pysqlite2.dbapi2 and sqlite3.')
+      return False
 
   module_version = getattr(module_object, 'sqlite_version', None)
   if not module_version:
@@ -193,14 +237,19 @@ def CheckDependencies(verbose_output=True):
   check_result = True
 
   for module_name, version_tuple in sorted(PYTHON_DEPENDENCIES.items()):
-    if not _CheckPythonModule(
+    if module_name == 'lzma':
+      if not _CheckLZMA(verbose_output=verbose_output):
+        check_result = False
+
+    elif module_name == 'sqlite3':
+      if not _CheckSQLite3(verbose_output=verbose_output):
+        check_result = False
+
+    elif not _CheckPythonModule(
         module_name, version_tuple[0], version_tuple[1],
         is_required=version_tuple[3], maximum_version=version_tuple[2],
         verbose_output=verbose_output):
       check_result = False
-
-  if not _CheckSQLite3(verbose_output=verbose_output):
-    check_result = False
 
   if check_result and not verbose_output:
     print('[OK]')
