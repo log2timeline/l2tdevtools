@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import abc
+import io
 import string
 
 
@@ -165,7 +166,7 @@ class DependencyFileWriter(object):
     Returns:
       string.Template: template string.
     """
-    with open(filename, 'rb') as file_object:
+    with io.open(filename, 'r', encoding='utf-8') as file_object:
       file_data = file_object.read()
 
     return string.Template(file_data)

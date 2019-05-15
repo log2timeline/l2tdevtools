@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -17,10 +18,8 @@ class DPKGCompatWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a dpkg control file."""
-    file_content = self._FILE_CONTENT.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
-      file_object.write(file_content)
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+      file_object.write(self._FILE_CONTENT)
 
 
 class DPKGControlWriter(interface.DependencyFileWriter):
@@ -165,7 +164,5 @@ class DPKGControlWriter(interface.DependencyFileWriter):
     file_content = '\n'.join(file_content)
     file_content = file_content.format(**template_mappings)
 
-    file_content = file_content.encode('utf-8')
-
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)

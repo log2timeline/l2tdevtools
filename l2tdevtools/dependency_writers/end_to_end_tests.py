@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -31,7 +32,7 @@ class RunPython2EndToEndTestsScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -60,5 +61,5 @@ class RunPython3EndToEndTestsScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with open(self.PATH, 'wb') as file_object:
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
