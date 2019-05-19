@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import datetime
 import logging
+import io
 import os
 import subprocess
 import sys
@@ -151,12 +152,12 @@ class RPMSpecFileGenerator(object):
     output_file_object.write(b'%package -n {0:s}\n'.format(name))
     if name == 'pytz':
       output_file_object.write(
-          b'Obsoletes: %{{name}} < %{{version}}\n'
-          b'Provides: %{{name}} = %{{version}}\n')
+          b'Obsoletes: %{name} < %{version}\n'
+          b'Provides: %{name} = %{version}\n')
     else:
       output_file_object.write(
-          b'Obsoletes: python-%{{name}} < %{{version}}\n'
-          b'Provides: python-%{{name}} = %{{version}}\n')
+          b'Obsoletes: python-%{name} < %{version}\n'
+          b'Provides: python-%{name} = %{version}\n')
 
     if requires:
       output_file_object.write(b'{0:s}'.format(requires))
@@ -334,7 +335,7 @@ class RPMSpecFileGenerator(object):
   def _RewriteSetupPyGeneratedFile(
       self, project_definition, source_directory, source_filename,
       project_name, rpm_build_dependencies, input_file, output_file_object,
-      python2_package_prefix='python-'):
+      python2_package_prefix='python2-'):
     """Rewrites the RPM spec file generated with setup.py.
 
     Args:
@@ -597,14 +598,93 @@ class RPMSpecFileGenerator(object):
 
     return True
 
+  def _RewriteSetupPyGeneratedFileForOSC(
+      self, input_file_object, output_file_object):
+    """Rewrites the RPM spec file generated with setup.py for OSC.
+
+    Args:
+      input_file_object (file): input file-like object to read from.
+      output_file_object (file): output file-like object to write to.
+
+    Returns:
+      bool: True if successful, False otherwise.
+    """
+    in_python3_package = False
+
+    for line in input_file_object.readlines():
+      if in_python3_package and (
+          line.startswith('%changelog') or line.startswith('%exclude ') or
+          line.startswith('%files ') or line.startswith('%package ') or
+          line.startswith('%prep')):
+
+        if line.startswith(b'%exclude %{python3_sitelib}'):
+          output_file_object.write(line)
+          continue
+
+        output_file_object.write(b'%endif # %{defined fedora} >= 28\n')
+        output_file_object.write(b'\n')
+
+        in_python3_package = False
+
+      elif (not in_python3_package and line.startswith(b'BuildRequires: ') and
+            b'python' in line):
+        build_requires = [require.strip() for require in line[15:].split(',')]
+        python_build_requires = [
+            require.strip() for require in build_requires
+            if 'python3' not in require]
+
+        output_file_object.write(b'%if %{defined fedora} >= 28\n')
+        output_file_object.write(b'BuildRequires: {0:s}\n'.format(', '.join(
+            build_requires)))
+        output_file_object.write(b'%else\n')
+        output_file_object.write(b'BuildRequires: {0:s}\n'.format(', '.join(
+            python_build_requires)))
+        output_file_object.write(b'%endif\n')
+        continue
+
+      elif line.startswith(b'%files -n python3-') or (
+          line.startswith(b'%files -n ') and line.endswith(b'-python3\n')):
+        output_file_object.write(b'%if %{defined fedora} >= 28\n')
+        output_file_object.write(b'\n')
+
+        in_python3_package = True
+
+      elif line.startswith(b'%package -n python3-') or (
+          line.startswith(b'%package -n ') and line.endswith(b'-python3\n')):
+        output_file_object.write(b'%if %{defined fedora} >= 28\n')
+        output_file_object.write(b'\n')
+
+        in_python3_package = True
+
+      elif line.startswith(b'%py3_build') or line.startswith(b'%py3_install'):
+        output_file_object.write(b'%if %{defined fedora} >= 28\n')
+        output_file_object.write(line)
+        output_file_object.write(b'%endif\n')
+        continue
+
+      elif (line.startswith(b'%configure ') and
+            b'--enable-python2 --enable-python3' in line):
+        output_file_object.write(b'%if %{defined fedora} >= 28\n')
+        output_file_object.write(line)
+        output_file_object.write(b'%else\n')
+        line = line.replace(
+            '--enable-python2 --enable-python3', '--enable-python')
+        output_file_object.write(line)
+        output_file_object.write(b'%endif\n')
+        continue
+
+      output_file_object.write(line)
+
+    return True
+
   def _WriteSpecFileFromTempate(
-      self, template_filename, project_version, output_file):
+      self, template_filename, project_version, output_file_object):
     """Writes the RPM spec file from a template.
 
     Args:
       template_filename (str): name of the template file.
       project_version (str): project version.
-      output_file (str): path of the output RPM spec file.
+      output_file_object (file): output file-like object to write to.
 
     Returns:
       bool: True if successful, False otherwise.
@@ -623,9 +703,10 @@ class RPMSpecFileGenerator(object):
 
     rules_template = rules_template.decode('utf-8')
 
-    with open(output_file, 'wb') as file_object:
-      data = rules_template.format(**template_values)
-      file_object.write(data.encode('utf-8'))
+    data = rules_template.format(**template_values)
+    data = data.encode('utf-8')
+
+    output_file_object.write(data)
 
     return True
 
@@ -682,56 +763,39 @@ class RPMSpecFileGenerator(object):
           project_definition.rpm_python2_prefix)
 
     elif project_definition.rpm_python2_prefix is None:
-      python2_package_prefix = 'python-'
+      python2_package_prefix = 'python2-'
 
-    if project_definition.rpm_template_spec:
-      result = self._WriteSpecFileFromTempate(
-          project_definition.rpm_template_spec, project_version, output_file)
-    else:
-      with open(output_file, 'wb') as file_object:
+    with open(output_file, 'wb') as output_file_object:
+      if project_definition.rpm_template_spec:
+        result = self._WriteSpecFileFromTempate(
+            project_definition.rpm_template_spec, project_version,
+            output_file_object)
+      else:
         result = self._RewriteSetupPyGeneratedFile(
             project_definition, source_directory, source_filename,
-            project_name, rpm_build_dependencies, input_file, file_object,
-            python2_package_prefix=python2_package_prefix)
+            project_name, rpm_build_dependencies, input_file,
+            output_file_object, python2_package_prefix=python2_package_prefix)
 
     return result
 
-  def RewriteSetupPyGeneratedFileForOSC(
-      self, project_definition, source_directory, source_filename,
-      project_name, project_version, input_file, output_file):
+  def RewriteSetupPyGeneratedFileForOSC(self, spec_file_path):
     """Rewrites the RPM spec file generated with setup.py for OSC.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
-      source_directory (str): path of the source directory.
-      source_filename (str): name of the source package.
-      project_name (str): name of the project.
-      project_version (str): version of the project.
-      input_file (str): path of the input RPM spec file.
-      output_file (str): path of the output RPM spec file.
+      spec_file_path (str): path of the RPM spec file.
 
     Returns:
       bool: True if successful, False otherwise.
     """
-    python2_only = project_definition.IsPython2Only()
+    with io.BytesIO() as temporary_file_object:
+      with open(spec_file_path, 'rb') as input_file_object:
+        data = input_file_object.read()
+        temporary_file_object.write(data)
 
-    rpm_build_dependencies = ['python2-devel', 'python2-setuptools']
+      temporary_file_object.seek(0, os.SEEK_SET)
 
-    if not python2_only:
-      rpm_build_dependencies.extend(['python3-devel', 'python3-setuptools'])
-
-    if project_definition.rpm_build_dependencies:
-      rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
-
-    # TODO: check if already prefixed with python-
-
-    if project_definition.rpm_template_spec:
-      result = self._WriteSpecFileFromTempate(
-          project_definition.rpm_template_spec, project_version, output_file)
-    else:
-      with open(output_file, 'wb') as file_object:
-        result = self._RewriteSetupPyGeneratedFile(
-            project_definition, source_directory, source_filename,
-            project_name, rpm_build_dependencies, input_file, file_object)
+      with open(spec_file_path, 'wb') as output_file_object:
+        result = self._RewriteSetupPyGeneratedFileForOSC(
+            temporary_file_object, output_file_object)
 
     return result

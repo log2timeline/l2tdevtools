@@ -16,7 +16,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Dean Gardiner <me@dgardiner.net>
 Url: https://github.com/fuzeman/bencode.py
-BuildRequires: python2-setuptools, python2-devel, python2-pbr, python3-setuptools, python3-devel, python3-pbr
+BuildRequires: python2-setuptools >= 17.0 , python2-devel, python2-pbr, python3-setuptools >= 17.0 , python3-devel, python3-pbr
 
 %description
 Simple bencode parser, forked from the bencode package

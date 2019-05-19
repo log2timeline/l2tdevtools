@@ -40,8 +40,8 @@ Cryptographic modules for Python
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-env CFLAGS="$RPM_OPT_FLAGS" %py2_build
-env CFLAGS="$RPM_OPT_FLAGS" %py3_build
+%py2_build
+%py3_build
 
 %install
 %py2_install

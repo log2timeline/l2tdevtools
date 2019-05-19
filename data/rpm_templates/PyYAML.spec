@@ -15,7 +15,7 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Kirill Simonov <xi@resolvent.net>
 Url: http://pyyaml.org/wiki/PyYAML
-BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
+BuildRequires: gcc, libyaml-devel, python2-setuptools, python2-devel, python3-setuptools, python3-devel
 
 %description
 Python-yaml is a complete YAML 1.1 parser and emitter
@@ -52,8 +52,8 @@ for improved speed.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-env CFLAGS="$RPM_OPT_FLAGS" %py2_build
-env CFLAGS="$RPM_OPT_FLAGS" %py3_build
+%py2_build
+%py3_build
 
 %install
 %py2_install
@@ -66,6 +66,7 @@ rm -rf %{{buildroot}}
 %files -n python2-pyyaml
 %license LICENSE
 %doc CHANGES README
+%{{_libdir}}/python2*/site-packages/_yaml.so*
 %{{_libdir}}/python2*/site-packages/yaml/
 %{{_libdir}}/python2*/site-packages/PyYAML*.egg-info
 
