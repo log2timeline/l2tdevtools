@@ -124,7 +124,8 @@ else:
         elif line.startswith('%files'):
           python_spec_file.extend([
               '%package -n %{name}-tools',
-              'Requires: {0:s}-l2tdevtools'.format(python_package),
+              'Requires: {0:s}-l2tdevtools >= %{{version}}'.format(
+                  python_package),
               'Summary: Tools for {0:s}'.format(summary),
               '',
               '%description -n %{name}-tools'])
@@ -190,7 +191,8 @@ else:
             python_summary = 'Python 3 module of {0:s}'.format(summary)
 
           python_spec_file.extend([
-              'Requires: l2tdevtools-data {0:s}'.format(requires),
+              'Requires: l2tdevtools-data >= %{{version}} {0:s}'.format(
+                  requires),
               'Summary: {0:s}'.format(python_summary),
               '',
               '%description -n {0:s}-%{{name}}'.format(python_package)])
@@ -232,7 +234,7 @@ l2tdevtools_description = (
     'Development tools for the log2timeline projects')
 
 l2tdevtools_long_description = (
-    'Development tools for the log2timeline projects')
+    'Development tools for the log2timeline projects.')
 
 setup(
     name='l2tdevtools',
@@ -241,8 +243,8 @@ setup(
     long_description=l2tdevtools_long_description,
     license='Apache License, Version 2.0',
     url='https://github.com/log2timeline/l2tdevtools',
-    maintainer='Joachim Metz',
-    maintainer_email='joachim.metz@gmail.com',
+    maintainer='Log2Timeline maintainers',
+    maintainer_email='log2timeline-maintainers@googlegroups.com',
     cmdclass={
         'bdist_msi': BdistMSICommand,
         'bdist_rpm': BdistRPMCommand},

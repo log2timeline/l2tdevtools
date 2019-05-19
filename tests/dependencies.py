@@ -42,8 +42,9 @@ class DependencyHelperTest(test_lib.BaseTestCase):
         configuration_file=configuration_file)
     self.assertIsNotNone(dependency_helper)
 
+    configuration_file = self._GetTestFilePath(['bogus.ini'])
     with self.assertRaises(IOError):
-      dependencies.DependencyHelper()
+      dependencies.DependencyHelper(configuration_file=configuration_file)
 
   def testCheckPythonModule(self):
     """Tests the _CheckPythonModule function."""
