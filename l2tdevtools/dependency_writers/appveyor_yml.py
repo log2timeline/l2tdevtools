@@ -62,11 +62,6 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('environment', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name == 'plaso':
-      template_data = self._GenerateFromTemplate(
-          'allow_failures', template_mappings)
-      file_content.append(template_data)
-
     template_data = self._GenerateFromTemplate('install', template_mappings)
     file_content.append(template_data)
 
