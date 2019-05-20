@@ -33,7 +33,7 @@ Backport of Python 3.3's 'lzma' module for XZ/LZMA compressed files.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-env CFLAGS="$RPM_OPT_FLAGS" %py2_build
+%py2_build
 
 %install
 %py2_install

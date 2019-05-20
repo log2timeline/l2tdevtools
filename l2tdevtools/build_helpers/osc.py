@@ -248,6 +248,12 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
           source_helper_object.project_name))
       return False
 
+    source_directory = source_helper_object.GetSourceDirectoryPath()
+    if not source_directory:
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
+      return False
+
     project_version = source_helper_object.GetProjectVersion()
 
     logging.info('Preparing osc build of: {0:s}'.format(source_filename))
@@ -285,6 +291,12 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
         osc_package_path, command), shell=True)
     if exit_code != 0:
       logging.error('Running: "{0:s}" failed.'.format(command))
+      return False
+
+    spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
+
+    if not spec_file_generator.RewriteSetupPyGeneratedFileForOSC(
+        osc_spec_file_path):
       return False
 
     if not spec_file_exists:
@@ -395,27 +407,30 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     if project_name.startswith('python-') and project_name != 'python-gflags':
       project_name = project_name[7:]
 
-    # TODO: determine project version.
-    project_version = ''
+    project_version = source_helper_object.GetProjectVersion()
 
     input_file_path = self._GetSetupPySpecFilePath(
         source_helper_object, source_directory)
 
     spec_filename = '{0:s}.spec'.format(project_name)
-    output_file_path = os.path.join(osc_package_path, spec_filename)
+    osc_spec_file_path = os.path.join(osc_package_path, spec_filename)
 
     # Determine if the output file exists before it is generated.
-    output_file_exists = os.path.exists(output_file_path)
+    output_file_exists = os.path.exists(osc_spec_file_path)
+
+    if not spec_file_generator.RewriteSetupPyGeneratedFile(
+        self._project_definition, source_directory, source_filename,
+        project_name, project_version, input_file_path, osc_spec_file_path):
+      return None
 
     if not spec_file_generator.RewriteSetupPyGeneratedFileForOSC(
-        self._project_definition, source_directory, source_filename,
-        project_name, project_version, input_file_path, output_file_path):
+        osc_spec_file_path):
       return False
 
     if not output_file_exists:
-      output_file_path = os.path.join(
+      osc_spec_file_path = os.path.join(
           source_helper_object.project_name, spec_filename)
-      if not self._OSCAdd(output_file_path):
+      if not self._OSCAdd(osc_spec_file_path):
         return False
 
     return self._OSCCommit(source_helper_object.project_name)
