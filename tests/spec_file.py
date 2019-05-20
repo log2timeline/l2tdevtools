@@ -14,6 +14,8 @@ from tests import test_lib
 class RPMSpecFileGeneratorTest(test_lib.BaseTestCase):
   """Tests for the RPM spec file generator."""
 
+  # pylint: disable=protected-access
+
   def testGetBuildDefinition(self):
     """Tests the _GetBuildDefinition function."""
     spec_file_generator = spec_file.RPMSpecFileGenerator('')
@@ -31,6 +33,32 @@ class RPMSpecFileGeneratorTest(test_lib.BaseTestCase):
   # TODO: test _WritePython3PackageFiles function.
   # TODO: test GenerateWithSetupPy function.
   # TODO: test _RewriteSetupPyGeneratedFile function.
+
+  def testSplitRequires(self):
+    """Tests the _SplitRequires function."""
+    spec_file_generator = spec_file.RPMSpecFileGenerator('')
+
+    requires_list = spec_file_generator._SplitRequires(
+        'Requires: libbde, liblnk >= 20190520')
+
+    self.assertEqual(requires_list, ['libbde', 'liblnk >= 20190520'])
+
+    requires_list = spec_file_generator._SplitRequires(
+        'Requires: libbde liblnk >= 20190520')
+
+    self.assertEqual(requires_list, ['libbde', 'liblnk >= 20190520'])
+
+    requires_list = spec_file_generator._SplitRequires(
+        'Requires: liblnk >= 20190520 libbde')
+
+    self.assertEqual(requires_list, ['libbde', 'liblnk >= 20190520'])
+
+    with self.assertRaises(ValueError):
+      spec_file_generator._SplitRequires(None)
+
+    with self.assertRaises(ValueError):
+      spec_file_generator._SplitRequires('Bogus')
+
   # TODO: test RewriteSetupPyGeneratedFile function.
   # TODO: test RewriteSetupPyGeneratedFileForOSC function.
 
