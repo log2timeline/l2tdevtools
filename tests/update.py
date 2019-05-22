@@ -19,6 +19,8 @@ from tests import test_lib
 class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the GitHub repo download helper class."""
 
+  # pylint: disable=protected-access
+
   _DOWNLOAD_URL = 'https://github.com/ForensicArtifacts/artifacts/releases'
 
   _PROJECT_NAME = 'artifacts'
@@ -31,11 +33,8 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
     package_download_urls = download_helper.GetPackageDownloadURLs(
         preferred_machine_type='x86', preferred_operating_system='Windows')
 
-    if (sys.version_info[0] not in (2, 3) or
-        (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
-        (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
-
-      # Python versions other than 2.7 and 3.6 are not supported.
+    if (sys.version_info[0], sys.version_info[1]) not in (
+        download_helper._SUPPORTED_PYTHON_VERSIONS):
       self.assertIsNone(package_download_urls)
 
     else:
@@ -66,11 +65,8 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
 
     available_packages = dependency_updater._GetAvailablePackages()
 
-    if (sys.version_info[0] not in (2, 3) or
-        (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
-        (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
-
-      # Python versions other than 2.7 and 3.6 are not supported.
+    if (sys.version_info[0], sys.version_info[1]) not in (
+        update.GithubRepoDownloadHelper._SUPPORTED_PYTHON_VERSIONS):
       self.assertEqual(available_packages, [])
 
     else:

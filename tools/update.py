@@ -61,6 +61,8 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
   _GITHUB_REPO_URL = (
       'https://github.com/log2timeline/l2tbinaries')
 
+  _SUPPORTED_PYTHON_VERSIONS = frozenset([(2, 7), (3, 6), (3, 7)])
+
   def __init__(self, download_url, branch='master'):
     """Initializes a download helper.
 
@@ -101,9 +103,8 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
           operating_system))
       return None
 
-    if (sys.version_info[0] not in (2, 3) or
-        (sys.version_info[0] == 2 and sys.version_info[1] != 7) or
-        (sys.version_info[0] == 3 and sys.version_info[1] != 6)):
+    if (sys.version_info[0], sys.version_info[1]) not in (
+        self._SUPPORTED_PYTHON_VERSIONS):
       logging.error('Python version: {0:d}.{1:d} not supported.'.format(
           sys.version_info[0], sys.version_info[1]))
       return None
