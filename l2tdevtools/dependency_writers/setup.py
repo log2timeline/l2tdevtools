@@ -105,6 +105,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
   _PROJECTS_WITH_PACKAGE_DATA = (
       'dfvfs', 'dfwinreg', 'dtformats', 'plaso', 'winregrc')
 
+  _PROJECTS_WITH_PYTHON3_AS_DEFAULT = ('plaso', )
+
   _PROJECTS_WITH_SDIST_TEST_DATA = (
       'dfvfs', 'dfwinreg', 'plaso')
 
@@ -168,6 +170,11 @@ class SetupPyWriter(interface.DependencyFileWriter):
         self._project_definition.description_long)
     description_long = '\n'.join([
         '    \'{0:s}\''.format(line) for line in description_long])
+
+    if self._project_definition.name in self._PROJECTS_WITH_PYTHON3_AS_DEFAULT:
+      shebang = '#!/usr/bin/env python3'
+    else:
+      shebang = '#!/usr/bin/env python'
 
     if self._project_definition.name in ('artifacts', 'plaso'):
       data_files_path = 'share/{0:s}'.format(self._project_definition.name)
@@ -331,6 +338,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'python3_package_files': python3_package_files,
         'rpm_doc_files': ' '.join(rpm_doc_files),
         'rpm_license_file': rpm_license_file,
+        'shebang': shebang,
         'scripts_directory': scripts_directory,
     }
 
