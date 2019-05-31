@@ -61,7 +61,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
   _GITHUB_REPO_URL = (
       'https://github.com/log2timeline/l2tbinaries')
 
-  _SUPPORTED_PYTHON_VERSIONS = frozenset([(2, 7), (3, 6), (3, 7)])
+  _SUPPORTED_PYTHON_VERSIONS = frozenset([(2, 7), (3, 7)])
 
   def __init__(self, download_url, branch='master'):
     """Initializes a download helper.
@@ -679,11 +679,9 @@ class DependencyUpdater(object):
     package_info = (
         ('.win32.msi', 'x86', None),
         ('.win32-py2.7.msi', 'x86', 2),
-        ('.win32-py3.6.msi', 'x86', 3),
         ('.win32-py3.7.msi', 'x86', 3),
         ('.win-amd64.msi', 'amd64', None),
         ('.win-amd64-py2.7.msi', 'amd64', 2),
-        ('.win-amd64-py3.6.msi', 'amd64', 3),
         ('.win-amd64-py3.7.msi', 'amd64', 3))
 
     connection = wmi.WMI()
