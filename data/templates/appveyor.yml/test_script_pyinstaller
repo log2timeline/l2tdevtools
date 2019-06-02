@@ -1,0 +1,4 @@
+- ps: If ($$env:TARGET -eq "pyinstaller") {
+    .\config\windows\make_release.ps1 -Architecture "$${env:MACHINE_TYPE}" -PythonPath "$${env:PYTHON}" }
+- cmd: if [%TARGET%]==[pyinstaller] (
+    config\windows\make_check.bat )
