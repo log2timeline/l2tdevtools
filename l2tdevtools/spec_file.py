@@ -146,7 +146,7 @@ class RPMSpecFileGenerator(object):
       output_file_object (file): output file-like object to write to.
       name (str): package name.
       summary (str): package summary.
-      requires (str): package requires definition.
+      requires (list[str]): package requires definition.
       description (str): package description.
     """
     output_file_object.write(b'%package -n {0:s}\n'.format(name))
@@ -160,7 +160,7 @@ class RPMSpecFileGenerator(object):
           b'Provides: python-%{name} = %{version}\n')
 
     if requires:
-      output_file_object.write(b'{0:s}'.format(requires))
+      output_file_object.write(b'Requires: {0:s}\n'.format(', '.join(requires)))
 
     output_file_object.write((
         b'{0:s}'
@@ -235,13 +235,13 @@ class RPMSpecFileGenerator(object):
       output_file_object (file): output file-like object to write to.
       name (str): package name.
       summary (str): package summary.
-      requires (str): package requires definition.
+      requires (list[str]): package requires definition.
       description (str): package description.
     """
     output_file_object.write(b'%package -n {0:s}\n'.format(name))
 
     if requires:
-      output_file_object.write(b'{0:s}'.format(requires))
+      output_file_object.write(b'Requires: {0:s}\n'.format(', '.join(requires)))
 
     output_file_object.write((
         b'{0:s}'
@@ -442,6 +442,11 @@ class RPMSpecFileGenerator(object):
 
         elif (in_python_package and not python_requires and
               line.startswith(b'Requires: ')):
+          python2_requires = self._SplitRequires(line)
+          if python2_requires:
+            line = b'Requires: {0:s}\n'.format(
+                ', '.join(python2_requires))
+
           python_requires = line
 
         elif line.startswith(b'BuildArch: noarch'):
@@ -490,9 +495,10 @@ class RPMSpecFileGenerator(object):
                   python2_package_prefix)
 
             if python_package_name != b'%{name}':
+              python2_requires = self._SplitRequires(requires)
               self._WritePython2PackageDefinition(
-                  output_file_object, python_package_name, summary, requires,
-                  description)
+                  output_file_object, python_package_name, summary,
+                  python2_requires, description)
 
           if not python2_only and not has_python3_package:
             if project_name != package_name:
@@ -510,6 +516,11 @@ class RPMSpecFileGenerator(object):
             python3_requires = python3_requires.replace(
                 ' python2-', ' python3-')
             python3_requires = python3_requires.replace(' python-', ' python3-')
+
+            # Remove Python 2 only dependencies like backports or pysqlite.
+            python3_requires = [
+                require for require in self._SplitRequires(python3_requires)
+                if 'backports' not in require and 'pysqlite' not in require]
 
             self._WritePython3PackageDefinition(
                 output_file_object, python_package_name, summary,
@@ -676,6 +687,51 @@ class RPMSpecFileGenerator(object):
       output_file_object.write(line)
 
     return True
+
+  def _SplitRequires(self, requires):
+    """Splits a spec file requires statement.
+
+    The requires statement starts with "Requires: " and is either space or
+    comma separated.
+
+    Args:
+      requires (str): requires statement.
+
+    Returns:
+      list[str]: individual required dependencies, such as "libbde" or
+          "liblnk >= 20190520", sorted by name.
+
+    Raises:
+      ValueError: if the requires statement is empty or does not start with
+          "Requires: ".
+    """
+    if not requires or not requires.startswith('Requires: '):
+      raise ValueError('Unsupported requires statement.')
+
+    # The requires statement can be space or comma separated. If it is space
+    # separated we want to keep the name of the requirement and its version
+    # grouped together.
+    if ',' in requires:
+      return sorted([require.strip() for require in requires[10:].split(',')])
+
+    requires_list = []
+    requires_segments = [
+        require.strip() for require in requires[10:].split(' ')]
+    number_of_segments = len(requires_segments)
+
+    group_start_index = 0
+    while group_start_index < number_of_segments:
+      group_end_index = group_start_index + 1
+      if (group_end_index < number_of_segments and
+          requires_segments[group_end_index] in ('>=', '==')):
+        group_end_index += 2
+
+      group = ' '.join(requires_segments[group_start_index:group_end_index])
+      requires_list.append(group)
+
+      group_start_index = group_end_index
+
+    return sorted(requires_list)
 
   def _WriteSpecFileFromTempate(
       self, template_filename, project_version, output_file_object):
