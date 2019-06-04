@@ -728,6 +728,8 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
       DPKGBuildConfiguration: dpkg build configuration or None if the build
           configuration could not be determed.
     """
+    installroot_path = os.path.join(source_directory, 'installroot')
+
     command = (
         '{0:s} setup.py install --root=installroot > /dev/null 2>&1').format(
             sys.executable)
@@ -739,9 +741,12 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
 
     else:
       build_configuration = dpkg_files.DPKGBuildConfiguration()
+
+      if os.path.exists(os.path.join(installroot_path, 'usr' 'bin')):
+        build_configuration.has_bin_directory = True
+
       dist_packages = os.path.join(
-          source_directory, 'installroot', 'usr', 'local', 'lib', 'python2.7',
-          'dist-packages')
+          installroot_path, 'usr', 'local', 'lib', 'python2.7', 'dist-packages')
 
       for directory_entry in os.listdir(dist_packages):
         directory_entry_path = os.path.join(dist_packages, directory_entry)
@@ -765,7 +770,6 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
         elif directory_entry.endswith('.so'):
           build_configuration.has_module_shared_object = True
 
-    installroot_path = os.path.join(source_directory, 'installroot')
     if os.path.exists(installroot_path):
       shutil.rmtree(installroot_path)
 
