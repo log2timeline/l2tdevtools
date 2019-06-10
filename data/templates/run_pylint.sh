@@ -10,7 +10,7 @@ set -e;
 
 pylint --version
 
-for FILE in `find ${paths_to_lint} -name \*.py`;
+for FILE in $$(find ${paths_to_lint} -name \*.py);
 do
 	echo "Checking: $${FILE}";
 
