@@ -14,6 +14,8 @@ class DPKGBuildConfiguration(object):
   """Dpkg build configuation.
 
   Attributes:
+    has_bin_directory (bool): True if the Python module creates
+        a /usr/bin directory.
     has_egg_info_directory (bool): True if the Python module has
         an .egg_info directory in the dist-packages directory.
     has_egg_info_file (bool): True if the Python module has
@@ -29,6 +31,7 @@ class DPKGBuildConfiguration(object):
   def __init__(self):
     """Initializes a dpkg build configuration."""
     super(DPKGBuildConfiguration, self).__init__()
+    self.has_bin_directory = False
     self.has_egg_info_directory = False
     self.has_egg_info_file = False
     self.has_module_source_files = False
@@ -38,6 +41,16 @@ class DPKGBuildConfiguration(object):
 
 class DPKGBuildFilesGenerator(object):
   """Dpkg build files generator."""
+
+  _PTYHON2_ONLY_DEPENDENCIES = frozenset([
+      'python-backports.functools-lru-cache',
+      'python-backports.lzma',
+      'python-concurrent.futures',
+      'python-configparser',
+      'python-enum34',
+      'python-funcsigs',
+      'python-mccabe',
+      'python-pysqlite2'])
 
   _EMAIL_ADDRESS = (
       'log2timeline development team <log2timeline-dev@googlegroups.com>')
@@ -518,9 +531,11 @@ class DPKGBuildFilesGenerator(object):
     python3_depends = []
 
     for dependency in self._project_definition.dpkg_dependencies:
-      if dependency.startswith('python-'):
+      if not dependency.startswith('python-'):
         python_depends.append(dependency)
-        python3_depends.append('python3-{0:s}'.format(dependency[7:]))
+
+        if dependency not in self._PTYHON2_ONLY_DEPENDENCIES:
+          python3_depends.append('python3-{0:s}'.format(dependency[7:]))
       else:
         depends.append(dependency)
 
@@ -566,7 +581,7 @@ class DPKGBuildFilesGenerator(object):
 
       # TODO: add configuration setting to indicate tools should be packaged.
       if package_name not in ('idna', 'mock', 'psutil'):
-        if os.path.isdir('scripts') or os.path.isdir('tools'):
+        if self._build_configuration.has_bin_directory:
           control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_TOOLS)
 
     control_template = '\n'.join(control_template)
@@ -627,7 +642,7 @@ class DPKGBuildFilesGenerator(object):
       if not self._project_definition.IsPython2Only():
         self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
 
-      if os.path.isdir('scripts') or os.path.isdir('tools'):
+      if self._build_configuration.has_bin_directory:
         install_package_name = self._GetPackageName()
         output_filename = '{0:s}-tools.install'.format(install_package_name)
         output_filename = os.path.join(dpkg_path, output_filename)
