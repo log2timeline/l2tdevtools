@@ -1,0 +1,4 @@
+
+test_script:
+- cmd: if [%TARGET%]==[unittests] (
+    "%PYTHON%\python.exe" run_tests.py )

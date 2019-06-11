@@ -1,5 +1,2 @@
 
 build: off
-
-test_script:
-- cmd: "%PYTHON%\\python.exe run_tests.py"
