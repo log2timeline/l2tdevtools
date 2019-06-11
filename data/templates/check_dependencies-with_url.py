@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+${shebang}
 # -*- coding: utf-8 -*-
 """Script to check for the availability and version of dependencies."""
 
