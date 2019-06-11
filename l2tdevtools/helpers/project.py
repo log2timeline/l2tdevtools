@@ -82,6 +82,7 @@ class ProjectHelper(cli.CLIHelper):
       'l2tscaffolder',
       'plaso',
       'timesketch',
+      'turbinia',
       'vstools',
       'winevt-kb',
       'winreg-kb'])
