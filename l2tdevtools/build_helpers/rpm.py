@@ -54,15 +54,19 @@ class BaseRPMBuildHelper(interface.BuildHelper):
       'zlib': ['zlib-devel']
   }
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
     super(BaseRPMBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, dependency_definitions)
     self.architecture = platform.machine()
 
     self.rpmbuild_path = os.path.join('~', 'rpmbuild')
@@ -427,15 +431,19 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
 class SetupPyRPMBuildHelper(RPMBuildHelper):
   """Helper to build RPM packages (.rpm)."""
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
     super(SetupPyRPMBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, dependency_definitions)
     if not project_definition.architecture_dependent:
       self.architecture = 'noarch'
 
@@ -692,15 +700,19 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
 class SetupPySRPMBuildHelper(SRPMBuildHelper):
   """Helper to build source RPM packages (.src.rpm)."""
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
     super(SetupPySRPMBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, dependency_definitions)
     if not project_definition.architecture_dependent:
       self.architecture = 'noarch'
 

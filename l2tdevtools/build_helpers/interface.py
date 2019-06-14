@@ -11,15 +11,20 @@ class BuildHelper(object):
 
   LOG_FILENAME = 'build.log'
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
     super(BuildHelper, self).__init__()
     self._data_path = os.path.join(l2tdevtools_path, 'data')
+    self._dependency_definitions = dependency_definitions
     self._project_definition = project_definition
 
   def _IsPython2Only(self):

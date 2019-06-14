@@ -37,7 +37,7 @@ class DPKGBuildHelperTest(test_lib.BaseTestCase):
     test_path = self._GetTestFilePath(['lsb-release'])
 
     test_build_helper = dpkg.DPKGBuildHelper(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, {})
     lsb_release_values = test_build_helper._ReadLSBReleaseConfigurationFile(
         test_path)
 
@@ -61,7 +61,7 @@ class DPKGBuildHelperTest(test_lib.BaseTestCase):
         os.path.abspath(__file__))))
 
     test_build_helper = dpkg.DPKGBuildHelper(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, {})
     output = test_build_helper._RunLSBReleaseCommand()
 
     if os.path.exists('/usr/bin/lsb_release'):

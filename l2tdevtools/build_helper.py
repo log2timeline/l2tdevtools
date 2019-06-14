@@ -37,13 +37,18 @@ class BuildHelperFactory(object):
   }
 
   @classmethod
-  def NewBuildHelper(cls, project_definition, build_target, l2tdevtools_path):
+  def NewBuildHelper(
+      cls, project_definition, build_target, l2tdevtools_path,
+      dependency_definitions):
     """Creates a new build helper object.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       build_target (str): build target.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
 
     Returns:
       BuildHelper: build helper or None if build system is not supported.
@@ -62,4 +67,5 @@ class BuildHelperFactory(object):
     if not build_helper_class:
       return None
 
-    return build_helper_class(project_definition, l2tdevtools_path)
+    return build_helper_class(
+        project_definition, l2tdevtools_path, dependency_definitions)

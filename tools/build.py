@@ -28,7 +28,11 @@ __file__ = os.path.abspath(__file__)
 # TODO: look into merging functionality with update script.
 
 class ProjectBuilder(object):
-  """Class that helps in building projects."""
+  """Class that helps in building projects.
+
+  Attributes:
+    project_definitions (dict[str, ProjectDefinition]): project definitions.
+  """
 
   # The distributions to build dpkg-source packages for.
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset(['bionic'])
@@ -45,6 +49,8 @@ class ProjectBuilder(object):
     self._build_target = build_target
     self._l2tdevtools_path = l2tdevtools_path
     self._source_helpers = {}
+
+    self.project_definitions = {}
 
   def _BuildProject(
       self, build_helper_object, source_helper_object, distribution):
@@ -171,7 +177,8 @@ class ProjectBuilder(object):
         return []
 
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
-        project_definition, self._build_target, self._l2tdevtools_path)
+        project_definition, self._build_target, self._l2tdevtools_path,
+        self.project_definitions)
     if not build_helper_object:
       logging.warning('Unable to determine how to build: {0:s}'.format(
           project_definition.name))
@@ -240,6 +247,37 @@ class ProjectBuilder(object):
     self._source_helpers[project_definition.name] = source_helper_object
 
     return True
+
+  def ReadProjectDefinitions(self, path):
+    """Reads project definitions.
+
+    Args:
+      path (str): path of the project definitions file.
+    """
+    with io.open(path, 'r', encoding='utf-8') as file_object:
+      project_definition_reader = projects.ProjectDefinitionReader()
+      self.project_definitions = {
+          definition.name: definition
+          for definition in project_definition_reader.Read(file_object)}
+
+  def ReadProjectsPreset(self, path, preset_name):
+    """Reads a projects preset from the preset file.
+
+    Args:
+      path (str): path of the projects preset file.
+      preset_name (str): name of the preset.
+
+    Returns:
+      list[str]: names of the projects defined by the preset or an empty list
+          if the preset was not defined.
+    """
+    with io.open(path, 'r', encoding='utf-8') as file_object:
+      preset_definition_reader = presets.PresetDefinitionReader()
+      for preset_definition in preset_definition_reader.Read(file_object):
+        if preset_definition.name == preset_name:
+          return preset_definition.project_names
+
+    return []
 
 
 def Main():
@@ -338,13 +376,8 @@ def Main():
 
   project_names = []
   if options.preset:
-    with io.open(presets_file, 'r', encoding='utf-8') as file_object:
-      preset_definition_reader = presets.PresetDefinitionReader()
-      for preset_definition in preset_definition_reader.Read(file_object):
-        if preset_definition.name == options.preset:
-          project_names = preset_definition.project_names
-          break
-
+    project_names = project_builder.ReadProjectsPreset(
+        presets_file, options.preset)
     if not project_names:
       print('Undefined preset: {0:s}'.format(options.preset))
       print('')
@@ -353,28 +386,27 @@ def Main():
   elif options.projects:
     project_names = options.projects.split(',')
 
+  project_builder.ReadProjectDefinitions(projects_file)
+
   builds = []
   disabled_projects = []
-  with io.open(projects_file, 'r', encoding='utf-8') as file_object:
-    project_definition_reader = projects.ProjectDefinitionReader()
-    for project_definition in project_definition_reader.Read(file_object):
-      if project_definition.name not in project_names:
-        continue
+  for name, definition in project_builder.project_definitions.items():
+    if name not in project_names:
+      continue
 
-      is_disabled = False
-      if (options.build_target in project_definition.disabled or
-          'all' in project_definition.disabled):
-        if options.preset:
-          is_disabled = True
-        else:
-          # If a project is manually specified ignore the disabled status.
-          logging.info('Ignoring disabled status for: {0:s}'.format(
-              project_definition.name))
-
-      if is_disabled:
-        disabled_projects.append(project_definition.name)
+    is_disabled = False
+    if (options.build_target in definition.disabled or
+        'all' in definition.disabled):
+      if options.preset:
+        is_disabled = True
       else:
-        builds.append(project_definition)
+        # If a project is manually specified ignore the disabled status.
+        logging.info('Ignoring disabled status for: {0:s}'.format(name))
+
+    if is_disabled:
+      disabled_projects.append(name)
+    else:
+      builds.append(definition)
 
   if not os.path.exists(options.build_directory):
     os.mkdir(options.build_directory)

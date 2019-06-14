@@ -18,7 +18,7 @@ class BuildHelperTest(test_lib.BaseTestCase):
   def testCheckBuildDependencies(self):
     """Tests the CheckBuildDependencies function."""
     project_definition = projects.ProjectDefinition('test')
-    build_helper = interface.BuildHelper(project_definition, '')
+    build_helper = interface.BuildHelper(project_definition, '', {})
 
     build_dependencies = build_helper.CheckBuildDependencies()
     self.assertEqual(build_dependencies, [])
@@ -26,7 +26,7 @@ class BuildHelperTest(test_lib.BaseTestCase):
   def testCheckBuildRequired(self):
     """Tests the CheckBuildRequired function."""
     project_definition = projects.ProjectDefinition('test')
-    build_helper = interface.BuildHelper(project_definition, '')
+    build_helper = interface.BuildHelper(project_definition, '', {})
 
     result = build_helper.CheckBuildRequired(None)
     self.assertTrue(result)
