@@ -16,14 +16,19 @@ from l2tdevtools.build_helpers import interface
 class PKGBuildHelper(interface.BuildHelper):
   """Helper to build MacOS-X packages (.pkg)."""
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
-    super(PKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    super(PKGBuildHelper, self).__init__(
+        project_definition, l2tdevtools_path, dependency_definitions)
     self._pkgbuild = os.path.join('/', 'usr', 'bin', 'pkgbuild')
 
   def _BuildDmg(self, pkg_filename, dmg_filename):

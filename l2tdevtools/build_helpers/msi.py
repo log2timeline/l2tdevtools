@@ -35,17 +35,21 @@ class MSIBuildHelper(interface.BuildHelper):
               'Program Files (x86)', 'GnuWin32', 'bin', 'patch.exe')),
       '{0:s}:{1:s}{2:s}'.format(
           'C', os.sep, os.path.join(
-              'ProgramData', 'chocolatey', 'bin', 'patch.exe'))
-  ]
+              'ProgramData', 'chocolatey', 'bin', 'patch.exe'))]
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
-    super(MSIBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    super(MSIBuildHelper, self).__init__(
+        project_definition, l2tdevtools_path, dependency_definitions)
     self._python_version_suffix = 'py{0:d}.{1:d}'.format(
         sys.version_info[0], sys.version_info[1])
     self.architecture = None
@@ -121,18 +125,22 @@ class MSIBuildHelper(interface.BuildHelper):
 class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
   """Helper to build Microsoft Installer packages (.msi)."""
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
 
     Raises:
       RuntimeError: if the Visual Studio version could not be determined.
     """
     super(ConfigureMakeMSIBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, dependency_definitions)
 
     if 'VS150COMNTOOLS' in os.environ:
       self.version = '2017'

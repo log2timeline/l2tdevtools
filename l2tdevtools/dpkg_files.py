@@ -11,7 +11,7 @@ import time
 
 
 class DPKGBuildConfiguration(object):
-  """Dpkg build configuation.
+  """Dpkg build configuration.
 
   Attributes:
     has_bin_directory (bool): True if the Python module creates
@@ -41,16 +41,6 @@ class DPKGBuildConfiguration(object):
 
 class DPKGBuildFilesGenerator(object):
   """Dpkg build files generator."""
-
-  _PTYHON2_ONLY_DEPENDENCIES = frozenset([
-      'python-backports.functools-lru-cache',
-      'python-backports.lzma',
-      'python-concurrent.futures',
-      'python-configparser',
-      'python-enum34',
-      'python-funcsigs',
-      'python-mccabe',
-      'python-pysqlite2'])
 
   _EMAIL_ADDRESS = (
       'log2timeline development team <log2timeline-dev@googlegroups.com>')
@@ -342,27 +332,27 @@ class DPKGBuildFilesGenerator(object):
       ''])
 
   def __init__(
-      self, project_name, project_version, project_definition, data_path,
-      build_configuration=None, distribution='unstable'):
+      self, project_definition, project_version, data_path,
+      dependency_definitions, build_configuration=None):
     """Initializes a dpkg build files generator.
 
     Args:
-      project_name (str): name of the project.
-      project_version (str): version of the project.
       project_definition (ProjectDefinition): project definition.
+      project_version (str): version of the project.
       data_path (str): path to the data directory which contains the dpkg
           templates and patches sub directories.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
       build_configuration (Optional[DPKGBuildConfiguration]): the dpgk build
           configuration.
-      distribution (Optional[str]): name of the distribution.
     """
     super(DPKGBuildFilesGenerator, self).__init__()
     self._build_configuration = build_configuration
     self._data_path = data_path
-    self._distribution = distribution
+    self._dependency_definitions = dependency_definitions
     self._project_definition = project_definition
-    self._project_name = project_name
     self._project_version = project_version
+    self._python2_only_dependencies = {}
 
   def _GenerateFile(
       self, template_filename, template_data, template_values, output_filename):
@@ -459,7 +449,7 @@ class DPKGBuildFilesGenerator(object):
     """
     source_package_name = self._GetSourcePackageName()
 
-    package_name = self._GetPackageName()
+    package_name = self._GetPackageName(self._project_definition)
     python_package_name, python3_package_name = self._GetPythonPackageNames()
 
     architecture = self._GetArchitecture()
@@ -531,10 +521,10 @@ class DPKGBuildFilesGenerator(object):
     python3_depends = []
 
     for dependency in self._project_definition.dpkg_dependencies:
-      if not dependency.startswith('python-'):
+      if dependency.startswith('python-'):
         python_depends.append(dependency)
 
-        if dependency not in self._PTYHON2_ONLY_DEPENDENCIES:
+        if not self._IsPython2OnlyDependency(dependency):
           python3_depends.append('python3-{0:s}'.format(dependency[7:]))
       else:
         depends.append(dependency)
@@ -556,7 +546,7 @@ class DPKGBuildFilesGenerator(object):
         'build_depends': build_depends,
         'depends': depends,
         'description_long': description_long,
-        'description_name': self._project_name,
+        'description_name': self._project_definition.name,
         'description_short': description_short,
         'package_name': package_name,
         'python_depends': python_depends,
@@ -601,7 +591,7 @@ class DPKGBuildFilesGenerator(object):
     license_file = os.path.dirname(license_file)
     license_file = os.path.join(
         license_file, 'data', 'licenses', 'LICENSE.{0:s}'.format(
-            self._project_name))
+            self._project_definition.name))
 
     filename = os.path.join(dpkg_path, 'copyright')
 
@@ -619,7 +609,7 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
-    package_name = self._GetPackageName()
+    package_name = self._GetPackageName(self._project_definition)
 
     # TODO: add support for configure_make
     if self._project_definition.build_system == 'configure_make':
@@ -643,7 +633,7 @@ class DPKGBuildFilesGenerator(object):
         self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
 
       if self._build_configuration.has_bin_directory:
-        install_package_name = self._GetPackageName()
+        install_package_name = self._GetPackageName(self._project_definition)
         output_filename = '{0:s}-tools.install'.format(install_package_name)
         output_filename = os.path.join(dpkg_path, output_filename)
         self._GenerateFile(
@@ -770,7 +760,7 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
-    package_name = self._GetPackageName()
+    package_name = self._GetPackageName(self._project_definition)
 
     build_system = '--buildsystem=autoconf'
 
@@ -884,16 +874,19 @@ class DPKGBuildFilesGenerator(object):
 
     return 'any'
 
-  def _GetPackageName(self):
+  def _GetPackageName(self, project_definition):
     """Retrieves the package name.
+
+    Args:
+      project_definition (ProjectDefinition): project definition.
 
     Returns:
       str: package name.
     """
-    if self._project_definition.dpkg_name:
-      package_name = self._project_definition.dpkg_name
+    if project_definition.dpkg_name:
+      package_name = project_definition.dpkg_name
     else:
-      package_name = self._project_name
+      package_name = project_definition.name
 
     if package_name.startswith('python-'):
       package_name = package_name[7:]
@@ -911,7 +904,7 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.dpkg_name:
       package_name = self._project_definition.dpkg_name
     else:
-      package_name = self._project_name
+      package_name = self._project_definition.name
 
     python2_package_name = package_name
 
@@ -934,7 +927,7 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.setup_name:
       return self._project_definition.setup_name
 
-    return self._project_name
+    return self._project_definition.name
 
   def _GetSourcePackageName(self):
     """Retrieves the source package name.
@@ -945,7 +938,25 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.dpkg_source_name:
       return self._project_definition.dpkg_source_name
 
-    return self._project_name
+    return self._project_definition.name
+
+  def _IsPython2OnlyDependency(self, dependency):
+    """Checks if a dependency is Python 2 only.
+
+    Args:
+      dependency (str): name of the dependency.
+
+    Returns:
+      bool: True if Python 2 only, False if not or None if dependency
+          was not found.
+    """
+    if not self._python2_only_dependencies:
+      for definition in self._dependency_definitions.values():
+        if definition.IsPython2Only():
+          package_name = self._GetPackageName(definition)
+          self._python2_only_dependencies[package_name] = definition
+
+    return dependency in self._python2_only_dependencies
 
   def GenerateFiles(self, dpkg_path):
     """Generates the dpkg build files.

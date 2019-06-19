@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import unittest
 
 from l2tdevtools import dpkg_files
+from l2tdevtools import projects
 
 from tests import test_lib
 
@@ -16,8 +17,10 @@ class DPKGBuildFilesGeneratorTest(test_lib.BaseTestCase):
 
   def testGenerateChangelogFile(self):
     """Tests the _GenerateChangelogFile function."""
+    project_definition = projects.ProjectDefinition('test')
+
     dpkg_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-        'test', '1.0', None, '')
+        project_definition, '1.0', 'data_path', {})
 
     _ = dpkg_files_generator
     # TODO: implement tests.

@@ -60,14 +60,19 @@ class DPKGBuildHelper(interface.BuildHelper):
       'zlib': 'zlib1g-dev'
   }
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
-    super(DPKGBuildHelper, self).__init__(project_definition, l2tdevtools_path)
+    super(DPKGBuildHelper, self).__init__(
+        project_definition, l2tdevtools_path, dependency_definitions)
     self._build_host_distribution = self._GetBuildHostDistribution()
     self._prep_script = 'prep-dpkg.sh'
     self._post_script = 'post-dpkg.sh'
@@ -196,12 +201,10 @@ class DPKGBuildHelper(interface.BuildHelper):
             tar_info.mtime = mtime
             tar_file.addfile(tar_info, fileobj=file_object)
 
-  def _CreatePackagingFiles(
-      self, source_helper_object, source_directory, project_version):
+  def _CreatePackagingFiles(self, source_directory, project_version):
     """Creates packaging files.
 
     Args:
-      source_helper_object (SourceHelper): source helper.
       source_directory (str): name of the source directory.
       project_version (str): project version.
 
@@ -231,8 +234,8 @@ class DPKGBuildHelper(interface.BuildHelper):
 
       try:
         build_files_generator = dpkg_files.DPKGBuildFilesGenerator(
-            source_helper_object.project_name, project_version,
-            self._project_definition, self._data_path,
+            self._project_definition, project_version, self._data_path,
+            self._dependency_definitions,
             build_configuration=build_configuration)
 
         build_files_generator.GenerateFiles('debian')
@@ -256,7 +259,7 @@ class DPKGBuildHelper(interface.BuildHelper):
 
     Returns:
       DPKGBuildConfiguration: dpkg build configuration or None if the build
-          configuration could not be determed.
+          configuration could not be determined.
     """
     return None
 
@@ -495,15 +498,19 @@ class DPKGBuildHelper(interface.BuildHelper):
 class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
   """Helper to build dpkg packages (.deb)."""
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
     super(ConfigureMakeDPKGBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, dependency_definitions)
     self.architecture = platform.machine()
     self.distribution = ''
     self.version_suffix = ''
@@ -543,8 +550,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info('Building deb of: {0:s}'.format(source_filename))
 
-    if not self._CreatePackagingFiles(
-        source_helper_object, source_directory, project_version):
+    if not self._CreatePackagingFiles(source_directory, project_version):
       return False
 
     # If there is a temporary packaging directory remove it.
@@ -608,15 +614,19 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
 class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
   """Helper to build source dpkg packages (.deb)."""
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
     super(ConfigureMakeSourceDPKGBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, dependency_definitions)
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'
     self.architecture = 'source'
@@ -651,8 +661,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
 
     logging.info('Building source deb of: {0:s}'.format(source_filename))
 
-    if not self._CreatePackagingFiles(
-        source_helper_object, source_directory, project_version):
+    if not self._CreatePackagingFiles(source_directory, project_version):
       return False
 
     # If there is a temporary packaging directory remove it.
@@ -726,7 +735,7 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
 
     Returns:
       DPKGBuildConfiguration: dpkg build configuration or None if the build
-          configuration could not be determed.
+          configuration could not be determined.
     """
     installroot_path = os.path.join(source_directory, 'installroot')
 
@@ -779,15 +788,19 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
 class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
   """Helper to build dpkg packages (.deb) using setup.py build system."""
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
     super(SetupPyDPKGBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, dependency_definitions)
     self.architecture = platform.machine()
     self.distribution = ''
     self.version_suffix = ''
@@ -856,8 +869,7 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
 
     logging.info('Building deb of: {0:s}'.format(source_filename))
 
-    if not self._CreatePackagingFiles(
-        source_helper_object, source_directory, project_version):
+    if not self._CreatePackagingFiles(source_directory, project_version):
       return False
 
     # If there is a temporary packaging directory remove it.
@@ -929,15 +941,19 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
 class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
   """Helper to build source dpkg packages using setup.py build system."""
 
-  def __init__(self, project_definition, l2tdevtools_path):
+  def __init__(
+      self, project_definition, l2tdevtools_path, dependency_definitions):
     """Initializes a build helper.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
+      project_definition (ProjectDefinition): definition of the project
+          to build.
       l2tdevtools_path (str): path to the l2tdevtools directory.
+      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+          projects, which is used to determine the properties of dependencies.
     """
     super(SetupPySourceDPKGBuildHelper, self).__init__(
-        project_definition, l2tdevtools_path)
+        project_definition, l2tdevtools_path, dependency_definitions)
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'
     self.architecture = 'source'
@@ -999,8 +1015,7 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
 
     logging.info('Building source deb of: {0:s}'.format(source_filename))
 
-    if not self._CreatePackagingFiles(
-        source_helper_object, source_directory, project_version):
+    if not self._CreatePackagingFiles(source_directory, project_version):
       return False
 
     # If there is a temporary packaging directory remove it.
