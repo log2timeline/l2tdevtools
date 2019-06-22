@@ -5,7 +5,8 @@
 
 .PHONY: override_dh_auto_install
 override_dh_auto_install:
-	dh_auto_install --destdir $(CURDIR) --namespace backports
+	dh_auto_install --destdir $(CURDIR)
+	rm -rf $(CURDIR)/debian/*/usr/lib/python2.7/dist-packages/backports/__init__.py
 
 .PHONY: override_dh_python2
 override_dh_python2:

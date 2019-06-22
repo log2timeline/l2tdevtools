@@ -702,11 +702,14 @@ class RPMSpecFileGenerator(object):
           "liblnk >= 20190520", sorted by name.
 
     Raises:
-      ValueError: if the requires statement is empty or does not start with
-          "Requires: ".
+      ValueError: if the requires statement does not start with "Requires: ".
     """
-    if not requires or not requires.startswith('Requires: '):
-      raise ValueError('Unsupported requires statement.')
+    if not requires:
+      return []
+
+    if not requires.startswith('Requires: '):
+      raise ValueError(
+          'Unsupported requires statement: "{0:s}".'.format(requires))
 
     # The requires statement can be space or comma separated. If it is space
     # separated we want to keep the name of the requirement and its version
