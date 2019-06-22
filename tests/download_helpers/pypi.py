@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 
 import os
 import re
+import shlex
+import subprocess
 import unittest
 
 from l2tdevtools.download_helpers import pypi
@@ -20,9 +22,37 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the PyPi download helper."""
 
   _DOWNLOAD_URL = 'https://pypi.org/project/dfvfs'
+  _GIT_URL = 'https://github.com/log2timeline/dfvfs.git'
 
   _PROJECT_NAME = 'dfvfs'
   _PROJECT_VERSION = '20190609'
+
+  @classmethod
+  def setUpClass(cls):
+    """Determines the project version from the latest git tag."""
+    command = 'git ls-remote --tags {0:s}'.format(cls._GIT_URL)
+    arguments = shlex.split(command)
+
+    try:
+      process = subprocess.Popen(
+          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    except OSError:
+      return
+
+    output, _ = process.communicate()
+    if process.returncode != 0:
+      return
+
+    output = output.decode('ascii')
+
+    latest_version = '0'
+    for line in output.split('\n'):
+      line = line.strip()
+      if 'refs/tags/' in line and not line.endswith('^{}'):
+        _, _, version = line.rpartition('refs/tags/')
+        latest_version = max(latest_version, version)
+
+    cls._PROJECT_VERSION = latest_version
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
