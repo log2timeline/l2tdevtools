@@ -53,8 +53,8 @@ class RPMSpecFileGeneratorTest(test_lib.BaseTestCase):
 
     self.assertEqual(requires_list, ['libbde', 'liblnk >= 20190520'])
 
-    with self.assertRaises(ValueError):
-      spec_file_generator._SplitRequires(None)
+    requires_list = spec_file_generator._SplitRequires(None)
+    self.assertEqual(requires_list, [])
 
     with self.assertRaises(ValueError):
       spec_file_generator._SplitRequires('Bogus')
