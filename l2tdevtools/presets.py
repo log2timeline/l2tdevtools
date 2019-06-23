@@ -18,6 +18,7 @@ class PresetDefinition(object):
 
   Attributes:
     name (str): name of the dependency.
+    preset_names (list[str]): project preset names.
     project_names (list[str]): project names.
   """
 
@@ -29,6 +30,7 @@ class PresetDefinition(object):
     """
     super(PresetDefinition, self).__init__()
     self.name = name
+    self.preset_names = None
     self.project_names = None
 
 
@@ -72,6 +74,8 @@ class PresetDefinitionReader(object):
     for section_name in config_parser.sections():
       preset_definition = PresetDefinition(section_name)
 
+      preset_definition.preset_names = self._GetConfigValue(
+          config_parser, section_name, 'presets')
       preset_definition.project_names = self._GetConfigValue(
           config_parser, section_name, 'projects')
 

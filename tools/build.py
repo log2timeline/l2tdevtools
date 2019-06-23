@@ -271,13 +271,30 @@ class ProjectBuilder(object):
       list[str]: names of the projects defined by the preset or an empty list
           if the preset was not defined.
     """
-    with io.open(path, 'r', encoding='utf-8') as file_object:
-      preset_definition_reader = presets.PresetDefinitionReader()
-      for preset_definition in preset_definition_reader.Read(file_object):
-        if preset_definition.name == preset_name:
-          return preset_definition.project_names
+    preset_definitions = {}
 
-    return []
+    with io.open(path, 'r', encoding='utf-8') as file_object:
+      definition_reader = presets.PresetDefinitionReader()
+      preset_definitions = {
+          preset_definition.name: preset_definition
+          for preset_definition in definition_reader.Read(file_object)}
+
+    preset_definition = preset_definitions.get(preset_name, None)
+    if not preset_definition:
+      return []
+
+    project_names = list(preset_definition.projects)
+    for sub_preset_name in preset_definition.presets:
+      sub_preset_definition = preset_definitions.get(sub_preset_name, None)
+      if sub_preset_definition.presets:
+        logging.warning((
+            'Multiple levels of presets not supported: {0:s} -> {1:s} -> '
+            '{2:s}').format(preset_name, sub_preset_name, ', '.join(
+                sub_preset_definition.presets)))
+
+      project_names.extend(preset_definition.projects)
+
+    return project_names
 
 
 def Main():
