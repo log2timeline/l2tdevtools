@@ -36,6 +36,8 @@ class ProjectDefinition(object):
     dpkg_dependencies (list[str]): dpkg dependencies.
     dpkg_name (str): dpkg package name.
     dpkg_source_name (str): dpkg source package name.
+    dpkg_template_additional (list[str]): names of additional dpkg template
+        files.
     dpkg_template_control (str): name of the dpkg control template file.
     dpkg_template_install (list[str]): names of the dpkg install template files.
     dpkg_template_install_python2 (list[str]): names of the dpkg Python 2
@@ -81,6 +83,7 @@ class ProjectDefinition(object):
     self.dpkg_dependencies = None
     self.dpkg_name = None
     self.dpkg_source_name = None
+    self.dpkg_template_additional = None
     self.dpkg_template_control = None
     self.dpkg_template_install = None
     self.dpkg_template_install_python2 = None
@@ -258,6 +261,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'dpkg_name')
       project_definition.dpkg_source_name = self._GetConfigValue(
           config_parser, section_name, 'dpkg_source_name')
+      project_definition.dpkg_template_additional = self._GetConfigValue(
+          config_parser, section_name, 'dpkg_template_additional')
       project_definition.dpkg_template_control = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_control')
       project_definition.dpkg_template_install = self._GetConfigValue(
@@ -348,6 +353,14 @@ class ProjectDefinitionReader(object):
           project_definition.dpkg_dependencies, py2to3.STRING_TYPES):
         project_definition.dpkg_dependencies = (
             project_definition.dpkg_dependencies.split(','))
+
+      if project_definition.dpkg_template_additional is None:
+        project_definition.dpkg_template_additional = []
+      elif isinstance(
+          project_definition.dpkg_template_additional,
+          py2to3.STRING_TYPES):
+        project_definition.dpkg_template_additional = (
+            project_definition.dpkg_template_additional.split(','))
 
       if project_definition.dpkg_template_install is None:
         project_definition.dpkg_template_install = []
