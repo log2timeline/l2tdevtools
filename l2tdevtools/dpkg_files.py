@@ -973,6 +973,10 @@ class DPKGBuildFilesGenerator(object):
     self._GenerateInstallFiles(dpkg_path)
     self._GenerateRulesFile(dpkg_path)
 
+    for filename in self._project_definition.dpkg_template_additional:
+      output_filename = os.path.join(dpkg_path, filename)
+      self._GenerateFile(filename, '', None, output_filename)
+
     os.mkdir(os.path.join(dpkg_path, 'source'))
     self._GenerateSourceFormatFile(dpkg_path)
     self._GenerateSourceOptionsFile(dpkg_path)
