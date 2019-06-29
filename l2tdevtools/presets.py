@@ -79,6 +79,13 @@ class PresetDefinitionReader(object):
       preset_definition.project_names = self._GetConfigValue(
           config_parser, section_name, 'projects')
 
+      if preset_definition.preset_names is None:
+        preset_definition.preset_names = []
+      elif isinstance(
+          preset_definition.preset_names, py2to3.STRING_TYPES):
+        preset_definition.preset_names = (
+            preset_definition.preset_names.split(','))
+
       if preset_definition.project_names is None:
         preset_definition.project_names = []
       elif isinstance(

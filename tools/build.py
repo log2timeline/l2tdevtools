@@ -283,8 +283,8 @@ class ProjectBuilder(object):
     if not preset_definition:
       return []
 
-    project_names = list(preset_definition.projects)
-    for sub_preset_name in preset_definition.presets:
+    project_names = list(preset_definition.project_names)
+    for sub_preset_name in preset_definition.preset_names:
       sub_preset_definition = preset_definitions.get(sub_preset_name, None)
       if sub_preset_definition.presets:
         logging.warning((
