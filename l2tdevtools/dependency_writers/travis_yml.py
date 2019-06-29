@@ -14,8 +14,11 @@ class TravisYMLWriter(interface.DependencyFileWriter):
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', '.travis.yml')
 
-  _PROJECTS_WITH_JENKINS_SUPPORT = (
-      'dfvfs', 'plaso')
+  _PROJECTS_WITH_DOCKERFILE = frozenset([
+      'plaso'])
+
+  _PROJECTS_WITH_JENKINS_SUPPORT = frozenset([
+      'dfvfs', 'plaso'])
 
   PATH = '.travis.yml'
 
@@ -59,8 +62,14 @@ class TravisYMLWriter(interface.DependencyFileWriter):
         'matrix_macos', template_mappings)
     file_content.append(template_data)
 
+    if self._project_definition.name in self._PROJECTS_WITH_DOCKERFILE:
+      template_data = self._GenerateFromTemplate(
+          'matrix_dockerfile', template_mappings)
+      file_content.append(template_data)
+
     if self._project_definition.name in self._PROJECTS_WITH_JENKINS_SUPPORT:
-      template_data = self._GenerateFromTemplate('jenkins', template_mappings)
+      template_data = self._GenerateFromTemplate(
+          'matrix_jenkins', template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('footer', template_mappings)
