@@ -115,12 +115,11 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
 
     return '\n'.join(formatted_test_dependencies)
 
-  def _GetRPMDebugDependencies(self, python_dependencies, python_version=2):
+  def _GetRPMDebugDependencies(self, python_dependencies):
     """Retrieves RPM debug dependencies.
 
     Args:
       python_dependencies (list[str]): RPM package names of Python dependencies.
-      python_version (Optional[int]): Python major version.
 
     Returns:
       list[str]: RPM package names of Python debug dependencies.
@@ -134,9 +133,6 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
         debug_dependencies.extend([
             '{0:s}-debuginfo'.format(libyal_dependency),
             '{0:s}-debuginfo'.format(dependency)])
-
-    if python_version == 2 and self._project_definition.name == 'plaso':
-      debug_dependencies.append('python-guppy')
 
     return debug_dependencies
 
@@ -156,8 +152,7 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
     if self._project_definition.name == 'plaso':
       development_dependencies.append('python-sphinx')
 
-    debug_dependencies = self._GetRPMDebugDependencies(
-        python_dependencies, python_version=python_version)
+    debug_dependencies = self._GetRPMDebugDependencies(python_dependencies)
 
     formatted_python_dependencies = self._FormatRPMPythonDependencies(
         python_dependencies, python_version=python_version)
