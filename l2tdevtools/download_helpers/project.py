@@ -123,6 +123,7 @@ class ProjectDownloadHelper(interface.DownloadHelper):
 
     return filename
 
+  # pylint: disable=redundant-returns-doc
   @abc.abstractmethod
   def GetDownloadURL(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
@@ -135,6 +136,7 @@ class ProjectDownloadHelper(interface.DownloadHelper):
       str: download URL of the project or None on error.
     """
 
+  # pylint: disable=redundant-returns-doc
   @abc.abstractmethod
   def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
