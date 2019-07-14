@@ -47,7 +47,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     python_dependencies = test_writer._GetRPMPythonDependencies(
         python_version=2)
     debug_dependencies = test_writer._GetRPMDebugDependencies(
-        python_dependencies, python_version=2)
+        python_dependencies)
     formatted_debug_dependencies = test_writer._FormatRPMDebugDependencies(
         debug_dependencies)
     self.assertEqual(
@@ -110,7 +110,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     python_dependencies = test_writer._GetRPMPythonDependencies(
         python_version=2)
     debug_dependencies = test_writer._GetRPMDebugDependencies(
-        python_dependencies, python_version=2)
+        python_dependencies)
     self.assertEqual(debug_dependencies, expected_debug_dependencies)
 
   # TODO: Add tests for the Write method.

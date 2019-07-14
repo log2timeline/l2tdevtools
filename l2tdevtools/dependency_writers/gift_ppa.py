@@ -144,9 +144,6 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
             '{0:s}-dbg'.format(dependency),
             '{0:s}-{1:s}-dbg'.format(dependency, python_version_string)])
 
-    if python_version == 2 and self._project_definition.name == 'plaso':
-      debug_dependencies.append('python-guppy')
-
     return debug_dependencies
 
   def _Write(self, python_version=2):
