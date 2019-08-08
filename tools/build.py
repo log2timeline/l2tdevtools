@@ -286,13 +286,13 @@ class ProjectBuilder(object):
     project_names = list(preset_definition.project_names)
     for sub_preset_name in preset_definition.preset_names:
       sub_preset_definition = preset_definitions.get(sub_preset_name, None)
-      if sub_preset_definition.presets:
+      if sub_preset_definition.preset_names:
         logging.warning((
             'Multiple levels of presets not supported: {0:s} -> {1:s} -> '
             '{2:s}').format(preset_name, sub_preset_name, ', '.join(
-                sub_preset_definition.presets)))
+                sub_preset_definition.preset_names)))
 
-      project_names.extend(preset_definition.projects)
+      project_names.extend(sub_preset_definition.project_names)
 
     return project_names
 
