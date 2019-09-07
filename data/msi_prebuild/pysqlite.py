@@ -12,8 +12,9 @@ import os
 import sys
 import zipfile
 
-from distutils import msvc9compiler
+from distutils import msvccompiler
 from distutils.spawn import spawn
+
 
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
@@ -80,7 +81,7 @@ if __name__ == '__main__':
   os.chdir(compile_dir)
 
   if not os.path.isfile('sqlite3.c'):
-    url = 'https://www.sqlite.org/2018/sqlite-amalgamation-3230100.zip'
+    url = 'https://www.sqlite.org/2019/sqlite-amalgamation-3290000.zip'
 
     sqlite_filename = DownloadFile(url)
     if not sqlite_filename:
@@ -94,11 +95,16 @@ if __name__ == '__main__':
           with open(member_filename, 'wb') as expanded_file:
             expanded_file.write(archive.read(member))
 
-  compiler = msvc9compiler.MSVCCompiler()
+  # Use the environment variables to determine the location of MSC.
+  os.environ['DISTUTILS_USE_SDK'] = '1'
+  os.environ['MSSDK'] = '1'
+
+  compiler = msvccompiler.MSVCCompiler()
   compiler.initialize()
 
   if not os.path.isfile('sqlite3.obj'):
-    spawn([compiler.cc, '-c', 'sqlite3.c'])
+    spawn([compiler.cc, '-DSQLITE_ENABLE_FTS3',
+           '-DSQLITE_ENABLE_FTS3_PARENTHESIS', '-c', 'sqlite3.c'])
 
   if not os.path.isfile('sqlite3.lib'):
     spawn([compiler.lib, 'sqlite3.obj', '-out:sqlite3.lib'])
