@@ -20,14 +20,6 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes an install.sh file."""
-    l2tbinaries_dependencies = self._dependency_helper.GetL2TBinaries(
-        platform='macos')
-
-    l2tbinaries_test_dependencies = self._test_dependency_helper.GetL2TBinaries(
-        platform='macos')
-
-    l2tbinaries_test_dependencies = sorted(l2tbinaries_test_dependencies)
-
     dpkg_build_dependencies = ['build-essential']
 
     dpkg_python2_dependencies = self._GetDPKGPythonDependencies(
@@ -56,9 +48,6 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
         rpm_python3_dependencies, python_version=3)
 
     template_mappings = {
-        'l2tbinaries_dependencies': ' '.join(l2tbinaries_dependencies),
-        'l2tbinaries_test_dependencies': ' '.join(
-            l2tbinaries_test_dependencies),
         'dpkg_build_dependencies': ' '.join(dpkg_build_dependencies),
         'dpkg_python2_dependencies': ' '.join(dpkg_python2_dependencies),
         'dpkg_python2_test_dependencies': ' '.join(

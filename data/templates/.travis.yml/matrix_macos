@@ -1,5 +1,5 @@
-  - name: "MacOS with Python 2.7.10"
-    env: [TARGET="macos-python27", PYTHONPATH="/Library/Python/2.7/site-packages/"]
+  - name: "MacOS 10.14 with Python 3.7 (tox)"
+    env: TOXENV="py37"
     os: osx
-    osx_image: xcode9.2
+    osx_image: xcode11
     language: generic
