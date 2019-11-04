@@ -740,8 +740,8 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
     installroot_path = os.path.join(source_directory, 'installroot')
 
     command = (
-        '{0:s} setup.py install --root=installroot > /dev/null 2>&1').format(
-            sys.executable)
+        '{0:s} setup.py install --root={1:s} > /dev/null 2>&1').format(
+            sys.executable, installroot_path)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -751,7 +751,10 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
     else:
       build_configuration = dpkg_files.DPKGBuildConfiguration()
 
-      if os.path.exists(os.path.join(installroot_path, 'usr' 'bin')):
+      if os.path.exists(os.path.join(installroot_path, 'usr', 'bin')):
+        build_configuration.has_bin_directory = True
+
+      if os.path.exists(os.path.join(installroot_path, 'usr', 'local', 'bin')):
         build_configuration.has_bin_directory = True
 
       dist_packages = os.path.join(
