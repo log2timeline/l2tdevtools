@@ -62,11 +62,6 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('environment', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name == 'plaso':
-      template_data = self._GenerateFromTemplate(
-          'environment_pyinstaller', template_mappings)
-      file_content.append(template_data)
-
     template_data = self._GenerateFromTemplate('install', template_mappings)
     file_content.append(template_data)
 
@@ -87,21 +82,11 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
         'install_windows_python3', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name == 'plaso':
-      template_data = self._GenerateFromTemplate(
-          'install_pyinstaller', template_mappings)
-      file_content.append(template_data)
-
     template_data = self._GenerateFromTemplate('build', template_mappings)
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('test_script', template_mappings)
     file_content.append(template_data)
-
-    if self._project_definition.name == 'plaso':
-      template_data = self._GenerateFromTemplate(
-          'test_script_pyinstaller', template_mappings)
-      file_content.append(template_data)
 
     file_content = ''.join(file_content)
 
