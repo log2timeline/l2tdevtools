@@ -740,7 +740,7 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
     installroot_path = os.path.join(source_directory, 'installroot')
 
     command = (
-        '{0:s} setup.py install --root=installroot --prefix=/usr> /dev/null '
+        '{0:s} setup.py install --root=installroot --prefix=/usr >/dev/null '
         '2>&1').format(sys.executable)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
