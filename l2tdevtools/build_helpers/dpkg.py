@@ -728,7 +728,7 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
   """Shared functionality for setup.py build system dpkg build helpers."""
 
   def _DetermineBuildConfiguration(self, source_directory):
-    """Determines the build configuration of a project that has setup.py
+    """Determines the build configuration of a project that has setup.py.
 
     Args:
       source_directory (str): path of the source directory.
@@ -740,8 +740,8 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
     installroot_path = os.path.join(source_directory, 'installroot')
 
     command = (
-        '{0:s} setup.py install --root=installroot > /dev/null 2>&1').format(
-            sys.executable)
+        '{0:s} setup.py install --root=installroot --prefix=/usr> /dev/null '
+        '2>&1').format(sys.executable)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -754,11 +754,13 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
       if os.path.exists(os.path.join(installroot_path, 'usr', 'bin')):
         build_configuration.has_bin_directory = True
 
-      if os.path.exists(os.path.join(installroot_path, 'usr', 'local', 'bin')):
-        build_configuration.has_bin_directory = True
-
       dist_packages = os.path.join(
-          installroot_path, 'usr', 'local', 'lib', 'python2.7', 'dist-packages')
+          # While it should be expected the modules are moved in dist-packages,
+          # since we're building debian packages, adding --prefix flag disables
+          # this in setuptools. See
+          # https://bugs.launchpad.net/ubuntu/+source/python2.6/+bug/362570
+          # https://lists.ubuntu.com/archives/ubuntu-devel/2009-February/027439.html
+          installroot_path, 'usr', 'lib', 'python2.7', 'site-packages')
 
       for directory_entry in os.listdir(dist_packages):
         directory_entry_path = os.path.join(dist_packages, directory_entry)
