@@ -754,12 +754,12 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
       if os.path.exists(os.path.join(installroot_path, 'usr', 'bin')):
         build_configuration.has_bin_directory = True
 
+      # While it should be expected the modules are moved in dist-packages,
+      # since we're building debian packages, adding --prefix flag disables
+      # this in setuptools. Also see:
+      # https://bugs.launchpad.net/ubuntu/+source/python2.6/+bug/362570
+      # https://lists.ubuntu.com/archives/ubuntu-devel/2009-February/027439.html
       dist_packages = os.path.join(
-          # While it should be expected the modules are moved in dist-packages,
-          # since we're building debian packages, adding --prefix flag disables
-          # this in setuptools. See
-          # https://bugs.launchpad.net/ubuntu/+source/python2.6/+bug/362570
-          # https://lists.ubuntu.com/archives/ubuntu-devel/2009-February/027439.html
           installroot_path, 'usr', 'lib', 'python2.7', 'site-packages')
 
       for directory_entry in os.listdir(dist_packages):
