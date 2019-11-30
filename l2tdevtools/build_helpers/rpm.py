@@ -471,7 +471,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     if not spec_file_generator.GenerateWithSetupPy(
-        source_directory, log_file_path):
+        self._project_definition, source_directory, log_file_path):
       return None
 
     if project_name.startswith('python-'):
@@ -740,7 +740,7 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     if not spec_file_generator.GenerateWithSetupPy(
-        source_directory, log_file_path):
+        self._project_definition, source_directory, log_file_path):
       return None
 
     if project_name.startswith('python-'):
