@@ -2,14 +2,6 @@ environment:
   matrix:
   - TARGET: unittests
     MACHINE_TYPE: "x86"
-    PYTHON: "C:\\Python27"
-    PYTHON_VERSION: "2.7"
-  - TARGET: unittests
-    MACHINE_TYPE: "amd64"
-    PYTHON: "C:\\Python27-x64"
-    PYTHON_VERSION: "2.7"
-  - TARGET: unittests
-    MACHINE_TYPE: "x86"
     PYTHON: "C:\\Python37"
     PYTHON_VERSION: "3.7"
   - TARGET: unittests

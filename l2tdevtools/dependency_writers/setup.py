@@ -55,11 +55,11 @@ class SetupCfgWriter(interface.DependencyFileWriter):
         line = '            {0:s}'.format(doc_file)
       formatted_doc_files.append(line)
 
-    python2_dependencies = self._dependency_helper.GetRPMRequires(
-        python_version=2)
+    python3_dependencies = self._dependency_helper.GetRPMRequires(
+        python_version=3)
 
     formatted_requires = []
-    for index, dependency in enumerate(python2_dependencies):
+    for index, dependency in enumerate(python3_dependencies):
       if index == 0:
         line = 'requires = {0:s}'.format(dependency)
       else:
@@ -223,54 +223,6 @@ class SetupPyWriter(interface.DependencyFileWriter):
     submodule_levels = self._DetermineSubmoduleLevels(
         self._project_definition.name)
 
-    python2_package_module_prefix = '%{{{{python2_sitelib}}}}/{0:s}'.format(
-        self._project_definition.name)
-    python2_package_files = [
-        '{0:s}/*.py'.format(python2_package_module_prefix)]
-
-    yaml_glob = os.path.join(python2_package_module_prefix[21:], '*.yaml')
-    if glob.glob(yaml_glob):
-      python2_package_files.append(
-          '{0:s}/*.yaml'.format(python2_package_module_prefix))
-
-    for _ in range(submodule_levels):
-      python2_package_module_prefix = '{0:s}/*'.format(
-          python2_package_module_prefix)
-      python2_package_files.append(
-          '{0:s}/*.py'.format(python2_package_module_prefix))
-
-      yaml_glob = os.path.join(python2_package_module_prefix[21:], '*.yaml')
-      if glob.glob(yaml_glob):
-        python2_package_files.append(
-            '{0:s}/*.yaml'.format(python2_package_module_prefix))
-
-    python2_package_files.extend([
-        '%{{python2_sitelib}}/{0:s}*.egg-info/*',
-        '',
-        '%exclude %{{_prefix}}/share/doc/*'])
-
-    python2_package_module_prefix = '%{{{{python2_sitelib}}}}/{0:s}'.format(
-        self._project_definition.name)
-    python2_package_files.extend([
-        '%exclude {0:s}/*.pyc'.format(python2_package_module_prefix),
-        '%exclude {0:s}/*.pyo'.format(python2_package_module_prefix)])
-
-    for _ in range(submodule_levels):
-      python2_package_module_prefix = '{0:s}/*'.format(
-          python2_package_module_prefix)
-      python2_package_files.extend([
-          '%exclude {0:s}/*.pyc'.format(python2_package_module_prefix),
-          '%exclude {0:s}/*.pyo'.format(python2_package_module_prefix)])
-
-    if not data_directory and scripts_directory:
-      python2_package_files.append('%exclude %{{_bindir}}/*.py')
-
-    python2_package_files = ',\n'.join([
-        '                \'{0:s}\''.format(package_file)
-        for package_file in python2_package_files])
-    python2_package_files = python2_package_files.format(
-        self._project_definition.name)
-
     python3_package_module_prefix = '%{{{{python3_sitelib}}}}/{0:s}'.format(
         self._project_definition.name)
     python3_package_files = [
@@ -312,7 +264,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
       python3_package_files.append('%exclude %{{_bindir}}/*.py')
 
     python3_package_files = ',\n'.join([
-        '                \'{0:s}\''.format(package_file)
+        '              \'{0:s}\''.format(package_file)
         for package_file in python3_package_files])
     python3_package_files = python3_package_files.format(
         self._project_definition.name)
@@ -334,7 +286,6 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'packages_exclude': packages_exclude,
         'project_name_description': self._project_definition.name_description,
         'project_name': self._project_definition.name,
-        'python2_package_files': python2_package_files,
         'python3_package_files': python3_package_files,
         'rpm_doc_files': ' '.join(rpm_doc_files),
         'rpm_license_file': rpm_license_file,

@@ -18,10 +18,7 @@ else:
       else:
         spec_file = bdist_rpm._make_spec_file(self)
 
-      if sys.version_info[0] < 3:
-        python_package = 'python2'
-      else:
-        python_package = 'python3'
+      python_package = 'python3'
 
       description = []
       requires = ''
@@ -39,9 +36,6 @@ else:
 
         elif line.startswith('Requires: '):
           requires = line[10:]
-          if python_package == 'python3':
-            requires = requires.replace('python-', 'python3-')
-            requires = requires.replace('python2-', 'python3-')
           continue
 
         elif line.startswith('%description'):

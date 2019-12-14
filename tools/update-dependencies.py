@@ -54,8 +54,8 @@ def Main():
       requirements.RequirementsWriter, requirements.TestRequirementsWriter,
       setup.SetupCfgWriter, setup.SetupPyWriter,
       travis.TravisInstallScriptWriter, travis.TravisRunCoverageScriptWriter,
-      travis.TravisRunPylintScriptWriter, travis.TravisRunPython2ScriptWriter,
-      travis.TravisRunPython3ScriptWriter, travis.TravisRunTestsScriptWriter,
+      travis.TravisRunPylintScriptWriter, travis.TravisRunPython3ScriptWriter,
+      travis.TravisRunTestsScriptWriter,
       travis.TravisRunWithTimeoutScriptWriter, travis_yml.TravisYMLWriter):
     writer = writer_class(
         l2tdevtools_path, project_definition, dependencies_helper,
@@ -67,7 +67,6 @@ def Main():
       check_dependencies.CheckDependenciesWriter,
       dependencies_py.DependenciesPyWriter, dpkg.DPKGCompatWriter,
       dpkg.DPKGControlWriter,
-      end_to_end_tests.RunPython2EndToEndTestsScriptWriter,
       end_to_end_tests.RunPython3EndToEndTestsScriptWriter,
       gift_copr.GIFTCOPRInstallScriptWriter,
       gift_ppa.GIFTPPAInstallScriptPY2Writer,
