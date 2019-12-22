@@ -211,7 +211,6 @@ Foreach ($d in $dep.context.DisplayPostContext.split(': ')[2].split(',')) {
 }
 
 # Remove debug, test and yet unused dependencies.
-Remove-Item -Force ${DistPath}\licenses\LICENSE.guppy
 Remove-Item -Force ${DistPath}\licenses\LICENSE.libexe
 Remove-Item -Force ${DistPath}\licenses\LICENSE.libwrc
 Remove-Item -Force ${DistPath}\licenses\LICENSE.mock
@@ -289,4 +288,5 @@ Copy-Item -Force "plaso\parsers\winreg_plugins\*.yaml" "${DistPath}\plaso\parser
 
 # Makes plaso-<version><python_version>-<architecture>.zip
 Add-Type -assembly "system.io.compression.filesystem"
-[io.compression.zipfile]::CreateFromDirectory("$(pwd | % Path)\dist\plaso", "$(pwd| % Path)\plaso-${Version}${PythonVersion}-${Architecture}.zip")
+$PlasoPath = $(pwd | % Path)
+[io.compression.zipfile]::CreateFromDirectory("${PlasoPath}\dist\plaso", "${PlasoPath}\plaso-${Version}${PythonVersion}-${Architecture}.zip")
