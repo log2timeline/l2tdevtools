@@ -571,7 +571,8 @@ class DPKGBuildFilesGenerator(object):
 
       # TODO: add configuration setting to indicate tools should be packaged.
       if package_name not in ('idna', 'mock', 'psutil'):
-        if self._build_configuration.has_bin_directory:
+        if (self._build_configuration and
+            self._build_configuration.has_bin_directory):
           control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_TOOLS)
 
     control_template = '\n'.join(control_template)
@@ -632,7 +633,8 @@ class DPKGBuildFilesGenerator(object):
       if not self._project_definition.IsPython2Only():
         self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
 
-      if self._build_configuration.has_bin_directory:
+      if (self._build_configuration and
+          self._build_configuration.has_bin_directory):
         install_package_name = self._GetPackageName(self._project_definition)
         output_filename = '{0:s}-tools.install'.format(install_package_name)
         output_filename = os.path.join(dpkg_path, output_filename)
