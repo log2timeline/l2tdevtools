@@ -11,7 +11,7 @@ set -e;
 if test -n "${FEDORA_VERSION}";
 then
 	CONTAINER_NAME="fedora${FEDORA_VERSION}";
-	CONTAINER_OPTIONS="-e LANG=en_US.UTF-8";
+	CONTAINER_OPTIONS="-e LANG=C.utf8";
 
 	if test -n "${TOXENV}";
 	then
@@ -20,10 +20,6 @@ then
 	elif test "${TARGET}" = "pylint";
 	then
 		TEST_COMMAND="./config/travis/run_pylint.sh";
-
-	elif test ${TRAVIS_PYTHON_VERSION} = "2.7";
-	then
-		TEST_COMMAND="./config/travis/run_python2.sh";
 	else
 		TEST_COMMAND="./config/travis/run_python3.sh";
 	fi
@@ -51,10 +47,6 @@ then
 
 		TEST_COMMAND="./config/travis/run_coverage.sh";
 
-	elif test "${TARGET}" = "jenkins2";
-	then
-		TEST_COMMAND="./config/jenkins/linux/run_end_to_end_tests.sh travis";
-
 	elif test "${TARGET}" = "jenkins3";
 	then
 		TEST_COMMAND="./config/jenkins/linux/run_end_to_end_tests_py3.sh travis";
@@ -62,28 +54,22 @@ then
 	elif test "${TARGET}" = "pylint";
 	then
 		TEST_COMMAND="./config/travis/run_pylint.sh";
-
-	elif test ${TRAVIS_PYTHON_VERSION} = "2.7";
-	then
-		TEST_COMMAND="./config/travis/run_python2.sh";
 	else
 		TEST_COMMAND="./config/travis/run_python3.sh";
 	fi
 	# Note that exec options need to be defined before the container name.
 	docker exec ${CONTAINER_OPTIONS} ${CONTAINER_NAME} sh -c "cd l2tdevtools && ${TEST_COMMAND}";
 
+elif test "${TARGET}" = "dockerfile";
+then
+	cd config/docker && docker build --build-arg PPA_TRACK="dev" -f Dockerfile .
+
 elif test "${TRAVIS_OS_NAME}" = "osx";
 then
-	PYTHONPATH=/Library/Python/2.7/site-packages/ /usr/bin/python ./run_tests.py;
+	# Set the following environment variables to build pycrypto and yara-python.
+	export CFLAGS="-I/usr/local/include -I/usr/local/opt/openssl@1.1/include ${CFLAGS}";
+	export LDFLAGS="-L/usr/local/lib -L/usr/local/opt/openssl@1.1/lib ${LDFLAGS}";
+	export TOX_TESTENV_PASSENV="CFLAGS LDFLAGS";
 
-	python ./setup.py build
-
-	python ./setup.py sdist
-
-	python ./setup.py bdist
-
-	if test -f tests/end-to-end.py;
-	then
-		PYTHONPATH=. python ./tests/end-to-end.py --debug -c config/end-to-end.ini;
-	fi
+	tox -e ${TOXENV};
 fi

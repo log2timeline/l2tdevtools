@@ -45,9 +45,9 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     expected_formatted_debug_dependencies = ''
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=2)
+        python_version=3)
     debug_dependencies = test_writer._GetDPKGDebugDependencies(
-        python_dependencies, python_version=2)
+        python_dependencies, python_version=3)
     formatted_debug_dependencies = test_writer._FormatDPKGDebugDependencies(
         debug_dependencies)
     self.assertEqual(
@@ -73,10 +73,10 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_formatted_python_dependencies = (
-        'PYTHON2_DEPENDENCIES="python-yaml";')
+        'PYTHON2_DEPENDENCIES="python3-yaml";')
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=2)
+        python_version=3)
     formatted_python_dependencies = test_writer._FormatDPKGPythonDependencies(
         python_dependencies)
     self.assertEqual(
@@ -87,17 +87,17 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_formatted_test_dependencies = (
-        'TEST_DEPENDENCIES="python-coverage\n'
-        '                   python-funcsigs\n'
-        '                   python-mock\n'
-        '                   python-pbr\n'
-        '                   python-setuptools\n'
-        '                   python-six";')
+        'TEST_DEPENDENCIES="python3-coverage\n'
+        '                   python3-distutils\n'
+        '                   python3-mock\n'
+        '                   python3-pbr\n'
+        '                   python3-setuptools\n'
+        '                   python3-six";')
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=2)
+        python_version=3)
     test_dependencies = test_writer._GetDPKGTestDependencies(
-        python_dependencies, python_version=2)
+        python_dependencies, python_version=3)
     formatted_test_dependencies = test_writer._FormatDPKGTestDependencies(
         test_dependencies)
     self.assertEqual(
@@ -110,9 +110,9 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     expected_debug_dependencies = []
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=2)
+        python_version=3)
     debug_dependencies = test_writer._GetDPKGDebugDependencies(
-        python_dependencies, python_version=2)
+        python_dependencies, python_version=3)
     self.assertEqual(debug_dependencies, expected_debug_dependencies)
 
 

@@ -4,10 +4,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
+import configparser
 
 
 class ProjectDefinition(object):
@@ -78,10 +75,8 @@ class ProjectDefinitionReader(object):
     Returns:
       ProjectDefinition: project definition.
     """
-    config_parser = configparser.RawConfigParser()
-    # pylint: disable=deprecated-method
-    # TODO: replace readfp by read_file, check if Python 2 compatible
-    config_parser.readfp(file_object)
+    config_parser = configparser.ConfigParser(interpolation=None)
+    config_parser.read_file(file_object)
 
     project_definition = ProjectDefinition()
     for value_name in self._VALUE_NAMES:

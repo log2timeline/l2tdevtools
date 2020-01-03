@@ -43,10 +43,10 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     """Tests the _GetDPKGPythonDependencies function."""
     test_writer = self._CreateTestWriter()
 
-    expected_python_dependencies = ['python-yaml']
+    expected_python_dependencies = ['python3-yaml']
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=2)
+        python_version=3)
     self.assertEqual(python_dependencies, expected_python_dependencies)
 
   def testGetDPKGTestDependencies(self):
@@ -54,13 +54,13 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_test_dependencies = [
-        'python-coverage', 'python-funcsigs', 'python-mock',
-        'python-pbr', 'python-setuptools', 'python-six']
+        'python3-coverage', 'python3-distutils', 'python3-mock', 'python3-pbr',
+        'python3-setuptools', 'python3-six']
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=2)
+        python_version=3)
     test_dependencies = test_writer._GetDPKGTestDependencies(
-        python_dependencies, python_version=2)
+        python_dependencies, python_version=3)
     self.assertEqual(test_dependencies, expected_test_dependencies)
 
   def testGetPyPIPythonDependencies(self):
@@ -90,10 +90,10 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     """Tests the _GetRPMPythonDependencies function."""
     test_writer = self._CreateTestWriter()
 
-    expected_python_dependencies = ['python2-pyyaml']
+    expected_python_dependencies = ['python3-pyyaml']
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=2)
+        python_version=3)
     self.assertEqual(python_dependencies, expected_python_dependencies)
 
   def testGetRPMTestDependencies(self):
@@ -101,13 +101,12 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_test_dependencies = [
-        'python2-funcsigs', 'python2-mock', 'python2-pbr', 'python2-setuptools',
-        'python2-six']
+        'python3-mock', 'python3-pbr', 'python3-setuptools', 'python3-six']
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=2)
+        python_version=3)
     test_dependencies = test_writer._GetRPMTestDependencies(
-        python_dependencies, python_version=2)
+        python_dependencies, python_version=3)
     self.assertEqual(test_dependencies, expected_test_dependencies)
 
   # TODO: add tests for _ReadTemplateFile.
