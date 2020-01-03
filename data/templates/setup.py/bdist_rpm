@@ -5,13 +5,8 @@
               '%license ${rpm_license_file}',
               '%doc ${rpm_doc_files}']
 
-          if python_package == 'python3':
-            lines.extend([
+          lines.extend([
 ${python3_package_files}])
-
-          else:
-            lines.extend([
-${python2_package_files}])
 
           python_spec_file.extend(lines)
           break
@@ -21,13 +16,7 @@ ${python2_package_files}])
 
           python_spec_file.append(
               '%package -n {0:s}-%{{name}}'.format(python_package))
-          if python_package == 'python2':
-            python_spec_file.extend([
-                'Obsoletes: python-${project_name} < %{version}',
-                'Provides: python-${project_name} = %{version}'])
-            python_summary = 'Python 2 module of {0:s}'.format(summary)
-          else:
-            python_summary = 'Python 3 module of {0:s}'.format(summary)
+          python_summary = 'Python 3 module of {0:s}'.format(summary)
 
           if requires:
             python_spec_file.append('Requires: {0:s}'.format(requires))

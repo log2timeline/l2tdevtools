@@ -1,4 +1,0 @@
-- cmd: if [%PYTHON_VERSION%]==[2.7] (
-    mkdir dependencies &&
-    set PYTHONPATH=..\l2tdevtools &&
-    "%PYTHON%\\python.exe" ..\l2tdevtools\tools\update.py --download-directory dependencies --machine-type %MACHINE_TYPE% --msi-targetdir "%PYTHON%" --track dev ${python2_dependencies} )

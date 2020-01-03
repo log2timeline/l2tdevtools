@@ -22,25 +22,11 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
     """Writes an install.sh file."""
     dpkg_build_dependencies = ['build-essential']
 
-    dpkg_python2_dependencies = self._GetDPKGPythonDependencies(
-        python_version=2)
-
-    dpkg_python2_test_dependencies = self._GetDPKGTestDependencies(
-        dpkg_python2_dependencies, python_version=2)
-
     dpkg_python3_dependencies = self._GetDPKGPythonDependencies(
         python_version=3)
 
     dpkg_python3_test_dependencies = self._GetDPKGTestDependencies(
         dpkg_python3_dependencies, python_version=3)
-
-    if 'python-backports.lzma' in dpkg_python2_dependencies:
-      dpkg_build_dependencies.append('liblzma-dev')
-
-    rpm_python2_dependencies = self._GetRPMPythonDependencies(python_version=2)
-
-    rpm_python2_test_dependencies = self._GetRPMTestDependencies(
-        rpm_python2_dependencies, python_version=2)
 
     rpm_python3_dependencies = self._GetRPMPythonDependencies(python_version=3)
 
@@ -49,16 +35,10 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 
     template_mappings = {
         'dpkg_build_dependencies': ' '.join(dpkg_build_dependencies),
-        'dpkg_python2_dependencies': ' '.join(dpkg_python2_dependencies),
-        'dpkg_python2_test_dependencies': ' '.join(
-            dpkg_python2_test_dependencies),
         'dpkg_python3_dependencies': ' '.join(dpkg_python3_dependencies),
         'dpkg_python3_test_dependencies': ' '.join(
             dpkg_python3_test_dependencies),
         'project_name': self._project_definition.name,
-        'rpm_python2_dependencies': ' '.join(rpm_python2_dependencies),
-        'rpm_python2_test_dependencies': ' '.join(
-            rpm_python2_test_dependencies),
         'rpm_python3_dependencies': ' '.join(rpm_python3_dependencies),
         'rpm_python3_test_dependencies': ' '.join(
             rpm_python3_test_dependencies)}
@@ -111,24 +91,6 @@ class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
     template_mappings = {
         'paths_to_lint': ' '.join(paths_to_lint)
     }
-
-    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
-    file_content = self._GenerateFromTemplate(template_file, template_mappings)
-
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
-      file_object.write(file_content)
-
-
-class TravisRunPython2ScriptWriter(interface.DependencyFileWriter):
-  """Travis-CI run_python2.sh file writer."""
-
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_python2.sh')
-
-  PATH = os.path.join('config', 'travis', 'run_python2.sh')
-
-  def Write(self):
-    """Writes a runtests.sh file."""
-    template_mappings = {}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)

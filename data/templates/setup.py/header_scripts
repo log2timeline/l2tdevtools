@@ -5,7 +5,6 @@ ${shebang}
 from __future__ import print_function
 
 import glob
-import locale
 import os
 import sys
 

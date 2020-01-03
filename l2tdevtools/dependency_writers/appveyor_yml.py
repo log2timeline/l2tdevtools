@@ -37,15 +37,6 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes an appveyor.yml file."""
-    python2_dependencies = self._dependency_helper.GetL2TBinaries(
-        python_version=2)
-
-    python2_dependencies.extend(self._test_dependency_helper.GetL2TBinaries(
-        python_version=2))
-
-    if 'backports.lzma' in python2_dependencies:
-      python2_dependencies.remove('backports.lzma')
-
     python3_dependencies = self._dependency_helper.GetL2TBinaries(
         python_version=3)
 
@@ -53,7 +44,6 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
         python_version=3))
 
     template_mappings = {
-        'python2_dependencies': ' '.join(sorted(set(python2_dependencies))),
         'python3_dependencies': ' '.join(sorted(set(python3_dependencies)))
     }
 
@@ -65,17 +55,8 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('install', template_mappings)
     file_content.append(template_data)
 
-    if 'pysqlite' in python2_dependencies:
-      template_data = self._GenerateFromTemplate(
-          'install_sqlite', template_mappings)
-      file_content.append(template_data)
-
     template_data = self._GenerateFromTemplate(
         'install_l2tdevtools', template_mappings)
-    file_content.append(template_data)
-
-    template_data = self._GenerateFromTemplate(
-        'install_windows_python2', template_mappings)
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
