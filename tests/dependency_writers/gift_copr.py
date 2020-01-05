@@ -45,7 +45,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     expected_formatted_debug_dependencies = ''
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=2)
+        python_version=3)
     debug_dependencies = test_writer._GetRPMDebugDependencies(
         python_dependencies)
     formatted_debug_dependencies = test_writer._FormatRPMDebugDependencies(
@@ -72,10 +72,10 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_formatted_python_dependencies = (
-        'PYTHON2_DEPENDENCIES="python2-pyyaml";')
+        'PYTHON2_DEPENDENCIES="python3-pyyaml";')
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=2)
+        python_version=3)
     formatted_python_dependencies = test_writer._FormatRPMPythonDependencies(
         python_dependencies)
     self.assertEqual(
@@ -86,16 +86,15 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_formatted_test_dependencies = (
-        'TEST_DEPENDENCIES="python2-funcsigs\n'
-        '                   python2-mock\n'
-        '                   python2-pbr\n'
-        '                   python2-setuptools\n'
-        '                   python2-six";')
+        'TEST_DEPENDENCIES="python3-mock\n'
+        '                   python3-pbr\n'
+        '                   python3-setuptools\n'
+        '                   python3-six";')
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=2)
+        python_version=3)
     test_dependencies = test_writer._GetRPMTestDependencies(
-        python_dependencies, python_version=2)
+        python_dependencies, python_version=3)
     formatted_test_dependencies = test_writer._FormatRPMTestDependencies(
         test_dependencies)
     self.assertEqual(
@@ -108,7 +107,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     expected_debug_dependencies = []
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=2)
+        python_version=3)
     debug_dependencies = test_writer._GetRPMDebugDependencies(
         python_dependencies)
     self.assertEqual(debug_dependencies, expected_debug_dependencies)

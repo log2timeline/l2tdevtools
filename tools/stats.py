@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
+import configparser
 import datetime
 import json
 import logging
@@ -13,10 +14,6 @@ import os
 import sys
 import time
 
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
 
 # pylint: disable=import-error,no-name-in-module
 if sys.version_info[0] < 3:
@@ -60,11 +57,8 @@ class StatsDefinitionReader(object):
     Returns:
       dict[str, list[str]]: organization names with corresponding project names.
     """
-    # TODO: replace by:
-    # config_parser = configparser. ConfigParser(interpolation=None)
-    config_parser = configparser.RawConfigParser()
-    # pylint: disable=deprecated-method
-    config_parser.readfp(file_object)
+    config_parser = configparser.ConfigParser(interpolation=None)
+    config_parser.read_file(file_object)
 
     projects_per_organization = {}
     for option_name in config_parser.options('organizations'):
@@ -89,11 +83,8 @@ class StatsDefinitionReader(object):
     Returns:
       dict[str, str]: user names with corresponding email address.
     """
-    # TODO: replace by:
-    # config_parser = configparser. ConfigParser(interpolation=None)
-    config_parser = configparser.RawConfigParser()
-    # pylint: disable=deprecated-method
-    config_parser.readfp(file_object)
+    config_parser = configparser.ConfigParser(interpolation=None)
+    config_parser.read_file(file_object)
 
     user_mappings = {}
     for option_name in config_parser.options('user_mappings'):
@@ -114,11 +105,8 @@ class StatsDefinitionReader(object):
     Returns:
       dict[str, str]: user names with corresponding email address.
     """
-    # TODO: replace by:
-    # config_parser = configparser. ConfigParser(interpolation=None)
-    config_parser = configparser.RawConfigParser()
-    # pylint: disable=deprecated-method
-    config_parser.readfp(file_object)
+    config_parser = configparser.ConfigParser(interpolation=None)
+    config_parser.read_file(file_object)
 
     usernames = {}
     for option_name in config_parser.options('usernames'):

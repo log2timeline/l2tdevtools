@@ -3,12 +3,7 @@
 
 from __future__ import unicode_literals
 
-import sys
-
-try:
-  import ConfigParser as configparser
-except ImportError:
-  import configparser  # pylint: disable=import-error
+import configparser
 
 from l2tdevtools import py2to3
 
@@ -62,14 +57,8 @@ class PresetDefinitionReader(object):
     Yields:
       PresetDefinition: preset definitions.
     """
-    # TODO: replace by:
-    # config_parser = configparser. ConfigParser(interpolation=None)
-    config_parser = configparser.RawConfigParser()
-
-    if sys.version_info[0] < 3:
-      config_parser.readfp(file_object)  # pylint: disable=deprecated-method
-    else:
-      config_parser.read_file(file_object)
+    config_parser = configparser.ConfigParser(interpolation=None)
+    config_parser.read_file(file_object)
 
     for section_name in config_parser.sections():
       preset_definition = PresetDefinition(section_name)
