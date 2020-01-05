@@ -108,5 +108,7 @@ elif test $${TRAVIS_OS_NAME} = "osx";
 then
 	brew update;
 
-	brew install tox;
+	# Brew will exit with 1 and print some diagnotisic information
+	# to prevent the CI test from failing || true is added.
+	brew install tox || true;
 fi
