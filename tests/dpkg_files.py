@@ -33,7 +33,6 @@ class DPKGBuildFilesGeneratorTest(test_lib.BaseTestCase):
   # TODO: test _GenerateConfigureMakeRulesFile function.
   # TODO: test _GenerateSetupPyRulesFile function.
   # TODO: test _GenerateSourceFormatFile function.
-  # TODO: test _IsPython2Only function.
   # TODO: test GenerateFiles function.
 
 

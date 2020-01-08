@@ -27,22 +27,6 @@ class BuildHelper(object):
     self._dependency_definitions = dependency_definitions
     self._project_definition = project_definition
 
-  def _IsPython2Only(self):
-    """Determines if the project only supports Python version 2.
-
-    Returns:
-      bool: True if the project only support Python version 2.
-    """
-    return 'python2_only' in self._project_definition.build_options
-
-  def _IsPython3Only(self):
-    """Determines if the project only supports Python version 3.
-
-    Returns:
-      bool: True if the project only support Python version 3.
-    """
-    return 'python3_only' in self._project_definition.build_options
-
   def CheckBuildDependencies(self):
     """Checks if the build dependencies are met.
 

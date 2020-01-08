@@ -453,7 +453,7 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
-      if not self._IsPython2Only() and 'python' in package_name:
+      if 'python' in package_name:
         package_name = package_name.replace('python', 'python3')
         if not self._CheckIsInstalled(package_name):
           missing_packages.append(package_name)
@@ -467,7 +467,7 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
-      if not self._IsPython2Only() and 'python' in package_name:
+      if 'python' in package_name:
         package_name = package_name.replace('python', 'python3')
         if not self._CheckIsInstalled(package_name):
           missing_packages.append(package_name)
@@ -932,7 +932,7 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
 
     self._RemoveOlderDPKGPackages(project_name, project_version)
 
-    if not self._IsPython2Only() and project_name.startswith('python-'):
+    if project_name.startswith('python-'):
       project_name = 'python3-{0:s}'.format(project_name[7])
 
       self._RemoveOlderDPKGPackages(project_name, project_version)

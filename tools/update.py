@@ -835,16 +835,6 @@ class DependencyUpdater(object):
             package_name))
         continue
 
-      if sys.version_info[0] != 2 and project_definition.IsPython2Only():
-        logging.info('Skipping: {0:s} because it only supports Python 2'.format(
-            package_name))
-        continue
-
-      elif sys.version_info[0] != 3 and project_definition.IsPython3Only():
-        logging.info('Skipping: {0:s} because it only supports Python 3'.format(
-            package_name))
-        continue
-
       if not os.path.exists(package_download_path):
         logging.info('Downloading: {0:s}'.format(package_filename))
         os.chdir(self._download_directory)

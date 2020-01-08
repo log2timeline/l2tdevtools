@@ -17,9 +17,6 @@ class ProjectDefinition(object):
     architecture_dependent (bool): True if the project is architecture
         dependent.
     build_dependencies (list[str]): build dependencies.
-    build_options (list[str]): build options. Supported build options are:
-        * "python2_only", build support only for Python 2;
-        * "python3_only", build support only for Python 3.
     build_system (str): build system.
     configure_options (list[str]): configure options.
     description_long (str): long description of the project.
@@ -67,7 +64,6 @@ class ProjectDefinition(object):
     super(ProjectDefinition, self).__init__()
     self.architecture_dependent = False
     self.build_dependencies = None
-    self.build_options = None
     self.build_system = None
     self.configure_options = None
     self.description_long = None
@@ -101,22 +97,6 @@ class ProjectDefinition(object):
     self.setup_name = None
     self.srpm_name = None
     self.version = None
-
-  def IsPython2Only(self):
-    """Determines if the project only supports Python 2.
-
-    Returns:
-      bool: True if the project only support Python 2.
-    """
-    return self.build_options and 'python2_only' in self.build_options
-
-  def IsPython3Only(self):
-    """Determines if the project only supports Python 3.
-
-    Returns:
-      bool: True if the project only support Python 3.
-    """
-    return self.build_options and 'python3_only' in self.build_options
 
 
 class ProjectVersionDefinition(object):
@@ -228,8 +208,6 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'architecture_dependent')
       project_definition.build_dependencies = self._GetConfigValue(
           config_parser, section_name, 'build_dependencies')
-      project_definition.build_options = self._GetConfigValue(
-          config_parser, section_name, 'build_options')
       project_definition.build_system = self._GetConfigValue(
           config_parser, section_name, 'build_system')
       project_definition.configure_options = self._GetConfigValue(
@@ -301,13 +279,6 @@ class ProjectDefinitionReader(object):
           project_definition.build_dependencies, py2to3.STRING_TYPES):
         project_definition.build_dependencies = (
             project_definition.build_dependencies.split(','))
-
-      if project_definition.build_options is None:
-        project_definition.build_options = []
-      elif isinstance(
-          project_definition.build_options, py2to3.STRING_TYPES):
-        project_definition.build_options = (
-            project_definition.build_options.split(','))
 
       if project_definition.configure_options is None:
         project_definition.configure_options = []
