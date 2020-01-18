@@ -18,18 +18,9 @@ Vendor: Logilab <contact@logilab.fr>
 Packager: Sylvain Thenault <sylvain.thenault@logilab.fr>
 Provides: logilab.common
 Url: http://www.logilab.org/project/logilab-common
-BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
+BuildRequires: python3-setuptools, python3-devel
 
 %description
-This package contains some modules used by differents
-Logilab's projects.
-
-%package -n python2-%{{name}}
-Obsoletes: python-%{{name}} < %{{version}}
-Provides: python-%{{name}} = %{{version}}
-Summary: collection of low-level Python packages and modules used by Logilab projects
-
-%description -n python2-%{{name}}
 This package contains some modules used by differents
 Logilab's projects.
 
@@ -44,22 +35,14 @@ Logilab's projects.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py2_build
 %py3_build
 
 %install
-%py2_install
 %py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
-
-%files -n python2-%{{name}}
-%doc README
-%{{python2_sitelib}}/logilab/common
-%{{python2_sitelib}}/logilab_common*.egg-info
-%{{python2_sitelib}}/logilab_common*.pth
 
 %files -n python3-%{{name}}
 %doc README

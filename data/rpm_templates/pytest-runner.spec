@@ -16,18 +16,9 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Jason R. Coombs <jaraco@jaraco.com>
 Url: https://github.com/pytest-dev/pytest-runner
-BuildRequires: python2-setuptools >= 30.3, python2-devel, python2-setuptools_scm, python3-setuptools >= 30.3, python3-devel, python3-setuptools_scm
+BuildRequires: python3-setuptools >= 30.3, python3-devel, python3-setuptools_scm
 
 %description
-Setup scripts can use pytest-runner to add setup.py test
-support for pytest runner.
-
-%package -n python2-%{{name}}
-Obsoletes: python-%{{{{name}}}} < %{{{{version}}}}
-Provides: python-%{{{{name}}}} = %{{{{version}}}}
-Summary: Invoke py.test as distutils command with dependency resolution
-
-%description -n python2-%{{name}}
 Setup scripts can use pytest-runner to add setup.py test
 support for pytest runner.
 
@@ -42,25 +33,18 @@ support for pytest runner.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py2_build
 %py3_build
 
 %install
-%py2_install
 %py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python2-%{{name}}
-%license LICENSE
-%{{python2_sitelib}}/*.py*
-%{{python2_sitelib}}/pytest_runner*.egg-info
-
 %files -n python3-%{{name}}
 %license LICENSE
-%{{python2_sitelib}}/*.py*
+%{{python3_sitelib}}/*.py*
 %{{python3_sitelib}}/pytest_runner*.egg-info
 
 %changelog

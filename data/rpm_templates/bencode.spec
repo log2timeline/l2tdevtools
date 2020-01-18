@@ -16,18 +16,9 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Dean Gardiner <me@dgardiner.net>
 Url: https://github.com/fuzeman/bencode.py
-BuildRequires: python2-setuptools >= 17.0 , python2-devel, python2-pbr, python3-setuptools >= 17.0 , python3-devel, python3-pbr
+BuildRequires: python3-setuptools >= 17.0 , python3-devel, python3-pbr
 
 %description
-Simple bencode parser, forked from the bencode package
-by Thomas Rampelberg.
-
-%package -n python2-%{{name}}
-Obsoletes: python-bencode <= %{{version}}
-Provides: python-bencode = %{{version}}
-Summary: Simple bencode parser for Python 2
-
-%description -n python2-%{{name}}
 Simple bencode parser, forked from the bencode package
 by Thomas Rampelberg.
 
@@ -42,20 +33,14 @@ by Thomas Rampelberg.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py2_build
 %py3_build
 
 %install
-%py2_install
 %py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
-
-%files -n python2-%{{name}}
-%{{python2_sitelib}}/bencode/
-%{{python2_sitelib}}/bencode.py*.egg-info
 
 %files -n python3-%{{name}}
 %{{python3_sitelib}}/bencode/

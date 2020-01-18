@@ -77,8 +77,7 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     """Tests the _GetPyPITestDependencies function."""
     test_writer = self._CreateTestWriter()
 
-    expected_test_dependencies = [
-        'funcsigs ; python_version < \'3.0\'', 'mock', 'pbr', 'six']
+    expected_test_dependencies = ['mock', 'pbr', 'six']
 
     python_dependencies = test_writer._GetPyPIPythonDependencies(
         exclude_version=True)

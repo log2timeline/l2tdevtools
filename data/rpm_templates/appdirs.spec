@@ -16,18 +16,9 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Trent Mick; Sridhar Ratnakumar; Jeff Rouse <trentm@gmail.com; github@srid.name; jr@its.to>
 Url: http://github.com/ActiveState/appdirs
-BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
+BuildRequires: python3-setuptools, python3-devel
 
 %description
-A small Python module for determining appropriate
-platform-specific dirs, e.g. a "user data dir".
-
-%package -n python2-%{{name}}
-Obsoletes: python-%{{name}} < %{{version}}
-Provides: python-%{{name}} = %{{version}}
-Summary: A small Python module for determining appropriate platform-specific dirs, e.g. a "user data dir".
-
-%description -n python2-%{{name}}
 A small Python module for determining appropriate
 platform-specific dirs, e.g. a "user data dir".
 
@@ -42,21 +33,14 @@ platform-specific dirs, e.g. a "user data dir".
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py2_build
 %py3_build
 
 %install
-%py2_install
 %py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
-
-%files -n python2-%{{name}}
-%license LICENSE.txt
-%{{python2_sitelib}}/appdirs.py*
-%{{python2_sitelib}}/appdirs*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE.txt
