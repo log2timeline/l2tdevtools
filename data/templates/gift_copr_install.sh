@@ -21,7 +21,7 @@ ${debug_dependencies}
 
 sudo dnf install dnf-plugins-core
 sudo dnf copr -y enable @gift/dev
-sudo dnf install -y $${PYTHON${python_version}_DEPENDENCIES}
+sudo dnf install -y $${PYTHON3_DEPENDENCIES}
 
 if [[ "$$*" =~ "include-debug" ]]; then
     sudo dnf install -y $${DEBUG_DEPENDENCIES}

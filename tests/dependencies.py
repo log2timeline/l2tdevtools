@@ -74,14 +74,6 @@ class DependencyHelperTest(test_lib.BaseTestCase):
 
     # TODO: add test with version with suffix 17.0.0b1
 
-  def testCheckSQLite3(self):
-    """Tests the _CheckSQLite3 function."""
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
-    dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    dependency_helper._CheckSQLite3()
-
   def testImportPythonModule(self):
     """Tests the _ImportPythonModule function."""
     configuration_file = self._GetTestFilePath(['dependencies.ini'])

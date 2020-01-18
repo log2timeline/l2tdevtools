@@ -72,7 +72,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_formatted_python_dependencies = (
-        'PYTHON2_DEPENDENCIES="python3-pyyaml";')
+        'PYTHON3_DEPENDENCIES="python3-pyyaml";')
 
     python_dependencies = test_writer._GetRPMPythonDependencies(
         python_version=3)
