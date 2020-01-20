@@ -46,9 +46,9 @@ class DPKGBuildHelper(interface.BuildHelper):
       'dpkg-dev',
       'fakeroot',
       'quilt',
-      'python-all',
-      'python-all-dev',
-      'python-setuptools',
+      'python3-all',
+      'python3-all-dev',
+      'python3-setuptools',
   ])
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
@@ -453,11 +453,6 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
 
-      if 'python' in package_name:
-        package_name = package_name.replace('python', 'python3')
-        if not self._CheckIsInstalled(package_name):
-          missing_packages.append(package_name)
-
     for name in self._project_definition.build_dependencies:
       package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(name, name)
       if package_name not in self._project_definition.dpkg_build_dependencies:
@@ -466,11 +461,6 @@ class DPKGBuildHelper(interface.BuildHelper):
     for package_name in self._project_definition.dpkg_build_dependencies:
       if not self._CheckIsInstalled(package_name):
         missing_packages.append(package_name)
-
-      if 'python' in package_name:
-        package_name = package_name.replace('python', 'python3')
-        if not self._CheckIsInstalled(package_name):
-          missing_packages.append(package_name)
 
     return missing_packages
 
@@ -755,7 +745,8 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
         build_configuration.has_bin_directory = True
 
       dist_packages = os.path.join(
-          installroot_path, 'usr', 'local', 'lib', 'python2.7', 'dist-packages')
+          installroot_path, 'usr', 'local', 'lib', 'python3.*', 'dist-packages')
+      dist_packages = glob.glob(dist_packages)[0]
 
       for directory_entry in os.listdir(dist_packages):
         directory_entry_path = os.path.join(dist_packages, directory_entry)
@@ -828,8 +819,8 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
       project_name = self._project_definition.dpkg_name
     else:
       project_name = source_helper_object.project_name
-      if not project_name.startswith('python-'):
-        project_name = 'python-{0:s}'.format(project_name)
+      if not project_name.startswith('python3-'):
+        project_name = 'python3-{0:s}'.format(project_name)
 
     project_version = source_helper_object.GetProjectVersion()
     if project_version and project_version.startswith('1!'):
@@ -934,7 +925,11 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
 
     if project_name.startswith('python-'):
       project_name = 'python3-{0:s}'.format(project_name[7])
+      self._RemoveOlderDPKGPackages(project_name, project_version)
 
+    elif (project_name.startswith('python2-') or
+          project_name.startswith('python3-')):
+      project_name = 'python3-{0:s}'.format(project_name[8])
       self._RemoveOlderDPKGPackages(project_name, project_version)
 
 
@@ -976,8 +971,8 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
       project_name = self._project_definition.dpkg_source_name
     else:
       project_name = source_helper_object.project_name
-      if not project_name.startswith('python-'):
-        project_name = 'python-{0:s}'.format(project_name)
+      if not project_name.startswith('python3-'):
+        project_name = 'python3-{0:s}'.format(project_name)
 
     project_version = source_helper_object.GetProjectVersion()
     if project_version and project_version.startswith('1!'):

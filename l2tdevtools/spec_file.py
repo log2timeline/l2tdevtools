@@ -830,7 +830,7 @@ class RPMSpecFileGenerator(object):
     if project_definition.architecture_dependent:
       rpm_build_dependencies = ['gcc', 'python3-devel', 'python3-setuptools']
     else:
-      rpm_build_dependencies = ['python3-setuptools']
+      rpm_build_dependencies = ['python3-devel', 'python3-setuptools']
 
     if project_definition.rpm_build_dependencies:
       rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
