@@ -65,12 +65,11 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
 
     return '\n'.join(formatted_development_dependencies)
 
-  def _FormatRPMPythonDependencies(self, python_dependencies, python_version=2):
+  def _FormatRPMPythonDependencies(self, python_dependencies):
     """Formats RPM Python dependencies for the template.
 
     Args:
       python_dependencies (list[str]): RPM package names of Python dependencies.
-      python_version (Optional[int]): Python major version.
 
     Returns:
       str: formatted RPM Python dependencies.
@@ -79,8 +78,7 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
 
     for index, dependency in enumerate(sorted(python_dependencies)):
       if index == 0:
-        line = 'PYTHON{0:d}_DEPENDENCIES="{1:s}'.format(
-            python_version, dependency)
+        line = 'PYTHON3_DEPENDENCIES="{0:s}'.format(dependency)
       else:
         line = '                      {0:s}'.format(dependency)
 
@@ -138,13 +136,10 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a gift_copr_install.sh file."""
-    python_version = 2
-
-    python_dependencies = self._GetRPMPythonDependencies(
-        python_version=python_version)
+    python_dependencies = self._GetRPMPythonDependencies(python_version=3)
 
     test_dependencies = self._GetRPMTestDependencies(
-        python_dependencies, python_version=python_version)
+        python_dependencies, python_version=3)
 
     # TODO: replace by dev_dependencies.ini or equiv.
     development_dependencies = ['pylint']
@@ -155,7 +150,7 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
     debug_dependencies = self._GetRPMDebugDependencies(python_dependencies)
 
     formatted_python_dependencies = self._FormatRPMPythonDependencies(
-        python_dependencies, python_version=python_version)
+        python_dependencies)
 
     formatted_test_dependencies = self._FormatRPMTestDependencies(
         test_dependencies)
@@ -171,7 +166,6 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
         'development_dependencies': formatted_development_dependencies,
         'project_name': self._project_definition.name,
         'python_dependencies': formatted_python_dependencies,
-        'python_version': '{0:d}'.format(python_version),
         'test_dependencies': formatted_test_dependencies}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
