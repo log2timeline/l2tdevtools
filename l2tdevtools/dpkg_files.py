@@ -352,7 +352,6 @@ class DPKGBuildFilesGenerator(object):
     self._dependency_definitions = dependency_definitions
     self._project_definition = project_definition
     self._project_version = project_version
-    self._python2_only_dependencies = {}
 
   def _GenerateFile(
       self, template_filename, template_data, template_values, output_filename):
@@ -454,9 +453,6 @@ class DPKGBuildFilesGenerator(object):
 
     architecture = self._GetArchitecture()
 
-    python2_only = self._project_definition.IsPython2Only()
-    python3_only = self._project_definition.IsPython3Only()
-
     build_depends = []
     python2_build_depends = []
     python3_build_depends = []
@@ -494,12 +490,8 @@ class DPKGBuildFilesGenerator(object):
 
       build_depends.append(dependency)
 
-    if (self._project_definition.build_system == 'setup_py' and
-        not python3_only):
+    if self._project_definition.build_system == 'setup_py':
       build_depends.extend(python2_build_depends)
-
-    if (self._project_definition.build_system == 'setup_py' and
-        not python2_only):
       build_depends.extend(python3_build_depends)
 
     if build_depends:
@@ -524,8 +516,7 @@ class DPKGBuildFilesGenerator(object):
       if dependency.startswith('python-'):
         python_depends.append(dependency)
 
-        if not self._IsPython2OnlyDependency(dependency):
-          python3_depends.append('python3-{0:s}'.format(dependency[7:]))
+        python3_depends.append('python3-{0:s}'.format(dependency[7:]))
       else:
         depends.append(dependency)
 
@@ -562,12 +553,7 @@ class DPKGBuildFilesGenerator(object):
       control_template.extend(self._CONTROL_TEMPLATE_CONFIGURE_MAKE)
 
     elif self._project_definition.build_system == 'setup_py':
-      if python2_only:
-        control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY)
-      elif python3_only:
-        control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON3_ONLY)
-      else:
-        control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY)
+      control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY)
 
       # TODO: add configuration setting to indicate tools should be packaged.
       if package_name not in ('idna', 'mock', 'psutil'):
@@ -627,11 +613,8 @@ class DPKGBuildFilesGenerator(object):
 
       template_values = {'package_name': package_name}
 
-      if not self._project_definition.IsPython3Only():
-        self._GeneratePython2ModuleInstallFile(dpkg_path, template_values)
-
-      if not self._project_definition.IsPython2Only():
-        self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
+      self._GeneratePython2ModuleInstallFile(dpkg_path, template_values)
+      self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
 
       if (self._build_configuration and
           self._build_configuration.has_bin_directory):
@@ -819,12 +802,7 @@ class DPKGBuildFilesGenerator(object):
         'setup_name': setup_name,
         'with_quilt': with_quilt}
 
-    if self._project_definition.IsPython2Only():
-      rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON2_ONLY
-    elif self._project_definition.IsPython3Only():
-      rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON3_ONLY
-    else:
-      rules_template = self._RULES_TEMPLATE_SETUP_PY
+    rules_template = self._RULES_TEMPLATE_SETUP_PY
 
     # TODO: replace manual write of rules file by call to _GenerateFile.
     template_filename = self._project_definition.dpkg_template_rules
@@ -941,24 +919,6 @@ class DPKGBuildFilesGenerator(object):
       return self._project_definition.dpkg_source_name
 
     return self._project_definition.name
-
-  def _IsPython2OnlyDependency(self, dependency):
-    """Checks if a dependency is Python 2 only.
-
-    Args:
-      dependency (str): name of the dependency.
-
-    Returns:
-      bool: True if Python 2 only, False if not or None if dependency
-          was not found.
-    """
-    if not self._python2_only_dependencies:
-      for definition in self._dependency_definitions.values():
-        if definition.IsPython2Only():
-          package_name = self._GetPackageName(definition)
-          self._python2_only_dependencies[package_name] = definition
-
-    return dependency in self._python2_only_dependencies
 
   def GenerateFiles(self, dpkg_path):
     """Generates the dpkg build files.

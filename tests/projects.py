@@ -16,12 +16,10 @@ from tests import test_lib
 class ProjectDefinitionTest(test_lib.BaseTestCase):
   """Tests for the project definition."""
 
-  def testIsPython2Only(self):
-    """Tests the IsPython2Only function."""
-    project_definition = projects.ProjectDefinition('test')
-
-    result = project_definition.IsPython2Only()
-    self.assertFalse(result)
+  def testInitialize(self):
+    """Tests the __init__ function."""
+    project_definition = projects.ProjectDefinition('name')
+    self.assertIsNotNone(project_definition)
 
 
 class ProjectVersionDefinitionTest(test_lib.BaseTestCase):

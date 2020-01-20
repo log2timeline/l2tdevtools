@@ -34,22 +34,13 @@ class RPMSpecFileGenerator(object):
     super(RPMSpecFileGenerator, self).__init__()
     self._data_path = data_path
 
-  def _GetBuildDefinition(self, python2_only):
+  def _GetBuildDefinition(self):
     """Retrieves the build definition.
-
-    Args:
-      python2_only (bool): True if the spec file should build Python 2
-          packages only.
 
     Returns:
       str: build definition.
     """
-    lines = ['%py2_build']
-    if not python2_only:
-      lines.append('%py3_build')
-
-    lines.append('')
-    return '\n'.join(lines)
+    return '\n'.join(['%py2_build', '%py3_build', ''])
 
   def _GetDocumentationFilesDefinition(self, source_directory):
     """Retrieves the documentation files definition.
@@ -72,33 +63,29 @@ class RPMSpecFileGenerator(object):
 
     return doc_file_definition
 
-  def _GetInstallDefinition(self, project_name, python2_only):
+  def _GetInstallDefinition(self, project_name):
     """Retrieves the install definition.
 
     Args:
       project_name (str): name of the project.
-      python2_only (bool): True if the spec file should build Python 2
-          packages only.
 
     Returns:
       str: install definition.
     """
-    lines = ['%py2_install']
-    if not python2_only:
-      lines.append('%py3_install')
-
-    lines.extend([
-        'rm -rf %{buildroot}/usr/share/doc/%{name}/'])
+    lines = [
+        '%py2_install',
+        '%py3_install',
+        'rm -rf %{buildroot}/usr/share/doc/%{name}/']
 
     if project_name == 'astroid':
-      lines.append('rm -rf %{buildroot}%{python2_sitelib}/astroid/tests')
-      if not python2_only:
-        lines.append('rm -rf %{buildroot}%{python3_sitelib}/astroid/tests')
+      lines.extend([
+          'rm -rf %{buildroot}%{python2_sitelib}/astroid/tests',
+          'rm -rf %{buildroot}%{python3_sitelib}/astroid/tests'])
 
     elif project_name == 'pylint':
-      lines.append('rm -rf %{buildroot}%{python2_sitelib}/pylint/test')
-      if not python2_only:
-        lines.append('rm -rf %{buildroot}%{python3_sitelib}/pylint/test')
+      lines.extend([
+          'rm -rf %{buildroot}%{python2_sitelib}/pylint/test',
+          'rm -rf %{buildroot}%{python3_sitelib}/pylint/test'])
 
     lines.append('')
     return '\n'.join(lines)
@@ -347,26 +334,18 @@ class RPMSpecFileGenerator(object):
           '%{{python3_sitelib}}/{3:s}*.egg-info\n').format(
               name, license_line, doc_line, setup_name))
 
-  def GenerateWithSetupPy(
-      self, project_definition, source_directory, build_log_file):
+  def GenerateWithSetupPy(self, source_directory, build_log_file):
     """Generates the RPM spec file with setup.py.
 
     Args:
-      project_definition (ProjectDefinition): project definition.
       source_directory (str): path of the source directory.
       build_log_file (str): path of the build log file.
 
     Returns:
       bool: True if successful, False otherwise.
     """
-    python_executable = sys.executable
-    if project_definition.IsPython2Only():
-      # Cannot generate a spec file if the projects checks for the Python
-      # version in its setup.py
-      python_executable = 'python2'
-
     command = '{0:s} setup.py bdist_rpm --spec-only >> {1:s} 2>&1'.format(
-        python_executable, build_log_file)
+        sys.executable, build_log_file)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -409,8 +388,6 @@ class RPMSpecFileGenerator(object):
 
     generated_build_definition = False
     generated_install_definition = False
-
-    python2_only = project_definition.IsPython2Only()
 
     if project_definition.rpm_name:
       package_name = project_definition.rpm_name
@@ -558,7 +535,7 @@ class RPMSpecFileGenerator(object):
                   output_file_object, python_package_name, summary,
                   python2_requires, description)
 
-          if not python2_only and not has_python3_package:
+          if not has_python3_package:
             if project_name != package_name:
               python_package_name = 'python3-{0:s}'.format(package_name)
             else:
@@ -596,7 +573,7 @@ class RPMSpecFileGenerator(object):
               line.startswith(
                   'env CFLAGS="$RPM_OPT_FLAGS" python3 setup.py build')):
           if not generated_build_definition:
-            line = self._GetBuildDefinition(python2_only)
+            line = self._GetBuildDefinition()
             generated_build_definition = True
 
         elif (line.startswith('python setup.py install') or
@@ -605,7 +582,7 @@ class RPMSpecFileGenerator(object):
               line.startswith('%py2_install') or
               line.startswith('%py3_install')):
           if not generated_install_definition:
-            line = self._GetInstallDefinition(project_name, python2_only)
+            line = self._GetInstallDefinition(project_name)
             generated_install_definition = True
 
         elif line == 'rm -rf $RPM_BUILD_ROOT\n':
@@ -639,15 +616,14 @@ class RPMSpecFileGenerator(object):
         output_file_object, project_definition, project_name,
         python_package_name, license_line, doc_line)
 
-    if not python2_only:
-      if project_name != package_name:
-        python_package_name = 'python3-{0:s}'.format(package_name)
-      else:
-        python_package_name = 'python3-%{name}'
+    if project_name != package_name:
+      python_package_name = 'python3-{0:s}'.format(package_name)
+    else:
+      python_package_name = 'python3-%{name}'
 
-      self._WritePython3PackageFiles(
-          output_file_object, project_definition, project_name,
-          python_package_name, license_line, doc_line)
+    self._WritePython3PackageFiles(
+        output_file_object, project_definition, project_name,
+        python_package_name, license_line, doc_line)
 
     if project_name == 'plaso':
       output_file_object.write(
@@ -840,8 +816,6 @@ class RPMSpecFileGenerator(object):
     Returns:
       bool: True if successful, False otherwise.
     """
-    python2_only = project_definition.IsPython2Only()
-
     if project_name in ('lz4', 'psutil', 'pysqlite', 'yara-python'):
       rpm_build_dependencies = ['gcc']
 
@@ -859,14 +833,13 @@ class RPMSpecFileGenerator(object):
     if project_definition.rpm_build_dependencies:
       rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
 
-    if not python2_only:
-      rpm_build_dependencies.extend(['python3-setuptools', 'python3-devel'])
+    rpm_build_dependencies.extend(['python3-setuptools', 'python3-devel'])
 
-      if project_definition.rpm_build_dependencies:
-        for dependency in project_definition.rpm_build_dependencies:
-          dependency = dependency.replace('python-', 'python3-')
-          dependency = dependency.replace('python2-', 'python3-')
-          rpm_build_dependencies.append(dependency)
+    if project_definition.rpm_build_dependencies:
+      for dependency in project_definition.rpm_build_dependencies:
+        dependency = dependency.replace('python-', 'python3-')
+        dependency = dependency.replace('python2-', 'python3-')
+        rpm_build_dependencies.append(dependency)
 
     # TODO: check if already prefixed with python-
 
