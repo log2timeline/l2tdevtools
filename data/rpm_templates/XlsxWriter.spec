@@ -16,20 +16,9 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: John McNamara <jmcnamara@cpan.org>
 Url: https://github.com/jmcnamara/XlsxWriter
-BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
+BuildRequires: python3-setuptools, python3-devel
 
 %description
-XlsxWriter is a Python module for writing files in the Excel
-2007+ XLSX file format. XlsxWriter can be used to write text, numbers,
-formulas and hyperlinks to multiple worksheets and it supports features
-such as formatting and many more.
-
-%package -n python2-%{{name}}
-Obsoletes: python-XlsxWriter < %{{version}}
-Provides: python-XlsxWriter = %{{version}}
-Summary: A Python module for creating Excel XLSX files.
-
-%description -n python2-%{{name}}
 XlsxWriter is a Python module for writing files in the Excel
 2007+ XLSX file format. XlsxWriter can be used to write text, numbers,
 formulas and hyperlinks to multiple worksheets and it supports features
@@ -48,21 +37,14 @@ such as formatting and many more.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py2_build
 %py3_build
 
 %install
-%py2_install
 %py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
-
-%files -n python2-%{{name}}
-%license LICENSE.txt
-%{{python2_sitelib}}/xlsxwriter/
-%{{python2_sitelib}}/XlsxWriter*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE.txt

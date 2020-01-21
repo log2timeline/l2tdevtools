@@ -16,18 +16,9 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Python Packaging Authority <distutils-sig@python.org>
 Url: https://github.com/pypa/setuptools
-BuildRequires: python2-setuptools, python2-devel, python3-setuptools, python3-devel
+BuildRequires: python3-setuptools, python3-devel
 
 %description
-Easily download, build, install, upgrade, and uninstall
-Python packages
-
-%package -n python2-%{{name}}
-Obsoletes: python-%{{name}} < %{{version}}
-Provides: python-%{{name}} = %{{version}}
-Summary: Easily download, build, install, upgrade, and uninstall Python packages
-
-%description -n python2-%{{name}}
 Easily download, build, install, upgrade, and uninstall
 Python packages
 
@@ -42,23 +33,14 @@ Python packages
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py2_build
 %py3_build
 
 %install
-%py2_install
 %py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
-
-%files -n python2-%{{name}}
-%license LICENSE
-%{{python2_sitelib}}/pkg_resources
-%{{python2_sitelib}}/easy_install.py*
-%{{python2_sitelib}}/setuptools
-%{{python2_sitelib}}/setuptools*.egg-info
 
 %files -n python3-%{{name}}
 %license LICENSE

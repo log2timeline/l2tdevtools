@@ -15,18 +15,9 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Victor M. Alvarez <plusvic@gmail.com;vmalvarez@virustotal.com>
 Url: https://github.com/VirusTotal/yara-python
-BuildRequires: gcc, python2-setuptools, python2-devel, python3-setuptools, python3-devel
+BuildRequires: gcc, python3-setuptools, python3-devel
 
 %description
-This is a library for using YARA from Python. You can use
-it to compile, save and load YARA rules, and to scan files or data strings.
-
-%package -n python2-yara
-Obsoletes: python-yara < %{{version}}
-Provides: python-yara = %{{version}}
-Summary: Python interface for YARA
-
-%description -n python2-yara
 This is a library for using YARA from Python. You can use
 it to compile, save and load YARA rules, and to scan files or data strings.
 
@@ -41,21 +32,14 @@ it to compile, save and load YARA rules, and to scan files or data strings.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py2_build
 %py3_build
 
 %install
-%py2_install
 %py3_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
 rm -rf %{{buildroot}}
-
-%files -n python2-yara
-%license LICENSE
-%{{_libdir}}/python2*/site-packages/*.so
-%{{_libdir}}/python2*/site-packages/yara_python*.egg-info
 
 %files -n python3-yara
 %license LICENSE
