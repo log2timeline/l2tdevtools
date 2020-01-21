@@ -112,3 +112,49 @@ class DPKGControlWriter(interface.DependencyFileWriter):
 
     with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
+
+
+class DPKGRulesWriter(interface.DependencyFileWriter):
+  """Dpkg rules file writer."""
+
+  PATH = os.path.join('config', 'dpkg', 'rules')
+
+  _FILE_CONTENT = [
+      '#!/usr/bin/make -f',
+      '',
+      '%:',
+      '\tdh $@ --buildsystem=python_distutils --with=python3',
+      '',
+      '.PHONY: override_dh_auto_clean',
+      'override_dh_auto_clean:',
+      '\tset -ex; for python in $(shell py3versions -r); do \\',
+      '\t\t$$python setup.py clean -a; \\',
+      '\tdone;',
+      ('\trm -rf build {project_name:s}.egg-info/SOURCES.txt '
+       '{project_name:s}.egg-info/PKG-INFO'),
+      '\tfind . -name __pycache__ -type d -exec rm -rf {{}} \\; || true',
+      '',
+      '.PHONY: override_dh_auto_build',
+      'override_dh_auto_build:',
+      '\tset -ex; for python in $(shell py3versions -r); do \\',
+      '\t\t$$python setup.py build; \\',
+      '\tdone;',
+      '',
+      '.PHONY: override_dh_auto_install',
+      'override_dh_auto_install:',
+      '\tset -ex; for python in $(shell py3versions -r); do \\',
+      '\t\t$$python setup.py install --root=$(CURDIR) --install-layout=deb; \\',
+      '\tdone;',
+      '',
+      '']
+
+  def Write(self):
+    """Writes a dpkg control file."""
+    template_mappings = {
+        'project_name': self._project_definition.name}
+
+    file_content = '\n'.join(self._FILE_CONTENT)
+    file_content = file_content.format(**template_mappings)
+
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+      file_object.write(file_content)
