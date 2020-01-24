@@ -21,7 +21,7 @@ override_dh_auto_test:
 .PHONY: override_dh_strip
 override_dh_strip:
 ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
-	dh_strip -plibtsk13 --dbg-package=libtsk13-dbg
+	dh_strip -plibtsk19 --dbg-package=libtsk19-dbg
 	dh_strip -psleuthkit --dbg-package=sleuthkit-dbg
 endif
 

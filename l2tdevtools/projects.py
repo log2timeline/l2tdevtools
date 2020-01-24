@@ -32,8 +32,6 @@ class ProjectDefinition(object):
         files.
     dpkg_template_control (str): name of the dpkg control template file.
     dpkg_template_install (list[str]): names of the dpkg install template files.
-    dpkg_template_install_python2 (list[str]): names of the dpkg Python 2
-        install template files.
     dpkg_template_install_python3 (list[str]): names of the dpkg Python 3
         install template files.
     download_url (str): source package download URL.
@@ -48,7 +46,6 @@ class ProjectDefinition(object):
     pypi_name (str): name of the project on PyPI.
     rpm_build_dependencies (list[str]): rpm build dependencies.
     rpm_name (str): RPM package name.
-    rpm_python2_prefix (str): Python 2 RPM package prefix.
     rpm_template_spec (str): name of the rpm spec file.
     setup_name (str): project name used in setup.py.
     srpm_name (str): source RPM package name.
@@ -77,7 +74,6 @@ class ProjectDefinition(object):
     self.dpkg_template_additional = None
     self.dpkg_template_control = None
     self.dpkg_template_install = None
-    self.dpkg_template_install_python2 = None
     self.dpkg_template_install_python3 = None
     self.dpkg_template_rules = None
     self.download_url = None
@@ -89,7 +85,6 @@ class ProjectDefinition(object):
     self.msi_prebuild = None
     self.rpm_build_dependencies = None
     self.rpm_name = None
-    self.rpm_python2_prefix = None
     self.rpm_template_spec = None
     self.patches = None
     self.pkg_configure_options = None
@@ -234,8 +229,6 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'dpkg_template_control')
       project_definition.dpkg_template_install = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_install')
-      project_definition.dpkg_template_install_python2 = self._GetConfigValue(
-          config_parser, section_name, 'dpkg_template_install_python2')
       project_definition.dpkg_template_install_python3 = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_install_python3')
       project_definition.dpkg_template_rules = self._GetConfigValue(
@@ -256,8 +249,6 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'rpm_build_dependencies')
       project_definition.rpm_name = self._GetConfigValue(
           config_parser, section_name, 'rpm_name')
-      project_definition.rpm_python2_prefix = self._GetConfigValue(
-          config_parser, section_name, 'rpm_python2_prefix')
       project_definition.rpm_template_spec = self._GetConfigValue(
           config_parser, section_name, 'rpm_template_spec')
       project_definition.patches = self._GetConfigValue(
@@ -330,14 +321,6 @@ class ProjectDefinitionReader(object):
         project_definition.dpkg_template_install = (
             project_definition.dpkg_template_install.split(','))
 
-      if project_definition.dpkg_template_install_python2 is None:
-        project_definition.dpkg_template_install_python2 = []
-      elif isinstance(
-          project_definition.dpkg_template_install_python2,
-          py2to3.STRING_TYPES):
-        project_definition.dpkg_template_install_python2 = (
-            project_definition.dpkg_template_install_python2.split(','))
-
       if project_definition.dpkg_template_install_python3 is None:
         project_definition.dpkg_template_install_python3 = []
       elif isinstance(
@@ -352,13 +335,6 @@ class ProjectDefinitionReader(object):
           project_definition.rpm_build_dependencies, py2to3.STRING_TYPES):
         project_definition.rpm_build_dependencies = (
             project_definition.rpm_build_dependencies.split(','))
-
-      if (project_definition.rpm_python2_prefix is None and
-          project_definition.rpm_name is not None):
-        if (project_definition.rpm_name.startswith('python-') or
-            project_definition.rpm_name.startswith('python2-')):
-          project_definition.rpm_python2_prefix, _, _ = (
-              project_definition.rpm_name.partition('-'))
 
       if project_definition.patches is None:
         project_definition.patches = []

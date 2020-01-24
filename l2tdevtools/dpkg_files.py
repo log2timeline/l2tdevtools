@@ -78,23 +78,6 @@ class DPKGBuildFilesGenerator(object):
       ' {description_long:s}',
       '']
 
-  _CONTROL_TEMPLATE_SETUP_PY_PYTHON2_ONLY = [
-      'Source: {source_package_name:s}',
-      'Section: python',
-      'Priority: extra',
-      'Maintainer: {upstream_maintainer:s}',
-      'Build-Depends: debhelper (>= 9){build_depends:s}, dh-python',
-      'Standards-Version: 4.1.4',
-      'X-Python-Version: >= 2.7',
-      'Homepage: {upstream_homepage:s}',
-      '',
-      'Package: {python_package_name:s}',
-      'Architecture: {architecture:s}',
-      'Depends: {python_depends:s}',
-      'Description: {description_short:s}',
-      ' {description_long:s}',
-      '']
-
   _CONTROL_TEMPLATE_SETUP_PY_PYTHON3_ONLY = [
       'Source: {source_package_name:s}',
       'Section: python',
@@ -105,42 +88,18 @@ class DPKGBuildFilesGenerator(object):
       'X-Python3-Version: >= 3.4',
       'Homepage: {upstream_homepage:s}',
       '',
-      'Package: {python_package_name:s}',
+      'Package: {python3_package_name:s}',
       'Architecture: {architecture:s}',
       'Depends: {python3_depends:s}',
       'Description: {description_short:s}',
       ' {description_long:s}',
       '']
 
-  _CONTROL_TEMPLATE_SETUP_PY = [
-      'Source: {source_package_name:s}',
-      'Section: python',
-      'Priority: extra',
-      'Maintainer: {upstream_maintainer:s}',
-      'Build-Depends: debhelper (>= 9){build_depends:s}, dh-python',
-      'Standards-Version: 4.1.4',
-      'X-Python-Version: >= 2.7',
-      'X-Python3-Version: >= 3.4',
-      'Homepage: {upstream_homepage:s}',
-      '',
-      'Package: {python_package_name:s}',
-      'Architecture: {architecture:s}',
-      'Depends: {python_depends:s}',
-      'Description: Python 2 module of {description_name:s}',
-      ' {description_long:s}',
-      '',
-      'Package: {python3_package_name:s}',
-      'Architecture: {architecture:s}',
-      'Depends: {python3_depends:s}',
-      'Description: Python 3 module of {description_name:s}',
-      ' {description_long:s}',
-      '']
-
   _CONTROL_TEMPLATE_SETUP_PY_TOOLS = [
       'Package: {source_package_name:s}-tools',
       'Architecture: all',
-      ('Depends: {python_package_name:s} (>= ${{binary:Version}}), '
-       'python (>= 2.7~), ${{python:Depends}}, ${{misc:Depends}}'),
+      ('Depends: {python3_package_name:s} (>= ${{binary:Version}}), '
+       'python3 (>= 3.5~), ${{python3:Depends}}, ${{misc:Depends}}'),
       'Description: Tools of {description_name:s}',
       ' {description_long:s}',
       '']
@@ -150,11 +109,6 @@ class DPKGBuildFilesGenerator(object):
 
   _INSTALL_TEMPLATE_PYTHON_DATA = '\n'.join([
       'data/* usr/share/{package_name:s}',
-      ''])
-
-  _INSTALL_TEMPLATE_PYTHON2 = '\n'.join([
-      'usr/lib/python2*/dist-packages/{package_name:s}/',
-      'usr/lib/python2*/dist-packages/{package_name:s}*.egg-info/*',
       ''])
 
   _INSTALL_TEMPLATE_PYTHON3 = '\n'.join([
@@ -170,7 +124,7 @@ class DPKGBuildFilesGenerator(object):
       '#!/usr/bin/make -f',
       '',
       '# Uncomment this to turn on verbose mode.',
-      '#export DH_VERBOSE=1',
+      '# export DH_VERBOSE=1',
       '',
       '# This has to be exported to make some magic below work.',
       'export DH_OPTIONS',
@@ -188,51 +142,7 @@ class DPKGBuildFilesGenerator(object):
       '.PHONY: override_dh_install',
       'override_dh_install:',
       '\t# Create the {package_name:s} package.',
-      '{install_package:s}',
-      '# The {package_name:s}-dbg package is created by dh_strip.',
       '\tdh_install',
-      '',
-      '.PHONY: override_dh_installmenu',
-      'override_dh_installmenu:',
-      '',
-      '.PHONY: override_dh_installmime',
-      'override_dh_installmime:',
-      '',
-      '.PHONY: override_dh_installmodules',
-      'override_dh_installmodules:',
-      '',
-      '.PHONY: override_dh_installlogcheck',
-      'override_dh_installlogcheck:',
-      '',
-      '.PHONY: override_dh_installlogrotate',
-      'override_dh_installlogrotate:',
-      '',
-      '.PHONY: override_dh_installpam',
-      'override_dh_installpam:',
-      '',
-      '.PHONY: override_dh_installppp',
-      'override_dh_installppp:',
-      '',
-      '.PHONY: override_dh_installudev',
-      'override_dh_installudev:',
-      '',
-      '.PHONY: override_dh_installwm',
-      'override_dh_installwm:',
-      '',
-      '.PHONY: override_dh_installxfonts',
-      'override_dh_installxfonts:',
-      '',
-      '.PHONY: override_dh_gconf',
-      'override_dh_gconf:',
-      '',
-      '.PHONY: override_dh_icons',
-      'override_dh_icons:',
-      '',
-      '.PHONY: override_dh_perl',
-      'override_dh_perl:',
-      '',
-      '.PHONY: override_dh_pysupport',
-      'override_dh_pysupport:',
       '',
       '.PHONY: override_dh_strip',
       'override_dh_strip:',
@@ -243,25 +153,6 @@ class DPKGBuildFilesGenerator(object):
       '.PHONY: override_dh_shlibdeps',
       'override_dh_shlibdeps:',
       '\tdh_shlibdeps -L{package_name:s} -l${{CURDIR}}/debian/tmp/usr/lib',
-      ''])
-
-  # Force the build system to setup.py here in case the package ships
-  # a Makefile or equivalent.
-  _RULES_TEMPLATE_SETUP_PY_PYTHON2_ONLY = '\n'.join([
-      '#!/usr/bin/make -f',
-      '',
-      '%:',
-      '\tdh $@ --buildsystem=python_distutils --with=python2{with_quilt:s}',
-      '',
-      '.PHONY: override_dh_auto_clean',
-      'override_dh_auto_clean:',
-      '\tdh_auto_clean',
-      ('\trm -rf build {setup_name:s}.egg-info/SOURCES.txt '
-       '{setup_name:s}.egg-info/PKG-INFO'),
-      '',
-      '.PHONY: override_dh_auto_install',
-      'override_dh_auto_install:',
-      '\tdh_auto_install --destdir $(CURDIR)',
       ''])
 
   # Force the build system to setup.py here in case the package ships
@@ -280,6 +171,7 @@ class DPKGBuildFilesGenerator(object):
       ('\trm -rf build {setup_name:s}.egg-info/requires.txt '
        '{setup_name:s}.egg-info/SOURCES.txt '
        '{setup_name:s}.egg-info/PKG-INFO'),
+      '\tfind . -name __pycache__ -type d -exec rm -rf {{}} \\; || true',
       '',
       '.PHONY: override_dh_auto_build',
       'override_dh_auto_build:',
@@ -289,34 +181,6 @@ class DPKGBuildFilesGenerator(object):
       '',
       '.PHONY: override_dh_auto_install',
       'override_dh_auto_install:',
-      '\tset -ex; for python in $(shell py3versions -r); do \\',
-      '\t\t$$python setup.py install --root=$(CURDIR) --install-layout=deb; \\',
-      '\tdone;',
-      ''])
-
-  _RULES_TEMPLATE_SETUP_PY = '\n'.join([
-      '#!/usr/bin/make -f',
-      '',
-      '%:',
-      ('\tdh $@ --buildsystem=python_distutils --with=python2,python3'
-       '{with_quilt:s}'),
-      '',
-      '.PHONY: override_dh_auto_clean',
-      'override_dh_auto_clean:',
-      '\tdh_auto_clean',
-      ('\trm -rf build {setup_name:s}.egg-info/SOURCES.txt '
-       '{setup_name:s}.egg-info/PKG-INFO'),
-      '',
-      '.PHONY: override_dh_auto_build',
-      'override_dh_auto_build:',
-      '\tdh_auto_build',
-      '\tset -ex; for python in $(shell py3versions -r); do \\',
-      '\t\t$$python setup.py build; \\',
-      '\tdone;',
-      '',
-      '.PHONY: override_dh_auto_install',
-      'override_dh_auto_install:',
-      '\tdh_auto_install --destdir $(CURDIR)',
       '\tset -ex; for python in $(shell py3versions -r); do \\',
       '\t\t$$python setup.py install --root=$(CURDIR) --install-layout=deb; \\',
       '\tdone;',
@@ -449,12 +313,11 @@ class DPKGBuildFilesGenerator(object):
     source_package_name = self._GetSourcePackageName()
 
     package_name = self._GetPackageName(self._project_definition)
-    python_package_name, python3_package_name = self._GetPythonPackageNames()
+    python3_package_name = self._GetPython3PackageName()
 
     architecture = self._GetArchitecture()
 
     build_depends = []
-    python2_build_depends = []
     python3_build_depends = []
 
     if self._project_definition.patches:
@@ -466,12 +329,6 @@ class DPKGBuildFilesGenerator(object):
     elif self._project_definition.build_system == 'setup_py':
       build_depends.append('dh-python')
 
-      python2_build_depends.append('python-all (>= 2.7~)')
-      python2_build_depends.append('python-setuptools')
-
-      if self._project_definition.architecture_dependent:
-        python2_build_depends.append('python-all-dev')
-
       python3_build_depends.append('python3-all (>= 3.4~)')
       python3_build_depends.append('python3-setuptools')
 
@@ -481,17 +338,19 @@ class DPKGBuildFilesGenerator(object):
     for dependency in self._project_definition.dpkg_build_dependencies:
       if self._project_definition.build_system == 'setup_py':
         if dependency.startswith('python-'):
-          python2_build_depends.append(dependency)
-
           dependency = 'python3-{0:s}'.format(dependency[7:])
           python3_build_depends.append(dependency)
+          continue
 
+        if (dependency.startswith('python2-') or
+            dependency.startswith('python3-')):
+          dependency = 'python3-{0:s}'.format(dependency[8:])
+          python3_build_depends.append(dependency)
           continue
 
       build_depends.append(dependency)
 
     if self._project_definition.build_system == 'setup_py':
-      build_depends.extend(python2_build_depends)
       build_depends.extend(python3_build_depends)
 
     if build_depends:
@@ -509,24 +368,20 @@ class DPKGBuildFilesGenerator(object):
     description_long = '\n '.join(description_long.split('\n'))
 
     depends = []
-    python_depends = []
     python3_depends = []
 
     for dependency in self._project_definition.dpkg_dependencies:
       if dependency.startswith('python-'):
-        python_depends.append(dependency)
-
         python3_depends.append('python3-{0:s}'.format(dependency[7:]))
+      elif (dependency.startswith('python2-') or
+            dependency.startswith('python3-')):
+        python3_depends.append('python3-{0:s}'.format(dependency[8:]))
       else:
         depends.append(dependency)
 
     depends.append('${shlibs:Depends}')
     depends.append('${misc:Depends}')
     depends = ', '.join(depends)
-
-    python_depends.append('${python:Depends}')
-    python_depends.append('${misc:Depends}')
-    python_depends = ', '.join(python_depends)
 
     python3_depends.append('${python3:Depends}')
     python3_depends.append('${misc:Depends}')
@@ -540,8 +395,6 @@ class DPKGBuildFilesGenerator(object):
         'description_name': self._project_definition.name,
         'description_short': description_short,
         'package_name': package_name,
-        'python_depends': python_depends,
-        'python_package_name': python_package_name,
         'python3_depends': python3_depends,
         'python3_package_name': python3_package_name,
         'source_package_name': source_package_name,
@@ -553,7 +406,7 @@ class DPKGBuildFilesGenerator(object):
       control_template.extend(self._CONTROL_TEMPLATE_CONFIGURE_MAKE)
 
     elif self._project_definition.build_system == 'setup_py':
-      control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY)
+      control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON3_ONLY)
 
       # TODO: add configuration setting to indicate tools should be packaged.
       if package_name not in ('idna', 'mock', 'psutil'):
@@ -613,7 +466,6 @@ class DPKGBuildFilesGenerator(object):
 
       template_values = {'package_name': package_name}
 
-      self._GeneratePython2ModuleInstallFile(dpkg_path, template_values)
       self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
 
       if (self._build_configuration and
@@ -627,54 +479,6 @@ class DPKGBuildFilesGenerator(object):
 
       # TODO: add support for data install files.
 
-  def _GeneratePython2ModuleInstallFile(self, dpkg_path, template_values):
-    """Generates the dpkg build Python 2 module .install file.
-
-    Args:
-      dpkg_path (str): path to the dpkg files.
-      template_values (dict[str, str]): template values or None if not defined.
-    """
-    python2_package_name, _ = self._GetPythonPackageNames()
-
-    template_files = (
-        self._project_definition.dpkg_template_install_python2 or [None])
-
-    for template_file in template_files:
-      if template_file:
-        output_filename = template_file
-        template_data = None
-      else:
-        output_filename = '{0:s}.install'.format(python2_package_name)
-        if not self._build_configuration:
-          template_data = self._INSTALL_TEMPLATE_PYTHON2
-        else:
-          template_data = []
-
-          if self._build_configuration.has_module_source_files:
-            template_data.append('usr/lib/python2*/dist-packages/*.py')
-          if self._build_configuration.has_module_shared_object:
-            template_data.append('usr/lib/python2*/dist-packages/*.so')
-
-          module_directories = self._build_configuration.module_directories
-          template_data.extend([
-              'usr/lib/python2*/dist-packages/{0:s}'.format(
-                  module_directory)
-              for module_directory in module_directories])
-
-          if self._build_configuration.has_egg_info_directory:
-            template_data.append(
-                'usr/lib/python2*/dist-packages/*.egg-info/*')
-
-          elif self._build_configuration.has_egg_info_file:
-            template_data.append(
-                'usr/lib/python2*/dist-packages/*.egg-info')
-
-          template_data = '\n'.join(template_data)
-
-      output_filename = os.path.join(dpkg_path, output_filename)
-      self._GenerateFile(
-          template_file, template_data, template_values, output_filename)
-
   def _GeneratePython3ModuleInstallFile(self, dpkg_path, template_values):
     """Generates the dpkg build Python 3 module .install file.
 
@@ -682,7 +486,7 @@ class DPKGBuildFilesGenerator(object):
       dpkg_path (str): path to the dpkg files.
       template_values (dict[str, str]): template values or None if not defined.
     """
-    _, python3_package_name = self._GetPythonPackageNames()
+    python3_package_name = self._GetPython3PackageName()
 
     template_files = (
         self._project_definition.dpkg_template_install_python3 or [None])
@@ -763,20 +567,9 @@ class DPKGBuildFilesGenerator(object):
       configure_options = ' '.join(
           self._project_definition.configure_options)
 
-    install_package = [
-        'debian/tmp/usr/lib/lib*.so.*.*.*']
-
-    lines = []
-    for glob_pattern in install_package:
-      lines.append('\tdh_install "{0:s}" -p {1:s}'.format(
-          glob_pattern, install_package))
-
-    install_package = '\n'.join(lines)
-
     template_values = {
         'build_system': build_system,
         'configure_options': configure_options,
-        'install_package': install_package,
         'package_name': package_name,
         'with_quilt': with_quilt}
 
@@ -802,7 +595,7 @@ class DPKGBuildFilesGenerator(object):
         'setup_name': setup_name,
         'with_quilt': with_quilt}
 
-    rules_template = self._RULES_TEMPLATE_SETUP_PY
+    rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON3_ONLY
 
     # TODO: replace manual write of rules file by call to _GenerateFile.
     template_filename = self._project_definition.dpkg_template_rules
@@ -870,33 +663,20 @@ class DPKGBuildFilesGenerator(object):
 
     if package_name.startswith('python-'):
       package_name = package_name[7:]
+    elif (package_name.startswith('python2-') or
+          package_name.startswith('python3-')):
+      package_name = package_name[8:]
 
     return package_name
 
-  def _GetPythonPackageNames(self):
-    """Retrieves the Python package names.
+  def _GetPython3PackageName(self):
+    """Retrieves the Python 3 package name.
 
     Returns:
-      tuple: contains:
-        str: Python 2 package name.
-        str: Python 3 package name.
+      str: Python 3 package name.
     """
-    if self._project_definition.dpkg_name:
-      package_name = self._project_definition.dpkg_name
-    else:
-      package_name = self._project_definition.name
-
-    python2_package_name = package_name
-
-    if package_name.startswith('python-'):
-      package_name = package_name[7:]
-
-    if not self._project_definition.dpkg_name:
-      python2_package_name = 'python-{0:s}'.format(package_name)
-
-    python3_package_name = 'python3-{0:s}'.format(package_name)
-
-    return python2_package_name, python3_package_name
+    package_name = self._GetPackageName(self._project_definition)
+    return 'python3-{0:s}'.format(package_name)
 
   def _GetPythonSetupName(self):
     """Retrieves the Python setup.py name.
