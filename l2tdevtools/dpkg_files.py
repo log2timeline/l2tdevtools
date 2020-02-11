@@ -157,33 +157,15 @@ class DPKGBuildFilesGenerator(object):
 
   # Force the build system to setup.py here in case the package ships
   # a Makefile or equivalent.
-  _RULES_TEMPLATE_SETUP_PY_PYTHON3_ONLY = '\n'.join([
+  _RULES_TEMPLATE_SETUP_PY = '\n'.join([
       '#!/usr/bin/make -f',
       '',
       '%:',
-      '\tdh $@ --buildsystem=python_distutils --with=python3{with_quilt:s}',
+      '\tdh $@ --buildsystem=pybuild --with=python3{with_quilt:s}',
       '',
-      '.PHONY: override_dh_auto_clean',
-      'override_dh_auto_clean:',
-      '\tset -ex; for python in $(shell py3versions -r); do \\',
-      '\t\t$$python setup.py clean -a; \\',
-      '\tdone;',
-      ('\trm -rf build {setup_name:s}.egg-info/requires.txt '
-       '{setup_name:s}.egg-info/SOURCES.txt '
-       '{setup_name:s}.egg-info/PKG-INFO'),
-      '\tfind . -name __pycache__ -type d -exec rm -rf {{}} \\; || true',
+      '.PHONY: override_dh_auto_tes',
+      'override_dh_auto_test:',
       '',
-      '.PHONY: override_dh_auto_build',
-      'override_dh_auto_build:',
-      '\tset -ex; for python in $(shell py3versions -r); do \\',
-      '\t\t$$python setup.py build; \\',
-      '\tdone;',
-      '',
-      '.PHONY: override_dh_auto_install',
-      'override_dh_auto_install:',
-      '\tset -ex; for python in $(shell py3versions -r); do \\',
-      '\t\t$$python setup.py install --root=$(CURDIR) --install-layout=deb; \\',
-      '\tdone;',
       ''])
 
   _SOURCE_FORMAT_TEMPLATE = '\n'.join([
@@ -443,42 +425,6 @@ class DPKGBuildFilesGenerator(object):
       with open(filename, 'wb') as file_object:
         file_object.write('\n')
 
-  def _GenerateInstallFiles(self, dpkg_path):
-    """Generates the dpkg build .install files.
-
-    Args:
-      dpkg_path (str): path to the dpkg files.
-    """
-    package_name = self._GetPackageName(self._project_definition)
-
-    # TODO: add support for configure_make
-    if self._project_definition.build_system == 'configure_make':
-      template_files = (
-          self._project_definition.dpkg_template_install or [])
-
-      for template_file in template_files:
-        output_filename = os.path.join(dpkg_path, template_file)
-        self._GenerateFile(template_file, '', {}, output_filename)
-
-    elif self._project_definition.build_system == 'setup_py':
-      # Python modules names contain "_" instead of "-"
-      package_name = package_name.replace('-', '_')
-
-      template_values = {'package_name': package_name}
-
-      self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
-
-      if (self._build_configuration and
-          self._build_configuration.has_bin_directory):
-        install_package_name = self._GetPackageName(self._project_definition)
-        output_filename = '{0:s}-tools.install'.format(install_package_name)
-        output_filename = os.path.join(dpkg_path, output_filename)
-        self._GenerateFile(
-            None, self._INSTALL_TEMPLATE_PYTHON_TOOLS, template_values,
-            output_filename)
-
-      # TODO: add support for data install files.
-
   def _GeneratePython3ModuleInstallFile(self, dpkg_path, template_values):
     """Generates the dpkg build Python 3 module .install file.
 
@@ -595,7 +541,7 @@ class DPKGBuildFilesGenerator(object):
         'setup_name': setup_name,
         'with_quilt': with_quilt}
 
-    rules_template = self._RULES_TEMPLATE_SETUP_PY_PYTHON3_ONLY
+    rules_template = self._RULES_TEMPLATE_SETUP_PY
 
     # TODO: replace manual write of rules file by call to _GenerateFile.
     template_filename = self._project_definition.dpkg_template_rules
@@ -712,7 +658,6 @@ class DPKGBuildFilesGenerator(object):
     self._GenerateCompatFile(dpkg_path)
     self._GenerateControlFile(dpkg_path)
     self._GenerateCopyrightFile(dpkg_path)
-    self._GenerateInstallFiles(dpkg_path)
     self._GenerateRulesFile(dpkg_path)
 
     for filename in self._project_definition.dpkg_template_additional:

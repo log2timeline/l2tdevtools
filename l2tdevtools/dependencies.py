@@ -484,6 +484,7 @@ class DependencyHelper(object):
         'pyfwnt',
         'pyfwsi',
         'pylnk',
+        'pyluksde',
         'pymsiecf',
         'pyolecf',
         'pyqcow',
