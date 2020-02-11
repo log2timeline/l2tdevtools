@@ -423,7 +423,7 @@ class DPKGBuildFilesGenerator(object):
     else:
       logging.warning('Missing license file: {0:s}'.format(license_file))
       with open(filename, 'wb') as file_object:
-        file_object.write('\n')
+        file_object.write(b'\n')
 
   def _GeneratePython3ModuleInstallFile(self, dpkg_path, template_values):
     """Generates the dpkg build Python 3 module .install file.
