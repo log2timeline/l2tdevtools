@@ -660,70 +660,7 @@ class RPMSpecFileGenerator(object):
     Returns:
       bool: True if successful, False otherwise.
     """
-    in_python3_package = False
-
     for line in input_file_object.readlines():
-      if in_python3_package and (
-          line.startswith('%changelog') or line.startswith('%exclude ') or
-          line.startswith('%files ') or line.startswith('%package ') or
-          line.startswith('%prep')):
-
-        if line.startswith('%exclude %{python3_sitelib}'):
-          output_file_object.write(line)
-          continue
-
-        output_file_object.write('%endif # %{defined fedora} >= 28\n')
-        output_file_object.write('\n')
-
-        in_python3_package = False
-
-      elif (not in_python3_package and line.startswith('BuildRequires: ') and
-            'python' in line):
-        build_requires = [require.strip() for require in line[15:].split(',')]
-        python_build_requires = [
-            require.strip() for require in build_requires
-            if 'python3' not in require]
-
-        output_file_object.write('%if %{defined fedora} >= 28\n')
-        output_file_object.write('BuildRequires: {0:s}\n'.format(', '.join(
-            build_requires)))
-        output_file_object.write('%else\n')
-        output_file_object.write('BuildRequires: {0:s}\n'.format(', '.join(
-            python_build_requires)))
-        output_file_object.write('%endif\n')
-        continue
-
-      elif line.startswith('%files -n python3-') or (
-          line.startswith('%files -n ') and line.endswith('-python3\n')):
-        output_file_object.write('%if %{defined fedora} >= 28\n')
-        output_file_object.write('\n')
-
-        in_python3_package = True
-
-      elif line.startswith('%package -n python3-') or (
-          line.startswith('%package -n ') and line.endswith('-python3\n')):
-        output_file_object.write('%if %{defined fedora} >= 28\n')
-        output_file_object.write('\n')
-
-        in_python3_package = True
-
-      elif line.startswith('%py3_build') or line.startswith('%py3_install'):
-        output_file_object.write('%if %{defined fedora} >= 28\n')
-        output_file_object.write(line)
-        output_file_object.write('%endif\n')
-        continue
-
-      elif (line.startswith('%configure ') and
-            '--enable-python2 --enable-python3' in line):
-        output_file_object.write('%if %{defined fedora} >= 28\n')
-        output_file_object.write(line)
-        output_file_object.write('%else\n')
-        line = line.replace(
-            '--enable-python2 --enable-python3', '--enable-python')
-        output_file_object.write(line)
-        output_file_object.write('%endif\n')
-        continue
-
       output_file_object.write(line)
 
     return True
@@ -859,7 +796,7 @@ class RPMSpecFileGenerator(object):
     Returns:
       bool: True if successful, False otherwise.
     """
-    with io.BytesIO() as temporary_file_object:
+    with io.StringIO() as temporary_file_object:
       with io.open(spec_file_path, 'r', encoding='utf8') as input_file_object:
         data = input_file_object.read()
         temporary_file_object.write(data)
