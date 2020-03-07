@@ -226,8 +226,9 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
 
       # The format of the download URL is:
       # <a class="js-navigation-open" title="{title}" id="{id}" href="{path}"
+      # Note that class="js-navigation-open " also has been seen to be used.
       expression_string = (
-          '<a class="js-navigation-open" title="[^"]*" id="[^"]*" '
+          '<a class="js-navigation-open[ ]*" title="[^"]*" id="[^"]*" '
           'href="([^"]*)"')
       matches = re.findall(expression_string, page_content)
 
