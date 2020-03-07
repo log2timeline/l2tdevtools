@@ -2,9 +2,11 @@ environment:
   matrix:
   - TARGET: unittests
     MACHINE_TYPE: "x86"
-    PYTHON: "C:\\Python37"
-    PYTHON_VERSION: "3.7"
+    PYTHON: "C:\\Python38"
+    PYTHON_VERSION: "3.8"
+    L2TBINARIES_TRACK: "testing"
   - TARGET: unittests
     MACHINE_TYPE: "amd64"
-    PYTHON: "C:\\Python37-x64"
-    PYTHON_VERSION: "3.7"
+    PYTHON: "C:\\Python38-x64"
+    PYTHON_VERSION: "3.8"
+    L2TBINARIES_TRACK: "testing"
