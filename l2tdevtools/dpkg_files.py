@@ -163,7 +163,7 @@ class DPKGBuildFilesGenerator(object):
       '%:',
       '\tdh $@ --buildsystem=pybuild --with=python3{with_quilt:s}',
       '',
-      '.PHONY: override_dh_auto_tes',
+      '.PHONY: override_dh_auto_test',
       'override_dh_auto_test:',
       '',
       ''])

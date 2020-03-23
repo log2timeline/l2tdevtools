@@ -14,7 +14,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Ero Carrera <ero.carrera@gmail.com>
 Url: https://github.com/erocarrera/pefile
-BuildRequires: python3-setuptools
+BuildRequires: python3-devel, python3-setuptools
 
 %description
 Python module to read and work with Portable Executable
