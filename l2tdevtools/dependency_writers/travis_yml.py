@@ -51,25 +51,25 @@ class TravisYMLWriter(interface.DependencyFileWriter):
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
-        'matrix_pylint3', template_mappings)
+        'jobs_pylint3', template_mappings)
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
-        'matrix_linux', template_mappings)
+        'jobs_linux', template_mappings)
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
-        'matrix_macos', template_mappings)
+        'jobs_macos', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in self._PROJECTS_WITH_DOCKERFILE:
       template_data = self._GenerateFromTemplate(
-          'matrix_dockerfile', template_mappings)
+          'jobs_dockerfile', template_mappings)
       file_content.append(template_data)
 
     if self._project_definition.name in self._PROJECTS_WITH_JENKINS_SUPPORT:
       template_data = self._GenerateFromTemplate(
-          'matrix_jenkins', template_mappings)
+          'jobs_jenkins', template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('footer', template_mappings)
