@@ -55,13 +55,14 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('install', template_mappings)
     file_content.append(template_data)
 
-    template_data = self._GenerateFromTemplate(
-        'install_l2tdevtools', template_mappings)
-    file_content.append(template_data)
+    if self._project_definition.name != 'l2tdevtools':
+      template_data = self._GenerateFromTemplate(
+          'install_l2tdevtools', template_mappings)
+      file_content.append(template_data)
 
-    template_data = self._GenerateFromTemplate(
-        'install_windows_python3', template_mappings)
-    file_content.append(template_data)
+      template_data = self._GenerateFromTemplate(
+          'install_windows_python3', template_mappings)
+      file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('build', template_mappings)
     file_content.append(template_data)
