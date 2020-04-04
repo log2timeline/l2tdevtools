@@ -7,11 +7,11 @@
 
 DPKG_PYTHON3_DEPENDENCIES="";
 
-DPKG_PYTHON3_TEST_DEPENDENCIES="python3-distutils python3-mock python3-pbr python3-setuptools python3-six";
+DPKG_PYTHON3_TEST_DEPENDENCIES="python3-coverage python3-distutils python3-mock python3-pbr python3-setuptools python3-six python3-yaml";
 
 RPM_PYTHON3_DEPENDENCIES="";
 
-RPM_PYTHON3_TEST_DEPENDENCIES="python3-mock python3-pbr python3-setuptools python3-six";
+RPM_PYTHON3_TEST_DEPENDENCIES="python3-mock python3-pbr python3-pyyaml python3-setuptools python3-six";
 
 # Exit on error.
 set -e;
