@@ -185,6 +185,8 @@ class DPKGBuildHelper(interface.BuildHelper):
       source_filename (str): name of the source package file.
       orig_source_filename (str): name of the .orig.tar.gz source package file.
     """
+    posix_epoch = datetime.datetime(1970, 1, 1)
+
     with zipfile.ZipFile(source_filename, 'r') as zip_file:
       with tarfile.open(name=orig_source_filename, mode='w:gz') as tar_file:
         for filename in zip_file.namelist():
@@ -192,13 +194,17 @@ class DPKGBuildHelper(interface.BuildHelper):
             zip_info = zip_file.getinfo(filename)
             tar_info = tarfile.TarInfo(filename)
             tar_info.size = zip_info.file_size
+
             # Populate modification times from zip file into tar archive,
             # as launchpad refuses to build packages containing files with
             # timestamps too far in the past.
             date_time = zip_info.date_time
-            mtime = datetime.datetime(*date_time)
-            mtime = int((mtime - datetime.datetime(1970, 1, 1)).total_seconds())
-            tar_info.mtime = mtime
+            modification_time = datetime.datetime(*date_time)
+            modification_time = int(
+                (modification_time - posix_epoch).total_seconds())
+
+            tar_info.mtime = modification_time
+
             tar_file.addfile(tar_info, fileobj=file_object)
 
   def _CreatePackagingFiles(self, source_directory, project_version):
