@@ -1,2 +1,6 @@
-matrix:
+version: ~> 1.0
+language: generic
+os: linux
+dist: bionic
+jobs:
   include:

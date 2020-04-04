@@ -1,6 +1,3 @@
   - name: "Dockerfile"
     env: TARGET="dockerfile"
-    os: linux
-    dist: xenial
-    sudo: required
     group: edge
