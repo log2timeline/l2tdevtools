@@ -22,6 +22,7 @@ from xml.etree import ElementTree
 from l2tdevtools import projects
 from l2tdevtools import versions
 from l2tdevtools.download_helpers import interface
+from l2tdevtools.lib import definitions
 
 
 class COPRProjectManager(object):
@@ -41,7 +42,7 @@ class COPRProjectManager(object):
       './{http://linux.duke.edu/metadata/repo}data[@type="primary"]/'
       '{http://linux.duke.edu/metadata/repo}location')
 
-  def __init__(self, name, distribution='29'):
+  def __init__(self, name, distribution=None):
     """Initializes a COPR manager.
 
     Args:
@@ -49,7 +50,7 @@ class COPRProjectManager(object):
       distribution (Optional[str]): name of the distribution.
     """
     super(COPRProjectManager, self).__init__()
-    self._distribution = distribution
+    self._distribution = distribution or definitions.DEFAULT_FEDORA_DISTRIBUTION
     self._download_helper = interface.DownloadHelper('')
     self._name = name
 
@@ -277,7 +278,7 @@ class LaunchpadPPAManager(object):
       'http://ppa.launchpad.net/{name:s}/{track:s}/ubuntu/dists'
       '/{distribution:s}/main/source/Sources.gz')
 
-  def __init__(self, name, distribution='bionic'):
+  def __init__(self, name, distribution=None):
     """Initializes a Launchpad PPA manager.
 
     Args:
@@ -285,7 +286,7 @@ class LaunchpadPPAManager(object):
       distribution (Optional[str]): name of the distribution.
     """
     super(LaunchpadPPAManager, self).__init__()
-    self._distribution = distribution
+    self._distribution = distribution or definitions.DEFAULT_UBUNTU_DISTRIBUTION
     self._download_helper = interface.DownloadHelper('')
     self._name = name
 
@@ -436,8 +437,10 @@ class PackagesManager(object):
       projects_file (str): path to the projects.ini file.
       distribution (Optional[str]): name of the distribution.
     """
-    fedora_distribution = distribution or '29'
-    ubuntu_distribution = distribution or 'bionic'
+    fedora_distribution = (
+        distribution or definitions.DEFAULT_FEDORA_DISTRIBUTION)
+    ubuntu_distribution = (
+        distribution or definitions.DEFAULT_UBUNTU_DISTRIBUTION)
 
     super(PackagesManager, self).__init__()
     self._copr_project_manager = COPRProjectManager(

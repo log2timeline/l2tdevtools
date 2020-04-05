@@ -18,6 +18,7 @@ import zipfile
 from l2tdevtools import dpkg_files
 from l2tdevtools import py2to3
 from l2tdevtools.build_helpers import interface
+from l2tdevtools.lib import definitions
 
 
 class DPKGBuildHelper(interface.BuildHelper):
@@ -626,7 +627,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'
     self.architecture = 'source'
-    self.distribution = 'bionic'
+    self.distribution = definitions.DEFAULT_UBUNTU_DISTRIBUTION
     self.version_suffix = 'ppa1'
 
   def Build(self, source_helper_object):
@@ -958,7 +959,7 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'
     self.architecture = 'source'
-    self.distribution = 'bionic'
+    self.distribution = definitions.DEFAULT_UBUNTU_DISTRIBUTION
     self.version_suffix = 'ppa1'
 
   def _GetFilenameSafeProjectInformation(self, source_helper_object):
