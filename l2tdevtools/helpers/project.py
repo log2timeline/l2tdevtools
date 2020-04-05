@@ -257,7 +257,7 @@ class ProjectHelper(cli.CLIHelper):
 
     return True
 
-  def UpdateDpkgChangelogFile(self):
+  def UpdateDPKGChangelogFile(self):
     """Updates the dpkg changelog file.
 
     Returns:

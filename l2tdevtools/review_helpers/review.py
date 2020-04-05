@@ -495,7 +495,7 @@ class ReviewHelper(object):
       print('Unable to update version file.')
       return False
 
-    if not self._project_helper.UpdateDpkgChangelogFile():
+    if not self._project_helper.UpdateDPKGChangelogFile():
       print('Unable to update dpkg changelog file.')
       return False
 
