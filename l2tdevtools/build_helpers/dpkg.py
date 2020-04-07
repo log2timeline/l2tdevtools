@@ -753,29 +753,31 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
 
       dist_packages = os.path.join(
           installroot_path, 'usr', 'local', 'lib', 'python3.*', 'dist-packages')
-      dist_packages = glob.glob(dist_packages)[0]
+      dist_packages = glob.glob(dist_packages)
+      if dist_packages:
+        dist_packages = dist_packages[0]
 
-      for directory_entry in os.listdir(dist_packages):
-        directory_entry_path = os.path.join(dist_packages, directory_entry)
+        for directory_entry in os.listdir(dist_packages):
+          directory_entry_path = os.path.join(dist_packages, directory_entry)
 
-        if directory_entry.endswith('.egg-info'):
-          # pylint: disable=simplifiable-if-statement
-          if os.path.isdir(directory_entry_path):
-            build_configuration.has_egg_info_directory = True
-          else:
-            build_configuration.has_egg_info_file = True
+          if directory_entry.endswith('.egg-info'):
+            # pylint: disable=simplifiable-if-statement
+            if os.path.isdir(directory_entry_path):
+              build_configuration.has_egg_info_directory = True
+            else:
+              build_configuration.has_egg_info_file = True
 
-        elif os.path.isdir(directory_entry_path):
-          if directory_entry != '__pycache__':
-            build_configuration.module_directories.append(directory_entry)
+          elif os.path.isdir(directory_entry_path):
+            if directory_entry != '__pycache__':
+              build_configuration.module_directories.append(directory_entry)
 
-            # TODO: determine depth of module directories.
+              # TODO: determine depth of module directories.
 
-        elif directory_entry.endswith('.py'):
-          build_configuration.has_module_source_files = True
+          elif directory_entry.endswith('.py'):
+            build_configuration.has_module_source_files = True
 
-        elif directory_entry.endswith('.so'):
-          build_configuration.has_module_shared_object = True
+          elif directory_entry.endswith('.so'):
+            build_configuration.has_module_shared_object = True
 
     if os.path.exists(installroot_path):
       shutil.rmtree(installroot_path)
