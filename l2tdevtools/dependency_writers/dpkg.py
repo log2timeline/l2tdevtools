@@ -125,6 +125,9 @@ class DPKGRulesWriter(interface.DependencyFileWriter):
       '%:',
       '\tdh $@ --buildsystem=pybuild --with=python3',
       '',
+      '.PHONY: override_dh_auto_test',
+      'override_dh_auto_test:',
+      '',
       '']
 
   def Write(self):
