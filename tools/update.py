@@ -349,6 +349,8 @@ class DependencyUpdater(object):
     package_versions = {}
     for package_url in package_urls:
       _, _, package_filename = package_url.rpartition('/')
+      package_filename = package_filename.lower()
+
       if package_filename.endswith('.dmg'):
         # Strip off the trailing part starting with '.dmg'.
         package_name, _, _ = package_filename.partition('.dmg')
@@ -690,6 +692,7 @@ class DependencyUpdater(object):
     query = 'SELECT PackageName FROM Win32_Product'
     for product in connection.query(query):
       name = getattr(product, 'PackageName', '')
+      name = name.lower()
 
       has_known_suffix = False
       machine_type = None
@@ -707,8 +710,7 @@ class DependencyUpdater(object):
           self._preferred_machine_type != machine_type):
         continue
 
-      # TODO: improve this check to support Python 3.
-      if python_version and python_version != 2:
+      if python_version and python_version not in (2, 3):
         continue
 
       name, _, version = name.rpartition('-')
@@ -777,6 +779,7 @@ class DependencyUpdater(object):
       else:
         package_name = project_name
 
+      package_name = package_name.lower()
       user_defined_package_names.append(package_name)
 
     # Maps a package name to a project definition.
@@ -806,9 +809,13 @@ class DependencyUpdater(object):
       package_download_path = os.path.join(
           self._download_directory, package_filename)
 
+      alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
+
       # Ignore package names if defined.
       if user_defined_package_names:
         in_package_names = package_name in user_defined_package_names
+        if not in_package_names and alternate_name:
+          in_package_names = alternate_name in user_defined_package_names
 
         if ((self._exclude_packages and in_package_names) or
             (not self._exclude_packages and not in_package_names)):
@@ -826,10 +833,8 @@ class DependencyUpdater(object):
           os.remove(filename)
 
       project_definition = project_definitions.get(project_name, None)
-      if not project_definition:
-        alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
-        if alternate_name:
-          project_definition = project_definitions.get(alternate_name, None)
+      if not project_definition and alternate_name:
+        project_definition = project_definitions.get(alternate_name, None)
 
       if not project_definition:
         logging.error('Missing project definition for package: {0:s}'.format(
