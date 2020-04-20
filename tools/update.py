@@ -276,7 +276,8 @@ class DependencyUpdater(object):
 
   # Some projects have different names than their module names.
   _ALTERNATE_NAMES = {
-      'lz4': 'python-lz4'}
+      'lz4': 'python-lz4',
+      'redis': 'redis-py'}
 
   def __init__(
       self, download_directory='build', download_only=False,
