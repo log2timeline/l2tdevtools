@@ -33,10 +33,6 @@ class BaseRPMBuildHelper(interface.BuildHelper):
       'flex',
       'byacc',
       'rpm-build',
-      'python2-dateutil',
-      'python2-devel',
-      'python2-setuptools',
-      'python2-test',
       'python3-dateutil',
       'python3-devel',
       'python3-setuptools',
@@ -47,8 +43,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
       'bzip2': ['bzip2-devel'],
       'fuse': ['fuse-devel'],
       'libcrypto': ['openssl-devel'],
-      'pytest-runner': [
-          'python2-pytest-runner', 'python3-pytest-runner'],
+      'pytest-runner': ['python3-pytest-runner'],
       'sqlite': ['sqlite-devel'],
       'zeromq': ['libzmq3-devel'],
       'zlib': ['zlib-devel']
@@ -498,7 +493,8 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       project_version (str): version of the project.
     """
     rpm_name = self._project_definition.rpm_name or project_name
-    if rpm_name.startswith('python-') or rpm_name.startswith('python2-'):
+    if (rpm_name.startswith('python-') or rpm_name.startswith('python2-') or
+        rpm_name.startswith('python3-')):
       _, _, rpm_name = rpm_name.partition('-')
 
     # TODO: add support for rpm_python_prefix.
@@ -589,7 +585,8 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
       project_version (str): version of the project.
     """
     srpm_name = self._project_definition.srpm_name or project_name
-    if srpm_name.startswith('python-') or srpm_name.startswith('python2-'):
+    if (srpm_name.startswith('python-') or srpm_name.startswith('python2-') or
+        srpm_name.startswith('python3-')):
       _, _, srpm_name = srpm_name.partition('-')
 
     filenames_glob = '{0:s}-*{1!s}-1.src.rpm'.format(srpm_name, project_version)
