@@ -85,8 +85,10 @@ class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
         paths_to_lint.append(path_to_lint)
 
     paths_to_lint = sorted(paths_to_lint)
-    if os.path.isfile('setup.py'):
-      paths_to_lint.insert(0, 'setup.py')
+
+    # Disabled for now since Python 3.8 and pylint fails to lint setup.py
+    # if os.path.isfile('setup.py'):
+    #   paths_to_lint.insert(0, 'setup.py')
 
     template_mappings = {
         'paths_to_lint': ' '.join(paths_to_lint)

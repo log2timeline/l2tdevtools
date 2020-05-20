@@ -768,32 +768,7 @@ class PackagesManager(object):
 
     sub_directory = None
 
-    if operating_system == 'Darwin':
-      # TODO: determine OSX version.
-      if cpu_architecture != 'x86_64':
-        logging.error('CPU architecture: {0:s} not supported.'.format(
-            cpu_architecture))
-        return None
-
-      sub_directory = 'macos'
-
-    elif operating_system == 'Linux':
-      # pylint: disable=deprecated-method
-      linux_name, linux_version, _ = platform.linux_distribution()
-      logging.error('Linux: {0:s} {1:s} not supported.'.format(
-          linux_name, linux_version))
-
-      if linux_name == 'Ubuntu':
-        wiki_url = (
-            'https://github.com/log2timeline/plaso/wiki/Dependencies---Ubuntu'
-            '#prepackaged-dependencies')
-        logging.error(
-            'Use the gift PPA instead. For more info see: {0:s}'.format(
-                wiki_url))
-
-      return None
-
-    elif operating_system == 'Windows':
+    if operating_system == 'Windows':
       if cpu_architecture == 'x86':
         sub_directory = 'win32'
 

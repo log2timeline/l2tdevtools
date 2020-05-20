@@ -6,6 +6,7 @@ else:
   class BdistMSICommand(bdist_msi):
     """Custom handler for the bdist_msi command."""
 
+    # pylint: disable=invalid-name
     def run(self):
       """Builds an MSI."""
       # Command bdist_msi does not support the library version, neither a date
