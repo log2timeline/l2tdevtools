@@ -80,8 +80,7 @@ class ProjectBuilder(object):
           source_helper_object.project_name))
     else:
       log_filename = '{0:s}_{1:s}'.format(
-          source_helper_object.project_name,
-          build_helper_object.LOG_FILENAME)
+          source_helper_object.project_name, build_helper_object.LOG_FILENAME)
 
       # Remove older logfiles if they exists otherwise the rename
       # fails on Windows.
@@ -96,11 +95,12 @@ class ProjectBuilder(object):
 
     return False
 
-  def Build(self, project_definition):
+  def Build(self, project_definition, distributions=None):
     """Builds a project.
 
     Args:
       project_definition (ProjectDefinition): project definition.
+      distributions (Optional[list[str]]): distributions to build.
 
     Returns:
       bool: True if the build is successful or False on error.
@@ -117,10 +117,11 @@ class ProjectBuilder(object):
       logging.warning('Missing source helper.')
       return False
 
-    if self._build_target == 'dpkg-source':
-      distributions = self._DPKG_SOURCE_DISTRIBUTIONS
-    else:
-      distributions = [None]
+    if not distributions:
+      if self._build_target == 'dpkg-source':
+        distributions = self._DPKG_SOURCE_DISTRIBUTIONS
+      else:
+        distributions = [None]
 
     for distribution in distributions:
       if not self._BuildProject(
@@ -327,6 +328,11 @@ def Main():
           'files e.g. projects.ini.'))
 
   argument_parser.add_argument(
+      '--distributions', dest='distributions', action='store',
+      metavar='NAME(S)', default='', help=(
+          'comma separated list of specific distribution names to build.'))
+
+  argument_parser.add_argument(
       '--preset', dest='preset', action='store',
       metavar='PRESET_NAME', default=None, help=(
           'name of the preset of project names to build. The default is to '
@@ -388,6 +394,8 @@ def Main():
 
   logging.basicConfig(
       level=logging.INFO, format='[%(levelname)s] %(message)s')
+
+  distributions = options.distributions.split(',') or None
 
   project_builder = ProjectBuilder(options.build_target, l2tdevtools_path)
 
@@ -477,7 +485,8 @@ def Main():
 
         # TODO: add support for dokan, bzip2
         # TODO: setup sqlite in build directory.
-        if not project_builder.Build(project_definition):
+        if not project_builder.Build(
+            project_definition, distributions=distributions):
           print('Failed building: {0:s}'.format(project_definition.name))
           failed_builds.add(project_definition.name)
 

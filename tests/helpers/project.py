@@ -33,7 +33,7 @@ class ProjectHelperTest(test_lib.BaseTestCase):
 
   # TODO: add test for GetReviewerUsername
   # TODO: add test for GetVersion
-  # TODO: add test for UpdateDpkgChangelogFile
+  # TODO: add test for UpdateDPKGChangelogFile
   # TODO: add test for UpdateAuthorsFile
   # TODO: add test for UpdateVersionFile
 
