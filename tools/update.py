@@ -61,7 +61,8 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
   _GITHUB_REPO_URL = (
       'https://github.com/log2timeline/l2tbinaries')
 
-  _SUPPORTED_PYTHON_VERSIONS = frozenset([(2, 7), (3, 7)])
+  # TODO: remove Python 3.7 support after completing the migration to 3.8
+  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 7), (3, 8)])
 
   def __init__(self, download_url, branch='master'):
     """Initializes a download helper.
@@ -98,7 +99,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
 
     sub_directory = None
 
-    if operating_system not in ('Darwin', 'Windows'):
+    if operating_system != 'Windows':
       logging.error('Operating system: {0:s} not supported.'.format(
           operating_system))
       return None
@@ -109,17 +110,11 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
           sys.version_info[0], sys.version_info[1]))
       return None
 
-    if operating_system == 'Darwin':
-      # TODO: determine macOS version.
-      if cpu_architecture == 'x86_64':
-        sub_directory = 'macos'
+    if cpu_architecture == 'x86':
+      sub_directory = 'win32'
 
-    elif operating_system == 'Windows':
-      if cpu_architecture == 'x86':
-        sub_directory = 'win32'
-
-      elif cpu_architecture == 'amd64':
-        sub_directory = 'win64'
+    elif cpu_architecture == 'amd64':
+      sub_directory = 'win64'
 
     if not sub_directory:
       logging.error('CPU architecture: {0:s} not supported.'.format(
@@ -352,21 +347,16 @@ class DependencyUpdater(object):
       _, _, package_filename = package_url.rpartition('/')
       package_filename = package_filename.lower()
 
-      if package_filename.endswith('.dmg'):
-        # Strip off the trailing part starting with '.dmg'.
-        package_name, _, _ = package_filename.partition('.dmg')
-
-      elif package_filename.endswith('.msi'):
-        # Strip off the trailing part starting with '.win'.
-        package_name, _, package_version = package_filename.partition('.win')
-
-        if ('-py' in package_version and
-            python_version_indicator not in package_version):
-          # Ignore packages that are for different versions of Python.
-          continue
-
-      else:
+      if not package_filename.endswith('.msi'):
         # Ignore all other file extensions.
+        continue
+
+      # Strip off the trailing part starting with '.win'.
+      package_name, _, package_version = package_filename.partition('.win')
+
+      if ('-py' in package_version and
+          python_version_indicator not in package_version):
+        # Ignore packages that are for different versions of Python.
         continue
 
       if package_name.startswith('pefile-1.'):
@@ -399,77 +389,140 @@ class DependencyUpdater(object):
 
     return available_packages.values()
 
-  def _InstallPackages(self, package_filenames, package_versions):
-    """Installs packages.
+  def _GetPackageFilenamesAndVersions(
+      self, project_definitions, available_packages,
+      user_defined_package_names):
+    """Determines the package filenames and versions.
 
     Args:
-      package_filenames (dict[str, str]): filenames per package.
-      package_versions (dict[str, str]): versions per package.
+      project_definitions (dist[str, ProjectDefinition]): project definitions
+          per name.
+      available_packages (list[PackageDownload]): packages available for
+          download.
+      user_defined_package_names (list[str]): names of packages that should be
+          updated if an update is available. These package names are derived
+          from the user specified names of projects. An empty list represents
+          all available packages.
 
     Returns:
-      bool: True if the installation was successful.
+      tuple: containing:
+          dict[str, str]: filenames per package.
+          dict[str, str]: versions per package.
     """
-    if self.operating_system == 'Darwin':
-      return self._InstallPackagesMacOS(
-          package_filenames, package_versions)
+    project_definition_per_package_name = {}
+    for project_name, project_definition in project_definitions.items():
+      package_name = getattr(
+          project_definition, 'msi_name', None) or project_name
+      package_name = package_name.lower()
+      project_definition_per_package_name[package_name] = project_definition
 
-    if self.operating_system == 'Windows':
-      return self._InstallPackagesWindows(
-          package_filenames, package_versions)
+    package_filenames = {}
+    package_versions = {}
 
-    return False
+    for package_download in available_packages:
+      package_name = package_download.name
+      package_filename = package_download.filename
+      package_download_path = os.path.join(
+          self._download_directory, package_filename)
 
-  def _InstallPackagesMacOS(self, package_filenames, package_versions):
-    """Installs packages on macOS.
+      # Ignore package names if user defined.
+      if user_defined_package_names:
+        in_package_names = package_name in user_defined_package_names
+
+        if ((self._exclude_packages and in_package_names) or
+            (not self._exclude_packages and not in_package_names)):
+          logging.info('Skipping: {0:s} because it was excluded'.format(
+              package_name))
+          continue
+
+      # Remove previous versions of a package.
+      filenames_glob = '{0:s}*{1:s}'.format(package_name, package_filename[:-4])
+      filenames = glob.glob(os.path.join(
+          self._download_directory, filenames_glob))
+      for filename in filenames:
+        if filename != package_download_path and os.path.isfile(filename):
+          logging.info('Removing: {0:s}'.format(filename))
+          os.remove(filename)
+
+      project_definition = project_definition_per_package_name.get(
+          package_name, None)
+      if not project_definition:
+        alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
+        if alternate_name:
+          project_definition = project_definitions.get(alternate_name, None)
+
+      if not project_definition:
+        logging.error('Missing project definition for package: {0:s}'.format(
+            package_name))
+        continue
+
+      if not os.path.exists(package_download_path):
+        logging.info('Downloading: {0:s}'.format(package_filename))
+        os.chdir(self._download_directory)
+        try:
+          self._download_helper.DownloadFile(package_download.url)
+        finally:
+          os.chdir('..')
+
+      package_filenames[package_name] = package_filename
+      package_versions[package_name] = package_download.version
+
+    return package_filenames, package_versions
+
+  def _GetProjectDefinitions(self, projects_file):
+    """Retrieves the project definitions from the projects file.
 
     Args:
-      package_filenames (dict[str, str]): filenames per package.
-      package_versions (dict[str, str]): versions per package.
+      projects_file (str): path to the projects.ini configuration file.
 
     Returns:
-      bool: True if the installation was successful.
+      dist[str, ProjectDefinition]: project definitions per name.
     """
-    result = True
-    for name in package_versions.keys():
-      package_filename = package_filenames[name]
+    project_definitions = {}
 
-      command = 'sudo /usr/bin/hdiutil attach {0:s}'.format(
-          os.path.join(self._download_directory, package_filename))
-      logging.info('Running: "{0:s}"'.format(command))
-      exit_code = subprocess.call(command, shell=True)
-      if exit_code != 0:
-        logging.error('Running: "{0:s}" failed.'.format(command))
-        result = False
+    with io.open(projects_file, 'r', encoding='utf-8') as file_object:
+      project_definition_reader = projects.ProjectDefinitionReader()
+      for project_definition in project_definition_reader.Read(file_object):
+        project_definitions[project_definition.name] = project_definition
+
+    return project_definitions
+
+  def _GetUserDefinedPackageNames(
+      self, project_definitions, user_defined_project_names):
+    """Determines names of packages that should be updated.
+
+    Args:
+      project_definitions (dist[str, ProjectDefinition]): project definitions
+          per name.
+      user_defined_project_names (list[str]): user specified names of projects,
+          that should be updated if an update is available. An empty list
+          represents all available projects.
+
+    Returns:
+      list[str]: names of packages that should be updated if an update is
+          available. These package names are derived from the user specified
+          names of projects. An empty list represents all available packages.
+    """
+    user_defined_package_names = []
+    for project_name in user_defined_project_names:
+      project_definition = project_definitions.get(project_name, None)
+      if not project_definition:
+        alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
+        if alternate_name:
+          project_definition = project_definitions.get(alternate_name, None)
+
+      if not project_definition:
+        logging.error('Missing project definition for package: {0:s}'.format(
+            project_name))
         continue
 
-      volume_path = '/Volumes/{0:s}.pkg'.format(package_filename[:-4])
-      if not os.path.exists(volume_path):
-        logging.error('Missing volume: {0:s}.'.format(volume_path))
-        result = False
-        continue
+      package_name = getattr(
+          project_definition, 'msi_name', None) or project_name
 
-      pkg_file = '{0:s}/{1:s}.pkg'.format(volume_path, package_filename[:-4])
-      if not os.path.exists(pkg_file):
-        logging.error('Missing pkg file: {0:s}.'.format(pkg_file))
-        result = False
-        continue
+      package_name = package_name.lower()
+      user_defined_package_names.append(package_name)
 
-      command = 'sudo /usr/sbin/installer -target / -pkg {0:s}'.format(
-          pkg_file)
-      logging.info('Running: "{0:s}"'.format(command))
-      exit_code = subprocess.call(command, shell=True)
-      if exit_code != 0:
-        logging.error('Running: "{0:s}" failed.'.format(command))
-        result = False
-
-      command = 'sudo /usr/bin/hdiutil detach {0:s}'.format(volume_path)
-      logging.info('Running: "{0:s}"'.format(command))
-      exit_code = subprocess.call(command, shell=True)
-      if exit_code != 0:
-        logging.error('Running: "{0:s}" failed.'.format(command))
-        result = False
-
-    return result
+    return user_defined_package_names
 
   def _InstallPackagesWindows(self, package_filenames, package_versions):
     """Installs packages on Windows.
@@ -510,166 +563,6 @@ class DependencyUpdater(object):
 
     return result
 
-  def _UninstallPackages(self, package_versions):
-    """Uninstalls packages if necessary.
-
-    It is preferred that the system package manager handles this, however not
-    every operating system seems to have a package manager capable to do so.
-
-    Args:
-      package_versions (dict[str, str]): versions per package.
-
-    Returns:
-      bool: True if the uninstall was successful.
-    """
-    if self.operating_system == 'Darwin':
-      return self._UninstallPackagesMacOSX(package_versions)
-
-    if self.operating_system == 'Windows':
-      return self._UninstallPackagesWindows(package_versions)
-
-    return False
-
-  def _UninstallPackagesMacOSX(self, package_versions):
-    """Uninstalls packages on Mac OS X.
-
-    Args:
-      package_versions (dict[str, str]): versions per package.
-
-    Returns:
-      bool: True if the uninstall was successful.
-    """
-    command = '/usr/sbin/pkgutil --packages'
-    logging.info('Running: "{0:s}"'.format(command))
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-    if process.returncode is None:
-      packages, _ = process.communicate()
-    else:
-      packages = ''
-
-    if process.returncode != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
-      return False
-
-    result = True
-
-    for package_name in packages.split('\n'):
-      if not package_name:
-        continue
-
-      matching_prefix = None
-      for prefix in self._PKG_NAME_PREFIXES:
-        if package_name.startswith(prefix):
-          matching_prefix = prefix
-
-      if matching_prefix:
-        name = package_name[len(matching_prefix):]
-
-        # Detect the PackageMaker naming convention.
-        if name.endswith('.pkg'):
-          _, _, sub_name = name[:-4].rpartition('.')
-          is_package_maker_pkg = True
-        else:
-          is_package_maker_pkg = False
-        name, _, _ = name.partition('.')
-
-        if name in package_versions:
-          # Determine the package version.
-          command = '/usr/sbin/pkgutil --pkg-info {0:s}'.format(package_name)
-          logging.info('Running: "{0:s}"'.format(command))
-          process = subprocess.Popen(
-              command, stdout=subprocess.PIPE, shell=True)
-          if process.returncode is None:
-            package_info, _ = process.communicate()
-          else:
-            package_info = ''
-
-          if process.returncode != 0:
-            logging.error('Running: "{0:s}" failed.'.format(command))
-            result = False
-            continue
-
-          location = None
-          version = None
-          volume = None
-          for attribute in package_info.split('\n'):
-            if attribute.startswith('location: '):
-              _, _, location = attribute.rpartition('location: ')
-
-            elif attribute.startswith('version: '):
-              _, _, version = attribute.rpartition('version: ')
-
-            elif attribute.startswith('volume: '):
-              _, _, volume = attribute.rpartition('volume: ')
-
-          if self._force_install:
-            compare_result = -1
-          elif name not in package_versions:
-            compare_result = 1
-          elif name in ('pytsk', 'pytsk3'):
-            # We cannot really tell by the version number that pytsk3 needs to
-            # be updated, so just uninstall and update it any way.
-            compare_result = -1
-          else:
-            version_tuple = version.split('.')
-            compare_result = versions.CompareVersions(
-                version_tuple, package_versions[name])
-            if compare_result >= 0:
-              # The latest or newer version is already installed.
-              del package_versions[name]
-
-          if compare_result < 0:
-            # Determine the files in the package.
-            command = '/usr/sbin/pkgutil --files {0:s}'.format(package_name)
-            logging.info('Running: "{0:s}"'.format(command))
-            process = subprocess.Popen(
-                command, stdout=subprocess.PIPE, shell=True)
-            if process.returncode is None:
-              package_files, _ = process.communicate()
-            else:
-              package_files = ''
-
-            if process.returncode != 0:
-              logging.error('Running: "{0:s}" failed.'.format(command))
-              result = False
-              continue
-
-            directories = []
-            files = []
-            for filename in package_files.split('\n'):
-              if is_package_maker_pkg:
-                filename = '{0:s}{1:s}/{2:s}/{3:s}'.format(
-                    volume, location, sub_name, filename)
-              else:
-                filename = '{0:s}{1:s}'.format(location, filename)
-
-              if os.path.isdir(filename):
-                directories.append(filename)
-              else:
-                files.append(filename)
-
-            logging.info('Removing: {0:s} {1:s}'.format(name, version))
-            for filename in files:
-              if os.path.exists(filename):
-                os.remove(filename)
-
-            for filename in directories:
-              if os.path.exists(filename):
-                try:
-                  os.rmdir(filename)
-                except OSError:
-                  # Ignore directories that are not empty.
-                  pass
-
-            command = '/usr/sbin/pkgutil --forget {0:s}'.format(
-                package_name)
-            exit_code = subprocess.call(command, shell=True)
-            if exit_code != 0:
-              logging.error('Running: "{0:s}" failed.'.format(command))
-              result = False
-
-    return result
-
   def _UninstallPackagesWindows(self, package_versions):
     """Uninstalls packages on Windows.
 
@@ -684,9 +577,11 @@ class DependencyUpdater(object):
         ('.win32.msi', 'x86', None),
         ('.win32-py2.7.msi', 'x86', 2),
         ('.win32-py3.7.msi', 'x86', 3),
+        ('.win32-py3.8.msi', 'x86', 3),
         ('.win-amd64.msi', 'amd64', None),
         ('.win-amd64-py2.7.msi', 'amd64', 2),
-        ('.win-amd64-py3.7.msi', 'amd64', 3))
+        ('.win-amd64-py3.7.msi', 'amd64', 3),
+        ('.win-amd64-py3.8.msi', 'amd64', 3))
 
     connection = wmi.WMI()
 
@@ -723,19 +618,15 @@ class DependencyUpdater(object):
         compare_result = -1
       elif not found_package:
         compare_result = 1
+      elif not package_versions[name]:
+        # No version was specified hence we want the package removed.
+        compare_result = -1
       else:
         compare_result = versions.CompareVersions(
             version_tuple, package_versions[name])
         if compare_result >= 0:
           # The latest or newer version is already installed.
           del package_versions[name]
-
-      if not found_package and name.startswith('py'):
-        # Remove libyal Python packages using the old naming convention.
-        new_name = 'lib{0:s}-python'.format(name[2:])
-        found_package = new_name in package_versions
-        if found_package:
-          compare_result = -1
 
       if found_package and compare_result < 0:
         logging.info('Removing: {0:s} {1:s}'.format(name, version))
@@ -755,112 +646,61 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the update was successful.
     """
-    project_definitions = {}
-    with io.open(projects_file, 'r', encoding='utf-8') as file_object:
-      project_definition_reader = projects.ProjectDefinitionReader()
-      for project_definition in project_definition_reader.Read(file_object):
-        project_definitions[project_definition.name] = project_definition
+    project_definitions = self._GetProjectDefinitions(projects_file)
 
-    user_defined_package_names = []
-    for project_name in user_defined_project_names:
-      project_definition = project_definitions.get(project_name, None)
-      if not project_definition:
-        alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
-        if alternate_name:
-          project_definition = project_definitions.get(alternate_name, None)
-
-      if not project_definition:
-        logging.error('Missing project definition for package: {0:s}'.format(
-            project_name))
-        continue
-
-      if self.operating_system == 'Windows':
-        package_name = getattr(
-            project_definition, 'msi_name', None) or project_name
-      else:
-        package_name = project_name
-
-      package_name = package_name.lower()
-      user_defined_package_names.append(package_name)
-
-    # Maps a package name to a project definition.
-    project_per_package = {}
-    for project_name, project_definition in project_definitions.items():
-      if self.operating_system == 'Windows':
-        package_name = getattr(
-            project_definition, 'msi_name', None) or project_name
-      else:
-        package_name = project_name
-
-      project_per_package[package_name] = project_definition
-
-    if not os.path.exists(self._download_directory):
-      os.mkdir(self._download_directory)
+    user_defined_package_names = self._GetUserDefinedPackageNames(
+        project_definitions, user_defined_project_names)
 
     available_packages = self._GetAvailablePackages()
     if not available_packages:
       logging.error('No packages found.')
       return False
 
-    package_filenames = {}
-    package_versions = {}
-    for package_download in available_packages:
-      package_name = package_download.name
-      package_filename = package_download.filename
-      package_download_path = os.path.join(
-          self._download_directory, package_filename)
+    if not os.path.exists(self._download_directory):
+      os.mkdir(self._download_directory)
 
-      alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
-
-      # Ignore package names if defined.
-      if user_defined_package_names:
-        in_package_names = package_name in user_defined_package_names
-        if not in_package_names and alternate_name:
-          in_package_names = alternate_name in user_defined_package_names
-
-        if ((self._exclude_packages and in_package_names) or
-            (not self._exclude_packages and not in_package_names)):
-          logging.info('Skipping: {0:s} because it was excluded'.format(
-              package_name))
-          continue
-
-      # Remove previous versions of a package.
-      filenames_glob = '{0:s}*{1:s}'.format(package_name, package_filename[:-4])
-      filenames = glob.glob(os.path.join(
-          self._download_directory, filenames_glob))
-      for filename in filenames:
-        if filename != package_download_path and os.path.isfile(filename):
-          logging.info('Removing: {0:s}'.format(filename))
-          os.remove(filename)
-
-      project_definition = project_definitions.get(project_name, None)
-      if not project_definition and alternate_name:
-        project_definition = project_definitions.get(alternate_name, None)
-
-      if not project_definition:
-        logging.error('Missing project definition for package: {0:s}'.format(
-            package_name))
-        continue
-
-      if not os.path.exists(package_download_path):
-        logging.info('Downloading: {0:s}'.format(package_filename))
-        os.chdir(self._download_directory)
-        try:
-          self._download_helper.DownloadFile(package_download.url)
-        finally:
-          os.chdir('..')
-
-      package_filenames[package_name] = package_filename
-      package_versions[package_name] = package_download.version
+    package_filenames, package_versions = self._GetPackageFilenamesAndVersions(
+        project_definitions, available_packages, user_defined_package_names)
 
     if self._download_only:
       return True
 
-    if not self._UninstallPackages(package_versions):
+    if not self._UninstallPackagesWindows(package_versions):
       logging.error('Unable to uninstall packages.')
       return False
 
-    return self._InstallPackages(package_filenames, package_versions)
+    return self._InstallPackagesWindows(package_filenames, package_versions)
+
+  def UninstallPackages(self, projects_file, user_defined_project_names):
+    """Uninstalls packages.
+
+    Args:
+      projects_file (str): path to the projects.ini configuration file.
+      user_defined_project_names (list[str]): user specified names of projects,
+          that should be updated if an update is available. An empty list
+          represents all available projects.
+
+    Returns:
+      bool: True if the uninstall was successful.
+    """
+    project_definitions = self._GetProjectDefinitions(projects_file)
+
+    user_defined_package_names = self._GetUserDefinedPackageNames(
+        project_definitions, user_defined_project_names)
+
+    if not user_defined_package_names:
+      logging.warning('No packages to uninstall.')
+      return True
+
+    # TODO: this currently uninstall all versions of the package win32 and
+    # win64. Make changes to only remove only the package for the running
+    # Python version.
+
+    # TODO: makes changes so lz4 is uninstalled as well.
+
+    package_versions = {name: None for name in user_defined_package_names}
+
+    return self._UninstallPackagesWindows(package_versions)
 
 
 def Main():
@@ -931,6 +771,10 @@ def Main():
           'the l2tbinaries track to download from. The default is stable.'))
 
   argument_parser.add_argument(
+      '--uninstall', action='store_true', dest='uninstall', default=False,
+      help='Uninstall the dependencies.')
+
+  argument_parser.add_argument(
       '-v', '--verbose', dest='verbose', action='store_true', default=False,
       help='have more verbose output.')
 
@@ -992,8 +836,14 @@ def Main():
       preferred_machine_type=options.machine_type,
       verbose_output=options.verbose)
 
-  return dependency_updater.UpdatePackages(
-      projects_file, user_defined_project_names)
+  if options.uninstall:
+    result = dependency_updater.UninstallPackages(
+        projects_file, user_defined_project_names)
+  else:
+    result = dependency_updater.UpdatePackages(
+        projects_file, user_defined_project_names)
+
+  return result
 
 
 if __name__ == '__main__':
