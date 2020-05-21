@@ -23,7 +23,8 @@ class ProjectDownloadHelper(interface.DownloadHelper):
     self._project_name = None
 
   def _GetLatestVersion(
-      self, earliest_version, latest_version, available_versions):
+      self, earliest_version, latest_version, available_versions,
+      with_epoch=False):
     """Determines the latest version from a list of available versions.
 
     Args:
@@ -34,6 +35,8 @@ class ProjectDownloadHelper(interface.DownloadHelper):
       available_versions (dict[str, [int]]): available versions where
           the key is the original version string and the value the individual
           integers of the digits in the version string.
+      with_epoch (Optional[bool]): True if the available versions start with
+          an epoch number.
 
     Returns:
       str: download URL of the project or None if not available.
@@ -48,14 +51,15 @@ class ProjectDownloadHelper(interface.DownloadHelper):
       comparable_latest_version = [
           int(digit) for digit in latest_version[1:]]
 
-    comparable_available_versions = list(available_versions.values())
+    comparable_available_versions = []
+    for version in available_versions.values():
+      if with_epoch:
+        comparable_available_versions.append(version[1:])
+      else:
+        comparable_available_versions.append(version)
 
     latest_match = None
     for match in comparable_available_versions:
-      if latest_match is None:
-        latest_match = match
-        continue
-
       if earliest_version is not None:
         if earliest_version[0] == '>' and match <= comparable_earliest_version:
           continue
@@ -70,8 +74,14 @@ class ProjectDownloadHelper(interface.DownloadHelper):
         if latest_version[0] == '<=' and match > comparable_latest_version:
           continue
 
-      if match > latest_match:
+      if latest_match is None:
         latest_match = match
+
+      elif match > latest_match:
+        latest_match = match
+
+    if not latest_match:
+      return None
 
     # Map the latest match value to its index within the dictionary and return
     # the version string which is stored as the key in within the available

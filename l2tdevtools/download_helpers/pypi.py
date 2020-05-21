@@ -119,7 +119,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     available_versions = self._GetAvailableVersions([
         match[0] for match in matches])
     return self._GetLatestVersion(
-        earliest_version, latest_version, available_versions)
+        earliest_version, latest_version, available_versions, with_epoch=True)
 
   def GetDownloadURL(self, project_name, project_version):
     """Retrieves the download URL for a given project name and version.
