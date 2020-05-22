@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
-"""Writer for GIFT PPA script files."""
+"""Writer for Linux script files."""
 
 from __future__ import unicode_literals
 
-import abc
 import io
 import os
 
 from l2tdevtools.dependency_writers import interface
 
 
-class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
-  """Shared functionality for GIFT PPA installation script writer."""
+class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
+  """Ubuntu installation script file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'gift_ppa_install.sh')
+  _TEMPLATE_FILE = os.path.join(
+      'data', 'templates', 'linux_scripts', 'ubuntu_install_project.sh')
 
-  # Path to GIFT PPA installation script.
-  PATH = ''
+  PATH = os.path.join('config', 'linux')
 
   def _FormatDPKGDebugDependencies(self, debug_dependencies):
     """Formats DPKG debug dependencies for the template.
@@ -116,44 +115,38 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     return '\n'.join(formatted_test_dependencies)
 
-  def _GetDPKGDebugDependencies(self, python_dependencies, python_version=2):
+  def _GetDPKGDebugDependencies(self, python_dependencies):
     """Retrieves DPKG debug dependencies.
 
     Args:
       python_dependencies (list[str]): DPKG package names of Python
           dependencies.
-      python_version (Optional[int]): Python major version.
 
     Returns:
       list[str]: DPKG package names of Python debug dependencies.
     """
-    if python_version == 3:
-      python_version_string = 'python3'
-    else:
-      python_version_string = 'python'
-
     debug_dependencies = []
     for dependency in sorted(python_dependencies):
-      if dependency.startswith('lib') and dependency.endswith(
-          python_version_string):
+      if dependency.startswith('lib') and dependency.endswith('python3'):
         dependency, _, _ = dependency.partition('-')
         debug_dependencies.extend([
             '{0:s}-dbg'.format(dependency),
-            '{0:s}-{1:s}-dbg'.format(dependency, python_version_string)])
+            '{0:s}-python3-dbg'.format(dependency)])
 
     return debug_dependencies
 
-  def _Write(self, python_version=2):
-    """Writes a gift_ppa_install.sh file.
+  def Write(self):
+    """Writes a ubuntu_install_project.sh file."""
+    python_dependencies = self._GetDPKGPythonDependencies(python_version=3)
 
-    Args:
-      python_version (Optional[int]): Python version.
-    """
-    python_dependencies = self._GetDPKGPythonDependencies(
-        python_version=python_version)
+    if self._project_definition.name == 'plaso':
+      # Use the Elasticsearch installation script to install the Elasticsearch
+      # Python bindings.
+      if 'python3-elasticsearch' in python_dependencies:
+        python_dependencies.remove('python3-elasticsearch')
 
     test_dependencies = self._GetDPKGTestDependencies(
-        python_dependencies, python_version=python_version)
+        python_dependencies, python_version=3)
 
     # TODO: replace by dev_dependencies.ini or equiv.
     development_dependencies = ['pylint']
@@ -161,8 +154,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
     if self._project_definition.name == 'plaso':
       development_dependencies.append('python-sphinx')
 
-    debug_dependencies = self._GetDPKGDebugDependencies(
-        python_dependencies, python_version=python_version)
+    debug_dependencies = self._GetDPKGDebugDependencies(python_dependencies)
 
     formatted_python_dependencies = self._FormatDPKGPythonDependencies(
         python_dependencies)
@@ -176,33 +168,19 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
     formatted_debug_dependencies = self._FormatDPKGDebugDependencies(
         debug_dependencies)
 
-    pylint_ppa = 'ppa:gift/pylint{0:d}'.format(python_version)
-
     template_mappings = {
         'debug_dependencies': formatted_debug_dependencies,
         'development_dependencies': formatted_development_dependencies,
         'project_name': self._project_definition.name,
-        'pylint_ppa': pylint_ppa,
         'python_dependencies': formatted_python_dependencies,
-        'python_version': '{0:d}'.format(python_version),
         'test_dependencies': formatted_test_dependencies}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    script_name = 'ubuntu_install_{0:s}.sh'.format(
+        self._project_definition.name)
+    script_path = os.path.join('config', 'linux', script_name)
+
+    with io.open(script_path, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
-
-  @abc.abstractmethod
-  def Write(self):
-    """Writes a gift_ppa_install.sh file."""
-
-
-class GIFTPPAInstallScriptPY3Writer(GIFTPPAInstallScriptWriter):
-  """GIFT PPA installation script file writer for Python 3."""
-
-  PATH = os.path.join('config', 'linux', 'gift_ppa_install_py3.sh')
-
-  def Write(self):
-    """Writes a gift_ppa_install.sh file."""
-    self._Write(python_version=3)

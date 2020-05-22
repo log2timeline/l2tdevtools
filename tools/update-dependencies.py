@@ -16,9 +16,10 @@ from l2tdevtools.dependency_writers import appveyor_yml
 from l2tdevtools.dependency_writers import check_dependencies
 from l2tdevtools.dependency_writers import dependencies_py
 from l2tdevtools.dependency_writers import dpkg
-from l2tdevtools.dependency_writers import end_to_end_tests
 from l2tdevtools.dependency_writers import gift_copr
 from l2tdevtools.dependency_writers import gift_ppa
+from l2tdevtools.dependency_writers import jenkins_scripts
+from l2tdevtools.dependency_writers import linux_scripts
 from l2tdevtools.dependency_writers import macos
 from l2tdevtools.dependency_writers import pylint_rc
 from l2tdevtools.dependency_writers import requirements
@@ -67,10 +68,11 @@ def Main():
       check_dependencies.CheckDependenciesWriter,
       dependencies_py.DependenciesPyWriter, dpkg.DPKGCompatWriter,
       dpkg.DPKGControlWriter, dpkg.DPKGRulesWriter,
-      end_to_end_tests.RunPython3EndToEndTestsScriptWriter,
       gift_copr.GIFTCOPRInstallScriptWriter,
-      gift_ppa.GIFTPPAInstallScriptPY2Writer,
       gift_ppa.GIFTPPAInstallScriptPY3Writer,
+      jenkins_scripts.LinuxRunEndToEndTestsScriptWriter,
+      jenkins_scripts.RunPython3EndToEndTestsScriptWriter,
+      linux_scripts.UbuntuInstallationScriptWriter,
       macos.MacOSInstallScriptWriter, macos.MacOSMakeDistScriptWriter,
       macos.MacOSUninstallScriptWriter, tox_ini.ToxIniWriter):
     if not os.path.exists(writer_class.PATH):
@@ -98,6 +100,11 @@ def Main():
 
     with io.open(output_path, 'w', encoding='utf-8') as file_object:
       file_object.write(file_data)
+
+  # Remove old scripts.
+  script_path = os.path.join('config', 'linux', 'gift_ppa_install.sh')
+  if os.path.isfile(script_path):
+    os.remove(script_path)
 
   return True
 
