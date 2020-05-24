@@ -10,6 +10,10 @@ set -e;
 
 pylint --version
 
+# Ignore setup.py for now due to:
+# setup.py:15:0: E0001: Cannot import 'distutils.command.bdist_msi' due to
+# syntax error 'expected an indented block (<unknown>, line 347)' (syntax-error)
+
 for FILE in $$(find ${paths_to_lint} -name \*.py);
 do
 	echo "Checking: $${FILE}";
