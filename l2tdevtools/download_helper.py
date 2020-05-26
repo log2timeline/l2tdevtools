@@ -12,16 +12,21 @@ class DownloadHelperFactory(object):
   """Factory class for download helpers."""
 
   @classmethod
-  def NewDownloadHelper(cls, download_url):
+  def NewDownloadHelper(cls, project_definition):
     """Creates a new download helper.
 
     Args:
-      download_url (str): download URL.
+      project_definition (ProjectDefinition): project definition.
 
     Returns:
-      DownloadHelper: download helper or None if no corresponding helper
-          could be found for the download URL.
+      DownloadHelper: download helper.
+
+    Raises:
+      ValueError: if no corresponding helper could be found for the download
+          URL.
     """
+    download_url = project_definition.download_url
+
     if download_url.endswith('/'):
       download_url = download_url[:-1]
 
@@ -33,20 +38,16 @@ class DownloadHelperFactory(object):
     download_url, _, _ = download_url.partition('?')
 
     if download_url.startswith('http://pypi.org/project/'):
-      download_helper_class = pypi.PyPIDownloadHelper
+      return pypi.PyPIDownloadHelper(
+          download_url, source_name=project_definition.pypi_source_name)
 
-    elif (download_url.startswith('http://sourceforge.net/projects/') and
-          download_url.endswith('/files')):
-      download_helper_class = sourceforge.SourceForgeDownloadHelper
+    if (download_url.startswith('http://sourceforge.net/projects/') and
+        download_url.endswith('/files')):
+      return sourceforge.SourceForgeDownloadHelper(download_url)
 
-    elif (download_url.startswith('http://github.com/') and
-          download_url.endswith('/releases')):
-      download_helper_class = github.GitHubReleasesDownloadHelper
+    if (download_url.startswith('http://github.com/') and
+        download_url.endswith('/releases')):
+      return github.GitHubReleasesDownloadHelper(download_url)
 
-    else:
-      download_helper_class = None
-
-    if not download_helper_class:
-      return None
-
-    return download_helper_class(download_url)
+    raise ValueError('Unsupported download URL: {0:s}.'.format(
+        project_definition.download_url))

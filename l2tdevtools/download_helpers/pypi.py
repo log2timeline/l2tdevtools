@@ -14,11 +14,14 @@ from l2tdevtools.download_helpers import project
 class PyPIDownloadHelper(project.ProjectDownloadHelper):
   """Helps in downloading a PyPI code project."""
 
-  def __init__(self, download_url):
+  def __init__(self, download_url, source_name=None):
     """Initializes the download helper.
 
     Args:
       download_url (str): download URL.
+      source_name (Optional[str]): PyPI source pacakge name, where None
+          indicates the source package name is the same as the PyPI project
+          name.
 
     Raises:
       ValueError: if download URL is not supported.
@@ -31,6 +34,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
     super(PyPIDownloadHelper, self).__init__(download_url)
     self._project_name = url_segments[4]
+    self._source_name = source_name or self._project_name
 
   def _GetAvailableVersions(self, version_strings):
     """Determines the available versions from version string matched.
@@ -110,7 +114,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     expression_string = (
         r'"https://files.pythonhosted.org/packages/.*/.*/.*/'
         r'{0:s}-([\d\.\!]*(post\d+)?)\.(tar\.bz2|tar\.gz|zip)"').format(
-            self._project_name)
+            self._source_name)
 
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
     if not matches:
@@ -144,7 +148,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     expression_string = (
         '(https://files.pythonhosted.org/packages/.*/.*/.*/'
         '{0:s}-{1!s}[.](tar[.]bz2|tar[.]gz|zip))').format(
-            self._project_name, project_version)
+            self._source_name, project_version)
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:

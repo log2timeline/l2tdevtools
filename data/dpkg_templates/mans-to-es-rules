@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --buildsystem=pybuild --with=python3
+
+.PHONY: override_dh_auto_test
+override_dh_auto_test:
+
+.PHONY: override_dh_auto_clean
+override_dh_auto_clean:
+	touch requirements.txt
+	dh_auto_clean
+
+.PHONY: override_dh_auto_install
+override_dh_auto_install:
+	touch requirements.txt
+	dh_auto_install
