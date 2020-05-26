@@ -67,14 +67,12 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     return '\n'.join(formatted_development_dependencies)
 
-  def _FormatDPKGPythonDependencies(
-      self, python_dependencies, python_version=2):
+  def _FormatDPKGPythonDependencies(self, python_dependencies):
     """Formats DPKG Python dependencies for the template.
 
     Args:
       python_dependencies (list[str]): DPKG package names of Python
           dependencies.
-      python_version (Optional[int]): Python major version.
 
     Returns:
       str: formatted DPKG Python dependencies.
@@ -83,10 +81,9 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
 
     for index, dependency in enumerate(sorted(python_dependencies)):
       if index == 0:
-        line = 'PYTHON{0:d}_DEPENDENCIES="{1:s}'.format(
-            python_version, dependency)
+        line = 'PYTHON_DEPENDENCIES="{0:s}'.format(dependency)
       else:
-        line = '                      {0:s}'.format(dependency)
+        line = '                     {0:s}'.format(dependency)
 
       if index + 1 == len(python_dependencies):
         line = '{0:s}";'.format(line)
@@ -168,7 +165,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
         python_dependencies, python_version=python_version)
 
     formatted_python_dependencies = self._FormatDPKGPythonDependencies(
-        python_dependencies, python_version=python_version)
+        python_dependencies)
 
     formatted_test_dependencies = self._FormatDPKGTestDependencies(
         test_dependencies)

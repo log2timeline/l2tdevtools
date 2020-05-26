@@ -73,7 +73,7 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_formatted_python_dependencies = (
-        'PYTHON2_DEPENDENCIES="python3-yaml";')
+        'PYTHON_DEPENDENCIES="python3-yaml";')
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(
         python_version=3)

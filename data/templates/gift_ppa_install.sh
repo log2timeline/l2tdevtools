@@ -21,7 +21,7 @@ ${debug_dependencies}
 
 sudo add-apt-repository ppa:gift/dev -y
 sudo apt-get update -q
-sudo apt-get install -y $${PYTHON${python_version}_DEPENDENCIES}
+sudo apt-get install -y $${PYTHON_DEPENDENCIES}
 
 if [[ "$$*" =~ "include-debug" ]]; then
     sudo apt-get install -y $${DEBUG_DEPENDENCIES}
