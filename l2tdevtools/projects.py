@@ -44,6 +44,7 @@ class ProjectDefinition(object):
     patches (list[str]): patch file names.
     pkg_configure_options (list[str]): configure options when building a pkg.
     pypi_name (str): name of the project on PyPI.
+    pypi_source_name (str): name used in the source package file on PyPI.
     rpm_build_dependencies (list[str]): rpm build dependencies.
     rpm_name (str): RPM package name.
     rpm_template_spec (str): name of the rpm spec file.
@@ -89,6 +90,7 @@ class ProjectDefinition(object):
     self.patches = None
     self.pkg_configure_options = None
     self.pypi_name = None
+    self.pypi_source_name = None
     self.setup_name = None
     self.srpm_name = None
     self.version = None
@@ -257,6 +259,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'pkg_configure_options')
       project_definition.pypi_name = self._GetConfigValue(
           config_parser, section_name, 'pypi_name')
+      project_definition.pypi_source_name = self._GetConfigValue(
+          config_parser, section_name, 'pypi_source_name')
       project_definition.setup_name = self._GetConfigValue(
           config_parser, section_name, 'setup_name')
       project_definition.srpm_name = self._GetConfigValue(

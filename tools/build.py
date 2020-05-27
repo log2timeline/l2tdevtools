@@ -220,11 +220,7 @@ class ProjectBuilder(object):
     """
     download_helper_object = (
         download_helper.DownloadHelperFactory.NewDownloadHelper(
-            project_definition.download_url))
-
-    if not download_helper_object:
-      raise ValueError('Unsupported download URL: {0:s}.'.format(
-          project_definition.download_url))
+            project_definition))
 
     source_helper_object = source_helper.SourcePackageHelper(
         project_definition.name, project_definition, download_helper_object)
