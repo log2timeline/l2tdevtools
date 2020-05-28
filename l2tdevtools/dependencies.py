@@ -18,8 +18,10 @@ class DependencyDefinition(object):
         provides the dependency.
     l2tbinaries_name (str): name of the l2tbinaries package that provides
         the dependency.
-    maximum_version (str): maximum supported version.
-    minimum_version (str): minimum supported version.
+    maximum_version (str): maximum supported version, a greater or equal
+        version is not supported.
+    minimum_version (str): minimum supported version, a lesser version is
+        not supported.
     name (str): name of (the Python module that provides) the dependency.
     pypi_name (str): name of the PyPI package that provides the dependency.
     python2_only (bool): True if the dependency is only supported by Python 2.
@@ -434,14 +436,16 @@ class DependencyHelper(object):
       if module_name == 'pysqlite':
         continue
 
-      if exclude_version or not dependency.minimum_version:
-        requires_string = module_name
-      elif not dependency.maximum_version:
-        requires_string = '{0:s} >= {1!s}'.format(
-            module_name, dependency.minimum_version)
-      else:
-        requires_string = '{0:s} >= {1!s},<= {2!s}'.format(
-            module_name, dependency.minimum_version, dependency.maximum_version)
+      requires_part = []
+      if not exclude_version:
+        if dependency.minimum_version:
+          requires_part.append('>= {0!s}'.format(dependency.minimum_version))
+        if dependency.maximum_version:
+          requires_part.append('< {0!s}'.format(dependency.maximum_version))
+
+      requires_string = module_name
+      if requires_part:
+        requires_string = ' '.join([requires_string, ','.join(requires_part)])
 
       if dependency.python2_only:
         # Also see:
