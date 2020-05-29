@@ -4,7 +4,7 @@
 
 :Author: David Goodger
 :Contact: goodger@python.org
-:Date: $Date: 2015-05-08 15:56:32 +0000 (Fri, 08 May 2015) $
+:Date: $Date: 2020-02-06 12:47:25 +0000 (Thu, 06 Feb 2020) $
 :Web site: http://docutils.sourceforge.net/
 :Copyright: This document has been placed in the public domain.
 
@@ -79,8 +79,6 @@ The exceptions to the `Public Domain Dedication`_ above are:
 * docutils/utils/math/__init__.py,
   docutils/utils/math/latex2mathml.py,
   docutils/writers/xetex/__init__.py,
-  docutils/writers/latex2e/docutils-05-compat.sty,
-  docs/user/docutils-05-compat.sty.txt,
   docutils/utils/error_reporting.py,
   docutils/test/transforms/test_smartquotes.py:
 
