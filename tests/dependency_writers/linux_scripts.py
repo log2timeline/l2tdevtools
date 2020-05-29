@@ -8,12 +8,12 @@ import unittest
 
 from l2tdevtools import dependencies
 from l2tdevtools import projects
-from l2tdevtools.dependency_writers import gift_ppa
+from l2tdevtools.dependency_writers import linux_scripts
 
 from tests import test_lib
 
 
-class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
+class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
   """Tests the hared functionality for GIFT PPA installation script writer."""
 
   # pylint: disable=protected-access
@@ -22,7 +22,7 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     """Creates a dependency file writer for testing.
 
     Returns:
-      GIFTPPAInstallScriptWriter: dependency file writer for testing.
+      UbuntuInstallationScriptWriter: dependency file writer for testing.
     """
     project_definition = projects.ProjectDefinition('test')
 
@@ -34,7 +34,7 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     test_dependency_helper = dependencies.DependencyHelper(
         configuration_file=configuration_file)
 
-    return gift_ppa.GIFTPPAInstallScriptWriter(
+    return linux_scripts.UbuntuInstallationScriptWriter(
         '/fake/l2tdevtools/', project_definition, dependency_helper,
         test_dependency_helper)
 
@@ -47,7 +47,7 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     python_dependencies = test_writer._GetDPKGPythonDependencies(
         python_version=3)
     debug_dependencies = test_writer._GetDPKGDebugDependencies(
-        python_dependencies, python_version=3)
+        python_dependencies)
     formatted_debug_dependencies = test_writer._FormatDPKGDebugDependencies(
         debug_dependencies)
     self.assertEqual(
@@ -112,37 +112,8 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     python_dependencies = test_writer._GetDPKGPythonDependencies(
         python_version=3)
     debug_dependencies = test_writer._GetDPKGDebugDependencies(
-        python_dependencies, python_version=3)
+        python_dependencies)
     self.assertEqual(debug_dependencies, expected_debug_dependencies)
-
-
-class GIFTPPAInstallPY3Test(test_lib.BaseTestCase):
-  """Tests the GIFT PPA installation script file writer for Python 3."""
-
-  def _CreateTestWriter(self):
-    """Creates a dependency file writer for testing.
-
-    Returns:
-      GIFTPPAInstallScriptPY3Writer: dependency file writer for testing.
-    """
-    project_definition = projects.ProjectDefinition('test')
-
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
-    dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    configuration_file = self._GetTestFilePath(['test_dependencies.ini'])
-    test_dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    return gift_ppa.GIFTPPAInstallScriptPY3Writer(
-        '/fake/l2tdevtools/', project_definition, dependency_helper,
-        test_dependency_helper)
-
-  def testInitialize(self):
-    """Tests the __init__ function."""
-    test_writer = self._CreateTestWriter()
-    self.assertIsNotNone(test_writer)
 
   # TODO: Add test for the Write method.
 
