@@ -56,7 +56,7 @@ then
 	docker run --name=${CONTAINER_NAME} --detach -i ubuntu:${UBUNTU_VERSION};
 
 	# Install add-apt-repository and locale-gen.
-	docker exec ${CONTAINER_NAME} apt-get update -q;
+	docker exec -e "DEBIAN_FRONTEND=noninteractive" ${CONTAINER_NAME} sh -c "apt-get update -q";
 	docker exec -e "DEBIAN_FRONTEND=noninteractive" ${CONTAINER_NAME} sh -c "apt-get install -y locales software-properties-common";
 
 	# Add additional apt repositories.
@@ -67,7 +67,7 @@ then
 	fi
 	docker exec ${CONTAINER_NAME} add-apt-repository ppa:gift/dev -y;
 
-	docker exec ${CONTAINER_NAME} apt-get update -q;
+	docker exec -e "DEBIAN_FRONTEND=noninteractive" ${CONTAINER_NAME} sh -c "apt-get update -q";
 
 	# Set locale to US English and UTF-8.
 	docker exec ${CONTAINER_NAME} locale-gen en_US.UTF-8;
