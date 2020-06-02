@@ -425,6 +425,19 @@ class DPKGBuildFilesGenerator(object):
       with open(filename, 'wb') as file_object:
         file_object.write(b'\n')
 
+  def _GeneratePy3DistOverridesFile(self, dpkg_path):
+    """Generates the dpkg build py3dist-overrides file if required.
+
+    Args:
+      dpkg_path (str): path to the dpkg files.
+    """
+    if self._project_definition.dpkg_template_py3dist_overrides:
+      output_filename = os.path.join(dpkg_path, 'py3dist-overrides')
+
+      self._GenerateFile(
+          self._project_definition.dpkg_template_py3dist_overrides,
+          None, None, output_filename)
+
   def _GeneratePython3ModuleInstallFile(self, dpkg_path, template_values):
     """Generates the dpkg build Python 3 module .install file.
 
@@ -576,11 +589,11 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
-    template_file = self._SOURCE_OPTIONS_TEMPLATE
-
     output_filename = os.path.join(dpkg_path, 'source', 'options')
 
-    self._GenerateFile(None, template_file, None, output_filename)
+    self._GenerateFile(
+        self._project_definition.dpkg_template_source_options,
+        self._SOURCE_OPTIONS_TEMPLATE, None, output_filename)
 
   def _GetArchitecture(self):
     """Retrieves the architecture.
@@ -665,6 +678,7 @@ class DPKGBuildFilesGenerator(object):
       self._GenerateFile(filename, '', None, output_filename)
 
     os.mkdir(os.path.join(dpkg_path, 'source'))
+    self._GeneratePy3DistOverridesFile(dpkg_path)
     self._GenerateSourceFormatFile(dpkg_path)
     self._GenerateSourceOptionsFile(dpkg_path)
 

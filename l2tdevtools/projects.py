@@ -23,6 +23,7 @@ class ProjectDefinition(object):
     description_short (str): short description of the project.
     disabled (list[str]): names of the build targets that are disabled for
         this project.
+    download_url (str): source package download URL.
     dpkg_build_dependencies (list[str]): dpkg build dependencies.
     dpkg_configure_options (list[str]): configure options when building a deb.
     dpkg_dependencies (list[str]): dpkg dependencies.
@@ -34,8 +35,11 @@ class ProjectDefinition(object):
     dpkg_template_install (list[str]): names of the dpkg install template files.
     dpkg_template_install_python3 (list[str]): names of the dpkg Python 3
         install template files.
-    download_url (str): source package download URL.
+    dpkg_template_py3dist_overrides (str): name of the dpkg py3dist-overrides
+        template file.
     dpkg_template_rules (str): name of the dpkg rules template file.
+    dpkg_template_source_options (str): name of the dpkg source options template
+        file.
     git_url (str): git repository URL.
     homepage_url (str): project homepage URL.
     maintainer (str): name and email address of the maintainer.
@@ -76,7 +80,9 @@ class ProjectDefinition(object):
     self.dpkg_template_control = None
     self.dpkg_template_install = None
     self.dpkg_template_install_python3 = None
+    self.dpkg_template_py3dist_overrides = None
     self.dpkg_template_rules = None
+    self.dpkg_template_source_options = None
     self.download_url = None
     self.git_url = None
     self.homepage_url = None
@@ -233,8 +239,12 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'dpkg_template_install')
       project_definition.dpkg_template_install_python3 = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_install_python3')
+      project_definition.dpkg_template_py3dist_overrides = self._GetConfigValue(
+          config_parser, section_name, 'dpkg_template_py3dist_overrides')
       project_definition.dpkg_template_rules = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_rules')
+      project_definition.dpkg_template_source_options = self._GetConfigValue(
+          config_parser, section_name, 'dpkg_template_source_options')
       project_definition.download_url = self._GetConfigValue(
           config_parser, section_name, 'download_url')
       project_definition.git_url = self._GetConfigValue(
