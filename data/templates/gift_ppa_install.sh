@@ -6,6 +6,8 @@
 # Exit on error.
 set -e
 
+export DEBIAN_FRONTEND=noninteractive
+
 # Dependencies for running ${project_name}, alphabetized, one per line.
 # This should not include packages only required for testing or development.
 ${python_dependencies}
