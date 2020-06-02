@@ -24,7 +24,7 @@ then
 		TEST_COMMAND="./config/travis/run_python3.sh";
 	fi
 	# Note that exec options need to be defined before the container name.
-	docker exec $${CONTAINER_OPTIONS} $${CONTAINER_NAME} sh -c "cd ${project_name} && $${TEST_COMMAND}";
+	docker exec $${CONTAINER_OPTIONS} $${CONTAINER_NAME} sh -c "cd ${source_directory} && $${TEST_COMMAND}";
 
 elif test -n "$${UBUNTU_VERSION}";
 then
@@ -54,7 +54,7 @@ then
 		TEST_COMMAND="./config/travis/run_python3.sh";
 	fi
 	# Note that exec options need to be defined before the container name.
-	docker exec $${CONTAINER_OPTIONS} $${CONTAINER_NAME} sh -c "cd ${project_name} && $${TEST_COMMAND}";
+	docker exec $${CONTAINER_OPTIONS} $${CONTAINER_NAME} sh -c "cd ${source_directory} && $${TEST_COMMAND}";
 
 elif test "$${TARGET}" = "dockerfile";
 then

@@ -12,9 +12,16 @@ from l2tdevtools.dependency_writers import interface
 class TravisInstallScriptWriter(interface.DependencyFileWriter):
   """Travis-CI install.sh file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'install.sh')
-
   PATH = os.path.join('config', 'travis', 'install.sh')
+
+  # Maps source directory names to project names.
+  _SOURCE_DIRECTORY_MAPPINGS = {
+      'esedbrc': 'esedb-kb',
+      'winevtrc': 'winevt-kb',
+      'winregrc': 'winreg-kb',
+  }
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'install.sh')
 
   _URL_L2TDEVTOOLS = 'https://github.com/log2timeline/l2tdevtools.git'
 
@@ -33,15 +40,18 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
     rpm_python3_test_dependencies = self._GetRPMTestDependencies(
         rpm_python3_dependencies, python_version=3)
 
+    source_directory = self._SOURCE_DIRECTORY_MAPPINGS.get(
+        self._project_definition.name, self._project_definition.name)
+
     template_mappings = {
         'dpkg_build_dependencies': ' '.join(dpkg_build_dependencies),
         'dpkg_python3_dependencies': ' '.join(dpkg_python3_dependencies),
         'dpkg_python3_test_dependencies': ' '.join(
             dpkg_python3_test_dependencies),
-        'project_name': self._project_definition.name,
         'rpm_python3_dependencies': ' '.join(rpm_python3_dependencies),
         'rpm_python3_test_dependencies': ' '.join(
-            rpm_python3_test_dependencies)}
+            rpm_python3_test_dependencies),
+        'source_directory': source_directory}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
@@ -58,7 +68,7 @@ class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
   PATH = os.path.join('config', 'travis', 'run_pylint.sh')
 
   def Write(self):
-    """Writes a runtests.sh file."""
+    """Writes a run_pylint.sh file."""
     paths_to_lint = [self._project_definition.name]
     for path_to_lint in ('config', 'scripts', 'tests', 'tools'):
       if os.path.isdir(path_to_lint):
@@ -89,7 +99,7 @@ class TravisRunPython3ScriptWriter(interface.DependencyFileWriter):
   PATH = os.path.join('config', 'travis', 'run_python3.sh')
 
   def Write(self):
-    """Writes a runtests.sh file."""
+    """Writes a run_python3.sh file."""
     template_mappings = {}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
@@ -102,15 +112,23 @@ class TravisRunPython3ScriptWriter(interface.DependencyFileWriter):
 class TravisRunTestsScriptWriter(interface.DependencyFileWriter):
   """Travis-CI runtests.sh file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'runtests.sh')
-
   PATH = os.path.join('config', 'travis', 'runtests.sh')
+
+  # Maps source directory names to project names.
+  _SOURCE_DIRECTORY_MAPPINGS = {
+      'esedbrc': 'esedb-kb',
+      'winevtrc': 'winevt-kb',
+      'winregrc': 'winreg-kb',
+  }
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'runtests.sh')
 
   def Write(self):
     """Writes a runtests.sh file."""
-    template_mappings = {
-        'project_name': self._project_definition.name,
-    }
+    source_directory = self._SOURCE_DIRECTORY_MAPPINGS.get(
+        self._project_definition.name, self._project_definition.name)
+
+    template_mappings = {'source_directory': source_directory}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
