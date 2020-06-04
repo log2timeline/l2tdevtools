@@ -50,26 +50,6 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
       file_object.write(file_content)
 
 
-class TravisRunCoverageScriptWriter(interface.DependencyFileWriter):
-  """Travis-CI run_coverage.sh file writer."""
-
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_coverage.sh')
-
-  PATH = os.path.join('config', 'travis', 'run_coverage.sh')
-
-  def Write(self):
-    """Writes a runtests.sh file."""
-    template_mappings = {
-        'project_name': self._project_definition.name,
-    }
-
-    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
-    file_content = self._GenerateFromTemplate(template_file, template_mappings)
-
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
-      file_object.write(file_content)
-
-
 class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
   """Travis-CI run_pylint.sh file writer."""
 
