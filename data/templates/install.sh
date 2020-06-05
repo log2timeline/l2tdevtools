@@ -75,15 +75,11 @@ then
 	# Install packages.
 	if test -n "$${TOXENV}";
 	then
-		DPKG_PACKAGES="${dpkg_build_dependencies} python$${TRAVIS_PYTHON_VERSION} python$${TRAVIS_PYTHON_VERSION}-dev tox";
+		DPKG_PACKAGES="${dpkg_build_dependencies} curl python$${TRAVIS_PYTHON_VERSION} python$${TRAVIS_PYTHON_VERSION}-dev tox";
 	else
 		DPKG_PACKAGES="";
 
-		if test "$${TARGET}" = "coverage";
-		then
-			DPKG_PACKAGES="$${DPKG_PACKAGES} curl git";
-
-		elif test "$${TARGET}" = "jenkins3";
+		if test "$${TARGET}" = "jenkins3";
 		then
 			DPKG_PACKAGES="$${DPKG_PACKAGES} sudo";
 
