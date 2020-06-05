@@ -6,7 +6,8 @@
 .PHONY: override_dh_auto_clean
 override_dh_auto_clean:
 	# `setup.py clean' is not supported.
-	rm -rf build numpy.egg-info/SOURCES.txt numpy.egg-info/PKG-INFO
+	find . -name __pycache__ -type d -exec rm -rf {{}} \; 2>/dev/null || true
+	rm -rf build cythonize.dat numpy.egg-info/SOURCES.txt numpy.egg-info/PKG-INFO
 
 .PHONY: override_dh_auto_test
 override_dh_auto_test:

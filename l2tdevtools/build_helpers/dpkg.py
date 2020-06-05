@@ -181,7 +181,6 @@ class DPKGBuildHelper(interface.BuildHelper):
       self._CreateOriginalSourcePackageFromZip(
           source_filename, deb_orig_source_filename)
     else:
-      # TODO: add fix psutil package name.
       shutil.copy(source_filename, deb_orig_source_filename)
 
   def _CreateOriginalSourcePackageFromZip(
@@ -199,7 +198,16 @@ class DPKGBuildHelper(interface.BuildHelper):
         for filename in zip_file.namelist():
           with zip_file.open(filename) as file_object:
             zip_info = zip_file.getinfo(filename)
+
             tar_info = tarfile.TarInfo(filename)
+
+            if zip_info.is_dir():
+              tar_info.mode = 0o755
+            else:
+              tar_info.mode = 0o644
+
+            tar_info.uid = os.getuid()
+            tar_info.gid = os.getgid()
             tar_info.size = zip_info.file_size
 
             # Populate modification times from zip file into tar archive,
