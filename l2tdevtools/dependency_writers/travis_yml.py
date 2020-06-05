@@ -51,7 +51,7 @@ class TravisYMLWriter(interface.DependencyFileWriter):
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
-        'jobs_pylint3', template_mappings)
+        'jobs_lint_and_type_check', template_mappings)
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(

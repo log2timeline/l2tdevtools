@@ -19,7 +19,7 @@ then
 
 	elif test "${TARGET}" = "pylint";
 	then
-		TEST_COMMAND="./config/travis/run_pylint.sh";
+		TEST_COMMAND="./config/travis/run_checks.sh";
 	else
 		TEST_COMMAND="./config/travis/run_python3.sh";
 	fi
@@ -53,7 +53,7 @@ then
 
 	elif test "${TARGET}" = "pylint";
 	then
-		TEST_COMMAND="./config/travis/run_pylint.sh";
+		TEST_COMMAND="./config/travis/run_checks.sh";
 	else
 		TEST_COMMAND="./config/travis/run_python3.sh";
 	fi

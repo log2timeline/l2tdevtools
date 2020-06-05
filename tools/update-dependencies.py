@@ -54,8 +54,8 @@ def Main():
       pylint_rc.PylintRcWriter, travis.TravisRunWithTimeoutScriptWriter,
       requirements.RequirementsWriter, requirements.TestRequirementsWriter,
       setup.SetupCfgWriter, setup.SetupPyWriter,
-      travis.TravisInstallScriptWriter, travis.TravisRunCoverageScriptWriter,
-      travis.TravisRunPylintScriptWriter, travis.TravisRunPython3ScriptWriter,
+      travis.TravisInstallScriptWriter, travis.TravisRunChecksScriptWriter,
+      travis.TravisRunCoverageScriptWriter, travis.TravisRunPython3ScriptWriter,
       travis.TravisRunTestsScriptWriter,
       travis.TravisRunWithTimeoutScriptWriter, travis_yml.TravisYMLWriter):
     writer = writer_class(
@@ -105,6 +105,12 @@ def Main():
   script_path = os.path.join('config', 'linux', 'gift_ppa_install.sh')
   if os.path.isfile(script_path):
     os.remove(script_path)
+
+  script_path = os.path.join('config', 'travis', 'run_checks.sh')
+  if os.path.isfile(script_path):
+    script_path = os.path.join('config', 'travis', 'run_pylint.sh')
+    if os.path.isfile(script_path):
+      os.remove(script_path)
 
   return True
 

@@ -12,7 +12,7 @@ from l2tdevtools.dependency_writers import interface
 class TravisInstallScriptWriter(interface.DependencyFileWriter):
   """Travis-CI install.sh file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'install.sh')
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'travis', 'install.sh')
 
   PATH = os.path.join('config', 'travis', 'install.sh')
 
@@ -53,7 +53,8 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
 class TravisRunCoverageScriptWriter(interface.DependencyFileWriter):
   """Travis-CI run_coverage.sh file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_coverage.sh')
+  _TEMPLATE_FILE = os.path.join(
+      'data', 'templates', 'travis', 'run_coverage.sh')
 
   PATH = os.path.join('config', 'travis', 'run_coverage.sh')
 
@@ -70,12 +71,12 @@ class TravisRunCoverageScriptWriter(interface.DependencyFileWriter):
       file_object.write(file_content)
 
 
-class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
-  """Travis-CI run_pylint.sh file writer."""
+class TravisRunChecksScriptWriter(interface.DependencyFileWriter):
+  """Travis-CI run_checks.sh file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_pylint.sh')
+  PATH = os.path.join('config', 'travis', 'run_checks.sh')
 
-  PATH = os.path.join('config', 'travis', 'run_pylint.sh')
+  _PROJECTS_WITH_TYPING = frozenset(['dfdatetime', 'dfwinreg'])
 
   def Write(self):
     """Writes a runtests.sh file."""
@@ -91,10 +92,17 @@ class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
     #   paths_to_lint.insert(0, 'setup.py')
 
     template_mappings = {
-        'paths_to_lint': ' '.join(paths_to_lint)
+        'paths_to_lint': ' '.join(paths_to_lint),
+        'project_name': self._project_definition.name,
     }
 
-    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    if self._project_definition.name in self._PROJECTS_WITH_TYPING:
+      template_file = 'run_checks-pylint_and_mypy.sh'
+    else:
+      template_file = 'run_checks-pylint.sh'
+
+    template_file = os.path.join(
+        self._l2tdevtools_path, 'data', 'templates', 'travis', template_file)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
     with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
@@ -104,7 +112,7 @@ class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
 class TravisRunPython3ScriptWriter(interface.DependencyFileWriter):
   """Travis-CI run_python3.sh file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_python3.sh')
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'travis', 'run_python3.sh')
 
   PATH = os.path.join('config', 'travis', 'run_python3.sh')
 
@@ -122,7 +130,7 @@ class TravisRunPython3ScriptWriter(interface.DependencyFileWriter):
 class TravisRunTestsScriptWriter(interface.DependencyFileWriter):
   """Travis-CI runtests.sh file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'runtests.sh')
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'travis', 'runtests.sh')
 
   PATH = os.path.join('config', 'travis', 'runtests.sh')
 
@@ -142,7 +150,8 @@ class TravisRunTestsScriptWriter(interface.DependencyFileWriter):
 class TravisRunWithTimeoutScriptWriter(interface.DependencyFileWriter):
   """Travis-CI run_with_timeout.sh file writer."""
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_with_timeout.sh')
+  _TEMPLATE_FILE = os.path.join(
+      'data', 'templates', 'travis', 'run_with_timeout.sh')
 
   PATH = os.path.join('config', 'travis', 'run_with_timeout.sh')
 
