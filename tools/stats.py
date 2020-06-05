@@ -14,18 +14,9 @@ import os
 import sys
 import time
 
+import urllib.error as urllib_error
+from urllib.request import urlopen
 
-# pylint: disable=import-error,no-name-in-module
-if sys.version_info[0] < 3:
-  # Keep urllib2 here since we this code should be able to be used
-  # by a default Python set up.
-  import urllib2 as urllib_error
-  from urllib2 import urlopen
-else:
-  import urllib.error as urllib_error
-  from urllib.request import urlopen
-
-# pylint: disable=wrong-import-position
 from l2tdevtools import py2to3
 
 
@@ -44,7 +35,7 @@ class StatsDefinitionReader(object):
       object: value or None if the value does not exists.
     """
     try:
-      return config_parser.get(section_name, value_name).decode('utf-8')
+      return config_parser.get(section_name, value_name)
     except configparser.NoOptionError:
       return None
 
@@ -346,7 +337,7 @@ class StdoutWriter(object):
     """Writes the data to stdout (without the default trailing newline).
 
     Args:
-      data (bytes): data to write.
+      data (str): data to write.
     """
     print(data, end='')
 
@@ -376,18 +367,15 @@ class StdoutWriter(object):
 
     if self._output_format == 'csv':
       if not self._header_written:
-        output_line = (
+        self.Write(
             'year\tweek number\tlogin name\tproject\tnumber of contributions\t'
             'number lines added\tnumber lines deleted\n')
-        self.Write(output_line.encode('utf-8'))
 
         self._header_written = True
 
-      output_line = (
-          '{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n').format(
-              year, week_number, username, project_name,
-              number_of_contributions, number_of_lines_added,
-              number_of_lines_deleted)
+      self.Write('{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n'.format(
+          year, week_number, username, project_name, number_of_contributions,
+          number_of_lines_added, number_of_lines_deleted))
 
     elif self._output_format == 'tilde':
       date_time_string = '{0:s}-W{1:s}-0'.format(year, week_number)
@@ -395,15 +383,12 @@ class StdoutWriter(object):
       date_time_string = date_time.isoformat()
 
       # TODO: add description.
-      output_line = (
+      self.Write((
           '{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
           'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
           '~ py:{4:d} ~ file_type:py ~ op_type:ADD ~\n').format(
-              date_time_string, username, project_name,
-              number_of_contributions, number_of_lines_added,
-              number_of_lines_deleted)
-
-    self.Write(output_line.encode('utf-8'))
+              date_time_string, username, project_name, number_of_contributions,
+              number_of_lines_added, number_of_lines_deleted))
 
   def WriteReview(
       self, creation_time, created_by, issue_number, description, reviewers,
@@ -420,17 +405,15 @@ class StdoutWriter(object):
     """
     if self._output_format == 'csv':
       if not self._header_written:
-        output_line = (
+        self.Write(
             'creation time\tcreated by\tissue number\tdescription\treviewers\t'
             'status\n')
-        self.Write(output_line.encode('utf-8'))
 
         self._header_written = True
 
-      output_line = '{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
+      self.Write('{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
           creation_time, created_by, issue_number, description, reviewers,
-          status)
-      self.Write(output_line.encode('utf-8'))
+          status))
 
 
 def Main():
