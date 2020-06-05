@@ -4,6 +4,8 @@
 
 from __future__ import unicode_literals
 
+import configparser
+import io
 import unittest
 
 from l2tdevtools import dependencies
@@ -25,8 +27,40 @@ class DependencyDefinitionReaderTest(test_lib.BaseTestCase):
 
   # pylint: disable=protected-access
 
-  # TODO: add tests for _GetConfigValue.
-  # TODO: add tests for Read.
+  _TEST_CONFIGURATION_DATA = '\n'.join([
+      '[dfdatetime]',
+      'dpkg_name: python3-dfdatetime',
+      'minimum_version: 20160814',
+      'rpm_name: python3-dfdatetime',
+      'version_property: __version__'])
+
+  def testGetConfigValue(self):
+    """Tests the _GetConfigValue function."""
+    test_reader = dependencies.DependencyDefinitionReader()
+
+    file_object = io.StringIO(self._TEST_CONFIGURATION_DATA)
+    config_parser = configparser.ConfigParser(interpolation=None)
+    config_parser.read_file(file_object)
+
+    configuration_value = test_reader._GetConfigValue(
+        config_parser, 'dfdatetime', 'dpkg_name')
+    self.assertEqual(configuration_value, 'python3-dfdatetime')
+
+    with self.assertRaises(configparser.NoSectionError):
+      test_reader._GetConfigValue(config_parser, 'bogus', 'dpkg_name')
+
+    configuration_value = test_reader._GetConfigValue(
+        config_parser, 'dfdatetime', 'bogus')
+    self.assertIsNone(configuration_value)
+
+  def testRead(self):
+    """Tests the Read function."""
+    test_reader = dependencies.DependencyDefinitionReader()
+
+    file_object = io.StringIO(self._TEST_CONFIGURATION_DATA)
+    definitions = list(test_reader.Read(file_object))
+
+    self.assertEqual(len(definitions), 1)
 
 
 @test_lib.skipUnlessHasTestFile(['dependencies.ini'])
@@ -129,6 +163,15 @@ class DependencyHelperTest(test_lib.BaseTestCase):
 
     install_requires = dependency_helper.GetInstallRequires()
     self.assertEqual(len(install_requires), 1)
+
+  def testGetPylintRcExtensionPkgs(self):
+    """Tests the GetPylintRcExtensionPkgs function."""
+    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependency_helper = dependencies.DependencyHelper(
+        configuration_file=configuration_file)
+
+    extension_packages = dependency_helper.GetPylintRcExtensionPkgs()
+    self.assertEqual(len(extension_packages), 0)
 
   def testGetRPMRequires(self):
     """Tests the GetRPMRequires function."""
