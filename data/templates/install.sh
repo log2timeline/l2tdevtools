@@ -45,7 +45,7 @@ then
 	fi
 	docker exec $${CONTAINER_NAME} dnf install -y $${RPM_PACKAGES};
 
-	docker cp ../${project_name} $${CONTAINER_NAME}:/
+	docker cp ../${source_directory} $${CONTAINER_NAME}:/
 
 elif test -n "$${UBUNTU_VERSION}";
 then
@@ -94,7 +94,7 @@ then
 	fi
 	docker exec -e "DEBIAN_FRONTEND=noninteractive" $${CONTAINER_NAME} sh -c "apt-get install -y $${DPKG_PACKAGES}";
 
-	docker cp ../${project_name} $${CONTAINER_NAME}:/
+	docker cp ../${source_directory} $${CONTAINER_NAME}:/
 
 elif test $${TRAVIS_OS_NAME} = "osx";
 then
