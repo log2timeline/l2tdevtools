@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 from l2tdevtools.build_helpers import dpkg
 from l2tdevtools.build_helpers import msi
 from l2tdevtools.build_helpers import osc
-from l2tdevtools.build_helpers import pkg
 from l2tdevtools.build_helpers import rpm
 from l2tdevtools.build_helpers import source
 
@@ -19,7 +18,6 @@ class BuildHelperFactory(object):
       'dpkg-source': dpkg.ConfigureMakeSourceDPKGBuildHelper,
       'msi': msi.ConfigureMakeMSIBuildHelper,
       'osc': osc.ConfigureMakeOSCBuildHelper,
-      'pkg': pkg.ConfigureMakePKGBuildHelper,
       'rpm': rpm.ConfigureMakeRPMBuildHelper,
       'source': source.ConfigureMakeSourceBuildHelper,
       'srpm': rpm.ConfigureMakeSRPMBuildHelper,
@@ -30,7 +28,6 @@ class BuildHelperFactory(object):
       'dpkg-source': dpkg.SetupPySourceDPKGBuildHelper,
       'msi': msi.SetupPyMSIBuildHelper,
       'osc': osc.SetupPyOSCBuildHelper,
-      'pkg': pkg.SetupPyPKGBuildHelper,
       'rpm': rpm.SetupPyRPMBuildHelper,
       'source': source.SetupPySourceBuildHelper,
       'srpm': rpm.SetupPySRPMBuildHelper,
