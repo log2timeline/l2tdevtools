@@ -71,6 +71,9 @@ jobs:
     env: TOXENV="py37"
     os: osx
     osx_image: xcode10
+  - name: "Dockerfile"
+    env: TARGET="dockerfile"
+    group: edge
 install:
 - ./config/travis/install.sh
 script:
