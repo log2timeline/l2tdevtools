@@ -62,7 +62,13 @@ then
 
 elif test "${TARGET}" = "dockerfile";
 then
-	cd config/docker && docker build --build-arg PPA_TRACK="dev" -f Dockerfile .
+	CONTAINER_NAME="log2timeline/plaso-dev";
+
+	cd config/docker
+
+	docker build --build-arg GITHUB_USERNAME="joachimmetz" -f plaso-dev.Dockerfile -t ${CONTAINER_NAME} .
+
+	docker run ${CONTAINER_NAME} ./run_tests.py
 
 elif test "${TRAVIS_OS_NAME}" = "osx";
 then
