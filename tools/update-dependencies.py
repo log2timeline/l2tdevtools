@@ -54,8 +54,8 @@ def Main():
       pylint_rc.PylintRcWriter, travis.TravisRunWithTimeoutScriptWriter,
       requirements.RequirementsWriter, requirements.TestRequirementsWriter,
       setup.SetupCfgWriter, setup.SetupPyWriter,
-      travis.TravisInstallScriptWriter, travis.TravisRunPylintScriptWriter,
-      travis.TravisRunPython3ScriptWriter, travis.TravisRunTestsScriptWriter,
+      travis.TravisInstallScriptWriter, travis.TravisRunPython3ScriptWriter,
+      travis.TravisRunTestsScriptWriter,
       travis.TravisRunWithTimeoutScriptWriter, travis_yml.TravisYMLWriter):
     writer = writer_class(
         l2tdevtools_path, project_definition, dependencies_helper,
@@ -106,6 +106,10 @@ def Main():
     os.remove(script_path)
 
   script_path = os.path.join('config', 'travis', 'run_coverage.sh')
+  if os.path.isfile(script_path):
+    os.remove(script_path)
+
+  script_path = os.path.join('config', 'travis', 'run_pylint.sh')
   if os.path.isfile(script_path):
     os.remove(script_path)
 
