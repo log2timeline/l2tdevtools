@@ -18,9 +18,12 @@ class DependenciesPyWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a dependencies.py file."""
-    dependencies = sorted(
+    dependencies = []
+    for dependency in sorted(
         self._dependency_helper.dependencies.values(),
-        key=lambda dependency: dependency.name.lower())
+        key=lambda dependency: dependency.name.lower()):
+      if not dependency.skip_check:
+        dependencies.append(dependency)
 
     python_dependencies = []
     for dependency in dependencies:
