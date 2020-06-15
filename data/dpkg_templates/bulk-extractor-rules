@@ -6,3 +6,6 @@
 
 %:
 	dh $@ --with autoreconf
+
+.PHONY: override_dh_auto_test
+override_dh_auto_test:
