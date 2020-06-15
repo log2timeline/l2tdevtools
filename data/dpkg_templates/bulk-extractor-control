@@ -8,5 +8,5 @@ Homepage: https://github.com/simsong/bulk_extractor
 
 Package: bulk-extractor
 Architecture: any
-Depends: $${shlibs:Depends}, $${misc:Depends}
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
 Description: A tool that will scan a disk image (or any other file) and extract useful information without parsing the file system
