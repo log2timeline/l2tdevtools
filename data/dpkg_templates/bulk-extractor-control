@@ -1,0 +1,12 @@
+Source: bulk-extractor
+Section: utils
+Priority: optional
+Maintainer: Simson L. Garfinkel <slgarfin@nps.edu>
+Build-Depends: debhelper (>= 9), dh-autoreconf, autoconf, automake, flex, libtool, default-jdk, bison, libssl-dev, zlib1g-dev, libxml2-dev
+Standards-Version: 3.9.8
+Homepage: https://github.com/simsong/bulk_extractor
+
+Package: bulk-extractor
+Architecture: any
+Depends: md5deep, openssl, ${{shlibs:Depends}}, ${{misc:Depends}}
+Description: A tool that will scan a disk image (or any other file) and extract useful information without parsing the file system
