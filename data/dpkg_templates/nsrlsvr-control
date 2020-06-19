@@ -1,0 +1,22 @@
+Source: nsrlsvr
+Section: utils
+Priority: extra
+Maintainer: Joachim Metz <joachim.metz@gmail.com>
+Build-Depends: debhelper (>= 9), cmake, libboost-dev, libboost-program-options-dev, python3
+Standards-Version: 3.9.5
+Homepage: https://github.com/rjhansen/nsrlsvr
+
+Package: nsrlsvr-server
+Section: utils
+Architecture: any
+Depends: ${{shlibs:Depends}}, ${{misc:Depends}}
+Description: Collection of command line tools that allow you to analyzing disk images
+ Collection of command line tools that allow you to analyzing disk images.
+
+Package: nsrlsvr-server-dbg
+Architecture: any
+Section: debug
+Depends: nsrlsvr-server (= ${{binary:Version}}), ${{misc:Depends}}
+Description: Debugging symbols for nsrlsvr
+ Debugging symbols for nsrlsvr.
+
