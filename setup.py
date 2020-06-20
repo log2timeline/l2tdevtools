@@ -228,8 +228,6 @@ setup(
         ('share/l2tdevtools/data/templates', glob.glob(
             os.path.join('data', 'templates', '.pylintrc'))),
         ('share/l2tdevtools/data/templates', glob.glob(
-            os.path.join('data', 'templates', '*.ini'))),
-        ('share/l2tdevtools/data/templates', glob.glob(
             os.path.join('data', 'templates', '*.sh'))),
         ('share/l2tdevtools/data/templates/.travis.yml', glob.glob(
             os.path.join('data', 'templates', '.travis.yml', '*'))),
@@ -239,6 +237,8 @@ setup(
             os.path.join('data', 'templates', 'setup.cfg', '*'))),
         ('share/l2tdevtools/data/templates/setup.py', glob.glob(
             os.path.join('data', 'templates', 'setup.py', '*'))),
+        ('share/l2tdevtools/data/templates/tox.ini', glob.glob(
+            os.path.join('data', 'templates', 'tox.ini', '*'))),
         ('share/doc/l2tdevtools', [
             'ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README']),
     ],

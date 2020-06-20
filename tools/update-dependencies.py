@@ -24,6 +24,7 @@ from l2tdevtools.dependency_writers import macos
 from l2tdevtools.dependency_writers import pylint_rc
 from l2tdevtools.dependency_writers import requirements
 from l2tdevtools.dependency_writers import setup
+from l2tdevtools.dependency_writers import sphinx_docs
 from l2tdevtools.dependency_writers import tox_ini
 from l2tdevtools.dependency_writers import travis
 from l2tdevtools.dependency_writers import travis_yml
@@ -73,7 +74,9 @@ def Main():
       jenkins_scripts.RunPython3EndToEndTestsScriptWriter,
       linux_scripts.UbuntuInstallationScriptWriter,
       macos.MacOSInstallScriptWriter, macos.MacOSMakeDistScriptWriter,
-      macos.MacOSUninstallScriptWriter, tox_ini.ToxIniWriter):
+      macos.MacOSUninstallScriptWriter,
+      sphinx_docs.SphinxBuildConfigurationWriter,
+      sphinx_docs.SphinxBuildRequirementsWriter, tox_ini.ToxIniWriter):
     if not os.path.exists(writer_class.PATH):
       continue
 
