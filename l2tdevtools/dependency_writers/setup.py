@@ -375,8 +375,13 @@ class SetupPyWriter(interface.DependencyFileWriter):
     file_content.append(template_data)
 
     if data_directory:
+      if self._project_definition.name == 'plaso':
+        template_file = 'setup_data_files-with_data-plaso'
+      else:
+        template_file = 'setup_data_files-with_data'
+
       template_data = self._GenerateFromTemplate(
-          'setup_data_files-with_data', template_mappings)
+          template_file, template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
