@@ -18,7 +18,22 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a tox.ini file."""
-    template_mappings = {'project_name': self._project_definition.name}
+    directories_to_lint = []
+
+    if os.path.isdir(self._project_definition.name):
+      directories_to_lint.append(self._project_definition.name)
+
+    if os.path.isdir('scripts'):
+      directories_to_lint.append('scripts')
+    elif os.path.isdir('tools'):
+      directories_to_lint.append('tools')
+
+    if os.path.isdir('tests'):
+      directories_to_lint.append('tests')
+
+    template_mappings = {
+        'directories_to_lint': ' '.join(sorted(directories_to_lint)),
+        'project_name': self._project_definition.name}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)

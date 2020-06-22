@@ -60,37 +60,6 @@ class TravisInstallScriptWriter(interface.DependencyFileWriter):
       file_object.write(file_content)
 
 
-class TravisRunPylintScriptWriter(interface.DependencyFileWriter):
-  """Travis-CI run_pylint.sh file writer."""
-
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'run_pylint.sh')
-
-  PATH = os.path.join('config', 'travis', 'run_pylint.sh')
-
-  def Write(self):
-    """Writes a run_pylint.sh file."""
-    paths_to_lint = [self._project_definition.name]
-    for path_to_lint in ('config', 'scripts', 'tests', 'tools'):
-      if os.path.isdir(path_to_lint):
-        paths_to_lint.append(path_to_lint)
-
-    paths_to_lint = sorted(paths_to_lint)
-
-    # Disabled for now since Python 3.8 and pylint fails to lint setup.py
-    # if os.path.isfile('setup.py'):
-    #   paths_to_lint.insert(0, 'setup.py')
-
-    template_mappings = {
-        'paths_to_lint': ' '.join(paths_to_lint)
-    }
-
-    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
-    file_content = self._GenerateFromTemplate(template_file, template_mappings)
-
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
-      file_object.write(file_content)
-
-
 class TravisRunPython3ScriptWriter(interface.DependencyFileWriter):
   """Travis-CI run_python3.sh file writer."""
 
