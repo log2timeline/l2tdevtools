@@ -44,6 +44,7 @@ rm -rf %{{buildroot}}
 
 %files -n python3-%{{name}}
 %{{python3_sitelib}}/bencode/
+%{{python3_sitelib}}/bencodepy/
 %{{python3_sitelib}}/bencode.py*.egg-info
 
 %changelog
