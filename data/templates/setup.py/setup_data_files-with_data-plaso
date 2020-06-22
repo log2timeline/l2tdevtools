@@ -1,0 +1,4 @@
+        ('share/plaso', glob.glob(
+            os.path.join('data', '*.*'))),
+        ('share/plaso/formatters', glob.glob(
+            os.path.join('data', 'formatters', '*.yaml'))),
