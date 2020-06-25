@@ -34,7 +34,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       'Maintainer: {maintainer:s}',
       'Build-Depends: debhelper (>= 9), dh-python, {build_dependencies:s}',
       'Standards-Version: 4.1.4',
-      'X-Python3-Version: >= 3.5',
+      'X-Python3-Version: >= 3.6',
       'Homepage: {homepage_url:s}',
       '']  # yapf: disable
 
@@ -97,7 +97,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
     if python3_dependencies:
       python3_dependencies = '{0:s}, '.format(python3_dependencies)
 
-    build_dependencies = ['python3-all (>= 3.5~)', 'python3-setuptools']
+    build_dependencies = ['python3-all (>= 3.6~)', 'python3-setuptools']
     if self._project_definition.name == 'timesketch':
       build_dependencies.insert(0, 'dh-systemd (>= 1.5)')
       build_dependencies.append('python3-pip')

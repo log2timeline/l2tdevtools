@@ -50,16 +50,13 @@ class TravisYMLWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('header', template_mappings)
     file_content.append(template_data)
 
-    template_data = self._GenerateFromTemplate(
-        'jobs_pylint3', template_mappings)
+    template_data = self._GenerateFromTemplate('jobs_linux', template_mappings)
     file_content.append(template_data)
 
-    template_data = self._GenerateFromTemplate(
-        'jobs_linux', template_mappings)
+    template_data = self._GenerateFromTemplate('jobs_pylint', template_mappings)
     file_content.append(template_data)
 
-    template_data = self._GenerateFromTemplate(
-        'jobs_macos', template_mappings)
+    template_data = self._GenerateFromTemplate('jobs_macos', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in self._PROJECTS_WITH_DOCKERFILE:

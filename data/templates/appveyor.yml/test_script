@@ -1,4 +1,7 @@
 
 test_script:
-- cmd: if [%TARGET%]==[unittests] (
-    "%PYTHON%\\python.exe" run_tests.py )
+- cmd: IF [%TARGET%]==[unittests] (
+    "%PYTHON%\\python.exe" run_tests.py &&
+    IF EXIST "tests\\end-to-end.py" (
+        set PYTHONPATH=. &&
+        "%PYTHON%\\python.exe" "tests\\end-to-end.py" --debug -c "config\\end-to-end.ini" ) )

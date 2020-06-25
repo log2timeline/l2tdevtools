@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --buildsystem=cmake
+
+.PHONY: override_dh_auto_configure
+override_dh_auto_configure:
+	cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DPYTHON_EXECUTABLE=/usr/bin/python3
+
+.PHONY: override_dh_auto_build
+override_dh_auto_build:
+	make
+
+.PHONY: override_dh_auto_install
+override_dh_auto_install:
+	make DESTDIR=${{PWD}}/debian/nsrlsvr-server install
+
+.PHONY: override_dh_auto_test
+override_dh_auto_test:
+
+.PHONY: override_dh_strip
+override_dh_strip:
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip -pnsrlsvr-server --dbg-package=nsrlsvr-server-dbg
+endif
+

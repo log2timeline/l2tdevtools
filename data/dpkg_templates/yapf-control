@@ -2,9 +2,9 @@ Source: yapf
 Section: python
 Priority: extra
 Maintainer: Bill Wendling <morbo@google.com>
-Build-Depends: debhelper (>= 9), dh-python, python3-all (>= 3.5~), python3-setuptools, python3-nose
+Build-Depends: debhelper (>= 9), dh-python, python3-all (>= 3.6~), python3-setuptools, python3-nose
 Standards-Version: 3.9.5
-X-Python3-Version: >= 3.5
+X-Python3-Version: >= 3.6
 Homepage: https://github.com/google/yapf
 
 Package: python3-yapf
