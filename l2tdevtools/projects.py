@@ -32,6 +32,7 @@ class ProjectDefinition(object):
     dpkg_template_additional (list[str]): names of additional dpkg template
         files.
     dpkg_template_control (str): name of the dpkg control template file.
+    dpkg_template_docs (str): name of the dpkg docs template file.
     dpkg_template_install (list[str]): names of the dpkg install template files.
     dpkg_template_install_python3 (list[str]): names of the dpkg Python 3
         install template files.
@@ -78,6 +79,7 @@ class ProjectDefinition(object):
     self.dpkg_source_name = None
     self.dpkg_template_additional = None
     self.dpkg_template_control = None
+    self.dpkg_template_docs = None
     self.dpkg_template_install = None
     self.dpkg_template_install_python3 = None
     self.dpkg_template_py3dist_overrides = None
@@ -235,6 +237,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'dpkg_template_additional')
       project_definition.dpkg_template_control = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_control')
+      project_definition.dpkg_template_docs = self._GetConfigValue(
+          config_parser, section_name, 'dpkg_template_docs')
       project_definition.dpkg_template_install = self._GetConfigValue(
           config_parser, section_name, 'dpkg_template_install')
       project_definition.dpkg_template_install_python3 = self._GetConfigValue(
