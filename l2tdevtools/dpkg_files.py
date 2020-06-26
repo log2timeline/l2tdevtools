@@ -425,20 +425,6 @@ class DPKGBuildFilesGenerator(object):
       with open(filename, 'wb') as file_object:
         file_object.write(b'\n')
 
-  def _GenerateDocsFile(self, dpkg_path):
-    """Generates the dpkg build docs file.
-
-    Args:
-      dpkg_path (str): path to the dpkg files.
-    """
-    template_filename = self._project_definition.dpkg_template_docs
-    if template_filename:
-      docs_file = os.path.join(
-          self._data_path, 'dpkg_templates', template_filename)
-      if os.path.exists(docs_file):
-        filename = os.path.join(dpkg_path, 'docs')
-        shutil.copy(docs_file, filename)
-
   def _GeneratePy3DistOverridesFile(self, dpkg_path):
     """Generates the dpkg build py3dist-overrides file if required.
 
@@ -685,7 +671,6 @@ class DPKGBuildFilesGenerator(object):
     self._GenerateCompatFile(dpkg_path)
     self._GenerateControlFile(dpkg_path)
     self._GenerateCopyrightFile(dpkg_path)
-    self._GenerateDocsFile(dpkg_path)
     self._GenerateRulesFile(dpkg_path)
 
     for filename in self._project_definition.dpkg_template_additional:
