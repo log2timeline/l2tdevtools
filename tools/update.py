@@ -589,7 +589,8 @@ class DependencyUpdater(object):
 
     query = 'SELECT PackageName FROM Win32_Product'
     for product in connection.query(query):
-      name = getattr(product, 'PackageName', '')
+      # Note that it appears that PackageName can be None on some installations.
+      name = getattr(product, 'PackageName', None) or ''
       name = name.lower()
 
       has_known_suffix = False
