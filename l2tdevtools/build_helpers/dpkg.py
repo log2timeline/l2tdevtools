@@ -816,6 +816,12 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
           elif directory_entry.endswith('.so'):
             build_configuration.has_module_shared_object = True
 
+      bin_scripts = os.path.join(
+          installroot_path, 'usr', 'local', 'bin', '*.py')
+      bin_scripts = glob.glob(bin_scripts)
+      if bin_scripts:
+        build_configuration.has_bin_directory = True
+
     if os.path.exists(installroot_path):
       shutil.rmtree(installroot_path)
 
