@@ -13,6 +13,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
   _VERSION_EXPRESSIONS = [
       '[0-9]+',
+      '[0-9]+-pre',
       '[0-9]+[.][0-9]+',
       '[0-9]+[.][0-9]+[.][0-9]+',
       'release-[0-9]+[.][0-9]+[.][0-9]+',
@@ -65,6 +66,10 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       # Remove a leading 'v'.
       elif version_string.startswith('v'):
         version_string = version_string[1:]
+
+      # Remove a trailing '-pre'.
+      if version_string.endswith('-pre'):
+        version_string = version_string[:-4]
 
       # Some versions contain '-' as the release number separator for the split
       # we want this to be '.'.
@@ -227,6 +232,17 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
           '/{0:s}/{1:s}/archive/{2:s}[-]{3!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               project_version)
+      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
+
+    if matches and len(matches) == 1:
+      return 'https://github.com{0:s}'.format(matches[0][:-1])
+
+    if len(matches) != 1:
+      # The format of the project archive download URL is:
+      # /{organization}/{repository}/archive/{version}-pre.tar.gz
+      expression_string = (
+          '/{0:s}/{1:s}/archive/{2!s}-pre[.]tar[.]gz[^.]').format(
+              self._organization, self._repository, project_version)
       matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if matches and len(matches) == 1:
