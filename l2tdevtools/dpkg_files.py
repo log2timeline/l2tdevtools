@@ -425,6 +425,33 @@ class DPKGBuildFilesGenerator(object):
       with open(filename, 'wb') as file_object:
         file_object.write(b'\n')
 
+  def _GenerateInstallFiles(self, dpkg_path):
+    """Generates the dpkg build .install files.
+
+    Args:
+      dpkg_path (str): path to the dpkg files.
+    """
+    # Generate install files if there is more than 1 package.
+    if (self._build_configuration and
+        self._build_configuration.has_bin_directory):
+      package_name = self._GetPackageName(self._project_definition)
+
+      # Python modules names contain "_" instead of "-"
+      package_name = package_name.replace('-', '_')
+
+      template_values = {'package_name': package_name}
+
+      self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
+
+      install_package_name = self._GetPackageName(self._project_definition)
+      output_filename = '{0:s}-tools.install'.format(install_package_name)
+      output_filename = os.path.join(dpkg_path, output_filename)
+      self._GenerateFile(
+          None, self._INSTALL_TEMPLATE_PYTHON_TOOLS, template_values,
+          output_filename)
+
+      # TODO: add support for data install files.
+
   def _GeneratePy3DistOverridesFile(self, dpkg_path):
     """Generates the dpkg build py3dist-overrides file if required.
 
@@ -671,6 +698,7 @@ class DPKGBuildFilesGenerator(object):
     self._GenerateCompatFile(dpkg_path)
     self._GenerateControlFile(dpkg_path)
     self._GenerateCopyrightFile(dpkg_path)
+    self._GenerateInstallFiles(dpkg_path)
     self._GenerateRulesFile(dpkg_path)
 
     for filename in self._project_definition.dpkg_template_additional:
