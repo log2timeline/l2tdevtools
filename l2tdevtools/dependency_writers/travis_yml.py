@@ -56,6 +56,11 @@ class TravisYMLWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('jobs_pylint', template_mappings)
     file_content.append(template_data)
 
+    if os.path.isfile(os.path.join('docs', 'conf.py')):
+      template_data = self._GenerateFromTemplate(
+          'jobs_sphinx', template_mappings)
+      file_content.append(template_data)
+
     template_data = self._GenerateFromTemplate('jobs_macos', template_mappings)
     file_content.append(template_data)
 
