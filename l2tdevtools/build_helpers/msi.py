@@ -349,18 +349,18 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
           # we set WINVER to 0x0501.
           if (self.version == '2008' or
               source_helper_object.project_name == 'libbde'):
-            if not line.startswith(b'#define WINVER 0x0501'):
-              print(b'#define WINVER 0x0501')
-              print(b'')
+            if not line.startswith('#define WINVER 0x0501'):
+              print('#define WINVER 0x0501')
+              print('')
 
           else:
-            if not line.startswith(b'#define WINVER 0x0600'):
-              print(b'#define WINVER 0x0600')
-              print(b'')
+            if not line.startswith('#define WINVER 0x0600'):
+              print('#define WINVER 0x0600')
+              print('')
 
           parsing_mode = 2
 
-        elif line.startswith(b'#define _CONFIG_'):
+        elif line.startswith('#define _CONFIG_'):
           parsing_mode = 1
 
       print(line)
