@@ -44,7 +44,8 @@ rm -rf %{{buildroot}}
 
 %files -n python3-%{{name}}
 %license LICENSE
-%{{python3_sitelib}}/*.py*
+%{{python3_sitelib}}/*.py
+%{{python3_sitelib}}/__pycache__/*.pyc
 %{{python3_sitelib}}/pytest_runner*.egg-info
 
 %changelog
