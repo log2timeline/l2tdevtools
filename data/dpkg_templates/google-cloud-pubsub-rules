@@ -8,8 +8,8 @@ override_dh_auto_test:
 
 .PHONY: override_dh_auto_install
 override_dh_auto_install:
-	dh_auto_install
-	for PROTO_PATH in `ls -d debian/python3-google-cloud-pubsub/usr/lib/python3*/dist-packages/google/cloud/pubsub_v1/proto`; do \
+	dh_auto_install --destdir=debian/tmp
+	for PROTO_PATH in `ls -d debian/tmp/usr/lib/python3*/dist-packages/google/cloud/pubsub_v1/proto`; do \
 		rm -f $${{PROTO_PATH}}/pubsub_pb2.py; \
 		protoc --proto_path=/usr/lib/python3/dist-packages --proto_path=$${{PROTO_PATH}} --python_out=$${{PROTO_PATH}} pubsub.proto; \
 	done
