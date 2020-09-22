@@ -250,18 +250,13 @@ class GithubRepoManager(object):
 
     packages = {}
     for filename in filenames:
-      if not filename:
+      if not filename or not filename.endswith('.msi'):
         continue
 
-      if filename.endswith('.dmg'):
-        filename, _, _ = filename.rpartition('.dmg')
-
-      elif filename.endswith('.msi'):
-        if sub_directory == 'win32':
-          filename, _, _ = filename.rpartition('.win32')
-        elif sub_directory == 'win64':
-          filename, _, _ = filename.rpartition('.win-amd64')
-
+      if sub_directory == 'win32':
+        filename, _, _ = filename.rpartition('.win32')
+      elif sub_directory == 'win64':
+        filename, _, _ = filename.rpartition('.win-amd64')
       else:
         continue
 
@@ -507,10 +502,18 @@ class PackagesManager(object):
       if not directory_entry.endswith('.src.rpm'):
         continue
 
-      name, _, _ = directory_entry.rpartition('-')
-      name, _, version = name.rpartition('-')
+      package_name, _, _ = directory_entry.rpartition('-')
+      package_name, _, package_version = package_name.rpartition('-')
 
-      reference_packages[name] = version
+      if package_name in reference_packages:
+        package_version_tuple = package_version.split('.')
+        version_tuple = reference_packages[package_name].split('.')
+        compare_result = versions.CompareVersions(
+            package_version_tuple, version_tuple)
+        if compare_result < 0:
+          continue
+
+      reference_packages[package_name] = package_version
 
     packages = self._copr_project_manager.GetPackages(project)
     return self._ComparePackages(reference_packages, packages)
@@ -547,17 +550,25 @@ class PackagesManager(object):
           directory_entry.endswith('-1.tar.gz')):
         continue
 
-      name, _, _ = directory_entry.rpartition('.')
-      if name.endswith('.tar'):
-        name, _, _ = name.rpartition('.')
-      name, _, version = name.rpartition('-')
+      package_name, _, _ = directory_entry.rpartition('.')
+      if package_name.endswith('.tar'):
+        package_name, _, _ = package_name.rpartition('.')
+      package_name, _, package_version = package_name.rpartition('-')
 
-      if (name.endswith('-alpha') or
-          name.endswith('-beta') or
-          name.endswith('-experimental')):
-        name, _, _ = name.rpartition('-')
+      if (package_name.endswith('-alpha') or
+          package_name.endswith('-beta') or
+          package_name.endswith('-experimental')):
+        package_name, _, _ = package_name.rpartition('-')
 
-      reference_packages[name] = version
+      if package_name in reference_packages:
+        package_version_tuple = package_version.split('.')
+        version_tuple = reference_packages[package_name].split('.')
+        compare_result = versions.CompareVersions(
+            package_version_tuple, version_tuple)
+        if compare_result < 0:
+          continue
+
+      reference_packages[package_name] = package_version
 
     packages = {}
     with open(csv_file, 'r') as file_object:
@@ -600,8 +611,17 @@ class PackagesManager(object):
       else:
         continue
 
-      name, _, version = directory_entry.rpartition('-')
-      reference_packages[name] = version
+      package_name, _, package_version = directory_entry.rpartition('-')
+
+      if package_name in reference_packages:
+        package_version_tuple = package_version.split('.')
+        version_tuple = reference_packages[package_name].split('.')
+        compare_result = versions.CompareVersions(
+            package_version_tuple, version_tuple)
+        if compare_result < 0:
+          continue
+
+      reference_packages[package_name] = package_version
 
     packages = self._github_repo_manager.GetPackages(sub_directory, track)
     return self._ComparePackages(reference_packages, packages)
@@ -634,10 +654,18 @@ class PackagesManager(object):
       if not directory_entry.endswith(name_suffix):
         continue
 
-      name, _, _ = directory_entry.rpartition('-')
-      name, _, version = name.rpartition('_')
+      package_name, _, _ = directory_entry.rpartition('-')
+      package_name, _, package_version = package_name.rpartition('_')
 
-      reference_packages[name] = version
+      if package_name in reference_packages:
+        package_version_tuple = package_version.split('.')
+        version_tuple = reference_packages[package_name].split('.')
+        compare_result = versions.CompareVersions(
+            package_version_tuple, version_tuple)
+        if compare_result < 0:
+          continue
+
+      reference_packages[package_name] = package_version
 
     packages = self._launchpad_ppa_manager.GetPackages(track)
     return self._ComparePackages(reference_packages, packages)
