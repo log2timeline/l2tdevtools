@@ -270,32 +270,32 @@ class SourcePackageHelper(SourceHelper):
         '^{0:s}-.*{1!s}'.format(self.project_name, project_version))
 
     # Remove previous versions of source packages in the format:
-    # project-*.tar.gz
-    filenames = glob.glob('{0:s}-*.tar.gz'.format(self.project_name))
+    # <project>-[0-9]*.tar.gz
+    filenames = glob.glob('{0:s}-[0-9]*.tar.gz'.format(self.project_name))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
         os.remove(filename)
 
     # Remove previous versions of source packages in the format:
-    # project-*.tgz
-    filenames = glob.glob('{0:s}-*.tgz'.format(self.project_name))
+    # <project>-[0-9]*.tgz
+    filenames = glob.glob('{0:s}-[0-9]*.tgz'.format(self.project_name))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
         os.remove(filename)
 
     # Remove previous versions of source packages in the format:
-    # project-*.zip
-    filenames = glob.glob('{0:s}-*.zip'.format(self.project_name))
+    # <project>-[0-9]*.zip
+    filenames = glob.glob('{0:s}-[0-9]*.zip'.format(self.project_name))
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
         os.remove(filename)
 
     # Remove previous versions of source directories in the format:
-    # project-{version}
-    filenames = glob.glob('{0:s}-*'.format(self.project_name))
+    # <project>-[0-9]*
+    filenames = glob.glob('{0:s}-[0-9]*'.format(self.project_name))
     for filename in filenames:
       if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))

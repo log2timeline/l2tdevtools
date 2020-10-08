@@ -346,13 +346,16 @@ class DPKGBuildHelper(interface.BuildHelper):
       project_name (str): project name.
       project_version (str): project version.
     """
+    if self._project_definition.dpkg_source_name:
+      project_name = self._project_definition.dpkg_source_name
+
     filenames_to_ignore = '^{0:s}[-_].*{1!s}'.format(
         project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-[1-9]_architecture.*
-    filenames_glob = '{0:s}[-_]*-[1-9]_{1:s}.*'.format(
+    # <project>[-_][0-9]*-[1-9]_<architecture>.*
+    filenames_glob = '{0:s}[-_][0-9]*-[1-9]_{1:s}.*'.format(
         project_name, self.architecture)
     filenames = glob.glob(filenames_glob)
 
@@ -362,8 +365,8 @@ class DPKGBuildHelper(interface.BuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-[1-9].*
-    filenames_glob = '{0:s}[-_]*-[1-9].*'.format(project_name)
+    # <project>[-_][0-9]*-[1-9].*
+    filenames_glob = '{0:s}[-_][0-9]*-[1-9].*'.format(project_name)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -382,25 +385,35 @@ class DPKGBuildHelper(interface.BuildHelper):
       version_suffix (str): version suffix.
       distribution (str): distribution.
     """
+    if self._project_definition.dpkg_source_name:
+      project_name = self._project_definition.dpkg_source_name
+
     filenames_to_ignore = '^{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, project_version)
 
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
-    # project_version.orig.tar.gz
-    if version_suffix and distribution:
-      filenames_glob = '{0:s}_*{1:s}~{2:s}.orig.tar.gz'.format(
-          project_name, version_suffix, distribution)
-    else:
-      filenames_glob = '{0:s}_*.orig.tar.gz'.format(project_name)
-
+    # <project>_[0-9]*<suffix>.orig.tar.gz
+    filenames_glob = '{0:s}_[0-9]*.orig.tar.gz'.format(project_name)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
         os.remove(filename)
+
+    # Remove files of previous versions in the format:
+    # <project>_[0-9]*<suffix>~<distribution>.orig.tar.gz
+    if version_suffix and distribution:
+      filenames_glob = '{0:s}_[0-9]*{1:s}~{2:s}.orig.tar.gz'.format(
+          project_name, version_suffix, distribution)
+      filenames = glob.glob(filenames_glob)
+
+      for filename in filenames:
+        if not filenames_to_ignore.match(filename):
+          logging.info('Removing: {0:s}'.format(filename))
+          os.remove(filename)
 
   def _RemoveOlderSourceDPKGPackages(self, project_name, project_version):
     """Removes previous versions of source dpkg packages.
@@ -409,13 +422,16 @@ class DPKGBuildHelper(interface.BuildHelper):
       project_name (str): project name.
       project_version (str): project version.
     """
+    if self._project_definition.dpkg_source_name:
+      project_name = self._project_definition.dpkg_source_name
+
     filenames_to_ignore = '^{0:s}[-_].*{1!s}'.format(
         project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
-    # project[-_]version-[1-9]suffix~distribution_architecture.*
-    filenames_glob = '{0:s}[-_]*-[1-9]{1:s}~{2:s}_{3:s}.*'.format(
+    # <project>[-_][0-9]*-[1-9]<suffix>~<distribution>_<architecture>.*
+    filenames_glob = '{0:s}[-_][0-9]*-[1-9]{1:s}~{2:s}_{3:s}.*'.format(
         project_name, self.version_suffix, self.distribution, self.architecture)
     filenames = glob.glob(filenames_glob)
 
@@ -425,8 +441,8 @@ class DPKGBuildHelper(interface.BuildHelper):
         os.remove(filename)
 
     # Remove files of previous versions in the format:
-    # project[-_]*version-[1-9]suffix~distribution.*
-    filenames_glob = '{0:s}[-_]*-[1-9]{1:s}~{2:s}.*'.format(
+    # <project>[-_][0-9]*-[1-9]i<suffix>~<distribution>.*
+    filenames_glob = '{0:s}[-_][0-9]*-[1-9]{1:s}~{2:s}.*'.format(
         project_name, self.version_suffix, self.distribution)
     filenames = glob.glob(filenames_glob)
 
