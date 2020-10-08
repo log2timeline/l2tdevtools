@@ -2,6 +2,6 @@ version: ~> 1.0
 language: generic
 arch: amd64
 os: linux
-dist: bionic
+dist: focal
 jobs:
   include:
