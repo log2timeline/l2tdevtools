@@ -1,10 +1,13 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
+MAINTAINER Log2Timeline <log2timeline-dev@googlegroups.com>
 
 # Create container with:
 # docker build --no-cache --build-arg GITHUB_USERNAME="username" \
 #   --force-rm -t log2timeline/plaso-dev .
 
 ARG GITHUB_USERNAME="log2timeline"
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install essential dependencies
 RUN apt-get -y clean
