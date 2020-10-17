@@ -61,8 +61,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
   _GITHUB_REPO_URL = (
       'https://github.com/log2timeline/l2tbinaries')
 
-  # TODO: remove Python 3.7 support after completing the migration to 3.8
-  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 7), (3, 8)])
+  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 8)])
 
   def __init__(self, download_url, branch='master'):
     """Initializes a download helper.
@@ -220,16 +219,18 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
         return None
 
       # The format of the download URL is:
-      # <a class="js-navigation-open link-gray-dark" title="{title}" id="{id}"
+      # <a class="js-navigation-open link-gray-dark" title="{title}"
       # href="{path}">{name}</a>
-      # Note that class="js-navigation-open" and class="js-navigation-open "
-      # also have been seen to be used.
+      # Note that:
+      # * class="js-navigation-open" and class="js-navigation-open " also have
+      #   been seen to be used.
+      # * an additional id="{id} parameter have been seen to be used previously.
       expression_string = (
-          '<a class="js-navigation-open[^"]*" title="[^"]*" id="[^"]*" '
+          '<a class="js-navigation-open[^"]*" title="[^"]*" (|id="[^"]*" )'
           'href="([^"]*)"')
       matches = re.findall(expression_string, page_content)
 
-      for match in matches:
+      for _, match in matches:
         _, _, filename = match.rpartition('/')
         download_url = (
             'https://github.com/log2timeline/l2tbinaries/raw/{0:s}/{1:s}/'
