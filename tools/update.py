@@ -432,6 +432,12 @@ class DependencyUpdater(object):
       if user_defined_package_names:
         in_package_names = package_name in user_defined_package_names
 
+        alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
+        if alternate_name:
+          if ((self._exclude_packages and in_package_names) or
+              (not self._exclude_packages and not in_package_names)):
+            in_package_names = alternate_name in user_defined_package_names
+
         if ((self._exclude_packages and in_package_names) or
             (not self._exclude_packages and not in_package_names)):
           logging.info('Skipping: {0:s} because it was excluded'.format(
