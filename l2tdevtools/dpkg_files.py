@@ -174,7 +174,8 @@ class DPKGBuildFilesGenerator(object):
 
   _SOURCE_OPTIONS_TEMPLATE = '\n'.join([
       ('extend-diff-ignore = "(^|/)(\\.eggs|config\\.h|config\\.log|'
-       'config\\.status|.*\\.egg-info|.*\\.egg-info/.*|.*\\.pxd|Makefile)$"'),
+       'config\\.status|.*\\.egg-info|.*\\.egg-info/.*|.*\\.pxd|.*\\.pyx|'
+       'Makefile)$"'),
       ''])
 
   def __init__(
