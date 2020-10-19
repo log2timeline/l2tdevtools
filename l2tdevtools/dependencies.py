@@ -487,12 +487,15 @@ class DependencyHelper(object):
     # to generate utils.DependencyHelper of the individual projects.
     names = (
         'pybde',
+        'pycreg',
         'pyesedb',
         'pyevt',
         'pyevtx',
         'pyewf',
         'pyexe',
         'pyfsapfs',
+        'pyfsext',
+        'pyfshfs',
         'pyfsntfs',
         'pyfvde',
         'pyfwnt',
