@@ -4,13 +4,6 @@ os: linux
 dist: focal
 jobs:
   include:
-  - name: "Pylint on Ubuntu Bionic (20.04) (Docker) with Python 3.8"
-    env: [TARGET="pylint", UBUNTU_VERSION="20.04"]
-    group: edge
-    language: python
-    python: 3.8
-    services:
-    - docker
   - name: "Fedora 31 (Docker) with Python 3.7"
     env: FEDORA_VERSION="31"
     group: edge
@@ -32,46 +25,79 @@ jobs:
     python: 3.9
     services:
     - docker
-  - name: "Ubuntu Bionic (18.04) (Docker) with Python 3.6"
+  - name: "Ubuntu Bionic (18.04) (Docker) with Python 3.6 (amd64)"
     env: UBUNTU_VERSION="18.04"
     group: edge
     language: python
     python: 3.6
     services:
     - docker
-  - name: "Ubuntu Focal (20.04) (Docker) with Python 3.8"
+  - name: "Ubuntu Bionic (18.04) (Docker) with Python 3.6 (ppc64le)"
+    env: UBUNTU_VERSION="18.04"
+    arch: ppc64le
+    group: edge
+    language: python
+    python: 3.6
+    services:
+    - docker
+  - name: "Ubuntu Focal (20.04) (Docker) with Python 3.8 (amd64)"
     env: UBUNTU_VERSION="20.04"
     group: edge
     language: python
     python: 3.8
     services:
     - docker
+  - name: "Ubuntu Focal (20.04) (Docker) with Python 3.8 (ppc64le)"
+    env: UBUNTU_VERSION="20.04"
+    arch: ppc64le
+    group: edge
+    language: python
+    python: 3.8
+    services:
+    - docker
   - name: "Ubuntu Focal (20.04) (Docker) with Python 3.6 (tox)"
-    env: [TOXENV="py36", UBUNTU_VERSION="20.04"]
+    env:
+    - TOXENV="py36"
+    - UBUNTU_VERSION="20.04"
     group: edge
     language: python
     python: 3.6
     services:
     - docker
   - name: "Ubuntu Focal (20.04) (Docker) with Python 3.7 (tox)"
-    env: [TOXENV="py37", UBUNTU_VERSION="20.04"]
+    env:
+    - TOXENV="py37"
+    - UBUNTU_VERSION="20.04"
     group: edge
     language: python
     python: 3.7
     services:
     - docker
   - name: "Ubuntu Focal (20.04) (Docker) with Python 3.8 (tox)"
-    env: [TOXENV="py38", UBUNTU_VERSION="20.04"]
+    env:
+    - TOXENV="py38"
+    - UBUNTU_VERSION="20.04"
     group: edge
     language: python
     python: 3.8
     services:
     - docker
   - name: "Ubuntu Focal (20.04) (Docker) with Python 3.9 (tox)"
-    env: [TOXENV="py39", UBUNTU_VERSION="20.04"]
+    env:
+    - TOXENV="py39"
+    - UBUNTU_VERSION="20.04"
     group: edge
     language: python
     python: 3.9
+    services:
+    - docker
+  - name: "Pylint on Ubuntu Focal (20.04) (Docker) with Python 3.8 (tox)"
+    env:
+    - TOXENV="pylint"
+    - UBUNTU_VERSION="20.04"
+    group: edge
+    language: python
+    python: 3.8
     services:
     - docker
   - name: "MacOS 10.14 with Python 3.8 (tox)"
