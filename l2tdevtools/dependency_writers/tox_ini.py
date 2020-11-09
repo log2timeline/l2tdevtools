@@ -50,9 +50,9 @@ class ToxIniWriter(interface.DependencyFileWriter):
     if os.path.isdir('tests'):
       paths_to_lint.append('tests')
 
-      envlist = 'py3{6,7,8},coverage,docs,pylint'
+      envlist = 'py3{6,7,8,9},coverage,docs,pylint'
     else:
-      envlist = 'py3{6,7,8},coverage,pylint'
+      envlist = 'py3{6,7,8,9},coverage,pylint'
 
     template_mappings = {
         'envlist': envlist,
