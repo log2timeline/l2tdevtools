@@ -497,6 +497,7 @@ class DependencyHelper(object):
         'pyfsext',
         'pyfshfs',
         'pyfsntfs',
+        'pyfsxfs',
         'pyfvde',
         'pyfwnt',
         'pyfwsi',
