@@ -1,0 +1,15 @@
+Source: yara-python
+Section: python
+Priority: extra
+Maintainer: Victor M. Alvarez <plusvic@gmail.com>
+Build-Depends: debhelper (>= 9), dh-python, libmagic-dev, libssl-dev, python3-all (>= 3.6~), python3-setuptools, python3-all-dev
+Standards-Version: 4.1.4
+X-Python3-Version: >= 3.6
+Homepage: http://virustotal.github.io/yara/
+
+Package: python3-yara
+Architecture: any
+Depends: libmagic1, openssl, ${{python3:Depends}}, ${{misc:Depends}}
+Description: Python interface for YARA
+ This is a library for using YARA from Python. You can use
+ it to compile, save and load YARA rules, and to scan files or data strings.
