@@ -1,8 +1,0 @@
-  - name: "MacOS 10.14 with Python 3.8 (tox)"
-    env: TOXENV="py38"
-    os: osx
-    osx_image: xcode11
-  - name: "MacOS 10.15 with Python 3.8 (tox)"
-    env: TOXENV="py38"
-    os: osx
-    osx_image: xcode12

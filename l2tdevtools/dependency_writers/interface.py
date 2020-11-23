@@ -83,8 +83,7 @@ class DependencyFileWriter(object):
     if python_version == 2:
       test_dependencies.extend(['python-setuptools'])
     else:
-      test_dependencies.extend([
-          'python3-coverage', 'python3-distutils', 'python3-setuptools'])
+      test_dependencies.extend(['python3-distutils', 'python3-setuptools'])
 
     return [
         test_dependency for test_dependency in sorted(test_dependencies)

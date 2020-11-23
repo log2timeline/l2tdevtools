@@ -1,2 +1,3 @@
 
-build: off
+build_script:
+- cmd: "%PYTHON%\\python.exe setup.py bdist_msi bdist_wheel"
