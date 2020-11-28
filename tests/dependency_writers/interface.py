@@ -54,7 +54,7 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_test_dependencies = [
-        'python3-coverage', 'python3-distutils', 'python3-mock', 'python3-pbr',
+        'python3-distutils', 'python3-mock', 'python3-pbr',
         'python3-setuptools', 'python3-six']
 
     python_dependencies = test_writer._GetDPKGPythonDependencies(

@@ -7,15 +7,18 @@ from __future__ import unicode_literals
 
 import io
 import os
+import shutil
 import sys
 
 from l2tdevtools import dependencies
 from l2tdevtools.helpers import project
 
+from l2tdevtools.dependency_writers import appveyor_scripts
 from l2tdevtools.dependency_writers import appveyor_yml
 from l2tdevtools.dependency_writers import check_dependencies
 from l2tdevtools.dependency_writers import dependencies_py
 from l2tdevtools.dependency_writers import dpkg
+from l2tdevtools.dependency_writers import github_actions
 from l2tdevtools.dependency_writers import gift_copr
 from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.dependency_writers import jenkins_scripts
@@ -26,8 +29,6 @@ from l2tdevtools.dependency_writers import requirements
 from l2tdevtools.dependency_writers import setup
 from l2tdevtools.dependency_writers import sphinx_docs
 from l2tdevtools.dependency_writers import tox_ini
-from l2tdevtools.dependency_writers import travis
-from l2tdevtools.dependency_writers import travis_yml
 
 
 def Main():
@@ -52,18 +53,20 @@ def Main():
         'test_dependencies.ini')
 
   for writer_class in (
-      pylint_rc.PylintRcWriter, travis.TravisRunWithTimeoutScriptWriter,
-      requirements.RequirementsWriter, requirements.TestRequirementsWriter,
-      setup.SetupCfgWriter, setup.SetupPyWriter,
-      travis.TravisInstallScriptWriter, travis.TravisRunPython3ScriptWriter,
-      travis.TravisRunTestsScriptWriter,
-      travis.TravisRunWithTimeoutScriptWriter, travis_yml.TravisYMLWriter):
+      pylint_rc.PylintRcWriter, requirements.RequirementsWriter,
+      requirements.TestRequirementsWriter, setup.SetupCfgWriter,
+      setup.SetupPyWriter):
     writer = writer_class(
         l2tdevtools_path, project_definition, dependencies_helper,
         test_dependencies_helper)
     writer.Write()
 
   for writer_class in (
+      github_actions.GitHubActionsTestDockerYmlWriter,
+      github_actions.GitHubActionsTestToxYmlWriter,
+      appveyor_scripts.AppVeyorInstallPS1ScriptWriter,
+      appveyor_scripts.AppVeyorInstallSHScriptWriter,
+      appveyor_scripts.AppVeyorRuntestsSHScriptWriter,
       appveyor_yml.AppveyorYmlWriter,
       check_dependencies.CheckDependenciesWriter,
       dependencies_py.DependenciesPyWriter, dpkg.DPKGCompatWriter,
@@ -103,18 +106,18 @@ def Main():
     with io.open(output_path, 'w', encoding='utf-8') as file_object:
       file_object.write(file_data)
 
-  # Remove old scripts.
+  # Remove old configurations and scripts.
   script_path = os.path.join('config', 'linux', 'gift_ppa_install.sh')
   if os.path.isfile(script_path):
     os.remove(script_path)
 
-  script_path = os.path.join('config', 'travis', 'run_coverage.sh')
+  script_path = os.path.join('.travis.yml')
   if os.path.isfile(script_path):
     os.remove(script_path)
 
-  script_path = os.path.join('config', 'travis', 'run_pylint.sh')
+  script_path = os.path.join('config', 'travis')
   if os.path.isfile(script_path):
-    os.remove(script_path)
+    shutil.rmtree(script_path)
 
   return True
 

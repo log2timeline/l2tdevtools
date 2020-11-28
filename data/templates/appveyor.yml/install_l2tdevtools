@@ -1,1 +1,2 @@
-- cmd: git clone https://github.com/log2timeline/l2tdevtools.git ..\l2tdevtools
+- ps: If ($$isWindows) { .\config\appveyor\install.ps1 }
+- sh: config/appveyor/install.sh

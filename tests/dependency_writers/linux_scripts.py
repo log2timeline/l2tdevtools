@@ -87,8 +87,7 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_formatted_test_dependencies = (
-        'TEST_DEPENDENCIES="python3-coverage\n'
-        '                   python3-distutils\n'
+        'TEST_DEPENDENCIES="python3-distutils\n'
         '                   python3-mock\n'
         '                   python3-pbr\n'
         '                   python3-setuptools\n'

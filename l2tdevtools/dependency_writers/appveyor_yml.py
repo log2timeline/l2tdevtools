@@ -37,15 +37,7 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes an appveyor.yml file."""
-    python3_dependencies = self._dependency_helper.GetL2TBinaries(
-        python_version=3)
-
-    python3_dependencies.extend(self._test_dependency_helper.GetL2TBinaries(
-        python_version=3))
-
-    template_mappings = {
-        'python3_dependencies': ' '.join(sorted(set(python3_dependencies)))
-    }
+    template_mappings = {}
 
     file_content = []
 
@@ -58,10 +50,6 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     if self._project_definition.name != 'l2tdevtools':
       template_data = self._GenerateFromTemplate(
           'install_l2tdevtools', template_mappings)
-      file_content.append(template_data)
-
-      template_data = self._GenerateFromTemplate(
-          'install_windows_python3', template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('build', template_mappings)

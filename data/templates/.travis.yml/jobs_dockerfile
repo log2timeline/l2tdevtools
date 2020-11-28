@@ -1,3 +1,0 @@
-  - name: "Dockerfile"
-    env: TARGET="dockerfile"
-    group: edge
