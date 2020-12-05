@@ -81,6 +81,7 @@ class ProjectHelper(cli.CLIHelper):
       'l2tdevtools',
       'l2tdocs',
       'l2tscaffolder',
+      'olecf-kb',
       'plaso',
       'timesketch',
       'turbinia',
