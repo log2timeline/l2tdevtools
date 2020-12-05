@@ -645,6 +645,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     project_version = source_helper_object.GetProjectVersion()
 
     if source_helper_object.project_name == 'dfvfs':
+      # TODO: determine if this is still needed.
       project_version = '{0!s}.1'.format(project_version)
     else:
       project_version = '{0!s}'.format(project_version)
@@ -787,6 +788,9 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
+    # TODO: check if this needs to be removed since removing build and dist
+    # in the main build directory does not make sense.
+
     # Remove previous versions build directories.
     for filename in ('build', 'dist'):
       if os.path.exists(filename):

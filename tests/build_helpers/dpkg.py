@@ -26,15 +26,15 @@ class DPKGBuildHelperTest(test_lib.BaseTestCase):
   # TODO: add tests for _CreatePackagingFiles
   # TODO: add tests for _GetBuildHostDistribution
 
-  @test_lib.skipUnlessHasTestFile(['lsb-release'])
   def testReadLSBReleaseConfigurationFile(self):
     """Tests the _ReadLSBReleaseConfigurationFile function."""
+    test_path = self._GetTestFilePath(['lsb-release'])
+    self._SkipIfPathNotExists(test_path)
+
     project_definition = projects.ProjectDefinition('test')
 
     l2tdevtools_path = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
-
-    test_path = self._GetTestFilePath(['lsb-release'])
 
     test_build_helper = dpkg.DPKGBuildHelper(
         project_definition, l2tdevtools_path, {})

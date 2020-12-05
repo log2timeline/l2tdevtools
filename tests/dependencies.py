@@ -63,7 +63,6 @@ class DependencyDefinitionReaderTest(test_lib.BaseTestCase):
     self.assertEqual(len(definitions), 1)
 
 
-@test_lib.skipUnlessHasTestFile(['dependencies.ini'])
 class DependencyHelperTest(test_lib.BaseTestCase):
   """Tests for the dependency helper."""
 
@@ -72,6 +71,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testInitialize(self):
     """Tests the __init__ function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
     self.assertIsNotNone(dependency_helper)
@@ -83,6 +84,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testCheckPythonModule(self):
     """Tests the _CheckPythonModule function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
@@ -97,6 +100,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testCheckPythonModuleVersion(self):
     """Tests the _CheckPythonModuleVersion function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
@@ -111,6 +116,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testImportPythonModule(self):
     """Tests the _ImportPythonModule function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
@@ -124,6 +131,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testCheckDependencies(self):
     """Tests the CheckDependencies function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
@@ -132,6 +141,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testCheckTestDependencies(self):
     """Tests the CheckTestDependencies function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
@@ -140,6 +151,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testGetDPKGDepends(self):
     """Tests the GetDPKGDepends function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
@@ -149,6 +162,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testGetL2TBinaries(self):
     """Tests the GetL2TBinaries function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
@@ -158,6 +173,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testGetInstallRequires(self):
     """Tests the GetInstallRequires function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
@@ -176,6 +193,8 @@ class DependencyHelperTest(test_lib.BaseTestCase):
   def testGetRPMRequires(self):
     """Tests the GetRPMRequires function."""
     dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    self._SkipIfPathNotExists(dependencies_file)
+
     dependency_helper = dependencies.DependencyHelper(
         dependencies_file=dependencies_file)
 
