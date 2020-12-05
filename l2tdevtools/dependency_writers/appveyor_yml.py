@@ -16,6 +16,9 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
 
   PATH = os.path.join('appveyor.yml')
 
+  _PROJECTS_WITHOUT_BUILD = frozenset([
+      'dtformats', 'esedbrc', 'olecfrc', 'vstools', 'winevtrc', 'winregrc'])
+
   def _GenerateFromTemplate(self, template_filename, template_mappings):
     """Generates file context based on a template file.
 
@@ -52,11 +55,21 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
           'install_l2tdevtools', template_mappings)
       file_content.append(template_data)
 
-    template_data = self._GenerateFromTemplate('build', template_mappings)
+    if self._project_definition.name in self._PROJECTS_WITHOUT_BUILD:
+      template_filename = 'build_off'
+    else:
+      template_filename = 'build'
+
+    template_data = self._GenerateFromTemplate(
+       template_filename, template_mappings)
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('test_script', template_mappings)
     file_content.append(template_data)
+
+    if self._project_definition.name not in self._PROJECTS_WITHOUT_BUILD:
+      template_data = self._GenerateFromTemplate('artifacts', template_mappings)
+      file_content.append(template_data)
 
     file_content = ''.join(file_content)
 
