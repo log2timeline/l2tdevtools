@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import configparser
+import os
 import re
 
 
@@ -14,8 +15,6 @@ class DependencyDefinition(object):
   Attributes:
     dpkg_name (str): name of the dpkg package that provides the dependency.
     is_optional (bool): True if the dependency is optional.
-    l2tbinaries_macos_name (str): name of the l2tbinaries macos package that
-        provides the dependency.
     l2tbinaries_name (str): name of the l2tbinaries package that provides
         the dependency.
     maximum_version (str): maximum supported version, a greater or equal
@@ -41,7 +40,6 @@ class DependencyDefinition(object):
     super(DependencyDefinition, self).__init__()
     self.dpkg_name = None
     self.is_optional = False
-    self.l2tbinaries_macos_name = None
     self.l2tbinaries_name = None
     self.maximum_version = None
     self.minimum_version = None
@@ -60,7 +58,6 @@ class DependencyDefinitionReader(object):
   _VALUE_NAMES = frozenset([
       'dpkg_name',
       'is_optional',
-      'l2tbinaries_macos_name',
       'l2tbinaries_name',
       'maximum_version',
       'minimum_version',
@@ -118,11 +115,15 @@ class DependencyHelper(object):
   _VERSION_NUMBERS_REGEX = re.compile(r'[0-9.]+')
   _VERSION_SPLIT_REGEX = re.compile(r'\.|\-')
 
-  def __init__(self, configuration_file='dependencies.ini'):
+  def __init__(
+      self, dependencies_file='dependencies.ini',
+      test_dependencies_file='test_dependencies.ini'):
     """Initializes a dependency helper.
 
     Args:
-      configuration_file (Optional[str]): path to the dependencies
+      dependencies_file (Optional[str]): path to the dependencies configuration
+          file.
+      test_dependencies_file (Optional[str]): path to the test dependencies
           configuration file.
     """
     super(DependencyHelper, self).__init__()
@@ -131,14 +132,14 @@ class DependencyHelper(object):
 
     dependency_reader = DependencyDefinitionReader()
 
-    with open(configuration_file, 'r') as file_object:
+    with open(dependencies_file, 'r') as file_object:
       for dependency in dependency_reader.Read(file_object):
         self.dependencies[dependency.name] = dependency
 
-    dependency = DependencyDefinition('mock')
-    dependency.minimum_version = '0.7.1'
-    dependency.version_property = '__version__'
-    self._test_dependencies['mock'] = dependency
+    if os.path.exists(test_dependencies_file):
+      with open(test_dependencies_file, 'r') as file_object:
+        for dependency in dependency_reader.Read(file_object):
+          self._test_dependencies[dependency.name] = dependency
 
   def _CheckPythonModule(self, dependency):
     """Checks the availability of a Python module.
@@ -252,6 +253,126 @@ class DependencyHelper(object):
     status_message = '{0:s} version: {1!s}'.format(module_name, module_version)
     return True, status_message
 
+  def _GetDPKGDepends(self, dependencies, exclude_version=False):
+    """Retrieves the DPKG control file installation requirements.
+
+    Args:
+      dependencies (dict[str, DependencyDefinition]): dependencies.
+      exclude_version (Optional[bool]): True if the version should be excluded
+          from the dependency definitions.
+
+    Returns:
+      list[str]: dependency definitions for requires for DPKG control file.
+    """
+    requires = []
+    for dependency in sorted(
+        dependencies.values(), key=lambda dependency: dependency.name):
+      module_name = dependency.dpkg_name or dependency.name
+      if 'python2' in module_name:
+        module_name = module_name.replace('python2', 'python3')
+      elif 'python3' not in module_name:
+        module_name = module_name.replace('python', 'python3')
+
+      if exclude_version or not dependency.minimum_version:
+        requires_string = module_name
+      else:
+        requires_string = '{0:s} (>= {1:s})'.format(
+            module_name, dependency.minimum_version)
+
+      requires.append(requires_string)
+
+    return sorted(requires)
+
+  def _GetInstallRequires(self, dependencies, exclude_version=False):
+    """Retrieves the setup.py installation requirements.
+
+    Args:
+      dependencies (dict[str, DependencyDefinition]): dependencies.
+      exclude_version (Optional[bool]): True if the version should be excluded
+          from the dependency definitions.
+
+    Returns:
+      list[str]: dependency definitions for install_requires in setup.py.
+    """
+    install_requires = []
+    for dependency in sorted(
+        dependencies.values(), key=lambda dependency: dependency.name):
+      module_name = dependency.pypi_name or dependency.name
+
+      # Use the sqlite3 module provided by the standard library.
+      if module_name == 'pysqlite':
+        continue
+
+      requires_part = []
+      if not exclude_version:
+        if dependency.minimum_version:
+          requires_part.append('>= {0!s}'.format(dependency.minimum_version))
+        if dependency.maximum_version:
+          requires_part.append('< {0!s}'.format(dependency.maximum_version))
+
+      requires_string = module_name
+      if requires_part:
+        requires_string = ' '.join([requires_string, ','.join(requires_part)])
+
+      install_requires.append(requires_string)
+
+    return sorted(install_requires)
+
+  def _GetL2TBinaries(self, dependencies):
+    """Retrieves the l2tbinaries requirements.
+
+    Args:
+      dependencies (dict[str, DependencyDefinition]): dependencies.
+
+    Returns:
+      list[str]: dependency definitions for l2tbinaries.
+    """
+    requires = []
+    for dependency in sorted(
+        dependencies.values(), key=lambda dependency: dependency.name):
+      if dependency.l2tbinaries_name:
+        module_name = dependency.l2tbinaries_name
+      else:
+        module_name = dependency.name
+
+      requires.append(module_name)
+
+    return sorted(requires)
+
+  def _GetRPMRequires(self, dependencies, exclude_version=False):
+    """Retrieves the setup.cfg RPM installation requirements.
+
+    Args:
+      dependencies (dict[str, DependencyDefinition]): dependencies.
+      exclude_version (Optional[bool]): True if the version should be excluded
+          from the dependency definitions.
+
+    Returns:
+      list[str]: dependency definitions for requires for setup.cfg.
+    """
+    requires = []
+    for dependency in sorted(
+        dependencies.values(), key=lambda dependency: dependency.name):
+      module_name = dependency.rpm_name or dependency.name
+      if module_name.startswith('python-'):
+        module_name = module_name.replace('python-', 'python3-')
+      else:
+        module_name = module_name.replace('python2-', 'python3-')
+      if module_name.endswith('-python'):
+        module_name = module_name.replace('-python', '-python3')
+      else:
+        module_name = module_name.replace('-python2', '-python3')
+
+      if exclude_version or not dependency.minimum_version:
+        requires_string = module_name
+      else:
+        requires_string = '{0:s} >= {1:s}'.format(
+            module_name, dependency.minimum_version)
+
+      requires.append(requires_string)
+
+    return sorted(requires)
+
   def _ImportPythonModule(self, module_name):
     """Imports a Python module.
 
@@ -359,123 +480,61 @@ class DependencyHelper(object):
     print('')
     return check_result
 
-  def GetDPKGDepends(self, exclude_version=False, python_version=2):
+  def GetDPKGDepends(self, exclude_version=False, test_dependencies=False):
     """Retrieves the DPKG control file installation requirements.
 
     Args:
       exclude_version (Optional[bool]): True if the version should be excluded
           from the dependency definitions.
-      python_version (Optional[int]): Python major version.
+      test_dependencies (Optional[bool]): True if the test dependencies should
+          returned instead of the regual dependencies.
 
     Returns:
       list[str]: dependency definitions for requires for DPKG control file.
     """
-    requires = []
-    for dependency in sorted(
-        self.dependencies.values(), key=lambda dependency: dependency.name):
-      if dependency.python2_only and python_version != 2:
-        continue
+    if test_dependencies:
+      dependencies = self._test_dependencies
+    else:
+      dependencies = self.dependencies
 
-      if dependency.python3_only and python_version != 3:
-        continue
+    return self._GetDPKGDepends(dependencies, exclude_version=exclude_version)
 
-      module_name = dependency.dpkg_name or dependency.name
-      if python_version == 3:
-        if 'python2' in module_name:
-          module_name = module_name.replace('python2', 'python3')
-        elif 'python3' not in module_name:
-          module_name = module_name.replace('python', 'python3')
-
-      if exclude_version or not dependency.minimum_version:
-        requires_string = module_name
-      else:
-        requires_string = '{0:s} (>= {1:s})'.format(
-            module_name, dependency.minimum_version)
-
-      requires.append(requires_string)
-
-    return sorted(requires)
-
-  def GetL2TBinaries(self, platform='win32', python_version=2):
+  def GetL2TBinaries(self, test_dependencies=False):
     """Retrieves the l2tbinaries requirements.
 
     Args:
-      platform (Optional[str]): identifier of the l2tbinaries target platform,
-          which currently are: 'macos', 'win32' or 'win64'.
-      python_version (Optional[int]): Python major version.
+      test_dependencies (Optional[bool]): True if the test dependencies should
+          returned instead of the regual dependencies.
 
     Returns:
       list[str]: dependency definitions for l2tbinaries.
     """
-    requires = []
-    for dependency in sorted(
-        self.dependencies.values(), key=lambda dependency: dependency.name):
-      if dependency.python2_only and python_version != 2:
-        continue
+    if test_dependencies:
+      dependencies = self._test_dependencies
+    else:
+      dependencies = self.dependencies
 
-      if dependency.python3_only and python_version != 3:
-        continue
+    return self._GetL2TBinaries(dependencies)
 
-      if platform == 'macos' and dependency.l2tbinaries_macos_name:
-        module_name = dependency.l2tbinaries_macos_name
-      elif dependency.l2tbinaries_name:
-        module_name = dependency.l2tbinaries_name
-      else:
-        module_name = dependency.name
-
-      requires.append(module_name)
-
-    return sorted(requires)
-
-  def GetInstallRequires(self, exclude_version=False):
+  def GetInstallRequires(self, exclude_version=False, test_dependencies=False):
     """Retrieves the setup.py installation requirements.
 
     Args:
       exclude_version (Optional[bool]): True if the version should be excluded
           from the dependency definitions.
+      test_dependencies (Optional[bool]): True if the test dependencies should
+          returned instead of the regual dependencies.
 
     Returns:
       list[str]: dependency definitions for install_requires in setup.py.
     """
-    install_requires = []
-    for dependency in sorted(
-        self.dependencies.values(), key=lambda dependency: dependency.name):
-      module_name = dependency.pypi_name or dependency.name
+    if test_dependencies:
+      dependencies = self._test_dependencies
+    else:
+      dependencies = self.dependencies
 
-      # Use the sqlite3 module provided by the standard library.
-      if module_name == 'pysqlite':
-        continue
-
-      requires_part = []
-      if not exclude_version:
-        if dependency.minimum_version:
-          requires_part.append('>= {0!s}'.format(dependency.minimum_version))
-        if dependency.maximum_version:
-          requires_part.append('< {0!s}'.format(dependency.maximum_version))
-
-      requires_string = module_name
-      if requires_part:
-        requires_string = ' '.join([requires_string, ','.join(requires_part)])
-
-      if dependency.python2_only:
-        # Also see:
-        # https://www.python.org/dev/peps/pep-0508/#environment-markers
-        # http://pip.readthedocs.io/en/stable/reference/pip_install/
-        #     #requirement-specifiers
-        requires_string = '{0:s} ; python_version < \'3.0\''.format(
-            requires_string)
-
-      if dependency.python3_only:
-        # Also see:
-        # https://www.python.org/dev/peps/pep-0508/#environment-markers
-        # http://pip.readthedocs.io/en/stable/reference/pip_install/
-        #     #requirement-specifiers
-        requires_string = '{0:s} ; python_version > \'3.0\''.format(
-            requires_string)
-
-      install_requires.append(requires_string)
-
-    return sorted(install_requires)
+    return self._GetInstallRequires(
+        dependencies, exclude_version=exclude_version)
 
   def GetPylintRcExtensionPkgs(self):
     """Retrieves the .pylintrc extension packages.
@@ -529,43 +588,21 @@ class DependencyHelper(object):
 
     return sorted(extension_packages)
 
-  def GetRPMRequires(self, exclude_version=False, python_version=2):
+  def GetRPMRequires(self, exclude_version=False, test_dependencies=False):
     """Retrieves the setup.cfg RPM installation requirements.
 
     Args:
       exclude_version (Optional[bool]): True if the version should be excluded
           from the dependency definitions.
-      python_version (Optional[int]): Python major version.
+      test_dependencies (Optional[bool]): True if the test dependencies should
+          returned instead of the regual dependencies.
 
     Returns:
       list[str]: dependency definitions for requires for setup.cfg.
     """
-    requires = []
-    for dependency in sorted(
-        self.dependencies.values(), key=lambda dependency: dependency.name):
-      if dependency.python2_only and python_version != 2:
-        continue
+    if test_dependencies:
+      dependencies = self._test_dependencies
+    else:
+      dependencies = self.dependencies
 
-      if dependency.python3_only and python_version != 3:
-        continue
-
-      module_name = dependency.rpm_name or dependency.name
-      if python_version == 3:
-        if module_name.startswith('python-'):
-          module_name = module_name.replace('python-', 'python3-')
-        else:
-          module_name = module_name.replace('python2-', 'python3-')
-        if module_name.endswith('-python'):
-          module_name = module_name.replace('-python', '-python3')
-        else:
-          module_name = module_name.replace('-python2', '-python3')
-
-      if exclude_version or not dependency.minimum_version:
-        requires_string = module_name
-      else:
-        requires_string = '{0:s} >= {1:s}'.format(
-            module_name, dependency.minimum_version)
-
-      requires.append(requires_string)
-
-    return sorted(requires)
+    return self._GetRPMRequires(dependencies, exclude_version=exclude_version)

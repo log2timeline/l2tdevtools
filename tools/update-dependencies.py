@@ -23,7 +23,6 @@ from l2tdevtools.dependency_writers import gift_copr
 from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.dependency_writers import jenkins_scripts
 from l2tdevtools.dependency_writers import linux_scripts
-from l2tdevtools.dependency_writers import macos
 from l2tdevtools.dependency_writers import pylint_rc
 from l2tdevtools.dependency_writers import requirements
 from l2tdevtools.dependency_writers import setup
@@ -47,18 +46,12 @@ def Main():
 
   dependencies_helper = dependencies.DependencyHelper()
 
-  test_dependencies_helper = None
-  if os.path.exists('test_dependencies.ini'):
-    test_dependencies_helper = dependencies.DependencyHelper(
-        'test_dependencies.ini')
-
   for writer_class in (
       pylint_rc.PylintRcWriter, requirements.RequirementsWriter,
       requirements.TestRequirementsWriter, setup.SetupCfgWriter,
       setup.SetupPyWriter):
     writer = writer_class(
-        l2tdevtools_path, project_definition, dependencies_helper,
-        test_dependencies_helper)
+        l2tdevtools_path, project_definition, dependencies_helper)
     writer.Write()
 
   for writer_class in (
@@ -72,20 +65,17 @@ def Main():
       dependencies_py.DependenciesPyWriter, dpkg.DPKGCompatWriter,
       dpkg.DPKGControlWriter, dpkg.DPKGRulesWriter,
       gift_copr.GIFTCOPRInstallScriptWriter,
-      gift_ppa.GIFTPPAInstallScriptPY3Writer,
+      gift_ppa.GIFTPPAInstallScriptWriter,
       jenkins_scripts.LinuxRunEndToEndTestsScriptWriter,
       jenkins_scripts.RunPython3EndToEndTestsScriptWriter,
       linux_scripts.UbuntuInstallationScriptWriter,
-      macos.MacOSInstallScriptWriter, macos.MacOSMakeDistScriptWriter,
-      macos.MacOSUninstallScriptWriter,
       sphinx_docs.SphinxBuildConfigurationWriter,
       sphinx_docs.SphinxBuildRequirementsWriter, tox_ini.ToxIniWriter):
     if not os.path.exists(writer_class.PATH):
       continue
 
     writer = writer_class(
-        l2tdevtools_path, project_definition, dependencies_helper,
-        test_dependencies_helper)
+        l2tdevtools_path, project_definition, dependencies_helper)
     writer.Write()
 
   output_path = os.path.join('utils', 'dependencies.py')
@@ -110,6 +100,10 @@ def Main():
   script_path = os.path.join('config', 'linux', 'gift_ppa_install.sh')
   if os.path.isfile(script_path):
     os.remove(script_path)
+
+  script_path = os.path.join('config', 'macos')
+  if os.path.isfile(script_path):
+    shutil.rmtree(script_path)
 
   script_path = os.path.join('.travis.yml')
   if os.path.isfile(script_path):

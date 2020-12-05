@@ -61,7 +61,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
   _GITHUB_REPO_URL = (
       'https://github.com/log2timeline/l2tbinaries')
 
-  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 8)])
+  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 8), (3, 9)])
 
   def __init__(self, download_url, branch='master'):
     """Initializes a download helper.

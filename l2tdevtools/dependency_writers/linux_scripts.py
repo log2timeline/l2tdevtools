@@ -137,7 +137,7 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a ubuntu_install_project.sh file."""
-    python_dependencies = self._GetDPKGPythonDependencies(python_version=3)
+    python_dependencies = self._GetDPKGPythonDependencies()
 
     if self._project_definition.name == 'plaso':
       # Use the Elasticsearch installation script to install the Elasticsearch
@@ -145,8 +145,7 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
       if 'python3-elasticsearch' in python_dependencies:
         python_dependencies.remove('python3-elasticsearch')
 
-    test_dependencies = self._GetDPKGTestDependencies(
-        python_dependencies, python_version=3)
+    test_dependencies = self._GetDPKGTestDependencies(python_dependencies)
 
     # TODO: replace by dev_dependencies.ini or equiv.
     development_dependencies = ['pylint']

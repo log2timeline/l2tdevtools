@@ -19,9 +19,10 @@ class AppVeyorInstallPS1ScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes an install.ps1 file."""
-    dependencies = self._dependency_helper.GetL2TBinaries(python_version=3)
-    dependencies.extend(self._test_dependency_helper.GetL2TBinaries(
-        python_version=3))
+    dependencies = self._dependency_helper.GetL2TBinaries()
+    test_dependencies = self._dependency_helper.GetL2TBinaries(
+        test_dependencies=True)
+    dependencies.extend(test_dependencies)
 
     template_mappings = {
         'dependencies': ' '.join(sorted(set(dependencies)))

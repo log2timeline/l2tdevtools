@@ -17,15 +17,16 @@ class ToxIniWriterTest(test_lib.BaseTestCase):
 
   def testInitialize(self):
     """Tests that the writer can be initialized."""
-
     l2tdevtools_path = '/fake/l2tdevtools/'
     project_definition = project.ProjectHelper(l2tdevtools_path)
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    test_dependencies_file = self._GetTestFilePath(['test_dependencies.ini'])
     dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
+        dependencies_file=dependencies_file,
+        test_dependencies_file=test_dependencies_file)
 
     writer = tox_ini.ToxIniWriter(
-        l2tdevtools_path, project_definition, dependency_helper, None)
+        l2tdevtools_path, project_definition, dependency_helper)
     self.assertIsNotNone(writer)
 
   # TODO: Add test for the Write method.

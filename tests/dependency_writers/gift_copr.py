@@ -26,17 +26,14 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     """
     project_definition = projects.ProjectDefinition('test')
 
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    test_dependencies_file = self._GetTestFilePath(['test_dependencies.ini'])
     dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    configuration_file = self._GetTestFilePath(['test_dependencies.ini'])
-    test_dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
+        dependencies_file=dependencies_file,
+        test_dependencies_file=test_dependencies_file)
 
     return gift_copr.GIFTCOPRInstallScriptWriter(
-        '/fake/l2tdevtools/', project_definition, dependency_helper,
-        test_dependency_helper)
+        '/fake/l2tdevtools/', project_definition, dependency_helper)
 
   def testFormatRPMDebugDependencies(self):
     """Tests the _FormatRPMDebugDependencies function."""
@@ -44,8 +41,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
 
     expected_formatted_debug_dependencies = ''
 
-    python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetRPMPythonDependencies()
     debug_dependencies = test_writer._GetRPMDebugDependencies(
         python_dependencies)
     formatted_debug_dependencies = test_writer._FormatRPMDebugDependencies(
@@ -74,8 +70,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     expected_formatted_python_dependencies = (
         'PYTHON3_DEPENDENCIES="python3-pyyaml";')
 
-    python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetRPMPythonDependencies()
     formatted_python_dependencies = test_writer._FormatRPMPythonDependencies(
         python_dependencies)
     self.assertEqual(
@@ -91,10 +86,8 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
         '                   python3-setuptools\n'
         '                   python3-six";')
 
-    python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=3)
-    test_dependencies = test_writer._GetRPMTestDependencies(
-        python_dependencies, python_version=3)
+    python_dependencies = test_writer._GetRPMPythonDependencies()
+    test_dependencies = test_writer._GetRPMTestDependencies(python_dependencies)
     formatted_test_dependencies = test_writer._FormatRPMTestDependencies(
         test_dependencies)
     self.assertEqual(
@@ -106,8 +99,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
 
     expected_debug_dependencies = []
 
-    python_dependencies = test_writer._GetRPMPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetRPMPythonDependencies()
     debug_dependencies = test_writer._GetRPMDebugDependencies(
         python_dependencies)
     self.assertEqual(debug_dependencies, expected_debug_dependencies)

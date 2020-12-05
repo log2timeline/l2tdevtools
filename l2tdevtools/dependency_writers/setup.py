@@ -55,8 +55,7 @@ class SetupCfgWriter(interface.DependencyFileWriter):
         line = '            {0:s}'.format(doc_file)
       formatted_doc_files.append(line)
 
-    python3_dependencies = self._dependency_helper.GetRPMRequires(
-        python_version=3)
+    python3_dependencies = self._dependency_helper.GetRPMRequires()
 
     formatted_requires = []
     for index, dependency in enumerate(python3_dependencies):
