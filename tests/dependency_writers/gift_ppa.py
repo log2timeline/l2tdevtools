@@ -25,18 +25,14 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
       GIFTPPAInstallScriptWriter: dependency file writer for testing.
     """
     project_definition = projects.ProjectDefinition('test')
-
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    test_dependencies_file = self._GetTestFilePath(['test_dependencies.ini'])
     dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    configuration_file = self._GetTestFilePath(['test_dependencies.ini'])
-    test_dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
+        dependencies_file=dependencies_file,
+        test_dependencies_file=test_dependencies_file)
 
     return gift_ppa.GIFTPPAInstallScriptWriter(
-        '/fake/l2tdevtools/', project_definition, dependency_helper,
-        test_dependency_helper)
+        '/fake/l2tdevtools/', project_definition, dependency_helper)
 
   def testFormatDPKGDebugDependencies(self):
     """Tests the _FormatDPKGDebugDependencies function."""
@@ -44,10 +40,9 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
 
     expected_formatted_debug_dependencies = ''
 
-    python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetDPKGPythonDependencies()
     debug_dependencies = test_writer._GetDPKGDebugDependencies(
-        python_dependencies, python_version=3)
+        python_dependencies)
     formatted_debug_dependencies = test_writer._FormatDPKGDebugDependencies(
         debug_dependencies)
     self.assertEqual(
@@ -75,8 +70,7 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
     expected_formatted_python_dependencies = (
         'PYTHON_DEPENDENCIES="python3-yaml";')
 
-    python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetDPKGPythonDependencies()
     formatted_python_dependencies = test_writer._FormatDPKGPythonDependencies(
         python_dependencies)
     self.assertEqual(
@@ -93,10 +87,9 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
         '                   python3-setuptools\n'
         '                   python3-six";')
 
-    python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetDPKGPythonDependencies()
     test_dependencies = test_writer._GetDPKGTestDependencies(
-        python_dependencies, python_version=3)
+        python_dependencies)
     formatted_test_dependencies = test_writer._FormatDPKGTestDependencies(
         test_dependencies)
     self.assertEqual(
@@ -108,40 +101,10 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
 
     expected_debug_dependencies = []
 
-    python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetDPKGPythonDependencies()
     debug_dependencies = test_writer._GetDPKGDebugDependencies(
-        python_dependencies, python_version=3)
+        python_dependencies)
     self.assertEqual(debug_dependencies, expected_debug_dependencies)
-
-
-class GIFTPPAInstallPY3Test(test_lib.BaseTestCase):
-  """Tests the GIFT PPA installation script file writer for Python 3."""
-
-  def _CreateTestWriter(self):
-    """Creates a dependency file writer for testing.
-
-    Returns:
-      GIFTPPAInstallScriptPY3Writer: dependency file writer for testing.
-    """
-    project_definition = projects.ProjectDefinition('test')
-
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
-    dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    configuration_file = self._GetTestFilePath(['test_dependencies.ini'])
-    test_dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    return gift_ppa.GIFTPPAInstallScriptPY3Writer(
-        '/fake/l2tdevtools/', project_definition, dependency_helper,
-        test_dependency_helper)
-
-  def testInitialize(self):
-    """Tests the __init__ function."""
-    test_writer = self._CreateTestWriter()
-    self.assertIsNotNone(test_writer)
 
   # TODO: Add test for the Write method.
 

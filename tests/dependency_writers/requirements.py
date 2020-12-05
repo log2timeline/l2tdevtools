@@ -23,18 +23,14 @@ class RequirementsWriterTest(test_lib.BaseTestCase):
       RequirementsWriter: dependency file writer for testing.
     """
     project_definition = projects.ProjectDefinition('test')
-
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    test_dependencies_file = self._GetTestFilePath(['test_dependencies.ini'])
     dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    configuration_file = self._GetTestFilePath(['test_dependencies.ini'])
-    test_dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
+        dependencies_file=dependencies_file,
+        test_dependencies_file=test_dependencies_file)
 
     return requirements.RequirementsWriter(
-        '/fake/l2tdevtools/', project_definition, dependency_helper,
-        test_dependency_helper)
+        '/fake/l2tdevtools/', project_definition, dependency_helper)
 
   def testInitialize(self):
     """Tests the __init__ function."""
@@ -54,18 +50,14 @@ class TestRequirementsWriterTest(test_lib.BaseTestCase):
       TestRequirementsWriter: dependency file writer for testing.
     """
     project_definition = projects.ProjectDefinition('test')
-
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    test_dependencies_file = self._GetTestFilePath(['test_dependencies.ini'])
     dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    configuration_file = self._GetTestFilePath(['test_dependencies.ini'])
-    test_dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
+        dependencies_file=dependencies_file,
+        test_dependencies_file=test_dependencies_file)
 
     return requirements.TestRequirementsWriter(
-        '/fake/l2tdevtools/', project_definition, dependency_helper,
-        test_dependency_helper)
+        '/fake/l2tdevtools/', project_definition, dependency_helper)
 
   def testInitialize(self):
     """Tests the __init__ function."""

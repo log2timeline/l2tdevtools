@@ -12,22 +12,18 @@ class DependencyFileWriter(object):
   """Base class for dependency file writers."""
 
   def __init__(
-      self, l2tdevtools_path, project_definition, dependency_helper,
-      test_dependency_helper):
+      self, l2tdevtools_path, project_definition, dependency_helper):
     """Initializes a dependency file writer.
 
     Args:
       l2tdevtools_path (str): path to l2tdevtools.
       project_definition (ProjectDefinition): project definition.
       dependency_helper (DependencyHelper): dependency helper.
-      test_dependency_helper (DependencyHelper): test dependency helper
-          or None if not available.
     """
     super(DependencyFileWriter, self).__init__()
     self._dependency_helper = dependency_helper
     self._l2tdevtools_path = l2tdevtools_path
     self._project_definition = project_definition
-    self._test_dependency_helper = test_dependency_helper
 
   def _GenerateFromTemplate(self, template_filename, template_mappings):
     """Generates file context based on a template file.
@@ -53,37 +49,29 @@ class DependencyFileWriter(object):
           'Unable to format template: {0:s} with error: {1!s}'.format(
               template_filename, exception))
 
-  def _GetDPKGPythonDependencies(self, python_version=2):
+  def _GetDPKGPythonDependencies(self):
     """Retrieves DPKG Python dependencies.
-
-    Args:
-      python_version (Optional[int]): Python major version.
 
     Returns:
       list[str]: DPKG package names of Python dependencies.
     """
-    return self._dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=python_version)
+    return self._dependency_helper.GetDPKGDepends(exclude_version=True)
 
-  def _GetDPKGTestDependencies(self, python_dependencies, python_version=2):
+  def _GetDPKGTestDependencies(self, python_dependencies):
     """Retrieves DPKG test dependencies.
 
     Args:
       python_dependencies (list[str]): DPKG package names of Python
           dependencies.
-      python_version (Optional[int]): Python major version.
 
     Returns:
       list[str]: DPKG package names of test dependencies.
     """
-    test_dependencies = self._test_dependency_helper.GetDPKGDepends(
-        exclude_version=True, python_version=python_version)
+    test_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True, test_dependencies=True)
 
     # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
-    if python_version == 2:
-      test_dependencies.extend(['python-setuptools'])
-    else:
-      test_dependencies.extend(['python3-distutils', 'python3-setuptools'])
+    test_dependencies.extend(['python3-distutils', 'python3-setuptools'])
 
     return [
         test_dependency for test_dependency in sorted(test_dependencies)
@@ -115,43 +103,35 @@ class DependencyFileWriter(object):
     Returns:
       list[str]: PyPI package names of test dependencies.
     """
-    test_dependencies = self._test_dependency_helper.GetInstallRequires(
-        exclude_version=exclude_version)
+    test_dependencies = self._dependency_helper.GetInstallRequires(
+        exclude_version=exclude_version, test_dependencies=True)
 
     return [
         test_dependency for test_dependency in test_dependencies
         if test_dependency not in python_dependencies]
 
-  def _GetRPMPythonDependencies(self, python_version=2):
+  def _GetRPMPythonDependencies(self):
     """Retrieves RPM Python dependencies.
-
-    Args:
-      python_version (Optional[int]): Python major version.
 
     Returns:
       list[str]: RPM package names of Python dependencies.
     """
-    return self._dependency_helper.GetRPMRequires(
-        exclude_version=True, python_version=python_version)
+    return self._dependency_helper.GetRPMRequires(exclude_version=True)
 
-  def _GetRPMTestDependencies(self, python_dependencies, python_version=2):
+  def _GetRPMTestDependencies(self, python_dependencies):
     """Retrieves RPM test dependencies.
 
     Args:
       python_dependencies (list[str]): RPM package names of Python dependencies.
-      python_version (Optional[int]): Python major version.
 
     Returns:
       list[str]: RPM package names of test dependencies.
     """
-    test_dependencies = self._test_dependency_helper.GetRPMRequires(
-        exclude_version=True, python_version=python_version)
+    test_dependencies = self._dependency_helper.GetRPMRequires(
+        exclude_version=True, test_dependencies=True)
 
     # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
-    if python_version == 2:
-      test_dependencies.extend(['python2-setuptools'])
-    else:
-      test_dependencies.extend(['python3-setuptools'])
+    test_dependencies.extend(['python3-setuptools'])
 
     return [
         test_dependency for test_dependency in sorted(test_dependencies)

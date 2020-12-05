@@ -25,18 +25,14 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
       UbuntuInstallationScriptWriter: dependency file writer for testing.
     """
     project_definition = projects.ProjectDefinition('test')
-
-    configuration_file = self._GetTestFilePath(['dependencies.ini'])
+    dependencies_file = self._GetTestFilePath(['dependencies.ini'])
+    test_dependencies_file = self._GetTestFilePath(['test_dependencies.ini'])
     dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
-
-    configuration_file = self._GetTestFilePath(['test_dependencies.ini'])
-    test_dependency_helper = dependencies.DependencyHelper(
-        configuration_file=configuration_file)
+        dependencies_file=dependencies_file,
+        test_dependencies_file=test_dependencies_file)
 
     return linux_scripts.UbuntuInstallationScriptWriter(
-        '/fake/l2tdevtools/', project_definition, dependency_helper,
-        test_dependency_helper)
+        '/fake/l2tdevtools/', project_definition, dependency_helper)
 
   def testFormatDPKGDebugDependencies(self):
     """Tests the _FormatDPKGDebugDependencies function."""
@@ -44,8 +40,7 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
 
     expected_formatted_debug_dependencies = ''
 
-    python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetDPKGPythonDependencies()
     debug_dependencies = test_writer._GetDPKGDebugDependencies(
         python_dependencies)
     formatted_debug_dependencies = test_writer._FormatDPKGDebugDependencies(
@@ -75,8 +70,7 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
     expected_formatted_python_dependencies = (
         'PYTHON_DEPENDENCIES="python3-yaml";')
 
-    python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetDPKGPythonDependencies()
     formatted_python_dependencies = test_writer._FormatDPKGPythonDependencies(
         python_dependencies)
     self.assertEqual(
@@ -93,10 +87,9 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
         '                   python3-setuptools\n'
         '                   python3-six";')
 
-    python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetDPKGPythonDependencies()
     test_dependencies = test_writer._GetDPKGTestDependencies(
-        python_dependencies, python_version=3)
+        python_dependencies)
     formatted_test_dependencies = test_writer._FormatDPKGTestDependencies(
         test_dependencies)
     self.assertEqual(
@@ -108,8 +101,7 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
 
     expected_debug_dependencies = []
 
-    python_dependencies = test_writer._GetDPKGPythonDependencies(
-        python_version=3)
+    python_dependencies = test_writer._GetDPKGPythonDependencies()
     debug_dependencies = test_writer._GetDPKGDebugDependencies(
         python_dependencies)
     self.assertEqual(debug_dependencies, expected_debug_dependencies)

@@ -19,14 +19,12 @@ class GitHubActionsTestDockerYmlWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a test_docker.yml GitHub actions workflow file ."""
-    dpkg_dependencies = self._GetDPKGPythonDependencies(python_version=3)
-    test_dependencies = self._GetDPKGTestDependencies(
-        dpkg_dependencies, python_version=3)
+    dpkg_dependencies = self._GetDPKGPythonDependencies()
+    test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
     dpkg_dependencies.extend(test_dependencies)
 
-    rpm_dependencies = self._GetRPMPythonDependencies(python_version=3)
-    test_dependencies = self._GetRPMTestDependencies(
-        rpm_dependencies, python_version=3)
+    rpm_dependencies = self._GetRPMPythonDependencies()
+    test_dependencies = self._GetRPMTestDependencies(rpm_dependencies)
     rpm_dependencies.extend(test_dependencies)
 
     template_mappings = {
@@ -50,9 +48,8 @@ class GitHubActionsTestToxYmlWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a test_tox.yml GitHub actions workflow file ."""
-    dpkg_dependencies = self._GetDPKGPythonDependencies(python_version=3)
-    test_dependencies = self._GetDPKGTestDependencies(
-        dpkg_dependencies, python_version=3)
+    dpkg_dependencies = self._GetDPKGPythonDependencies()
+    test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
     dpkg_dependencies.extend(test_dependencies)
 
     template_mappings = {

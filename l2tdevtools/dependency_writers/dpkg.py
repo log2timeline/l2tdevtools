@@ -87,8 +87,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
     description_long = '\n'.join(
         [' {0:s}'.format(line) for line in description_long.split('\n')])
 
-    python3_dependencies = self._dependency_helper.GetDPKGDepends(
-        python_version=3)
+    python3_dependencies = self._dependency_helper.GetDPKGDepends()
 
     if data_dependency:
       python3_dependencies.insert(0, data_dependency)
