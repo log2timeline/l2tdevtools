@@ -253,6 +253,115 @@ class DependencyHelper(object):
     status_message = '{0:s} version: {1!s}'.format(module_name, module_version)
     return True, status_message
 
+  def _ImportPythonModule(self, module_name):
+    """Imports a Python module.
+
+    Args:
+      module_name (str): name of the module.
+
+    Returns:
+      module: Python module or None if the module cannot be imported.
+    """
+    try:
+      module_object = list(map(__import__, [module_name]))[0]
+    except ImportError:
+      return None
+
+    # If the module name contains dots get the upper most module object.
+    if '.' in module_name:
+      for submodule_name in module_name.split('.')[1:]:
+        module_object = getattr(module_object, submodule_name, None)
+
+    return module_object
+
+  def _PrintCheckDependencyStatus(
+      self, dependency, result, status_message, verbose_output=True):
+    """Prints the check dependency status.
+
+    Args:
+      dependency (DependencyDefinition): dependency definition.
+      result (bool): True if the Python module is available and conforms to
+            the minimum required version, False otherwise.
+      status_message (str): status message.
+      verbose_output (Optional[bool]): True if output should be verbose.
+    """
+    if not result or dependency.is_optional:
+      if dependency.is_optional:
+        status_indicator = '[OPTIONAL]'
+      else:
+        status_indicator = '[FAILURE]'
+
+      print('{0:s}\t{1:s}'.format(status_indicator, status_message))
+
+    elif verbose_output:
+      print('[OK]\t\t{0:s}'.format(status_message))
+
+  def CheckDependencies(self, verbose_output=True):
+    """Checks the availability of the dependencies.
+
+    Args:
+      verbose_output (Optional[bool]): True if output should be verbose.
+
+    Returns:
+      bool: True if the dependencies are available, False otherwise.
+    """
+    print('Checking availability and versions of dependencies.')
+    check_result = True
+
+    for _, dependency in sorted(self.dependencies.items()):
+      if dependency.skip_check:
+        continue
+
+      result, status_message = self._CheckPythonModule(dependency)
+
+      if not result and not dependency.is_optional:
+        check_result = False
+
+      self._PrintCheckDependencyStatus(
+          dependency, result, status_message, verbose_output=verbose_output)
+
+    if check_result and not verbose_output:
+      print('[OK]')
+
+    print('')
+    return check_result
+
+  def CheckTestDependencies(self, verbose_output=True):
+    """Checks the availability of the dependencies when running tests.
+
+    Args:
+      verbose_output (Optional[bool]): True if output should be verbose.
+
+    Returns:
+      bool: True if the dependencies are available, False otherwise.
+    """
+    if not self.CheckDependencies(verbose_output=verbose_output):
+      return False
+
+    print('Checking availability and versions of test dependencies.')
+    check_result = True
+
+    for dependency in sorted(
+        self._test_dependencies.values(),
+        key=lambda dependency: dependency.name):
+      if dependency.skip_check:
+        continue
+
+      result, status_message = self._CheckPythonModule(dependency)
+      if not result:
+        check_result = False
+
+      self._PrintCheckDependencyStatus(
+          dependency, result, status_message, verbose_output=verbose_output)
+
+    if check_result and not verbose_output:
+      print('[OK]')
+
+    print('')
+    return check_result
+
+  # The following functions should not be included in utils/dependencies.py
+
   def _GetDPKGDepends(self, dependencies, exclude_version=False):
     """Retrieves the DPKG control file installation requirements.
 
@@ -372,113 +481,6 @@ class DependencyHelper(object):
       requires.append(requires_string)
 
     return sorted(requires)
-
-  def _ImportPythonModule(self, module_name):
-    """Imports a Python module.
-
-    Args:
-      module_name (str): name of the module.
-
-    Returns:
-      module: Python module or None if the module cannot be imported.
-    """
-    try:
-      module_object = list(map(__import__, [module_name]))[0]
-    except ImportError:
-      return None
-
-    # If the module name contains dots get the upper most module object.
-    if '.' in module_name:
-      for submodule_name in module_name.split('.')[1:]:
-        module_object = getattr(module_object, submodule_name, None)
-
-    return module_object
-
-  def _PrintCheckDependencyStatus(
-      self, dependency, result, status_message, verbose_output=True):
-    """Prints the check dependency status.
-
-    Args:
-      dependency (DependencyDefinition): dependency definition.
-      result (bool): True if the Python module is available and conforms to
-            the minimum required version, False otherwise.
-      status_message (str): status message.
-      verbose_output (Optional[bool]): True if output should be verbose.
-    """
-    if not result or dependency.is_optional:
-      if dependency.is_optional:
-        status_indicator = '[OPTIONAL]'
-      else:
-        status_indicator = '[FAILURE]'
-
-      print('{0:s}\t{1:s}'.format(status_indicator, status_message))
-
-    elif verbose_output:
-      print('[OK]\t\t{0:s}'.format(status_message))
-
-  def CheckDependencies(self, verbose_output=True):
-    """Checks the availability of the dependencies.
-
-    Args:
-      verbose_output (Optional[bool]): True if output should be verbose.
-
-    Returns:
-      bool: True if the dependencies are available, False otherwise.
-    """
-    print('Checking availability and versions of dependencies.')
-    check_result = True
-
-    for _, dependency in sorted(self.dependencies.items()):
-      if dependency.skip_check:
-        continue
-
-      result, status_message = self._CheckPythonModule(dependency)
-
-      if not result and not dependency.is_optional:
-        check_result = False
-
-      self._PrintCheckDependencyStatus(
-          dependency, result, status_message, verbose_output=verbose_output)
-
-    if check_result and not verbose_output:
-      print('[OK]')
-
-    print('')
-    return check_result
-
-  def CheckTestDependencies(self, verbose_output=True):
-    """Checks the availability of the dependencies when running tests.
-
-    Args:
-      verbose_output (Optional[bool]): True if output should be verbose.
-
-    Returns:
-      bool: True if the dependencies are available, False otherwise.
-    """
-    if not self.CheckDependencies(verbose_output=verbose_output):
-      return False
-
-    print('Checking availability and versions of test dependencies.')
-    check_result = True
-
-    for dependency in sorted(
-        self._test_dependencies.values(),
-        key=lambda dependency: dependency.name):
-      if dependency.skip_check:
-        continue
-
-      result, status_message = self._CheckPythonModule(dependency)
-      if not result:
-        check_result = False
-
-      self._PrintCheckDependencyStatus(
-          dependency, result, status_message, verbose_output=verbose_output)
-
-    if check_result and not verbose_output:
-      print('[OK]')
-
-    print('')
-    return check_result
 
   def GetDPKGDepends(self, exclude_version=False, test_dependencies=False):
     """Retrieves the DPKG control file installation requirements.
