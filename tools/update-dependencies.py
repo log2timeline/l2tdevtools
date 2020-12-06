@@ -85,7 +85,7 @@ def Main():
     file_data = []
     with io.open(input_path, 'r', encoding='utf-8') as file_object:
       for line in file_object.readlines():
-        if 'GetDPKGDepends' in line:
+        if '# The following functions should not be included in ' in line:
           break
 
         file_data.append(line)
