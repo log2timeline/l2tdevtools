@@ -8,6 +8,7 @@ from l2tdevtools.build_helpers import msi
 from l2tdevtools.build_helpers import osc
 from l2tdevtools.build_helpers import rpm
 from l2tdevtools.build_helpers import source
+from l2tdevtools.build_helpers import wheel
 
 
 class BuildHelperFactory(object):
@@ -21,6 +22,7 @@ class BuildHelperFactory(object):
       'rpm': rpm.ConfigureMakeRPMBuildHelper,
       'source': source.ConfigureMakeSourceBuildHelper,
       'srpm': rpm.ConfigureMakeSRPMBuildHelper,
+      'wheel': wheel.ConfigureMakeWheelBuildHelper,
   }
 
   _SETUP_PY_BUILD_HELPER_CLASSES = {
@@ -31,6 +33,7 @@ class BuildHelperFactory(object):
       'rpm': rpm.SetupPyRPMBuildHelper,
       'source': source.SetupPySourceBuildHelper,
       'srpm': rpm.SetupPySRPMBuildHelper,
+      'wheel': wheel.SetupPyWheelBuildHelper,
   }
 
   @classmethod

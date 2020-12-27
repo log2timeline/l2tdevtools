@@ -258,9 +258,9 @@ class GitHelper(cli.CLIHelper):
       bool: True if the push was successful.
     """
     if force:
-      command = 'git push --set-upstream origin {0:s}'.format(branch)
-    else:
       command = 'git push -f --set-upstream origin {0:s}'.format(branch)
+    else:
+      command = 'git push --set-upstream origin {0:s}'.format(branch)
 
     exit_code, _, _ = self.RunCommand(command)
     return exit_code == 0

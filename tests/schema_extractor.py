@@ -40,10 +40,10 @@ class SQLiteSchemaExtractorTest(test_lib.BaseTestCase):
 
     self.assertEqual(schema, self._TEST_FORMATTED_SCHEMA)
 
-  @test_lib.skipUnlessHasTestFile(['downloads.sqlite'])
   def testGetDatabaseSchema(self):
     """Tests the GetDatabaseSchema function."""
     test_path = self._GetTestFilePath(['downloads.sqlite'])
+    self._SkipIfPathNotExists(test_path)
 
     test_extractor = schema_extractor.SQLiteSchemaExtractor()
     schema = test_extractor.GetDatabaseSchema(test_path)

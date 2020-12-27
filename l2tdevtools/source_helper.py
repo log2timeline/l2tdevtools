@@ -17,7 +17,7 @@ from l2tdevtools import py2to3
 
 
 class SourceHelper(object):
-  """Helper to manager project source code."""
+  """Helper to manage project source code."""
 
   def __init__(self, project_name, project_definition):
     """Initializes a source helper.
@@ -45,6 +45,13 @@ class SourceHelper(object):
     Returns:
       str: project identifier or None on error.
     """
+
+  # TODO: add GetProjectVersion as interface function.
+
+  # TODO: add GetSourceDirectoryPath as interface function.
+
+  # TODO: add GetSourcePackageFilename as interface function,
+  # or move into GetSourceDirectoryPath of SourcePackageHelper.
 
 
 class GitRepositorySourceHelper(SourceHelper):
