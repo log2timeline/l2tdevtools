@@ -86,7 +86,7 @@ class WheelBuildHelper(interface.BuildHelper):
       return False
 
     filenames_glob = os.path.join(
-        source_directory, 'dist', '{0:s}-*-*-*-*.whl'.format(project_name))
+        source_directory, 'dist', '{0:s}-*-*-*.whl'.format(project_name))
     filenames = glob.glob(filenames_glob)
 
     if len(filenames) != 1:
@@ -147,7 +147,7 @@ class WheelBuildHelper(interface.BuildHelper):
         project_name, project_version)
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    filenames_glob = '{0:s}-*-*-*-*.whl'.format(project_name)
+    filenames_glob = '{0:s}-*-*-*.whl'.format(project_name)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
