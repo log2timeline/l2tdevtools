@@ -17,8 +17,6 @@ import time
 import urllib.error as urllib_error
 from urllib.request import urlopen
 
-from l2tdevtools import py2to3
-
 
 class StatsDefinitionReader(object):
   """Class that implements a stats definition reader."""
@@ -58,7 +56,7 @@ class StatsDefinitionReader(object):
 
       if project_names is None:
         project_names = []
-      elif isinstance(project_names, py2to3.STRING_TYPES):
+      elif isinstance(project_names, bytes):
         project_names = project_names.split(',')
 
       projects_per_organization[option_name] = project_names

@@ -5,8 +5,6 @@ from __future__ import unicode_literals
 
 import configparser
 
-from l2tdevtools import py2to3
-
 
 class PresetDefinition(object):
   """Class that implements a preset definition.
@@ -71,14 +69,14 @@ class PresetDefinitionReader(object):
       if preset_definition.preset_names is None:
         preset_definition.preset_names = []
       elif isinstance(
-          preset_definition.preset_names, py2to3.STRING_TYPES):
+          preset_definition.preset_names, str):
         preset_definition.preset_names = (
             preset_definition.preset_names.split(','))
 
       if preset_definition.project_names is None:
         preset_definition.project_names = []
       elif isinstance(
-          preset_definition.project_names, py2to3.STRING_TYPES):
+          preset_definition.project_names, str):
         preset_definition.project_names = (
             preset_definition.project_names.split(','))
 
