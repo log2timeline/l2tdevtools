@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for building projects from source."""
 
-from __future__ import unicode_literals
-
 from l2tdevtools.build_helpers import dpkg
 from l2tdevtools.build_helpers import msi
 from l2tdevtools.build_helpers import osc

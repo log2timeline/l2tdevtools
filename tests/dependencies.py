@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the helper to check for dependencies."""
 
-from __future__ import unicode_literals
-
 import configparser
 import io
 import unittest

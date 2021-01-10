@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Build helper related functions and classes for testing."""
 
-from __future__ import unicode_literals
-
 import logging
 import os
 import tarfile

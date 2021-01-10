@@ -1,18 +1,10 @@
 # -*- coding: utf-8 -*-
 """Helper for using URL library (urllib)."""
-from __future__ import unicode_literals
 
-import sys
+import urllib.error as urllib_error
+import urllib.request as urllib_request
 
-# pylint: disable=import-error,no-name-in-module
-if sys.version_info[0] < 3:
-  import urllib2 as urllib_error
-  import urllib2 as urllib_request
-else:
-  import urllib.error as urllib_error
-  import urllib.request as urllib_request
-
-from l2tdevtools.lib import errors  # pylint: disable=wrong-import-position
+from l2tdevtools.lib import errors
 
 
 class URLLibHelper(object):
@@ -35,11 +27,7 @@ class URLLibHelper(object):
 
     if post_data is not None:
       # This will change the request into a POST.
-      if hasattr(request, 'add_data'):
-        request.add_data(post_data)
-      else:
-        # add_data has been removed from the urllib API.
-        request.data = post_data.encode('utf-8')
+      request.data = post_data.encode('utf-8')
 
     try:
       url_object = urllib_request.urlopen(request)

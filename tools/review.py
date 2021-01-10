@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """Script to manage code reviews."""
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import os
 import sys
@@ -136,9 +133,9 @@ def Main():
       print('Feature branch value is missing.')
       print_help_on_error = True
 
-      # Support "username:branch" notation.
-      if ':' in feature_branch:
-        _, _, feature_branch = feature_branch.rpartition(':')
+    # Support "username:branch" notation.
+    elif ':' in str(feature_branch):
+      _, _, feature_branch = feature_branch.rpartition(':')
 
   if options.command in ('merge', 'merge-edit', 'merge_edit'):
     github_origin = getattr(options, 'github_origin', None)

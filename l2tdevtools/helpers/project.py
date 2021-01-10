@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with a project."""
 
-from __future__ import unicode_literals
-
 import logging
 import os
 import random

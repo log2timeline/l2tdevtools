@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
-from __future__ import unicode_literals
-
 from l2tdevtools.download_helpers import github
 from l2tdevtools.download_helpers import pypi
 from l2tdevtools.download_helpers import sourceforge

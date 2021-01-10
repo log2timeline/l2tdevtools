@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """Script to automate creating builds of projects."""
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import io
 import logging

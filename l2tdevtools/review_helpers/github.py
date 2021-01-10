@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with GitHub."""
 
-from __future__ import unicode_literals
-
 import json
 import logging
 

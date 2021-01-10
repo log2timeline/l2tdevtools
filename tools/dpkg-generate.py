@@ -3,9 +3,6 @@
 # pylint: disable=invalid-name
 """Script to generate dpkg packaging files."""
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import glob
 import logging

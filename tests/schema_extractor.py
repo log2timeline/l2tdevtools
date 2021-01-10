@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the SQLite database schema extractor tool."""
 
-from __future__ import unicode_literals
-
 import unittest
 
 from tools import schema_extractor

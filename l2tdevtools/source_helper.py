@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for managing project source code."""
 
-from __future__ import unicode_literals
-
 import abc
 import glob
 import logging

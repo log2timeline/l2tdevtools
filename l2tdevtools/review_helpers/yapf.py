@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Helper for using yapf (Yet Another Python Formatter)."""
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import subprocess

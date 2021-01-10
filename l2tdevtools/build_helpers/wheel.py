@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for building Python wheel packages (.whl)."""
 
-from __future__ import unicode_literals
-
 import glob
 import logging
 import os

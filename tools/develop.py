@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tool to build, run and manage dockerized development environments."""
 
-from __future__ import unicode_literals
-from __future__ import print_function
-
 import argparse
 import json
 import os

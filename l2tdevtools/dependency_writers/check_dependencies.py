@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for check_dependencies script."""
 
-from __future__ import unicode_literals
-
 import io
 import os
 
