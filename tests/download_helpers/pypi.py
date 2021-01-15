@@ -26,6 +26,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
 
   _PROJECT_NAME = 'dfvfs'
   _PROJECT_VERSION = '20201219'
+  _PYPI_VERSION = '20201219'
 
   @classmethod
   def setUpClass(cls):
@@ -60,7 +61,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
 
     latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
 
-    self.assertEqual(latest_version, self._PROJECT_VERSION)
+    self.assertEqual(latest_version, self._PYPI_VERSION)
 
   def testGetDownloadURL(self):
     """Tests the GetDownloadURL functions."""
@@ -71,10 +72,9 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
         r'[\da-f/]+{0:s}-\d{{8}}.tar.gz'.format(self._PROJECT_NAME))
 
     download_url = download_helper.GetDownloadURL(
-        self._PROJECT_NAME, self._PROJECT_VERSION)
+        self._PROJECT_NAME, self._PYPI_VERSION)
 
-    # pylint: disable=deprecated-method
-    self.assertRegexpMatches(download_url, expected_download_url_regexp)
+    self.assertRegex(download_url, expected_download_url_regexp)
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""

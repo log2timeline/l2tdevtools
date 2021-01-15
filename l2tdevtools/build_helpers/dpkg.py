@@ -17,7 +17,6 @@ import tarfile
 import zipfile
 
 from l2tdevtools import dpkg_files
-from l2tdevtools import py2to3
 from l2tdevtools.build_helpers import interface
 from l2tdevtools.lib import definitions
 
@@ -493,7 +492,7 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not process or process.returncode != 0:
         output = None
 
-      elif isinstance(output, py2to3.BYTES_TYPE):
+      elif isinstance(output, bytes):
         try:
           output = output.decode('utf-8')
         except UnicodeDecodeError:

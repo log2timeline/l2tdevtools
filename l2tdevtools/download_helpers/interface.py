@@ -5,17 +5,9 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import sys
 
-# pylint: disable=import-error,no-name-in-module
-if sys.version_info[0] < 3:
-  import urllib2 as urllib_error
-  import urllib2 as urllib_request
-else:
-  import urllib.error as urllib_error
-  import urllib.request as urllib_request
-
-from l2tdevtools import py2to3  # pylint: disable=wrong-import-position
+import urllib.error as urllib_error
+import urllib.request as urllib_request
 
 
 class DownloadHelper(object):
@@ -96,7 +88,7 @@ class DownloadHelper(object):
 
       page_content = url_object.read()
 
-      if encoding and isinstance(page_content, py2to3.BYTES_TYPE):
+      if encoding and isinstance(page_content, bytes):
         page_content = page_content.decode(encoding)
 
       self._cached_page_content = page_content

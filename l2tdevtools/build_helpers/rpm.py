@@ -12,7 +12,6 @@ import shutil
 import subprocess
 
 from l2tdevtools.build_helpers import interface
-from l2tdevtools import py2to3
 from l2tdevtools import spec_file
 
 
@@ -202,7 +201,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
       # Remove setuptools epoch.
       project_version = project_version[2:]
 
-    if isinstance(project_version, py2to3.STRING_TYPES):
+    if isinstance(project_version, str):
       project_version = project_version.replace('-', '_')
 
     return project_name, project_version

@@ -7,7 +7,6 @@ import logging
 import os
 import tarfile
 
-from l2tdevtools import py2to3
 from l2tdevtools import source_helper
 
 
@@ -47,7 +46,7 @@ class TestSourceHelper(source_helper.SourceHelper):
     for tar_info in archive.getmembers():
       filename = getattr(tar_info, 'name', None)
 
-      if isinstance(filename, py2to3.BYTES_TYPE):
+      if isinstance(filename, bytes):
         try:
           filename = filename.decode('utf8')
         except UnicodeDecodeError:

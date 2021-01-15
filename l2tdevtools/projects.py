@@ -7,8 +7,6 @@ import configparser
 import logging
 import re
 
-from l2tdevtools import py2to3
-
 
 class ProjectDefinition(object):
   """Project definition.
@@ -284,86 +282,72 @@ class ProjectDefinitionReader(object):
 
       if project_definition.build_dependencies is None:
         project_definition.build_dependencies = []
-      elif isinstance(
-          project_definition.build_dependencies, py2to3.STRING_TYPES):
+      elif isinstance(project_definition.build_dependencies, str):
         project_definition.build_dependencies = (
             project_definition.build_dependencies.split(','))
 
       if project_definition.configure_options is None:
         project_definition.configure_options = []
-      elif isinstance(
-          project_definition.configure_options, py2to3.STRING_TYPES):
+      elif isinstance(project_definition.configure_options, str):
         project_definition.configure_options = (
             project_definition.configure_options.split(','))
 
       if project_definition.disabled is None:
         project_definition.disabled = []
-      elif isinstance(project_definition.disabled, py2to3.STRING_TYPES):
+      elif isinstance(project_definition.disabled, str):
         project_definition.disabled = project_definition.disabled.split(
             ',')
 
       if project_definition.dpkg_build_dependencies is None:
         project_definition.dpkg_build_dependencies = []
-      elif isinstance(
-          project_definition.dpkg_build_dependencies, py2to3.STRING_TYPES):
+      elif isinstance(project_definition.dpkg_build_dependencies, str):
         project_definition.dpkg_build_dependencies = (
             project_definition.dpkg_build_dependencies.split(','))
 
       if project_definition.dpkg_configure_options is None:
         project_definition.dpkg_configure_options = []
-      elif isinstance(
-          project_definition.dpkg_configure_options, py2to3.STRING_TYPES):
+      elif isinstance(project_definition.dpkg_configure_options, str):
         project_definition.dpkg_configure_options = (
             project_definition.dpkg_configure_options.split(','))
 
       if project_definition.dpkg_dependencies is None:
         project_definition.dpkg_dependencies = []
-      elif isinstance(
-          project_definition.dpkg_dependencies, py2to3.STRING_TYPES):
+      elif isinstance(project_definition.dpkg_dependencies, str):
         project_definition.dpkg_dependencies = (
             project_definition.dpkg_dependencies.split(','))
 
       if project_definition.dpkg_template_additional is None:
         project_definition.dpkg_template_additional = []
-      elif isinstance(
-          project_definition.dpkg_template_additional,
-          py2to3.STRING_TYPES):
+      elif isinstance(project_definition.dpkg_template_additional, str):
         project_definition.dpkg_template_additional = (
             project_definition.dpkg_template_additional.split(','))
 
       if project_definition.dpkg_template_install is None:
         project_definition.dpkg_template_install = []
-      elif isinstance(
-          project_definition.dpkg_template_install,
-          py2to3.STRING_TYPES):
+      elif isinstance(project_definition.dpkg_template_install, str):
         project_definition.dpkg_template_install = (
             project_definition.dpkg_template_install.split(','))
 
       if project_definition.dpkg_template_install_python3 is None:
         project_definition.dpkg_template_install_python3 = []
-      elif isinstance(
-          project_definition.dpkg_template_install_python3,
-          py2to3.STRING_TYPES):
+      elif isinstance(project_definition.dpkg_template_install_python3, str):
         project_definition.dpkg_template_install_python3 = (
             project_definition.dpkg_template_install_python3.split(','))
 
       if project_definition.rpm_build_dependencies is None:
         project_definition.rpm_build_dependencies = []
-      elif isinstance(
-          project_definition.rpm_build_dependencies, py2to3.STRING_TYPES):
+      elif isinstance(project_definition.rpm_build_dependencies, str):
         project_definition.rpm_build_dependencies = (
             project_definition.rpm_build_dependencies.split(','))
 
       if project_definition.patches is None:
         project_definition.patches = []
-      elif isinstance(project_definition.patches, py2to3.STRING_TYPES):
-        project_definition.patches = project_definition.patches.split(
-            ',')
+      elif isinstance(project_definition.patches, str):
+        project_definition.patches = project_definition.patches.split(',')
 
       if project_definition.pkg_configure_options is None:
         project_definition.pkg_configure_options = []
-      elif isinstance(
-          project_definition.pkg_configure_options, py2to3.STRING_TYPES):
+      elif isinstance(project_definition.pkg_configure_options, str):
         project_definition.pkg_configure_options = (
             project_definition.pkg_configure_options.split(','))
 
