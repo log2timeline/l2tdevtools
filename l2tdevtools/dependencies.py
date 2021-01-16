@@ -573,6 +573,7 @@ class DependencyHelper(object):
         'pyvhdi',
         'pyvmdk',
         'pyvshadow',
+        'pyvsgpt',
         'pyvslvm',
         'pywrc',
         'yara')
