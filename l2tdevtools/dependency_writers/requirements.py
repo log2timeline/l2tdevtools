@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for requirements.txt files."""
 
-from __future__ import unicode_literals
-
 import io
 
 from l2tdevtools.dependency_writers import interface

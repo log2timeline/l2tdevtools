@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
-from __future__ import unicode_literals
-
 import abc
 import logging
 import os

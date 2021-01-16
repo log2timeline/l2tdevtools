@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """Script to manage the GIFT launchpad PPA and l2tbinaries."""
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import csv
 import gzip

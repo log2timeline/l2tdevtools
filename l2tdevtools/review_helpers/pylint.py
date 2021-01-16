@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with pylint."""
 
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import os
 import subprocess
 

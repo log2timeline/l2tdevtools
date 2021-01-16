@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the netrcfile implementation."""
 
-from __future__ import unicode_literals
-
 import unittest
 
 import l2tdevtools.lib.netrcfile as netrcfile_lib

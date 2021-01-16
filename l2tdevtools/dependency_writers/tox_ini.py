@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for tox.ini files."""
 
-from __future__ import unicode_literals
-
 import io
 import os
 

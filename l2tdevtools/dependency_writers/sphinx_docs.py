@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for Sphinx build configuration and documentation files."""
 
-from __future__ import unicode_literals
-
 import io
 import os
 

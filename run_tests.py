@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Script to run the tests."""
 
-from __future__ import unicode_literals
-
 import unittest
 import sys
 

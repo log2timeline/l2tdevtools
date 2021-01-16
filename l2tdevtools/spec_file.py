@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """RPM spec file generator."""
 
-from __future__ import unicode_literals
-
 import datetime
 import logging
 import io

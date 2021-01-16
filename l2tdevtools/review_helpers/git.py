@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for interacting with git."""
 
-from __future__ import unicode_literals
-
 import os
 
 from l2tdevtools.review_helpers import cli

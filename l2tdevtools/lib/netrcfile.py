@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Implementation of a net resources file."""
-from __future__ import unicode_literals
 
 import os
 import re

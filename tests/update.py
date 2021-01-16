@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the update tool."""
 
-from __future__ import unicode_literals
-
 import os
 import sys
 import unittest

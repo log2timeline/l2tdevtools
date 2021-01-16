@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for writing files that contain dependency information."""
 
-from __future__ import unicode_literals
-
 import abc
 import io
 import string

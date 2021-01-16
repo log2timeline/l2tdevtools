@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Project definitions."""
 
-from __future__ import unicode_literals
-
 import configparser
 import logging
 import re

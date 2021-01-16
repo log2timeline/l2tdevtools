@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the pylint helper."""
 
-from __future__ import unicode_literals
-
 import unittest
 
 from l2tdevtools.review_helpers import pylint

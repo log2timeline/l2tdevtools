@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Helper for building projects from source."""
 
-from __future__ import unicode_literals
-
 import os
 
 

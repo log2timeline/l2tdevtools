@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Dpkg build files generator."""
 
-from __future__ import unicode_literals
-
 import logging
 import os
 import shutil

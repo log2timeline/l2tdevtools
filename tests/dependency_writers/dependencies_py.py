@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the dependencies.py writer."""
 
-from __future__ import unicode_literals
-
 import unittest
 
 from l2tdevtools import dependencies
