@@ -21,6 +21,7 @@ from l2tdevtools.dependency_writers import gift_copr
 from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.dependency_writers import jenkins_scripts
 from l2tdevtools.dependency_writers import linux_scripts
+from l2tdevtools.dependency_writers import pipenv
 from l2tdevtools.dependency_writers import pylint_rc
 from l2tdevtools.dependency_writers import requirements
 from l2tdevtools.dependency_writers import setup
@@ -45,9 +46,9 @@ def Main():
   dependencies_helper = dependencies.DependencyHelper()
 
   for writer_class in (
-      pylint_rc.PylintRcWriter, requirements.RequirementsWriter,
-      requirements.TestRequirementsWriter, setup.SetupCfgWriter,
-      setup.SetupPyWriter):
+      pipenv.PipenvPipfileWriter, pylint_rc.PylintRcWriter,
+      requirements.RequirementsWriter, requirements.TestRequirementsWriter,
+      setup.SetupCfgWriter, setup.SetupPyWriter):
     writer = writer_class(
         l2tdevtools_path, project_definition, dependencies_helper)
     writer.Write()

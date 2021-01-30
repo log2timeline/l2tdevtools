@@ -200,6 +200,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
     if os.path.isdir('docs'):
       packages_exclude.append('docs')
+    if os.path.isdir('examples'):
+      packages_exclude.append('examples')
 
     data_directory = None
     if os.path.isdir('data'):

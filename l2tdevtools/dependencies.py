@@ -535,6 +535,40 @@ class DependencyHelper(object):
     return self._GetInstallRequires(
         dependencies, exclude_version=exclude_version)
 
+  def GetPipenvPackages(self):
+    """Retrieves the pipenv Pipfile packages.
+
+    Returns:
+      list[str]: dependency definitions for packages in Pipfile.
+    """
+    packages = []
+    for dependency in sorted(
+        self.dependencies.values(), key=lambda dependency: dependency.name):
+      module_name = dependency.pypi_name or dependency.name
+
+      if module_name == 'efilter':
+        requires_string = '{0:s} = "==1-{1!s}"'.format(
+            module_name, dependency.minimum_version)
+        packages.append(requires_string)
+        continue
+
+      # Use the sqlite3 module provided by the standard library.
+      if module_name == 'pysqlite':
+        continue
+
+      if not dependency.minimum_version:
+        requires_string = module_name
+      elif not dependency.maximum_version:
+        requires_string = '{0:s} = ">={1!s}"'.format(
+            module_name, dependency.minimum_version)
+      else:
+        requires_string = '{0:s} = ">={1!s},<={2!s}"'.format(
+            module_name, dependency.minimum_version, dependency.maximum_version)
+
+      packages.append(requires_string)
+
+    return sorted(packages)
+
   def GetPylintRcExtensionPkgs(self):
     """Retrieves the .pylintrc extension packages.
 
