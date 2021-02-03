@@ -221,10 +221,10 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
       # Note that:
       # * class="js-navigation-open" and class="js-navigation-open " also have
       #   been seen to be used.
-      # * an additional id="{id} parameter have been seen to be used previously.
+      # * an additional data-pjax="{data}" parameter.
       expression_string = (
-          '<a class="js-navigation-open[^"]*" title="[^"]*" (|id="[^"]*" )'
-          'href="([^"]*)"')
+          '<a class="js-navigation-open[^"]*" title="[^"]*" '
+          '(|data-pjax="[^"]*" )href="([^"]*)"')
       matches = re.findall(expression_string, page_content)
 
       for _, match in matches:
