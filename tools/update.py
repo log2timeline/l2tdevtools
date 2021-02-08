@@ -60,7 +60,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
 
   _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 8), (3, 9)])
 
-  def __init__(self, download_url, branch='master'):
+  def __init__(self, download_url, branch='main'):
     """Initializes a download helper.
 
     Args:
@@ -249,7 +249,7 @@ class DependencyUpdater(object):
 
   _GIT_BRANCH_PER_TRACK = {
       'dev': 'dev',
-      'stable': 'master',
+      'stable': 'main',
       'testing': 'testing'}
 
   _PKG_NAME_PREFIXES = [
@@ -298,7 +298,7 @@ class DependencyUpdater(object):
       verbose_output (Optional[bool]): True more verbose output should be
           provided.
     """
-    branch = self._GIT_BRANCH_PER_TRACK.get(download_track, 'master')
+    branch = self._GIT_BRANCH_PER_TRACK.get(download_track, 'main')
 
     super(DependencyUpdater, self).__init__()
     self._download_directory = download_directory

@@ -83,7 +83,7 @@ class GitHubHelper(object):
         '  "title": "{0:s}",\n'
         '  "body": "{1:s}",\n'
         '  "head": "{2:s}",\n'
-        '  "base": "master",\n'
+        '  "base": "main",\n'
         '  "maintainer_can_modify": {3:s}\n'
         '}}\n').format(title, body, origin, maintainer_can_modify)
 

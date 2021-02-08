@@ -18,7 +18,7 @@ class DownloadHelperTest(test_lib.BaseTestCase):
   def setUp(self):
     """Sets up a test case."""
     self._download_url = (
-        'https://raw.githubusercontent.com/log2timeline/l2tdevtools/master/'
+        'https://raw.githubusercontent.com/log2timeline/l2tdevtools/main/'
         '{0:s}').format(self._FILENAME)
 
   def testDownloadPageContent(self):

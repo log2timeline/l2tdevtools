@@ -16,7 +16,7 @@ class ReviewHelperTest(test_lib.BaseTestCase):
     """Tests that the helper can be initialized."""
     helper = review.ReviewHelper(
         'test', '.', 'https://github.com/log2timeline/l2tdevtools.git',
-        'import', 'upstream/master')
+        'import', 'upstream/main')
     self.assertIsNotNone(helper)
 
   # TODO: test CheckLocalGitState.
