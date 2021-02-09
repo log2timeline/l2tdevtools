@@ -114,16 +114,16 @@ class GitHelper(cli.CLIHelper):
       bool: True if the git repo is synchronized with upstream.
     """
     # Fetch the entire upstream repo information not only that of
-    # the master branch. Otherwise the information about the current
+    # the main branch. Otherwise the information about the current
     # upstream HEAD is not updated.
     exit_code, _, _ = self.RunCommand('git fetch upstream')
     if exit_code != 0:
       return False
 
-    # The result of "git log HEAD..upstream/master --oneline" should be empty
+    # The result of "git log HEAD..upstream/main --oneline" should be empty
     # if the git repo is synchronized with upstream.
     exit_code, output, _ = self.RunCommand(
-        'git log HEAD..upstream/master --oneline')
+        'git log HEAD..upstream/main --oneline')
     return exit_code == 0 and not output
 
   def DropUncommittedChanges(self):
@@ -152,7 +152,7 @@ class GitHelper(cli.CLIHelper):
     """Retrieves the changed files.
 
     Args:
-      diffbase (Optional[str]): git diffbase, for example "upstream/master".
+      diffbase (Optional[str]): git diffbase, for example "upstream/main".
 
     Returns:
       list[str]: names of the changed files.
@@ -177,7 +177,7 @@ class GitHelper(cli.CLIHelper):
     * setup.py and review/lib/upload.py
 
     Args:
-      diffbase (Optional[str]): git diffbase, for example "upstream/master".
+      diffbase (Optional[str]): git diffbase, for example "upstream/main".
 
     Returns:
       list[str]: names of the changed Python files.
@@ -269,7 +269,7 @@ class GitHelper(cli.CLIHelper):
     Args:
       branch (str): name of the feature branch.
     """
-    if branch == 'master':
+    if branch == 'main':
       return
 
     self.RunCommand('git push origin --delete {0:s}'.format(branch))
@@ -285,7 +285,7 @@ class GitHelper(cli.CLIHelper):
     if exit_code != 0:
       return False
 
-    exit_code, _, _ = self.RunCommand('git pull --no-edit origin master')
+    exit_code, _, _ = self.RunCommand('git pull --no-edit origin main')
 
     return exit_code == 0
 
@@ -300,7 +300,7 @@ class GitHelper(cli.CLIHelper):
       return False
 
     exit_code, _, _ = self.RunCommand(
-        'git pull --no-edit --rebase upstream master')
+        'git pull --no-edit --rebase upstream main')
     if exit_code != 0:
       return False
 
@@ -309,10 +309,10 @@ class GitHelper(cli.CLIHelper):
     return exit_code == 0
 
   def SwitchToMasterBranch(self):
-    """Switches git to the master branch.
+    """Switches git to the main branch.
 
     Returns:
-      bool: True if the git repository has switched to the master branch.
+      bool: True if the git repository has switched to the main branch.
     """
-    exit_code, _, _ = self.RunCommand('git checkout master')
+    exit_code, _, _ = self.RunCommand('git checkout main')
     return exit_code == 0

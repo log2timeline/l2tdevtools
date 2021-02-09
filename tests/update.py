@@ -39,7 +39,7 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
       self.assertIsNotNone(package_download_urls)
 
       expected_url = (
-          'https://github.com/log2timeline/l2tbinaries/raw/master/win32/'
+          'https://github.com/log2timeline/l2tbinaries/raw/main/win32/'
           '{0:s}-{1:s}.1.win32.msi').format(
               self._PROJECT_NAME, self._PROJECT_VERSION)
       self.assertIn(expected_url, package_download_urls)

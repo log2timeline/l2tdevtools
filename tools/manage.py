@@ -168,7 +168,7 @@ class GithubRepoManager(object):
       return None
 
     if track == 'stable':
-      branch = 'master'
+      branch = 'main'
     else:
       branch = track
 

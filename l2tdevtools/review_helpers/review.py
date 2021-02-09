@@ -109,20 +109,20 @@ class ReviewHelper(object):
     if self._github_organization in ('ForensicArtifacts', 'log2timeline'):
       self._active_branch = self._git_helper.GetActiveBranch()
       if self._command in ('create-pr', 'create_pr'):
-        if self._active_branch == 'master':
-          print('{0:s} aborted - active branch is master.'.format(
+        if self._active_branch == 'main':
+          print('{0:s} aborted - active branch is main.'.format(
               self._command.title()))
           return False
 
       elif self._command == 'close':
-        if self._feature_branch == 'master':
-          print('{0:s} aborted - feature branch cannot be master.'.format(
+        if self._feature_branch == 'main':
+          print('{0:s} aborted - feature branch cannot be main.'.format(
               self._command.title()))
           return False
 
-        if self._active_branch != 'master':
+        if self._active_branch != 'main':
           self._git_helper.SwitchToMasterBranch()
-          self._active_branch = 'master'
+          self._active_branch = 'main'
 
     return True
   # yapf: enable
@@ -139,7 +139,7 @@ class ReviewHelper(object):
         if not self._git_helper.SynchronizeWithUpstream():
           print((
               '{0:s} aborted - unable to synchronize with '
-              'upstream/master.').format(self._command.title()))
+              'upstream/main.').format(self._command.title()))
           return False
 
       elif self._command in ('create-pr', 'create_pr'):
@@ -147,7 +147,7 @@ class ReviewHelper(object):
           if not self._git_helper.SynchronizeWithUpstream():
             print((
                 '{0:s} aborted - unable to synchronize with '
-                'upstream/master.').format(self._command.title()))
+                'upstream/main.').format(self._command.title()))
             return False
 
           force_push = True
@@ -168,7 +168,7 @@ class ReviewHelper(object):
         if not self._git_helper.SynchronizeWithOrigin():
           print((
               '{0:s} aborted - unable to synchronize with '
-              'origin/master.').format(self._command.title()))
+              'origin/main.').format(self._command.title()))
           return False
 
     return True
@@ -343,7 +343,7 @@ class ReviewHelper(object):
     if self._all_files:
       diffbase = None
     elif self._command == 'merge':
-      diffbase = 'origin/master'
+      diffbase = 'origin/main'
     else:
       diffbase = self._diffbase
 
@@ -383,7 +383,7 @@ class ReviewHelper(object):
     if self._all_files:
       diffbase = None
     elif self._command == 'merge':
-      diffbase = 'origin/master'
+      diffbase = 'origin/main'
     else:
       diffbase = self._diffbase
 

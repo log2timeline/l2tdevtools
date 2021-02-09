@@ -32,8 +32,8 @@ def Main():
 
   argument_parser.add_argument(
       '--diffbase', dest='diffbase', action='store', type=str,
-      metavar='DIFFBASE', default='upstream/master', help=(
-          'The diffbase the default is upstream/master. This options is used '
+      metavar='DIFFBASE', default='upstream/main', help=(
+          'The diffbase the default is upstream/main. This options is used '
           'to indicate to what "base" the code changes are relative to and '
           'can be used to "chain" code reviews.'))
 
