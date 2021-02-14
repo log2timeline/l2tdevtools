@@ -54,7 +54,7 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
   # pylint: disable=protected-access
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20201219'
+  _PROJECT_VERSION = '20210213'
 
   def testGetAvailablePackages(self):
     """Tests the _GetAvailablePackages function."""
