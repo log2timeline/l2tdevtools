@@ -121,18 +121,20 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     if not matches:
       # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/{version}.tar.gz
+      # /{organization}/{repository}/archive/refs/tags/{version}.tar.gz
       expression_string = (
-          '/{0:s}/{1:s}/archive/({2:s})[.]tar[.]gz[^.]').format(
+          '/{0:s}/{1:s}/archive/refs/tags/({2:s})[.]tar[.]gz[^.]').format(
               self._organization, self._repository,
               '|'.join(self._VERSION_EXPRESSIONS))
       matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
       # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/{project name}-{version}.tar.gz
+      # /{organization}/{repository}/archive/refs/tags/
+      # {project name}-{version}.tar.gz
       expression_string = (
-          '/{0:s}/{1:s}/archive/{2:s}[-]({3:s})[.]tar[.]gz[^.]').format(
+          '/{0:s}/{1:s}/archive/refs/tags/'
+          '{2:s}[-]({3:s})[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               '|'.join(self._VERSION_EXPRESSIONS))
       matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
@@ -192,9 +194,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       return None
 
     # The format of the project archive download URL is:
-    # /{organization}/{repository}/archive/{version}.tar.gz
+    # /{organization}/{repository}/archive/refs/tags/{version}.tar.gz
     expression_string = (
-        '/{0:s}/{1:s}/archive/{2!s}[.]tar[.]gz[^.]').format(
+        '/{0:s}/{1:s}/archive/refs/tags/{2!s}[.]tar[.]gz[^.]').format(
             self._organization, self._repository, project_version)
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
@@ -203,9 +205,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     if len(matches) != 1:
       # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/release-{version}.tar.gz
+      # /{organization}/{repository}/archive/refs/tags/release-{version}.tar.gz
       expression_string = (
-          '/{0:s}/{1:s}/archive/release-{2!s}[.]tar[.]gz[^.]').format(
+          '/{0:s}/{1:s}/archive/refs/tags/release-{2!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_version)
       matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
@@ -214,9 +216,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     if len(matches) != 1:
       # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/v{version}.tar.gz
+      # /{organization}/{repository}/archive/refs/tags/v{version}.tar.gz
       expression_string = (
-          '/{0:s}/{1:s}/archive/v{2!s}[.]tar[.]gz[^.]').format(
+          '/{0:s}/{1:s}/archive/refs/tags/v{2!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_version)
       matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
@@ -225,9 +227,10 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     if len(matches) != 1:
       # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/{project name}-{version}.tar.gz
+      # /{organization}/{repository}/archive/refs/tags/
+      # {project name}-{version}.tar.gz
       expression_string = (
-          '/{0:s}/{1:s}/archive/{2:s}[-]{3!s}[.]tar[.]gz[^.]').format(
+          '/{0:s}/{1:s}/archive/refs/tags/{2:s}[-]{3!s}[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_name,
               project_version)
       matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
@@ -237,9 +240,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     if len(matches) != 1:
       # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/{version}-pre.tar.gz
+      # /{organization}/{repository}/archive/refs/tags/{version}-pre.tar.gz
       expression_string = (
-          '/{0:s}/{1:s}/archive/{2!s}-pre[.]tar[.]gz[^.]').format(
+          '/{0:s}/{1:s}/archive/refs/tags/{2!s}-pre[.]tar[.]gz[^.]').format(
               self._organization, self._repository, project_version)
       matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 

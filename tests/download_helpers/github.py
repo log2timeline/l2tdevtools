@@ -69,7 +69,7 @@ class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        'https://github.com/{0:s}/{1:s}/archive/{2:s}.tar.gz').format(
+        'https://github.com/{0:s}/{1:s}/archive/refs/tags/{2:s}.tar.gz').format(
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_VERSION)
 
