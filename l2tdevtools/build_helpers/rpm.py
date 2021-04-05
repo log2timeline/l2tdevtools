@@ -40,6 +40,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
       'bzip2': ['bzip2-devel'],
       'fuse': ['fuse-devel'],
       'libcrypto': ['openssl-devel'],
+      'liblzma': ['xz-devel'],
       'pytest-runner': ['python3-pytest-runner'],
       'sqlite': ['sqlite-devel'],
       'zeromq': ['libzmq3-devel'],
@@ -252,7 +253,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
 
     for package_name in self._project_definition.build_dependencies:
       dependencies = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(
-          package_name, package_name)
+          package_name, [package_name])
       for dependency in dependencies:
         if not self._CheckIsInstalled(dependency):
           missing_packages.append(dependency)
