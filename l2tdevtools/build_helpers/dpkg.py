@@ -54,6 +54,7 @@ class DPKGBuildHelper(interface.BuildHelper):
       'bzip2': 'libbz2-dev',
       'fuse': 'libfuse-dev',
       'libcrypto': 'libssl-dev',
+      'liblzma': 'liblzma-dev',
       'sqlite': 'libsqlite3-dev',
       'zeromq': 'libzmq3-dev',
       'zlib': 'zlib1g-dev'
