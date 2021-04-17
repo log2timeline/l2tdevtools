@@ -8,7 +8,7 @@ export CRYPTOGRAPHY_DONT_BUILD_RUST=1
 .PHONY: override_dh_auto_clean
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -f src/rust/target
+	rm -rf src/rust/target
 
 .PHONY: override_dh_auto_test
 override_dh_auto_test:
