@@ -430,16 +430,22 @@ class DPKGBuildFilesGenerator(object):
     Args:
       dpkg_path (str): path to the dpkg files.
     """
+    package_name = self._GetPackageName(self._project_definition)
+
+    # Python modules names contain "_" instead of "-"
+    package_name = package_name.replace('-', '_')
+
+    template_values = {'package_name': package_name}
+
+    if self._project_definition.dpkg_template_install:
+      for template_file in self._project_definition.dpkg_template_install:
+        output_filename = os.path.join(dpkg_path, template_file)
+        self._GenerateFile(
+            template_file, None, template_values, output_filename)
+
     # Generate install files if there is more than 1 package.
-    if (self._build_configuration and
-        self._build_configuration.has_bin_directory):
-      package_name = self._GetPackageName(self._project_definition)
-
-      # Python modules names contain "_" instead of "-"
-      package_name = package_name.replace('-', '_')
-
-      template_values = {'package_name': package_name}
-
+    elif (self._build_configuration and
+          self._build_configuration.has_bin_directory):
       self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
 
       install_package_name = self._GetPackageName(self._project_definition)
