@@ -9,7 +9,7 @@
 
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:
-	dh_auto_configure -- --disable-java --without-afflib --without-libewf --without-libpq --without-libvhdi --without-libvmdk CFLAGS="-g"
+	dh_auto_configure -- --disable-java --without-afflib --without-libewf --without-libvhdi --without-libvmdk CFLAGS="-g"
 
 .PHONY: override_dh_missing
 override_dh_missing:
