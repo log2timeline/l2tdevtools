@@ -8,10 +8,10 @@ Summary: Python client for Elasticsearch
 Name: %{{name}}
 Version: %{{version}}
 Release: %{{release}}
-Source0: %{{name}}-%{{unmangled_version}}.tar.gz
+Source0: elasticsearch-%{{unmangled_version}}.tar.gz
 License: Apache License, Version 2.0
 Group: Development/Libraries
-BuildRoot: %{{_tmppath}}/%{{name}}-%{{version}}-%{{release}}-buildroot
+BuildRoot: %{{_tmppath}}/elasticsearch-%{{version}}-%{{release}}-buildroot
 Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Honza Král <honza.kral@gmail.com>
@@ -29,7 +29,7 @@ Requires: python3-urllib3
 Python client for Elasticsearch.
 
 %prep
-%autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
+%autosetup -n elasticsearch-%{{unmangled_version}}
 
 %build
 %py3_build
