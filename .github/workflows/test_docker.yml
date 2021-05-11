@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['32', '33']
+        version: ['32', '33', '34']
     container:
       image: registry.fedoraproject.org/fedora:${{ matrix.version }}
     steps:
@@ -17,7 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         dnf copr -y enable @gift/dev
-        dnf install -y python3 python3-mock python3-pbr python3-pyyaml python3-setuptools python3-six
+        dnf install -y python3 python3-mock python3-pbr python3-pyyaml python3-setuptools python3-six python3-wheel
     - name: Run tests
       env:
         LANG: C.utf8
