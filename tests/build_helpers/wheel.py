@@ -170,6 +170,11 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
       directory_entries = os.listdir(temp_directory)
       self.assertIn('build.log', directory_entries)
 
+      if len(directory_entries) < 4:
+        build_log_path = os.path.join(temp_directory, 'build.log')
+        with open(build_log_path, 'rt') as file_object:
+          print(''.join(file_object.readlines()))
+
       self.assertEqual(len(directory_entries), 4)
 
 
@@ -216,6 +221,11 @@ class SetupPyWheelBuildHelperTest(shared_test_lib.BaseTestCase):
 
       directory_entries = os.listdir(temp_directory)
       self.assertIn('build.log', directory_entries)
+
+      if len(directory_entries) < 4:
+        build_log_path = os.path.join(temp_directory, 'build.log')
+        with open(build_log_path, 'rt') as file_object:
+          print(''.join(file_object.readlines()))
 
       self.assertEqual(len(directory_entries), 4)
       self.assertIn(self._TEST_WHEEL_FILENAME, directory_entries)
