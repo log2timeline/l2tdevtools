@@ -99,7 +99,7 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   _PROJECT_ORGANIZATION = 'libyal'
   _PROJECT_NAME = 'libevt'
   _PROJECT_STATUS = 'alpha'
-  _PROJECT_VERSION = '20200926'
+  _PROJECT_VERSION = '20210424'
 
   @classmethod
   def setUpClass(cls):
@@ -174,7 +174,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
   _PROJECT_ORGANIZATION = 'log2timeline'
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20210213'
+  _PROJECT_VERSION = '20210501'
 
   @classmethod
   def setUpClass(cls):
