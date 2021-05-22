@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the download helper object implementations."""
 
-import os
 import shlex
 import subprocess
 import unittest
@@ -12,9 +11,6 @@ from l2tdevtools.download_helpers import github
 from tests import test_lib
 
 
-@unittest.skipIf(
-    os.environ.get('TRAVIS_OS_NAME') == 'osx',
-    'TLS 1.2 not supported by macOS on Travis')
 class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the docopt GitHub releases download helper."""
 
@@ -87,9 +83,6 @@ class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
-@unittest.skipIf(
-    os.environ.get('TRAVIS_OS_NAME') == 'osx',
-    'TLS 1.2 not supported by macOS on Travis')
 class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the libyal GitHub releases download helper."""
 
@@ -163,9 +156,6 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     self.assertEqual(project_identifier, expected_project_identifier)
 
 
-@unittest.skipIf(
-    os.environ.get('TRAVIS_OS_NAME') == 'osx',
-    'TLS 1.2 not supported by macOS on Travis')
 class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the log2timeline GitHub releases download helper."""
 

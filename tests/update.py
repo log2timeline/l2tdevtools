@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the update tool."""
 
-import os
 import sys
 import unittest
 
@@ -11,9 +10,6 @@ from tools import update
 from tests import test_lib
 
 
-@unittest.skipIf(
-    os.environ.get('TRAVIS_OS_NAME') == 'osx',
-    'TLS 1.2 not supported by macOS on Travis')
 class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the GitHub repo download helper class."""
 
@@ -45,9 +41,6 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
       self.assertIn(expected_url, package_download_urls)
 
 
-@unittest.skipIf(
-    os.environ.get('TRAVIS_OS_NAME') == 'osx',
-    'TLS 1.2 not supported by macOS on Travis')
 class DependencyUpdaterTest(test_lib.BaseTestCase):
   """Tests for the dependency updater class."""
 

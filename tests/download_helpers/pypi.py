@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the download helper object implementations."""
 
-import os
 import re
 import shlex
 import subprocess
@@ -13,9 +12,6 @@ from l2tdevtools.download_helpers import pypi
 from tests import test_lib
 
 
-@unittest.skipIf(
-    os.environ.get('TRAVIS_OS_NAME') == 'osx',
-    'Test is flaky for macOS on Travis')
 class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   """Tests for the PyPi download helper."""
 
@@ -23,8 +19,8 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   _GIT_URL = 'https://github.com/log2timeline/dfvfs.git'
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20210501'
-  _PYPI_VERSION = '20210501'
+  _PROJECT_VERSION = '20210522'
+  _PYPI_VERSION = '20210522'
 
   @classmethod
   def setUpClass(cls):
