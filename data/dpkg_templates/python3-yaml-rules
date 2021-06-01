@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --buildsystem=pybuild --with=python3
+
+.PHONY: override_dh_auto_clean
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f yaml/_yaml.c
+
+.PHONY: override_dh_auto_test
+override_dh_auto_test:
+
