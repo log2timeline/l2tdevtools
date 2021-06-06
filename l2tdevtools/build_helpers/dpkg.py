@@ -785,6 +785,9 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
       DPKGBuildConfiguration: dpkg build configuration or None if the build
           configuration could not be determined.
     """
+    if not os.path.isfile(os.path.join(source_directory, 'setup.py')):
+      return None
+
     installroot_path = os.path.join(source_directory, 'installroot')
 
     command = (
