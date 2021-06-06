@@ -3,7 +3,7 @@
 
 
 # The default Fedora distribution
-DEFAULT_FEDORA_DISTRIBUTION = '32'
+DEFAULT_FEDORA_DISTRIBUTION = '34'
 
 # The default Ubuntu distribution
 DEFAULT_UBUNTU_DISTRIBUTION = 'bionic'
