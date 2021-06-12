@@ -49,6 +49,7 @@ class GitHubActionsTestToxYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies = self._GetDPKGPythonDependencies()
     test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
     dpkg_dependencies.extend(test_dependencies)
+    dpkg_dependencies.append('python3-pip')
 
     template_mappings = {
         'dpkg_dependencies': ' '.join(sorted(set(dpkg_dependencies)))}
