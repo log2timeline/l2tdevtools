@@ -28,7 +28,7 @@ class ReviewHelper(object):
       'create-pr', 'create_pr', 'merge', 'lint', 'lint-test', 'lint_test'])
 
   def __init__(
-      self, command, project_path, github_origin, feature_branch, diffbase,
+      self, command, project_path, github_origin, feature_branch,
       all_files=False, no_browser=False, no_confirm=False,
       no_edit=False):  # yapf: disable
     """Initializes a review helper.
@@ -38,7 +38,6 @@ class ReviewHelper(object):
       project_path (str): path to the project being reviewed.
       github_origin (str): GitHub origin.
       feature_branch (str): feature branch.
-      diffbase (str): diffbase.
       all_files (Optional[bool]): True if the command should apply to all
           files. Currently this only affects the lint command.
       no_browser (Optional[bool]): True if the functionality to use the
@@ -52,7 +51,6 @@ class ReviewHelper(object):
     self._active_branch = None
     self._all_files = all_files
     self._command = command
-    self._diffbase = diffbase
     self._feature_branch = feature_branch
     self._git_helper = None
     self._git_repo_url = None
@@ -342,10 +340,8 @@ class ReviewHelper(object):
 
     if self._all_files:
       diffbase = None
-    elif self._command == 'merge':
-      diffbase = 'origin/main'
     else:
-      diffbase = self._diffbase
+      diffbase = 'origin/main'
 
     changed_python_files = self._git_helper.GetChangedPythonFiles(
         diffbase=diffbase)
@@ -382,10 +378,8 @@ class ReviewHelper(object):
 
     if self._all_files:
       diffbase = None
-    elif self._command == 'merge':
-      diffbase = 'origin/main'
     else:
-      diffbase = self._diffbase
+      diffbase = 'origin/main'
 
     changed_python_files = self._git_helper.GetChangedPythonFiles(
         diffbase=diffbase)

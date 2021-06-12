@@ -31,13 +31,6 @@ def Main():
           'command.'))
 
   argument_parser.add_argument(
-      '--diffbase', dest='diffbase', action='store', type=str,
-      metavar='DIFFBASE', default='upstream/main', help=(
-          'The diffbase the default is upstream/main. This options is used '
-          'to indicate to what "base" the code changes are relative to and '
-          'can be used to "chain" code reviews.'))
-
-  argument_parser.add_argument(
       '--nobrowser', '--no-browser', '--no_browser', dest='no_browser',
       action='store_true', default=False, help=(
           'Disable the functionality to use the webbrowser to get the OAuth '
@@ -168,7 +161,6 @@ def Main():
       options.project_path,
       github_origin,
       feature_branch,
-      options.diffbase,
       all_files=options.all_files,
       no_browser=options.no_browser,
       no_confirm=options.no_confirm,
