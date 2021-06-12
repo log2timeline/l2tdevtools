@@ -18,7 +18,6 @@ def Main():
   argument_parser = argparse.ArgumentParser(
       description='Script to manage code reviews.')
 
-  # yapf: disable
   argument_parser.add_argument(
       '--project-path', '--project_path', '-p', dest='project_path',
       action='store', default=os.getcwd(), help=(
@@ -70,43 +69,12 @@ def Main():
   commands_parser.add_parser('create-pr')
   commands_parser.add_parser('create_pr')
 
-  merge_command_parser = commands_parser.add_parser('merge')
-
-  # TODO: add this to help output.
-  merge_command_parser.add_argument(
-      'github_origin', action='store',
-      metavar='GITHUB_ORIGIN', default=None,
-      help='the github origin to merged e.g. username:feature.')
-
-  merge_edit_command_parser = commands_parser.add_parser('merge-edit')
-
-  # TODO: add this to help output.
-  merge_edit_command_parser.add_argument(
-      'github_origin', action='store',
-      metavar='GITHUB_ORIGIN', default=None,
-      help='the github origin to merged e.g. username:feature.')
-
-  merge_edit_command_parser = commands_parser.add_parser('merge_edit')
-
-  # TODO: add this to help output.
-  merge_edit_command_parser.add_argument(
-      'github_origin', action='store',
-      metavar='GITHUB_ORIGIN', default=None,
-      help='the github origin to merged e.g. username:feature.')
-
   commands_parser.add_parser('lint')
 
   commands_parser.add_parser('lint-test')
   commands_parser.add_parser('lint_test')
 
-  # yapf: enable
-
-  # TODO: add submit option?
-
   commands_parser.add_parser('test')
-
-  # TODO: add dry-run option to run merge without commit.
-  # useful to test pending CLs.
 
   commands_parser.add_parser('update-authors')
   commands_parser.add_parser('update_authors')
@@ -130,18 +98,10 @@ def Main():
     elif ':' in str(feature_branch):
       _, _, feature_branch = feature_branch.rpartition(':')
 
-  if options.command in ('merge', 'merge-edit', 'merge_edit'):
-    github_origin = getattr(options, 'github_origin', None)
-    if not github_origin:
-      print('Github origin value is missing.')
-      print_help_on_error = True
-
-  # yapf: disable
   if options.offline and options.command not in (
       'lint', 'lint-test', 'lint_test', 'test'):
     print('Cannot run: {0:s} in offline mode.'.format(options.command))
     print_help_on_error = True
-  # yapf: enable
 
   if print_help_on_error:
     print('')
@@ -153,7 +113,7 @@ def Main():
   netrc_path = os.path.join(home_path, '.netrc')
   if not os.path.exists(netrc_path):
     print('{0:s} aborted - unable to find .netrc.'.format(
-        options.command.title()))  # yapf: disable
+        options.command.title()))
     return False
 
   review_helper = review.ReviewHelper(
@@ -175,14 +135,6 @@ def Main():
   if not options.offline and not review_helper.CheckRemoteGitState():
     return False
 
-  if options.command == 'merge':
-    # TODO: merge disabled until re-implementation.
-    return False
-
-  if options.command in ('merge', 'merge-edit', 'merge_edit'):
-    if not review_helper.PullChangesFromFork():
-      return False
-
   if not review_helper.Lint():
     return False
 
@@ -202,10 +154,6 @@ def Main():
 
   elif options.command in ('lint', 'lint-test', 'lint_test', 'test'):
     result = True
-
-  elif options.command == 'merge':
-    # result = review_helper.Merge(pull_request_issue_number)
-    pass
 
   elif options.command in ('update-authors', 'update_authors'):
     result = review_helper.UpdateAuthors()

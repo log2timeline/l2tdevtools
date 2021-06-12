@@ -25,12 +25,12 @@ class ReviewHelper(object):
 
   # Commands that trigger inspection (pylint, yapf) of changed files.
   _CODE_INSPECTION_COMMANDS = frozenset([
-      'create-pr', 'create_pr', 'merge', 'lint', 'lint-test', 'lint_test'])
+      'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test'])
 
   def __init__(
       self, command, project_path, github_origin, feature_branch,
       all_files=False, no_browser=False, no_confirm=False,
-      no_edit=False):  # yapf: disable
+      no_edit=False):
     """Initializes a review helper.
 
     Args:
@@ -60,8 +60,6 @@ class ReviewHelper(object):
     self._fork_feature_branch = None
     self._fork_username = None
     self._maintainer = None
-    self._merge_author = None
-    self._merge_description = None
     self._no_browser = no_browser
     self._no_confirm = no_confirm
     self._no_edit = no_edit
@@ -73,7 +71,6 @@ class ReviewHelper(object):
       self._fork_username, _, self._fork_feature_branch = (
           self._github_origin.partition(':'))
 
-  # yapf: disable
   def CheckLocalGitState(self):
     """Checks the state of the local git repository.
 
@@ -87,12 +84,6 @@ class ReviewHelper(object):
           print('{0:s} aborted - missing project upstream.'.format(
               self._command.title()))
           print('Run: git remote add upstream {0:s}'.format(self._git_repo_url))
-          return False
-
-      elif self._command == 'merge':
-        if not self._git_helper.CheckHasProjectOrigin():
-          print('{0:s} aborted - missing project origin.'.format(
-              self._command.title()))
           return False
 
     if self._command not in (
@@ -123,9 +114,7 @@ class ReviewHelper(object):
           self._active_branch = 'main'
 
     return True
-  # yapf: enable
 
-  # yapf: disable
   def CheckRemoteGitState(self):
     """Checks the state of the remote git repository.
 
@@ -162,15 +151,7 @@ class ReviewHelper(object):
       elif self._command in ('lint', 'lint-test', 'lint_test'):
         self._git_helper.CheckSynchronizedWithUpstream()
 
-      elif self._command == 'merge':
-        if not self._git_helper.SynchronizeWithOrigin():
-          print((
-              '{0:s} aborted - unable to synchronize with '
-              'origin/main.').format(self._command.title()))
-          return False
-
     return True
-  # yapf: enable
 
   def Close(self):
     """Closes a review.
@@ -291,7 +272,7 @@ class ReviewHelper(object):
     self._project_name = self._project_helper.project_name
     if not self._project_name:
       print('{0:s} aborted - unable to determine project name.'.format(
-          self._command.title()))  # yapf: disable
+          self._command.title()))
       return False
 
     project_definition = self._project_helper.ReadDefinitionFile()
@@ -351,13 +332,10 @@ class ReviewHelper(object):
           self._command.title())
       print(message)
 
-      if self._command == 'merge':
-        self._git_helper.DropUncommittedChanges()
       return False
 
     return True
 
-  # yapf: disable
   def Lint(self):
     """Lints a review.
 
@@ -389,25 +367,9 @@ class ReviewHelper(object):
       print('{0:s} aborted - unable to pass linter.'.format(
           self._command.title()))
 
-      if self._command == 'merge':
-        self._git_helper.DropUncommittedChanges()
       return False
 
     return True
-  # yapf: enable
-
-  def Merge(self, pull_request_issue_number):
-    """Merges a review.
-
-    Args:
-      pull_request_issue_number (int|str): GitHub pull request issue number.
-
-    Returns:
-      bool: True if the merge was successful.
-    """
-    # TODO: re-implement.
-    _ = pull_request_issue_number
-    return False
 
   def PullChangesFromFork(self):
     """Pulls changes from a feature branch on a fork.
@@ -418,17 +380,13 @@ class ReviewHelper(object):
     fork_git_repo_url = self._github_helper.GetForkGitRepoUrl(
         self._fork_username)
 
-    # yapf: disable
     if not self._git_helper.PullFromFork(
         fork_git_repo_url, self._fork_feature_branch):
       print('{0:s} aborted - unable to pull changes from fork.'.format(
           self._command.title()))
       return False
-    # yapf: enable
 
     return True
-
-  # yapf: disable
 
   def Test(self):
     """Tests a review.
@@ -440,7 +398,7 @@ class ReviewHelper(object):
       return True
 
     if self._command not in (
-        'create-pr', 'create_pr', 'lint-test', 'lint_test', 'merge', 'test'):
+        'create-pr', 'create_pr', 'lint-test', 'lint_test', 'test'):
       return True
 
     # TODO: determine why this alters the behavior of argparse.
@@ -451,13 +409,9 @@ class ReviewHelper(object):
       print('{0:s} aborted - unable to pass review.'.format(
           self._command.title()))
 
-      if self._command == 'merge':
-        self._git_helper.DropUncommittedChanges()
       return False
 
     return True
-
-  # yapf: enable
 
   def UpdateAuthors(self):
     """Updates the authors.
