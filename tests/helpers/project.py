@@ -30,10 +30,6 @@ class ProjectHelperTest(test_lib.BaseTestCase):
     self.assertIn(reviewer, project.ProjectHelper._REVIEWERS_DEFAULT)
 
   # TODO: add test for GetReviewerUsername
-  # TODO: add test for GetVersion
-  # TODO: add test for UpdateDPKGChangelogFile
-  # TODO: add test for UpdateAuthorsFile
-  # TODO: add test for UpdateVersionFile
 
 
 if __name__ == '__main__':
