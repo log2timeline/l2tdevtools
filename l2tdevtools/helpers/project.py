@@ -4,7 +4,6 @@
 import logging
 import os
 import random
-import time
 
 from l2tdevtools import project_config
 from l2tdevtools.review_helpers import cli
@@ -28,9 +27,7 @@ class ProjectHelper(cli.CLIHelper):
       '#',
       '# See python fnmatch module documentation for more information.',
       '',
-      'Google Inc. (*@google.com)'] # yapf: disable
-
-  # yapf: disable
+      'Google Inc. (*@google.com)']
 
   _REVIEWERS_PER_PROJECT = {
       'dfdatetime': frozenset([
@@ -60,8 +57,6 @@ class ProjectHelper(cli.CLIHelper):
   _REVIEWERS_DEFAULT = frozenset([
       'joachimmetz',
       'Onager'])
-
-  # yapf: enable
 
   SUPPORTED_PROJECTS = frozenset([
       'acstore',
@@ -179,27 +174,6 @@ class ProjectHelper(cli.CLIHelper):
 
     return reviewers[0]
 
-  def GetVersion(self):
-    """Retrieves the project version from the version file.
-
-    Returns:
-      str: project version or None if not available.
-    """
-    version_file_contents = self._ReadFileContents(self.version_file_path)
-    if not version_file_contents:
-      return None
-
-    # The version is formatted as:
-    # __version__ = 'VERSION'
-    version_line_prefix = '__version__ = \''
-
-    lines = version_file_contents.split('\n')
-    for line in lines:
-      if line.startswith(version_line_prefix):
-        return line[len(version_line_prefix):-1]
-
-    return None
-
   def ReadDefinitionFile(self):
     """Reads the project definitions file (project_name.ini).
 
@@ -214,129 +188,3 @@ class ProjectHelper(cli.CLIHelper):
         self._project_definition = project_reader.Read(file_object)
 
     return self._project_definition
-
-  def UpdateAuthorsFile(self):
-    """Updates the AUTHORS file.
-
-    Returns:
-      bool: True if the AUTHORS file update was successful.
-    """
-    exit_code, output, _ = self.RunCommand('git log --format="%aN (%aE)"')
-    if exit_code != 0:
-      return False
-
-    lines = output.split(b'\n')
-
-    # Reverse the lines since we want the oldest commits first.
-    lines.reverse()
-
-    authors_by_commit = []
-    authors = {}
-    for author in lines:
-      name, _, email_address = author[:-1].rpartition('(')
-      if email_address in authors:
-        if name != authors[email_address]:
-          logging.warning(
-              'Detected name mismatch for author: {0:d}.'.format(
-                  email_address))
-        continue
-
-      authors[email_address] = name
-      authors_by_commit.append(author)
-
-    file_content = []
-    file_content.extend(self._AUTHORS_FILE_HEADER)
-    file_content.extend(authors_by_commit)
-
-    file_content = '\n'.join(file_content)
-    file_content = file_content.encode('utf-8')
-
-    with open('AUTHORS', 'wb') as file_object:
-      file_object.write(file_content)
-
-    return True
-
-  def UpdateDPKGChangelogFile(self):
-    """Updates the dpkg changelog file.
-
-    Returns:
-      bool: True if the dpkg changelog file was updated or if the dpkg
-          changelog file does not exist.
-    """
-    project_definition = self.ReadDefinitionFile()
-
-    project_version = self.GetVersion()
-
-    dpkg_changelog_path = os.path.join('config', 'dpkg', 'changelog')
-    if not os.path.exists(dpkg_changelog_path):
-      return True
-
-    dpkg_maintainter = project_definition.maintainer
-    if not dpkg_maintainter:
-      dpkg_maintainter = 'Log2Timeline <log2timeline-dev@googlegroups.com>'
-
-    dpkg_date = time.strftime('%a, %d %b %Y %H:%M:%S %z')
-    dpkg_changelog_content = '\n'.join([
-        '{0:s} ({1:s}-1) unstable; urgency=low'.format(
-            self.project_name, project_version),
-        '',
-        '  * Auto-generated',
-        '',
-        ' -- {0:s}  {1:s}'.format(dpkg_maintainter, dpkg_date)]) #yapf: disable
-
-    try:
-      dpkg_changelog_content = dpkg_changelog_content.encode('utf-8')
-    except UnicodeEncodeError as exception:
-      logging.error(
-          'Unable to write dpkg changelog file with error: {0!s}'.format(
-              exception))
-      return False
-
-    try:
-      with open(dpkg_changelog_path, 'wb') as file_object:
-        file_object.write(dpkg_changelog_content)
-    except IOError as exception:
-      logging.error(
-          'Unable to write dpkg changelog file with error: {0!s}'.format(
-              exception))
-      return False
-
-    return True
-
-  def UpdateVersionFile(self):
-    """Updates the version file.
-
-    Returns:
-      bool: True if the file was updated.
-    """
-    version_file_contents = self._ReadFileContents(self.version_file_path)
-    if not version_file_contents:
-      logging.error('Unable to read version file.')
-      return False
-
-    date_version = time.strftime('%Y%m%d')
-    lines = version_file_contents.split('\n')
-    for line_index, line in enumerate(lines):
-      if line.startswith('__version__ = '):
-        version_string = '__version__ = \'{0:s}\''.format(date_version)
-        lines[line_index] = version_string
-
-    version_file_contents = '\n'.join(lines)
-
-    try:
-      version_file_contents = version_file_contents.encode('utf-8')
-    except UnicodeEncodeError as exception:
-      logging.error(
-          'Unable to write version file with error: {0!s}'.format(exception))
-      return False
-
-    try:
-      with open(self.version_file_path, 'wb') as file_object:
-        file_object.write(version_file_contents)
-
-    except IOError as exception:
-      logging.error(
-          'Unable to write version file with error: {0!s}'.format(exception))
-      return False
-
-    return True

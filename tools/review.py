@@ -76,12 +76,6 @@ def Main():
 
   commands_parser.add_parser('test')
 
-  commands_parser.add_parser('update-authors')
-  commands_parser.add_parser('update_authors')
-
-  commands_parser.add_parser('update-version')
-  commands_parser.add_parser('update_version')
-
   options = argument_parser.parse_args()
 
   feature_branch = None
@@ -154,12 +148,6 @@ def Main():
 
   elif options.command in ('lint', 'lint-test', 'lint_test', 'test'):
     result = True
-
-  elif options.command in ('update-authors', 'update_authors'):
-    result = review_helper.UpdateAuthors()
-
-  elif options.command in ('update-version', 'update_version'):
-    result = review_helper.UpdateVersion()
 
   return result
 

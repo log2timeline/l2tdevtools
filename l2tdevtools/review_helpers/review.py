@@ -412,37 +412,3 @@ class ReviewHelper(object):
       return False
 
     return True
-
-  def UpdateAuthors(self):
-    """Updates the authors.
-
-    Returns:
-      bool: True if the authors update was successful.
-    """
-    if self._project_name == 'l2tdocs':
-      return True
-
-    if not self._project_helper.UpdateAuthorsFile():
-      print('Unable to update authors file.')
-      return False
-
-    return True
-
-  def UpdateVersion(self):
-    """Updates the version.
-
-    Returns:
-      bool: True if the version update was successful.
-    """
-    if self._project_name == 'l2tdocs':
-      return True
-
-    if not self._project_helper.UpdateVersionFile():
-      print('Unable to update version file.')
-      return False
-
-    if not self._project_helper.UpdateDPKGChangelogFile():
-      print('Unable to update dpkg changelog file.')
-      return False
-
-    return True
