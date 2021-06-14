@@ -97,7 +97,7 @@ class ReviewHelper(object):
           return False
 
         if self._active_branch != 'main':
-          self._git_helper.SwitchToMasterBranch()
+          self._git_helper.SwitchToMainBranch()
           self._active_branch = 'main'
 
     return True
@@ -112,6 +112,11 @@ class ReviewHelper(object):
       print('No such feature branch: {0:s}'.format(self._feature_branch))
     else:
       self._git_helper.RemoveFeatureBranch(self._feature_branch)
+
+    if not self._git_helper.SynchronizeWithUpstream():
+      print((
+          '{0:s} aborted - unable to synchronize with '
+          'upstream/main.').format(self._command.title()))
 
     return True
 
