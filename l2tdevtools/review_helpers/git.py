@@ -308,7 +308,7 @@ class GitHelper(cli.CLIHelper):
 
     return exit_code == 0
 
-  def SwitchToMasterBranch(self):
+  def SwitchToMainBranch(self):
     """Switches git to the main branch.
 
     Returns:
