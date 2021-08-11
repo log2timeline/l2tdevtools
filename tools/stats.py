@@ -53,7 +53,7 @@ class StatsDefinitionReader(object):
 
       if project_names is None:
         project_names = []
-      elif isinstance(project_names, bytes):
+      elif isinstance(project_names, str):
         project_names = project_names.split(',')
 
       projects_per_organization[option_name] = project_names
