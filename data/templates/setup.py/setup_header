@@ -1,5 +1,29 @@
 
 
+def parse_requirements_from_file(path):
+  """Parses requirements from a requirements file.
+
+  Args:
+    path (str): path to the requirements file.
+
+  Yields:
+    str: name and optional version information of the required package.
+  """
+  with open(path, 'r') as file_object:
+    file_contents = file_object.read()
+
+  for requirement in pkg_resources.parse_requirements(file_contents):
+    try:
+      name = str(requirement.req)
+    except AttributeError:
+      name = str(requirement)
+
+    if name.startswith('pip '):
+      continue
+
+    yield name
+
+
 ${project_name}_description = (
 ${description_short})
 

@@ -2,5 +2,6 @@ ${shebang}
 # -*- coding: utf-8 -*-
 """Installation and deployment script."""
 
+import pkg_resources
 import sys
 
