@@ -18,7 +18,7 @@ class PylintRcWriter(interface.DependencyFileWriter):
     """Writes a .pylintrc file."""
     dependencies = self._dependency_helper.GetPylintRcExtensionPkgs()
 
-    template_mappings = {'extension_pkg_whitelist': ','.join(dependencies)}
+    template_mappings = {'extension_pkg_allow_list': ','.join(dependencies)}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
