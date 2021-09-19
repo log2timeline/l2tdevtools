@@ -20,7 +20,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
 
   _PROJECT_NAME = 'dfvfs'
   _PROJECT_VERSION = '20210606'
-  _PYPI_VERSION = '20210728'
+  _PYPI_VERSION = '20210918'
 
   @classmethod
   def setUpClass(cls):
