@@ -13,7 +13,7 @@ BuildRoot: %{{_tmppath}}/%{{name}}-%{{version}}-%{{release}}-buildroot
 Prefix: %{{_prefix}}
 Vendor: Bob Ippolito <bob@redivi.com>
 Url: http://github.com/xattr/xattr
-BuildRequires: gcc, python3-devel, python3-setuptools
+BuildRequires: gcc, python3-devel, python3-setuptools, python3-cffi
 
 %description
 Extended attributes extend the basic attributes of files
