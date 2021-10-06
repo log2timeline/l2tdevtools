@@ -23,10 +23,10 @@ Extended attributes are currently only available on Darwin 8.0+
 (Mac OS X 10.4) and Linux 2.6+. Experimental support is included for
 Solaris and FreeBSD.
 
-%package -n python3-%{{name}}
+%package -n python3-py%{{name}}
 Summary: Python 3 module of Python wrapper for extended filesystem attributes
 
-%description -n python3-%{{name}}
+%description -n python3-py%{{name}}
 Extended attributes extend the basic attributes of files
 and directories in the file system. They are stored as name:data pairs
 associated with file system objects (files, directories, symlinks, etc).
@@ -47,7 +47,7 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python3-%{{name}}
+%files -n python3-py%{{name}}
 %license LICENSE.txt
 %doc CHANGES.txt
 %{{_libdir}}/python3*/site-packages/xattr
