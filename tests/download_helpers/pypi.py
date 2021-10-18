@@ -19,8 +19,8 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   _GIT_URL = 'https://github.com/log2timeline/dfvfs.git'
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20210606'
-  _PYPI_VERSION = '20210918'
+  _PROJECT_VERSION = '20211017'
+  _PYPI_VERSION = '20211017'
 
   @classmethod
   def setUpClass(cls):
@@ -29,13 +29,13 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
     arguments = shlex.split(command)
 
     try:
-      process = subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    except OSError:
-      return
+      with subprocess.Popen(
+          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
+        output, _ = process.communicate()
+        if process.returncode != 0:
+          return
 
-    output, _ = process.communicate()
-    if process.returncode != 0:
+    except OSError:
       return
 
     output = output.decode('ascii')
