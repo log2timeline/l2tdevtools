@@ -51,7 +51,7 @@ rm -rf %{{buildroot}}
 
 %files -n python3-pyyaml
 %license LICENSE
-%doc CHANGES README
+%doc CHANGES README.md
 %{{_libdir}}/python3*/site-packages/_yaml/
 %{{_libdir}}/python3*/site-packages/yaml/
 %{{_libdir}}/python3*/site-packages/PyYAML*.egg-info
