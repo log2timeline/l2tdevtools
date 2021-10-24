@@ -1,22 +1,20 @@
 %define name pyparsing
 %define version {version}
-%define unmangled_name pyparsing
-%define unmangled_version {version}
 %define release 1
 
 Summary: Python parsing module
 Name: %{{name}}
 Version: %{{version}}
 Release: %{{release}}
-Source0: %{{unmangled_name}}-%{{unmangled_version}}.tar.gz
+Source0: %{{name}}-%{{version}}.tar.gz
 License: MIT License
 Group: Development/Libraries
-BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-buildroot
+BuildRoot: %{{_tmppath}}/%{{name}}-%{{version}}-%{{release}}-buildroot
 Prefix: %{{_prefix}}
 BuildArch: noarch
-Vendor: Paul McGuire <ptmcg@users.sourceforge.net>
-Url: http://pyparsing.wikispaces.com/
-BuildRequires: python3-setuptools, python3-devel
+Vendor: Paul McGuire <ptmcg.gm+pyparsing@gmail.com>
+Url: https://github.com/pyparsing/pyparsing/
+BuildRequires: python3-devel, python3-setuptools
 
 %description
 The parsing module is an alternative approach to creating
@@ -26,7 +24,7 @@ of classes that client code uses to construct the grammar directly
 in Python code.
 
 %package -n python3-%{{name}}
-Summary: Python parsing module
+Summary: Python 3 module of Python parsing module
 
 %description -n python3-%{{name}}
 The parsing module is an alternative approach to creating
@@ -36,7 +34,7 @@ of classes that client code uses to construct the grammar directly
 in Python code.
 
 %prep
-%autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
+%autosetup -n %{{name}}-%{{version}}
 
 %build
 %py3_build
@@ -51,7 +49,7 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{name}}
 %license LICENSE
 %doc CHANGES README.rst
-%{{python3_sitelib}}/pyparsing.*
+%{{python3_sitelib}}/pyparsing
 %{{python3_sitelib}}/pyparsing*.egg-info
 
 %exclude %{{python3_sitelib}}/__pycache__/

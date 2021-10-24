@@ -16,7 +16,7 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Brian E. Granger, Min Ragan-Kelley <zeromq-dev@lists.zeromq.org>
 Url: https://pyzmq.readthedocs.org
-BuildRequires: gcc, gcc-c++, python3-setuptools, python3-devel
+BuildRequires: gcc, gcc-c++, python3-setuptools, python3-devel, python3-packaging
 
 %description
 PyZMQ is the official Python binding for the ZeroMQ

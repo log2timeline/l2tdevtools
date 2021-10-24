@@ -11,15 +11,15 @@ from l2tdevtools.download_helpers import github
 from tests import test_lib
 
 
-class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
-  """Tests for the docopt GitHub releases download helper."""
+class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
+  """Tests for the pefile GitHub releases download helper."""
 
-  _DOWNLOAD_URL = 'https://github.com/docopt/docopt/releases'
-  _GIT_URL = 'https://github.com/docopt/docopt.git'
+  _DOWNLOAD_URL = 'https://github.com/erocarrera/pefile/releases'
+  _GIT_URL = 'https://github.com/erocarrera/pefile.git'
 
-  _PROJECT_ORGANIZATION = 'docopt'
-  _PROJECT_NAME = 'docopt'
-  _PROJECT_VERSION = '0.6.2'
+  _PROJECT_ORGANIZATION = 'erocarrera'
+  _PROJECT_NAME = 'pefile'
+  _PROJECT_VERSION = '2021.9.3'
 
   @classmethod
   def setUpClass(cls):
@@ -28,13 +28,13 @@ class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     arguments = shlex.split(command)
 
     try:
-      process = subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    except OSError:
-      return
+      with subprocess.Popen(
+          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
+        output, _ = process.communicate()
+        if process.returncode != 0:
+          return
 
-    output, _ = process.communicate()
-    if process.returncode != 0:
+    except OSError:
       return
 
     output = output.decode('ascii')
@@ -44,6 +44,10 @@ class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
       line = line.strip()
       if 'refs/tags/' in line and not line.endswith('^{}'):
         _, _, version = line.rpartition('refs/tags/')
+        if version.startswith('pefile-'):
+          version = version[7:]
+        elif version.startswith('v'):
+          version = version[1:]
         version = tuple(version.split('.'))
         latest_version = max(latest_version, version)
 
@@ -65,7 +69,8 @@ class DocoptGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        'https://github.com/{0:s}/{1:s}/archive/refs/tags/{2:s}.tar.gz').format(
+        'https://github.com/{0:s}/{1:s}/releases/download/v{2:s}/'
+        'pefile-{2:s}.tar.gz').format(
             self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
             self._PROJECT_VERSION)
 
@@ -101,13 +106,13 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     arguments = shlex.split(command)
 
     try:
-      process = subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    except OSError:
-      return
+      with subprocess.Popen(
+          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
+        output, _ = process.communicate()
+        if process.returncode != 0:
+          return
 
-    output, _ = process.communicate()
-    if process.returncode != 0:
+    except OSError:
       return
 
     output = output.decode('ascii')
@@ -173,13 +178,13 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     arguments = shlex.split(command)
 
     try:
-      process = subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    except OSError:
-      return
+      with subprocess.Popen(
+          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
+        output, _ = process.communicate()
+        if process.returncode != 0:
+          return
 
-    output, _ = process.communicate()
-    if process.returncode != 0:
+    except OSError:
       return
 
     output = output.decode('ascii')
