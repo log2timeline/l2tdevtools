@@ -3,7 +3,6 @@
 
 import logging
 import os
-import random
 
 from l2tdevtools import project_config
 from l2tdevtools.review_helpers import cli
@@ -29,35 +28,6 @@ class ProjectHelper(cli.CLIHelper):
       '',
       'Google Inc. (*@google.com)']
 
-  _REVIEWERS_PER_PROJECT = {
-      'dfdatetime': frozenset([
-          'joachimmetz',
-          'Onager']),
-      'dfkinds': frozenset([
-          'joachimmetz',
-          'Onager']),
-      'dfvfs': frozenset([
-          'joachimmetz',
-          'Onager']),
-      'dfwinreg': frozenset([
-          'joachimmetz',
-          'Onager']),
-      'dftimewolf': frozenset([
-          'Onager',
-          'someguyiknow',
-          'tomchop']),
-      'plaso': frozenset([
-          'joachimmetz',
-          'Onager',
-          'rgayon']),
-      'l2tscaffolder': frozenset([
-          'kiddinn',
-          'Onager'])}
-
-  _REVIEWERS_DEFAULT = frozenset([
-      'joachimmetz',
-      'Onager'])
-
   SUPPORTED_PROJECTS = frozenset([
       'acstore',
       'artifacts',
@@ -71,6 +41,7 @@ class ProjectHelper(cli.CLIHelper):
       'dtfabric',
       'dtformats',
       'esedb-kb',
+      'imagetools',
       'l2tdevtools',
       'l2tdocs',
       'l2tscaffolder',
@@ -150,29 +121,6 @@ class ProjectHelper(cli.CLIHelper):
       return None
 
     return file_contents
-
-  @classmethod
-  def GetReviewer(cls, project_name, author):
-    """Determines the GitHub username of the reviewer.
-
-    Args:
-      project_name (str): name of the project.
-      author (str): GitHub username of the author.
-
-    Returns:
-      str: GitHub username of the reviewer.
-    """
-    reviewers = list(
-        cls._REVIEWERS_PER_PROJECT.get(project_name, cls._REVIEWERS_DEFAULT))
-
-    try:
-      reviewers.remove(author)
-    except ValueError:
-      pass
-
-    random.shuffle(reviewers)
-
-    return reviewers[0]
 
   def ReadDefinitionFile(self):
     """Reads the project definitions file (project_name.ini).

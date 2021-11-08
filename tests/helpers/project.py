@@ -23,14 +23,6 @@ class ProjectHelperTest(test_lib.BaseTestCase):
   # TODO: add test for _GetProjectName
   # TODO: add test for _ReadFileContents
 
-  def testGetReviewer(self):
-    """Tests the GetReviewer function."""
-    reviewer = project.ProjectHelper.GetReviewer('l2tdevtools', 'test')
-    self.assertNotEqual(reviewer, 'test')
-    self.assertIn(reviewer, project.ProjectHelper._REVIEWERS_DEFAULT)
-
-  # TODO: add test for GetReviewerUsername
-
 
 if __name__ == '__main__':
   unittest.main()
