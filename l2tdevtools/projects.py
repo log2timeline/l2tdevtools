@@ -41,6 +41,7 @@ class ProjectDefinition(object):
     maintainer (str): name and email address of the maintainer.
     msi_name (str): MSI package name.
     name (str): name of the project.
+    optional_build_dependencies (list[str]): optional build dependencies.
     patches (list[str]): patch file names.
     pkg_configure_options (list[str]): configure options when building a pkg.
     pypi_name (str): name of the project on PyPI.
@@ -68,6 +69,7 @@ class ProjectDefinition(object):
     self.description_long = None
     self.description_short = None
     self.disabled = None
+    self.download_url = None
     self.dpkg_build_dependencies = None
     self.dpkg_configure_options = None
     self.dpkg_dependencies = None
@@ -80,20 +82,20 @@ class ProjectDefinition(object):
     self.dpkg_template_py3dist_overrides = None
     self.dpkg_template_rules = None
     self.dpkg_template_source_options = None
-    self.download_url = None
     self.git_url = None
     self.homepage_url = None
     self.maintainer = None
     self.msi_name = None
-    self.name = name
     self.msi_prebuild = None
-    self.rpm_build_dependencies = None
-    self.rpm_name = None
-    self.rpm_template_spec = None
+    self.name = name
+    self.optional_build_dependencies = None
     self.patches = None
     self.pkg_configure_options = None
     self.pypi_name = None
     self.pypi_source_name = None
+    self.rpm_build_dependencies = None
+    self.rpm_name = None
+    self.rpm_template_spec = None
     self.setup_name = None
     self.srpm_name = None
     self.version = None
@@ -209,6 +211,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'architecture_dependent')
       project_definition.build_dependencies = self._GetConfigValue(
           config_parser, section_name, 'build_dependencies')
+      project_definition.optional_build_dependencies = self._GetConfigValue(
+          config_parser, section_name, 'optional_build_dependencies')
       project_definition.build_system = self._GetConfigValue(
           config_parser, section_name, 'build_system')
       project_definition.configure_options = self._GetConfigValue(
