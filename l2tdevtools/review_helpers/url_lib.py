@@ -29,16 +29,23 @@ class URLLibHelper(object):
       # This will change the request into a POST.
       request.data = post_data.encode('utf-8')
 
+    response_code = None
+    page_content = None
+
     try:
-      url_object = urllib_request.urlopen(request)
+      with urllib_request.urlopen(request) as url_object:
+        response_code = url_object.code
+        if response_code in (200, 201):
+          page_content = url_object.read()
+
     except urllib_error.HTTPError as exception:
       raise errors.ConnectivityError(
           'Failed requesting URL {0:s} with error: {1!s}'.format(
               url, exception))
 
-    if url_object.code not in (200, 201):
+    if response_code not in (200, 201):
       raise errors.ConnectivityError(
           'Failed requesting URL {0:s} with status code: {1:d}'.format(
-              url, url_object.code))
+              url, response_code))
 
-    return url_object.read()
+    return page_content

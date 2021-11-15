@@ -12,6 +12,7 @@ class PylintHelper(cli.CLIHelper):
 
   MINIMUM_VERSION = '1.7.0'
 
+  # pylint: disable=consider-using-generator
   _MINIMUM_VERSION_TUPLE = tuple(
       [int(digit, 10) for digit in MINIMUM_VERSION.split('.')])
 
@@ -34,6 +35,7 @@ class PylintHelper(cli.CLIHelper):
           # Remove a trailing comma.
           version, _, _ = version.partition(',')
 
+          # pylint: disable=consider-using-generator
           version_tuple = tuple([
               int(digit, 10) for digit in version.split('.')])
 

@@ -38,47 +38,46 @@ class TestSourceHelper(source_helper.SourceHelper):
       str: name of the source directory or None if no files can be extracted
           from the .tar.gz source package.
     """
-    archive = tarfile.open(source_filename, 'r:*', encoding='utf-8')
-    directory_name = ''
+    with tarfile.open(source_filename, 'r:*', encoding='utf-8') as archive:
+      directory_name = ''
 
-    for tar_info in archive.getmembers():
-      filename = getattr(tar_info, 'name', None)
+      for tar_info in archive.getmembers():
+        filename = getattr(tar_info, 'name', None)
 
-      if isinstance(filename, bytes):
-        try:
-          filename = filename.decode('utf8')
-        except UnicodeDecodeError:
-          logging.warning(
-              'Unable to decode filename in tar file: {0:s}'.format(
-                  source_filename))
+        if isinstance(filename, bytes):
+          try:
+            filename = filename.decode('utf8')
+          except UnicodeDecodeError:
+            logging.warning(
+                'Unable to decode filename in tar file: {0:s}'.format(
+                    source_filename))
+            continue
+
+        if filename is None:
+          logging.warning('Missing filename in tar file: {0:s}'.format(
+              source_filename))
           continue
 
-      if filename is None:
-        logging.warning('Missing filename in tar file: {0:s}'.format(
-            source_filename))
-        continue
+        if not directory_name:
+          # Note that this will set directory name to an empty string
+          # if filename start with a /.
+          directory_name, _, _ = filename.partition('/')
+          if not directory_name or directory_name.startswith('..'):
+            logging.error(
+                'Unsupported directory name in tar file: {0:s}'.format(
+                    source_filename))
+            return None
+          if os.path.exists(directory_name):
+            break
+          logging.info('Extracting: {0:s}'.format(source_filename))
 
-      if not directory_name:
-        # Note that this will set directory name to an empty string
-        # if filename start with a /.
-        directory_name, _, _ = filename.partition('/')
-        if not directory_name or directory_name.startswith('..'):
-          logging.error(
-              'Unsupported directory name in tar file: {0:s}'.format(
-                  source_filename))
-          return None
-        if os.path.exists(directory_name):
-          break
-        logging.info('Extracting: {0:s}'.format(source_filename))
+        elif not filename.startswith(directory_name):
+          logging.warning(
+              'Skipping: {0:s} in tar file: {1:s}'.format(
+                  filename, source_filename))
+          continue
 
-      elif not filename.startswith(directory_name):
-        logging.warning(
-            'Skipping: {0:s} in tar file: {1:s}'.format(
-                filename, source_filename))
-        continue
-
-      archive.extract(tar_info)
-    archive.close()
+        archive.extract(tar_info)
 
     return directory_name
 

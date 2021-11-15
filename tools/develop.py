@@ -59,38 +59,43 @@ class DockerBuildHelper(object):
         self._plaso_source, 'config', 'linux', 'gift_ppa_install.sh')
 
     # Add the installer file and dockerfile to the same build context
-    context_tarball_location = tempfile.NamedTemporaryFile(
-        delete=False, suffix='.tar').name
-    tar = tarfile.open(context_tarball_location, 'w')
-    tar.add(ppa_installer_location, arcname='gift_ppa_install.sh')
-    tar.add(dockerfile_location, arcname='Dockerfile')
-    tar.close()
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix='.tar') as context_tarball:
+      context_tarball_location = context_tarball.name
+      with tarfile.open(context_tarball_location, 'w') as tar:
+        tar.add(ppa_installer_location, arcname='gift_ppa_install.sh')
+        tar.add(dockerfile_location, arcname='Dockerfile')
 
-    with open(context_tarball_location, 'rb') as tarball:
-      for line in self._docker_build_client.build(
-          fileobj=tarball,
-          tag=self.DOCKER_IMAGE_NAME,
-          nocache=nocache,
-          custom_context=True):
-        parts = line.decode('utf-8').split('\r\n')
-        for part in parts:
-          if part == '':
-            continue
-          part_json = json.loads(part)
-          if 'stream' in part_json:
-            stream = part_json['stream']
-          elif 'aux' in part_json:
-            sha_id = part_json['aux']['ID']
-            print('Built image with SHA: {0:s}'.format(sha_id))
-            continue
-          elif 'status' in part_json and 'id' in part_json:
-            stream = '{0:s}:{1:s}'.format(part_json['status'], part_json['id'])
-          else:
-            continue
-          if 'Step' in stream and not verbose:
-            print(stream)
-          elif verbose:
-            print(stream.strip())
+      with open(context_tarball_location, 'rb') as tarball:
+        for line in self._docker_build_client.build(
+            fileobj=tarball, tag=self.DOCKER_IMAGE_NAME, nocache=nocache,
+            custom_context=True):
+
+          parts = line.decode('utf-8').split('\r\n')
+          for part in parts:
+            if part == '':
+              continue
+
+            part_json = json.loads(part)
+            if 'stream' in part_json:
+              stream = part_json['stream']
+
+            elif 'aux' in part_json:
+              sha_id = part_json['aux']['ID']
+              print('Built image with SHA: {0:s}'.format(sha_id))
+              continue
+
+            elif 'status' in part_json and 'id' in part_json:
+              stream = '{0:s}:{1:s}'.format(
+                  part_json['status'], part_json['id'])
+
+            else:
+              continue
+
+            if 'Step' in stream and not verbose:
+              print(stream)
+            elif verbose:
+              print(stream.strip())
 
   def RunCommand(self, image_name, command):
     """Runs a command inside a Plaso development container, prints the output.
