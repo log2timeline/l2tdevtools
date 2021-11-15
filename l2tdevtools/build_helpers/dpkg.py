@@ -484,18 +484,19 @@ class DPKGBuildHelper(interface.BuildHelper):
     path = '/usr/bin/lsb_release'
 
     if os.path.exists(path):
-      process = subprocess.Popen(
-          [path, option], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+      with subprocess.Popen(
+          [path, option], stderr=subprocess.PIPE,
+          stdout=subprocess.PIPE) as process:
 
-      output, _ = process.communicate()
-      if not process or process.returncode != 0:
-        output = None
-
-      elif isinstance(output, bytes):
-        try:
-          output = output.decode('utf-8')
-        except UnicodeDecodeError:
+        output, _ = process.communicate()
+        if not process or process.returncode != 0:
           output = None
+
+        elif isinstance(output, bytes):
+          try:
+            output = output.decode('utf-8')
+          except UnicodeDecodeError:
+            output = None
 
     return output
 

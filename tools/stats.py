@@ -120,18 +120,21 @@ class DownloadHelper(object):
     if not download_url:
       return None, None
 
+    page_content = None
+    response_headers = None
+
     try:
-      url_object = urlopen(download_url)
+      with urlopen(download_url) as url_object:
+        if url_object.code == 200:
+          page_content = url_object.read()
+          response_headers = url_object.info()
+
     except urllib_error.URLError as exception:
       logging.warning(
           'Unable to download URL: {0:s} with error: {1!s}'.format(
               download_url, exception))
-      return None, None
 
-    if url_object.code != 200:
-      return None, None
-
-    return url_object.read(), url_object.info()
+    return page_content, response_headers
 
 
 class GithubContributionsHelper(DownloadHelper):

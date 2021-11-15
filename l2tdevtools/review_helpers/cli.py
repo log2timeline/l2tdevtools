@@ -48,20 +48,23 @@ class CLIHelper(object):
 
     arguments = shlex.split(command)
 
+    exit_code = 1
+    output = None
+    error = None
+
     try:
-      process = subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+      with subprocess.Popen(
+          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
+        output, error = process.communicate()
+        output = codecs.decode(output, self.preferred_encoding)
+        error = codecs.decode(error, self.preferred_encoding)
+        exit_code = process.returncode
+        if exit_code != 0:
+          logging.error('Running: "{0:s}" failed with error: {1!s}.'.format(
+              command, error))
+
     except OSError as exception:
-      logging.error(
-          'Running: "{0:s}" failed with error: {1!s}'.format(
-              command, exception))
-      return 1, None, None
+      logging.error('Running: "{0:s}" failed with error: {1!s}'.format(
+          command, exception))
 
-    output, error = process.communicate()
-    output = codecs.decode(output, self.preferred_encoding)
-    error = codecs.decode(error, self.preferred_encoding)
-    if process.returncode != 0:
-      logging.error(
-          'Running: "{0:s}" failed with error: {1!s}.'.format(command, error))
-
-    return process.returncode, output, error
+    return exit_code, output, error

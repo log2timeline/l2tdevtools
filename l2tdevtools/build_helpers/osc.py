@@ -65,21 +65,21 @@ class OSCBuildHelper(interface.BuildHelper):
     """
     command = 'osc status {0:s}'.format(self._OSC_PROJECT)
     arguments = shlex.split(command)
-    process = subprocess.Popen(
-        arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    if not process:
-      logging.error('Running: "{0:s}" failed.'.format(command))
-      return False
+    with subprocess.Popen(
+        arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
+      if not process:
+        logging.error('Running: "{0:s}" failed.'.format(command))
+        return False
 
-    output, error = process.communicate()
-    if process.returncode != 0:
-      logging.error('Running: "{0:s}" failed with error: {1!s}.'.format(
-          command, error))
-      return False
+      output, error = process.communicate()
+      if process.returncode != 0:
+        logging.error('Running: "{0:s}" failed with error: {1!s}.'.format(
+            command, error))
+        return False
 
-    if output:
-      logging.error('Unable to continue with pending changes.')
-      return False
+      if output:
+        logging.error('Unable to continue with pending changes.')
+        return False
 
     return True
 

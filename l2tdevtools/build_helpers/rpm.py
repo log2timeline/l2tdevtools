@@ -166,9 +166,8 @@ class BaseRPMBuildHelper(interface.BuildHelper):
     spec_filename = os.path.join(
         self._rpmbuild_specs_path, '{0:s}.spec'.format(project_name))
 
-    rpm_spec_file = open(spec_filename, 'w')
-    rpm_spec_file.write(spec_file_data)
-    rpm_spec_file.close()
+    with open(spec_filename, 'w') as rpm_spec_file:
+      rpm_spec_file.write(spec_file_data)
 
   def _CopySourceFile(self, source_package_filename):
     """Copies the source file to the rpmbuild directory.

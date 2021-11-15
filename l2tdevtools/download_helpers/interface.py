@@ -40,21 +40,22 @@ class DownloadHelper(object):
       logging.info('Downloading: {0:s}'.format(download_url))
 
       try:
-        url_object = urllib_request.urlopen(download_url)
+        with urllib_request.urlopen(download_url) as url_object:
+          if url_object.code != 200:
+            logging.warning(
+                'Unable to download URL: {0:s} with status code: {1:d}'.format(
+                    download_url, url_object.code))
+            return None
+
+          page_content = url_object.read()
+          with open(filename, 'wb') as file_object:
+            file_object.write(page_content)
+
       except urllib_error.URLError as exception:
         logging.warning(
             'Unable to download URL: {0:s} with error: {1!s}'.format(
                 download_url, exception))
         return None
-
-      if url_object.code != 200:
-        logging.warning(
-            'Unable to download URL: {0:s} with status code: {1:d}'.format(
-                download_url, url_object.code))
-        return None
-
-      with open(filename, 'wb') as file_object:
-        file_object.write(url_object.read())
 
     return filename
 
@@ -74,17 +75,17 @@ class DownloadHelper(object):
 
     if self._cached_url != download_url:
       try:
-        url_object = urllib_request.urlopen(download_url)
+        with urllib_request.urlopen(download_url) as url_object:
+          if url_object.code != 200:
+            return None
+
+          page_content = url_object.read()
+
       except urllib_error.URLError as exception:
         logging.warning(
             'Unable to download URL: {0:s} with error: {1!s}'.format(
                 download_url, exception))
         return None
-
-      if url_object.code != 200:
-        return None
-
-      page_content = url_object.read()
 
       if encoding and isinstance(page_content, bytes):
         page_content = page_content.decode(encoding)
