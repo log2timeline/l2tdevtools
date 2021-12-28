@@ -38,6 +38,8 @@ class RPMSpecFileGenerator(object):
       '',
       '%install',
       '%py3_install',
+      ('rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/'
+       'requires.txt'),
       'rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/',
       '',
       '%clean',
@@ -95,6 +97,8 @@ class RPMSpecFileGenerator(object):
     """
     lines = [
         '%py3_install',
+        ('rm -rf %{buildroot}/usr/lib/python*/site-packages/*.egg-info/'
+         'requires.txt'),
         'rm -rf %{buildroot}/usr/share/doc/%{name}/']
 
     if project_name == 'astroid':
