@@ -36,6 +36,7 @@ it to compile, save and load YARA rules, and to scan files or data strings.
 
 %install
 %py3_install
+rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

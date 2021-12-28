@@ -39,6 +39,7 @@ codebase to support both Python 2 and Python 3 with minimal overhead.
 
 %install
 python3 setup.py install -O1 --root=%{{buildroot}}
+rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

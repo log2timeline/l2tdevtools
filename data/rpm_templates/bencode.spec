@@ -37,6 +37,7 @@ by Thomas Rampelberg.
 
 %install
 %py3_install
+rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
