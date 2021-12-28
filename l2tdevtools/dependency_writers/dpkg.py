@@ -47,8 +47,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
   _PYTHON3_PACKAGE = [
       'Package: python3-{project_name:s}',
       'Architecture: all',
-      ('Depends: {python3_dependencies:s}'
-       '${{python3:Depends}}, ${{misc:Depends}}'),
+      'Depends: {python3_dependencies:s}, ${{misc:Depends}}',
       'Description: Python 3 module of {name_description:s}',
       '{description_long:s}',
       '']  # yapf: disable
@@ -57,7 +56,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       'Package: {project_name:s}-tools',
       'Architecture: all',
       ('Depends: python3-{project_name:s} (>= ${{binary:Version}}), '
-       '${{python3:Depends}}, ${{misc:Depends}}'),
+       '${{misc:Depends}}'),
       'Description: Tools of {name_description:s}',
       '{description_long:s}',
       '']  # yapf: disable
