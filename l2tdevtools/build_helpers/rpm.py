@@ -184,7 +184,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
       source_helper_object (SourceHelper): source helper.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
 
         * str: filename safe project name.
         * str: version.

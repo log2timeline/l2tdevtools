@@ -49,7 +49,7 @@ class WheelBuildHelper(interface.BuildHelper):
       source_helper_object (SourceHelper): source helper.
 
     Returns:
-      tuple: contains:
+      tuple: containing:
 
         * str: project name used by the wheel filename.
         * str: project version used by the wheel filename.
