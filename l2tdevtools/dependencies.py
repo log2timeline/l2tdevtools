@@ -571,6 +571,7 @@ class DependencyHelper(object):
         'pymodi',
         'pymsiecf',
         'pyolecf',
+        'pyphdi',
         'pyqcow',
         'pyregf',
         'pyscca',
@@ -584,6 +585,7 @@ class DependencyHelper(object):
         'pyvsgpt',
         'pyvslvm',
         'pywrc',
+        'xattr',
         'yara')
 
     extension_packages = []
