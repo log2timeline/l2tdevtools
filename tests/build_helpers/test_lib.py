@@ -125,3 +125,13 @@ class TestSourceHelper(source_helper.SourceHelper):
       str: filename of the source package or None if not available.
     """
     return self._source_package_filename
+
+  def GetSourcePackagePath(self):
+    """Retrieves the path of the source package.
+
+    This function downloads the source package if not done so previously.
+
+    Returns:
+      str: path of the source package or None if not available.
+    """
+    return self._source_package_filename

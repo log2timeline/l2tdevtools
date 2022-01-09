@@ -203,18 +203,19 @@ class OSCBuildHelper(interface.BuildHelper):
 
     osc_package_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name)
-    osc_source_filename = '{0:s}-{1!s}.tar.gz'.format(
+    osc_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
         source_helper_object.project_name, project_version)
 
     filenames_to_ignore = '^{0:s}'.format(
-        os.path.join(osc_package_path, osc_source_filename))
+        os.path.join(osc_package_path, osc_source_package_filename))
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
     # project-version.tar.gz
-    osc_source_filename_glob = '{0:s}-*.tar.gz'.format(
+    osc_source_package_filename_glob = '{0:s}-*.tar.gz'.format(
         source_helper_object.project_name)
-    filenames_glob = os.path.join(osc_package_path, osc_source_filename_glob)
+    filenames_glob = os.path.join(
+        osc_package_path, osc_source_package_filename_glob)
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -240,8 +241,8 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -254,7 +255,9 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
 
     project_version = source_helper_object.GetProjectVersion()
 
-    logging.info('Preparing osc build of: {0:s}'.format(source_filename))
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Preparing osc build of: {0:s}'.format(
+        source_package_filename))
 
     if not self._BuildPrepare(source_helper_object):
       return False
@@ -263,15 +266,16 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
         self._OSC_PROJECT, source_helper_object.project_name)
 
     # osc wants the project filename without the status indication.
-    osc_source_filename = '{0:s}-{1!s}.tar.gz'.format(
+    osc_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
         source_helper_object.project_name, project_version)
 
     # Copy the source package to the package directory.
-    osc_source_path = os.path.join(osc_package_path, osc_source_filename)
-    shutil.copy(source_filename, osc_source_path)
+    osc_source_path = os.path.join(
+        osc_package_path, osc_source_package_filename)
+    shutil.copy(source_package_path, osc_source_path)
 
     osc_source_path = os.path.join(
-        source_helper_object.project_name, osc_source_filename)
+        source_helper_object.project_name, osc_source_package_filename)
     if not self._OSCAdd(osc_source_path):
       return False
 
@@ -283,7 +287,7 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
     spec_file_exists = os.path.exists(osc_spec_file_path)
 
     command = 'tar xfO {0:s} {1:s}-{2!s}/{3:s} > {3:s}'.format(
-        osc_source_filename, source_helper_object.project_name,
+        osc_source_package_filename, source_helper_object.project_name,
         project_version, spec_filename)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         osc_package_path, command), shell=True)
@@ -316,12 +320,12 @@ class ConfigureMakeOSCBuildHelper(OSCBuildHelper):
     """
     project_version = source_helper_object.GetProjectVersion()
 
-    osc_source_filename = '{0:s}-{1!s}.tar.gz'.format(
+    osc_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
         source_helper_object.project_name, project_version)
 
     osc_source_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name,
-        osc_source_filename)
+        osc_source_package_filename)
 
     return not os.path.exists(osc_source_path)
 
@@ -364,8 +368,8 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -376,7 +380,9 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
           source_helper_object.project_name))
       return False
 
-    logging.info('Preparing osc build of: {0:s}'.format(source_filename))
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Preparing osc build of: {0:s}'.format(
+        source_package_filename))
 
     if not self._BuildPrepare(source_helper_object):
       return False
@@ -384,13 +390,13 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     osc_package_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name)
 
-    osc_source_path = os.path.join(osc_package_path, source_filename)
+    osc_source_path = os.path.join(osc_package_path, source_package_filename)
     if not os.path.exists(osc_source_path):
       # Copy the source package to the package directory if needed.
-      shutil.copy(source_filename, osc_source_path)
+      shutil.copy(source_package_path, osc_source_path)
 
       osc_source_path = os.path.join(
-          source_helper_object.project_name, source_filename)
+          source_helper_object.project_name, source_package_filename)
       if not self._OSCAdd(osc_source_path):
         return False
 
@@ -417,7 +423,7 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     output_file_exists = os.path.exists(osc_spec_file_path)
 
     if not spec_file_generator.RewriteSetupPyGeneratedFile(
-        self._project_definition, source_directory, source_filename,
+        self._project_definition, source_directory, source_package_filename,
         project_name, project_version, input_file_path, osc_spec_file_path):
       return None
 
@@ -444,11 +450,11 @@ class SetupPyOSCBuildHelper(OSCBuildHelper):
     """
     project_version = source_helper_object.GetProjectVersion()
 
-    osc_source_filename = '{0:s}-{1!s}.tar.gz'.format(
+    osc_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
         source_helper_object.project_name, project_version)
 
     osc_source_path = os.path.join(
         self._OSC_PROJECT, source_helper_object.project_name,
-        osc_source_filename)
+        osc_source_package_filename)
 
     return not os.path.exists(osc_source_path)

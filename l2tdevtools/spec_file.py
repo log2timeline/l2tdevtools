@@ -340,14 +340,14 @@ class RPMSpecFileGenerator(object):
 
   # pylint: disable=too-many-arguments
   def _WriteSourcePackageDefinition(
-      self, output_file_object, source_filename, project_definition,
+      self, output_file_object, source_package_filename, project_definition,
       unmangled_name, summary, package_license, url, packager, vendor,
       build_requires, description):
     """Writes the source package definition.
 
     Args:
       output_file_object (file): output file-like object to write to.
-      source_filename (str): name of the package source file.
+      source_package_filename (str): name of the package source file.
       project_definition (ProjectDefinition): project definition.
       unmangled_name (str): unmangled name of the project.
       summary (str): package summary.
@@ -358,7 +358,7 @@ class RPMSpecFileGenerator(object):
       build_requires (list[str]): package build requires definition.
       description (str): package description.
     """
-    if source_filename.endswith('.zip'):
+    if source_package_filename.endswith('.zip'):
       source_extension = 'zip'
     else:
       source_extension = 'tar.gz'
@@ -471,14 +471,14 @@ class RPMSpecFileGenerator(object):
     return True
 
   def _RewriteSetupPyGeneratedFile(
-      self, project_definition, source_directory, source_filename,
+      self, project_definition, source_directory, source_package_filename,
       project_name, rpm_build_dependencies, input_file, output_file_object):
     """Rewrites the RPM spec file generated with setup.py.
 
     Args:
       project_definition (ProjectDefinition): project definition.
       source_directory (str): path of the source directory.
-      source_filename (str): name of the source package.
+      source_package_filename (str): name of the source package.
       project_name (str): name of the project.
       rpm_build_dependencies (list[str]): RPM build dependencies.
       input_file (str): path of the input RPM spec file.
@@ -593,9 +593,9 @@ class RPMSpecFileGenerator(object):
       build_requires = self._SplitRequires(build_requires)
 
     self._WriteSourcePackageDefinition(
-        output_file_object, source_filename, project_definition, unmangled_name,
-        summary, package_license, url, packager, vendor, build_requires,
-        description)
+        output_file_object, source_package_filename, project_definition,
+        unmangled_name, summary, package_license, url, packager, vendor,
+        build_requires, description)
 
     if project_name != package_name:
       python_package_name = 'python3-{0:s}'.format(package_name)
@@ -748,14 +748,14 @@ class RPMSpecFileGenerator(object):
     return True
 
   def RewriteSetupPyGeneratedFile(
-      self, project_definition, source_directory, source_filename,
+      self, project_definition, source_directory, source_package_filename,
       project_name, project_version, input_file, output_file):
     """Rewrites the RPM spec file generated with setup.py.
 
     Args:
       project_definition (ProjectDefinition): project definition.
       source_directory (str): path of the source directory.
-      source_filename (str): name of the source package.
+      source_package_filename (str): name of the source package.
       project_name (str): name of the project.
       project_version (str): version of the project.
       input_file (str): path of the input RPM spec file.
@@ -783,7 +783,7 @@ class RPMSpecFileGenerator(object):
             output_file_object)
       else:
         result = self._RewriteSetupPyGeneratedFile(
-            project_definition, source_directory, source_filename,
+            project_definition, source_directory, source_package_filename,
             project_name, rpm_build_dependencies, input_file,
             output_file_object)
 
