@@ -34,16 +34,19 @@ class ProjectBuilder(object):
   # The distributions to build dpkg-source packages for.
   _DPKG_SOURCE_DISTRIBUTIONS = frozenset(['bionic'])
 
-  def __init__(self, build_target, l2tdevtools_path):
+  def __init__(self, build_target, l2tdevtools_path, downloads_directory):
     """Initializes the project builder.
 
     Args:
       build_target (str): build target.
       l2tdevtools_path (str): path to l2tdevtools.
+      downloads_directory (str): path to the directory where projects are
+          downloaded.
     """
     super(ProjectBuilder, self).__init__()
     self._build_helpers = {}
     self._build_target = build_target
+    self._downloads_directory = downloads_directory
     self._l2tdevtools_path = l2tdevtools_path
     self._source_helpers = {}
 
@@ -147,13 +150,14 @@ class ProjectBuilder(object):
       logging.warning('Missing source helper.')
       return []
 
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return []
 
     if not source_helper_object.Create():
+      source_filename = source_helper_object.GetSourcePackageFilename()
       logging.error('Extraction of source package: {0:s} failed'.format(
           source_filename))
       return []
@@ -220,19 +224,20 @@ class ProjectBuilder(object):
             project_definition))
 
     source_helper_object = source_helper.SourcePackageHelper(
-        project_definition.name, project_definition, download_helper_object)
+        project_definition.name, project_definition, self._downloads_directory,
+        download_helper_object)
 
     source_helper_object.Clean()
 
     # TODO: add a step to make sure build environment is sane
     # e.g. _CheckStatusIsClean()
 
-    source_filename = source_helper_object.Download()
+    source_package_path = source_helper_object.Download()
 
     if self._build_target == 'download':
       # If available run the script post-download.sh after download.
       if os.path.exists('post-download.sh'):
-        command = 'sh ./post-download.sh {0:s}'.format(source_filename)
+        command = 'sh ./post-download.sh {0:s}'.format(source_package_path)
         exit_code = subprocess.call(command, shell=True)
         if exit_code != 0:
           logging.error('Running: "{0:s}" failed.'.format(command))
@@ -308,11 +313,12 @@ def Main():
       'build_target', choices=sorted(build_targets), action='store',
       metavar='BUILD_TARGET', default=None, help='The build target.')
 
+  default_builds_directory = os.path.join('..', 'l2tbuilds')
   argument_parser.add_argument(
-      '--build-directory', '--build_directory', action='store',
-      metavar='DIRECTORY', dest='build_directory', type=str,
-      default=os.path.join('..', 'l2tbuilds'), help=(
-          'The location of the build directory.'))
+      '--build-directory', '--builds-directory', '--build_directory',
+      '--builds_directory', action='store', metavar='DIRECTORY',
+      dest='builds_directory', type=str, default=default_builds_directory,
+      help='The location of the build directory.')
 
   argument_parser.add_argument(
       '-c', '--config', dest='config_path', action='store',
@@ -324,6 +330,14 @@ def Main():
       '--distributions', dest='distributions', action='store',
       metavar='NAME(S)', default='', help=(
           'comma separated list of specific distribution names to build.'))
+
+  default_downloads_directory = os.path.join('..', 'l2tbuilds')
+  argument_parser.add_argument(
+      '--download-directory', '--downloads-directory', '--download_directory',
+      '--downloads_directory', action='store', metavar='DIRECTORY',
+      dest='downloads_directory', type=str,
+      default=default_downloads_directory, help=(
+          'The location of the downloads directory.'))
 
   argument_parser.add_argument(
       '--preset', dest='preset', action='store',
@@ -378,9 +392,9 @@ def Main():
     print('')
     return False
 
-  if os.path.abspath(options.build_directory).startswith(l2tdevtools_path):
+  if os.path.abspath(options.builds_directory).startswith(l2tdevtools_path):
     print(
-        'Build directory cannot be within l2tdevtools directory due to usage '
+        'Builds directory cannot be within l2tdevtools directory due to usage '
         'of pbr')
     print('')
     return False
@@ -390,7 +404,11 @@ def Main():
 
   distributions = options.distributions.split(',') or None
 
-  project_builder = ProjectBuilder(options.build_target, l2tdevtools_path)
+  if not options.downloads_directory:
+    options.downloads_directory = options.builds_directory
+
+  project_builder = ProjectBuilder(
+      options.build_target, l2tdevtools_path, options.downloads_directory)
 
   project_names = []
   if options.preset:
@@ -426,8 +444,11 @@ def Main():
     else:
       builds.append(definition)
 
-  if not os.path.exists(options.build_directory):
-    os.mkdir(options.build_directory)
+  if not os.path.exists(options.builds_directory):
+    os.mkdir(options.builds_directory)
+
+  if not os.path.exists(options.downloads_directory):
+    os.mkdir(options.downloads_directory)
 
   undefined_projects = set(project_names)
   for disabled_package in disabled_projects:
@@ -438,24 +459,24 @@ def Main():
   failed_downloads = set()
   missing_build_dependencies = set()
 
-  current_working_directory = os.getcwd()
-  os.chdir(options.build_directory)
+  for project_definition in list(builds):
+    if project_names and project_definition.name not in project_names:
+      builds.remove(project_definition)
+      continue
 
-  try:
-    for project_definition in list(builds):
-      if project_names and project_definition.name not in project_names:
-        builds.remove(project_definition)
-        continue
+    undefined_projects.remove(project_definition.name)
 
-      undefined_projects.remove(project_definition.name)
+    if not project_builder.Download(project_definition):
+      builds.remove(project_definition)
 
-      if not project_builder.Download(project_definition):
-        builds.remove(project_definition)
+      print('Failed downloading: {0:s}'.format(project_definition.name))
+      failed_downloads.add(project_definition.name)
 
-        print('Failed downloading: {0:s}'.format(project_definition.name))
-        failed_downloads.add(project_definition.name)
+  if options.build_target != 'download':
+    current_working_directory = os.getcwd()
+    os.chdir(options.builds_directory)
 
-    if options.build_target != 'download':
+    try:
       for project_definition in list(builds):
         dependencies = project_builder.CheckBuildDependencies(
             project_definition)
@@ -483,8 +504,8 @@ def Main():
           print('Failed building: {0:s}'.format(project_definition.name))
           failed_builds.add(project_definition.name)
 
-  finally:
-    os.chdir(current_working_directory)
+    finally:
+      os.chdir(current_working_directory)
 
   if undefined_projects:
     print('')

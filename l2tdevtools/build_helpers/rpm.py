@@ -131,19 +131,20 @@ class BaseRPMBuildHelper(interface.BuildHelper):
     exit_code = subprocess.call(command, shell=True)
     return exit_code == 0
 
-  def _CopySourcePackageToRPMBuildSources(self, source_package_filename):
+  def _CopySourcePackageToRPMBuildSources(self, source_package_path):
     """Copies the source package to the rpmbuild SOURCES directory.
 
     Args:
-      source_package_filename (str): name of the source package file.
+      source_package_path (str): path of the source package file.
     """
+    source_package_filename = os.path.basename(source_package_path)
     rpm_source_package_path = os.path.join(
         self._rpmbuild_sources_path, source_package_filename)
 
     if not os.path.exists(rpm_source_package_path):
       self._CreateRPMbuildDirectories()
 
-      shutil.copy(source_package_filename, rpm_source_package_path)
+      shutil.copy(source_package_path, rpm_source_package_path)
 
   def _CreateRPMbuildDirectories(self):
     """Creates the rpmbuild and sub directories."""
@@ -169,13 +170,13 @@ class BaseRPMBuildHelper(interface.BuildHelper):
     with open(spec_filename, 'w') as rpm_spec_file:
       rpm_spec_file.write(spec_file_data)
 
-  def _CopySourceFile(self, source_package_filename):
+  def _CopySourceFile(self, source_package_path):
     """Copies the source file to the rpmbuild directory.
 
     Args:
-      source_package_filename (str): name of the source package file.
+      source_package_path (str): path of the source package file.
     """
-    shutil.copy(source_package_filename, self._rpmbuild_sources_path)
+    shutil.copy(source_package_path, self._rpmbuild_sources_path)
 
   def _GetFilenameSafeProjectInformation(self, source_helper_object):
     """Determines the filename safe project name and version.
@@ -375,12 +376,13 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_package_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info('Building rpm of: {0:s}'.format(source_package_filename))
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
@@ -389,7 +391,7 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     # rpmbuild wants the source package filename without the status indication.
     rpm_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
         project_name, project_version)
-    os.rename(source_package_filename, rpm_source_package_filename)
+    shutil.copyfile(source_package_path, rpm_source_package_filename)
 
     build_successful = self._BuildFromSourcePackage(
         rpm_source_package_filename, rpmbuild_flags='-tb')
@@ -399,9 +401,6 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
 
       setup_name = self._project_definition.setup_name or project_name
       self._RemoveBuildDirectory(setup_name, project_version)
-
-    # Change the source package filename back to the original.
-    os.rename(rpm_source_package_filename, source_package_filename)
 
     return build_successful
 
@@ -518,18 +517,19 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_package_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info('Building rpm of: {0:s}'.format(source_package_filename))
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    self._CopySourcePackageToRPMBuildSources(source_package_filename)
+    self._CopySourcePackageToRPMBuildSources(source_package_path)
 
     rpm_spec_file_path = self._GenerateSpecFile(
         project_name, project_version, source_package_filename,
@@ -660,12 +660,13 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_package_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info('Building source rpm of: {0:s}'.format(
         source_package_filename))
 
@@ -675,7 +676,7 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
     # rpmbuild wants the source package filename without the status indication.
     rpm_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
         project_name, project_version)
-    os.rename(source_package_filename, rpm_source_package_filename)
+    shutil.copyfile(source_package_path, rpm_source_package_filename)
 
     build_successful = self._BuildFromSourcePackage(
         rpm_source_package_filename, rpmbuild_flags='-ts')
@@ -684,9 +685,6 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
 
     if build_successful:
       self._MoveRPMs(project_name, project_version)
-
-    # Change the source package filename back to the original.
-    os.rename(rpm_source_package_filename, source_package_filename)
 
     return build_successful
 
@@ -762,19 +760,20 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_package_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
 
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info('Building source rpm of: {0:s}'.format(
         source_package_filename))
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    self._CopySourcePackageToRPMBuildSources(source_package_filename)
+    self._CopySourcePackageToRPMBuildSources(source_package_path)
 
     rpm_spec_file_path = self._GenerateSpecFile(
         project_name, project_version, source_package_filename,
