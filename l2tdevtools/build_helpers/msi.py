@@ -453,7 +453,7 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """
     download_helper = zlib.ZlibDownloadHelper('http://www.zlib.net')
     source_helper_object = source_helper.SourcePackageHelper(
-        'zlib', None, download_helper)
+        'zlib', None, '.', download_helper)
 
     source_filename = source_helper_object.GetSourcePackageFilename()
     if not source_filename:
