@@ -169,17 +169,18 @@ class SourcePackageHelper(SourceHelper):
     self._source_package_filename = None
     self._source_package_path = None
 
-  def _CreateFromTar(self, source_filename):
+  def _CreateFromTar(self, source_package_filename):
     """Creates the source directory from a .tar source package.
 
     Args:
-      source_filename (str): filename of the source package.
+      source_package_filename (str): filename of the source package.
 
     Returns:
       str: name of the source directory or None if no files can be extracted
           from the .tar.gz source package.
     """
-    with tarfile.open(source_filename, 'r:*', encoding='utf-8') as archive:
+    with tarfile.open(
+        source_package_filename, 'r:*', encoding='utf-8') as archive:
       directory_name = ''
 
       for tar_info in archive.getmembers():
@@ -191,12 +192,12 @@ class SourcePackageHelper(SourceHelper):
           except UnicodeDecodeError:
             logging.warning(
                 'Unable to decode filename in tar file: {0:s}'.format(
-                    source_filename))
+                    source_package_filename))
             continue
 
         if filename is None:
           logging.warning('Missing filename in tar file: {0:s}'.format(
-              source_filename))
+              source_package_filename))
           continue
 
         if not directory_name:
@@ -206,42 +207,42 @@ class SourcePackageHelper(SourceHelper):
           if not directory_name or directory_name.startswith('..'):
             logging.error(
                 'Unsupported directory name in tar file: {0:s}'.format(
-                    source_filename))
+                    source_package_filename))
             return None
 
           if os.path.exists(directory_name):
             break
 
-          logging.info('Extracting: {0:s}'.format(source_filename))
+          logging.info('Extracting: {0:s}'.format(source_package_filename))
 
         elif not filename.startswith(directory_name):
           logging.warning(
               'Skipping: {0:s} in tar file: {1:s}'.format(
-                  filename, source_filename))
+                  filename, source_package_filename))
           continue
 
         archive.extract(tar_info)
 
     return directory_name
 
-  def _CreateFromZip(self, source_filename):
+  def _CreateFromZip(self, source_package_filename):
     """Creates the source directory from a .zip source package.
 
     Args:
-      source_filename (str): filename of the source package.
+      source_package_filename (str): filename of the source package.
 
     Returns:
       str: name of the source directory or None if no files can be extracted
           from the .zip source package.
     """
-    with zipfile.ZipFile(source_filename, 'r') as archive:
+    with zipfile.ZipFile(source_package_filename, 'r') as archive:
       directory_name = ''
 
       for zip_info in archive.infolist():
         filename = getattr(zip_info, 'filename', None)
         if filename is None:
           logging.warning('Missing filename in zip file: {0:s}'.format(
-              source_filename))
+              source_package_filename))
           continue
 
         if not directory_name:
@@ -251,18 +252,18 @@ class SourcePackageHelper(SourceHelper):
           if not directory_name or directory_name.startswith('..'):
             logging.error(
                 'Unsupported directory name in zip file: {0:s}'.format(
-                    source_filename))
+                    source_package_filename))
             return None
 
           if os.path.exists(directory_name):
             break
 
-          logging.info('Extracting: {0:s}'.format(source_filename))
+          logging.info('Extracting: {0:s}'.format(source_package_filename))
 
         elif not filename.startswith(directory_name):
           logging.warning(
               'Skipping: {0:s} in zip file: {1:s}'.format(
-                  filename, source_filename))
+                  filename, source_package_filename))
           continue
 
         archive.extract(zip_info)

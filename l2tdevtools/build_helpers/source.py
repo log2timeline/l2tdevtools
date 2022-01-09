@@ -25,8 +25,8 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -37,7 +37,8 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
           source_helper_object.project_name))
       return False
 
-    logging.info('Building source of: {0:s}'.format(source_filename))
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Building source of: {0:s}'.format(source_package_filename))
 
     if self._project_definition.patches:
       # TODO: add self._ApplyPatches
@@ -83,8 +84,8 @@ class SetupPySourceBuildHelper(SourceBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -95,7 +96,8 @@ class SetupPySourceBuildHelper(SourceBuildHelper):
           source_helper_object.project_name))
       return False
 
-    logging.info('Building source of: {0:s}'.format(source_filename))
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Building source of: {0:s}'.format(source_package_filename))
 
     if self._project_definition.patches:
       # TODO: add self._ApplyPatches

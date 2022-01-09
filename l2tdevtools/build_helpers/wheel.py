@@ -173,8 +173,8 @@ class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
     Raises:
       RuntimeError: if setup.py is missing and a wheel cannot be build.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -185,7 +185,8 @@ class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
           source_helper_object.project_name))
       return False
 
-    logging.info('Building wheel of: {0:s}'.format(source_filename))
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
 
     setup_py_path = os.path.join(source_directory, 'setup.py')
     if not os.path.exists(setup_py_path):
@@ -218,8 +219,8 @@ class SetupPyWheelBuildHelper(WheelBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -230,7 +231,8 @@ class SetupPyWheelBuildHelper(WheelBuildHelper):
           source_helper_object.project_name))
       return False
 
-    logging.info('Building wheel of: {0:s}'.format(source_filename))
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     command = '\"{0:s}\" setup.py bdist_wheel > {1:s} 2>&1'.format(
