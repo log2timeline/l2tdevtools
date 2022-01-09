@@ -159,40 +159,42 @@ class DPKGBuildHelper(interface.BuildHelper):
     return exit_code == 0
 
   def _CreateOriginalSourcePackage(
-      self, source_filename, project_name, project_version):
+      self, source_package_path, project_name, project_version):
     """Creates the .orig.tar.gz source package.
 
     Args:
-      source_filename (str): name of the source package file.
+      source_package_path (str): path of the source package file.
       project_name (str): project name.
       project_version (str): version of the project.
     """
     if self._project_definition.dpkg_source_name:
       project_name = self._project_definition.dpkg_source_name
 
-    deb_orig_source_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
+    deb_orig_source_package_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
         project_name, project_version)
-    if os.path.exists(deb_orig_source_filename):
+    if os.path.exists(deb_orig_source_package_filename):
       return
 
-    if source_filename.endswith('.zip'):
+    if source_package_path.endswith('.zip'):
       self._CreateOriginalSourcePackageFromZip(
-          source_filename, deb_orig_source_filename)
+          source_package_path, deb_orig_source_package_filename)
     else:
-      shutil.copy(source_filename, deb_orig_source_filename)
+      shutil.copy(source_package_path, deb_orig_source_package_filename)
 
   def _CreateOriginalSourcePackageFromZip(
-      self, source_filename, orig_source_filename):
+      self, source_package_path, orig_source_package_filename):
     """Creates the .orig.tar.gz source package from a .zip file.
 
     Args:
-      source_filename (str): name of the source package file.
-      orig_source_filename (str): name of the .orig.tar.gz source package file.
+      source_package_path (str): path of the source package file.
+      orig_source_package_filename (str): name of the .orig.tar.gz source
+          package file.
     """
     posix_epoch = datetime.datetime(1970, 1, 1)
 
-    with zipfile.ZipFile(source_filename, 'r') as zip_file:
-      with tarfile.open(name=orig_source_filename, mode='w:gz') as tar_file:
+    with zipfile.ZipFile(source_package_path, 'r') as zip_file:
+      with tarfile.open(
+          name=orig_source_package_filename, mode='w:gz') as tar_file:
         for filename in zip_file.namelist():
           with zip_file.open(filename) as file_object:
             zip_info = zip_file.getinfo(filename)
@@ -577,8 +579,8 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -594,9 +596,10 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     self._CreateOriginalSourcePackage(
-        source_filename, source_helper_object.project_name, project_version)
+        source_package_path, source_helper_object.project_name, project_version)
 
-    logging.info('Building deb of: {0:s}'.format(source_filename))
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Building deb of: {0:s}'.format(source_package_filename))
 
     if not self._CreatePackagingFiles(source_directory, project_version):
       return False
@@ -690,8 +693,8 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -705,10 +708,11 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     project_version = source_helper_object.GetProjectVersion()
 
     self._CreateOriginalSourcePackage(
-        source_filename, source_helper_object.project_name, project_version)
+        source_package_path, source_helper_object.project_name, project_version)
 
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info('Building source deb of: {0:s} for: {1:s}'.format(
-        source_filename, self.distribution))
+        source_package_filename, self.distribution))
 
     if not self._CreatePackagingFiles(source_directory, project_version):
       return False
@@ -908,8 +912,8 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -926,9 +930,10 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     self._CreateOriginalSourcePackage(
-        source_filename, source_helper_object.project_name, project_version)
+        source_package_path, source_helper_object.project_name, project_version)
 
-    logging.info('Building deb of: {0:s}'.format(source_filename))
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Building deb of: {0:s}'.format(source_package_filename))
 
     if not self._CreatePackagingFiles(source_directory, project_version):
       return False
@@ -1060,8 +1065,8 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
     Returns:
       bool: True if successful, False otherwise.
     """
-    source_filename = source_helper_object.GetSourcePackageFilename()
-    if not source_filename:
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
       logging.info('Missing source package of: {0:s}'.format(
           source_helper_object.project_name))
       return False
@@ -1076,10 +1081,11 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
         source_helper_object)
 
     self._CreateOriginalSourcePackage(
-        source_filename, source_helper_object.project_name, project_version)
+        source_package_path, source_helper_object.project_name, project_version)
 
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info('Building source deb of: {0:s} for: {1:s}'.format(
-        source_filename, self.distribution))
+        source_package_filename, self.distribution))
 
     if not self._CreatePackagingFiles(source_directory, project_version):
       return False
