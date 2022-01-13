@@ -413,6 +413,9 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
+    self._RemoveOlderSourceDirectories(project_name, project_version)
+    self._RemoveOlderSourcePackages(project_name, project_version)
+
     setup_name = self._project_definition.setup_name or project_name
     self._RemoveOlderBuildDirectory(setup_name, project_version)
 
@@ -564,6 +567,9 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     # Remove previous versions of rpms.
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
+
+    self._RemoveOlderSourceDirectories(project_name, project_version)
+    self._RemoveOlderSourcePackages(project_name, project_version)
 
     setup_name = self._project_definition.setup_name or project_name
     self._RemoveOlderBuildDirectory(setup_name, project_version)
