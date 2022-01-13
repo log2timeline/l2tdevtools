@@ -655,6 +655,11 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     """
     project_version = source_helper_object.GetProjectVersion()
 
+    self._RemoveOlderSourceDirectories(
+        source_helper_object.project_name, project_version)
+    self._RemoveOlderSourcePackages(
+        source_helper_object.project_name, project_version)
+
     self._RemoveOlderOriginalSourcePackage(
         source_helper_object.project_name, project_version)
 
@@ -769,6 +774,11 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
       source_helper_object (SourceHelper): source helper.
     """
     project_version = source_helper_object.GetProjectVersion()
+
+    self._RemoveOlderSourceDirectories(
+        source_helper_object.project_name, project_version)
+    self._RemoveOlderSourcePackages(
+        source_helper_object.project_name, project_version)
 
     self._RemoveOlderOriginalSourcePackage(
         source_helper_object.project_name, project_version)
@@ -993,6 +1003,11 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
+    self._RemoveOlderSourceDirectories(
+        source_helper_object.project_name, project_version)
+    self._RemoveOlderSourcePackages(
+        source_helper_object.project_name, project_version)
+
     self._RemoveOlderOriginalSourcePackage(
         source_helper_object.project_name, project_version)
 
@@ -1142,6 +1157,11 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
       source_helper_object (SourceHelper): source helper.
     """
     project_version = source_helper_object.GetProjectVersion()
+
+    self._RemoveOlderSourceDirectories(
+        source_helper_object.project_name, project_version)
+    self._RemoveOlderSourcePackages(
+        source_helper_object.project_name, project_version)
 
     self._RemoveOlderOriginalSourcePackage(
         source_helper_object.project_name, project_version,
