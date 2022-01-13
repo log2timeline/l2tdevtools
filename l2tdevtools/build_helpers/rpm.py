@@ -651,6 +651,9 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
+    self._RemoveOlderSourceDirectories(project_name, project_version)
+    self._RemoveOlderSourcePackages(project_name, project_version)
+
     self._RemoveOlderSourceRPMs(project_name, project_version)
 
 
