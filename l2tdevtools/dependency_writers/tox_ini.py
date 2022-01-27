@@ -35,10 +35,15 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a tox.ini file."""
+    python_module_name = self._project_definition.name
+
+    if self._project_definition.name.endswith('-kb'):
+      python_module_name = ''.join([python_module_name[:-3], 'rc'])
+
     paths_to_lint = []
 
-    if os.path.isdir(self._project_definition.name):
-      paths_to_lint.append(self._project_definition.name)
+    if os.path.isdir(python_module_name):
+      paths_to_lint.append(python_module_name)
 
     if os.path.isdir('scripts'):
       paths_to_lint.append('scripts')
@@ -55,7 +60,8 @@ class ToxIniWriter(interface.DependencyFileWriter):
     template_mappings = {
         'envlist': envlist,
         'paths_to_lint': ' '.join(sorted(paths_to_lint)),
-        'project_name': self._project_definition.name}
+        'project_name': self._project_definition.name,
+        'python_module_name': python_module_name}
 
     file_content = []
 

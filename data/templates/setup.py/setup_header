@@ -26,17 +26,17 @@ def parse_requirements_from_file(path):
   return requirements
 
 
-${project_name}_description = (
+${python_module_name}_description = (
 ${description_short})
 
-${project_name}_long_description = (
+${python_module_name}_long_description = (
 ${description_long})
 
 setup(
-    name='${project_name}',
-    version=${project_name}.__version__,
-    description=${project_name}_description,
-    long_description=${project_name}_long_description,
+    name='${python_module_name}',
+    version=${python_module_name}.__version__,
+    description=${python_module_name}_description,
+    long_description=${python_module_name}_long_description,
     license='Apache License, Version 2.0',
     url='${homepage_url}',
     maintainer='${maintainer}',

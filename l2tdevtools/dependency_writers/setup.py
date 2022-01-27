@@ -17,7 +17,7 @@ class SetupCfgWriter(interface.DependencyFileWriter):
   _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
 
   _PROJECTS_WITH_SDIST_TEST_DATA = (
-      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevtrc', 'winregrc')
+      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevt-kb', 'winreg-kb')
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.cfg')
 
@@ -105,20 +105,20 @@ class SetupPyWriter(interface.DependencyFileWriter):
   _PROJECTS_WITH_PYTHON3_AS_DEFAULT = ('plaso', )
 
   _PROJECTS_WITH_SDIST_TEST_DATA = (
-      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevtrc', 'winregrc')
+      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevt-kb', 'winreg-kb')
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.py')
 
-  def _DetermineSubmoduleLevels(self, project_name):
+  def _DetermineSubmoduleLevels(self, python_module_name):
     """Determines the number of submodule levels.
 
     Args:
-      project_name (str): name of the project.
+      python_module_name (str): name of the Python module.
 
     Return:
       int: number of submodule levels.
     """
-    submodule_glob = project_name
+    submodule_glob = python_module_name
     submodule_levels = 0
 
     while submodule_levels < 10:
@@ -155,6 +155,11 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a setup.py file."""
+    python_module_name = self._project_definition.name
+
+    if self._project_definition.name.endswith('-kb'):
+      python_module_name = ''.join([python_module_name[:-3], 'rc'])
+
     # Width is 80 characters minus 4 spaces, 2 single quotes and 1 comma.
     text_wrapper = textwrap.TextWrapper(drop_whitespace=False, width=73)
 
@@ -217,11 +222,10 @@ class SetupPyWriter(interface.DependencyFileWriter):
     packages_exclude = ', '.join([
         '\'{0:s}\''.format(exclude) for exclude in sorted(packages_exclude)])
 
-    submodule_levels = self._DetermineSubmoduleLevels(
-        self._project_definition.name)
+    submodule_levels = self._DetermineSubmoduleLevels(python_module_name)
 
     python3_package_module_prefix = '%{{{{python3_sitelib}}}}/{0:s}'.format(
-        self._project_definition.name)
+        python_module_name)
     python3_package_files = [
         '{0:s}/*.py'.format(python3_package_module_prefix)]
 
@@ -247,7 +251,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         '%exclude %{{_prefix}}/share/doc/*'])
 
     python3_package_module_prefix = '%{{{{python3_sitelib}}}}/{0:s}'.format(
-        self._project_definition.name)
+        python_module_name)
     python3_package_files.append(
         '%exclude {0:s}/__pycache__/*'.format(python3_package_module_prefix))
 
@@ -264,7 +268,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         '              \'{0:s}\''.format(package_file)
         for package_file in python3_package_files])
     python3_package_files = python3_package_files.format(
-        self._project_definition.name)
+        python_module_name)
 
     rpm_doc_files = [
         doc_file for doc_file in doc_files if doc_file != 'LICENSE']
@@ -283,6 +287,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'packages_exclude': packages_exclude,
         'project_name_description': self._project_definition.name_description,
         'project_name': self._project_definition.name,
+        'python_module_name': python_module_name,
         'python3_package_files': python3_package_files,
         'rpm_doc_files': ' '.join(rpm_doc_files),
         'rpm_license_file': rpm_license_file,
