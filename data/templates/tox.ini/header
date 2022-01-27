@@ -12,7 +12,7 @@ deps =
 commands =
     py3{6,7,8,9,10}: ./run_tests.py
     coverage: coverage erase
-    coverage: coverage run --source=${project_name} --omit="*_test*,*__init__*,*test_lib*" run_tests.py
+    coverage: coverage run --source=${python_module_name} --omit="*_test*,*__init__*,*test_lib*" run_tests.py
 
 [testenv:codecov]
 skip_install = true

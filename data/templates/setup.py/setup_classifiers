@@ -7,5 +7,5 @@
     packages=find_packages('.', exclude=[
         ${packages_exclude}]),
     package_dir={
-        '${project_name}': '${project_name}'
+        '${python_module_name}': '${python_module_name}'
     },

@@ -31,6 +31,7 @@ class ProjectHelper(cli.CLIHelper):
   SUPPORTED_PROJECTS = frozenset([
       'acstore',
       'artifacts',
+      'artifacts-kb',
       'clitooltester',
       'dfdatetime',
       'dfkinds',

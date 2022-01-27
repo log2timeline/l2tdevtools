@@ -9,10 +9,10 @@ from sphinx.ext import apidoc
 from docutils import nodes
 from docutils import transforms
 
-# Change PYTHONPATH to include ${project_name} module and dependencies.
+# Change PYTHONPATH to include ${python_module_name} module and dependencies.
 sys.path.insert(0, os.path.abspath('..'))
 
-import ${project_name}  # pylint: disable=wrong-import-position
+import ${python_module_name}  # pylint: disable=wrong-import-position
 
 import utils.dependencies  # pylint: disable=wrong-import-position
 
@@ -58,7 +58,7 @@ napoleon_include_special_with_doc = True
 # General information about the project.
 # pylint: disable=redefined-builtin
 project = '${name_description}'
-copyright = 'The ${name_description} Project Authors'
+copyright = 'The ${name_description} authors'
 version = ${project_name}.__version__
 release = ${project_name}.__version__
 
@@ -83,7 +83,7 @@ pygments_style = 'sphinx'
 html_theme = 'sphinx_rtd_theme'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = '${project_name}doc'
+htmlhelp_basename = '${htmlhelp_basename}doc'
 
 
 # -- Options linkcheck ----------------------------------------------------
@@ -106,7 +106,7 @@ def RunSphinxAPIDoc(app):
         the Sphinx event callback API.
   """
   current_directory = os.path.abspath(os.path.dirname(__file__))
-  module_path = os.path.join(current_directory, '..', '${project_name}')
+  module_path = os.path.join(current_directory, '..', '${python_module_name}')
   api_directory = os.path.join(current_directory, 'sources', 'api')
   apidoc.main(['-o', api_directory, module_path, '--force'])
 

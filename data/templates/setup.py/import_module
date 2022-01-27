@@ -5,7 +5,7 @@ if version_tuple < (3, 6):
       'required.').format(sys.version))
   sys.exit(1)
 
-# Change PYTHONPATH to include ${project_name} so that we can get the version.
+# Change PYTHONPATH to include ${python_module_name} so that we can get the version.
 sys.path.insert(0, '.')
 
-import ${project_name}  # pylint: disable=wrong-import-position
+import ${python_module_name}  # pylint: disable=wrong-import-position

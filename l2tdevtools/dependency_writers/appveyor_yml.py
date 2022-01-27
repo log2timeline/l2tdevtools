@@ -47,9 +47,10 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     file_content.append(template_data)
 
     if self._project_definition.name not in self._PROJECTS_WITHOUT_BUILD:
-      template_data = self._GenerateFromTemplate(
-          'pypi_token', template_mappings)
-      file_content.append(template_data)
+      if self._project_definition.pypi_token:
+        template_data = self._GenerateFromTemplate(
+            'pypi_token', template_mappings)
+        file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('matrix', template_mappings)
     file_content.append(template_data)
@@ -78,9 +79,10 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
       template_data = self._GenerateFromTemplate('artifacts', template_mappings)
       file_content.append(template_data)
 
-      template_data = self._GenerateFromTemplate(
-          'deploy_script', template_mappings)
-      file_content.append(template_data)
+      if self._project_definition.pypi_token:
+        template_data = self._GenerateFromTemplate(
+            'deploy_script', template_mappings)
+        file_content.append(template_data)
 
     file_content = ''.join(file_content)
 

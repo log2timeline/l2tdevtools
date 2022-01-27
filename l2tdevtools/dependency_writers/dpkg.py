@@ -45,24 +45,49 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       ''] # yapf: disable
 
   _PYTHON3_PACKAGE = [
-      'Package: python3-{project_name:s}',
+      'Package: python3-{python_module_name:s}',
       'Architecture: all',
       'Depends: {python3_dependencies:s}${{misc:Depends}}',
-      'Description: Python 3 module of {name_description:s}',
+      'Description: Python 3 module of {python_module_description:s}',
       '{description_long:s}',
       '']  # yapf: disable
 
   _TOOLS_PACKAGE = [
       'Package: {project_name:s}-tools',
       'Architecture: all',
-      ('Depends: python3-{project_name:s} (>= ${{binary:Version}}), '
+      ('Depends: python3-{python_module_name:s} (>= ${{binary:Version}}), '
        '${{misc:Depends}}'),
-      'Description: Tools of {name_description:s}',
-      '{description_long:s}',
+      'Description: {tools_description:s}',
+      ' {tool_description_long:s}',
       '']  # yapf: disable
 
   def Write(self):
     """Writes a dpkg control file."""
+    python_module_description = self._project_definition.name_description
+    python_module_name = self._project_definition.name
+    tools_description = 'Tools of {0:s}'.format(
+        self._project_definition.name_description)
+    tool_description_long = self._project_definition.description_long
+
+    if self._project_definition.name.endswith('-kb'):
+      python_module_name = ''.join([python_module_name[:-3], 'rc'])
+
+      python_module_description, _, _ = python_module_description.partition(
+          ' knowledge base ')
+      python_module_description = ''.join([
+          python_module_description,
+          ' resources ({0:s})'.format(python_module_name)])
+
+      tools_description = 'Tools for {0:s}'.format(
+          self._project_definition.name_description)
+
+      tool_description_long, _, _ = (
+          self._project_definition.name_description.rpartition(' ('))
+      tool_description_long = (
+          '{0:s}{1:s} is a project to build a {2:s}.'.format(
+              self._project_definition.name[0].upper(),
+              self._project_definition.name[1:], tool_description_long))
+
     file_content = []
 
     file_content.extend(self._PYTHON3_FILE_HEADER)
@@ -108,7 +133,11 @@ class DPKGControlWriter(interface.DependencyFileWriter):
         'maintainer': self._project_definition.maintainer,
         'name_description': self._project_definition.name_description,
         'project_name': self._project_definition.name,
-        'python3_dependencies': python3_dependencies}
+        'python_module_description': python_module_description,
+        'python_module_name': python_module_name,
+        'python3_dependencies': python3_dependencies,
+        'tools_description': tools_description,
+        'tool_description_long': tool_description_long}
 
     file_content = '\n'.join(file_content)
     file_content = file_content.format(**template_mappings)
