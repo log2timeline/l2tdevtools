@@ -59,8 +59,8 @@ napoleon_include_special_with_doc = True
 # pylint: disable=redefined-builtin
 project = '${name_description}'
 copyright = 'The ${name_description} authors'
-version = ${project_name}.__version__
-release = ${project_name}.__version__
+version = ${python_module_name}.__version__
+release = ${python_module_name}.__version__
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

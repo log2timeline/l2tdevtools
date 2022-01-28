@@ -58,7 +58,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       ('Depends: python3-{python_module_name:s} (>= ${{binary:Version}}), '
        '${{misc:Depends}}'),
       'Description: {tools_description:s}',
-      ' {tool_description_long:s}',
+      '{tool_description_long:s}',
       '']  # yapf: disable
 
   def Write(self):
@@ -87,6 +87,9 @@ class DPKGControlWriter(interface.DependencyFileWriter):
           '{0:s}{1:s} is a project to build a {2:s}.'.format(
               self._project_definition.name[0].upper(),
               self._project_definition.name[1:], tool_description_long))
+
+    tool_description_long = '\n'.join(
+        [' {0:s}'.format(line) for line in tool_description_long.split('\n')])
 
     file_content = []
 

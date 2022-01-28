@@ -100,7 +100,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
   _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
 
   _PROJECTS_WITH_PACKAGE_DATA = (
-      'dfvfs', 'dfwinreg', 'dtformats', 'plaso', 'winregrc')
+      'dfvfs', 'dfwinreg', 'dtformats', 'plaso', 'olecf-kb', 'winreg-kb')
 
   _PROJECTS_WITH_PYTHON3_AS_DEFAULT = ('plaso', )
 
@@ -295,6 +295,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'scripts_directory': scripts_directory,
     }
 
+    # TODO: use a glob to determine if project has package data
     if self._project_definition.name in self._PROJECTS_WITH_PACKAGE_DATA:
       if self._project_definition.name == 'dfvfs':
         package_data_paths = ['dfvfs.lib']
@@ -303,10 +304,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
             'plaso.parsers', 'plaso.parsers.esedb_plugins',
             'plaso.parsers.olecf_plugins', 'plaso.parsers.plist_plugins',
             'plaso.parsers.winreg_plugins']
-      elif self._project_definition.name == 'winreg-kb':
-        package_data_paths = ['winregrc']
       else:
-        package_data_paths = [self._project_definition.name]
+        package_data_paths = [python_module_name]
 
       template_mappings['package_data_paths'] = ',\n'.join([
           '        \'{0:s}\': [\'*.yaml\']'.format(path)
