@@ -33,7 +33,7 @@ class COPRProjectManager(object):
 
   _COPR_REPO_URL = (
       'https://copr-be.cloud.fedoraproject.org/results/%40{name:s}/'
-      '{project:s}/fedora-{fedora_version:s}-i386')
+      '{project:s}/fedora-{fedora_version:s}-x86_64')
 
   _PRIMARY_XML_XPATH = (
       './{http://linux.duke.edu/metadata/repo}data[@type="primary"]/'
@@ -469,7 +469,9 @@ class PackagesManager(object):
       version_tuple = packages[name].split('.')
       new_version_tuple = version.split('.')
 
-      if new_version_tuple > version_tuple:
+      compare_result = versions.CompareVersions(
+          version_tuple, new_version_tuple)
+      if compare_result < 0:
         new_versions[name] = version
 
     return new_packages, new_versions
@@ -820,10 +822,11 @@ def Main():
     bool: True if successful or False if not.
   """
   actions = frozenset([
-      'copr-diff-dev', 'copr-diff-stable', 'copr-diff-testing', 'csv-diff',
-      'l2tbinaries-diff-dev', 'l2tbinaries-diff-stable',
+      'copr-diff-dev', 'copr-diff-stable', 'copr-diff-staging',
+      'copr-diff-testing', 'csv-diff', 'l2tbinaries-diff-dev',
+      'l2tbinaries-diff-stable', 'l2tbinaries-diff-staging',
       'l2tbinaries-diff-testing', 'launchpad-diff-dev', 'launchpad-diff-stable',
-      'launchpad-diff-testing', 'pypi-diff'])
+      'launchpad-diff-staging', 'launchpad-diff-testing', 'pypi-diff'])
 
   argument_parser = argparse.ArgumentParser(description=(
       'Manages the GIFT copr, launchpad PPA and l2tbinaries.'))
@@ -911,8 +914,10 @@ def Main():
     else:
       if track == 'dev':
         reference_track = 'testing'
-      else:
+      elif track == 'staging':
         reference_track = 'dev'
+      else:
+        reference_track = 'staging'
 
       new_packages, new_versions = packages_manager.CompareCOPRProjects(
           reference_track, track)
@@ -949,8 +954,10 @@ def Main():
     else:
       if track == 'dev':
         reference_track = 'testing'
-      else:
+      elif track == 'staging':
         reference_track = 'dev'
+      else:
+        reference_track = 'staging'
 
       new_packages, new_versions = packages_manager.CompareGithubRepos(
           sub_directory, reference_track, track)
@@ -976,8 +983,10 @@ def Main():
     else:
       if track == 'dev':
         reference_track = 'testing'
-      else:
+      elif track == 'staging':
         reference_track = 'dev'
+      else:
+        reference_track = 'staging'
 
       new_packages, new_versions = packages_manager.CompareLaunchpadPPATracks(
           reference_track, track)
