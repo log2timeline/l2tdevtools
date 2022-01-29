@@ -641,6 +641,32 @@ class DependencyUpdater(object):
 
     return True
 
+  def ExpandPresets(self, preset_definitions, preset_names):
+    """Expands preset names to project names.
+
+    Args:
+      preset_definitions (dict[str, PresetDefinition]): preset definitions.
+      preset_names (str): names of the presets to expand.
+
+    Returns:
+      set[str]: project names.
+    """
+    project_names = set()
+    for preset_name in preset_names:
+      preset_definition = preset_definitions.get(preset_name, None)
+      if not preset_definition:
+        continue
+
+      if preset_definition.preset_names:
+        sub_project_names = self.ExpandPresets(
+            preset_definitions, preset_definition.preset_names)
+        project_names = project_names.union(sub_project_names)
+
+      project_names = project_names.union(
+          set(preset_definition.project_names))
+
+    return project_names
+
   def UpdatePackages(self, projects_file, user_defined_project_names):
     """Updates packages.
 
@@ -816,23 +842,6 @@ def Main():
   logging.basicConfig(
       level=logging.INFO, format='[%(levelname)s] %(message)s')
 
-  user_defined_project_names = []
-  if options.preset:
-    with io.open(presets_file, 'r', encoding='utf-8') as file_object:
-      preset_definition_reader = presets.PresetDefinitionReader()
-      for preset_definition in preset_definition_reader.Read(file_object):
-        if preset_definition.name == options.preset:
-          user_defined_project_names = preset_definition.project_names
-          break
-
-    if not user_defined_project_names:
-      print('Undefined preset: {0:s}'.format(options.preset))
-      print('')
-      return False
-
-  elif options.project_names:
-    user_defined_project_names = options.project_names
-
   dependency_updater = DependencyUpdater(
       download_directory=options.download_directory,
       download_only=options.download_only,
@@ -842,6 +851,26 @@ def Main():
       msi_targetdir=options.msi_targetdir,
       preferred_machine_type=options.machine_type,
       verbose_output=options.verbose)
+
+  user_defined_project_names = []
+  if options.preset:
+    preset_definitions = {}
+
+    with io.open(presets_file, 'r', encoding='utf-8') as file_object:
+      definition_reader = presets.PresetDefinitionReader()
+      preset_definitions = {
+          preset_definition.name: preset_definition
+          for preset_definition in definition_reader.Read(file_object)}
+
+    user_defined_project_names = dependency_updater.ExpandPresets(
+        preset_definitions, options.preset)
+    if not user_defined_project_names:
+      print('Undefined preset: {0:s}'.format(options.preset))
+      print('')
+      return False
+
+  elif options.project_names:
+    user_defined_project_names = options.project_names
 
   if options.uninstall:
     result = dependency_updater.UninstallPackages(
