@@ -291,9 +291,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
         'python3_package_files': python3_package_files,
         'rpm_doc_files': ' '.join(rpm_doc_files),
         'rpm_license_file': rpm_license_file,
-        'shebang': shebang,
         'scripts_directory': scripts_directory,
-    }
+        'shebang': shebang}
 
     # TODO: use a glob to determine if project has package data
     if self._project_definition.name in self._PROJECTS_WITH_PACKAGE_DATA:
@@ -339,6 +338,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
       template_file = 'bdist_rpm-with_data_and_tools'
     elif data_directory:
       template_file = 'bdist_rpm-with_data'
+    elif scripts_directory:
+      template_file = 'bdist_rpm-with_tools'
     else:
       template_file = 'bdist_rpm'
 
