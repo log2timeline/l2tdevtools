@@ -331,13 +331,11 @@ def Main():
       metavar='NAME(S)', default='', help=(
           'comma separated list of specific distribution names to build.'))
 
-  default_downloads_directory = os.path.join('..', 'l2tbuilds')
   argument_parser.add_argument(
       '--download-directory', '--downloads-directory', '--download_directory',
       '--downloads_directory', action='store', metavar='DIRECTORY',
       dest='downloads_directory', type=str,
-      default=default_downloads_directory, help=(
-          'The location of the downloads directory.'))
+      default=None, help='The location of the downloads directory.')
 
   argument_parser.add_argument(
       '--preset', dest='preset', action='store',
