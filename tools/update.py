@@ -250,6 +250,7 @@ class DependencyUpdater(object):
   _GIT_BRANCH_PER_TRACK = {
       'dev': 'dev',
       'stable': 'main',
+      'staging': 'staging',
       'testing': 'testing'}
 
   _PKG_NAME_PREFIXES = [
@@ -716,7 +717,7 @@ def Main():
   Returns:
     bool: True if successful or False if not.
   """
-  tracks = ['dev', 'stable', 'testing']
+  tracks = ['dev', 'stable', 'staging', 'testing']
 
   argument_parser = argparse.ArgumentParser(description=(
       'Installs the latest versions of project dependencies.'))
