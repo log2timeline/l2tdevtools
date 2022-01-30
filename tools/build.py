@@ -95,6 +95,32 @@ class ProjectBuilder(object):
 
     return False
 
+  def _ExpandPresets(self, preset_definitions, preset_names):
+    """Expands preset names to project names.
+
+    Args:
+      preset_definitions (dict[str, PresetDefinition]): preset definitions.
+      preset_names (str): names of the presets to expand.
+
+    Returns:
+      set[str]: project names.
+    """
+    project_names = set()
+    for preset_name in preset_names:
+      preset_definition = preset_definitions.get(preset_name, None)
+      if not preset_definition:
+        continue
+
+      if preset_definition.preset_names:
+        sub_project_names = self._ExpandPresets(
+            preset_definitions, preset_definition.preset_names)
+        project_names = project_names.union(sub_project_names)
+
+      project_names = project_names.union(
+          set(preset_definition.project_names))
+
+    return project_names
+
   def Build(self, project_definition, distributions=None):
     """Builds a project.
 
@@ -278,22 +304,7 @@ class ProjectBuilder(object):
           preset_definition.name: preset_definition
           for preset_definition in definition_reader.Read(file_object)}
 
-    preset_definition = preset_definitions.get(preset_name, None)
-    if not preset_definition:
-      return []
-
-    project_names = list(preset_definition.project_names)
-    for sub_preset_name in preset_definition.preset_names:
-      sub_preset_definition = preset_definitions.get(sub_preset_name, None)
-      if sub_preset_definition.preset_names:
-        logging.warning((
-            'Multiple levels of presets not supported: {0:s} -> {1:s} -> '
-            '{2:s}').format(preset_name, sub_preset_name, ', '.join(
-                sub_preset_definition.preset_names)))
-
-      project_names.extend(sub_preset_definition.project_names)
-
-    return project_names
+    return list(self._ExpandPresets(preset_definitions, [preset_name]))
 
 
 def Main():
