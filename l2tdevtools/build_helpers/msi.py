@@ -589,6 +589,11 @@ class ConfigureMakeMSIBuildHelper(MSIBuildHelper):
     """
     project_version = source_helper_object.GetProjectVersion()
 
+    self._RemoveOlderSourceDirectories(
+        source_helper_object.project_name, project_version)
+    self._RemoveOlderSourcePackages(
+        source_helper_object.project_name, project_version)
+
     # Remove previous versions of MSIs.
     filenames_to_ignore = 'py{0:s}-.*{1!s}.1.{2:s}-{3:s}'.format(
         source_helper_object.project_name[3:], project_version,
@@ -788,19 +793,13 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
-    # TODO: check if this needs to be removed since removing build and dist
-    # in the main build directory does not make sense.
-
-    # Remove previous versions build directories.
-    for filename in ('build', 'dist'):
-      if os.path.exists(filename):
-        logging.info('Removing: {0:s}'.format(filename))
-        shutil.rmtree(filename, True)
-
-    # Remove previous versions of MSIs.
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
+    self._RemoveOlderSourceDirectories(project_name, project_version)
+    self._RemoveOlderSourcePackages(project_name, project_version)
+
+    # Remove previous versions of MSIs.
     if self._project_definition.architecture_dependent:
       suffix = '-{0:s}'.format(self._python_version_suffix)
     else:
