@@ -47,6 +47,7 @@ class ProjectDefinition(object):
     pypi_name (str): name of the project on PyPI.
     pypi_source_name (str): name used in the source package file on PyPI.
     rpm_build_dependencies (list[str]): rpm build dependencies.
+    rpm_dependencies (list[str]): rpm dependencies.
     rpm_name (str): RPM package name.
     rpm_template_spec (str): name of the rpm spec file.
     setup_name (str): project name used in setup.py.
@@ -94,6 +95,7 @@ class ProjectDefinition(object):
     self.pypi_name = None
     self.pypi_source_name = None
     self.rpm_build_dependencies = None
+    self.rpm_dependencies = None
     self.rpm_name = None
     self.rpm_template_spec = None
     self.setup_name = None
@@ -261,6 +263,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'msi_prebuild')
       project_definition.rpm_build_dependencies = self._GetConfigValue(
           config_parser, section_name, 'rpm_build_dependencies')
+      project_definition.rpm_dependencies = self._GetConfigValue(
+          config_parser, section_name, 'rpm_dependencies')
       project_definition.rpm_name = self._GetConfigValue(
           config_parser, section_name, 'rpm_name')
       project_definition.rpm_template_spec = self._GetConfigValue(
@@ -341,6 +345,12 @@ class ProjectDefinitionReader(object):
       elif isinstance(project_definition.rpm_build_dependencies, str):
         project_definition.rpm_build_dependencies = (
             project_definition.rpm_build_dependencies.split(','))
+
+      if project_definition.rpm_dependencies is None:
+        project_definition.rpm_dependencies = []
+      elif isinstance(project_definition.rpm_dependencies, str):
+        project_definition.rpm_dependencies = (
+            project_definition.rpm_dependencies.split(','))
 
       if project_definition.patches is None:
         project_definition.patches = []
