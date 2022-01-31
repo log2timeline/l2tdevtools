@@ -607,6 +607,8 @@ class RPMSpecFileGenerator(object):
       python3_requires = requires
 
     python3_requires = self._GetPython3Requires(python3_requires)
+    if project_definition.rpm_dependencies:
+      python3_requires.extend(project_definition.rpm_dependencies)
 
     if has_data_package:
       self._WriteDataPackageDefinition(
