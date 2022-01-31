@@ -937,6 +937,8 @@ def Main():
         'Difference between: {0:s} and CSV'.format(reference_directory))
 
   elif action_tuple[0] == 'l2tbinaries' and action_tuple[1] == 'diff':
+    track = action_tuple[2]
+
     sub_directory = packages_manager.GetMachineTypeSubDirectory(
         preferred_machine_type=options.machine_type)
 
