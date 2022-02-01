@@ -36,6 +36,31 @@ class GitHubActionsTestDockerYmlWriter(interface.DependencyFileWriter):
       file_object.write(file_content)
 
 
+class GitHubActionsTestDocsYmlWriter(interface.DependencyFileWriter):
+  """test_docs.yml GitHub actions workflow file writer."""
+
+  _TEMPLATE_FILE = os.path.join(
+      'data', 'templates', 'github_actions', 'test_docs.yml')
+
+  PATH = os.path.join('.github', 'workflows', 'test_docs.yml')
+
+  def Write(self):
+    """Writes a test_docs.yml GitHub actions workflow file ."""
+    dpkg_dependencies = self._GetDPKGPythonDependencies()
+    test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
+    dpkg_dependencies.extend(test_dependencies)
+    dpkg_dependencies.append('python3-pip')
+
+    template_mappings = {
+        'dpkg_dependencies': ' '.join(sorted(set(dpkg_dependencies)))}
+
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+      file_object.write(file_content)
+
+
 class GitHubActionsTestToxYmlWriter(interface.DependencyFileWriter):
   """test_tox.yml GitHub actions workflow file writer."""
 
