@@ -100,7 +100,8 @@ class SetupPyWriter(interface.DependencyFileWriter):
   _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
 
   _PROJECTS_WITH_PACKAGE_DATA = (
-      'dfvfs', 'dfwinreg', 'dtformats', 'plaso', 'olecf-kb', 'winreg-kb')
+      'artifacts-kb', 'dfvfs', 'dfwinreg', 'dtformats', 'esedb-kb', 'olecf-kb',
+      'plaso', 'winreg-kb')
 
   _PROJECTS_WITH_PYTHON3_AS_DEFAULT = ('plaso', )
 

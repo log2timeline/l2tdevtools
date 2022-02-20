@@ -477,9 +477,14 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     spec_filename = '{0:s}.spec'.format(project_name)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
-    if not spec_file_generator.RewriteSetupPyGeneratedFile(
-        self._project_definition, source_directory, source_package_filename,
-        project_name, project_version, input_file_path, output_file_path):
+    try:
+      result = spec_file_generator.RewriteSetupPyGeneratedFile(
+          self._project_definition, source_directory, source_package_filename,
+          project_name, project_version, input_file_path, output_file_path)
+    except FileNotFoundError:
+      result = False
+
+    if not result:
       return None
 
     return output_file_path
@@ -753,9 +758,14 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
     spec_filename = '{0:s}.spec'.format(project_name)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
-    if not spec_file_generator.RewriteSetupPyGeneratedFile(
-        self._project_definition, source_directory, source_package_filename,
-        project_name, project_version, input_file_path, output_file_path):
+    try:
+      result = spec_file_generator.RewriteSetupPyGeneratedFile(
+          self._project_definition, source_directory, source_package_filename,
+          project_name, project_version, input_file_path, output_file_path)
+    except FileNotFoundError:
+      result = False
+
+    if not result:
       return None
 
     return output_file_path
