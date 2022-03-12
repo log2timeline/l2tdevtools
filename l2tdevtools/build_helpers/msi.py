@@ -648,13 +648,7 @@ class SetupPyMSIBuildHelper(MSIBuildHelper):
 
     project_version = source_helper_object.GetProjectVersion()
 
-    if source_helper_object.project_name == 'dfvfs':
-      # TODO: determine if this is still needed.
-      project_version = '{0!s}.1'.format(project_version)
-    else:
-      project_version = '{0!s}'.format(project_version)
-
-    return project_name, project_version
+    return project_name, '{0!s}'.format(project_version)
 
   def Build(self, source_helper_object):
     """Builds the msi.
