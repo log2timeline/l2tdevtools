@@ -92,8 +92,13 @@ class ToxIniWriter(interface.DependencyFileWriter):
           'testenv_docs', template_mappings)
       file_content.append(template_data)
 
+    if paths_to_lint_yaml:
+      template_name = 'testenv_lint-with_yaml'
+    else:
+      template_name = 'testenv_lint'
+
     template_data = self._GenerateFromTemplate(
-        'testenv_lint', template_mappings)
+        template_name, template_mappings)
     file_content.append(template_data)
 
     file_content = ''.join(file_content)
