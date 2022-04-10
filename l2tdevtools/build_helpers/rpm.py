@@ -391,7 +391,8 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     # rpmbuild wants the source package filename without the status indication.
     rpm_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
         project_name, project_version)
-    shutil.copyfile(source_package_path, rpm_source_package_filename)
+    if not os.path.exists(rpm_source_package_filename):
+      shutil.copyfile(source_package_path, rpm_source_package_filename)
 
     build_successful = self._BuildFromSourcePackage(
         rpm_source_package_filename, rpmbuild_flags='-tb')
@@ -573,10 +574,13 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    self._RemoveOlderSourceDirectories(project_name, project_version)
+    # The setup.py directory name can differ from the project name.
+    setup_name = self._project_definition.setup_name or project_name
+    setup_name = setup_name.replace('-', '_')
+
+    self._RemoveOlderSourceDirectories(setup_name, project_version)
     self._RemoveOlderSourcePackages(project_name, project_version)
 
-    setup_name = self._project_definition.setup_name or project_name
     self._RemoveOlderBuildDirectory(setup_name, project_version)
 
     self._RemoveOlderRPMs(project_name, project_version)
