@@ -43,9 +43,7 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 rm -rf %{{buildroot}}
 
 %files -n python3-%{{name}}
-
-
-%{{python3_sitelib}}/Deprecated
+%{{python3_sitelib}}/deprecated
 %{{python3_sitelib}}/Deprecated*.egg-info
 
 %changelog
