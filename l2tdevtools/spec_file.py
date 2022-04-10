@@ -220,7 +220,7 @@ class RPMSpecFileGenerator(object):
 
     if unmangled_name:
       template.extend([
-          '%define unmangled_name {unmanged_name:s}',
+          '%define unmangled_name {unmangled_name:s}',
           '%define unmangled_version {version:s}'])
 
     template.extend([
@@ -509,12 +509,19 @@ class RPMSpecFileGenerator(object):
     else:
       package_name = project_name
 
+    if project_definition.setup_name:
+      source_name = project_definition.setup_name
+    else:
+      source_name = project_name
+
     if package_name.startswith('python-'):
       package_name = package_name[7:]
 
     unmangled_name = ''
     if package_name != project_name:
-      unmangled_name = project_name
+      unmangled_name = package_name
+    elif package_name != source_name:
+      unmangled_name = source_name
 
     with io.open(input_file, 'r+', encoding='utf8') as input_file_object:
       for line in input_file_object.readlines():

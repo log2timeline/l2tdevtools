@@ -191,17 +191,11 @@ class BaseRPMBuildHelper(interface.BuildHelper):
         * str: version.
     """
     project_name = source_helper_object.project_name
-    if (self._project_definition.setup_name and
-        project_name not in ('bencode', 'dateutil')):
-      project_name = self._project_definition.setup_name
 
     project_version = source_helper_object.GetProjectVersion()
     if project_version and project_version.startswith('1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
-
-    if isinstance(project_version, str):
-      project_version = project_version.replace('-', '_')
 
     return project_name, project_version
 
@@ -391,7 +385,8 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     # rpmbuild wants the source package filename without the status indication.
     rpm_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
         project_name, project_version)
-    shutil.copyfile(source_package_path, rpm_source_package_filename)
+    if not os.path.exists(rpm_source_package_filename):
+      shutil.copyfile(source_package_path, rpm_source_package_filename)
 
     build_successful = self._BuildFromSourcePackage(
         rpm_source_package_filename, rpmbuild_flags='-tb')
@@ -573,10 +568,12 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    self._RemoveOlderSourceDirectories(project_name, project_version)
+    # The setup.py directory name can differ from the project name.
+    setup_name = self._project_definition.setup_name or project_name
+
+    self._RemoveOlderSourceDirectories(setup_name, project_version)
     self._RemoveOlderSourcePackages(project_name, project_version)
 
-    setup_name = self._project_definition.setup_name or project_name
     self._RemoveOlderBuildDirectory(setup_name, project_version)
 
     self._RemoveOlderRPMs(project_name, project_version)
