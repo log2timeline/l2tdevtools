@@ -463,7 +463,7 @@ class DPKGBuildHelper(interface.BuildHelper):
       file_content = file_object.read()
 
     for old_name, new_name in self._FOCAL_PYTHON2_PACKAGE_NAMES.items():
-      if self.distribution == 'focal':
+      if self.distribution in ('focal', 'jammy'):
         file_content = file_content.replace(old_name, new_name)
       else:
         file_content = file_content.replace(new_name, old_name)
