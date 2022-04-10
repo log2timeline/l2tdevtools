@@ -220,7 +220,7 @@ class RPMSpecFileGenerator(object):
 
     if unmangled_name:
       template.extend([
-          '%define unmangled_name {unmanged_name:s}',
+          '%define unmangled_name {unmangled_name:s}',
           '%define unmangled_version {version:s}'])
 
     template.extend([

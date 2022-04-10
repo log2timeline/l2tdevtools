@@ -191,17 +191,11 @@ class BaseRPMBuildHelper(interface.BuildHelper):
         * str: version.
     """
     project_name = source_helper_object.project_name
-    if (self._project_definition.setup_name and
-        project_name not in ('bencode', 'dateutil')):
-      project_name = self._project_definition.setup_name
 
     project_version = source_helper_object.GetProjectVersion()
     if project_version and project_version.startswith('1!'):
       # Remove setuptools epoch.
       project_version = project_version[2:]
-
-    if isinstance(project_version, str):
-      project_version = project_version.replace('-', '_')
 
     return project_name, project_version
 
@@ -576,7 +570,6 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
 
     # The setup.py directory name can differ from the project name.
     setup_name = self._project_definition.setup_name or project_name
-    setup_name = setup_name.replace('-', '_')
 
     self._RemoveOlderSourceDirectories(setup_name, project_version)
     self._RemoveOlderSourcePackages(project_name, project_version)
