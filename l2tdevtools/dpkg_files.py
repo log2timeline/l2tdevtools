@@ -266,7 +266,7 @@ class DPKGBuildFilesGenerator(object):
     """
     # TODO: add support for configure_make
 
-    if self._project_definition.build_system == 'setup_py':
+    if self._project_definition.build_system in ('pyproject', 'setup_py'):
       setup_name = self._GetPythonSetupName()
 
       template_values = {
@@ -307,8 +307,11 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'configure_make':
       build_depends.append('autotools-dev')
 
-    elif self._project_definition.build_system == 'setup_py':
+    elif self._project_definition.build_system in ('pyproject', 'setup_py'):
       build_depends.append('dh-python')
+
+      if self._project_definition.build_system == 'pyproject':
+        build_depends.append('pybuild-plugin-pyproject')
 
       python3_build_depends.append('python3-all (>= 3.6~)')
       python3_build_depends.append('python3-setuptools')
@@ -317,7 +320,7 @@ class DPKGBuildFilesGenerator(object):
         python3_build_depends.append('python3-all-dev')
 
     for dependency in self._project_definition.dpkg_build_dependencies:
-      if self._project_definition.build_system == 'setup_py':
+      if self._project_definition.build_system in ('pyproject', 'setup_py'):
         if dependency.startswith('python-'):
           dependency = 'python3-{0:s}'.format(dependency[7:])
           python3_build_depends.append(dependency)
@@ -331,7 +334,7 @@ class DPKGBuildFilesGenerator(object):
 
       build_depends.append(dependency)
 
-    if self._project_definition.build_system == 'setup_py':
+    if self._project_definition.build_system in ('pyproject', 'setup_py'):
       build_depends.extend(python3_build_depends)
 
     if build_depends:
@@ -386,7 +389,7 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'configure_make':
       control_template.extend(self._CONTROL_TEMPLATE_CONFIGURE_MAKE)
 
-    elif self._project_definition.build_system == 'setup_py':
+    elif self._project_definition.build_system in ('pyproject', 'setup_py'):
       control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON3_ONLY)
 
       # TODO: add configuration setting to indicate tools should be packaged.
@@ -527,7 +530,7 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'configure_make':
       self._GenerateConfigureMakeRulesFile(dpkg_path)
 
-    elif self._project_definition.build_system == 'setup_py':
+    elif self._project_definition.build_system in ('pyproject', 'setup_py'):
       self._GenerateSetupPyRulesFile(dpkg_path)
 
     filename = os.path.join(dpkg_path, 'rules')

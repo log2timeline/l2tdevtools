@@ -787,8 +787,8 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
         source_helper_object.project_name, project_version)
 
 
-class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
-  """Shared functionality for setup.py build system dpkg build helpers."""
+class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
+  """Shared functionality for dh-pybuild build system dpkg build helpers."""
 
   def _DetermineBuildConfiguration(self, source_directory):
     """Determines the build configuration of a project that has setup.py
@@ -800,14 +800,19 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
       DPKGBuildConfiguration: dpkg build configuration or None if the build
           configuration could not be determined.
     """
-    if not os.path.isfile(os.path.join(source_directory, 'setup.py')):
+    if os.path.isfile(os.path.join(source_directory, 'pyproject.toml')):
+      command = ('{0:s} -m pip install --no-deps -t installroot . > /dev/null '
+                 '2>&1').format(sys.executable)
+
+    elif os.path.isfile(os.path.join(source_directory, 'setup.py')):
+      command = ('{0:s} setup.py install --root=installroot > /dev/null '
+                 '2>&1').format(sys.executable)
+
+    else:
       return None
 
     installroot_path = os.path.join(source_directory, 'installroot')
 
-    command = (
-        '{0:s} setup.py install --root=installroot > /dev/null 2>&1').format(
-            sys.executable)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
     if exit_code != 0:
@@ -860,8 +865,8 @@ class SetupPyDPKGBuildHelperBase(DPKGBuildHelper):
     return build_configuration
 
 
-class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
-  """Helper to build dpkg packages (.deb) using setup.py build system."""
+class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
+  """Helper to build dpkg packages (.deb) using dh-pybuild build system."""
 
   def __init__(
       self, project_definition, l2tdevtools_path, dependency_definitions):
@@ -874,7 +879,7 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(SetupPyDPKGBuildHelper, self).__init__(
+    super(PybuildDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self.architecture = platform.machine()
     self.distribution = ''
@@ -1023,7 +1028,7 @@ class SetupPyDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
       self._RemoveOlderDPKGPackages(project_name, project_version)
 
 
-class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
+class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
   """Helper to build source dpkg packages using setup.py build system."""
 
   def __init__(
@@ -1037,7 +1042,7 @@ class SetupPySourceDPKGBuildHelper(SetupPyDPKGBuildHelperBase):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(SetupPySourceDPKGBuildHelper, self).__init__(
+    super(PybuildSourceDPKGBuildHelper, self).__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'

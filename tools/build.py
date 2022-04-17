@@ -197,6 +197,8 @@ class ProjectBuilder(object):
     if not project_definition.build_system:
       if os.path.exists(os.path.join(source_directory, 'configure')):
         project_definition.build_system = 'configure_make'
+      elif os.path.exists(os.path.join(source_directory, 'pyproject.toml')):
+        project_definition.build_system = 'pyproject'
       elif os.path.exists(os.path.join(source_directory, 'setup.py')):
         project_definition.build_system = 'setup_py'
       else:
