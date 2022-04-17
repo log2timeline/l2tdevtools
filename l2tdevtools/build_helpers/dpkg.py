@@ -801,14 +801,13 @@ class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
           configuration could not be determined.
     """
     if os.path.isfile(os.path.join(source_directory, 'pyproject.toml')):
-      command = (
-          '{0:s} pip -m pip install --no-deps -t installroot . > /dev/null '
-          '2>&1').format(sys.executable)
+      command = ('{0:s} -m pip install --no-deps -t installroot . > /dev/null '
+                 '2>&1').format(sys.executable)
 
     elif os.path.isfile(os.path.join(source_directory, 'setup.py')):
-      command = (
-          '{0:s} setup.py install --root=installroot > /dev/null 2>&1').format(
-              sys.executable)
+      command = ('{0:s} setup.py install --root=installroot > /dev/null '
+                 '2>&1').format(sys.executable)
+
     else:
       return None
 
