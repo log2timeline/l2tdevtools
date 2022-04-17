@@ -57,7 +57,7 @@ class DPKGBuildFilesGenerator(object):
       ''])
 
   _COMPAT_TEMPLATE = '\n'.join([
-      '9',
+      '10',
       ''])
 
   _CONTROL_TEMPLATE_CONFIGURE_MAKE = [
