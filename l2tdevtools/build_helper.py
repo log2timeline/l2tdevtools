@@ -23,9 +23,14 @@ class BuildHelperFactory(object):
       'wheel': wheel.ConfigureMakeWheelBuildHelper,
   }
 
+  _PYPROJECT_BUILD_HELPER_CLASSES = {
+      'dpkg': dpkg.PybuildDPKGBuildHelper,
+      'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
+  }
+
   _SETUP_PY_BUILD_HELPER_CLASSES = {
-      'dpkg': dpkg.SetupPyDPKGBuildHelper,
-      'dpkg-source': dpkg.SetupPySourceDPKGBuildHelper,
+      'dpkg': dpkg.PybuildDPKGBuildHelper,
+      'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
       'msi': msi.SetupPyMSIBuildHelper,
       'osc': osc.SetupPyOSCBuildHelper,
       'rpm': rpm.SetupPyRPMBuildHelper,
@@ -38,7 +43,7 @@ class BuildHelperFactory(object):
   def NewBuildHelper(
       cls, project_definition, build_target, l2tdevtools_path,
       dependency_definitions):
-    """Creates a new build helper object.
+    """Creates a new build helper.
 
     Args:
       project_definition (ProjectDefinition): definition of the project
@@ -53,6 +58,10 @@ class BuildHelperFactory(object):
     """
     if project_definition.build_system == 'configure_make':
       build_helper_class = cls._CONFIGURE_MAKE_BUILD_HELPER_CLASSES.get(
+          build_target, None)
+
+    elif project_definition.build_system == 'pyproject':
+      build_helper_class = cls._PYPROJECT_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
     elif project_definition.build_system == 'setup_py':

@@ -86,7 +86,7 @@ class ConfigureMakeSourceDPKGBuildHelperTest(test_lib.BaseTestCase):
   # TODO: add tests for Clean
 
 
-class SetupPyDPKGBuildHelperTest(test_lib.BaseTestCase):
+class PybuildDPKGBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build dpkg packages (.deb)."""
 
   # TODO: add tests for _GetFilenameSafeProjectInformation
@@ -95,7 +95,7 @@ class SetupPyDPKGBuildHelperTest(test_lib.BaseTestCase):
   # TODO: add tests for Clean
 
 
-class SetupPySourceDPKGBuildHelperTest(test_lib.BaseTestCase):
+class PybuildSourceDPKGBuildHelperTest(test_lib.BaseTestCase):
   """Tests for the helper to build source dpkg packages (.deb)."""
 
   # TODO: add tests for _GetFilenameSafeProjectInformation
