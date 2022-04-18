@@ -800,12 +800,12 @@ class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
       DPKGBuildConfiguration: dpkg build configuration or None if the build
           configuration could not be determined.
     """
-    if os.path.isfile(os.path.join(source_directory, 'pyproject.toml')):
-      command = ('{0:s} -m pip install --no-deps -t installroot . > /dev/null '
+    if os.path.isfile(os.path.join(source_directory, 'setup.py')):
+      command = ('{0:s} setup.py install --root=installroot > /dev/null '
                  '2>&1').format(sys.executable)
 
-    elif os.path.isfile(os.path.join(source_directory, 'setup.py')):
-      command = ('{0:s} setup.py install --root=installroot > /dev/null '
+    elif os.path.isfile(os.path.join(source_directory, 'pyproject.toml')):
+      command = ('{0:s} -m pip install --no-deps -t installroot . > /dev/null '
                  '2>&1').format(sys.executable)
 
     else:
