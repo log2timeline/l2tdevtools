@@ -354,8 +354,8 @@ class DPKGBuildHelper(interface.BuildHelper):
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
     # Remove files of previous versions in the format:
-    # <project>[-_][0-9]*-[1-9]_<architecture>.*
-    filenames_glob = '{0:s}[-_][0-9]*-[1-9]_{1:s}.*'.format(
+    # <project>*[-_][0-9]*-[1-9]_<architecture>.*
+    filenames_glob = '{0:s}*[-_][0-9]*-[1-9]_{1:s}.*'.format(
         project_name, self.architecture)
     filenames = glob.glob(filenames_glob)
 
