@@ -137,12 +137,6 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
     """Writes a ubuntu_install_project.sh file."""
     python_dependencies = self._GetDPKGPythonDependencies()
 
-    if self._project_definition.name == 'plaso':
-      # Use the Elasticsearch installation script to install the Elasticsearch
-      # Python bindings.
-      if 'python3-elasticsearch' in python_dependencies:
-        python_dependencies.remove('python3-elasticsearch')
-
     test_dependencies = self._GetDPKGTestDependencies(python_dependencies)
 
     # TODO: replace by dev_dependencies.ini or equiv.
