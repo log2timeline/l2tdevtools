@@ -18,7 +18,7 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
   _DOWNLOAD_URL = 'https://github.com/ForensicArtifacts/artifacts/releases'
 
   _PROJECT_NAME = 'artifacts'
-  _PROJECT_VERSION = '20211205'
+  _PROJECT_VERSION = '20220219'
 
   def testGetPackageDownloadURLs(self):
     """Tests the GetPackageDownloadURLs function."""
@@ -47,7 +47,7 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
   # pylint: disable=protected-access
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20211228'
+  _PROJECT_VERSION = '20220419'
 
   def testGetAvailablePackages(self):
     """Tests the _GetAvailablePackages function."""
