@@ -104,11 +104,11 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
       test_path = os.path.join(
           temp_directory, '{0:s}-20180101-py2.py3-none-any.whl'.format(
               self._TEST_PROJECT_NAME))
-      with open(test_path, 'a'):
+      with open(test_path, 'a', encoding='utf-8'):
         pass
 
       test_path = os.path.join(temp_directory, self._TEST_WHEEL_FILENAME)
-      with open(test_path, 'a'):
+      with open(test_path, 'a', encoding='utf-8'):
         pass
 
       directory_entries = os.listdir(temp_directory)
@@ -172,7 +172,7 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
 
       if len(directory_entries) < 4:
         build_log_path = os.path.join(temp_directory, 'build.log')
-        with open(build_log_path, 'rt') as file_object:
+        with open(build_log_path, 'r', encoding='utf-8') as file_object:
           print(''.join(file_object.readlines()))
 
       self.assertEqual(len(directory_entries), 4)
@@ -224,7 +224,7 @@ class SetupPyWheelBuildHelperTest(shared_test_lib.BaseTestCase):
 
       if len(directory_entries) < 4:
         build_log_path = os.path.join(temp_directory, 'build.log')
-        with open(build_log_path, 'rt') as file_object:
+        with open(build_log_path, 'r', encoding='utf-8') as file_object:
           print(''.join(file_object.readlines()))
 
       self.assertEqual(len(directory_entries), 4)

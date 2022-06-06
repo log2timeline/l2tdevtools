@@ -107,11 +107,11 @@ class SetupPyMSIBuildHelperTest(shared_test_lib.BaseTestCase):
       test_path = os.path.join(
           temp_directory, '{0:s}-20180101.1.win32.msi'.format(
               self._TEST_PROJECT_NAME))
-      with open(test_path, 'a'):
+      with open(test_path, 'a', encoding='utf-8'):
         pass
 
       test_path = os.path.join(temp_directory, self._TEST_MSI_FILENAME)
-      with open(test_path, 'a'):
+      with open(test_path, 'a', encoding='utf-8'):
         pass
 
       directory_entries = os.listdir(temp_directory)

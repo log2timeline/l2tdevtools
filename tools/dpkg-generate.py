@@ -54,7 +54,7 @@ def Main():
     return False
 
   project_definition_match = None
-  with open(options.config_file) as file_object:
+  with open(options.config_file, 'r', encoding='utf-8') as file_object:
     project_definition_reader = projects.ProjectDefinitionReader()
     for project_definition in project_definition_reader.Read(file_object):
       if options.project_name == project_definition.name:
