@@ -14,8 +14,7 @@ class GitHelperTest(test_lib.BaseTestCase):
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""
-    helper = git.GitHelper(
-        u'https://github.com/log2timeline/l2tdevtools.git')
+    helper = git.GitHelper('https://github.com/log2timeline/l2tdevtools.git')
     self.assertIsNotNone(helper)
 
 

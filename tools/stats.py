@@ -465,7 +465,7 @@ def Main():
   stats_definition_reader = StatsDefinitionReader()
 
   user_mappings = {}
-  with open(stats_file) as file_object:
+  with open(stats_file, 'r', encoding='utf-8') as file_object:
     user_mappings = stats_definition_reader.ReadUserMappings(file_object)
 
   output_writer = StdoutWriter(
@@ -478,7 +478,7 @@ def Main():
 
   if options.statistics_type == 'contributions':
     projects_per_organization = {}
-    with open(stats_file) as file_object:
+    with open(stats_file, 'r', encoding='utf-8') as file_object:
       stats_definition_reader = StatsDefinitionReader()
       projects_per_organization = (
           stats_definition_reader.ReadProjectsPerOrganization(file_object))

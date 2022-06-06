@@ -359,7 +359,7 @@ class PyPIManager(object):
     self._pypi_package_names = {}
 
     if projects_file:
-      with io.open(projects_file, 'r', encoding='utf-8') as file_object:
+      with open(projects_file, 'r', encoding='utf-8') as file_object:
         project_definition_reader = projects.ProjectDefinitionReader()
         for project_definition in project_definition_reader.Read(file_object):
           self._package_names.append(project_definition.name)
@@ -570,7 +570,7 @@ class PackagesManager(object):
       reference_packages[package_name] = package_version
 
     packages = {}
-    with open(csv_file, 'r') as file_object:
+    with open(csv_file, 'r', encoding='utf-8') as file_object:
       for row in csv.DictReader(file_object):
         packages[row['project']] = row['version']
 
