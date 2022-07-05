@@ -228,7 +228,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
           '(|data-pjax="[^"]*" )(|data-turbo-frame="[^"]*" )'
           'href="([^"]*)"')
       matches = re.findall(expression_string, page_content)
-      
+
       for _, _, match in matches:
         _, _, filename = match.rpartition('/')
         download_url = (
