@@ -169,6 +169,40 @@ class SourcePackageHelper(SourceHelper):
     self._source_package_filename = None
     self._source_package_path = None
 
+  def _CleanDownloads(self, project_name, project_version):
+    """Removes previous versions of downloaded source packages.
+
+    Args:
+      project_name (str): name of the project.
+      project_version (str): current version of the project.
+    """
+    filenames_to_ignore = re.compile(
+        '^{0:s}-.*{1!s}'.format(project_name, project_version))
+
+    # Remove previous versions of source packages in the format:
+    # <project>-*[0-9]*.tar.gz
+    filenames = glob.glob('{0:s}-*[0-9]*.tar.gz'.format(project_name))
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info('Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove previous versions of source packages in the format:
+    # <project>-*[0-9]*.tgz
+    filenames = glob.glob('{0:s}-*[0-9]*.tgz'.format(project_name))
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info('Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
+    # Remove previous versions of source packages in the format:
+    # <project>-*[0-9]*.zip
+    filenames = glob.glob('{0:s}-*[0-9]*.zip'.format(project_name))
+    for filename in filenames:
+      if not filenames_to_ignore.match(filename):
+        logging.info('Removing: {0:s}'.format(filename))
+        os.remove(filename)
+
   def _CreateFromTar(self, source_package_filename):
     """Creates the source directory from a .tar source package.
 
@@ -276,32 +310,16 @@ class SourcePackageHelper(SourceHelper):
     if not project_version:
       return
 
+    current_working_directory = os.getcwd()
+    os.chdir(self._downloads_directory)
+
+    try:
+      self._CleanDownloads(self.project_name, project_version)
+    finally:
+      os.chdir(current_working_directory)
+
     filenames_to_ignore = re.compile(
         '^{0:s}-.*{1!s}'.format(self.project_name, project_version))
-
-    # Remove previous versions of source packages in the format:
-    # <project>-[0-9]*.tar.gz
-    filenames = glob.glob('{0:s}-[0-9]*.tar.gz'.format(self.project_name))
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove previous versions of source packages in the format:
-    # <project>-[0-9]*.tgz
-    filenames = glob.glob('{0:s}-[0-9]*.tgz'.format(self.project_name))
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
-        os.remove(filename)
-
-    # Remove previous versions of source packages in the format:
-    # <project>-[0-9]*.zip
-    filenames = glob.glob('{0:s}-[0-9]*.zip'.format(self.project_name))
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
-        os.remove(filename)
 
     # Remove previous versions of source directories in the format:
     # <project>-[0-9]*
