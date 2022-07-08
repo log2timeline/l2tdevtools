@@ -6,7 +6,7 @@
 .PHONY: override_dh_auto_clean
 override_dh_auto_clean:
 	dh_auto_clean
-	rm -f bundled/zeromq/src/platform.hpp
+	rm -f a.out bundled/zeromq/src/platform.hpp
 
 .PHONY: override_dh_auto_test
 override_dh_auto_test:
