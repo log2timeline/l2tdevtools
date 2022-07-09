@@ -374,8 +374,9 @@ class SourcePackageHelper(SourceHelper):
       finally:
         os.chdir(current_working_directory)
 
-      self._source_package_path = os.path.join(
-          self._downloads_directory, self._source_package_filename)
+      if self._source_package_filename:
+        self._source_package_path = os.path.join(
+            self._downloads_directory, self._source_package_filename)
 
     return self._source_package_path
 
