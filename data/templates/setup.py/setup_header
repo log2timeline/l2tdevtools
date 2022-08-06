@@ -37,6 +37,7 @@ setup(
     version=${python_module_name}.__version__,
     description=${python_module_name}_description,
     long_description=${python_module_name}_long_description,
+    long_description_content_type='text/plain',
     license='Apache License, Version 2.0',
     url='${homepage_url}',
     maintainer='${maintainer}',

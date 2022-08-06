@@ -218,6 +218,7 @@ setup(
     version=l2tdevtools.__version__,
     description=l2tdevtools_description,
     long_description=l2tdevtools_long_description,
+    long_description_content_type='text/plain',
     license='Apache License, Version 2.0',
     url='https://github.com/log2timeline/l2tdevtools',
     maintainer='Log2Timeline maintainers',
