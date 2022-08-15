@@ -213,6 +213,12 @@ l2tdevtools_description = (
 l2tdevtools_long_description = (
     'Development tools for the log2timeline projects.')
 
+command_classes = {}
+if BdistMSICommand:
+  command_classes['bdist_msi'] = BdistMSICommand
+if BdistRPMCommand:
+  command_classes['bdist_rpm'] = BdistRPMCommand
+
 setup(
     name='l2tdevtools',
     version=l2tdevtools.__version__,
@@ -223,9 +229,7 @@ setup(
     url='https://github.com/log2timeline/l2tdevtools',
     maintainer='Log2Timeline maintainers',
     maintainer_email='log2timeline-maintainers@googlegroups.com',
-    cmdclass={
-        'bdist_msi': BdistMSICommand,
-        'bdist_rpm': BdistRPMCommand},
+    cmdclass=command_classes,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
