@@ -1,37 +1,4 @@
 
-
-def parse_requirements_from_file(path):
-  """Parses requirements from a requirements file.
-
-  Args:
-    path (str): path to the requirements file.
-
-  Returns:
-    list[str]: name and optional version information of the required packages.
-  """
-  requirements = []
-  if os.path.isfile(path):
-    with open(path, 'r') as file_object:
-      file_contents = file_object.read()
-
-    for requirement in pkg_resources.parse_requirements(file_contents):
-      try:
-        name = str(requirement.req)
-      except AttributeError:
-        name = str(requirement)
-
-      if not name.startswith('pip '):
-        requirements.append(name)
-
-  return requirements
-
-
-${python_module_name}_description = (
-${description_short})
-
-${python_module_name}_long_description = (
-${description_long})
-
 setup(
     name='${python_module_name}',
     version=${python_module_name}.__version__,
@@ -42,3 +9,4 @@ setup(
     url='${homepage_url}',
     maintainer='${maintainer}',
     maintainer_email='${maintainer_email}',
+    cmdclass=command_classes,

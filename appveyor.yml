@@ -24,7 +24,7 @@ install:
 - sh: config/appveyor/install.sh
 
 build_script:
-- cmd: "%PYTHON%\\python.exe setup.py bdist_msi"
+- cmd: echo
 
 test_script:
 - cmd: "%PYTHON%\\python.exe run_tests.py"

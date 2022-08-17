@@ -348,15 +348,19 @@ class SetupPyWriter(interface.DependencyFileWriter):
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
-        'setup_header', template_mappings)
+        'parse_requirements', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in self._PROJECTS_WITH_SDIST_TEST_DATA:
-      template_file = 'setup_cmdclass_sdist'
+      template_file = 'cmdclass_sdist'
     else:
-      template_file = 'setup_cmdclass'
+      template_file = 'cmdclass'
 
     template_data = self._GenerateFromTemplate(template_file, template_mappings)
+    file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate(
+        'setup_header', template_mappings)
     file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
