@@ -23,6 +23,8 @@ install:
 - ps: If ($isWindows) { .\config\appveyor\install.ps1 }
 - sh: config/appveyor/install.sh
 
+build_script:
+
 test_script:
 - cmd: "%PYTHON%\\python.exe run_tests.py"
 - cmd: IF EXIST "tests\\end-to-end.py" (
