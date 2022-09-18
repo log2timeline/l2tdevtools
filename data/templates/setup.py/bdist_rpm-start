@@ -32,8 +32,8 @@ else:
           summary = line[9:]
 
         elif line.startswith('BuildRequires: '):
-          line = 'BuildRequires: {0:s}-setuptools, {0:s}-devel'.format(
-              python_package)
+          line = (f'BuildRequires: {python_package:s}-setuptools, '
+                  f'{python_package:s}-devel')
 
         elif line.startswith('Requires: '):
           requires = line[10:]
