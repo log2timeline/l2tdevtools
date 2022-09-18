@@ -1,6 +1,6 @@
         elif line.startswith('%files'):
           lines = [
-              '%files -n {0:s}-%{{name}}'.format(python_package),
+              f'%files -n {python_package:s}-%{{name}}',
               '%defattr(644,root,root,755)',
               '%license ${rpm_license_file}',
               '%doc ${rpm_doc_files}']
@@ -14,17 +14,16 @@ ${python3_package_files}])
         elif line.startswith('%prep'):
           in_description = False
 
-          python_spec_file.append(
-              '%package -n {0:s}-%{{name}}'.format(python_package))
-          python_summary = 'Python 3 module of {0:s}'.format(summary)
+          python_spec_file.append(f'%package -n {python_package:s}-%{{name}}')
+          python_summary = f'Python 3 module of {summary:s}'
 
           if requires:
-            python_spec_file.append('Requires: {0:s}'.format(requires))
+            python_spec_file.append(f'Requires: {requires:s}')
 
           python_spec_file.extend([
-              'Summary: {0:s}'.format(python_summary),
+              f'Summary: {python_summary:s}',
               '',
-              '%description -n {0:s}-%{{name}}'.format(python_package)])
+              f'%description -n {python_package:s}-%{{name}}'])
 
           python_spec_file.extend(description)
 

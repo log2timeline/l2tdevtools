@@ -108,16 +108,24 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       return None
 
     # The format of the project download URL is:
-    # /{organization}/{repository}/releases/download/{git tag}/
-    # {project name}{status-}{version}.tar.gz
-    # Note that the status is optional and will be: beta, alpha or experimental.
-    # E.g. used by libyal.
+    # <a href="/{organization}/{repository}/releases/tag/{git tag}"
     expression_string = (
-        '/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*({3:s})'
-        '[.]tar[.]gz[^.]').format(
-            self._organization, self._repository, project_name,
-            '|'.join(self._VERSION_EXPRESSIONS))
+        '<a href="/{0:s}/{1:s}/releases/tag/([^"]*)"[^>]*>[^<]*</a>').format(
+            self._organization, self._repository)
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
+
+    if not matches:
+      # The format of the project download URL is:
+      # /{organization}/{repository}/releases/download/{git tag}/
+      # {project name}{status-}{version}.tar.gz
+      # Note that the status is optional and will be: beta, alpha or
+      # experimental. E.g. used by libyal.
+      expression_string = (
+          '/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*({3:s})'
+          '[.]tar[.]gz[^.]').format(
+              self._organization, self._repository, project_name,
+              '|'.join(self._VERSION_EXPRESSIONS))
+      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
       # The format of the project archive download URL is:
@@ -166,6 +174,20 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
       return None
+
+    # The format of the project download URL is:
+    # <a href="/{organization}/{repository}/releases/tag/{git tag}"
+    expression_string = (
+        '<a href="/{0:s}/{1:s}/releases/tag/(.*{2!s}[^"]*)"[^>]*>([^<]*)'
+        '</a>').format(self._organization, self._repository, project_version)
+    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
+
+    if matches and len(matches) == 1:
+      return (
+          'https://github.com/{0:s}/{1:s}/releases/download/{2!s}/'
+          '{3:s}.tar.gz').format(
+              self._organization, self._repository, matches[0][0],
+              matches[0][1].replace(' ', '-'))
 
     # The format of the project download URL is:
     # /{organization}/{repository}/releases/download/{git tag}/

@@ -1,8 +1,7 @@
 version_tuple = (sys.version_info[0], sys.version_info[1])
 if version_tuple < (3, 7):
-  print((
-      'Unsupported Python version: {0:s}, version 3.7 or higher '
-      'required.').format(sys.version))
+  print(f'Unsupported Python version: {sys.version:s}, version 3.7 or higher '
+        f'required.')
   sys.exit(1)
 
 # Change PYTHONPATH to include ${python_module_name} so that we can get the version.
