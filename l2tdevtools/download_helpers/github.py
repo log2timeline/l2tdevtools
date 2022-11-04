@@ -9,21 +9,14 @@ from l2tdevtools.download_helpers import project
 class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
   """Helps in downloading a project with GitHub releases."""
 
-  _VERSION_EXPRESSIONS = [
-      '[0-9]+',
-      '[0-9]+-pre',
-      '[0-9]+[.][0-9]+',
-      '[0-9]+[.][0-9]+[.][0-9]+',
-      'release-[0-9]+[.][0-9]+[.][0-9]+',
-      'v[0-9]+[.][0-9]',
-      'v[0-9]+[.][0-9]+[.][0-9]+',
-      '[0-9]+[.][0-9]+[.][0-9]+[-][0-9]+']
-
-  def __init__(self, download_url):
+  def __init__(
+      self, download_url, release_prefix=None, release_tag_prefix=None):
     """Initializes the download helper.
 
     Args:
       download_url (str): download URL.
+      release_prefix (Optional[str]): release prefix.
+      release_tag_prefix (Optional[str]): release tag prefix.
 
     Raises:
       ValueError: if download URL is not supported.
@@ -34,6 +27,8 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     super(GitHubReleasesDownloadHelper, self).__init__(download_url)
     self._organization = url_segments[3]
+    self._release_prefix = release_prefix or ''
+    self._release_tag_prefix = release_tag_prefix or ''
     self._repository = url_segments[4]
 
   def _GetAvailableVersions(self, version_strings):
@@ -53,21 +48,15 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     """
     available_versions = {}
 
+    release_tag_prefix_length = len(self._release_tag_prefix)
+
     for version_string in version_strings:
       if not version_string:
         continue
 
-      # Remove a leading 'release-'.
-      if version_string.startswith('release-'):
-        version_string = version_string[8:]
-
-      # Remove a leading 'v'.
-      elif version_string.startswith('v'):
-        version_string = version_string[1:]
-
-      # Remove a trailing '-pre'.
-      if version_string.endswith('-pre'):
-        version_string = version_string[:-4]
+      if (self._release_tag_prefix and
+          version_string.startswith(self._release_tag_prefix)):
+        version_string = version_string[release_tag_prefix_length:]
 
       # Some versions contain '-' as the release number separator for the split
       # we want this to be '.'.
@@ -79,6 +68,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     return available_versions
 
+  # pylint: disable=unused-argument
   def GetLatestVersion(self, project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
@@ -115,42 +105,6 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
-      # The format of the project download URL is:
-      # /{organization}/{repository}/releases/download/{git tag}/
-      # {project name}{status-}{version}.tar.gz
-      # Note that the status is optional and will be: beta, alpha or
-      # experimental. E.g. used by libyal.
-      expression_string = (
-          '/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*({3:s})'
-          '[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_name,
-              '|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if not matches:
-      # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/refs/tags/{version}.tar.gz
-      expression_string = (
-          '/{0:s}/{1:s}/archive/refs/tags/({2:s})[.]tar[.]gz[^.]').format(
-              self._organization, self._repository,
-              '|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if not matches:
-      # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/refs/tags/
-      # {project name}-{version}.tar.gz
-      expression_string = (
-          '/{0:s}/{1:s}/archive/refs/tags/'
-          '{2:s}[-]({3:s})[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_name,
-              '|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-      # TODO: this check will fail if the case in the URL is different.
-      # Make checks case insensitive.
-
-    if not matches:
       return None
 
     available_versions = self._GetAvailableVersions(matches)
@@ -178,98 +132,25 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     # The format of the project download URL is:
     # <a href="/{organization}/{repository}/releases/tag/{git tag}"
     expression_string = (
-        '<a href="/{0:s}/{1:s}/releases/tag/(.*{2!s}[^"]*)"[^>]*>([^<]*)'
-        '</a>').format(self._organization, self._repository, project_version)
+        '<a href="/{0:s}/{1:s}/releases/tag/{2:s}(.*{3!s}[^"]*)"[^>]*>([^<]*)'
+        '</a>').format(
+            self._organization, self._repository, self._release_tag_prefix,
+            project_version)
+
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if matches and len(matches) == 1:
+      version = matches[0][0]
+      if self._release_prefix:
+        release = '{0:s}{1:s}.tar.gz'.format(self._release_prefix, version)
+      else:
+        release = '{0:s}.tar.gz'.format(matches[0][1].replace(' ', '-'))
+
       return (
-          'https://github.com/{0:s}/{1:s}/releases/download/{2!s}/'
-          '{3:s}.tar.gz').format(
-              self._organization, self._repository, matches[0][0],
-              matches[0][1].replace(' ', '-'))
-
-    # The format of the project download URL is:
-    # /{organization}/{repository}/releases/download/{git tag}/
-    # {project name}{status-}{version}.tar.gz
-    # Note that the status is optional and will be: beta, alpha or experimental.
-    expression_string = (
-        '/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*{3!s}'
-        '[.]tar[.]gz[^.]').format(
-            self._organization, self._repository, project_name, project_version)
-    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if len(matches) != 1:
-      # Try finding a match without the status in case the project provides
-      # multiple versions with a different status.
-      expression_string = (
-          '/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-*{3!s}'
-          '[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_name,
-              project_version)
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if matches and len(matches) == 1:
-      return 'https://github.com{0:s}'.format(matches[0][:-1])
-
-    if matches and len(matches) != 1:
-      return None
-
-    # The format of the project archive download URL is:
-    # /{organization}/{repository}/archive/refs/tags/{version}.tar.gz
-    expression_string = (
-        '/{0:s}/{1:s}/archive/refs/tags/{2!s}[.]tar[.]gz[^.]').format(
-            self._organization, self._repository, project_version)
-    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if matches and len(matches) == 1:
-      return 'https://github.com{0:s}'.format(matches[0][:-1])
-
-    if len(matches) != 1:
-      # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/refs/tags/release-{version}.tar.gz
-      expression_string = (
-          '/{0:s}/{1:s}/archive/refs/tags/release-{2!s}[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_version)
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if matches and len(matches) == 1:
-      return 'https://github.com{0:s}'.format(matches[0][:-1])
-
-    if len(matches) != 1:
-      # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/refs/tags/v{version}.tar.gz
-      expression_string = (
-          '/{0:s}/{1:s}/archive/refs/tags/v{2!s}[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_version)
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if matches and len(matches) == 1:
-      return 'https://github.com{0:s}'.format(matches[0][:-1])
-
-    if len(matches) != 1:
-      # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/refs/tags/
-      # {project name}-{version}.tar.gz
-      expression_string = (
-          '/{0:s}/{1:s}/archive/refs/tags/{2:s}[-]{3!s}[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_name,
-              project_version)
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if matches and len(matches) == 1:
-      return 'https://github.com{0:s}'.format(matches[0][:-1])
-
-    if len(matches) != 1:
-      # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/refs/tags/{version}-pre.tar.gz
-      expression_string = (
-          '/{0:s}/{1:s}/archive/refs/tags/{2!s}-pre[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_version)
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if matches and len(matches) == 1:
-      return 'https://github.com{0:s}'.format(matches[0][:-1])
+          'https://github.com/{0:s}/{1:s}/releases/download/{2:s}{3!s}/'
+          '{4:s}').format(
+              self._organization, self._repository, self._release_tag_prefix,
+              version, release)
 
     return None
 
