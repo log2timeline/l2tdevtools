@@ -55,7 +55,8 @@ class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
   def testGetLatestVersion(self):
     """Tests the GetLatestVersion functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    download_helper = github.GitHubReleasesDownloadHelper(
+        self._DOWNLOAD_URL, release_tag_prefix='v')
 
     latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
 
@@ -63,7 +64,8 @@ class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
   def testGetDownloadURL(self):
     """Tests the GetDownloadURL functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    download_helper = github.GitHubReleasesDownloadHelper(
+        self._DOWNLOAD_URL, release_tag_prefix='v')
 
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
@@ -78,7 +80,8 @@ class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
   def testGetProjectIdentifier(self):
     """Tests the GetProjectIdentifier functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    download_helper = github.GitHubReleasesDownloadHelper(
+        self._DOWNLOAD_URL, release_tag_prefix='v')
 
     project_identifier = download_helper.GetProjectIdentifier()
 
