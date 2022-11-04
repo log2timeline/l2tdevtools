@@ -9,11 +9,13 @@ from l2tdevtools.download_helpers import project
 class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
   """Helps in downloading a project with GitHub releases."""
 
-  def __init__(self, download_url, release_tag_prefix=None):
+  def __init__(
+      self, download_url, release_prefix=None, release_tag_prefix=None):
     """Initializes the download helper.
 
     Args:
       download_url (str): download URL.
+      release_prefix (Optional[str]): release prefix.
       release_tag_prefix (Optional[str]): release tag prefix.
 
     Raises:
@@ -25,6 +27,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     super(GitHubReleasesDownloadHelper, self).__init__(download_url)
     self._organization = url_segments[3]
+    self._release_prefix = release_prefix or ''
     self._release_tag_prefix = release_tag_prefix or ''
     self._repository = url_segments[4]
 
@@ -137,11 +140,17 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if matches and len(matches) == 1:
+      version = matches[0][0]
+      if self._release_prefix:
+        release = '{0:s}{1:s}.tar.gz'.format(self._release_prefix, version)
+      else:
+        release = '{0:s}.tar.gz'.format(matches[0][1].replace(' ', '-'))
+
       return (
           'https://github.com/{0:s}/{1:s}/releases/download/{2:s}{3!s}/'
-          '{4:s}.tar.gz').format(
+          '{4:s}').format(
               self._organization, self._repository, self._release_tag_prefix,
-              matches[0][0], matches[0][1].replace(' ', '-'))
+              version, release)
 
     return None
 

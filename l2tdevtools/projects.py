@@ -37,6 +37,7 @@ class ProjectDefinition(object):
     dpkg_template_source_options (str): name of the dpkg source options template
         file.
     git_url (str): git repository URL.
+    github_release_prefix (str): github release prefix.
     github_release_tag_prefix (str): github release tag prefix.
     homepage_url (str): project homepage URL.
     maintainer (str): name and email address of the maintainer.
@@ -85,6 +86,7 @@ class ProjectDefinition(object):
     self.dpkg_template_rules = None
     self.dpkg_template_source_options = None
     self.git_url = None
+    self.github_release_prefix = None
     self.github_release_tag_prefix = None
     self.homepage_url = None
     self.maintainer = None
@@ -255,6 +257,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'download_url')
       project_definition.git_url = self._GetConfigValue(
           config_parser, section_name, 'git_url')
+      project_definition.github_release_prefix = self._GetConfigValue(
+          config_parser, section_name, 'github_release_prefix')
       project_definition.github_release_tag_prefix = self._GetConfigValue(
           config_parser, section_name, 'github_release_tag_prefix')
       project_definition.homepage_url = self._GetConfigValue(
