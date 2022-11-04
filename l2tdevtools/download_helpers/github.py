@@ -19,11 +19,12 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       'v[0-9]+[.][0-9]+[.][0-9]+',
       '[0-9]+[.][0-9]+[.][0-9]+[-][0-9]+']
 
-  def __init__(self, download_url):
+  def __init__(self, download_url, github_release_tag_prefix=None):
     """Initializes the download helper.
 
     Args:
       download_url (str): download URL.
+      github_release_tag_prefix (Optional[str]): github release tag prefix.
 
     Raises:
       ValueError: if download URL is not supported.
@@ -33,6 +34,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       raise ValueError('Unsupported download URL.')
 
     super(GitHubReleasesDownloadHelper, self).__init__(download_url)
+    self._github_release_tag_prefix = github_release_tag_prefix or ''
     self._organization = url_segments[3]
     self._repository = url_segments[4]
 
@@ -79,6 +81,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
     return available_versions
 
+  # pylint: disable=unused-argument
   def GetLatestVersion(self, project_name, version_definition):
     """Retrieves the latest version number for a given project name.
 
@@ -113,42 +116,6 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
         '<a href="/{0:s}/{1:s}/releases/tag/([^"]*)"[^>]*>[^<]*</a>').format(
             self._organization, self._repository)
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if not matches:
-      # The format of the project download URL is:
-      # /{organization}/{repository}/releases/download/{git tag}/
-      # {project name}{status-}{version}.tar.gz
-      # Note that the status is optional and will be: beta, alpha or
-      # experimental. E.g. used by libyal.
-      expression_string = (
-          '/{0:s}/{1:s}/releases/download/[^/]*/{2:s}-[a-z-]*({3:s})'
-          '[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_name,
-              '|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if not matches:
-      # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/refs/tags/{version}.tar.gz
-      expression_string = (
-          '/{0:s}/{1:s}/archive/refs/tags/({2:s})[.]tar[.]gz[^.]').format(
-              self._organization, self._repository,
-              '|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-    if not matches:
-      # The format of the project archive download URL is:
-      # /{organization}/{repository}/archive/refs/tags/
-      # {project name}-{version}.tar.gz
-      expression_string = (
-          '/{0:s}/{1:s}/archive/refs/tags/'
-          '{2:s}[-]({3:s})[.]tar[.]gz[^.]').format(
-              self._organization, self._repository, project_name,
-              '|'.join(self._VERSION_EXPRESSIONS))
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-      # TODO: this check will fail if the case in the URL is different.
-      # Make checks case insensitive.
 
     if not matches:
       return None
