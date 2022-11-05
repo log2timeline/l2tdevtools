@@ -45,11 +45,12 @@ class DownloadHelperFactory(object):
 
     if (download_url.startswith('http://github.com/') and
         download_url.endswith('/releases')):
+      release_is_archive = project_definition.github_release_is_archive
       release_prefix = project_definition.github_release_prefix
       release_tag_prefix = project_definition.github_release_tag_prefix
       return github.GitHubReleasesDownloadHelper(
-          download_url, release_prefix=release_prefix,
-          release_tag_prefix=release_tag_prefix)
+          download_url, release_is_archive=release_is_archive,
+          release_prefix=release_prefix, release_tag_prefix=release_tag_prefix)
 
     raise ValueError('Unsupported download URL: {0:s}.'.format(
         project_definition.download_url))
