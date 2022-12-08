@@ -2,6 +2,7 @@
 envlist = ${envlist}
 
 [testenv]
+allowlist_externals = ./run_tests.py
 pip_pre = True
 setenv =
     PYTHONPATH = {toxinidir}
