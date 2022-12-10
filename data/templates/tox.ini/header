@@ -4,6 +4,10 @@ envlist = ${envlist}
 [testenv]
 allowlist_externals = ./run_tests.py
 pip_pre = True
+passenv =
+    CFLAGS
+    CPPFLAGS
+    LDFLAGS
 setenv =
     PYTHONPATH = {toxinidir}
 deps =
@@ -18,12 +22,15 @@ commands =
 [testenv:codecov]
 skip_install = True
 passenv =
+    CFLAGS
+    CPPFLAGS
     GITHUB_ACTION
     GITHUB_HEAD_REF
     GITHUB_REF
     GITHUB_REPOSITORY
     GITHUB_RUN_ID
     GITHUB_SHA
+    LDFLAGS
 deps =
     codecov < 2.1.10
 commands =
