@@ -82,8 +82,7 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
         'TEST_DEPENDENCIES="python3-distutils\n'
         '                   python3-mock\n'
         '                   python3-pbr\n'
-        '                   python3-setuptools\n'
-        '                   python3-six";')
+        '                   python3-setuptools";')
 
     python_dependencies = test_writer._GetDPKGPythonDependencies()
     test_dependencies = test_writer._GetDPKGTestDependencies(
