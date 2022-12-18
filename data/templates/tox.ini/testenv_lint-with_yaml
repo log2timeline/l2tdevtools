@@ -2,6 +2,10 @@
 [testenv:lint]
 skipsdist = True
 pip_pre = True
+passenv =
+    CFLAGS
+    CPPFLAGS
+    LDFLAGS
 setenv =
     PYTHONPATH = {toxinidir}
 deps =
