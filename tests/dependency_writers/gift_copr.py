@@ -81,8 +81,7 @@ class GIFTCOPRInstallTest(test_lib.BaseTestCase):
     expected_formatted_test_dependencies = (
         'TEST_DEPENDENCIES="python3-mock\n'
         '                   python3-pbr\n'
-        '                   python3-setuptools\n'
-        '                   python3-six";')
+        '                   python3-setuptools";')
 
     python_dependencies = test_writer._GetRPMPythonDependencies()
     test_dependencies = test_writer._GetRPMTestDependencies(python_dependencies)

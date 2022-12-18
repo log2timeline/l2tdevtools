@@ -16,7 +16,7 @@ commands =
     coverage: coverage run --source=${python_module_name} --omit="*_test*,*__init__*,*test_lib*" run_tests.py
 
 [testenv:codecov]
-skip_install = true
+skip_install = True
 passenv =
     GITHUB_ACTION
     GITHUB_HEAD_REF

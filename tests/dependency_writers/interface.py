@@ -48,7 +48,7 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
 
     expected_test_dependencies = [
         'python3-distutils', 'python3-mock', 'python3-pbr',
-        'python3-setuptools', 'python3-six']
+        'python3-setuptools']
 
     python_dependencies = test_writer._GetDPKGPythonDependencies()
     test_dependencies = test_writer._GetDPKGTestDependencies(
@@ -69,7 +69,7 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     """Tests the _GetPyPITestDependencies function."""
     test_writer = self._CreateTestWriter()
 
-    expected_test_dependencies = ['mock', 'pbr', 'six']
+    expected_test_dependencies = ['mock', 'pbr']
 
     python_dependencies = test_writer._GetPyPIPythonDependencies(
         exclude_version=True)
@@ -91,7 +91,7 @@ class DependencyFileWriterTest(test_lib.BaseTestCase):
     test_writer = self._CreateTestWriter()
 
     expected_test_dependencies = [
-        'python3-mock', 'python3-pbr', 'python3-setuptools', 'python3-six']
+        'python3-mock', 'python3-pbr', 'python3-setuptools']
 
     python_dependencies = test_writer._GetRPMPythonDependencies()
     test_dependencies = test_writer._GetRPMTestDependencies(python_dependencies)

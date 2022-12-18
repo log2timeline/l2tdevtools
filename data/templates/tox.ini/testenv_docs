@@ -1,6 +1,6 @@
 
 [testenv:docs]
-usedevelop = true
+usedevelop = True
 deps =
     -rdocs/requirements.txt
 commands =
