@@ -4,7 +4,6 @@
 
 import argparse
 import glob
-import io
 import json
 import logging
 import os
@@ -489,7 +488,7 @@ class DependencyUpdater(object):
     """
     project_definitions = {}
 
-    with io.open(projects_file, 'r', encoding='utf-8') as file_object:
+    with open(projects_file, 'r', encoding='utf-8') as file_object:
       project_definition_reader = projects.ProjectDefinitionReader()
       for project_definition in project_definition_reader.Read(file_object):
         project_definitions[project_definition.name] = project_definition
@@ -566,7 +565,7 @@ class DependencyUpdater(object):
         result = False
 
         if self._verbose_output:
-          with io.open(log_file, 'r', encoding='utf-16-le') as file_object:
+          with open(log_file, 'r', encoding='utf-16-le') as file_object:
             log_file_contents = file_object.read()
             print(log_file_contents.encode('ascii', errors='replace'))
 
@@ -859,7 +858,7 @@ def Main():
   if options.preset:
     preset_definitions = {}
 
-    with io.open(presets_file, 'r', encoding='utf-8') as file_object:
+    with open(presets_file, 'r', encoding='utf-8') as file_object:
       definition_reader = presets.PresetDefinitionReader()
       preset_definitions = {
           preset_definition.name: preset_definition
