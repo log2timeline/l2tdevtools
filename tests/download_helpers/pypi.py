@@ -19,8 +19,8 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   _GIT_URL = 'https://github.com/log2timeline/dfvfs.git'
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20221218'
-  _PYPI_VERSION = '20221218'
+  _PROJECT_VERSION = '20221224'
+  _PYPI_VERSION = '20221224'
 
   @classmethod
   def setUpClass(cls):

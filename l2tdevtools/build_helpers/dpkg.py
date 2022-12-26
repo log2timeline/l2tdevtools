@@ -822,7 +822,7 @@ class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
     else:
       build_configuration = dpkg_files.DPKGBuildConfiguration()
 
-      if os.path.exists(os.path.join(installroot_path, 'usr' 'bin')):
+      if os.path.exists(os.path.join(installroot_path, 'usr', 'bin')):
         build_configuration.has_bin_directory = True
 
       dist_packages = os.path.join(
