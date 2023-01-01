@@ -268,12 +268,12 @@ class RPMBuildHelper(BaseRPMBuildHelper):
     filename = '{0:s}-{1!s}'.format(project_name, project_version)
     filename = os.path.join(self.rpmbuild_path, 'BUILD', filename)
 
-    logging.info('Removing: {0:s}'.format(filename))
-
-    try:
-      shutil.rmtree(filename)
-    except OSError:
-      logging.warning('Unable to remove: {0:s}'.format(filename))
+    if os.path.exists(filename):
+      logging.info('Removing: {0:s}'.format(filename))
+      try:
+        shutil.rmtree(filename)
+      except OSError:
+        logging.warning('Unable to remove: {0:s}'.format(filename))
 
   def _RemoveOlderBuildDirectory(self, project_name, project_version):
     """Removes previous versions of build directories.
