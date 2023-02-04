@@ -52,7 +52,8 @@ class ProjectHelper(cli.CLIHelper):
       'turbinia',
       'vstools',
       'winevt-kb',
-      'winreg-kb'])
+      'winreg-kb',
+      'winsps-kb'])
 
   def __init__(self, project_path):
     """Initializes a project helper.
