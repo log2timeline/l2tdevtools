@@ -17,7 +17,8 @@ class SetupCfgWriter(interface.DependencyFileWriter):
   _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
 
   _PROJECTS_WITH_SDIST_TEST_DATA = (
-      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevt-kb', 'winreg-kb')
+      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevt-kb', 'winreg-kb',
+      'winsps-kb')
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.cfg')
 
@@ -101,12 +102,13 @@ class SetupPyWriter(interface.DependencyFileWriter):
 
   _PROJECTS_WITH_PACKAGE_DATA = (
       'artifacts-kb', 'dfvfs', 'dfwinreg', 'dtformats', 'esedb-kb', 'olecf-kb',
-      'plaso', 'winreg-kb')
+      'plaso', 'winreg-kb', 'winsps-kb')
 
   _PROJECTS_WITH_PYTHON3_AS_DEFAULT = ('plaso', )
 
   _PROJECTS_WITH_SDIST_TEST_DATA = (
-      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevt-kb', 'winreg-kb')
+      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevt-kb', 'winreg-kb',
+      'winsps-kb')
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.py')
 
