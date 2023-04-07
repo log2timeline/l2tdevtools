@@ -544,6 +544,7 @@ class DependencyHelper(object):
     # to generate utils.DependencyHelper of the individual projects.
     names = (
         'pybde',
+        'pycaes',
         'pycreg',
         'pyesedb',
         'pyevt',
