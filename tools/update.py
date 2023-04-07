@@ -771,7 +771,7 @@ class DependencyUpdater(object):
 
     if not available_packages:
       logging.error('No packages found.')
-     return False
+      return False
 
     if not os.path.exists(self._download_directory):
       os.mkdir(self._download_directory)
