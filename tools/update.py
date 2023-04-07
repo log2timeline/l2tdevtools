@@ -766,32 +766,31 @@ class DependencyUpdater(object):
 
     if (sys.version_info[0], sys.version_info[1]) == (3.10):
       available_packages = self._GetAvailableMSIPackages()
-      if not available_packages:
-        logging.error('No MSI packages found.')
-        return False
+    else:
+      available_packages = self._GetAvailableWheelPackages()
 
-      if not os.path.exists(self._download_directory):
-        os.mkdir(self._download_directory)
+    if not available_packages:
+      logging.error('No packages found.')
+     return False
 
-      package_filenames, package_versions = (
-          self._GetPackageFilenamesAndVersions(
-              project_definitions, available_packages,
-              user_defined_package_names))
+    if not os.path.exists(self._download_directory):
+      os.mkdir(self._download_directory)
 
-      if self._download_only:
-        return True
+    package_filenames, package_versions = (
+        self._GetPackageFilenamesAndVersions(
+            project_definitions, available_packages,
+            user_defined_package_names))
 
+    if self._download_only:
+      return True
+
+    if (sys.version_info[0], sys.version_info[1]) == (3.10):
       if not self._UninstallMSIPackagesWindows(package_versions):
         logging.error('Unable to uninstall MSI packages.')
         return False
 
       return self._InstallMSIPackagesWindows(
           package_filenames, package_versions)
-
-    available_packages = self._GetAvailableWheelPackages()
-    if not available_packages:
-      logging.error('No wheel packages found.')
-      return False
 
     return self._InstallWheelPackagesWindows(
         package_filenames, package_versions)
