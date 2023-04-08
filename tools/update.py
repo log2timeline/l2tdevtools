@@ -445,10 +445,10 @@ class DependencyUpdater(object):
 
     return available_packages.values()
 
-  def _GetPackageFilenamesAndVersions(
+  def _GetMSIPackageFilenamesAndVersions(
       self, project_definitions, available_packages,
       user_defined_package_names):
-    """Determines the package filenames and versions.
+    """Determines the MSI package filenames and versions.
 
     Args:
       project_definitions (dist[str, ProjectDefinition]): project definitions
@@ -469,6 +469,92 @@ class DependencyUpdater(object):
     for project_name, project_definition in project_definitions.items():
       package_name = getattr(
           project_definition, 'msi_name', None) or project_name
+      package_name = package_name.lower()
+      project_definition_per_package_name[package_name] = project_definition
+
+    package_filenames = {}
+    package_versions = {}
+
+    for package_download in available_packages:
+      package_name = package_download.name
+      package_filename = package_download.filename
+      package_download_path = os.path.join(
+          self._download_directory, package_filename)
+
+      # Ignore package names if user defined.
+      if user_defined_package_names:
+        in_package_names = package_name in user_defined_package_names
+
+        alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
+        if alternate_name:
+          if ((self._exclude_packages and in_package_names) or
+              (not self._exclude_packages and not in_package_names)):
+            in_package_names = alternate_name in user_defined_package_names
+
+        if ((self._exclude_packages and in_package_names) or
+            (not self._exclude_packages and not in_package_names)):
+          logging.info('Skipping: {0:s} because it was excluded'.format(
+              package_name))
+          continue
+
+      # Remove previous versions of a package.
+      filenames_glob = '{0:s}*{1:s}'.format(package_name, package_filename[:-4])
+      filenames = glob.glob(os.path.join(
+          self._download_directory, filenames_glob))
+      for filename in filenames:
+        if filename != package_download_path and os.path.isfile(filename):
+          logging.info('Removing: {0:s}'.format(filename))
+          os.remove(filename)
+
+      project_definition = project_definition_per_package_name.get(
+          package_name, None)
+      if not project_definition:
+        alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
+        if alternate_name:
+          project_definition = project_definitions.get(alternate_name, None)
+
+      if not project_definition:
+        logging.error('Missing project definition for package: {0:s}'.format(
+            package_name))
+        continue
+
+      if not os.path.exists(package_download_path):
+        logging.info('Downloading: {0:s}'.format(package_filename))
+        os.chdir(self._download_directory)
+        try:
+          self._download_helper.DownloadFile(package_download.url)
+        finally:
+          os.chdir('..')
+
+      package_filenames[package_name] = package_filename
+      package_versions[package_name] = package_download.version
+
+    return package_filenames, package_versions
+
+  def _GetWheelPackageFilenamesAndVersions(
+      self, project_definitions, available_packages,
+      user_defined_package_names):
+    """Determines the wheel package filenames and versions.
+
+    Args:
+      project_definitions (dist[str, ProjectDefinition]): project definitions
+          per name.
+      available_packages (list[PackageDownload]): packages available for
+          download.
+      user_defined_package_names (list[str]): names of packages that should be
+          updated if an update is available. These package names are derived
+          from the user specified names of projects. An empty list represents
+          all available packages.
+
+    Returns:
+      tuple: containing:
+          dict[str, str]: filenames per package.
+          dict[str, str]: versions per package.
+    """
+    project_definition_per_package_name = {}
+    for project_name, project_definition in project_definitions.items():
+      package_name = getattr(
+          project_definition, 'wheel_name', None) or project_name
       package_name = package_name.lower()
       project_definition_per_package_name[package_name] = project_definition
 
@@ -776,10 +862,16 @@ class DependencyUpdater(object):
     if not os.path.exists(self._download_directory):
       os.mkdir(self._download_directory)
 
-    package_filenames, package_versions = (
-        self._GetPackageFilenamesAndVersions(
-            project_definitions, available_packages,
-            user_defined_package_names))
+    if (sys.version_info[0], sys.version_info[1]) == (3.10):
+      package_filenames, package_versions = (
+          self._GetMSIPackageFilenamesAndVersions(
+              project_definitions, available_packages,
+              user_defined_package_names))
+    else:
+      package_filenames, package_versions = (
+          self._GetWheelPackageFilenamesAndVersions(
+              project_definitions, available_packages,
+              user_defined_package_names))
 
     if self._download_only:
       return True
