@@ -635,9 +635,9 @@ class DependencyUpdater(object):
 
     return project_definitions
 
-  def _GetUserDefinedPackageNames(
+  def _GetUserDefinedMSIPackageNames(
       self, project_definitions, user_defined_project_names):
-    """Determines names of packages that should be updated.
+    """Determines names of MSI packages that should be updated.
 
     Args:
       project_definitions (dist[str, ProjectDefinition]): project definitions
@@ -666,6 +666,43 @@ class DependencyUpdater(object):
 
       package_name = getattr(
           project_definition, 'msi_name', None) or project_name
+
+      package_name = package_name.lower()
+      user_defined_package_names.append(package_name)
+
+    return user_defined_package_names
+
+  def _GetUserDefinedWheelPackageNames(
+      self, project_definitions, user_defined_project_names):
+    """Determines names of wheel packages that should be updated.
+
+    Args:
+      project_definitions (dist[str, ProjectDefinition]): project definitions
+          per name.
+      user_defined_project_names (list[str]): user specified names of projects,
+          that should be updated if an update is available. An empty list
+          represents all available projects.
+
+    Returns:
+      list[str]: names of packages that should be updated if an update is
+          available. These package names are derived from the user specified
+          names of projects. An empty list represents all available packages.
+    """
+    user_defined_package_names = []
+    for project_name in user_defined_project_names:
+      project_definition = project_definitions.get(project_name, None)
+      if not project_definition:
+        alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
+        if alternate_name:
+          project_definition = project_definitions.get(alternate_name, None)
+
+      if not project_definition:
+        logging.error('Missing project definition for package: {0:s}'.format(
+            project_name))
+        continue
+
+      package_name = getattr(
+          project_definition, 'wheel_name', None) or project_name
 
       package_name = package_name.lower()
       user_defined_package_names.append(package_name)
@@ -847,12 +884,15 @@ class DependencyUpdater(object):
     """
     project_definitions = self._GetProjectDefinitions(projects_file)
 
-    user_defined_package_names = self._GetUserDefinedPackageNames(
-        project_definitions, user_defined_project_names)
-
     if (sys.version_info[0], sys.version_info[1]) == (3, 10):
+      user_defined_package_names = self._GetUserDefinedMSIPackageNames(
+          project_definitions, user_defined_project_names)
+
       available_packages = self._GetAvailableMSIPackages()
     else:
+      user_defined_package_names = self._GetUserDefinedWheelPackageNames(
+          project_definitions, user_defined_project_names)
+
       available_packages = self._GetAvailableWheelPackages()
 
     if not available_packages:
@@ -901,7 +941,7 @@ class DependencyUpdater(object):
     """
     project_definitions = self._GetProjectDefinitions(projects_file)
 
-    user_defined_package_names = self._GetUserDefinedPackageNames(
+    user_defined_package_names = self._GetUserDefinedMSIPackageNames(
         project_definitions, user_defined_project_names)
 
     if not user_defined_package_names:
