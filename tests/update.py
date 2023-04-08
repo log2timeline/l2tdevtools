@@ -102,22 +102,24 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
     """Tests the UpdatePackages function."""
     projects_file = os.path.join('data', 'projects.ini')
 
-    with test_lib.TempDirectory() as temp_directory:
-      dependency_updater = update.DependencyUpdater(
-          download_directory=temp_directory, download_only=True,
-          download_track='dev', preferred_machine_type='x86',
-          preferred_operating_system='Windows')
+    if (sys.version_info[0], sys.version_info[1]) in (
+        update.GithubRepoDownloadHelper._SUPPORTED_PYTHON_VERSIONS):
+      with test_lib.TempDirectory() as temp_directory:
+        dependency_updater = update.DependencyUpdater(
+            download_directory=temp_directory, download_only=True,
+            download_track='dev', preferred_machine_type='x86',
+            preferred_operating_system='Windows')
 
-      dependency_updater.UpdatePackages(projects_file, ['dfvfs'])
+        dependency_updater.UpdatePackages(projects_file, ['dfvfs'])
 
-      glob_results = sorted(glob.glob(os.path.join(temp_directory, '*.whl')))
+        glob_results = sorted(glob.glob(os.path.join(temp_directory, '*.whl')))
 
-      self.assertEqual(len(glob_results), 1)
+        self.assertEqual(len(glob_results), 1)
 
-      expected_path = os.path.join(
-          temp_directory, 'dfvfs-{0:s}-py2.py3-none-any.whl'.format(
-              self._DFVFS_WHEEL_VERSION))
-      self.assertEqual(glob_results[0], expected_path)
+        expected_path = os.path.join(
+            temp_directory, 'dfvfs-{0:s}-py2.py3-none-any.whl'.format(
+                self._DFVFS_WHEEL_VERSION))
+        self.assertEqual(glob_results[0], expected_path)
 
 
 if __name__ == '__main__':
