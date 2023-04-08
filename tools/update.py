@@ -57,7 +57,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
   _GITHUB_REPO_URL = (
       'https://github.com/log2timeline/l2tbinaries')
 
-  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 10)])
+  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 10), (3, 11)])
 
   def __init__(self, download_url, branch='main'):
     """Initializes a download helper.
@@ -323,8 +323,8 @@ class DependencyUpdater(object):
     else:
       self._preferred_machine_type = None
 
-  def _GetAvailablePackages(self):
-    """Determines the packages available for download.
+  def _GetAvailableMSIPackages(self):
+    """Determines the MSI packages available for download.
 
     Returns:
       list[PackageDownload]: packages available for download.
@@ -388,6 +388,60 @@ class DependencyUpdater(object):
         package_download = PackageDownload(
             name, version, package_filename, package_url)
         available_packages[name] = package_download
+
+    return available_packages.values()
+
+  def _GetAvailableWheelPackages(self):
+    """Determines the wheel packages available for download.
+
+    Returns:
+      list[PackageDownload]: packages available for download.
+    """
+    python_version_indicator = 'cp{0:d}{1:d}'.format(
+        sys.version_info[0], sys.version_info[1])
+
+    # The API is rate limited, so we scrape the web page instead.
+    package_urls = self._download_helper.GetPackageDownloadURLs(
+        preferred_machine_type=self._preferred_machine_type,
+        preferred_operating_system=self.operating_system)
+    if not package_urls:
+      logging.error('Unable to determine package download URLs.')
+      return []
+
+    # Use a dictionary so we can more efficiently set a newer version of
+    # a package that was set previously.
+    available_packages = {}
+
+    package_versions = {}
+    for package_url in package_urls:
+      _, _, package_filename = package_url.rpartition('/')
+      package_filename = package_filename.lower()
+
+      if not package_filename.endswith('.whl'):
+        # Ignore all other file extensions.
+        continue
+
+      (package_name, package_version, python_tags,
+       _, _) = package_filename[:-4].split('-')
+
+      if python_tags not in (python_version_indicator, 'py2.py3', 'py3'):
+        # Ignore packages that are for different versions of Python.
+        continue
+
+      version = package_version.split('.')
+
+      if package_name not in package_versions:
+        compare_result = 1
+      else:
+        compare_result = versions.CompareVersions(
+            version, package_versions[package_name])
+
+      if compare_result > 0:
+        package_versions[package_name] = version
+
+        package_download = PackageDownload(
+            package_name, version, package_filename, package_url)
+        available_packages[package_name] = package_download
 
     return available_packages.values()
 
@@ -532,8 +586,8 @@ class DependencyUpdater(object):
 
     return user_defined_package_names
 
-  def _InstallPackagesWindows(self, package_filenames, package_versions):
-    """Installs packages on Windows.
+  def _InstallMSIPackagesWindows(self, package_filenames, package_versions):
+    """Installs MSI packages on Windows.
 
     Args:
       package_filenames (dict[str, str]): filenames per package.
@@ -571,8 +625,32 @@ class DependencyUpdater(object):
 
     return result
 
-  def _UninstallPackagesWindows(self, package_versions):
-    """Uninstalls packages on Windows.
+  def _InstallWheelPackagesWindows(self, package_filenames, package_versions):
+    """Installs wheel packages on Windows.
+
+    Args:
+      package_filenames (dict[str, str]): filenames per package.
+      package_versions (dict[str, str]): versions per package.
+
+    Returns:
+      bool: True if the installation was successful.
+    """
+    result = True
+    for name, version in package_versions.items():
+      package_filename = package_filenames[name]
+      package_path = os.path.join(self._download_directory, package_filename)
+      command = '{0:s} -m pip install {1:s}'.format(
+          sys.executable, package_path)
+      logging.info('Installing: {0:s} {1:s}'.format(name, '.'.join(version)))
+      exit_code = subprocess.call(command, shell=False)
+      if exit_code != 0:
+        logging.error('Running: "{0:s}" failed.'.format(command))
+        result = False
+
+    return result
+
+  def _UninstallMSIPackagesWindows(self, package_versions):
+    """Uninstalls MSI packages on Windows.
 
     Args:
       package_versions (dict[str, str]): versions per package.
@@ -686,7 +764,11 @@ class DependencyUpdater(object):
     user_defined_package_names = self._GetUserDefinedPackageNames(
         project_definitions, user_defined_project_names)
 
-    available_packages = self._GetAvailablePackages()
+    if (sys.version_info[0], sys.version_info[1]) == (3.10):
+      available_packages = self._GetAvailableMSIPackages()
+    else:
+      available_packages = self._GetAvailableWheelPackages()
+
     if not available_packages:
       logging.error('No packages found.')
       return False
@@ -694,17 +776,24 @@ class DependencyUpdater(object):
     if not os.path.exists(self._download_directory):
       os.mkdir(self._download_directory)
 
-    package_filenames, package_versions = self._GetPackageFilenamesAndVersions(
-        project_definitions, available_packages, user_defined_package_names)
+    package_filenames, package_versions = (
+        self._GetPackageFilenamesAndVersions(
+            project_definitions, available_packages,
+            user_defined_package_names))
 
     if self._download_only:
       return True
 
-    if not self._UninstallPackagesWindows(package_versions):
-      logging.error('Unable to uninstall packages.')
-      return False
+    if (sys.version_info[0], sys.version_info[1]) == (3.10):
+      if not self._UninstallMSIPackagesWindows(package_versions):
+        logging.error('Unable to uninstall MSI packages.')
+        return False
 
-    return self._InstallPackagesWindows(package_filenames, package_versions)
+      return self._InstallMSIPackagesWindows(
+          package_filenames, package_versions)
+
+    return self._InstallWheelPackagesWindows(
+        package_filenames, package_versions)
 
   def UninstallPackages(self, projects_file, user_defined_project_names):
     """Uninstalls packages.
@@ -735,7 +824,7 @@ class DependencyUpdater(object):
 
     package_versions = {name: None for name in user_defined_package_names}
 
-    return self._UninstallPackagesWindows(package_versions)
+    return self._UninstallMSIPackagesWindows(package_versions)
 
 
 def Main():

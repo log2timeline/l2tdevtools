@@ -49,12 +49,12 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
   _PROJECT_NAME = 'dfvfs'
   _PROJECT_VERSION = '20221224'
 
-  def testGetAvailablePackages(self):
-    """Tests the _GetAvailablePackages function."""
+  def testGetAvailableMSIPackages(self):
+    """Tests the _GetAvailableMSIPackages function."""
     dependency_updater = update.DependencyUpdater(
         preferred_machine_type='x86', preferred_operating_system='Windows')
 
-    available_packages = dependency_updater._GetAvailablePackages()
+    available_packages = dependency_updater._GetAvailableMSIPackages()
 
     if (sys.version_info[0], sys.version_info[1]) not in (
         update.GithubRepoDownloadHelper._SUPPORTED_PYTHON_VERSIONS):
@@ -66,6 +66,29 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
       for package_download in available_packages:
         if package_download.name == self._PROJECT_NAME:
           expected_package_filename = '{0:s}-{1:s}.1.win32.msi'.format(
+              self._PROJECT_NAME, self._PROJECT_VERSION)
+          self.assertEqual(package_download.filename, expected_package_filename)
+
+          expected_package_version = [self._PROJECT_VERSION, '1']
+          self.assertEqual(package_download.version, expected_package_version)
+
+  def testGetAvailableWheelPackages(self):
+    """Tests the _GetAvailableWheelPackages function."""
+    dependency_updater = update.DependencyUpdater(
+        preferred_machine_type='x86', preferred_operating_system='Windows')
+
+    available_packages = dependency_updater._GetAvailableWheelPackages()
+
+    if (sys.version_info[0], sys.version_info[1]) not in (
+        update.GithubRepoDownloadHelper._SUPPORTED_PYTHON_VERSIONS):
+      self.assertEqual(available_packages, [])
+
+    else:
+      self.assertNotEqual(available_packages, [])
+
+      for package_download in available_packages:
+        if package_download.name == self._PROJECT_NAME:
+          expected_package_filename = '{0:s}-{1:s}-py2.py3-none-any.whl'.format(
               self._PROJECT_NAME, self._PROJECT_VERSION)
           self.assertEqual(package_download.filename, expected_package_filename)
 
