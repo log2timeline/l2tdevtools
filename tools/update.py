@@ -850,7 +850,7 @@ class DependencyUpdater(object):
     user_defined_package_names = self._GetUserDefinedPackageNames(
         project_definitions, user_defined_project_names)
 
-    if (sys.version_info[0], sys.version_info[1]) == (3.10):
+    if (sys.version_info[0], sys.version_info[1]) == (3, 10):
       available_packages = self._GetAvailableMSIPackages()
     else:
       available_packages = self._GetAvailableWheelPackages()
@@ -862,7 +862,7 @@ class DependencyUpdater(object):
     if not os.path.exists(self._download_directory):
       os.mkdir(self._download_directory)
 
-    if (sys.version_info[0], sys.version_info[1]) == (3.10):
+    if (sys.version_info[0], sys.version_info[1]) == (3, 10):
       package_filenames, package_versions = (
           self._GetMSIPackageFilenamesAndVersions(
               project_definitions, available_packages,
@@ -876,7 +876,7 @@ class DependencyUpdater(object):
     if self._download_only:
       return True
 
-    if (sys.version_info[0], sys.version_info[1]) == (3.10):
+    if (sys.version_info[0], sys.version_info[1]) == (3, 10):
       if not self._UninstallMSIPackagesWindows(package_versions):
         logging.error('Unable to uninstall MSI packages.')
         return False
