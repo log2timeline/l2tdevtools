@@ -487,9 +487,6 @@ def Main():
     contributions_helper.ListContributions(
         projects_per_organization, output_writer)
 
-  # TODO: add support for pull requests
-  # TODO: add support for more granular CL information
-
   return True
 
 

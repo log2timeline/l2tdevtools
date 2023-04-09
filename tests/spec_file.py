@@ -58,7 +58,6 @@ class RPMSpecFileGeneratorTest(test_lib.BaseTestCase):
       spec_file_generator._SplitRequires('Bogus')
 
   # TODO: test RewriteSetupPyGeneratedFile function.
-  # TODO: test RewriteSetupPyGeneratedFileForOSC function.
 
 
 if __name__ == '__main__':

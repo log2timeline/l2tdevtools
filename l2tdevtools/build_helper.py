@@ -3,7 +3,6 @@
 
 from l2tdevtools.build_helpers import dpkg
 from l2tdevtools.build_helpers import msi
-from l2tdevtools.build_helpers import osc
 from l2tdevtools.build_helpers import rpm
 from l2tdevtools.build_helpers import source
 from l2tdevtools.build_helpers import wheel
@@ -16,7 +15,6 @@ class BuildHelperFactory(object):
       'dpkg': dpkg.ConfigureMakeDPKGBuildHelper,
       'dpkg-source': dpkg.ConfigureMakeSourceDPKGBuildHelper,
       'msi': msi.ConfigureMakeMSIBuildHelper,
-      'osc': osc.ConfigureMakeOSCBuildHelper,
       'rpm': rpm.ConfigureMakeRPMBuildHelper,
       'source': source.ConfigureMakeSourceBuildHelper,
       'srpm': rpm.ConfigureMakeSRPMBuildHelper,
@@ -32,7 +30,6 @@ class BuildHelperFactory(object):
       'dpkg': dpkg.PybuildDPKGBuildHelper,
       'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
       'msi': msi.SetupPyMSIBuildHelper,
-      'osc': osc.SetupPyOSCBuildHelper,
       'rpm': rpm.SetupPyRPMBuildHelper,
       'source': source.SetupPySourceBuildHelper,
       'srpm': rpm.SetupPySRPMBuildHelper,
