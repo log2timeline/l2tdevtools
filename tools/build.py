@@ -316,7 +316,7 @@ def Main():
     bool: True if successful or False if not.
   """
   build_targets = frozenset([
-      'download', 'dpkg', 'dpkg-source', 'msi', 'osc', 'rpm', 'source', 'srpm',
+      'download', 'dpkg', 'dpkg-source', 'msi', 'rpm', 'source', 'srpm',
       'wheel'])
 
   argument_parser = argparse.ArgumentParser(description=(

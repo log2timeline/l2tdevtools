@@ -660,22 +660,6 @@ class RPMSpecFileGenerator(object):
 
     return True
 
-  def _RewriteSetupPyGeneratedFileForOSC(
-      self, input_file_object, output_file_object):
-    """Rewrites the RPM spec file generated with setup.py for OSC.
-
-    Args:
-      input_file_object (file): input file-like object to read from.
-      output_file_object (file): output file-like object to write to.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    for line in input_file_object.readlines():
-      output_file_object.write(line)
-
-    return True
-
   def _SplitRequires(self, requires):
     """Splits a spec file requires statement.
 
@@ -795,27 +779,5 @@ class RPMSpecFileGenerator(object):
             project_definition, source_directory, source_package_filename,
             project_name, rpm_build_dependencies, input_file,
             output_file_object)
-
-    return result
-
-  def RewriteSetupPyGeneratedFileForOSC(self, spec_file_path):
-    """Rewrites the RPM spec file generated with setup.py for OSC.
-
-    Args:
-      spec_file_path (str): path of the RPM spec file.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    with io.StringIO() as temporary_file_object:
-      with io.open(spec_file_path, 'r', encoding='utf8') as input_file_object:
-        data = input_file_object.read()
-        temporary_file_object.write(data)
-
-      temporary_file_object.seek(0, os.SEEK_SET)
-
-      with io.open(spec_file_path, 'w', encoding='utf8') as output_file_object:
-        result = self._RewriteSetupPyGeneratedFileForOSC(
-            temporary_file_object, output_file_object)
 
     return result
