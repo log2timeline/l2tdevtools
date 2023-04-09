@@ -24,7 +24,8 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
 
   def testGetPackageDownloadURLs(self):
     """Tests the GetPackageDownloadURLs function."""
-    download_helper = update.GithubRepoDownloadHelper(self._DOWNLOAD_URL)
+    download_helper = update.GithubRepoDownloadHelper(
+        self._DOWNLOAD_URL, branch='dev')
 
     package_download_urls = download_helper.GetPackageDownloadURLs(
         preferred_machine_type='x86', preferred_operating_system='Windows')
@@ -37,8 +38,8 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
       self.assertIsNotNone(package_download_urls)
 
       expected_url = (
-          'https://github.com/log2timeline/l2tbinaries/raw/main/win32/'
-          '{0:s}-{1:s}.1.win32.msi').format(
+          'https://github.com/log2timeline/l2tbinaries/raw/dev/win32/'
+          '{0:s}-{1:s}-py2.py3-none-any.whl').format(
               self._PROJECT_NAME, self._PROJECT_VERSION)
       self.assertIn(expected_url, package_download_urls)
 
@@ -48,31 +49,7 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
 
   # pylint: disable=protected-access
 
-  _DFVFS_MSI_VERSION = '20221224'
   _DFVFS_WHEEL_VERSION = '20230531'
-
-  def testGetAvailableMSIPackages(self):
-    """Tests the _GetAvailableMSIPackages function."""
-    dependency_updater = update.DependencyUpdater(
-        preferred_machine_type='x86', preferred_operating_system='Windows')
-
-    available_packages = dependency_updater._GetAvailableMSIPackages()
-
-    if (sys.version_info[0], sys.version_info[1]) not in (
-        update.GithubRepoDownloadHelper._SUPPORTED_PYTHON_VERSIONS):
-      self.assertEqual(available_packages, [])
-
-    else:
-      self.assertNotEqual(available_packages, [])
-
-      for package_download in available_packages:
-        if package_download.name == 'dfvfs':
-          expected_package_filename = 'dfvfs-{0:s}.1.win32.msi'.format(
-              self._DFVFS_MSI_VERSION)
-          self.assertEqual(package_download.filename, expected_package_filename)
-
-          expected_package_version = [self._DFVFS_MSI_VERSION, '1']
-          self.assertEqual(package_download.version, expected_package_version)
 
   def testGetAvailableWheelPackages(self):
     """Tests the _GetAvailableWheelPackages function."""
@@ -102,7 +79,8 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
     """Tests the UpdatePackages function."""
     projects_file = os.path.join('data', 'projects.ini')
 
-    if (sys.version_info[0], sys.version_info[1]) in (3, 11):
+    if (sys.version_info[0], sys.version_info[1]) in (
+        update.GithubRepoDownloadHelper._SUPPORTED_PYTHON_VERSIONS):
       with test_lib.TempDirectory() as temp_directory:
         dependency_updater = update.DependencyUpdater(
             download_directory=temp_directory, download_only=True,

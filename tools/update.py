@@ -18,10 +18,6 @@ from l2tdevtools import versions
 from l2tdevtools.download_helpers import interface
 
 
-if platform.system() == 'Windows':
-  import wmi  # pylint: disable=import-error
-
-
 class PackageDownload(object):
   """Information about a package download.
 
@@ -57,7 +53,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
   _GITHUB_REPO_URL = (
       'https://github.com/log2timeline/l2tbinaries')
 
-  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 10), (3, 11)])
+  _SUPPORTED_PYTHON_VERSIONS = frozenset([(3, 11)])
 
   def __init__(self, download_url, branch='main'):
     """Initializes a download helper.
@@ -277,8 +273,8 @@ class DependencyUpdater(object):
   def __init__(
       self, download_directory='build', download_only=False,
       download_track='stable', exclude_packages=False, force_install=False,
-      msi_targetdir=None, preferred_machine_type=None,
-      preferred_operating_system=None, verbose_output=False):
+      preferred_machine_type=None, preferred_operating_system=None,
+      verbose_output=False):
     """Initializes the dependency updater.
 
     Args:
@@ -290,7 +286,6 @@ class DependencyUpdater(object):
           instead of included.
       force_install (Optional[bool]): True if the installation (update) should
           be forced.
-      msi_targetdir (Optional[str]): MSI TARGETDIR property.
       preferred_machine_type (Optional[str]): preferred machine type, where
           None, which will auto-detect the current machine type.
       preferred_operating_system (Optional[str]): preferred operating system,
@@ -308,7 +303,6 @@ class DependencyUpdater(object):
     self._download_track = download_track
     self._exclude_packages = exclude_packages
     self._force_install = force_install
-    self._msi_targetdir = msi_targetdir
     self._verbose_output = verbose_output
 
     if preferred_operating_system:
@@ -320,74 +314,6 @@ class DependencyUpdater(object):
       self._preferred_machine_type = preferred_machine_type.lower()
     else:
       self._preferred_machine_type = None
-
-  def _GetAvailableMSIPackages(self):
-    """Determines the MSI packages available for download.
-
-    Returns:
-      list[PackageDownload]: packages available for download.
-    """
-    python_version_indicator = '-py{0:d}.{1:d}'.format(
-        sys.version_info[0], sys.version_info[1])
-
-    # The API is rate limited, so we scrape the web page instead.
-    package_urls = self._download_helper.GetPackageDownloadURLs(
-        preferred_machine_type=self._preferred_machine_type,
-        preferred_operating_system=self.operating_system)
-    if not package_urls:
-      logging.error('Unable to determine package download URLs.')
-      return []
-
-    # Use a dictionary so we can more efficiently set a newer version of
-    # a package that was set previously.
-    available_packages = {}
-
-    package_versions = {}
-    for package_url in package_urls:
-      _, _, package_filename = package_url.rpartition('/')
-      package_filename = package_filename.lower()
-
-      if not package_filename.endswith('.msi'):
-        # Ignore all other file extensions.
-        continue
-
-      # Strip off the trailing part starting with '.win'.
-      package_name, _, package_version = package_filename.partition('.win')
-
-      if ('-py' in package_version and
-          python_version_indicator not in package_version):
-        # Ignore packages that are for different versions of Python.
-        continue
-
-      if package_name.startswith('pefile-1.'):
-        # We need to use the most left '-' character as the separator of the
-        # name and the version, since version can contain the '-' character.
-        name, _, version = package_name.partition('-')
-      else:
-        # We need to use the most right '-' character as the separator of the
-        # name and the version, since name can contain the '-' character.
-        name, _, version = package_name.rpartition('-')
-
-      version = version.split('.')
-
-      if package_name.startswith('pefile-1.'):
-        last_part = version.pop()
-        version.extend(last_part.split('-'))
-
-      if name not in package_versions:
-        compare_result = 1
-      else:
-        compare_result = versions.CompareVersions(
-            version, package_versions[name])
-
-      if compare_result > 0:
-        package_versions[name] = version
-
-        package_download = PackageDownload(
-            name, version, package_filename, package_url)
-        available_packages[name] = package_download
-
-    return available_packages.values()
 
   def _GetAvailableWheelPackages(self):
     """Determines the wheel packages available for download.
@@ -442,92 +368,6 @@ class DependencyUpdater(object):
         available_packages[package_name] = package_download
 
     return available_packages.values()
-
-  def _GetMSIPackageFilenamesAndVersions(
-      self, project_definitions, available_packages,
-      user_defined_package_names):
-    """Determines the MSI package filenames and versions.
-
-    Args:
-      project_definitions (dist[str, ProjectDefinition]): project definitions
-          per name.
-      available_packages (list[PackageDownload]): packages available for
-          download.
-      user_defined_package_names (list[str]): names of packages that should be
-          updated if an update is available. These package names are derived
-          from the user specified names of projects. An empty list represents
-          all available packages.
-
-    Returns:
-      tuple: containing:
-          dict[str, str]: filenames per package.
-          dict[str, str]: versions per package.
-    """
-    project_definition_per_package_name = {}
-    for project_name, project_definition in project_definitions.items():
-      package_name = getattr(
-          project_definition, 'msi_name', None) or project_name
-      package_name = package_name.lower()
-      project_definition_per_package_name[package_name] = project_definition
-
-    package_filenames = {}
-    package_versions = {}
-
-    for package_download in available_packages:
-      package_name = package_download.name
-      package_filename = package_download.filename
-      package_download_path = os.path.join(
-          self._download_directory, package_filename)
-
-      # Ignore package names if user defined.
-      if user_defined_package_names:
-        in_package_names = package_name in user_defined_package_names
-
-        alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
-        if alternate_name:
-          if ((self._exclude_packages and in_package_names) or
-              (not self._exclude_packages and not in_package_names)):
-            in_package_names = alternate_name in user_defined_package_names
-
-        if ((self._exclude_packages and in_package_names) or
-            (not self._exclude_packages and not in_package_names)):
-          logging.info('Skipping: {0:s} because it was excluded'.format(
-              package_name))
-          continue
-
-      # Remove previous versions of a package.
-      filenames_glob = '{0:s}*{1:s}'.format(package_name, package_filename[:-4])
-      filenames = glob.glob(os.path.join(
-          self._download_directory, filenames_glob))
-      for filename in filenames:
-        if filename != package_download_path and os.path.isfile(filename):
-          logging.info('Removing: {0:s}'.format(filename))
-          os.remove(filename)
-
-      project_definition = project_definition_per_package_name.get(
-          package_name, None)
-      if not project_definition:
-        alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
-        if alternate_name:
-          project_definition = project_definitions.get(alternate_name, None)
-
-      if not project_definition:
-        logging.error('Missing project definition for package: {0:s}'.format(
-            package_name))
-        continue
-
-      if not os.path.exists(package_download_path):
-        logging.info('Downloading: {0:s}'.format(package_filename))
-        os.chdir(self._download_directory)
-        try:
-          self._download_helper.DownloadFile(package_download.url)
-        finally:
-          os.chdir('..')
-
-      package_filenames[package_name] = package_filename
-      package_versions[package_name] = package_download.version
-
-    return package_filenames, package_versions
 
   def _GetWheelPackageFilenamesAndVersions(
       self, project_definitions, available_packages,
@@ -633,43 +473,6 @@ class DependencyUpdater(object):
 
     return project_definitions
 
-  def _GetUserDefinedMSIPackageNames(
-      self, project_definitions, user_defined_project_names):
-    """Determines names of MSI packages that should be updated.
-
-    Args:
-      project_definitions (dist[str, ProjectDefinition]): project definitions
-          per name.
-      user_defined_project_names (list[str]): user specified names of projects,
-          that should be updated if an update is available. An empty list
-          represents all available projects.
-
-    Returns:
-      list[str]: names of packages that should be updated if an update is
-          available. These package names are derived from the user specified
-          names of projects. An empty list represents all available packages.
-    """
-    user_defined_package_names = []
-    for project_name in user_defined_project_names:
-      project_definition = project_definitions.get(project_name, None)
-      if not project_definition:
-        alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
-        if alternate_name:
-          project_definition = project_definitions.get(alternate_name, None)
-
-      if not project_definition:
-        logging.error('Missing project definition for package: {0:s}'.format(
-            project_name))
-        continue
-
-      package_name = getattr(
-          project_definition, 'msi_name', None) or project_name
-
-      package_name = package_name.lower()
-      user_defined_package_names.append(package_name)
-
-    return user_defined_package_names
-
   def _GetUserDefinedWheelPackageNames(
       self, project_definitions, user_defined_project_names):
     """Determines names of wheel packages that should be updated.
@@ -707,45 +510,6 @@ class DependencyUpdater(object):
 
     return user_defined_package_names
 
-  def _InstallMSIPackagesWindows(self, package_filenames, package_versions):
-    """Installs MSI packages on Windows.
-
-    Args:
-      package_filenames (dict[str, str]): filenames per package.
-      package_versions (dict[str, str]): versions per package.
-
-    Returns:
-      bool: True if the installation was successful.
-    """
-    log_file = 'msiexec.log'
-    if os.path.exists(log_file):
-      os.remove(log_file)
-
-    if self._msi_targetdir:
-      parameters = ' TARGETDIR="{0:s}"'.format(self._msi_targetdir)
-    else:
-      parameters = ''
-
-    result = True
-    for name, version in package_versions.items():
-      # TODO: add RunAs ?
-      package_filename = package_filenames[name]
-      package_path = os.path.join(self._download_directory, package_filename)
-      command = 'msiexec.exe /i {0:s} /q /log {1:s}{2:s}'.format(
-          package_path, log_file, parameters)
-      logging.info('Installing: {0:s} {1:s}'.format(name, '.'.join(version)))
-      exit_code = subprocess.call(command, shell=False)
-      if exit_code != 0:
-        logging.error('Running: "{0:s}" failed.'.format(command))
-        result = False
-
-        if self._verbose_output:
-          with open(log_file, 'r', encoding='utf-16-le') as file_object:
-            log_file_contents = file_object.read()
-            print(log_file_contents.encode('ascii', errors='replace'))
-
-    return result
-
   def _InstallWheelPackagesWindows(self, package_filenames, package_versions):
     """Installs wheel packages on Windows.
 
@@ -772,78 +536,6 @@ class DependencyUpdater(object):
         result = False
 
     return result
-
-  def _UninstallMSIPackagesWindows(self, package_versions):
-    """Uninstalls MSI packages on Windows.
-
-    Args:
-      package_versions (dict[str, str]): versions per package.
-
-    Returns:
-      bool: True if the uninstall was successful.
-    """
-    # Tuple of package name suffix, machine type, Python version.
-    package_info = (
-        ('.win32.msi', 'x86', None),
-        ('.win32-py2.7.msi', 'x86', 2),
-        ('.win32-py3.7.msi', 'x86', 3),
-        ('.win32-py3.8.msi', 'x86', 3),
-        ('.win-amd64.msi', 'amd64', None),
-        ('.win-amd64-py2.7.msi', 'amd64', 2),
-        ('.win-amd64-py3.7.msi', 'amd64', 3),
-        ('.win-amd64-py3.8.msi', 'amd64', 3))
-
-    connection = wmi.WMI()
-
-    query = 'SELECT PackageName FROM Win32_Product'
-    for product in connection.query(query):
-      # Note that it appears that PackageName can be None on some installations.
-      name = getattr(product, 'PackageName', None) or ''
-      name = name.lower()
-
-      has_known_suffix = False
-      machine_type = None
-      python_version = None
-      for name_suffix, machine_type, python_version in package_info:
-        has_known_suffix = name.endswith(name_suffix)
-        if has_known_suffix:
-          name = name[:-len(name_suffix)]
-          break
-
-      if not has_known_suffix:
-        continue
-
-      if (self._preferred_machine_type and
-          self._preferred_machine_type != machine_type):
-        continue
-
-      if python_version and python_version not in (2, 3):
-        continue
-
-      name, _, version = name.rpartition('-')
-
-      found_package = name in package_versions
-
-      version_tuple = version.split('.')
-      if self._force_install:
-        compare_result = -1
-      elif not found_package:
-        compare_result = 1
-      elif not package_versions[name]:
-        # No version was specified hence we want the package removed.
-        compare_result = -1
-      else:
-        compare_result = versions.CompareVersions(
-            version_tuple, package_versions[name])
-        if compare_result >= 0:
-          # The latest or newer version is already installed.
-          del package_versions[name]
-
-      if found_package and compare_result < 0:
-        logging.info('Removing: {0:s} {1:s}'.format(name, version))
-        product.Uninstall()
-
-    return True
 
   def ExpandPresets(self, preset_definitions, preset_names):
     """Expands preset names to project names.
@@ -885,17 +577,10 @@ class DependencyUpdater(object):
     """
     project_definitions = self._GetProjectDefinitions(projects_file)
 
-    if (sys.version_info[0], sys.version_info[1]) == (3, 10):
-      user_defined_package_names = self._GetUserDefinedMSIPackageNames(
-          project_definitions, user_defined_project_names)
+    user_defined_package_names = self._GetUserDefinedWheelPackageNames(
+        project_definitions, user_defined_project_names)
 
-      available_packages = self._GetAvailableMSIPackages()
-    else:
-      user_defined_package_names = self._GetUserDefinedWheelPackageNames(
-          project_definitions, user_defined_project_names)
-
-      available_packages = self._GetAvailableWheelPackages()
-
+    available_packages = self._GetAvailableWheelPackages()
     if not available_packages:
       logging.error('No packages found.')
       return False
@@ -903,61 +588,16 @@ class DependencyUpdater(object):
     if not os.path.exists(self._download_directory):
       os.mkdir(self._download_directory)
 
-    if (sys.version_info[0], sys.version_info[1]) == (3, 10):
-      package_filenames, package_versions = (
-          self._GetMSIPackageFilenamesAndVersions(
-              project_definitions, available_packages,
-              user_defined_package_names))
-    else:
-      package_filenames, package_versions = (
-          self._GetWheelPackageFilenamesAndVersions(
-              project_definitions, available_packages,
-              user_defined_package_names))
+    package_filenames, package_versions = (
+        self._GetWheelPackageFilenamesAndVersions(
+            project_definitions, available_packages,
+            user_defined_package_names))
 
     if self._download_only:
       return True
 
-    if (sys.version_info[0], sys.version_info[1]) == (3, 10):
-      if not self._UninstallMSIPackagesWindows(package_versions):
-        logging.error('Unable to uninstall MSI packages.')
-        return False
-
-      return self._InstallMSIPackagesWindows(
-          package_filenames, package_versions)
-
     return self._InstallWheelPackagesWindows(
         package_filenames, package_versions)
-
-  def UninstallPackages(self, projects_file, user_defined_project_names):
-    """Uninstalls packages.
-
-    Args:
-      projects_file (str): path to the projects.ini configuration file.
-      user_defined_project_names (list[str]): user specified names of projects,
-          that should be updated if an update is available. An empty list
-          represents all available projects.
-
-    Returns:
-      bool: True if the uninstall was successful.
-    """
-    project_definitions = self._GetProjectDefinitions(projects_file)
-
-    user_defined_package_names = self._GetUserDefinedMSIPackageNames(
-        project_definitions, user_defined_project_names)
-
-    if not user_defined_package_names:
-      logging.warning('No packages to uninstall.')
-      return True
-
-    # TODO: this currently uninstall all versions of the package win32 and
-    # win64. Make changes to only remove only the package for the running
-    # Python version.
-
-    # TODO: makes changes so lz4 is uninstalled as well.
-
-    package_versions = {name: None for name in user_defined_package_names}
-
-    return self._UninstallMSIPackagesWindows(package_versions)
 
 
 def Main():
@@ -1009,13 +649,6 @@ def Main():
           '\'x86\' onto another \'amd64\'.'))
 
   argument_parser.add_argument(
-      '--msi-targetdir', '--msi_targetdir', action='store', metavar='TYPE',
-      dest='msi_targetdir', type=str, default=None, help=(
-          'Manually sets the MSI TARGETDIR property. Usage of this argument '
-          'is not recommended unless want to force the installation of the '
-          'MSIs into different directory than the system default.'))
-
-  argument_parser.add_argument(
       '--preset', dest='preset', action='store',
       metavar='PRESET_NAME', default=None, help=(
           'name of the preset of project names to update. The default is to '
@@ -1026,10 +659,6 @@ def Main():
       '-t', '--track', dest='track', action='store', metavar='TRACK',
       default='stable', choices=sorted(tracks), help=(
           'the l2tbinaries track to download from. The default is stable.'))
-
-  argument_parser.add_argument(
-      '--uninstall', action='store_true', dest='uninstall', default=False,
-      help='Uninstall the dependencies.')
 
   argument_parser.add_argument(
       '-v', '--verbose', dest='verbose', action='store_true', default=False,
@@ -1072,7 +701,6 @@ def Main():
       download_track=options.track,
       exclude_packages=options.exclude_packages,
       force_install=options.force_install,
-      msi_targetdir=options.msi_targetdir,
       preferred_machine_type=options.machine_type,
       verbose_output=options.verbose)
 
@@ -1096,12 +724,8 @@ def Main():
   elif options.project_names:
     user_defined_project_names = options.project_names
 
-  if options.uninstall:
-    result = dependency_updater.UninstallPackages(
-        projects_file, user_defined_project_names)
-  else:
-    result = dependency_updater.UpdatePackages(
-        projects_file, user_defined_project_names)
+  result = dependency_updater.UpdatePackages(
+      projects_file, user_defined_project_names)
 
   return result
 
