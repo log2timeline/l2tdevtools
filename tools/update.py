@@ -1018,7 +1018,7 @@ def Main():
       '--preset', dest='preset', action='store',
       metavar='PRESET_NAME', default=None, help=(
           'name of the preset of project names to update. The default is to '
-          'build all project defined in the projects.ini configuration file. '
+          'update all project defined in the projects.ini configuration file. '
           'The presets are defined in the preset.ini configuration file.'))
 
   argument_parser.add_argument(
