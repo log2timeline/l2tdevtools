@@ -125,11 +125,10 @@ class WheelBuildHelper(interface.BuildHelper):
     project_name, project_version = self._GetWheelFilenameProjectInformation(
         source_helper_object)
 
-    wheel_filename = '{0:s}-{1:s}-*-*-*.whl'.format(
+    filenames_glob = '{0:s}-{1:s}-*-*-*.whl'.format(
         project_name, project_version)
 
-    # TODO: change this to use glob.glob()
-    return not os.path.exists(wheel_filename)
+    return not glob.glob(filenames_glob)
 
   def Clean(self, source_helper_object):
     """Cleans the build and dist directory.
