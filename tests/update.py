@@ -102,8 +102,7 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
     """Tests the UpdatePackages function."""
     projects_file = os.path.join('data', 'projects.ini')
 
-    if (sys.version_info[0], sys.version_info[1]) in (
-        update.GithubRepoDownloadHelper._SUPPORTED_PYTHON_VERSIONS):
+    if (sys.version_info[0], sys.version_info[1]) in (3, 11):
       with test_lib.TempDirectory() as temp_directory:
         dependency_updater = update.DependencyUpdater(
             download_directory=temp_directory, download_only=True,
