@@ -21,6 +21,10 @@ class BuildHelperFactory(object):
       'wheel': wheel.ConfigureMakeWheelBuildHelper,
   }
 
+  _FLIT_BUILD_HELPER_CLASSES = {
+      'wheel': wheel.FlitWheelBuildHelper,
+  }
+
   _PYPROJECT_BUILD_HELPER_CLASSES = {
       'dpkg': dpkg.PybuildDPKGBuildHelper,
       'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
@@ -55,6 +59,10 @@ class BuildHelperFactory(object):
     """
     if project_definition.build_system == 'configure_make':
       build_helper_class = cls._CONFIGURE_MAKE_BUILD_HELPER_CLASSES.get(
+          build_target, None)
+
+    elif project_definition.build_system == 'flit':
+      build_helper_class = cls._FLIT_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
     elif project_definition.build_system == 'pyproject':

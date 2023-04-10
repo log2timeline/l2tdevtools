@@ -9,11 +9,11 @@ import os
 import subprocess
 import sys
 
-from l2tdevtools import build_helper
 from l2tdevtools import download_helper
 from l2tdevtools import presets
 from l2tdevtools import projects
 from l2tdevtools import source_helper
+from l2tdevtools.build_helpers import factory as build_helper
 
 
 # Since os.path.abspath() uses the current working directory (cwd)
