@@ -420,6 +420,9 @@ class DependencyHelper(object):
       if requires_part:
         requires_string = ' '.join([requires_string, ','.join(requires_part)])
 
+      if module_name == 'pyxattr':
+        requires_string = f'{requires_string:s} ; platform_system != "Windows"'
+
       install_requires.append(requires_string)
 
     return sorted(install_requires)
