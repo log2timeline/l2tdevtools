@@ -2,7 +2,6 @@
 """Helper for building projects from source."""
 
 from l2tdevtools.build_helpers import dpkg
-from l2tdevtools.build_helpers import msi
 from l2tdevtools.build_helpers import rpm
 from l2tdevtools.build_helpers import source
 from l2tdevtools.build_helpers import wheel
@@ -14,7 +13,6 @@ class BuildHelperFactory(object):
   _CONFIGURE_MAKE_BUILD_HELPER_CLASSES = {
       'dpkg': dpkg.ConfigureMakeDPKGBuildHelper,
       'dpkg-source': dpkg.ConfigureMakeSourceDPKGBuildHelper,
-      'msi': msi.ConfigureMakeMSIBuildHelper,
       'rpm': rpm.ConfigureMakeRPMBuildHelper,
       'source': source.ConfigureMakeSourceBuildHelper,
       'srpm': rpm.ConfigureMakeSRPMBuildHelper,
@@ -33,7 +31,6 @@ class BuildHelperFactory(object):
   _SETUP_PY_BUILD_HELPER_CLASSES = {
       'dpkg': dpkg.PybuildDPKGBuildHelper,
       'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
-      'msi': msi.SetupPyMSIBuildHelper,
       'rpm': rpm.SetupPyRPMBuildHelper,
       'source': source.SetupPySourceBuildHelper,
       'srpm': rpm.SetupPySRPMBuildHelper,
