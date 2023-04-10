@@ -758,13 +758,16 @@ class DependencyUpdater(object):
     Returns:
       bool: True if the installation was successful.
     """
+    package_paths = [
+        os.path.join(self._download_directory, package_filenames[name])
+        for name in package_versions]
+
     result = True
-    for name, version in package_versions.items():
-      package_filename = package_filenames[name]
-      package_path = os.path.join(self._download_directory, package_filename)
+    if package_paths:
+      logging.info('Installing: {0:s}'.format(' '.join(package_paths)))
+
       command = '{0:s} -m pip install {1:s}'.format(
-          sys.executable, package_path)
-      logging.info('Installing: {0:s} {1:s}'.format(name, '.'.join(version)))
+          sys.executable, ' '.join(package_paths))
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
         logging.error('Running: "{0:s}" failed.'.format(command))
