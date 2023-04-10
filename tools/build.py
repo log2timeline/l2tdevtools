@@ -316,8 +316,7 @@ def Main():
     bool: True if successful or False if not.
   """
   build_targets = frozenset([
-      'download', 'dpkg', 'dpkg-source', 'msi', 'rpm', 'source', 'srpm',
-      'wheel'])
+      'download', 'dpkg', 'dpkg-source', 'rpm', 'source', 'srpm', 'wheel'])
 
   argument_parser = argparse.ArgumentParser(description=(
       'Downloads and builds the latest versions of projects.'))
