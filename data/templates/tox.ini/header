@@ -32,6 +32,6 @@ passenv =
     GITHUB_SHA
     LDFLAGS
 deps =
-    codecov < 2.1.10
+    codecov
 commands =
     codecov
