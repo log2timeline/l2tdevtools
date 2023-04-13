@@ -19,20 +19,3 @@ commands =
     coverage: coverage erase
     coverage: coverage run --source=${python_module_name} --omit="*_test*,*__init__*,*test_lib*" run_tests.py
     coverage: coverage xml
-
-[testenv:codecov]
-skip_install = True
-allowlist_externals =
-    ./codecov
-passenv =
-    CFLAGS
-    CPPFLAGS
-    GITHUB_ACTION
-    GITHUB_HEAD_REF
-    GITHUB_REF
-    GITHUB_REPOSITORY
-    GITHUB_RUN_ID
-    GITHUB_SHA
-    LDFLAGS
-commands =
-    ./codecov
