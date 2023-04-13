@@ -21,6 +21,8 @@ commands =
 
 [testenv:codecov]
 skip_install = True
+allowlist_externals =
+    ./codecov
 passenv =
     CFLAGS
     CPPFLAGS
@@ -31,7 +33,5 @@ passenv =
     GITHUB_RUN_ID
     GITHUB_SHA
     LDFLAGS
-deps =
-    codecov
 commands =
-    codecov
+    ./codecov
