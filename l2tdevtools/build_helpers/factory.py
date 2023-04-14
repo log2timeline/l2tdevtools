@@ -23,6 +23,12 @@ class BuildHelperFactory(object):
       'wheel': wheel.FlitWheelBuildHelper,
   }
 
+  _POETRY_BUILD_HELPER_CLASSES = {
+      'dpkg': dpkg.PybuildDPKGBuildHelper,
+      'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
+      'wheel': wheel.PoetryWheelBuildHelper,
+  }
+
   _PYPROJECT_BUILD_HELPER_CLASSES = {
       'dpkg': dpkg.PybuildDPKGBuildHelper,
       'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
@@ -60,6 +66,10 @@ class BuildHelperFactory(object):
 
     elif project_definition.build_system == 'flit':
       build_helper_class = cls._FLIT_BUILD_HELPER_CLASSES.get(
+          build_target, None)
+
+    elif project_definition.build_system == 'poetry':
+      build_helper_class = cls._POETRY_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
     elif project_definition.build_system == 'pyproject':
