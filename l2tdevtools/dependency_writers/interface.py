@@ -53,7 +53,13 @@ class DependencyFileWriter(object):
     Returns:
       list[str]: DPKG package names of Python dependencies.
     """
-    return self._dependency_helper.GetDPKGDepends(exclude_version=True)
+    dpkg_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True)
+
+    if 'python3-yara' in dpkg_dependencies:
+      dpkg_dependencies.append('libssl-dev')
+
+    return dpkg_dependencies
 
   def _GetDPKGTestDependencies(self, python_dependencies):
     """Retrieves DPKG test dependencies.
