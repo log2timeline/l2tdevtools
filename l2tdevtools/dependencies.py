@@ -554,6 +554,7 @@ class DependencyHelper(object):
         'pyevtx',
         'pyewf',
         'pyexe',
+        'pyfcrypto',
         'pyfmos',
         'pyfsapfs',
         'pyfsext',
