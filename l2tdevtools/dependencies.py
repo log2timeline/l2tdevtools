@@ -565,6 +565,7 @@ class DependencyHelper(object):
         'pyfwevt',
         'pyfwnt',
         'pyfwsi',
+        'pyhmac',
         'pylnk',
         'pyluksde',
         'pymodi',
