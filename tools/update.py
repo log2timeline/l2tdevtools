@@ -215,25 +215,23 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
         return None
 
       # The format of the download URL is:
-      # <a class="js-navigation-open link-gray-dark" title="{title}"
-      # href="{path}">{name}</a>
-      # Note that:
-      # * class="js-navigation-open" and class="js-navigation-open " also have
-      #   been seen to be used.
-      # * an additional data-pjax="{data}" parameter.
-      # * an additional data-turbo-frame="{data}" parameter.
+      # <script type="application/json" data-target="react-app.embeddedData">
+      # {"payload":{$JSON}}</script>
       expression_string = (
-          '<a class="js-navigation-open[^"]*" title="[^"]*" '
-          '(|data-pjax="[^"]*" )(|data-turbo-frame="[^"]*" )'
-          'href="([^"]*)"')
+          '<script type="application/json" '
+          'data-target="react-app.embeddedData">({"payload":{.*}})</script>')
       matches = re.findall(expression_string, page_content)
 
-      for _, _, match in matches:
-        _, _, filename = match.rpartition('/')
-        download_url = (
-            'https://github.com/log2timeline/l2tbinaries/raw/{0:s}/{1:s}/'
-            '{2:s}').format(self._branch, sub_directory, filename)
-        download_urls.append(download_url)
+      if len(matches) == 1:
+        json_dict = json.loads(matches[0])
+        payload = json_dict.get('payload', {})
+        tree = payload.get('tree', {})
+        for item in tree.get('items', []):
+          item_path = item.get('path', None)
+          download_url = (
+              'https://github.com/log2timeline/l2tbinaries/raw/{0:s}/'
+              '{1:s}').format(self._branch, item_path)
+          download_urls.append(download_url)
 
     return download_urls
 

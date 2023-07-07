@@ -49,7 +49,7 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
   # pylint: disable=protected-access
 
   _DFVFS_MSI_VERSION = '20221224'
-  _DFVFS_WHEEL_VERSION = '20230507'
+  _DFVFS_WHEEL_VERSION = '20230531'
 
   def testGetAvailableMSIPackages(self):
     """Tests the _GetAvailableMSIPackages function."""
