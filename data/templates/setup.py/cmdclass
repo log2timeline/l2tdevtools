@@ -1,6 +1,4 @@
 
 command_classes = {}
-if BdistMSICommand:
-  command_classes['bdist_msi'] = BdistMSICommand
 if BdistRPMCommand:
   command_classes['bdist_rpm'] = BdistRPMCommand

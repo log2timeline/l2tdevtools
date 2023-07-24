@@ -54,6 +54,9 @@ class ToxIniWriter(interface.DependencyFileWriter):
       if glob.glob(os.path.join('data', '**', '*.yaml'), recursive=True):
         paths_to_lint_yaml.append('data')
 
+    if os.path.isfile('setup.py'):
+      paths_to_lint_python.append('setup.py')
+
     if os.path.isdir('scripts'):
       paths_to_lint_python.append('scripts')
 

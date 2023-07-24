@@ -42,7 +42,6 @@ class ProjectDefinition(object):
     github_release_tag_prefix (str): github release tag prefix.
     homepage_url (str): project homepage URL.
     maintainer (str): name and email address of the maintainer.
-    msi_name (str): MSI package name.
     name (str): name of the project.
     optional_build_dependencies (list[str]): optional build dependencies.
     patches (list[str]): patch file names.
@@ -92,8 +91,6 @@ class ProjectDefinition(object):
     self.github_release_tag_prefix = None
     self.homepage_url = None
     self.maintainer = None
-    self.msi_name = None
-    self.msi_prebuild = None
     self.name = name
     self.optional_build_dependencies = None
     self.patches = None
@@ -269,10 +266,6 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'homepage_url')
       project_definition.maintainer = self._GetConfigValue(
           config_parser, section_name, 'maintainer')
-      project_definition.msi_name = self._GetConfigValue(
-          config_parser, section_name, 'msi_name')
-      project_definition.msi_prebuild = self._GetConfigValue(
-          config_parser, section_name, 'msi_prebuild')
       project_definition.rpm_build_dependencies = self._GetConfigValue(
           config_parser, section_name, 'rpm_build_dependencies')
       project_definition.rpm_dependencies = self._GetConfigValue(

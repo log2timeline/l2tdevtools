@@ -332,7 +332,7 @@ class SetupPyWriter(interface.DependencyFileWriter):
           'import_sdist', template_mappings)
       file_content.append(template_data)
 
-    for template_file in ('import_module', 'bdist_msi', 'bdist_rpm-start'):
+    for template_file in ('import_module', 'bdist_rpm-start'):
       template_data = self._GenerateFromTemplate(
           template_file, template_mappings)
       file_content.append(template_data)

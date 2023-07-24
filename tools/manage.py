@@ -247,17 +247,12 @@ class GithubRepoManager(object):
 
     packages = {}
     for filename in filenames:
-      if not filename or not filename.endswith('.msi'):
+      if not filename or not filename.endswith('.whl'):
         continue
 
-      if sub_directory == 'win32':
-        filename, _, _ = filename.rpartition('.win32')
-      elif sub_directory == 'win64':
-        filename, _, _ = filename.rpartition('.win-amd64')
-      else:
-        continue
-
+      filename, _, _ = filename.partition('-')
       name, _, version = filename.rpartition('-')
+
       packages[name] = version
 
     return packages
@@ -578,11 +573,11 @@ class PackagesManager(object):
 
   def CompareDirectoryWithGithubRepo(
       self, reference_directory, sub_directory, track):
-    """Compares a directory containing msi or dmg packages with a GitHub repo.
+    """Compares a directory containing wheel packages with a GitHub repo.
 
     Args:
       reference_directory (str): path of the reference directory that contains
-          msi or dmg packages.
+          wheel packages.
       sub_directory (str): name of the machine type sub directory.
       track (str): name of the track.
 
@@ -598,18 +593,10 @@ class PackagesManager(object):
     """
     reference_packages = {}
     for directory_entry in os.listdir(reference_directory):
-      if directory_entry.endswith('.dmg'):
-        directory_entry, _, _ = directory_entry.rpartition('.dmg')
-
-      elif directory_entry.endswith('.msi'):
-        if sub_directory == 'win32':
-          directory_entry, _, _ = directory_entry.rpartition('.win32')
-        elif sub_directory == 'win64':
-          directory_entry, _, _ = directory_entry.rpartition('.win-amd64')
-
-      else:
+      if not directory_entry or not directory_entry.endswith('.whl'):
         continue
 
+      directory_entry, _, _ = directory_entry.rpartition('-')
       package_name, _, package_version = directory_entry.rpartition('-')
 
       if package_name in reference_packages:
@@ -741,7 +728,7 @@ class PackagesManager(object):
 
     Args:
       reference_directory (str): path of the reference directory that
-          contains msi or dmg packages.
+          contains wheel packages.
 
     Returns:
       tuple: containing:

@@ -49,7 +49,8 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
 
   # pylint: disable=protected-access
 
-  _DFVFS_WHEEL_VERSION = '20230531'
+  _PROJECT_NAME = 'dfvfs'
+  _PROJECT_VERSION = '20230531'
 
   def testGetAvailableWheelPackages(self):
     """Tests the _GetAvailableWheelPackages function."""
@@ -67,12 +68,12 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
       self.assertNotEqual(available_packages, [])
 
       for package_download in available_packages:
-        if package_download.name == 'dfvfs':
-          expected_package_filename = 'dfvfs-{0:s}-py2.py3-none-any.whl'.format(
-              self._DFVFS_WHEEL_VERSION)
+        if package_download.name == self._PROJECT_NAME:
+          expected_package_filename = '{0:s}-{1:s}-py2.py3-none-any.whl'.format(
+              self._PROJECT_NAME, self._PROJECT_VERSION)
           self.assertEqual(package_download.filename, expected_package_filename)
 
-          expected_package_version = [self._DFVFS_WHEEL_VERSION]
+          expected_package_version = [self._PROJECT_VERSION]
           self.assertEqual(package_download.version, expected_package_version)
 
   def testUpdatePackages(self):
@@ -87,15 +88,15 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
             download_track='dev', preferred_machine_type='x86',
             preferred_operating_system='Windows')
 
-        dependency_updater.UpdatePackages(projects_file, ['dfvfs'])
+        dependency_updater.UpdatePackages(projects_file, [self._PROJECT_NAME])
 
         glob_results = sorted(glob.glob(os.path.join(temp_directory, '*.whl')))
 
         self.assertEqual(len(glob_results), 1)
 
         expected_path = os.path.join(
-            temp_directory, 'dfvfs-{0:s}-py2.py3-none-any.whl'.format(
-                self._DFVFS_WHEEL_VERSION))
+            temp_directory, '{0:s}-{1:s}-py2.py3-none-any.whl'.format(
+                self._PROJECT_NAME, self._PROJECT_VERSION))
         self.assertEqual(glob_results[0], expected_path)
 
 
