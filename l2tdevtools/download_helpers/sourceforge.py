@@ -61,14 +61,6 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
               self._project_name)
       matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
-    elif self._project_name == 'pywin32':
-      # The format of the project download URL is:
-      # /projects/{project name}/files/{project name}/Build%20{version}/
-      expression_string = (
-          '<a href="/projects/{0:s}/files/{0:s}/Build%20([0-9]+)/"').format(
-              self._project_name)
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
     if not matches:
       return None
 
@@ -107,20 +99,6 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
         download_url = (
             'https://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
             '/{0:s}-{1:s}.tar.gz').format(
-                self._project_name, project_version)
-
-    elif self._project_name == 'pywin32':
-      # The format of the project download URL is:
-      # /projects/{project name}/files/{project name}/Build%20{version}/
-      expression_string = (
-          '<a href="/projects/{0:s}/files/{0:s}/Build%20({1:s})/"').format(
-              self._project_name, project_version)
-      matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
-
-      if matches:
-        download_url = (
-            'https://downloads.sourceforge.net/project/{0:s}/{0:s}'
-            '/Build%20{1:s}/{0:s}-{1:s}.zip').format(
                 self._project_name, project_version)
 
     return download_url
