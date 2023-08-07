@@ -48,6 +48,7 @@ class ProjectHelper(cli.CLIHelper):
       'l2tscaffolder',
       'olecf-kb',
       'plaso',
+      'sqlite-kb',
       'timesketch',
       'turbinia',
       'vstools',
