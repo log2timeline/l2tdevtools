@@ -1,4 +1,0 @@
-
-command_classes = {}
-if BdistRPMCommand:
-  command_classes['bdist_rpm'] = BdistRPMCommand

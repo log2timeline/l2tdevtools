@@ -2,7 +2,7 @@
 [testenv:docs]
 usedevelop = True
 deps =
-    -rdocs/requirements.txt
+  -rdocs/requirements.txt
 commands =
-    sphinx-build -b html -d build/doctrees docs dist/docs
-    sphinx-build -b linkcheck docs dist/docs
+  sphinx-build -b html -d build/doctrees docs dist/docs
+  sphinx-build -b linkcheck docs dist/docs
