@@ -19,7 +19,8 @@ deps =
     setuptools
 commands =
   py3{7,8,9,10,11,12}: ./run_tests.py
-  coverage: coverage erase
-  coverage: coverage run --source=${python_module_name} --omit="*_test*,*__init__*,*test_lib*" run_tests.py
-  coverage: coverage xml
+  coverage:
+    coverage erase
+    coverage run --source=${python_module_name} --omit="*_test*,*__init__*,*test_lib*" run_tests.py
+    coverage xml
   wheel: python -m build --no-isolation --wheel
