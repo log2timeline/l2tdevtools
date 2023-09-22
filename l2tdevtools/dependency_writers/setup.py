@@ -3,7 +3,6 @@
 
 import glob
 import os
-import textwrap
 
 from l2tdevtools.dependency_writers import interface
 
