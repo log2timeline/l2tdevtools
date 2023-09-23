@@ -87,6 +87,17 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a setup.cfg file."""
+    if self._project_definition.status == 'experimental':
+      development_status = 'Development Status :: 2 - Pre-Alpha'
+    elif self._project_definition.status == 'alpha':
+      development_status = 'Development Status :: 3 - Alpha'
+    elif self._project_definition.status == 'beta':
+      development_status = 'Development Status :: 4 - Beta'
+    elif self._project_definition.status == 'stable':
+      development_status = 'Development Status :: 5 - Production/Stable'
+    else:
+      development_status = ''
+
     doc_files = [
         doc_file for doc_file in self._DOC_FILES if os.path.isfile(doc_file)]
 
@@ -94,6 +105,16 @@ class SetupCfgWriter(interface.DependencyFileWriter):
         f'  {doc_file:s}' for doc_file in sorted(doc_files)]
     if formatted_doc_files:
       formatted_doc_files.insert(0, 'doc_files =')
+
+    maintainer_name, _, maintainer_email = (
+        self._project_definition.maintainer.partition('<'))
+    maintainer_name = maintainer_name.rstrip()
+    maintainer_email = maintainer_email[:-1]
+
+    python_module_name = self._project_definition.name
+
+    if self._project_definition.name.endswith('-kb'):
+      python_module_name = ''.join([python_module_name[:-3], 'rc'])
 
     python3_dependencies = self._dependency_helper.GetRPMRequires()
 
@@ -104,16 +125,16 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
     formatted_requires.append('')
 
-    maintainer_name, _, maintainer_email = (
-        self._project_definition.maintainer.partition('<'))
-    maintainer_name = maintainer_name.rstrip()
-    maintainer_email = maintainer_email[:-1]
-
     template_mappings = {
+        'description_long': self._project_definition.description_long,
+        'description_short': self._project_definition.description_short,
+        'development_status': development_status,
         'doc_files': '\n'.join(formatted_doc_files),
+        'homepage_url': self._project_definition.homepage_url,
         'maintainer': self._project_definition.maintainer,
         'maintainer_email': maintainer_email,
         'maintainer_name': maintainer_name,
+        'python_module_name': python_module_name,
         'requires': '\n'.join(formatted_requires)}
 
     file_content = []
