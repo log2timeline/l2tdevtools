@@ -10,7 +10,6 @@ Source0: %{{name}}-%{{version}}.tar.gz
 License: BSD
 Group: Development/Libraries
 Prefix: %{{_prefix}}
-BuildArch: noarch
 Vendor: Sergey Dryabzhinsky <sergey.dryabzhinsky@gmail.com>
 Url: https://github.com/sergey-dryabzhinsky/python-zstd
 BuildRequires: python3-devel, python3-setuptools
