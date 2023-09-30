@@ -12,7 +12,7 @@ Group: Development/Libraries
 Prefix: %{{_prefix}}
 Vendor: Sergey Dryabzhinsky <sergey.dryabzhinsky@gmail.com>
 Url: https://github.com/sergey-dryabzhinsky/python-zstd
-BuildRequires: python3-devel, python3-setuptools
+BuildRequires: gcc, python3-devel, python3-setuptools
 
 %description
 Python bindings to Yann Collet ZSTD compression library.
