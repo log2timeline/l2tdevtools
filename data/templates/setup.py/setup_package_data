@@ -1,5 +1,0 @@
-    include_package_data=True,
-    package_data={
-${package_data_paths}
-    },
-    zip_safe=False,

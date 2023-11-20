@@ -20,6 +20,7 @@ class GitHubActionsTestDockerYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies = self._GetDPKGPythonDependencies()
     test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
     dpkg_dependencies.extend(test_dependencies)
+    dpkg_dependencies.extend(['python3-pip', 'python3-wheel'])
 
     rpm_dependencies = self._GetRPMPythonDependencies()
     test_dependencies = self._GetRPMTestDependencies(rpm_dependencies)

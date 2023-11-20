@@ -1,9 +1,8 @@
-${shebang}
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """Installation and deployment script."""
 
-import glob
-import os
-import pkg_resources
-import sys
+from setuptools import setup
 
+
+setup()

@@ -1,3 +1,33 @@
 [metadata]
-license_files = LICENSE
+name = ${python_module_name}
+version = 20230506
+description = ${description_short}
+long_description = ${description_long}
+url = ${homepage_url}
+maintainer = ${maintainer_name}
+maintainer_email = ${maintainer_email}
+license = Apache License, Version 2.0
+license_files =
+  ACKNOWLEDGEMENTS
+  AUTHORS
+  LICENSE
+  README
+classifiers =
+  ${development_status}
+  Programming Language :: Python
+
+[options]
+install_requires = file:requirements.txt
+package_dir =
+  ${python_module_name} = ${python_module_name}
+packages = find:
+python_requires = >=3.7
+
+[options.packages.find]
+exclude =
+  docs
+  tests
+  tests.*
+  utils
+where = .
 

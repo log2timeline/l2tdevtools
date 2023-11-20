@@ -1,4 +1,0 @@
-
-command_classes = {'sdist_test_data': sdist}
-if BdistRPMCommand:
-  command_classes['bdist_rpm'] = BdistRPMCommand

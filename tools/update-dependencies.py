@@ -46,8 +46,8 @@ def Main():
 
   for writer_class in (
       pylint_rc.PylintRcWriter, requirements.RequirementsWriter,
-      requirements.TestRequirementsWriter, setup.SetupCfgWriter,
-      setup.SetupPyWriter):
+      requirements.TestRequirementsWriter, setup.PyprojectTomlWriter,
+      setup.SetupCfgWriter, setup.SetupPyWriter):
     writer = writer_class(
         l2tdevtools_path, project_definition, dependencies_helper)
     writer.Write()

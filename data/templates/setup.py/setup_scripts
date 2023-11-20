@@ -1,1 +1,0 @@
-    scripts=glob.glob(os.path.join('${scripts_directory}', '[a-z]*.py')),

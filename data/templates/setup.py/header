@@ -1,8 +1,0 @@
-${shebang}
-# -*- coding: utf-8 -*-
-"""Installation and deployment script."""
-
-import os
-import pkg_resources
-import sys
-

@@ -73,13 +73,14 @@ class ToxIniWriter(interface.DependencyFileWriter):
     if os.path.isdir('tools'):
       paths_to_lint_python.append('tools')
 
+    envlist = ['py3{7,8,9,10,11,12}', 'coverage']
     if os.path.isdir('docs'):
-      envlist = 'py3{7,8,9,10,11},coverage,docs,lint'
-    else:
-      envlist = 'py3{7,8,9,10,11},coverage,lint'
+      envlist.append('docs')
+
+    envlist.extend(['lint', 'wheel'])
 
     template_mappings = {
-        'envlist': envlist,
+        'envlist': ','.join(envlist),
         'paths_to_lint_python': ' '.join(sorted(paths_to_lint_python)),
         'paths_to_lint_yaml': ' '.join(sorted(paths_to_lint_yaml)),
         'project_name': self._project_definition.name,
