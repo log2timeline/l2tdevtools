@@ -3,6 +3,7 @@ name = ${python_module_name}
 version = 20230506
 description = ${description_short}
 long_description = ${description_long}
+long_description_content_type = text/plain
 url = ${homepage_url}
 maintainer = ${maintainer_name}
 maintainer_email = ${maintainer_email}
