@@ -59,7 +59,7 @@ jobs:
       matrix:
         include:
         - python-version: '3.11'
-          toxenv: 'py311,coverage'
+          toxenv: 'coverage'
     container:
       image: ubuntu:22.04
     steps:
