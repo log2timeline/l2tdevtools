@@ -192,7 +192,7 @@ class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
       raise RuntimeError('Missing setup.py cannot build wheel')
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = '\"{0:s}\" setup.py bdist_wheel > {1:s} 2>&1'.format(
+    command = '\"{0:s}\" -m build --wheel > {1:s} 2>&1'.format(
         sys.executable, log_file_path)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)
@@ -234,7 +234,7 @@ class SetupPyWheelBuildHelper(WheelBuildHelper):
     logging.info('Building wheel of: {0:s}'.format(source_package_filename))
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = '\"{0:s}\" setup.py bdist_wheel > {1:s} 2>&1'.format(
+    command = '\"{0:s}\" -m build --wheel > {1:s} 2>&1'.format(
         sys.executable, log_file_path)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
         source_directory, command), shell=True)

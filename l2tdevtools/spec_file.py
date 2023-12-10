@@ -29,19 +29,36 @@ class RPMSpecFileGenerator(object):
       '%description -n %{{name}}-data',
       '{description:s}']
 
-  _SPEC_TEMPLATE_PYTHON3_BODY = [
+  _SPEC_TEMPLATE_PYTHON3_PREP_AND_BUILD = [
       '%prep',
       '%autosetup -n {name:s}',
       '',
       '%build',
       '%py3_build',
       '',
+      '']
+
+  _SPEC_TEMPLATE_PYTHON3_INSTALL = [
       '%install',
       '%py3_install',
       ('rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/'
        'requires.txt'),
       'rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/',
       '',
+      '']
+
+  _SPEC_TEMPLATE_TOOLS_PYTHON3_INSTALL = [
+      '%install',
+      '%py3_install',
+      ('rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/'
+       'requires.txt'),
+      'rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/',
+      ('mv %{{buildroot}}/usr/lib/python*/site-packages/tools/ '
+       '%{{buildroot}}/usr/bin'),
+      '',
+      '']
+
+  _SPEC_TEMPLATE_CLEAN = [
       '%clean',
       'rm -rf %{{buildroot}}',
       '',
@@ -232,13 +249,16 @@ class RPMSpecFileGenerator(object):
     output_string = output_string.format(**template_mappings)
     output_file_object.write(output_string)
 
-  def _WritePython3Body(self, output_file_object, project_name, unmangled_name):
+  def _WritePython3Body(
+      self, output_file_object, project_name, unmangled_name,
+      has_tools_package=False):
     """Writes the Python 3 body.
 
     Args:
       output_file_object (file): output file-like object to write to.
       project_name (str): name of the project.
       unmangled_name (str): unmangled name of the project.
+      has_tools_package (Optional[bool]): True if the project has tools.
     """
     # TODO: handle GetInstallDefinition
 
@@ -252,7 +272,18 @@ class RPMSpecFileGenerator(object):
     template_mappings = {
         'name': name}
 
-    output_string = '\n'.join(self._SPEC_TEMPLATE_PYTHON3_BODY)
+    output_string = '\n'.join(self._SPEC_TEMPLATE_PYTHON3_PREP_AND_BUILD)
+    output_string = output_string.format(**template_mappings)
+    output_file_object.write(output_string)
+
+    if has_tools_package:
+      output_string = '\n'.join(self._SPEC_TEMPLATE_TOOLS_PYTHON3_INSTALL)
+    else:
+      output_string = '\n'.join(self._SPEC_TEMPLATE_PYTHON3_INSTALL)
+    output_string = output_string.format(**template_mappings)
+    output_file_object.write(output_string)
+
+    output_string = '\n'.join(self._SPEC_TEMPLATE_CLEAN)
     output_string = output_string.format(**template_mappings)
     output_file_object.write(output_string)
 
@@ -447,7 +478,7 @@ class RPMSpecFileGenerator(object):
     """
     output_file_object.write(
         '%files -n %{name}-tools\n'
-        '%{_bindir}/*.py\n'
+        '%{_bindir}/*\n'
         '\n')
 
   def GenerateWithSetupPy(self, source_directory, build_log_file):
@@ -499,7 +530,13 @@ class RPMSpecFileGenerator(object):
     python_package_requires = ''
 
     has_data_package = False
-    has_tools_package = False
+
+    if os.path.isdir(os.path.join(source_directory, 'scripts')):
+      has_tools_package = True
+    elif os.path.isdir(os.path.join(source_directory, 'tools')):
+      has_tools_package = True
+    else:
+      has_tools_package = False
 
     in_description = False
     in_python_package = False
@@ -577,9 +614,6 @@ class RPMSpecFileGenerator(object):
         elif line.startswith('%package -n %{name}-data'):
           has_data_package = True
 
-        elif line.startswith('%package -n %{name}-tools'):
-          has_tools_package = True
-
         elif (line.startswith('%package -n python-') or
               line.startswith('%package -n python2-') or
               line.startswith('%package -n python3-')):
@@ -633,7 +667,9 @@ class RPMSpecFileGenerator(object):
 
     doc_line = self._GetDocumentationFilesDefinition(source_directory)
 
-    self._WritePython3Body(output_file_object, project_name, unmangled_name)
+    self._WritePython3Body(
+       output_file_object, project_name, unmangled_name,
+       has_tools_package=has_tools_package)
 
     if has_data_package:
       self._WriteDataPackageFiles(output_file_object)
@@ -649,11 +685,6 @@ class RPMSpecFileGenerator(object):
     if project_name in ('chardet', 'dtfabric', 'pbr'):
       output_file_object.write((
           '%exclude %{_bindir}/*\n'
-          '\n'))
-
-    if project_name == 'dfvfs':
-      output_file_object.write((
-          '%exclude %{python3_sitelib}/examples\n'
           '\n'))
 
     self._WriteChangeLog(output_file_object, project_version)

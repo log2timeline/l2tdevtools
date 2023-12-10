@@ -172,7 +172,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
   _PROJECT_ORGANIZATION = 'log2timeline'
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20230531'
+  _PROJECT_VERSION = '20231205'
 
   @classmethod
   def setUpClass(cls):
