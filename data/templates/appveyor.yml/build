@@ -1,3 +1,4 @@
 
 build_script:
-- cmd: "%PYTHON%\\python.exe setup.py bdist_wheel"
+- cmd: IF [%TARGET%]==[wheel] (
+    "%PYTHON%\\python.exe" -m build --wheel )
