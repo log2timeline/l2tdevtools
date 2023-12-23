@@ -1,6 +1,6 @@
 [metadata]
 name = ${python_module_name}
-version = 20230506
+version = ${version}
 description = ${description_short}
 long_description = ${description_long}
 long_description_content_type = text/plain
@@ -23,12 +23,3 @@ package_dir =
   ${python_module_name} = ${python_module_name}
 packages = find:
 python_requires = >=3.7
-
-[options.packages.find]
-exclude =
-  docs
-  tests
-  tests.*
-  utils
-where = .
-

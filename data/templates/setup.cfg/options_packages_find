@@ -1,0 +1,9 @@
+
+[options.packages.find]
+exclude =
+  docs
+  tests
+  tests.*
+  utils
+where = .
+
