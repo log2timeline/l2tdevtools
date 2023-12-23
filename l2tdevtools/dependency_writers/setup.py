@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Writer for setup configuration and script files."""
 
+import datetime
 import glob
 import os
 
@@ -87,6 +88,9 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a setup.cfg file."""
+    description_long = ' '.join(
+        self._project_definition.description_long.split('\n'))
+
     if self._project_definition.status == 'experimental':
       development_status = 'Development Status :: 2 - Pre-Alpha'
     elif self._project_definition.status == 'alpha':
@@ -103,8 +107,6 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
     formatted_doc_files = [
         f'  {doc_file:s}' for doc_file in sorted(doc_files)]
-    if formatted_doc_files:
-      formatted_doc_files.insert(0, 'doc_files =')
 
     maintainer_name, _, maintainer_email = (
         self._project_definition.maintainer.partition('<'))
@@ -120,13 +122,37 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
     formatted_requires = [
           f'  {dependency:s}' for dependency in python3_dependencies]
-    if formatted_requires:
-      formatted_requires.insert(0, 'requires =')
 
-    formatted_requires.append('')
+    package_data = []
+    for data_file in glob.glob(
+        f'{python_module_name:s}/**/*.yaml', recursive=True):
+      data_file_directory = os.path.dirname(
+          data_file[len(f'{python_module_name:s}/'):])
+      data_file = f'{data_file_directory:s}/*.yaml'
+      if data_file not in package_data:
+        package_data.append(data_file)
+
+    formatted_package_data = [
+        f'  {data_file:s}' for data_file in sorted(package_data)]
+
+    scripts_directory = None
+    if os.path.isdir('scripts'):
+      scripts_directory = 'scripts'
+    elif os.path.isdir('tools'):
+      scripts_directory = 'tools'
+
+    scripts = []
+    if scripts_directory:
+      scripts = glob.glob(f'{scripts_directory:s}/[a-z]*.py')
+
+    formatted_scripts = [
+        f'  {script:s}' for script in sorted(scripts)]
+
+    date_time = datetime.datetime.now()
+    version = date_time.strftime('%Y%m%d')
 
     template_mappings = {
-        'description_long': self._project_definition.description_long,
+        'description_long': description_long,
         'description_short': self._project_definition.description_short,
         'development_status': development_status,
         'doc_files': '\n'.join(formatted_doc_files),
@@ -134,12 +160,29 @@ class SetupCfgWriter(interface.DependencyFileWriter):
         'maintainer': self._project_definition.maintainer,
         'maintainer_email': maintainer_email,
         'maintainer_name': maintainer_name,
+        'package_data': '\n'.join(formatted_package_data),
         'python_module_name': python_module_name,
-        'requires': '\n'.join(formatted_requires)}
+        'requires': '\n'.join(formatted_requires),
+        'scripts': '\n'.join(formatted_scripts),
+        'version': version}
 
     file_content = []
 
     template_data = self._GenerateFromTemplate('metadata', template_mappings)
+    file_content.append(template_data)
+
+    if scripts:
+      template_data = self._GenerateFromTemplate(
+          'options_scripts', template_mappings)
+      file_content.append(template_data)
+
+    if package_data:
+      template_data = self._GenerateFromTemplate(
+          'options_package_data', template_mappings)
+      file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate(
+        'options_packages_find', template_mappings)
     file_content.append(template_data)
 
     if self._project_definition.name in self._PROJECTS_WITH_SDIST_TEST_DATA:
