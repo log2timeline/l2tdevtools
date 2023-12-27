@@ -6,4 +6,3 @@ exclude =
   tests.*
   utils
 where = .
-
