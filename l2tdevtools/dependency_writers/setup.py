@@ -120,20 +120,30 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
     python3_dependencies = self._dependency_helper.GetRPMRequires()
 
-    formatted_requires = [
+    formatted_rpm_requires = [
           f'  {dependency:s}' for dependency in python3_dependencies]
 
+    has_data_directory = False
     package_data = []
     for data_file in glob.glob(
         f'{python_module_name:s}/**/*.yaml', recursive=True):
       data_file_directory = os.path.dirname(
           data_file[len(f'{python_module_name:s}/'):])
-      data_file = f'{data_file_directory:s}/*.yaml'
-      if data_file not in package_data:
+
+      data_file = '*.yaml'
+      if data_file_directory:
+        data_file = '/'.join([data_file_directory, data_file])
+
+      if data_file_directory == 'data':
+        has_data_directory = True
+      elif data_file not in package_data:
         package_data.append(data_file)
 
     formatted_package_data = [
         f'  {data_file:s}' for data_file in sorted(package_data)]
+
+    # TODO: add support for has_data_directory
+    _ = has_data_directory
 
     scripts_directory = None
     if os.path.isdir('scripts'):
@@ -162,7 +172,7 @@ class SetupCfgWriter(interface.DependencyFileWriter):
         'maintainer_name': maintainer_name,
         'package_data': '\n'.join(formatted_package_data),
         'python_module_name': python_module_name,
-        'requires': '\n'.join(formatted_requires),
+        'rpm_requires': '\n'.join(formatted_rpm_requires),
         'scripts': '\n'.join(formatted_scripts),
         'version': version}
 
@@ -192,6 +202,11 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
     template_data = self._GenerateFromTemplate('bdist_rpm', template_mappings)
     file_content.append(template_data)
+
+    if python3_dependencies:
+      template_data = self._GenerateFromTemplate(
+          'bdist_rpm_requires', template_mappings)
+      file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('bdist_wheel', template_mappings)
     file_content.append(template_data)

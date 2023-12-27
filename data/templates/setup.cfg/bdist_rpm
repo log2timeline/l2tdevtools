@@ -1,9 +1,7 @@
+
 [bdist_rpm]
 release = 1
 packager = ${maintainer}
 doc_files =
 ${doc_files}
 build_requires = python3-setuptools
-requires =
-${requires}
-
