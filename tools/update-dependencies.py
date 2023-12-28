@@ -68,6 +68,7 @@ def Main():
       jenkins_scripts.LinuxRunEndToEndTestsScriptWriter,
       jenkins_scripts.RunPython3EndToEndTestsScriptWriter,
       linux_scripts.UbuntuInstallationScriptWriter,
+      sphinx_docs.ReadthedocsConfigurationWriter,
       sphinx_docs.SphinxBuildConfigurationWriter,
       sphinx_docs.SphinxBuildRequirementsWriter, tox_ini.ToxIniWriter):
     if not os.path.exists(writer_class.PATH):
