@@ -7,6 +7,24 @@ import os
 from l2tdevtools.dependency_writers import interface
 
 
+class ReadthedocsConfigurationWriter(interface.DependencyFileWriter):
+  """Readthedocs configuration file writer."""
+
+  _TEMPLATE_FILE = os.path.join('data', 'templates', 'readthedocs.yaml')
+
+  PATH = os.path.join('.readthedocs.yaml')
+
+  def Write(self):
+    """Writes a .readthedocs.yaml file."""
+    template_mappings = {}
+
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+      file_object.write(file_content)
+
+
 class SphinxBuildConfigurationWriter(interface.DependencyFileWriter):
   """Sphinx build configuration file writer."""
 
