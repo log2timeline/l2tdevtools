@@ -559,12 +559,14 @@ class DependencyHelper(object):
         'pyfsapfs',
         'pyfsext',
         'pyfsfat',
+        'pygzipf',
         'pyfshfs',
         'pyfsntfs',
         'pyfsxfs',
         'pyfvde',
         'pyfwevt',
         'pyfwnt',
+        'pyfwps',
         'pyfwsi',
         'pyhmac',
         'pylnk',
@@ -590,7 +592,8 @@ class DependencyHelper(object):
         'pyvsmbr',
         'pywrc',
         'xattr',
-        'yara')
+        'yara',
+        'zstd')
 
     extension_packages = []
     for dependency in sorted(
