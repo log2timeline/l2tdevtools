@@ -269,6 +269,7 @@ class DependencyUpdater(object):
   _ALTERNATE_NAMES = {
       'lz4': 'python-lz4',
       'redis': 'redis-py',
+      'snappy': 'python-snappy',
       'zstd': 'python-zstd'}
 
   def __init__(
