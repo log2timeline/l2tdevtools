@@ -40,10 +40,6 @@ class ConfigureMakeSourceBuildHelper(SourceBuildHelper):
     source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info('Building source of: {0:s}'.format(source_package_filename))
 
-    if self._project_definition.patches:
-      # TODO: add self._ApplyPatches
-      pass
-
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     command = './configure > {0:s} 2>&1'.format(log_file_path)
     exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
@@ -98,10 +94,6 @@ class SetupPySourceBuildHelper(SourceBuildHelper):
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info('Building source of: {0:s}'.format(source_package_filename))
-
-    if self._project_definition.patches:
-      # TODO: add self._ApplyPatches
-      pass
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     command = '{0:s} setup.py build > {1:s} 2>&1'.format(

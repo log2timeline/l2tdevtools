@@ -44,7 +44,6 @@ class ProjectDefinition(object):
     maintainer (str): name and email address of the maintainer.
     name (str): name of the project.
     optional_build_dependencies (list[str]): optional build dependencies.
-    patches (list[str]): patch file names.
     pkg_configure_options (list[str]): configure options when building a pkg.
     pypi_name (str): name of the project on PyPI.
     pypi_source_name (str): name used in the source package file on PyPI.
@@ -93,7 +92,6 @@ class ProjectDefinition(object):
     self.maintainer = None
     self.name = name
     self.optional_build_dependencies = None
-    self.patches = None
     self.pkg_configure_options = None
     self.pypi_name = None
     self.pypi_source_name = None
@@ -274,8 +272,6 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'rpm_name')
       project_definition.rpm_template_spec = self._GetConfigValue(
           config_parser, section_name, 'rpm_template_spec')
-      project_definition.patches = self._GetConfigValue(
-          config_parser, section_name, 'patches')
       project_definition.pkg_configure_options = self._GetConfigValue(
           config_parser, section_name, 'pkg_configure_options')
       project_definition.pypi_name = self._GetConfigValue(
@@ -356,11 +352,6 @@ class ProjectDefinitionReader(object):
       elif isinstance(project_definition.rpm_dependencies, str):
         project_definition.rpm_dependencies = (
             project_definition.rpm_dependencies.split(','))
-
-      if project_definition.patches is None:
-        project_definition.patches = []
-      elif isinstance(project_definition.patches, str):
-        project_definition.patches = project_definition.patches.split(',')
 
       if project_definition.pkg_configure_options is None:
         project_definition.pkg_configure_options = []

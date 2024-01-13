@@ -128,7 +128,7 @@ class DPKGBuildFilesGenerator(object):
       'export DH_OPTIONS',
       '',
       '%:',
-      '\tdh  $@ {build_system:s}{with_quilt:s}',
+      '\tdh  $@ {build_system:s}',
       '',
       '.PHONY: override_dh_auto_configure',
       'override_dh_auto_configure:',
@@ -159,7 +159,7 @@ class DPKGBuildFilesGenerator(object):
       '#!/usr/bin/make -f',
       '',
       '%:',
-      '\tdh $@ --buildsystem=pybuild --with=python3{with_quilt:s}',
+      '\tdh $@ --buildsystem=pybuild --with=python3',
       '',
       '.PHONY: override_dh_auto_test',
       'override_dh_auto_test:',
@@ -185,7 +185,7 @@ class DPKGBuildFilesGenerator(object):
       project_definition (ProjectDefinition): project definition.
       project_version (str): version of the project.
       data_path (str): path to the data directory which contains the dpkg
-          templates and patches sub directories.
+          templates sub directory.
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
       build_configuration (Optional[DPKGBuildConfiguration]): the dpgk build
@@ -300,9 +300,6 @@ class DPKGBuildFilesGenerator(object):
 
     build_depends = []
     python3_build_depends = []
-
-    if self._project_definition.patches:
-      build_depends.append('quilt')
 
     if self._project_definition.build_system == 'configure_make':
       build_depends.append('autotools-dev')
@@ -547,11 +544,6 @@ class DPKGBuildFilesGenerator(object):
 
     build_system = '--buildsystem=autoconf'
 
-    if self._project_definition.patches:
-      with_quilt = ' --with quilt'
-    else:
-      with_quilt = ''
-
     configure_options = ''
     if self._project_definition.dpkg_configure_options:
       configure_options = ' '.join(
@@ -564,8 +556,7 @@ class DPKGBuildFilesGenerator(object):
     template_values = {
         'build_system': build_system,
         'configure_options': configure_options,
-        'package_name': package_name,
-        'with_quilt': with_quilt}
+        'package_name': package_name}
 
     output_filename = os.path.join(dpkg_path, 'rules')
     self._GenerateFile(
@@ -580,14 +571,8 @@ class DPKGBuildFilesGenerator(object):
     """
     setup_name = self._GetPythonSetupName()
 
-    if self._project_definition.patches:
-      with_quilt = ' --with quilt'
-    else:
-      with_quilt = ''
-
     template_values = {
-        'setup_name': setup_name,
-        'with_quilt': with_quilt}
+        'setup_name': setup_name}
 
     rules_template = self._RULES_TEMPLATE_SETUP_PY
 
@@ -717,27 +702,3 @@ class DPKGBuildFilesGenerator(object):
     self._GeneratePy3DistOverridesFile(dpkg_path)
     self._GenerateSourceFormatFile(dpkg_path)
     self._GenerateSourceOptionsFile(dpkg_path)
-
-    if self._project_definition.patches:
-      patches_directory = os.path.join(dpkg_path, 'patches')
-      os.mkdir(patches_directory)
-
-      current_path = os.getcwd()
-      os.chdir(patches_directory)
-
-      patch_filenames = []
-      for patch_filename in self._project_definition.patches:
-        filename = os.path.join(self._data_path, 'patches', patch_filename)
-        if not os.path.exists(filename):
-          logging.warning('Missing patch file: {0:s}'.format(filename))
-          continue
-
-        shutil.copy(filename, patch_filename)
-        patch_filenames.append(patch_filename)
-
-      os.chdir(current_path)
-
-      filename = os.path.join(dpkg_path, 'patches', 'series')
-      with open(filename, 'wb') as file_object:
-        data = '\n'.join(patch_filenames)
-        file_object.write(data.encode('utf-8'))

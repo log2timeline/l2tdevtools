@@ -77,7 +77,7 @@ class RPMSpecFileGenerator(object):
 
     Args:
       data_path (str): path to the data directory which contains the RPM
-          templates and patches sub directories.
+          templates sub directory.
     """
     super(RPMSpecFileGenerator, self).__init__()
     self._data_path = data_path
