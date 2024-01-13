@@ -48,7 +48,7 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python3-py%{{name}}
+%files -n python3-%{{name}}
 %license LICENSE.txt
 %doc CHANGES.txt
 %{{_libdir}}/python3*/site-packages/xattr
