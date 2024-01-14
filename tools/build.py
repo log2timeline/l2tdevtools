@@ -6,6 +6,7 @@ import argparse
 import io
 import logging
 import os
+import platform
 import subprocess
 import sys
 
@@ -403,9 +404,8 @@ def Main():
     return False
 
   if os.path.abspath(options.builds_directory).startswith(l2tdevtools_path):
-    print(
-        'Builds directory cannot be within l2tdevtools directory due to usage '
-        'of pbr')
+    print(('Builds directory cannot be within l2tdevtools directory due to '
+           'usage of pbr'))
     print('')
     return False
 
@@ -434,6 +434,8 @@ def Main():
 
   project_builder.ReadProjectDefinitions(projects_file)
 
+  operating_system = platform.system().lower()
+
   builds = []
   disabled_projects = []
   for name, definition in project_builder.project_definitions.items():
@@ -442,6 +444,7 @@ def Main():
 
     is_disabled = False
     if (options.build_target in definition.disabled or
+        operating_system in definition.disabled or
         'all' in definition.disabled):
       if options.preset:
         is_disabled = True
@@ -547,9 +550,8 @@ def Main():
     for name in failed_builds:
       print('\t{0:s}'.format(name))
 
-  return (
-      not failed_downloads and not missing_build_dependencies and
-      not failed_builds)
+  return (not failed_downloads and not missing_build_dependencies and
+          not failed_builds)
 
 
 if __name__ == '__main__':
