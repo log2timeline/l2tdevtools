@@ -3,7 +3,6 @@
 
 import datetime
 import glob
-import io
 import logging
 import os
 import platform
@@ -58,11 +57,6 @@ class DPKGBuildHelper(interface.BuildHelper):
       'sqlite': 'libsqlite3-dev',
       'zeromq': 'libzmq3-dev',
       'zlib': 'zlib1g-dev'
-  }
-
-  # Maps Ubuntu 18.04 (bionic) to 20.04 (focal) Python2 package names.
-  _FOCAL_PYTHON2_PACKAGE_NAMES = {
-      'python-dev': 'python2-dev',
   }
 
   def __init__(
@@ -247,8 +241,6 @@ class DPKGBuildHelper(interface.BuildHelper):
 
     if os.path.exists(dpkg_directory):
       shutil.copytree(dpkg_directory, debian_directory)
-
-      self._RewriteControlFile(debian_directory)
 
     else:
       build_configuration = self._DetermineBuildConfiguration(source_directory)  # pylint: disable=assignment-from-none
@@ -450,26 +442,6 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
         os.remove(filename)
-
-  def _RewriteControlFile(self, debian_directory):
-    """Rewrites the packing control file for the current distribution.
-
-    Args:
-      debian_directory (str): path of the directory with the packaging files.
-    """
-    control_file_path = os.path.join(debian_directory, 'control')
-
-    with io.open(control_file_path, 'r', encoding='utf8') as file_object:
-      file_content = file_object.read()
-
-    for old_name, new_name in self._FOCAL_PYTHON2_PACKAGE_NAMES.items():
-      if self.distribution in ('focal', 'jammy'):
-        file_content = file_content.replace(old_name, new_name)
-      else:
-        file_content = file_content.replace(new_name, old_name)
-
-    with io.open(control_file_path, 'w', encoding='utf8') as file_object:
-      file_object.write(file_content)
 
   def _RunLSBReleaseCommand(self, option='-a'):
     """Runs the lsb-release command (/usr/bin/lsb_release).
