@@ -2,7 +2,6 @@
 """Helper for writing files that contain dependency information."""
 
 import abc
-import io
 import string
 
 
@@ -47,6 +46,30 @@ class DependencyFileWriter(object):
           'Unable to format template: {0:s} with error: {1!s}'.format(
               template_filename, exception))
 
+  def _GetDPKGDevDependencies(self):
+    """Retrieves DPKG development dependencies.
+
+    Returns:
+      list[str]: DPKG package names of development dependencies.
+    """
+    dpkg_dependencies = self._dependency_helper.GetDPKGDepends(
+        exclude_version=True)
+
+    dpkg_dev_dependencies = []
+
+    # TODO: extract from configuration.
+
+    if 'python3-snappy' in dpkg_dependencies:
+      dpkg_dev_dependencies.append('libsnappy-dev')
+
+    if 'python3-yara' in dpkg_dependencies:
+      dpkg_dev_dependencies.append('libssl-dev')
+
+    if 'python3-xattr' in dpkg_dependencies:
+      dpkg_dev_dependencies.append('libffi-dev')
+
+    return dpkg_dev_dependencies
+
   def _GetDPKGPythonDependencies(self):
     """Retrieves DPKG Python dependencies.
 
@@ -55,9 +78,6 @@ class DependencyFileWriter(object):
     """
     dpkg_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True)
-
-    if 'python3-yara' in dpkg_dependencies:
-      dpkg_dependencies.append('libssl-dev')
 
     return dpkg_dependencies
 
@@ -150,7 +170,7 @@ class DependencyFileWriter(object):
     Returns:
       string.Template: template string.
     """
-    with io.open(filename, 'r', encoding='utf-8') as file_object:
+    with open(filename, 'r', encoding='utf-8') as file_object:
       file_data = file_object.read()
 
     return string.Template(file_data)

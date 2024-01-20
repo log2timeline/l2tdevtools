@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for check_dependencies script."""
 
-import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -37,5 +36,5 @@ class CheckDependenciesWriter(interface.DependencyFileWriter):
         self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_file)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)

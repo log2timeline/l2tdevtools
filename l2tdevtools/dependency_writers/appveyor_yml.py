@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for appveyor.yml files."""
 
-import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -86,5 +85,5 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
 
     file_content = ''.join(file_content)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)

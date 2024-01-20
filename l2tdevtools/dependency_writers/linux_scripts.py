@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for Linux script files."""
 
-import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -173,5 +172,5 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
         self._project_definition.name)
     script_path = os.path.join('config', 'linux', script_name)
 
-    with io.open(script_path, 'w', encoding='utf-8') as file_object:
+    with open(script_path, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)

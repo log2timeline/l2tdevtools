@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for Debian packaging (dpkg) files."""
 
-import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -16,7 +15,7 @@ class DPKGCompatWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a dpkg control file."""
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(self._FILE_CONTENT)
 
 
@@ -145,7 +144,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
     file_content = '\n'.join(file_content)
     file_content = file_content.format(**template_mappings)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -173,5 +172,5 @@ class DPKGRulesWriter(interface.DependencyFileWriter):
     file_content = '\n'.join(self._FILE_CONTENT)
     file_content = file_content.format(**template_mappings)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
