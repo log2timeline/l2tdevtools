@@ -3,7 +3,6 @@
 
 import datetime
 import logging
-import io
 import os
 import subprocess
 import sys
@@ -560,7 +559,7 @@ class RPMSpecFileGenerator(object):
     elif package_name != source_name:
       unmangled_name = source_name
 
-    with io.open(input_file, 'r+', encoding='utf8') as input_file_object:
+    with open(input_file, 'r+', encoding='utf8') as input_file_object:
       for line in input_file_object.readlines():
         if in_description:
           if line.startswith('%'):
@@ -762,7 +761,7 @@ class RPMSpecFileGenerator(object):
 
     template_file_path = os.path.join(
         self._data_path, 'rpm_templates', template_filename)
-    with io.open(template_file_path, 'r', encoding='utf8') as file_object:
+    with open(template_file_path, 'r', encoding='utf8') as file_object:
       rules_template = file_object.read()
 
     data = rules_template.format(**template_values)
@@ -800,7 +799,7 @@ class RPMSpecFileGenerator(object):
 
     # TODO: check if already prefixed with python-
 
-    with io.open(output_file, 'w', encoding='utf8') as output_file_object:
+    with open(output_file, 'w', encoding='utf8') as output_file_object:
       if project_definition.rpm_template_spec:
         result = self._WriteSpecFileFromTempate(
             project_definition.rpm_template_spec, project_version,

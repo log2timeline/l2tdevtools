@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for .pylintrc files."""
 
-import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -23,5 +22,5 @@ class PylintRcWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)

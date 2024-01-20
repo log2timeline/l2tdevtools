@@ -131,7 +131,7 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
   """Tests for the helper to build Python wheel packages (.whl)."""
 
   _TEST_PROJECT_NAME = 'libsigscan'
-  _TEST_PROJECT_VERSION = '20221218'
+  _TEST_PROJECT_VERSION = '20231201'
   _TEST_SOURCE_PACKAGE = '{0:s}-{1:s}.tar.gz'.format(
       _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
 

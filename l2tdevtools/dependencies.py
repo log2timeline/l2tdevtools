@@ -488,7 +488,7 @@ class DependencyHelper(object):
       exclude_version (Optional[bool]): True if the version should be excluded
           from the dependency definitions.
       test_dependencies (Optional[bool]): True if the test dependencies should
-          returned instead of the regual dependencies.
+          returned instead of the regular dependencies.
 
     Returns:
       list[str]: dependency definitions for requires for DPKG control file.
@@ -505,7 +505,7 @@ class DependencyHelper(object):
 
     Args:
       test_dependencies (Optional[bool]): True if the test dependencies should
-          returned instead of the regual dependencies.
+          returned instead of the regular dependencies.
 
     Returns:
       list[str]: dependency definitions for l2tbinaries.
@@ -524,7 +524,7 @@ class DependencyHelper(object):
       exclude_version (Optional[bool]): True if the version should be excluded
           from the dependency definitions.
       test_dependencies (Optional[bool]): True if the test dependencies should
-          returned instead of the regual dependencies.
+          returned instead of the regular dependencies.
 
     Returns:
       list[str]: dependency definitions for install_requires in setup.py.
@@ -612,7 +612,7 @@ class DependencyHelper(object):
       exclude_version (Optional[bool]): True if the version should be excluded
           from the dependency definitions.
       test_dependencies (Optional[bool]): True if the test dependencies should
-          returned instead of the regual dependencies.
+          returned instead of the regular dependencies.
 
     Returns:
       list[str]: dependency definitions for requires for setup.cfg.

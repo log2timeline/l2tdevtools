@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Writer for GitHub actions workflow files."""
 
-import io
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -33,7 +32,7 @@ class GitHubActionsTestDockerYmlWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -52,13 +51,16 @@ class GitHubActionsTestDocsYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies.extend(test_dependencies)
     dpkg_dependencies.append('python3-pip')
 
+    dpkg_dev_dependencies = self._GetDPKGDevDependencies()
+
     template_mappings = {
-        'dpkg_dependencies': ' '.join(sorted(set(dpkg_dependencies)))}
+        'dpkg_dependencies': ' '.join(sorted(set(dpkg_dependencies))),
+        'dpkg_dev_dependencies': ' '.join(sorted(set(dpkg_dev_dependencies)))}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
 
 
@@ -77,11 +79,14 @@ class GitHubActionsTestToxYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies.extend(test_dependencies)
     dpkg_dependencies.append('python3-pip')
 
+    dpkg_dev_dependencies = self._GetDPKGDevDependencies()
+
     template_mappings = {
-        'dpkg_dependencies': ' '.join(sorted(set(dpkg_dependencies)))}
+        'dpkg_dependencies': ' '.join(sorted(set(dpkg_dependencies))),
+        'dpkg_dev_dependencies': ' '.join(sorted(set(dpkg_dev_dependencies)))}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    with io.open(self.PATH, 'w', encoding='utf-8') as file_object:
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)
