@@ -171,6 +171,7 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
       self.assertIn('build.log', directory_entries)
 
       if len(directory_entries) < 4:
+        print('X:', directory_entries)
         build_log_path = os.path.join(temp_directory, 'build.log')
         with open(build_log_path, 'r', encoding='utf-8') as file_object:
           print(''.join(file_object.readlines()))
