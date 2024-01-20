@@ -131,7 +131,7 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
   """Tests for the helper to build Python wheel packages (.whl)."""
 
   _TEST_PROJECT_NAME = 'libsigscan'
-  _TEST_PROJECT_VERSION = '20221218'
+  _TEST_PROJECT_VERSION = '20231201'
   _TEST_SOURCE_PACKAGE = '{0:s}-{1:s}.tar.gz'.format(
       _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
 
@@ -171,7 +171,6 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
       self.assertIn('build.log', directory_entries)
 
       if len(directory_entries) < 4:
-        print('X:', directory_entries)
         build_log_path = os.path.join(temp_directory, 'build.log')
         with open(build_log_path, 'r', encoding='utf-8') as file_object:
           print(''.join(file_object.readlines()))
