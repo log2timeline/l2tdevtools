@@ -158,6 +158,11 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     formatted_scripts = [
         f'  {script:s}' for script in sorted(scripts)]
 
+    # TODO: add support for entry points
+    scripts_directory = None
+    if os.path.isdir(os.path.join(python_module_name, 'scripts')):
+      scripts_directory = None
+
     date_time = datetime.datetime.now()
     version = date_time.strftime('%Y%m%d')
 

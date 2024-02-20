@@ -52,8 +52,6 @@ class RPMSpecFileGenerator(object):
       ('rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/'
        'requires.txt'),
       'rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/',
-      ('mv %{{buildroot}}/usr/lib/python*/site-packages/tools/ '
-       '%{{buildroot}}/usr/bin'),
       '',
       '']
 
@@ -530,9 +528,14 @@ class RPMSpecFileGenerator(object):
 
     has_data_package = False
 
+    python_module_name = project_name
+
     if os.path.isdir(os.path.join(source_directory, 'scripts')):
       has_tools_package = True
     elif os.path.isdir(os.path.join(source_directory, 'tools')):
+      has_tools_package = True
+    elif os.path.isdir(os.path.join(
+        source_directory, python_module_name, 'scripts')):
       has_tools_package = True
     else:
       has_tools_package = False
