@@ -71,6 +71,8 @@ class RPMSpecFileGenerator(object):
       '%description -n %{{name}}-tools',
       '{description:s}']
 
+  LOG_FILENAME = 'build.log'
+
   def __init__(self, data_path):
     """Initializes the RPM spec file generator.
 

@@ -53,7 +53,7 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 mkdir -p %{{buildroot}}/usr/share/plaso/
 mv %{{buildroot}}/usr/lib/python*/site-packages/plaso/data/* %{{buildroot}}/usr/share/plaso/
 rmdir %{{buildroot}}/usr/lib/python*/site-packages/plaso/data
-for FILENAME in %{{buildroot}}/usr/bin/*; do mv ${{FILENAME}} ${{FILENAME}}.py; done;
+for FILENAME in %{{buildroot}}/usr/bin/*; do mv ${{FILENAME}} ${{FILENAME}}.py; done
 
 %clean
 rm -rf %{{buildroot}}
