@@ -47,6 +47,13 @@ class BuildHelperFactory(object):
       'wheel': wheel.SetupPyWheelBuildHelper,
   }
 
+  # Note that the rpm and srpm setup.py build helpers are used to build
+  # projects that use setuptools.
+  _SETUPTOOLS_BUILD_HELPER_CLASSES = {
+      'rpm': rpm.SetupPyRPMBuildHelper,
+      'srpm': rpm.SetupPySRPMBuildHelper,
+  }
+
   @classmethod
   def NewBuildHelper(
       cls, project_definition, build_target, l2tdevtools_path,
@@ -82,6 +89,10 @@ class BuildHelperFactory(object):
 
     elif project_definition.build_system == 'setup_py':
       build_helper_class = cls._SETUP_PY_BUILD_HELPER_CLASSES.get(
+          build_target, None)
+
+    elif project_definition.build_system == 'setuptools':
+      build_helper_class = cls._SETUPTOOLS_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
     else:
