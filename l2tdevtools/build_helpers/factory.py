@@ -19,7 +19,11 @@ class BuildHelperFactory(object):
       'wheel': wheel.ConfigureMakeWheelBuildHelper,
   }
 
+  # Note that the rpm and srpm setup.py build helpers are used to build
+  # projects that use flit.
   _FLIT_BUILD_HELPER_CLASSES = {
+      'rpm': rpm.SetupPyRPMBuildHelper,
+      'srpm': rpm.SetupPySRPMBuildHelper,
       'wheel': wheel.FlitWheelBuildHelper,
   }
 

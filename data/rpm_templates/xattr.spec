@@ -10,8 +10,6 @@ License: MIT License
 Vendor: Bob Ippolito <bob@redivi.com>
 Url: http://github.com/xattr/xattr
 Source0: %{{name}}-%{{version}}.tar.gz
-Group: Development/Libraries
-BuildRoot: %{{_tmppath}}/%{{name}}-%{{version}}-%{{release}}-buildroot
 BuildRequires: gcc, python3-cffi, python3-devel, python3-pip, python3-setuptools, python3-tox-current-env, python3-wheel
 
 %description
