@@ -232,7 +232,7 @@ class DPKGBuildHelper(interface.BuildHelper):
     # the dpkg directory.
     if os.path.exists(debian_directory):
       logging.info('Removing: {0:s}'.format(debian_directory))
-      shutil.rmtree(debian_directory)
+      shutil.rmtree(debian_directory, ignore_errors=True)
 
     dpkg_directory = os.path.join(source_directory, 'dpkg')
 
@@ -580,7 +580,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     temporary_directory = os.path.join(source_directory, 'tmp')
     if os.path.exists(temporary_directory):
       logging.info('Removing: {0:s}'.format(temporary_directory))
-      shutil.rmtree(temporary_directory)
+      shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(
         source_directory, source_helper_object.project_name, project_version,
@@ -698,7 +698,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     temporary_directory = os.path.join(source_directory, 'tmp')
     if os.path.exists(temporary_directory):
       logging.info('Removing: {0:s}'.format(temporary_directory))
-      shutil.rmtree(temporary_directory)
+      shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(
         source_directory, source_helper_object.project_name, project_version,
@@ -832,7 +832,7 @@ class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
         build_configuration.has_bin_directory = True
 
     if os.path.exists(installroot_path):
-      shutil.rmtree(installroot_path)
+      shutil.rmtree(installroot_path, ignore_errors=True)
 
     return build_configuration
 
@@ -929,7 +929,7 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     temporary_directory = os.path.join(source_directory, 'tmp')
     if os.path.exists(temporary_directory):
       logging.info('Removing: {0:s}'.format(temporary_directory))
-      shutil.rmtree(temporary_directory)
+      shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(
         source_directory, project_name, project_version, self.version_suffix,
@@ -1086,7 +1086,7 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     temporary_directory = os.path.join(source_directory, 'tmp')
     if os.path.exists(temporary_directory):
       logging.info('Removing: {0:s}'.format(temporary_directory))
-      shutil.rmtree(temporary_directory)
+      shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(
         source_directory, project_name, project_version, self.version_suffix,

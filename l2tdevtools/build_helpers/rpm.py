@@ -293,7 +293,7 @@ class RPMBuildHelper(BaseRPMBuildHelper):
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
-        shutil.rmtree(filename)
+        shutil.rmtree(filename, ignore_errors=True)
 
   def _RemoveOlderRPMs(self, project_name, project_version):
     """Removes previous versions of .rpm files.
@@ -557,7 +557,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
     for filename in ('build', 'dist'):
       if os.path.exists(filename):
         logging.info('Removing: {0:s}'.format(filename))
-        shutil.rmtree(filename, True)
+        shutil.rmtree(filename, ignore_errors=True)
 
     # Remove previous versions of rpms.
     project_name, project_version = self._GetFilenameSafeProjectInformation(

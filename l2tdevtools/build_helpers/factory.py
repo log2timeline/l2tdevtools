@@ -19,13 +19,21 @@ class BuildHelperFactory(object):
       'wheel': wheel.ConfigureMakeWheelBuildHelper,
   }
 
+  # Note that the rpm and srpm setup.py build helpers are used to build
+  # projects that use flit.
   _FLIT_BUILD_HELPER_CLASSES = {
+      'rpm': rpm.SetupPyRPMBuildHelper,
+      'srpm': rpm.SetupPySRPMBuildHelper,
       'wheel': wheel.FlitWheelBuildHelper,
   }
 
+  # Note that the rpm and srpm setup.py build helpers are used to build
+  # projects that use poetry.
   _POETRY_BUILD_HELPER_CLASSES = {
       'dpkg': dpkg.PybuildDPKGBuildHelper,
       'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
+      'rpm': rpm.SetupPyRPMBuildHelper,
+      'srpm': rpm.SetupPySRPMBuildHelper,
       'wheel': wheel.PoetryWheelBuildHelper,
   }
 
@@ -40,7 +48,15 @@ class BuildHelperFactory(object):
       'rpm': rpm.SetupPyRPMBuildHelper,
       'source': source.SetupPySourceBuildHelper,
       'srpm': rpm.SetupPySRPMBuildHelper,
-      'wheel': wheel.SetupPyWheelBuildHelper,
+      'wheel': wheel.SetuptoolsWheelBuildHelper,
+  }
+
+  # Note that the rpm and srpm setup.py build helpers are used to build
+  # projects that use setuptools.
+  _SETUPTOOLS_BUILD_HELPER_CLASSES = {
+      'rpm': rpm.SetupPyRPMBuildHelper,
+      'srpm': rpm.SetupPySRPMBuildHelper,
+      'wheel': wheel.SetuptoolsWheelBuildHelper,
   }
 
   @classmethod
@@ -78,6 +94,10 @@ class BuildHelperFactory(object):
 
     elif project_definition.build_system == 'setup_py':
       build_helper_class = cls._SETUP_PY_BUILD_HELPER_CLASSES.get(
+          build_target, None)
+
+    elif project_definition.build_system == 'setuptools':
+      build_helper_class = cls._SETUPTOOLS_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
     else:
