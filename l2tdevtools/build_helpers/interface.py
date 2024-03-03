@@ -45,7 +45,7 @@ class BuildHelper(object):
     for filename in filenames:
       if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
-        shutil.rmtree(filename)
+        shutil.rmtree(filename, ignore_errors=True)
 
   def _RemoveOlderSourcePackages(self, project_name, project_version):
     """Removes previous versions of source packages.

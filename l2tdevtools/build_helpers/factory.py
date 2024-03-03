@@ -23,9 +23,13 @@ class BuildHelperFactory(object):
       'wheel': wheel.FlitWheelBuildHelper,
   }
 
+  # Note that the rpm and srpm setup.py build helpers are used to build
+  # projects that use poetry.
   _POETRY_BUILD_HELPER_CLASSES = {
       'dpkg': dpkg.PybuildDPKGBuildHelper,
       'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
+      'rpm': rpm.SetupPyRPMBuildHelper,
+      'srpm': rpm.SetupPySRPMBuildHelper,
       'wheel': wheel.PoetryWheelBuildHelper,
   }
 

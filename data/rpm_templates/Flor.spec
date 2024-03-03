@@ -19,10 +19,10 @@ BuildRequires: python3-devel, python3-setuptools
 %description
 A Bloom filter implementation in Python
 
-%package -n python3-%{{name}}
+%package -n python3-flor
 Summary: Python 3 module of Flor - An efficient Bloom filter implementation in Python
 
-%description -n python3-%{{name}}
+%description -n python3-flor
 A Bloom filter implementation in Python
 
 %prep
@@ -39,9 +39,8 @@ rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 %clean
 rm -rf %{{buildroot}}
 
-%files -n python3-%{{name}}
-
-
+%files -n python3-flor
+%doc README.md
 %{{python3_sitelib}}/flor
 %{{python3_sitelib}}/Flor*.egg-info
 
