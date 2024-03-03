@@ -11,7 +11,7 @@ Url: https://github.com/pyparsing/pyparsing/
 Vendor: Paul McGuire <ptmcg.gm+pyparsing@gmail.com>
 Source0: %{{name}}-%{{version}}.tar.gz
 BuildArch: noarch
-BuildRequires: python3-devel, python3-flit-core, python3-setuptools
+BuildRequires: python3-devel, python3-flit-core, python3-pip, python3-setuptools
 
 %description
 The parsing module is an alternative approach to creating

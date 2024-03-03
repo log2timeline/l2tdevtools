@@ -24,8 +24,8 @@ Fake implementation of redis API (redis-py) for testing purposes
 %prep
 %autosetup -p1 -n %{{name}}-%{{version}}
 
-%generate_buildrequires
-%pyproject_buildrequires -t
+# %generate_buildrequires
+# %pyproject_buildrequires -t
 
 %build
 %pyproject_wheel
