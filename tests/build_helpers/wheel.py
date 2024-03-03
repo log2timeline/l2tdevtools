@@ -41,7 +41,7 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
     l2tdevtools_path = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
 
-    test_build_helper = wheel.SetupPyWheelBuildHelper(
+    test_build_helper = wheel.WheelBuildHelper(
         project_definition, l2tdevtools_path, {})
 
     source_helper_object = test_lib.TestSourceHelper(
@@ -63,7 +63,7 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
     l2tdevtools_path = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
 
-    test_build_helper = wheel.SetupPyWheelBuildHelper(
+    test_build_helper = wheel.WheelBuildHelper(
         project_definition, l2tdevtools_path, {})
 
     missing_packages = test_build_helper.CheckBuildDependencies()
@@ -77,7 +77,7 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
     l2tdevtools_path = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
 
-    test_build_helper = wheel.SetupPyWheelBuildHelper(
+    test_build_helper = wheel.WheelBuildHelper(
         project_definition, l2tdevtools_path, {})
 
     source_helper_object = test_lib.TestSourceHelper(
@@ -94,7 +94,7 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
     l2tdevtools_path = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
 
-    test_build_helper = wheel.SetupPyWheelBuildHelper(
+    test_build_helper = wheel.WheelBuildHelper(
         project_definition, l2tdevtools_path, {})
 
     source_helper_object = test_lib.TestSourceHelper(
@@ -144,7 +144,7 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
     l2tdevtools_path = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
 
-    test_build_helper = wheel.SetupPyWheelBuildHelper(
+    test_build_helper = wheel.ConfigureMakeWheelBuildHelper(
         project_definition, l2tdevtools_path, {})
 
     source_helper_object = test_lib.TestSourceHelper(
@@ -178,7 +178,7 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
       self.assertEqual(len(directory_entries), 4)
 
 
-class SetupPyWheelBuildHelperTest(shared_test_lib.BaseTestCase):
+class SetuptoolsWheelBuildHelperTest(shared_test_lib.BaseTestCase):
   """Tests for the helper to build Python wheel packages (.whl)."""
 
   _TEST_PROJECT_NAME = 'dfdatetime'
@@ -196,7 +196,7 @@ class SetupPyWheelBuildHelperTest(shared_test_lib.BaseTestCase):
     l2tdevtools_path = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
 
-    test_build_helper = wheel.SetupPyWheelBuildHelper(
+    test_build_helper = wheel.SetuptoolsWheelBuildHelper(
         project_definition, l2tdevtools_path, {})
 
     source_helper_object = test_lib.TestSourceHelper(

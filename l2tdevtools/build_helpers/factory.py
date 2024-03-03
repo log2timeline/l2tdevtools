@@ -44,7 +44,7 @@ class BuildHelperFactory(object):
       'rpm': rpm.SetupPyRPMBuildHelper,
       'source': source.SetupPySourceBuildHelper,
       'srpm': rpm.SetupPySRPMBuildHelper,
-      'wheel': wheel.SetupPyWheelBuildHelper,
+      'wheel': wheel.SetuptoolsWheelBuildHelper,
   }
 
   # Note that the rpm and srpm setup.py build helpers are used to build
@@ -52,6 +52,7 @@ class BuildHelperFactory(object):
   _SETUPTOOLS_BUILD_HELPER_CLASSES = {
       'rpm': rpm.SetupPyRPMBuildHelper,
       'srpm': rpm.SetupPySRPMBuildHelper,
+      'wheel': wheel.SetuptoolsWheelBuildHelper,
   }
 
   @classmethod
