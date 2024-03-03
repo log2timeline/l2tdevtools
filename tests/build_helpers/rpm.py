@@ -8,11 +8,11 @@ import unittest
 # TODO: add BaseRPMBuildHelper tests.
 # TODO: add RPMBuildHelper tests.
 # TODO: add ConfigureMakeRPMBuildHelper tests.
-# TODO: add SetupPyRPMBuildHelper tests.
+# TODO: add PyprojectRPMBuildHelper tests.
 
 # TODO: add SRPMBuildHelper tests.
 # TODO: add ConfigureMakeSRPMBuildHelper tests.
-# TODO: add SetupPySRPMBuildHelper tests.
+# TODO: add PyprojectSRPMBuildHelper tests.
 
 
 if __name__ == '__main__':

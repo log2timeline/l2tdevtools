@@ -417,7 +417,7 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     self._RemoveOlderRPMs(project_name, project_version)
 
 
-class SetupPyRPMBuildHelper(RPMBuildHelper):
+class PyprojectRPMBuildHelper(RPMBuildHelper):
   """Helper to build RPM packages (.rpm)."""
 
   def __init__(
@@ -431,7 +431,7 @@ class SetupPyRPMBuildHelper(RPMBuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(SetupPyRPMBuildHelper, self).__init__(
+    super(PyprojectRPMBuildHelper, self).__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     if not project_definition.architecture_dependent:
       self.architecture = 'noarch'
@@ -695,7 +695,7 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
     return build_successful
 
 
-class SetupPySRPMBuildHelper(SRPMBuildHelper):
+class PyprojectSRPMBuildHelper(SRPMBuildHelper):
   """Helper to build source RPM packages (.src.rpm)."""
 
   def __init__(
@@ -709,7 +709,7 @@ class SetupPySRPMBuildHelper(SRPMBuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(SetupPySRPMBuildHelper, self).__init__(
+    super(PyprojectSRPMBuildHelper, self).__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     if not project_definition.architecture_dependent:
       self.architecture = 'noarch'
