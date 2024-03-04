@@ -118,6 +118,8 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     if self._project_definition.name.endswith('-kb'):
       python_module_name = ''.join([python_module_name[:-3], 'rc'])
 
+    # TODO: handle data directory without yaml files.
+
     package_data = []
     for data_file in glob.glob(
         f'{python_module_name:s}/**/*.yaml', recursive=True):
@@ -128,8 +130,7 @@ class SetupCfgWriter(interface.DependencyFileWriter):
       if data_file_directory:
         data_file = '/'.join([data_file_directory, data_file])
 
-      if (data_file_directory == 'data' or
-          data_file not in package_data):
+      if data_file not in package_data:
         package_data.append(data_file)
 
     formatted_package_data = [
