@@ -118,12 +118,8 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     if self._project_definition.name.endswith('-kb'):
       python_module_name = ''.join([python_module_name[:-3], 'rc'])
 
-    python3_dependencies = self._dependency_helper.GetRPMRequires()
+    # TODO: handle data directory without yaml files.
 
-    formatted_rpm_requires = [
-          f'  {dependency:s}' for dependency in python3_dependencies]
-
-    has_data_directory = False
     package_data = []
     for data_file in glob.glob(
         f'{python_module_name:s}/**/*.yaml', recursive=True):
@@ -134,16 +130,11 @@ class SetupCfgWriter(interface.DependencyFileWriter):
       if data_file_directory:
         data_file = '/'.join([data_file_directory, data_file])
 
-      if data_file_directory == 'data':
-        has_data_directory = True
-      elif data_file not in package_data:
+      if data_file not in package_data:
         package_data.append(data_file)
 
     formatted_package_data = [
         f'  {data_file:s}' for data_file in sorted(package_data)]
-
-    # TODO: add support for has_data_directory
-    _ = has_data_directory
 
     scripts_directory = None
     if os.path.isdir('scripts'):
@@ -177,7 +168,6 @@ class SetupCfgWriter(interface.DependencyFileWriter):
         'maintainer_name': maintainer_name,
         'package_data': '\n'.join(formatted_package_data),
         'python_module_name': python_module_name,
-        'rpm_requires': '\n'.join(formatted_rpm_requires),
         'scripts': '\n'.join(formatted_scripts),
         'version': version}
 
@@ -203,14 +193,6 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     if self._project_definition.name in self._PROJECTS_WITH_SDIST_TEST_DATA:
       template_data = self._GenerateFromTemplate(
           'sdist_test_data', template_mappings)
-      file_content.append(template_data)
-
-    template_data = self._GenerateFromTemplate('bdist_rpm', template_mappings)
-    file_content.append(template_data)
-
-    if python3_dependencies:
-      template_data = self._GenerateFromTemplate(
-          'bdist_rpm_requires', template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('bdist_wheel', template_mappings)
