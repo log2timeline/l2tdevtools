@@ -17,6 +17,8 @@ Packager: Forensic artifacts <forensicartifacts@googlegroups.com>
 Url: https://github.com/ForensicArtifacts/artifacts
 BuildRequires: python3-devel, python3-setuptools
 
+%{{?python_disable_dependency_generator}}
+
 %description
 A free, community-sourced, machine-readable knowledge base of forensic artifacts that the world can use both as an information source and within other tools.
 

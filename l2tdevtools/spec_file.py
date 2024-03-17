@@ -2,10 +2,9 @@
 """RPM spec file generator."""
 
 import datetime
-import logging
 import os
-import subprocess
-import sys
+
+from setuptools.config import setupcfg
 
 from l2tdevtools import dependencies
 
@@ -28,38 +27,22 @@ class RPMSpecFileGenerator(object):
       'Summary: Data files for {summary:s}',
       '',
       '%description -n %{{name}}-data',
-      '{description:s}']
+      '{description:s}',
+      '',
+      '']
 
-  _SPEC_TEMPLATE_PYTHON3_PREP_AND_BUILD = [
+  _SPEC_TEMPLATE_PYTHON3_BODY = [
+      '%generate_buildrequires',
+      '%pyproject_buildrequires -R',
+      '',
       '%prep',
-      '%autosetup -n {name:s}',
+      '%autosetup -p1 -n %{{name}}-%{{version}}',
       '',
       '%build',
-      '%py3_build',
+      '%pyproject_wheel',
       '',
-      '']
-
-  _SPEC_TEMPLATE_PYTHON3_INSTALL = [
       '%install',
-      '%py3_install',
-      ('rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/'
-       'requires.txt'),
-      'rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/',
-      '',
-      '']
-
-  _SPEC_TEMPLATE_TOOLS_PYTHON3_INSTALL = [
-      '%install',
-      '%py3_install',
-      ('rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/'
-       'requires.txt'),
-      'rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/',
-      '',
-      '']
-
-  _SPEC_TEMPLATE_CLEAN = [
-      '%clean',
-      'rm -rf %{{buildroot}}',
+      '%pyproject_install',
       '',
       '']
 
@@ -69,7 +52,9 @@ class RPMSpecFileGenerator(object):
       'Summary: Tools for {summary:s}',
       '',
       '%description -n %{{name}}-tools',
-      '{description:s}']
+      '{description:s}',
+      '',
+      '']
 
   LOG_FILENAME = 'build.log'
 
@@ -83,23 +68,133 @@ class RPMSpecFileGenerator(object):
     super(RPMSpecFileGenerator, self).__init__()
     self._data_path = data_path
 
-  def _GenerateWithSetupPy(self, source_directory, build_log_file):
-    """Generates the RPM spec file with setup.py.
+  def _GenerateSpecFile(
+      self, project_definition, source_directory, source_package_filename,
+      project_name, rpm_build_dependencies, output_file_object):
+    """Generates a RPM spec file.
 
     Args:
+      project_definition (ProjectDefinition): project definition.
       source_directory (str): path of the source directory.
-      build_log_file (str): path of the build log file.
+      source_package_filename (str): name of the source package.
+      project_name (str): name of the project.
+      rpm_build_dependencies (list[str]): RPM build dependencies.
+      output_file_object (file): output file-like object to write to.
 
     Returns:
       bool: True if successful, False otherwise.
     """
-    command = '{0:s} setup.py bdist_rpm --spec-only >> {1:s} 2>&1'.format(
-        sys.executable, build_log_file)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
-    if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
-      return False
+    configuration = {
+        'description': None,
+        'name': None,
+        'license': None,
+        'summary': None,
+        'url': None,
+        'vendor': None,
+        'version': None}
+
+    has_data_package = False
+
+    python_module_name = project_name
+
+    if os.path.isdir(os.path.join(source_directory, 'scripts')):
+      has_tools_package = True
+    elif os.path.isdir(os.path.join(source_directory, 'tools')):
+      has_tools_package = True
+    elif os.path.isdir(os.path.join(
+        source_directory, python_module_name, 'scripts')):
+      has_tools_package = True
+    else:
+      has_tools_package = False
+
+    if project_definition.rpm_name:
+      package_name = project_definition.rpm_name
+    else:
+      package_name = project_name
+
+    if package_name.startswith('python-'):
+      package_name = package_name[7:]
+
+    if project_definition.description_long:
+      configuration['description'] = '{0:s}\n\n'.format(
+          project_definition.description_long)
+
+    # TODO: add support for pyproject.toml
+    # build.util.project_wheel_metadata
+
+    setup_cfg_file = os.path.join(source_directory, 'setup.cfg')
+    if os.path.isfile(setup_cfg_file):
+      setup_cfg = setupcfg.read_configuration(setup_cfg_file)
+      setup_cfg_metadata = setup_cfg.get('metadata', {})
+
+      if not configuration['version']:
+        configuration['version'] = setup_cfg_metadata.get('version', None)
+
+      if not configuration['license']:
+        configuration['license'] = setup_cfg_metadata.get('license', None)
+
+      if not configuration['description']:
+        configuration['description'] = setup_cfg_metadata.get(
+            'long_description', None)
+
+      if not configuration['summary']:
+        configuration['summary'] = setup_cfg_metadata.get('description', None)
+
+      if not configuration['url']:
+        configuration['url'] = setup_cfg_metadata.get('url', None)
+
+      if not configuration['vendor']:
+        configuration['vendor'] = setup_cfg_metadata.get('maintainer', None)
+
+    if rpm_build_dependencies:
+      build_requires = rpm_build_dependencies
+    else:
+      build_requires = self._SplitRequires(build_requires)
+
+    configuration['name'] = project_name
+
+    self._WriteSourcePackageDefinition(
+        output_file_object, source_package_filename, project_definition,
+        build_requires, configuration)
+
+    if project_name != package_name:
+      python_package_name = 'python3-{0:s}'.format(package_name)
+    else:
+      python_package_name = 'python3-%{name}'
+
+    if has_data_package:
+      self._WriteDataPackageDefinition(output_file_object, configuration)
+
+    self._WritePython3PackageDefinition(
+        project_definition, source_directory, python_package_name,
+        configuration, output_file_object)
+
+    if has_tools_package:
+      self._WriteToolsPackageDefinition(output_file_object, configuration)
+
+    license_line = self._GetLicenseFileDefinition(source_directory)
+
+    doc_line = self._GetDocumentationFilesDefinition(source_directory)
+
+    self._WritePython3Body(output_file_object, project_name)
+
+    if has_data_package:
+      self._WriteDataPackageFiles(output_file_object)
+
+    self._WritePython3PackageFiles(
+        output_file_object, project_definition, project_name,
+        python_package_name, license_line, doc_line)
+
+    if has_tools_package:
+      self._WriteToolsPackageFiles(output_file_object)
+
+    # TODO make this more generic.
+    if project_name in ('chardet', 'dtfabric', 'pbr'):
+      output_file_object.write((
+          '%exclude %{_bindir}/*\n'
+          '\n'))
+
+    self._WriteChangeLog(output_file_object, configuration['version'])
 
     return True
 
@@ -135,7 +230,7 @@ class RPMSpecFileGenerator(object):
     """
     lines = [
         '%py3_install',
-        ('rm -rf %{buildroot}/usr/lib/python*/site-packages/*.egg-info/'
+        ('rm -rf %{buildroot}/usr/lib/python*/site-packages/*.dist-info/'
          'requires.txt'),
         'rm -rf %{buildroot}/usr/share/doc/%{name}/']
 
@@ -167,219 +262,6 @@ class RPMSpecFileGenerator(object):
         break
 
     return license_file_definition
-
-  def _GetPython3Requires(self, requires):
-    """Determines the Python 3 requires definition.
-
-    Args:
-      requires (str): requires definition.
-
-    Returns:
-      list[str]: Python 3 requires definition.
-    """
-    requires = requires.replace('-python2 ', '-python3 ')
-    requires = requires.replace('-python ', '-python3 ')
-    requires = requires.replace(' python2-', ' python3-')
-    requires = requires.replace(' python-', ' python3-')
-
-    # Remove Python 2 only dependencies like backports or pysqlite.
-    return [require for require in self._SplitRequires(requires)
-            if 'backports' not in require and 'pysqlite' not in require]
-
-  def _RewriteSetupPyGeneratedFile(
-      self, project_definition, source_directory, source_package_filename,
-      project_name, rpm_build_dependencies, input_file, output_file_object):
-    """Rewrites the RPM spec file generated with setup.py.
-
-    Args:
-      project_definition (ProjectDefinition): project definition.
-      source_directory (str): path of the source directory.
-      source_package_filename (str): name of the source package.
-      project_name (str): name of the project.
-      rpm_build_dependencies (list[str]): RPM build dependencies.
-      input_file (str): path of the input RPM spec file.
-      output_file_object (file): output file-like object to write to.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    project_version = ''
-    description = ''
-    package_license = ''
-    packager = ''
-    requires = ''
-    summary = ''
-    url = ''
-    vendor = ''
-    build_requires = ''
-    python_package_requires = ''
-
-    has_data_package = False
-
-    python_module_name = project_name
-
-    if os.path.isdir(os.path.join(source_directory, 'scripts')):
-      has_tools_package = True
-    elif os.path.isdir(os.path.join(source_directory, 'tools')):
-      has_tools_package = True
-    elif os.path.isdir(os.path.join(
-        source_directory, python_module_name, 'scripts')):
-      has_tools_package = True
-    else:
-      has_tools_package = False
-
-    in_description = False
-    in_python_package = False
-
-    if project_definition.rpm_name:
-      package_name = project_definition.rpm_name
-    else:
-      package_name = project_name
-
-    if project_definition.setup_name:
-      source_name = project_definition.setup_name
-    else:
-      source_name = project_name
-
-    if package_name.startswith('python-'):
-      package_name = package_name[7:]
-
-    unmangled_name = ''
-    if package_name != project_name:
-      unmangled_name = package_name
-    elif package_name != source_name:
-      unmangled_name = source_name
-
-    with open(input_file, 'r+', encoding='utf8') as input_file_object:
-      for line in input_file_object.readlines():
-        if in_description:
-          if line.startswith('%'):
-            in_description = False
-
-          elif not description and line == '\n':
-            # Ignore leading white lines in the description.
-            continue
-
-          else:
-            description = ''.join([description, line])
-
-        if in_python_package:
-          if line.startswith('%package') or line.startswith('%prep'):
-            in_python_package = False
-
-          elif not python_package_requires and line.startswith('Requires: '):
-            python_package_requires = line
-
-        if in_description or in_python_package:
-          continue
-
-        if line.startswith('%define version '):
-          _, _, project_version = line.strip().rpartition(' ')
-
-        elif line.startswith('BuildRequires: '):
-          build_requires = line
-
-        elif not package_license and line.startswith('License: '):
-          _, _, package_license = line.strip().partition(' ')
-
-        elif not packager and line.startswith('Packager: '):
-          _, _, packager = line.strip().partition(' ')
-
-        elif not summary and line.startswith('Summary: '):
-          _, _, summary = line.strip().partition(' ')
-
-        elif not url and line.startswith('Url: '):
-          _, _, url = line.strip().partition(' ')
-
-        elif not vendor and line.startswith('Vendor: '):
-          _, _, vendor = line.strip().partition(' ')
-
-        elif (not description and not requires and
-              line.startswith('Requires: ')):
-          requires = line
-
-        elif line.startswith('%description') and not description:
-          in_description = True
-
-        elif line.startswith('%package -n %{name}-data'):
-          has_data_package = True
-
-        elif (line.startswith('%package -n python-') or
-              line.startswith('%package -n python2-') or
-              line.startswith('%package -n python3-')):
-          in_python_package = True
-
-        elif line.startswith('%files'):
-          break
-
-    self._WriteHeader(
-        output_file_object, project_name, unmangled_name, project_version)
-
-    if project_definition.description_long:
-      description = '{0:s}\n\n'.format(project_definition.description_long)
-
-    if rpm_build_dependencies:
-      build_requires = rpm_build_dependencies
-    else:
-      build_requires = self._SplitRequires(build_requires)
-
-    self._WriteSourcePackageDefinition(
-        output_file_object, source_package_filename, project_definition,
-        unmangled_name, summary, package_license, url, packager, vendor,
-        build_requires, description)
-
-    if project_name != package_name:
-      python_package_name = 'python3-{0:s}'.format(package_name)
-    else:
-      python_package_name = 'python3-%{name}'
-
-    python3_requires = python_package_requires
-    if not python3_requires:
-      python3_requires = requires
-
-    python3_requires = self._GetPython3Requires(python3_requires)
-    if project_definition.rpm_dependencies:
-      python3_requires.extend(project_definition.rpm_dependencies)
-
-    if has_data_package:
-      self._WriteDataPackageDefinition(
-          output_file_object, summary, description)
-
-    self._WritePython3PackageDefinition(
-        output_file_object, python_package_name, summary,
-        python3_requires, description)
-
-    if has_tools_package:
-      self._WriteToolsPackageDefinition(
-          output_file_object, project_name, summary, description)
-
-    license_line = self._GetLicenseFileDefinition(source_directory)
-
-    doc_line = self._GetDocumentationFilesDefinition(source_directory)
-
-    self._WritePython3Body(
-       output_file_object, project_name, unmangled_name,
-       has_tools_package=has_tools_package)
-
-    if has_data_package:
-      self._WriteDataPackageFiles(output_file_object)
-
-    self._WritePython3PackageFiles(
-        output_file_object, project_definition, project_name,
-        python_package_name, license_line, doc_line)
-
-    if has_tools_package:
-      self._WriteToolsPackageFiles(output_file_object)
-
-    # TODO make this more generic.
-    if project_name in ('chardet', 'dtfabric', 'pbr'):
-      output_file_object.write((
-          '%exclude %{_bindir}/*\n'
-          '\n'))
-
-    self._WriteChangeLog(output_file_object, project_version)
-
-    return True
 
   def _SplitRequires(self, requires):
     """Splits a spec file requires statement.
@@ -447,18 +329,16 @@ class RPMSpecFileGenerator(object):
         '- Auto-generated\n').format(
             date_time_string, self._EMAIL_ADDRESS, version))
 
-  def _WriteDataPackageDefinition(
-      self, output_file_object, summary, description):
+  def _WriteDataPackageDefinition(self, output_file_object, configuration):
     """Writes the data package definition.
 
     Args:
       output_file_object (file): output file-like object to write to.
-      summary (str): package summary.
-      description (str): package description.
+      configuration (dict[str, str]): package configuration.
     """
     template_mappings = {
-        'description': description,
-        'summary': summary}
+        'description': configuration['description'],
+        'summary': configuration['summary']}
 
     output_string = '\n'.join(self._SPEC_TEMPLATE_DATA_PACKAGE_DEFINITION)
     output_string = output_string.format(**template_mappings)
@@ -482,93 +362,53 @@ class RPMSpecFileGenerator(object):
     output_string = '\n'.join(template)
     output_file_object.write(output_string)
 
-  def _WriteHeader(
-      self, output_file_object, project_name, unmangled_name, version):
-    """Writes the header.
-
-    Args:
-      output_file_object (file): output file-like object to write to.
-      project_name (str): name of the project.
-      unmangled_name (str): unmangled name of the project.
-      version (str): version.
-    """
-    template_mappings = {
-        'name': project_name,
-        'unmangled_name': unmangled_name,
-        'version': version}
-
-    template = [
-        '%define name {name:s}',
-        '%define version {version:s}']
-
-    if unmangled_name:
-      template.extend([
-          '%define unmangled_name {unmangled_name:s}',
-          '%define unmangled_version {version:s}'])
-
-    template.extend([
-        '%define release 1',
-        '',
-        ''])
-
-    output_string = '\n'.join(template)
-    output_string = output_string.format(**template_mappings)
-    output_file_object.write(output_string)
-
-  def _WritePython3Body(
-      self, output_file_object, project_name, unmangled_name,
-      has_tools_package=False):
+  def _WritePython3Body(self, output_file_object, project_name):
     """Writes the Python 3 body.
 
     Args:
       output_file_object (file): output file-like object to write to.
       project_name (str): name of the project.
-      unmangled_name (str): unmangled name of the project.
-      has_tools_package (Optional[bool]): True if the project has tools.
     """
     # TODO: handle GetInstallDefinition
 
     if project_name == 'psutil':
       name = '%{name}-release-%{version}'
-    elif unmangled_name:
-      name = '%{unmangled_name}-%{unmangled_version}'
     else:
       name = '%{name}-%{version}'
 
     template_mappings = {
         'name': name}
 
-    output_string = '\n'.join(self._SPEC_TEMPLATE_PYTHON3_PREP_AND_BUILD)
-    output_string = output_string.format(**template_mappings)
-    output_file_object.write(output_string)
-
-    if has_tools_package:
-      output_string = '\n'.join(self._SPEC_TEMPLATE_TOOLS_PYTHON3_INSTALL)
-    else:
-      output_string = '\n'.join(self._SPEC_TEMPLATE_PYTHON3_INSTALL)
-    output_string = output_string.format(**template_mappings)
-    output_file_object.write(output_string)
-
-    output_string = '\n'.join(self._SPEC_TEMPLATE_CLEAN)
+    output_string = '\n'.join(self._SPEC_TEMPLATE_PYTHON3_BODY)
     output_string = output_string.format(**template_mappings)
     output_file_object.write(output_string)
 
   def _WritePython3PackageDefinition(
-      self, output_file_object, name, summary, requires, description):
+      self, project_definition, source_directory, python_package_name,
+      configuration, output_file_object):
     """Writes the Python 3 package definition.
 
     Args:
+      project_definition (ProjectDefinition): project definition.
+      source_directory (str): path of the source directory.
+      python_package_name (str): Python package name.
+      configuration (dict[str, str]): package configuration.
       output_file_object (file): output file-like object to write to.
-      name (str): package name.
-      summary (str): package summary.
-      requires (list[str]): package requires definition.
-      description (str): package description.
     """
+    requires = project_definition.rpm_dependencies
+
+    if not requires:
+      dependencies_file = os.path.join(source_directory, 'dependencies.ini')
+      if os.path.isfile(dependencies_file):
+        dependency_helper = dependencies.DependencyHelper(
+            dependencies_file=dependencies_file)
+        requires = dependency_helper.GetRPMRequires()
+
     template_mappings = {
-        'description': description,
-        'name': name,
+        'description': configuration['description'],
+        'name': python_package_name,
         'requires': ', '.join(requires),
-        'summary': summary}
+        'summary': configuration['summary']}
 
     template = ['%package -n {name:s}']
 
@@ -579,7 +419,9 @@ class RPMSpecFileGenerator(object):
         'Summary: Python 3 module of {summary:s}',
         '',
         '%description -n {name:s}',
-        '{description:s}'])
+        '{description:s}',
+        '',
+        ''])
 
     output_string = '\n'.join(template)
     output_string = output_string.format(**template_mappings)
@@ -622,12 +464,12 @@ class RPMSpecFileGenerator(object):
     if project_definition.architecture_dependent:
       template.extend([
           '%{{_libdir}}/python3*/site-packages/{setup_name:s}',
-          '%{{_libdir}}/python3*/site-packages/{setup_name:s}*.egg-info'])
+          '%{{_libdir}}/python3*/site-packages/{setup_name:s}*.dist-info'])
 
     else:
       template.extend([
           '%{{python3_sitelib}}/{setup_name:s}',
-          '%{{python3_sitelib}}/{setup_name:s}*.egg-info'])
+          '%{{python3_sitelib}}/{setup_name:s}*.dist-info'])
 
     template.extend(['', ''])
 
@@ -676,102 +518,77 @@ class RPMSpecFileGenerator(object):
 
     return True
 
-  # pylint: disable=too-many-arguments
   def _WriteSourcePackageDefinition(
       self, output_file_object, source_package_filename, project_definition,
-      unmangled_name, summary, package_license, url, packager, vendor,
-      build_requires, description):
+      build_requires, configuration):
     """Writes the source package definition.
 
     Args:
       output_file_object (file): output file-like object to write to.
       source_package_filename (str): name of the package source file.
       project_definition (ProjectDefinition): project definition.
-      unmangled_name (str): unmangled name of the project.
-      summary (str): package summary.
-      package_license (str): package license.
-      url (str): package URL.
-      packager (str): packager.
-      vendor (str): vendor.
       build_requires (list[str]): package build requires definition.
-      description (str): package description.
+      configuration (dict[str, str]): package configuration.
     """
     if source_package_filename.endswith('.zip'):
       source_extension = 'zip'
     else:
       source_extension = 'tar.gz'
 
-    if unmangled_name:
-      source = '%{{unmangled_name}}-%{{unmangled_version}}.{0:s}'.format(
-          source_extension)
-    else:
-      source = '%{{name}}-%{{version}}.{0:s}'.format(source_extension)
-
-    if unmangled_name:
-      build_root = (
-          '%{_tmppath}/%{unmangled_name}-%{version}-%{release}-buildroot')
-    else:
-      build_root = '%{_tmppath}/%{name}-%{version}-%{release}-buildroot'
-
     template_mappings = {
-        'build_root': build_root,
         'build_requires': ', '.join(build_requires),
-        'description': description,
+        'description': configuration['description'],
         'group': 'Development/Libraries',
-        'license': package_license,
-        'packager': packager,
-        'source': source,
-        'summary': summary,
-        'url': url,
-        'vendor': vendor}
+        'license': configuration['license'],
+        'name': configuration['name'],
+        'source': f'%{{name}}-%{{version}}.{source_extension:s}',
+        'summary': configuration['summary'],
+        'url': configuration['url'],
+        'vendor': configuration['vendor'],
+        'version': configuration['version']}
 
     template = [
-        'Summary: {summary:s}',
-        'Name: %{{name}}',
-        'Version: %{{version}}',
-        'Release: %{{release}}',
-        'Source0: {source:s}',
-        'License: {license:s}',
+        'Name: {name:s}',
+        'Version: {version:s}',
+        'Release: 1',
         'Group: {group:s}',
-        'BuildRoot: {build_root:s}',
-        'Prefix: %{{_prefix}}']
+        'License: {license:s}',
+        'Summary: {summary:s}',
+        'Url: {url:s}',
+        'Vendor: {vendor:s}']
+
+    template.append('Source0: {source:s}')
 
     if not project_definition.architecture_dependent:
       template.append('BuildArch: noarch')
-
-    template.append('Vendor: {vendor:s}')
-
-    if packager:
-      template.append('Packager: {packager:s}')
-
-    template.append('Url: {url:s}')
 
     if build_requires:
       template.append('BuildRequires: {build_requires:s}')
 
     template.extend([
         '',
+        '%{{?python_disable_dependency_generator}}',
+        '',
         '%description',
-        '{description:s}'])
+        '{description:s}',
+        '',
+        ''])
 
     output_string = '\n'.join(template)
     output_string = output_string.format(**template_mappings)
     output_file_object.write(output_string)
 
-  def _WriteToolsPackageDefinition(
-      self, output_file_object, project_name, summary, description):
+  def _WriteToolsPackageDefinition(self, output_file_object, configuration):
     """Writes the tools package definition.
 
     Args:
       output_file_object (file): output file-like object to write to.
-      project_name (str): name of the project.
-      summary (str): package summary.
-      description (str): package description.
+      configuration (dict[str, str]): package configuration.
     """
     template_mappings = {
-        'description': description,
-        'project_name': project_name,
-        'summary': summary}
+        'description': configuration['description'],
+        'project_name': configuration['name'],
+        'summary': configuration['summary']}
 
     output_string = '\n'.join(self._SPEC_TEMPLATE_TOOLS_PACKAGE_DEFINITION)
     output_string = output_string.format(**template_mappings)
@@ -790,7 +607,7 @@ class RPMSpecFileGenerator(object):
 
   def Generate(
       self, project_definition, source_directory, source_package_filename,
-      project_name, project_version, input_file, output_file):
+      project_name, project_version, output_file):
     """Generated a RPM spec file.
 
     Args:
@@ -799,28 +616,20 @@ class RPMSpecFileGenerator(object):
       source_package_filename (str): name of the source package.
       project_name (str): name of the project.
       project_version (str): version of the project.
-      input_file (str): path of the input RPM spec file.
       output_file (str): path of the output RPM spec file.
 
     Returns:
       bool: True if successful, False otherwise.
     """
-    rpm_build_dependencies = []
+    rpm_build_dependencies = [
+        'python3-devel', 'pyproject-rpm-macros', 'python3-pip',
+        'python3-setuptools', 'python3-wheel']
 
     if project_definition.architecture_dependent:
-      rpm_build_dependencies = ['gcc', 'python3-devel', 'python3-setuptools']
-    else:
-      rpm_build_dependencies = ['python3-devel', 'python3-setuptools']
+      rpm_build_dependencies.append('gcc')
 
     if project_definition.rpm_build_dependencies:
       rpm_build_dependencies.extend(project_definition.rpm_build_dependencies)
-
-    # TODO: check if already prefixed with python-
-
-    if not project_definition.rpm_template_spec:
-      log_file_path = os.path.join('..', self.LOG_FILENAME)
-      if not self._GenerateWithSetupPy(source_directory, log_file_path):
-        return None
 
     with open(output_file, 'w', encoding='utf8') as output_file_object:
       if project_definition.rpm_template_spec:
@@ -828,9 +637,8 @@ class RPMSpecFileGenerator(object):
             project_definition, source_directory, project_version,
             output_file_object)
       else:
-        result = self._RewriteSetupPyGeneratedFile(
+        result = self._GenerateSpecFile(
             project_definition, source_directory, source_package_filename,
-            project_name, rpm_build_dependencies, input_file,
-            output_file_object)
+            project_name, rpm_build_dependencies, output_file_object)
 
     return result

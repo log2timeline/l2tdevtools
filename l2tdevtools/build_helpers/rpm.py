@@ -199,25 +199,6 @@ class BaseRPMBuildHelper(interface.BuildHelper):
 
     return project_name, project_version
 
-  def _GetSetupPySpecFilePath(self, source_helper_object, source_directory):
-    """Retrieves the path of the setup.py generated .spec file.
-
-    Args:
-      source_helper_object (SourceHelper): source helper.
-      source_directory (str): name of the source directory.
-
-    Returns:
-      str: path of the setup.py generated .spec file.
-    """
-    if self._project_definition.setup_name:
-      setup_name = self._project_definition.setup_name
-    else:
-      setup_name = source_helper_object.project_name
-
-    spec_filename = '{0:s}.spec'.format(setup_name)
-
-    return os.path.join(source_directory, 'dist', spec_filename)
-
   def _MoveFilesToCurrentDirectory(self, filenames_glob):
     """Moves files into the current directory.
 
@@ -461,17 +442,14 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
     if project_name.startswith('python-'):
       project_name = project_name[7:]
 
-    input_file_path = self._GetSetupPySpecFilePath(
-        source_helper_object, source_directory)
-
     spec_filename = '{0:s}.spec'.format(project_name)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     try:
       result = spec_file_generator.Generate(
           self._project_definition, source_directory, source_package_filename,
-          project_name, project_version, input_file_path, output_file_path)
-    except FileNotFoundError:
+          project_name, project_version, output_file_path)
+    except (FileNotFoundError, TypeError):
       result = False
 
     if not result:
@@ -739,17 +717,14 @@ class PyprojectSRPMBuildHelper(SRPMBuildHelper):
     if project_name.startswith('python-'):
       project_name = project_name[7:]
 
-    input_file_path = self._GetSetupPySpecFilePath(
-        source_helper_object, source_directory)
-
     spec_filename = '{0:s}.spec'.format(project_name)
     output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
 
     try:
       result = spec_file_generator.Generate(
           self._project_definition, source_directory, source_package_filename,
-          project_name, project_version, input_file_path, output_file_path)
-    except FileNotFoundError:
+          project_name, project_version, output_file_path)
+    except (FileNotFoundError, TypeError):
       result = False
 
     if not result:

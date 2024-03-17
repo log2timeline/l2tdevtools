@@ -55,6 +55,7 @@ class ProjectHelper(cli.CLIHelper):
       'vstools',
       'winevt-kb',
       'winreg-kb',
+      'winshl-kb',
       'winsps-kb'])
 
   def __init__(self, project_path):
