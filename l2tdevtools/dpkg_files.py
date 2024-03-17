@@ -527,8 +527,8 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'configure_make':
       self._GenerateConfigureMakeRulesFile(dpkg_path)
 
-    elif self._project_definition.build_system in ('pyproject', 'setup_py'):
-      self._GenerateSetupPyRulesFile(dpkg_path)
+    else:
+      self._GeneratePyProjectRulesFile(dpkg_path)
 
     filename = os.path.join(dpkg_path, 'rules')
     stat_info = os.stat(filename)
@@ -563,7 +563,7 @@ class DPKGBuildFilesGenerator(object):
         self._project_definition.dpkg_template_rules,
         self._RULES_TEMPLATE_CONFIGURE_MAKE, template_values, output_filename)
 
-  def _GenerateSetupPyRulesFile(self, dpkg_path):
+  def _GeneratePyProjectRulesFile(self, dpkg_path):
     """Generates the dpkg build rules file.
 
     Args:
