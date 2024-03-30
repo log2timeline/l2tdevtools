@@ -36,10 +36,6 @@ class SetupCfgWriter(interface.DependencyFileWriter):
       'artifacts-kb', 'dfvfs', 'dfwinreg', 'dtformats', 'esedb-kb', 'olecf-kb',
       'plaso', 'winreg-kb', 'winsps-kb')
 
-  _PROJECTS_WITH_SDIST_TEST_DATA = (
-      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevt-kb', 'winreg-kb',
-      'winsps-kb')
-
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.cfg')
 
   def _DetermineSubmoduleLevels(self, python_module_name):
@@ -189,11 +185,6 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate(
         'options_packages_find', template_mappings)
     file_content.append(template_data)
-
-    if self._project_definition.name in self._PROJECTS_WITH_SDIST_TEST_DATA:
-      template_data = self._GenerateFromTemplate(
-          'sdist_test_data', template_mappings)
-      file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('bdist_wheel', template_mappings)
     file_content.append(template_data)
