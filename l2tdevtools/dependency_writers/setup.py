@@ -36,10 +36,6 @@ class SetupCfgWriter(interface.DependencyFileWriter):
       'artifacts-kb', 'dfvfs', 'dfwinreg', 'dtformats', 'esedb-kb', 'olecf-kb',
       'plaso', 'winreg-kb', 'winsps-kb')
 
-  _PROJECTS_WITH_SDIST_TEST_DATA = (
-      'dfimagetools', 'dfvfs', 'dfwinreg', 'plaso', 'winevt-kb', 'winreg-kb',
-      'winsps-kb')
-
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.cfg')
 
   def _DetermineSubmoduleLevels(self, python_module_name):
@@ -136,11 +132,11 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     formatted_package_data = [
         f'  {data_file:s}' for data_file in sorted(package_data)]
 
-    scripts_directory = None
-    if os.path.isdir('scripts'):
-      scripts_directory = 'scripts'
-    elif os.path.isdir('tools'):
+    scripts_directory = 'scripts'
+    if not os.path.isdir(scripts_directory):
       scripts_directory = 'tools'
+    if not os.path.isdir(scripts_directory):
+      scripts_directory = None
 
     scripts = []
     if scripts_directory:
@@ -149,15 +145,26 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     formatted_scripts = [
         f'  {script:s}' for script in sorted(scripts)]
 
-    # TODO: add support for entry points
-    scripts_directory = None
-    if os.path.isdir(os.path.join(python_module_name, 'scripts')):
-      scripts_directory = None
+    console_scripts_directory = os.path.join(python_module_name, 'scripts')
+    if not os.path.isdir(console_scripts_directory):
+      console_scripts_directory = None
+
+    console_scripts = []
+    if console_scripts_directory:
+      console_scripts = glob.glob(f'{console_scripts_directory:s}/[a-z]*.py')
+
+    entry_points_console_scripts = []
+    for console_script in sorted(console_scripts):
+      console_script = console_script.replace('.py', '')
+      module_name = console_script.replace(os.path.sep, '.')
+      name = os.path.basename(console_script)
+      entry_points_console_scripts.append(f'  {name:s} = {module_name:s}:Main')
 
     date_time = datetime.datetime.now()
     version = date_time.strftime('%Y%m%d')
 
     template_mappings = {
+        'console_scripts': '\n'.join(entry_points_console_scripts),
         'description_long': description_long,
         'description_short': self._project_definition.description_short,
         'development_status': development_status,
@@ -190,9 +197,9 @@ class SetupCfgWriter(interface.DependencyFileWriter):
         'options_packages_find', template_mappings)
     file_content.append(template_data)
 
-    if self._project_definition.name in self._PROJECTS_WITH_SDIST_TEST_DATA:
+    if entry_points_console_scripts:
       template_data = self._GenerateFromTemplate(
-          'sdist_test_data', template_mappings)
+          'options_entry_points', template_mappings)
       file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate('bdist_wheel', template_mappings)
