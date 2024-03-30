@@ -33,7 +33,7 @@ class ProjectBuilder(object):
   """
 
   # The distributions to build dpkg-source packages for.
-  _DPKG_SOURCE_DISTRIBUTIONS = frozenset(['jammy'])
+  _DPKG_SOURCE_DISTRIBUTIONS = frozenset(['noble'])
 
   def __init__(self, build_target, l2tdevtools_path, downloads_directory):
     """Initializes the project builder.
