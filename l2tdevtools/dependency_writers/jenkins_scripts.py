@@ -17,16 +17,16 @@ class LinuxRunEndToEndTestsScriptWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a Linux run_end_to_end_tests.sh file."""
-    if self._project_definition.name == 'dfvfs':
-      scripts_directory_option = '--scripts-directory ./examples'
-    elif self._project_definition.name == 'plaso':
-      scripts_directory_option = '--tools-directory ./tools'
-    else:
-      scripts_directory_option = '--scripts-directory ./scripts'
+    python_module_name = self._project_definition.name
+
+    if self._project_definition.name.endswith('-kb'):
+      python_module_name = ''.join([python_module_name[:-3], 'rc'])
+
+    scripts_directory = os.path.join(python_module_name, 'scripts')
 
     template_mappings = {
         'project_name': self._project_definition.name,
-        'scripts_directory_option': scripts_directory_option}
+        'scripts_directory': scripts_directory}
 
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
