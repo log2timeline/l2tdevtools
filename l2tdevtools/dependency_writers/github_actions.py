@@ -21,13 +21,14 @@ class GitHubActionsTestDockerYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies.extend(test_dependencies)
     dpkg_dependencies.extend([
         'python3', 'python3-build', 'python3-dev', 'python3-pip',
-        'python3-wheel'])
+        'python3-setuptools', 'python3-wheel'])
 
     rpm_dependencies = self._GetRPMPythonDependencies()
     test_dependencies = self._GetRPMTestDependencies(rpm_dependencies)
     rpm_dependencies.extend(test_dependencies)
     rpm_dependencies.extend([
-        'python3', 'python3-build', 'python3-devel', 'python3-wheel'])
+        'python3', 'python3-build', 'python3-devel', 'python3-setuptools',
+        'python3-wheel'])
 
     template_mappings = {
         'dpkg_dependencies': ' '.join(sorted(set(dpkg_dependencies))),
@@ -53,7 +54,9 @@ class GitHubActionsTestDocsYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies = self._GetDPKGPythonDependencies()
     test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
     dpkg_dependencies.extend(test_dependencies)
-    dpkg_dependencies.append('python3-pip')
+    dpkg_dependencies.extend([
+        'python3-distutils', 'python3-lib2to3', 'python3-pip',
+        'python3-setuptools'])
 
     dpkg_dev_dependencies = self._GetDPKGDevDependencies()
 
@@ -81,7 +84,9 @@ class GitHubActionsTestToxYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies = self._GetDPKGPythonDependencies()
     test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
     dpkg_dependencies.extend(test_dependencies)
-    dpkg_dependencies.append('python3-pip')
+    dpkg_dependencies.extend([
+        'python3-distutils', 'python3-lib2to3', 'python3-pip',
+        'python3-setuptools'])
 
     dpkg_dev_dependencies = self._GetDPKGDevDependencies()
 

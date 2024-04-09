@@ -80,6 +80,7 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
 
     expected_formatted_test_dependencies = (
         'TEST_DEPENDENCIES="python3-distutils\n'
+        '                   python3-lib2to3\n'
         '                   python3-mock\n'
         '                   python3-pbr\n'
         '                   python3-setuptools";')
@@ -87,6 +88,9 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
     python_dependencies = test_writer._GetDPKGPythonDependencies()
     test_dependencies = test_writer._GetDPKGTestDependencies(
         python_dependencies)
+    test_dependencies.extend([
+        'python3-distutils', 'python3-lib2to3', 'python3-setuptools'])
+
     formatted_test_dependencies = test_writer._FormatDPKGTestDependencies(
         test_dependencies)
     self.assertEqual(

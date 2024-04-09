@@ -94,9 +94,6 @@ class DependencyFileWriter(object):
     test_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True, test_dependencies=True)
 
-    # TODO: replace by test_dependencies.ini or dev_dependencies.ini or equiv.
-    test_dependencies.extend(['python3-distutils', 'python3-setuptools'])
-
     return [
         test_dependency for test_dependency in sorted(test_dependencies)
         if test_dependency not in python_dependencies]
