@@ -10,7 +10,7 @@ from tests import test_lib
 
 
 class GitHelperTest(test_lib.BaseTestCase):
-  """Tests the git helper"""
+  """Tests the git helper."""
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""

@@ -763,7 +763,7 @@ class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
   """Shared functionality for dh-pybuild build system dpkg build helpers."""
 
   def _DetermineBuildConfiguration(self, source_directory):
-    """Determines the build configuration of a project that has setup.py
+    """Determines the build configuration of a project that has setup.py.
 
     Args:
       source_directory (str): path of the source directory.

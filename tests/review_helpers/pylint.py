@@ -10,7 +10,7 @@ from tests import test_lib
 
 
 class PylintHelperTest(test_lib.BaseTestCase):
-  """Tests the pylint helper"""
+  """Tests the pylint helper."""
 
   # pylint: disable=protected-access
 
