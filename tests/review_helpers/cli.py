@@ -10,7 +10,7 @@ from tests import test_lib
 
 
 class CLIHelperTest(test_lib.BaseTestCase):
-  """Tests the command line helper"""
+  """Tests the command line helper."""
 
   def testRunCommand(self):
     """Tests that the helper can be initialized."""

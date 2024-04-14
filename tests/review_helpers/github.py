@@ -12,7 +12,7 @@ from tests.review_helpers import test_lib
 
 
 class GitHubHelperTest(shared_test_lib.BaseTestCase):
-  """Tests the command line helper"""
+  """Tests the command line helper."""
 
   # pylint: disable=protected-access
 

@@ -10,7 +10,7 @@ from tests import test_lib
 
 
 class ReviewHelperTest(test_lib.BaseTestCase):
-  """Tests the review helper"""
+  """Tests the review helper."""
 
   def testInitialize(self):
     """Tests that the helper can be initialized."""
