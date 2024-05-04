@@ -354,7 +354,11 @@ class DPKGBuildHelper(interface.BuildHelper):
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
-        os.remove(filename)
+        try:
+          os.remove(filename)
+        except PermissionError as exception:
+          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
+              filename, exception))
 
     # Remove files of previous versions in the format:
     # <project>[-_][0-9]*-[1-9].*
@@ -364,7 +368,11 @@ class DPKGBuildHelper(interface.BuildHelper):
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
-        os.remove(filename)
+        try:
+          os.remove(filename)
+        except PermissionError as exception:
+          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
+              filename, exception))
 
   def _RemoveOlderOriginalSourcePackage(
       self, project_name, project_version, version_suffix=None,
@@ -393,7 +401,11 @@ class DPKGBuildHelper(interface.BuildHelper):
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
-        os.remove(filename)
+        try:
+          os.remove(filename)
+        except PermissionError as exception:
+          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
+              filename, exception))
 
     # Remove files of previous versions in the format:
     # <project>_[0-9]*<suffix>~<distribution>.orig.tar.gz
@@ -405,7 +417,11 @@ class DPKGBuildHelper(interface.BuildHelper):
       for filename in filenames:
         if not filenames_to_ignore.match(filename):
           logging.info('Removing: {0:s}'.format(filename))
-          os.remove(filename)
+          try:
+            os.remove(filename)
+          except PermissionError as exception:
+            logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
+                filename, exception))
 
   def _RemoveOlderSourceDPKGPackages(self, project_name, project_version):
     """Removes previous versions of source dpkg packages.
@@ -430,7 +446,11 @@ class DPKGBuildHelper(interface.BuildHelper):
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
-        os.remove(filename)
+        try:
+          os.remove(filename)
+        except PermissionError as exception:
+          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
+              filename, exception))
 
     # Remove files of previous versions in the format:
     # <project>[-_][0-9]*-[1-9]i<suffix>~<distribution>.*
@@ -441,7 +461,11 @@ class DPKGBuildHelper(interface.BuildHelper):
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
         logging.info('Removing: {0:s}'.format(filename))
-        os.remove(filename)
+        try:
+          os.remove(filename)
+        except PermissionError as exception:
+          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
+              filename, exception))
 
   def _RunLSBReleaseCommand(self, option='-a'):
     """Runs the lsb-release command (/usr/bin/lsb_release).
