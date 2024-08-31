@@ -38,13 +38,13 @@ class BaseRPMBuildHelper(interface.BuildHelper):
 
   _BUILD_DEPENDENCY_PACKAGE_NAMES = {
       'bzip2': ['bzip2-devel'],
-      'fuse': ['fuse-devel'],
+      'fuse': ['fuse3-devel'],
       'libcrypto': ['openssl-devel'],
       'liblzma': ['xz-devel'],
       'pytest-runner': ['python3-pytest-runner'],
       'sqlite': ['sqlite-devel'],
       'zeromq': ['libzmq3-devel'],
-      'zlib': ['zlib-devel']
+      'zlib': ['zlib-ng-devel']
   }
 
   def __init__(
@@ -90,7 +90,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
         rpmbuild_flags, spec_filename, self.LOG_FILENAME)
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
 
     os.chdir(current_path)
 
@@ -113,7 +113,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
         rpmbuild_flags, source_package_filename, self.LOG_FILENAME)
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return False
 
     return True
@@ -165,7 +165,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
       spec_file_data (str): spec file data.
     """
     spec_filename = os.path.join(
-        self._rpmbuild_specs_path, '{0:s}.spec'.format(project_name))
+        self._rpmbuild_specs_path, f'{project_name:s}.spec')
 
     with open(spec_filename, 'w', encoding='utf-8') as rpm_spec_file:
       rpm_spec_file.write(spec_file_data)
@@ -207,7 +207,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
     """
     filenames = glob.glob(filenames_glob)
     for filename in filenames:
-      logging.info('Moving: {0:s}'.format(filename))
+      logging.info(f'Moving: {filename:s}')
 
       local_filename = os.path.basename(filename)
       if os.path.exists(local_filename):
@@ -246,15 +246,15 @@ class RPMBuildHelper(BaseRPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    filename = '{0:s}-{1!s}'.format(project_name, project_version)
-    filename = os.path.join(self.rpmbuild_path, 'BUILD', filename)
+    filename = os.path.join(
+        self.rpmbuild_path, 'BUILD', f'{project_name:s}-{project_version!s}')
 
     if os.path.exists(filename):
-      logging.info('Removing: {0:s}'.format(filename))
       try:
         shutil.rmtree(filename)
+        logging.info(f'Removed: {filename:s}')
       except OSError:
-        logging.warning('Unable to remove: {0:s}'.format(filename))
+        logging.warning(f'Unable to remove: {filename:s}')
 
   def _RemoveOlderBuildDirectory(self, project_name, project_version):
     """Removes previous versions of build directories.
@@ -263,9 +263,7 @@ class RPMBuildHelper(BaseRPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    filenames_to_ignore = '{0:s}-{1!s}'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    filenames_to_ignore = re.compile(f'{project_name:s}-{project_version!s}')
 
     filenames_glob = os.path.join(
         self.rpmbuild_path, 'BUILD', '{0:s}-*'.format(project_name))
@@ -449,7 +447,9 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
       result = spec_file_generator.Generate(
           self._project_definition, source_directory, source_package_filename,
           project_name, project_version, output_file_path)
-    except (FileNotFoundError, TypeError):
+    except (FileNotFoundError, TypeError) as exception:
+      logging.warning(
+          f'Unable to gerenate rpm spec file with error: {exception!s}')
       result = False
 
     if not result:

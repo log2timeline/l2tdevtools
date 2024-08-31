@@ -116,8 +116,8 @@ class RPMSpecFileGenerator(object):
       package_name = package_name[7:]
 
     if project_definition.description_long:
-      configuration['description'] = '{0:s}\n\n'.format(
-          project_definition.description_long)
+      configuration['description'] = (
+          f'{project_definition.description_long:s}\n\n')
 
     # TODO: add support for pyproject.toml
     # build.util.project_wheel_metadata
@@ -158,7 +158,7 @@ class RPMSpecFileGenerator(object):
         build_requires, configuration)
 
     if project_name != package_name:
-      python_package_name = 'python3-{0:s}'.format(package_name)
+      python_package_name = f'python3-{package_name:s}'
     else:
       python_package_name = 'python3-%{name}'
 
@@ -213,9 +213,11 @@ class RPMSpecFileGenerator(object):
       if os.path.exists(doc_file_path):
         doc_files.append(doc_file)
 
-    doc_file_definition = ''
-    if doc_files:
-      doc_file_definition = '%doc {0:s}\n'.format(' '.join(doc_files))
+    if not doc_files:
+      doc_file_definition = ''
+    else:
+      doc_files = ' '.join(doc_files)
+      doc_file_definition = f'%doc {doc_files:s}\n'
 
     return doc_file_definition
 

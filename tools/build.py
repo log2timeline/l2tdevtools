@@ -523,31 +523,31 @@ def Main():
   if undefined_projects:
     print('')
     print('Undefined projects:')
-    for name in undefined_projects:
+    for name in sorted(undefined_projects):
       print('\t{0:s}'.format(name))
 
   if configuration_errors:
     print('')
     print('Projects with configuration errors:')
-    for name in configuration_errors:
+    for name in sorted(configuration_errors):
       print('\t{0:s}'.format(name))
 
   if failed_downloads:
     print('')
     print('Failed downloading:')
-    for name in failed_downloads:
+    for name in sorted(failed_downloads):
       print('\t{0:s}'.format(name))
 
   if missing_build_dependencies:
     print('')
     print('Missing build dependencies:')
-    for dependency in missing_build_dependencies:
+    for dependency in sorted(missing_build_dependencies):
       print('\t{0:s}'.format(dependency))
 
   if failed_builds:
     print('')
     print('Failed building:')
-    for name in failed_builds:
+    for name in sorted(failed_builds):
       print('\t{0:s}'.format(name))
 
   return (not failed_downloads and not missing_build_dependencies and
