@@ -1,6 +1,6 @@
 %define name yara-python
 %define version {version}
-%define unmangled_name yara-python
+%define unmangled_name yara_python
 %define unmangled_version {version}
 %define release 1
 

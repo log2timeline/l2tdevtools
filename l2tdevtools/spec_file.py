@@ -33,9 +33,9 @@ class RPMSpecFileGenerator(object):
       '']
 
   _SPEC_TEMPLATE_PYTHON3_BODY = [
-      # '%generate_buildrequires',
-      # '%pyproject_buildrequires -R',
-      # '',
+      '# %generate_buildrequires',
+      '# %pyproject_buildrequires -R',
+      '#',
       '%prep',
       '%autosetup -p1 -n %{{name}}-%{{version}}',
       '',
@@ -164,10 +164,19 @@ class RPMSpecFileGenerator(object):
 
     if not configuration['version']:
       for version_file in glob.glob(os.path.join(
+          source_directory, '**', '__init__.py')):
+        with open(version_file, 'r', encoding='utf8') as file_object:
+          for line in file_object:
+            if '__version__' in line and '=' in line:
+              version = line.strip().rsplit('=', maxsplit=1)[-1]
+              configuration['version'] = version.strip().strip('\'').strip('"')
+
+    if not configuration['version']:
+      for version_file in glob.glob(os.path.join(
           source_directory, '**', 'version.py')):
         with open(version_file, 'r', encoding='utf8') as file_object:
           for line in file_object:
-            if '__version__' in line:
+            if '__version__' in line and '=' in line:
               version = line.strip().rsplit('=', maxsplit=1)[-1]
               configuration['version'] = version.strip().strip('\'').strip('"')
 
@@ -606,7 +615,6 @@ class RPMSpecFileGenerator(object):
         ''])
 
     output_string = '\n'.join(template)
-    print('X:', template_mappings)
     output_string = output_string.format(**template_mappings)
     output_file_object.write(output_string)
 
