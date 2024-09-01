@@ -13,6 +13,10 @@ Vendor: Brian E. Granger, Min Ragan-Kelley <zeromq-dev@lists.zeromq.org>
 Source0: %{{name}}-%{{version}}.tar.gz
 BuildRequires: gcc, gcc-c++, python3-devel, python3-packaging, python3-scikit-build-core, python3-setuptools
 
+%{{?python_disable_dependency_generator}}
+
+%global debug_package %{nil}
+
 %description
 PyZMQ is the official Python binding for the ZeroMQ
 Messaging Library (http://www.zeromq.org).
@@ -34,7 +38,7 @@ Messaging Library (http://www.zeromq.org).
 %pyproject_install
 
 %files -n python3-zmq
-%license LICENSE.BSD LICENSE.LESSER
+%license LICENSE.md
 %doc AUTHORS.md README.md
 %{{_libdir}}/python3*/site-packages/zmq
 %{{_libdir}}/python3*/site-packages/pyzmq*.dist-info
