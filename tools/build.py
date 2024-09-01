@@ -77,11 +77,11 @@ class ProjectBuilder(object):
       return True
 
     if not os.path.exists(build_helper_object.LOG_FILENAME):
-      logging.warning('Build of: {0:s} failed.'.format(
-          source_helper_object.project_name))
+      logging.warning(
+          f'Build of: {source_helper_object.project_name:s} failed.')
     else:
-      log_filename = '{0:s}_{1:s}'.format(
-          source_helper_object.project_name, build_helper_object.LOG_FILENAME)
+      log_filename = '_'.join([
+          source_helper_object.project_name, build_helper_object.LOG_FILENAME])
 
       # Remove older logfiles if they exists otherwise the rename
       # fails on Windows.
@@ -90,9 +90,8 @@ class ProjectBuilder(object):
 
       os.rename(build_helper_object.LOG_FILENAME, log_filename)
       logging.warning((
-          'Build of: {0:s} failed, for more information check '
-          '{1:s}').format(
-              source_helper_object.project_name, log_filename))
+          f'Build of: {source_helper_object.project_name:s} failed, for more '
+          f'information check {log_filename:s}'))
 
     return False
 
@@ -156,8 +155,7 @@ class ProjectBuilder(object):
         return False
 
     if os.path.exists(build_helper_object.LOG_FILENAME):
-      logging.info('Removing: {0:s}'.format(
-          build_helper_object.LOG_FILENAME))
+      logging.info(f'Removing: {build_helper_object.LOG_FILENAME:s}')
       os.remove(build_helper_object.LOG_FILENAME)
 
     return True

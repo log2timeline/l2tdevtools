@@ -440,14 +440,14 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
     if project_name.startswith('python-'):
       project_name = project_name[7:]
 
-    spec_filename = '{0:s}.spec'.format(project_name)
-    output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
+    output_file_path = os.path.join(
+        self._rpmbuild_specs_path, f'{project_name:s}.spec')
 
     try:
       result = spec_file_generator.Generate(
           self._project_definition, source_directory, source_package_filename,
           project_name, project_version, output_file_path)
-    except (FileNotFoundError, TypeError) as exception:
+    except (FileNotFoundError, TypeError, ValueError) as exception:
       logging.warning(
           f'Unable to gerenate rpm spec file with error: {exception!s}')
       result = False
@@ -717,14 +717,14 @@ class PyprojectSRPMBuildHelper(SRPMBuildHelper):
     if project_name.startswith('python-'):
       project_name = project_name[7:]
 
-    spec_filename = '{0:s}.spec'.format(project_name)
-    output_file_path = os.path.join(self._rpmbuild_specs_path, spec_filename)
+    output_file_path = os.path.join(
+        self._rpmbuild_specs_path, f'{project_name:s}.spec')
 
     try:
       result = spec_file_generator.Generate(
           self._project_definition, source_directory, source_package_filename,
           project_name, project_version, output_file_path)
-    except (FileNotFoundError, TypeError):
+    except (FileNotFoundError, TypeError, ValueError):
       result = False
 
     if not result:
