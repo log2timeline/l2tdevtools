@@ -2,6 +2,7 @@
 """RPM spec file generator."""
 
 import datetime
+import glob
 import os
 
 from setuptools.config import setupcfg
@@ -32,9 +33,9 @@ class RPMSpecFileGenerator(object):
       '']
 
   _SPEC_TEMPLATE_PYTHON3_BODY = [
-      '%generate_buildrequires',
-      '%pyproject_buildrequires -R',
-      '',
+      '# %generate_buildrequires',
+      '# %pyproject_buildrequires -R',
+      '#',
       '%prep',
       '%autosetup -p1 -n %{{name}}-%{{version}}',
       '',
@@ -83,6 +84,9 @@ class RPMSpecFileGenerator(object):
 
     Returns:
       bool: True if successful, False otherwise.
+
+    Raises:
+      ValueError: if required configuration values are missing.
     """
     configuration = {
         'description': None,
@@ -116,8 +120,20 @@ class RPMSpecFileGenerator(object):
       package_name = package_name[7:]
 
     if project_definition.description_long:
-      configuration['description'] = '{0:s}\n\n'.format(
-          project_definition.description_long)
+      configuration['description'] = (
+          f'{project_definition.description_long:s}\n\n')
+
+    if project_definition.description_short:
+      configuration['summary'] = project_definition.description_short
+
+    if project_definition.homepage_url:
+      configuration['url'] = project_definition.homepage_url
+
+    if project_definition.license:
+      configuration['license'] = project_definition.license
+
+    if project_definition.maintainer:
+      configuration['vendor'] = project_definition.maintainer
 
     # TODO: add support for pyproject.toml
     # build.util.project_wheel_metadata
@@ -146,6 +162,24 @@ class RPMSpecFileGenerator(object):
       if not configuration['vendor']:
         configuration['vendor'] = setup_cfg_metadata.get('maintainer', None)
 
+    if not configuration['version']:
+      for version_file in glob.glob(os.path.join(
+          source_directory, '**', 'version.py')):
+        with open(version_file, 'r', encoding='utf8') as file_object:
+          for line in file_object:
+            if '__version__' in line and '=' in line:
+              version = line.strip().rsplit('=', maxsplit=1)[-1]
+              configuration['version'] = version.strip().strip('\'').strip('"')
+
+    if not configuration['version']:
+      for version_file in glob.glob(os.path.join(
+          source_directory, '**', '__init__.py')):
+        with open(version_file, 'r', encoding='utf8') as file_object:
+          for line in file_object:
+            if '__version__' in line and '=' in line:
+              version = line.strip().rsplit('=', maxsplit=1)[-1]
+              configuration['version'] = version.strip().strip('\'').strip('"')
+
     if rpm_build_dependencies:
       build_requires = rpm_build_dependencies
     else:
@@ -153,12 +187,16 @@ class RPMSpecFileGenerator(object):
 
     configuration['name'] = project_name
 
+    for key, value in configuration.items():
+      if value is None:
+        raise ValueError(f'Missing configuration value: {key:s}')
+
     self._WriteSourcePackageDefinition(
         output_file_object, source_package_filename, project_definition,
         build_requires, configuration)
 
     if project_name != package_name:
-      python_package_name = 'python3-{0:s}'.format(package_name)
+      python_package_name = f'python3-{package_name:s}'
     else:
       python_package_name = 'python3-%{name}'
 
@@ -213,9 +251,11 @@ class RPMSpecFileGenerator(object):
       if os.path.exists(doc_file_path):
         doc_files.append(doc_file)
 
-    doc_file_definition = ''
-    if doc_files:
-      doc_file_definition = '%doc {0:s}\n'.format(' '.join(doc_files))
+    if not doc_files:
+      doc_file_definition = ''
+    else:
+      doc_files = ' '.join(doc_files)
+      doc_file_definition = f'%doc {doc_files:s}\n'
 
     return doc_file_definition
 

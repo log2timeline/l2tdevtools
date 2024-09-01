@@ -82,6 +82,8 @@ class BuildHelperFactory(object):
       build_helper_class = cls._FLIT_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
+    # TODO: add support for hatchling (used by urllib3)
+
     elif project_definition.build_system == 'poetry':
       build_helper_class = cls._POETRY_BUILD_HELPER_CLASSES.get(
           build_target, None)

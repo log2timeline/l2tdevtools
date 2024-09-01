@@ -1,6 +1,6 @@
 %define name PyYAML
 %define version {version}
-%define unmangled_name PyYAML
+%define unmangled_name pyyaml
 %define unmangled_version {version}
 %define release 1
 

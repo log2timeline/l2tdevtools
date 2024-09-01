@@ -13,8 +13,8 @@ Source0: %{{unmangled_name}}-%{{unmangled_version}}.tar.gz
 BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-buildroot
 Prefix: %{{_prefix}}
 URL: http://www.sleuthkit.org
-BuildRequires: gcc gcc-c++ sqlite-devel zlib-devel
-Requires: sleuthkit-libs = %{{version}}-%{{release}} sqlite zlib
+BuildRequires: gcc gcc-c++ sqlite-devel zlib-ng-devel
+Requires: sleuthkit-libs = %{{version}}-%{{release}} sqlite zlib-ng
 
 %description
 The Sleuth Kit (TSK) is a collection of UNIX-based command line tools that

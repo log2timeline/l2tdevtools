@@ -1,6 +1,6 @@
 %define name opensearch-py
 %define version {version}
-%define unmangled_name opensearch-py
+%define unmangled_name opensearch_py
 %define unmangled_version {version}
 %define release 1
 
@@ -8,10 +8,10 @@ Summary: Python client for OpenSearch
 Name: %{{name}}
 Version: %{{version}}
 Release: %{{release}}
-Source0: opensearch-py-%{{unmangled_version}}.tar.gz
+Source0: %{{unmangled_name}}-%{{unmangled_version}}.tar.gz
 License: Apache License, Version 2.0
 Group: Development/Libraries
-BuildRoot: %{{_tmppath}}/opensearch-py-%{{version}}-%{{release}}-buildroot
+BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-%{{version}}-%{{release}}-buildroot
 Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Honza Král <honza.kral@gmail.com>
@@ -29,7 +29,7 @@ Requires: python3-certifi, python3-urllib3
 Python client for OpenSearch.
 
 %prep
-%autosetup -n opensearch-py-%{{unmangled_version}}
+%autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
 %py3_build

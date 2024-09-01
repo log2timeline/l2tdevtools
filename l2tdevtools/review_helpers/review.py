@@ -181,7 +181,7 @@ class ReviewHelper(object):
     if self._all_files:
       diffbase = None
     else:
-      diffbase = 'origin/main'
+      diffbase = 'main'
 
     changed_python_files = self._git_helper.GetChangedPythonFiles(
         diffbase=diffbase)

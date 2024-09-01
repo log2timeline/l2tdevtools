@@ -41,6 +41,7 @@ class ProjectDefinition(object):
     github_release_prefix (str): github release prefix.
     github_release_tag_prefix (str): github release tag prefix.
     homepage_url (str): project homepage URL.
+    license (str): license.
     maintainer (str): name and email address of the maintainer.
     name (str): name of the project.
     optional_build_dependencies (list[str]): optional build dependencies.
@@ -89,6 +90,7 @@ class ProjectDefinition(object):
     self.github_release_prefix = None
     self.github_release_tag_prefix = None
     self.homepage_url = None
+    self.license = None
     self.maintainer = None
     self.name = name
     self.optional_build_dependencies = None
@@ -262,6 +264,8 @@ class ProjectDefinitionReader(object):
           config_parser, section_name, 'github_release_tag_prefix')
       project_definition.homepage_url = self._GetConfigValue(
           config_parser, section_name, 'homepage_url')
+      project_definition.license = self._GetConfigValue(
+          config_parser, section_name, 'license')
       project_definition.maintainer = self._GetConfigValue(
           config_parser, section_name, 'maintainer')
       project_definition.rpm_build_dependencies = self._GetConfigValue(

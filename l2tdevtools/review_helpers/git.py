@@ -158,7 +158,7 @@ class GitHelper(cli.CLIHelper):
       list[str]: names of the changed files.
     """
     if diffbase:
-      command = 'git diff --name-only {0:s}'.format(diffbase)
+      command = f'git diff --name-only {diffbase:s}'
     else:
       command = 'git ls-files'
 

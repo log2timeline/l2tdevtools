@@ -45,7 +45,6 @@ rm -rf %{{buildroot}}
 
 %files -n python3-%{{name}}
 %license LICENSE
-%doc README
 %{{python3_sitelib}}/
 
 %changelog
