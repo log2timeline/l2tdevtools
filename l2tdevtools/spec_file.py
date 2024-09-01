@@ -164,7 +164,7 @@ class RPMSpecFileGenerator(object):
 
     if not configuration['version']:
       for version_file in glob.glob(os.path.join(
-          source_directory, '**', '__init__.py')):
+          source_directory, '**', 'version.py')):
         with open(version_file, 'r', encoding='utf8') as file_object:
           for line in file_object:
             if '__version__' in line and '=' in line:
@@ -173,7 +173,7 @@ class RPMSpecFileGenerator(object):
 
     if not configuration['version']:
       for version_file in glob.glob(os.path.join(
-          source_directory, '**', 'version.py')):
+          source_directory, '**', '__init__.py')):
         with open(version_file, 'r', encoding='utf8') as file_object:
           for line in file_object:
             if '__version__' in line and '=' in line:
