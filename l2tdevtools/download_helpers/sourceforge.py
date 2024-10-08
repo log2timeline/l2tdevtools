@@ -52,6 +52,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
     if not page_content:
       return None
 
+    matches = None
     if self._project_name == 'pyparsing':
       # The format of the project download URL is:
       # /projects/{project name}/files/{project name}/{project name}-{version}/

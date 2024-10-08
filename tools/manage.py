@@ -883,6 +883,9 @@ def Main():
       projects_file, distribution=options.distribution)
 
   action_tuple = options.action.split('-')
+  diff_header = None
+  new_packages = {}
+  new_versions = {}
 
   if action_tuple[0] == 'copr' and action_tuple[1] == 'diff':
     track = action_tuple[2]
