@@ -15,7 +15,7 @@ BuildRequires: gcc, gcc-c++, python3-devel, python3-packaging, python3-scikit-bu
 
 %{{?python_disable_dependency_generator}}
 
-%global debug_package %{nil}
+%global debug_package %{{nil}}
 
 %description
 PyZMQ is the official Python binding for the ZeroMQ
