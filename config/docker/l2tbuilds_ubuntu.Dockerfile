@@ -34,6 +34,7 @@ RUN apt-get -y update && \
 	libfuse-dev \
 	liblzma-dev \
 	libmagic-dev \
+	libsqlite3-dev \
 	libssl-dev \
         libtool \
 	libyaml-dev \
