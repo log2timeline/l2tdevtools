@@ -43,7 +43,7 @@ class AppVeyorInstallSHScriptWriter(interface.DependencyFileWriter):
     """Writes an install.sh file."""
     dependencies = self._dependency_helper.GetL2TBinaries()
 
-    brew_packages = ['gettext', 'gnu-sed', 'python@3.12', 'tox']
+    brew_packages = ['gettext', 'gnu-sed', 'python@3.13', 'tox']
     if 'snappy' in dependencies:
       brew_packages.append('snappy')
 

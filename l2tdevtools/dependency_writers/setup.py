@@ -202,9 +202,6 @@ class SetupCfgWriter(interface.DependencyFileWriter):
           'options_entry_points', template_mappings)
       file_content.append(template_data)
 
-    template_data = self._GenerateFromTemplate('bdist_wheel', template_mappings)
-    file_content.append(template_data)
-
     file_content = ''.join(file_content)
 
     with open(self.PATH, 'w', encoding='utf-8') as file_object:
