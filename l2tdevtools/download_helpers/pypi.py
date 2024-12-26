@@ -102,8 +102,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
       latest_version = version_definition.GetLatestVersion()
 
-    download_url = 'https://pypi.org/project/{0:s}#files'.format(
-        self._project_name)
+    download_url = 'https://pypi.org/pypi/{0:s}/json'.format(self._project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -114,6 +113,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
         r'{0:s}-([\d\.\!]*(post\d+)?)\.(tar\.bz2|tar\.gz|zip)"').format(
             self._source_name)
 
+    print("X:", expression_string)
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
     if not matches:
       return None
@@ -133,8 +133,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     Returns:
       str: download URL of the project or None if not available.
     """
-    download_url = 'https://pypi.org/project/{0:s}/{1!s}'.format(
-        self._project_name, project_version)
+    download_url = 'https://pypi.org/pypi/{0:s}/json'.format(self._project_name)
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
