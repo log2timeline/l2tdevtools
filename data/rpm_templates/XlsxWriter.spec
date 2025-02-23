@@ -1,6 +1,6 @@
-%define name XlsxWriter
+%define name xlsxwriter
 %define version {version}
-%define unmangled_name XlsxWriter
+%define unmangled_name xlsxwriter
 %define unmangled_version {version}
 %define release 1
 

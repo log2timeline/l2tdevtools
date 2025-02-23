@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
+import http.client
 import logging
 import os
 
@@ -51,7 +52,7 @@ class DownloadHelper(object):
           with open(filename, 'wb') as file_object:
             file_object.write(page_content)
 
-      except urllib_error.URLError as exception:
+      except (http.client.InvalidURL, urllib_error.URLError) as exception:
         logging.warning(
             'Unable to download URL: {0:s} with error: {1!s}'.format(
                 download_url, exception))
