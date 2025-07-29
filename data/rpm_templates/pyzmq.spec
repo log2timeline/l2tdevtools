@@ -11,7 +11,7 @@ Summary: Python bindings for 0MQ
 Url: https://pyzmq.readthedocs.org
 Vendor: Brian E. Granger, Min Ragan-Kelley <zeromq-dev@lists.zeromq.org>
 Source0: %{{name}}-%{{version}}.tar.gz
-BuildRequires: gcc, gcc-c++, python3-devel, python3-packaging, python3-pip, python3-scikit-build-core, python3-setuptools
+BuildRequires: gcc, gcc-c++, libsodium-devel, python3-devel, python3-packaging, python3-pip, python3-scikit-build-core, python3-setuptools
 
 %{{?python_disable_dependency_generator}}
 
