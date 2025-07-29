@@ -2,6 +2,7 @@
 
 set -e
 
+brew untap homebrew/homebrew-cask-versions
 brew update -q
 brew install -q ${brew_packages} || true
 

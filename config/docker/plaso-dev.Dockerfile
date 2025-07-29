@@ -25,6 +25,7 @@ RUN apt-get -y install --no-install-recommends \
   libyaml-dev \
   locales \
   mercurial \
+  python3-build \
   python3-dev \
   python3-distutils \
   python3-setuptools \
