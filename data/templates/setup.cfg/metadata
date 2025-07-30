@@ -22,4 +22,4 @@ install_requires = file:requirements.txt
 package_dir =
   ${python_module_name} = ${python_module_name}
 packages = find:
-python_requires = >=3.8
+python_requires = >=3.9
