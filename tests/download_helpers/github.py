@@ -19,7 +19,7 @@ class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
   _PROJECT_ORGANIZATION = 'erocarrera'
   _PROJECT_NAME = 'pefile'
-  _PROJECT_VERSION = '2023.2.7'
+  _PROJECT_VERSION = '2024.8.26'
 
   @classmethod
   def setUpClass(cls):
@@ -172,7 +172,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
   _PROJECT_ORGANIZATION = 'log2timeline'
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20240317'
+  _PROJECT_VERSION = '20240505'
 
   @classmethod
   def setUpClass(cls):

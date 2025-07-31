@@ -50,7 +50,7 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{name}}
 %license LICENSE.txt
 %{{python3_sitelib}}/xlsxwriter/
-%{{python3_sitelib}}/XlsxWriter*.egg-info
+%{{python3_sitelib}}/xlsxwriter*.egg-info
 
 %exclude %{{_bindir}}/*
 
