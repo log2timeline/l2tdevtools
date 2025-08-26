@@ -319,7 +319,8 @@ class SourcePackageHelper(SourceHelper):
       os.chdir(current_working_directory)
 
     filenames_to_ignore = re.compile(
-        '^{0:s}-.*{1!s}'.format(self.project_name, project_version))
+        '^{0:s}-(|experimental-|alpha-|beta-){1!s}'.format(
+            self.project_name, project_version))
 
     # Remove previous versions of source directories in the format:
     # <project>-[0-9]*
