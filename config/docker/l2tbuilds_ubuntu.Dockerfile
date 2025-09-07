@@ -1,5 +1,4 @@
 FROM ubuntu:noble
-MAINTAINER Log2Timeline <log2timeline-dev@googlegroups.com>
 
 # Create container with:
 # docker build -f l2tbuilds_ubuntu.Dockerfile --force-rm --no-cache -t log2timeline/l2tbuilds_ubuntu .
@@ -61,12 +60,13 @@ RUN apt-get -y update && \
 # Set terminal to UTF-8 by default
 RUN locale-gen en_US.UTF-8
 RUN update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 
 # Changes pinentry to use TTY
 RUN update-alternatives --set pinentry /usr/bin/pinentry-tty
 
 # Set up the l2tdevtools source and build directories
-WORKDIR /home/build/
+USER ubuntu
+WORKDIR /home/ubuntu
 RUN git clone https://github.com/log2timeline/l2tdevtools.git

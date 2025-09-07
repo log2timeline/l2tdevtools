@@ -1,5 +1,4 @@
 FROM fedora:42
-MAINTAINER Log2Timeline <log2timeline-dev@googlegroups.com>
 
 # Create container with:
 # docker build -f l2tbuilds_fedora.Dockerfile --force-rm --no-cache -t log2timeline/l2tbuilds_fedora .
