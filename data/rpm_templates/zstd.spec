@@ -1,5 +1,5 @@
 %define name zstd
-%define version 1.5.5.1
+%define version {version}
 %define release 1
 
 Summary: ZSTD Bindings for Python
