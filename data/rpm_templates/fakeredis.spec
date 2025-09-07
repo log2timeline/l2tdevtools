@@ -10,7 +10,7 @@ License: BSD-3-Clause
 URL: https://github.com/cunla/fakeredis-py
 Source: %{{name}}-%{{version}}.tar.gz
 BuildArch: noarch
-BuildRequires: python3-devel, python3-poetry-core, python3-tox-current-env
+BuildRequires: python3-devel, python3-hatchling, python3-pip, python3-tox-current-env
 
 %description
 Fake implementation of redis API (redis-py) for testing purposes
