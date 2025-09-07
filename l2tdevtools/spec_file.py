@@ -111,7 +111,9 @@ class RPMSpecFileGenerator(object):
     else:
       has_tools_package = False
 
-    if project_definition.rpm_name:
+    if project_definition.srpm_name:
+      package_name = project_definition.srpm_name
+    elif project_definition.rpm_name:
       package_name = project_definition.rpm_name
     else:
       package_name = project_name
