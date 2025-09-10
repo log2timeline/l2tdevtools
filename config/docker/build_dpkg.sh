@@ -21,8 +21,8 @@ docker build -f l2tbuilds_ubuntu.Dockerfile --force-rm --no-cache -t log2timelin
 if test -d "${GNUPG_DIRECTORY}";
 then
 	# Run the container in interactive mode ("run -it") to use gpg-agent to sign the builds
-	docker run -it -u ${UID}:${GID} -v "${GNUPG_DIRECTORY}:/home/ubuntu/.gnupg:z" -v "${L2TBUILDS_DIRECTORY}:/home/build/l2tbuilds:z" log2timeline/l2tbuilds_ubuntu
+	docker run -it -u ${UID}:${GID} -v "${GNUPG_DIRECTORY}:/home/ubuntu/.gnupg:z" -v "${L2TBUILDS_DIRECTORY}:/home/ubuntu/l2tbuilds:z" log2timeline/l2tbuilds_ubuntu
 else
-	docker run -u ${UID}:${GID} -v "${L2TBUILDS_DIRECTORY}:/home/build/l2tbuilds:z" log2timeline/l2tbuilds_ubuntu /bin/bash -c "(cd l2tdevtools && ./utils/build_dpkg.sh --preset plaso)"
+	docker run -u ${UID}:${GID} -v "${L2TBUILDS_DIRECTORY}:/home/ubuntu/l2tbuilds:z" log2timeline/l2tbuilds_ubuntu /bin/bash -c "(cd l2tdevtools && ./utils/build_dpkg.sh --preset plaso)"
 fi
 
