@@ -43,6 +43,7 @@ class DPKGBuildHelper(interface.BuildHelper):
       'devscripts',
       'dpkg-dev',
       'fakeroot',
+      'pkg-config',
       'quilt',
       'python3-all',
       'python3-all-dev',

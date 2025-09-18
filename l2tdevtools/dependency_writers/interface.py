@@ -55,7 +55,7 @@ class DependencyFileWriter(object):
     dpkg_dependencies = self._dependency_helper.GetDPKGDepends(
         exclude_version=True)
 
-    dpkg_dev_dependencies = []
+    dpkg_dev_dependencies = ['pkg-config']
 
     # TODO: extract from configuration.
 
