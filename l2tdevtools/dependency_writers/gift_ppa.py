@@ -138,7 +138,7 @@ class GIFTPPAInstallScriptWriter(interface.DependencyFileWriter):
     test_dependencies = self._GetDPKGTestDependencies(python_dependencies)
 
     # TODO: replace by dev_dependencies.ini or equiv.
-    test_dependencies.extend(['python3-lib2to3', 'python3-setuptools'])
+    test_dependencies.extend(['python3-setuptools'])
 
     # TODO: replace by dev_dependencies.ini or equiv.
     development_dependencies = ['pylint']

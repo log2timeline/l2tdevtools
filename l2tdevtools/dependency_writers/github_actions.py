@@ -54,8 +54,7 @@ class GitHubActionsTestDocsYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies = self._GetDPKGPythonDependencies()
     test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
     dpkg_dependencies.extend(test_dependencies)
-    dpkg_dependencies.extend([
-        'python3-lib2to3', 'python3-pip', 'python3-setuptools'])
+    dpkg_dependencies.extend(['python3-pip', 'python3-setuptools', 'tox'])
 
     dpkg_dev_dependencies = self._GetDPKGDevDependencies()
 
@@ -83,8 +82,7 @@ class GitHubActionsTestToxYmlWriter(interface.DependencyFileWriter):
     dpkg_dependencies = self._GetDPKGPythonDependencies()
     test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
     dpkg_dependencies.extend(test_dependencies)
-    dpkg_dependencies.extend([
-        'python3-lib2to3', 'python3-pip', 'python3-setuptools'])
+    dpkg_dependencies.extend(['python3-pip', 'python3-setuptools', 'tox'])
 
     dpkg_dev_dependencies = self._GetDPKGDevDependencies()
 

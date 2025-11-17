@@ -47,9 +47,6 @@ jobs:
         add-apt-repository -y ppa:gift/dev
         apt-get update -q
         apt-get install -y build-essential git ${dpkg_dev_dependencies} python$${{ matrix.python-version }} python$${{ matrix.python-version }}-dev python$${{ matrix.python-version }}-venv ${dpkg_dependencies}
-    - name: Install tox
-      run: |
-        python3 -m pip install tox
     - name: Run tests
       env:
         LANG: en_US.UTF-8
@@ -83,9 +80,6 @@ jobs:
         add-apt-repository -y ppa:gift/dev
         apt-get update -q
         apt-get install -y build-essential git ${dpkg_dev_dependencies} python$${{ matrix.python-version }} python$${{ matrix.python-version }}-dev python$${{ matrix.python-version }}-venv ${dpkg_dependencies}
-    - name: Install tox
-      run: |
-        python3 -m pip install tox
     - name: Run tests with coverage
       env:
         LANG: en_US.UTF-8
@@ -123,9 +117,6 @@ jobs:
         add-apt-repository -y ppa:gift/dev
         apt-get update -q
         apt-get install -y build-essential git ${dpkg_dev_dependencies} python$${{ matrix.python-version }} python$${{ matrix.python-version }}-dev python$${{ matrix.python-version }}-venv ${dpkg_dependencies}
-    - name: Install tox
-      run: |
-        python3 -m pip install tox
     - name: Run linter
       env:
         LANG: en_US.UTF-8
