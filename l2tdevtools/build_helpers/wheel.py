@@ -153,6 +153,45 @@ class WheelBuildHelper(interface.BuildHelper):
         os.remove(filename)
 
 
+class BuildWheelBuildHelper(WheelBuildHelper):
+  """Helper to build Python wheel packages (.whl) using build."""
+
+  def Build(self, source_helper_object):
+    """Builds the wheel.
+
+    Args:
+      source_helper_object (SourceHelper): source helper.
+
+    Returns:
+      bool: True if successful, False otherwise.
+    """
+    source_package_path = source_helper_object.GetSourcePackagePath()
+    if not source_package_path:
+      logging.info('Missing source package of: {0:s}'.format(
+          source_helper_object.project_name))
+      return False
+
+    source_directory = source_helper_object.GetSourceDirectoryPath()
+    if not source_directory:
+      logging.info('Missing source directory of: {0:s}'.format(
+          source_helper_object.project_name))
+      return False
+
+    source_package_filename = source_helper_object.GetSourcePackageFilename()
+    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
+
+    log_file_path = os.path.join('..', self.LOG_FILENAME)
+    command = '\"{0:s}\" -m build --wheel > {1:s} 2>&1'.format(
+        sys.executable, log_file_path)
+    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
+        source_directory, command), shell=True)
+    if exit_code != 0:
+      logging.error('Running: "{0:s}" failed.'.format(command))
+      return False
+
+    return self._MoveWheel(source_helper_object)
+
+
 class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
   """Helper to build Python wheel packages (.whl).
 
@@ -190,165 +229,6 @@ class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
     setup_py_path = os.path.join(source_directory, 'setup.py')
     if not os.path.exists(setup_py_path):
       raise RuntimeError('Missing setup.py cannot build wheel')
-
-    log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = '\"{0:s}\" -m build --wheel > {1:s} 2>&1'.format(
-        sys.executable, log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
-    if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
-      return False
-
-    return self._MoveWheel(source_helper_object)
-
-
-class FlitWheelBuildHelper(WheelBuildHelper):
-  """Helper to build Python wheel packages (.whl) using flit."""
-
-  def Build(self, source_helper_object):
-    """Builds the wheel.
-
-    Args:
-      source_helper_object (SourceHelper): source helper.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    source_package_path = source_helper_object.GetSourcePackagePath()
-    if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_directory = source_helper_object.GetSourceDirectoryPath()
-    if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
-
-    log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = '\"{0:s}\" -m flit build --format wheel > {1:s} 2>&1'.format(
-        sys.executable, log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
-    if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
-      return False
-
-    return self._MoveWheel(source_helper_object)
-
-
-class HatchlingWheelBuildHelper(WheelBuildHelper):
-  """Helper to build Python wheel packages (.whl) using hatchling."""
-
-  def Build(self, source_helper_object):
-    """Builds the wheel.
-
-    Args:
-      source_helper_object (SourceHelper): source helper.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    source_package_path = source_helper_object.GetSourcePackagePath()
-    if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_directory = source_helper_object.GetSourceDirectoryPath()
-    if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
-
-    log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = '\"{0:s}\" -m hatch build --format wheel > {1:s} 2>&1'.format(
-        sys.executable, log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
-    if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
-      return False
-
-    return self._MoveWheel(source_helper_object)
-
-
-class PoetryWheelBuildHelper(WheelBuildHelper):
-  """Helper to build Python wheel packages (.whl) using poetry."""
-
-  def Build(self, source_helper_object):
-    """Builds the wheel.
-
-    Args:
-      source_helper_object (SourceHelper): source helper.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    source_package_path = source_helper_object.GetSourcePackagePath()
-    if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_directory = source_helper_object.GetSourceDirectoryPath()
-    if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
-
-    log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = '\"{0:s}\" -m poetry build --format wheel > {1:s} 2>&1'.format(
-        sys.executable, log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
-    if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
-      return False
-
-    return self._MoveWheel(source_helper_object)
-
-
-class SetuptoolsWheelBuildHelper(WheelBuildHelper):
-  """Helper to build Python wheel packages (.whl) using setuptools.
-
-  Builds wheel packages for projects that use setup.py as their build system.
-  """
-
-  def Build(self, source_helper_object):
-    """Builds the wheel.
-
-    Args:
-      source_helper_object (SourceHelper): source helper.
-
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    source_package_path = source_helper_object.GetSourcePackagePath()
-    if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_directory = source_helper_object.GetSourceDirectoryPath()
-    if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
-      return False
-
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
     command = '\"{0:s}\" -m build --wheel > {1:s} 2>&1'.format(

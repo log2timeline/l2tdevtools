@@ -44,6 +44,7 @@ RUN apt-get -y update && \
         python3-all-dev \
 	python3-cffi \
 	python3-build \
+	python3-flit-core \
 	python3-hatchling \
 	python3-packaging \
 	python3-pbr \
@@ -51,6 +52,7 @@ RUN apt-get -y update && \
 	python3-poetry-core \
 	python3-pytest \
 	python3-pytest-runner \
+	python3-scikit-build-core \
         python3-setuptools \
 	python3-setuptools-scm \
 	python3-toml \
