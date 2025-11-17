@@ -101,12 +101,15 @@ class RPMSpecFileGenerator(object):
 
     python_module_name = project_name
 
-    if os.path.isdir(os.path.join(source_directory, 'scripts')):
-      has_tools_package = True
-    elif os.path.isdir(os.path.join(source_directory, 'tools')):
-      has_tools_package = True
-    elif os.path.isdir(os.path.join(
-        source_directory, python_module_name, 'scripts')):
+    tools_directory = os.path.join(source_directory, 'scripts')
+    if not os.path.isdir(tools_directory):
+      tools_directory = os.path.join(source_directory, 'tools')
+    if not os.path.isdir(tools_directory):
+      tools_directory = os.path.join(
+          source_directory, python_module_name, 'scripts')
+
+    if os.path.isdir(tools_directory) and glob.glob(os.path.join(
+        tools_directory, '*.py')):
       has_tools_package = True
     else:
       has_tools_package = False
@@ -176,6 +179,16 @@ class RPMSpecFileGenerator(object):
     if not configuration['version']:
       for version_file in glob.glob(os.path.join(
           source_directory, '**', '__init__.py')):
+        with open(version_file, 'r', encoding='utf8') as file_object:
+          for line in file_object:
+            if '__version__' in line and '=' in line:
+              version = line.strip().rsplit('=', maxsplit=1)[-1]
+              configuration['version'] = version.strip().strip('\'').strip('"')
+
+    if not configuration['version']:
+      # idna uses package_data.py
+      for version_file in glob.glob(os.path.join(
+          source_directory, '**', 'package_data.py')):
         with open(version_file, 'r', encoding='utf8') as file_object:
           for line in file_object:
             if '__version__' in line and '=' in line:

@@ -76,7 +76,7 @@ class DPKGBuildFilesGenerator(object):
       ' {description_long:s}',
       '']
 
-  _CONTROL_TEMPLATE_SETUP_PY_PYTHON3_ONLY = [
+  _CONTROL_TEMPLATE_SETUP_PY_PYTHON3 = [
       'Source: {source_package_name:s}',
       'Section: python',
       'Priority: extra',
@@ -386,11 +386,12 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'configure_make':
       control_template.extend(self._CONTROL_TEMPLATE_CONFIGURE_MAKE)
 
-    elif self._project_definition.build_system in ('pyproject', 'setup_py'):
-      control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON3_ONLY)
+    elif self._project_definition.build_system in (
+        'flit', 'hatchling', 'poetry', 'scikit', 'setup_py', 'setuptools'):
+      control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON3)
 
       # TODO: add configuration setting to indicate tools should be packaged.
-      if package_name not in ('idna', 'mock', 'psutil'):
+      if package_name not in ('mock', 'psutil'):
         if (self._build_configuration and
             self._build_configuration.has_bin_directory):
           control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_TOOLS)
