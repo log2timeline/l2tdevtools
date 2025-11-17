@@ -41,6 +41,7 @@ RUN apt-get -y update && \
         locales \
         pkg-config \
 	pinentry-tty \
+	pybuild-plugin-pyproject \
         python3-all \
         python3-all-dev \
 	python3-cffi \

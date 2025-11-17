@@ -175,8 +175,9 @@ class RPMSpecFileGenerator(object):
           source_directory, '**', '__init__.py')):
         with open(version_file, 'r', encoding='utf8') as file_object:
           for line in file_object:
-            if '__version__' in line and '=' in line:
-              version = line.strip().rsplit('=', maxsplit=1)[-1]
+            line = line.strip()
+            if line.startswith('__version__') and '=' in line:
+              version = line.rsplit('=', maxsplit=1)[-1]
               version = version.strip().strip('\'').strip('"')
               # pytz sets __version__ to VERSION
               if version != 'VERSION':
