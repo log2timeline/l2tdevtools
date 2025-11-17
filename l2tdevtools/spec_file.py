@@ -106,11 +106,8 @@ class RPMSpecFileGenerator(object):
       tools_directory = os.path.join(
           source_directory, python_module_name, 'scripts')
 
-    if os.path.isdir(tools_directory) and glob.glob(os.path.join(
-        tools_directory, '*.py')):
-      has_tools_package = True
-    else:
-      has_tools_package = False
+    has_tools_package = bool(os.path.isdir(
+        tools_directory) and glob.glob(os.path.join(tools_directory, '*.py')))
 
     if project_definition.srpm_name:
       package_name = project_definition.srpm_name
