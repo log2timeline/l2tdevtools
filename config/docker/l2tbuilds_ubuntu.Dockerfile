@@ -73,5 +73,4 @@ RUN update-alternatives --set pinentry /usr/bin/pinentry-tty
 # Set up the l2tdevtools source and build directories
 USER ubuntu
 WORKDIR /home/ubuntu
-# RUN git clone https://github.com/log2timeline/l2tdevtools.git
-RUN git clone https://github.com/joachimmetz/l2tdevtools.git -b updates1
+RUN git clone https://github.com/log2timeline/l2tdevtools.git
