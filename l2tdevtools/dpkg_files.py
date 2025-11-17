@@ -266,7 +266,8 @@ class DPKGBuildFilesGenerator(object):
     """
     # TODO: add support for configure_make
 
-    if self._project_definition.build_system in ('pyproject', 'setup_py'):
+    if self._project_definition.build_system in (
+        'flit', 'hatchling', 'poetry', 'scikit', 'setup_py', 'setuptools'):
       setup_name = self._GetPythonSetupName()
 
       template_values = {
@@ -304,7 +305,8 @@ class DPKGBuildFilesGenerator(object):
     if self._project_definition.build_system == 'configure_make':
       build_depends.append('autotools-dev')
 
-    elif self._project_definition.build_system in ('pyproject', 'setup_py'):
+    elif self._project_definition.build_system in (
+        'flit', 'hatchling', 'poetry', 'scikit', 'setup_py', 'setuptools'):
       build_depends.append('dh-python')
 
       if self._project_definition.build_system == 'pyproject':
@@ -317,7 +319,8 @@ class DPKGBuildFilesGenerator(object):
         python3_build_depends.append('python3-all-dev')
 
     for dependency in self._project_definition.dpkg_build_dependencies:
-      if self._project_definition.build_system in ('pyproject', 'setup_py'):
+      if self._project_definition.build_system in (
+          'flit', 'hatchling', 'poetry', 'scikit', 'setup_py', 'setuptools'):
         if dependency.startswith('python-'):
           dependency = 'python3-{0:s}'.format(dependency[7:])
           python3_build_depends.append(dependency)
@@ -331,7 +334,8 @@ class DPKGBuildFilesGenerator(object):
 
       build_depends.append(dependency)
 
-    if self._project_definition.build_system in ('pyproject', 'setup_py'):
+    if self._project_definition.build_system in (
+        'flit', 'hatchling', 'poetry', 'scikit', 'setup_py', 'setuptools'):
       build_depends.extend(python3_build_depends)
 
     if build_depends:
