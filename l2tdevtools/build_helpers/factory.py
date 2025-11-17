@@ -25,6 +25,14 @@ class BuildHelperFactory(object):
       'wheel': wheel.FlitWheelBuildHelper,
   }
 
+  _HATCHLING_BUILD_HELPER_CLASSES = {
+      'dpkg': dpkg.PybuildDPKGBuildHelper,
+      'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
+      'rpm': rpm.PyprojectRPMBuildHelper,
+      'srpm': rpm.PyprojectSRPMBuildHelper,
+      'wheel': wheel.HatchlingWheelBuildHelper,
+  }
+
   _POETRY_BUILD_HELPER_CLASSES = {
       'dpkg': dpkg.PybuildDPKGBuildHelper,
       'dpkg-source': dpkg.PybuildSourceDPKGBuildHelper,
@@ -82,7 +90,9 @@ class BuildHelperFactory(object):
       build_helper_class = cls._FLIT_BUILD_HELPER_CLASSES.get(
           build_target, None)
 
-    # TODO: add support for hatchling (used by urllib3)
+    elif project_definition.build_system == 'hatchling':
+      build_helper_class = cls._HATCHLING_BUILD_HELPER_CLASSES.get(
+          build_target, None)
 
     elif project_definition.build_system == 'poetry':
       build_helper_class = cls._POETRY_BUILD_HELPER_CLASSES.get(

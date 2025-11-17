@@ -185,7 +185,7 @@ class SetuptoolsWheelBuildHelperTest(shared_test_lib.BaseTestCase):
   _TEST_PROJECT_VERSION = '20190517'
   _TEST_SOURCE_PACKAGE = '{0:s}-{1:s}.tar.gz'.format(
       _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
-  _TEST_WHEEL_FILENAME = '{0:s}-{1:s}-py3-none-any.whl'.format(
+  _TEST_WHEEL_FILENAME = '{0:s}-{1:s}-py2.py3-none-any.whl'.format(
       _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
 
   def testBuild(self):
