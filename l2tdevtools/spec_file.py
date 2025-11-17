@@ -172,35 +172,25 @@ class RPMSpecFileGenerator(object):
 
     if not configuration['version']:
       for version_file in glob.glob(os.path.join(
-          source_directory, '**', 'version.py')):
+          source_directory, '**', '__init__.py')):
         with open(version_file, 'r', encoding='utf8') as file_object:
           for line in file_object:
-            if '__version__' in line and '=' in line:
+            if ('__version__' in line or line.startswith('VERSION')) and '=' in line:
               version = line.strip().rsplit('=', maxsplit=1)[-1]
-              configuration['version'] = version.strip().strip('\'').strip('"')
+              version = version.strip().strip('\'').strip('"')
+              # pytz sets __version__ to VERSION
+              if version != 'VERSION':
+                configuration['version'] = version
+              break
 
     if not configuration['version']:
-      package_version = None
-
-      # idna uses package_data.py
-      for file_name in ('package_data.py', 'version.py', '__init__.py'):
-        if package_version:
-          break
-
-        for version_file in glob.glob(os.path.join(
-            source_directory, '**', file_name)):
-          with open(version_file, 'r', encoding='utf8') as file_object:
-            for line in file_object:
-              # pytz sets __version__ to VERSION
-              if ('__version__' in line or line.startswith('VERSION')) and '=' in line:
-                version = line.strip().rsplit('=', maxsplit=1)[-1]
-                version = version.strip().strip('\'').strip('"')
-                if version != 'VERSION':
-                  package_version = version
-                  break
-
-      if package_version:
-        configuration['version'] = package_version
+      for version_file in glob.glob(os.path.join(source_directory, 'PKG-INFO')):
+        with open(version_file, 'r', encoding='utf8') as file_object:
+          for line in file_object:
+            if line.startswith('Version: '):
+              version = line.strip().rsplit(':', maxsplit=1)[-1]
+              configuration['version'] = version.strip()
+              break
 
     if rpm_build_dependencies:
       build_requires = rpm_build_dependencies
