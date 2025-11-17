@@ -180,23 +180,27 @@ class RPMSpecFileGenerator(object):
               configuration['version'] = version.strip().strip('\'').strip('"')
 
     if not configuration['version']:
-      for version_file in glob.glob(os.path.join(
-          source_directory, '**', '__init__.py')):
-        with open(version_file, 'r', encoding='utf8') as file_object:
-          for line in file_object:
-            if '__version__' in line and '=' in line:
-              version = line.strip().rsplit('=', maxsplit=1)[-1]
-              configuration['version'] = version.strip().strip('\'').strip('"')
+      package_version = None
 
-    if not configuration['version']:
       # idna uses package_data.py
-      for version_file in glob.glob(os.path.join(
-          source_directory, '**', 'package_data.py')):
-        with open(version_file, 'r', encoding='utf8') as file_object:
-          for line in file_object:
-            if '__version__' in line and '=' in line:
-              version = line.strip().rsplit('=', maxsplit=1)[-1]
-              configuration['version'] = version.strip().strip('\'').strip('"')
+      for file_name in ('package_data.py', 'version.py', '__init__.py'):
+        if package_version:
+          break
+
+        for version_file in glob.glob(os.path.join(
+            source_directory, '**', file_name)):
+          with open(version_file, 'r', encoding='utf8') as file_object:
+            for line in file_object:
+              # pytz sets __version__ to VERSION
+              if ('__version__' in line or line.startswith('VERSION')) and '=' in line:
+                version = line.strip().rsplit('=', maxsplit=1)[-1]
+                version = version.strip().strip('\'').strip('"')
+                if version != 'VERSION':
+                  package_version = version
+                  break
+
+      if package_version:
+        configuration['version'] = package_version
 
     if rpm_build_dependencies:
       build_requires = rpm_build_dependencies
