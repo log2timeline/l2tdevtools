@@ -97,7 +97,7 @@ Else
 	Write-Host ${Output}
 }
 
-$Arguments = "--hidden-import artifacts --hidden-import future --hidden-import pysigscan --hidden-import requests --hidden-import yara --onedir tools\log2timeline.py"
+$Arguments = "--hidden-import artifacts --hidden-import pysigscan --hidden-import requests --hidden-import yara --onedir tools\log2timeline.py"
 
 If ( $Python -ne "" )
 {
@@ -157,7 +157,7 @@ Else
 	Write-Host ${Output}
 }
 
-$Arguments = "--hidden-import artifacts --hidden-import future --hidden-import pysigscan --hidden-import requests --hidden-import yara --onedir tools\psteal.py"
+$Arguments = "--hidden-import artifacts --hidden-import pysigscan --hidden-import requests --hidden-import yara --onedir tools\psteal.py"
 
 If ( $Python -ne "" )
 {

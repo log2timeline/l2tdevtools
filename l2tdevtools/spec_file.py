@@ -35,7 +35,7 @@ class RPMSpecFileGenerator(object):
 
   _SPEC_TEMPLATE_PYTHON3_BODY = [
       '%prep',
-      '%autosetup -p1 -n %{{name}}-%{{version}}',
+      '%autosetup -p1 -n {setup_name:s}-%{{version}}',
       '',
       '%build',
       '%pyproject_wheel',
@@ -127,7 +127,8 @@ class RPMSpecFileGenerator(object):
           f'{project_definition.description_long:s}\n\n')
 
     if project_definition.description_short:
-      configuration['summary'] = project_definition.description_short
+      configuration['summary'] = project_definition.description_short.replace(
+          '\n', ' ')
 
     if project_definition.homepage_url:
       configuration['url'] = project_definition.homepage_url
@@ -227,7 +228,7 @@ class RPMSpecFileGenerator(object):
 
     doc_line = self._GetDocumentationFilesDefinition(source_directory)
 
-    self._WritePython3Body(output_file_object, project_name)
+    self._WritePython3Body(output_file_object, project_definition)
 
     if has_data_package:
       self._WriteDataPackageFiles(output_file_object)
@@ -415,22 +416,22 @@ class RPMSpecFileGenerator(object):
     output_string = '\n'.join(template)
     output_file_object.write(output_string)
 
-  def _WritePython3Body(self, output_file_object, project_name):
+  def _WritePython3Body(self, output_file_object, project_definition):
     """Writes the Python 3 body.
 
     Args:
       output_file_object (file): output file-like object to write to.
-      project_name (str): name of the project.
+      project_definition (ProjectDefinition): project definition.
     """
     # TODO: handle GetInstallDefinition
 
-    if project_name == 'psutil':
-      name = '%{name}-release-%{version}'
+    if project_definition.setup_name:
+      setup_name = project_definition.setup_name
     else:
-      name = '%{name}-%{version}'
+      setup_name = '%{name}'
 
     template_mappings = {
-        'name': name}
+        'setup_name': setup_name}
 
     output_string = '\n'.join(self._SPEC_TEMPLATE_PYTHON3_BODY)
     output_string = output_string.format(**template_mappings)
@@ -588,13 +589,18 @@ class RPMSpecFileGenerator(object):
     else:
       source_extension = 'tar.gz'
 
+    if project_definition.setup_name:
+      setup_name = project_definition.setup_name
+    else:
+      setup_name = '%{name}'
+
     template_mappings = {
         'build_requires': ', '.join(build_requires),
         'description': configuration['description'],
         'group': 'Development/Libraries',
         'license': configuration['license'],
         'name': configuration['name'],
-        'source': f'%{{name}}-%{{version}}.{source_extension:s}',
+        'source': f'{setup_name:s}-%{{version}}.{source_extension:s}',
         'summary': configuration['summary'],
         'url': configuration['url'],
         'vendor': configuration['vendor'],
