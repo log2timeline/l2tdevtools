@@ -143,8 +143,8 @@ class RPMSpecFileGenerator(object):
       with open(pyproject_toml_file, 'rb') as file_object:
         pyproject_toml = tomllib.load(file_object)
 
-      has_tools_package = bool(pyproject_toml.get('project', {}).get(
-          'scripts', {}))
+      if pyproject_toml.get('project', {}).get( 'scripts', {}):
+        has_tools_package = True
 
     setup_cfg_file = os.path.join(source_directory, 'setup.cfg')
     if os.path.isfile(setup_cfg_file):
