@@ -43,6 +43,7 @@ RUN apt-get -y update && \
         python3-all \
         python3-all-dev \
 	python3-cffi \
+	python3-build \
 	python3-packaging \
 	python3-pbr \
 	python3-pkgconfig \

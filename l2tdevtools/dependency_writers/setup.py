@@ -33,8 +33,8 @@ class SetupCfgWriter(interface.DependencyFileWriter):
   _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
 
   _PROJECTS_WITH_PACKAGE_DATA = (
-      'artifacts-kb', 'dfvfs', 'dfwinreg', 'dtformats', 'esedb-kb', 'olecf-kb',
-      'plaso', 'winreg-kb', 'winsps-kb')
+      'artifacts-kb', 'dfvfs', 'dfwinreg', 'dtformats', 'esedb-kb', 'mapi-kb',
+      'olecf-kb', 'plaso', 'winreg-kb', 'winsps-kb')
 
   _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.cfg')
 
