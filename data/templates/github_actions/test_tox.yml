@@ -24,8 +24,10 @@ jobs:
           toxenv: 'py312,wheel'
         - python-version: '3.13'
           toxenv: 'py313,wheel'
+        - python-version: '3.14'
+          toxenv: 'py314,wheel'
     container:
-      image: ubuntu:22.04
+      image: ubuntu:24.04
     steps:
     - uses: actions/checkout@v4
     - name: Set up container
@@ -45,9 +47,6 @@ jobs:
         add-apt-repository -y ppa:gift/dev
         apt-get update -q
         apt-get install -y build-essential git ${dpkg_dev_dependencies} python$${{ matrix.python-version }} python$${{ matrix.python-version }}-dev python$${{ matrix.python-version }}-venv ${dpkg_dependencies}
-    - name: Install tox
-      run: |
-        python3 -m pip install tox
     - name: Run tests
       env:
         LANG: en_US.UTF-8
@@ -58,10 +57,10 @@ jobs:
     strategy:
       matrix:
         include:
-        - python-version: '3.10'
+        - python-version: '3.12'
           toxenv: 'coverage'
     container:
-      image: ubuntu:22.04
+      image: ubuntu:24.04
     steps:
     - uses: actions/checkout@v4
     - name: Set up container
@@ -81,9 +80,6 @@ jobs:
         add-apt-repository -y ppa:gift/dev
         apt-get update -q
         apt-get install -y build-essential git ${dpkg_dev_dependencies} python$${{ matrix.python-version }} python$${{ matrix.python-version }}-dev python$${{ matrix.python-version }}-venv ${dpkg_dependencies}
-    - name: Install tox
-      run: |
-        python3 -m pip install tox
     - name: Run tests with coverage
       env:
         LANG: en_US.UTF-8
@@ -101,7 +97,7 @@ jobs:
         - python-version: '3.12'
           toxenv: 'lint'
     container:
-      image: ubuntu:22.04
+      image: ubuntu:24.04
     steps:
     - uses: actions/checkout@v4
     - name: Set up container
@@ -121,9 +117,6 @@ jobs:
         add-apt-repository -y ppa:gift/dev
         apt-get update -q
         apt-get install -y build-essential git ${dpkg_dev_dependencies} python$${{ matrix.python-version }} python$${{ matrix.python-version }}-dev python$${{ matrix.python-version }}-venv ${dpkg_dependencies}
-    - name: Install tox
-      run: |
-        python3 -m pip install tox
     - name: Run linter
       env:
         LANG: en_US.UTF-8

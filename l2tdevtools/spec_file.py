@@ -4,6 +4,7 @@
 import datetime
 import glob
 import os
+import tomllib
 
 from setuptools.config import setupcfg
 
@@ -33,11 +34,8 @@ class RPMSpecFileGenerator(object):
       '']
 
   _SPEC_TEMPLATE_PYTHON3_BODY = [
-      '# %generate_buildrequires',
-      '# %pyproject_buildrequires -R',
-      '#',
       '%prep',
-      '%autosetup -p1 -n %{{name}}-%{{version}}',
+      '%autosetup -p1 -n {setup_name:s}-%{{version}}',
       '',
       '%build',
       '%pyproject_wheel',
@@ -101,15 +99,15 @@ class RPMSpecFileGenerator(object):
 
     python_module_name = project_name
 
-    if os.path.isdir(os.path.join(source_directory, 'scripts')):
-      has_tools_package = True
-    elif os.path.isdir(os.path.join(source_directory, 'tools')):
-      has_tools_package = True
-    elif os.path.isdir(os.path.join(
-        source_directory, python_module_name, 'scripts')):
-      has_tools_package = True
-    else:
-      has_tools_package = False
+    tools_directory = os.path.join(source_directory, 'scripts')
+    if not os.path.isdir(tools_directory):
+      tools_directory = os.path.join(source_directory, 'tools')
+    if not os.path.isdir(tools_directory):
+      tools_directory = os.path.join(
+          source_directory, python_module_name, 'scripts')
+
+    has_tools_package = bool(os.path.isdir(
+        tools_directory) and glob.glob(os.path.join(tools_directory, '*.py')))
 
     if project_definition.srpm_name:
       package_name = project_definition.srpm_name
@@ -126,7 +124,8 @@ class RPMSpecFileGenerator(object):
           f'{project_definition.description_long:s}\n\n')
 
     if project_definition.description_short:
-      configuration['summary'] = project_definition.description_short
+      configuration['summary'] = project_definition.description_short.replace(
+          '\n', ' ')
 
     if project_definition.homepage_url:
       configuration['url'] = project_definition.homepage_url
@@ -137,8 +136,13 @@ class RPMSpecFileGenerator(object):
     if project_definition.maintainer:
       configuration['vendor'] = project_definition.maintainer
 
-    # TODO: add support for pyproject.toml
-    # build.util.project_wheel_metadata
+    pyproject_toml_file = os.path.join(source_directory, 'pyproject.toml')
+    if os.path.isfile(pyproject_toml_file):
+      with open(pyproject_toml_file, 'rb') as file_object:
+        pyproject_toml = tomllib.load(file_object)
+
+      if pyproject_toml.get('project', {}).get( 'scripts', {}):
+        has_tools_package = True
 
     setup_cfg_file = os.path.join(source_directory, 'setup.cfg')
     if os.path.isfile(setup_cfg_file):
@@ -166,21 +170,26 @@ class RPMSpecFileGenerator(object):
 
     if not configuration['version']:
       for version_file in glob.glob(os.path.join(
-          source_directory, '**', 'version.py')):
-        with open(version_file, 'r', encoding='utf8') as file_object:
-          for line in file_object:
-            if '__version__' in line and '=' in line:
-              version = line.strip().rsplit('=', maxsplit=1)[-1]
-              configuration['version'] = version.strip().strip('\'').strip('"')
-
-    if not configuration['version']:
-      for version_file in glob.glob(os.path.join(
           source_directory, '**', '__init__.py')):
         with open(version_file, 'r', encoding='utf8') as file_object:
           for line in file_object:
-            if '__version__' in line and '=' in line:
-              version = line.strip().rsplit('=', maxsplit=1)[-1]
-              configuration['version'] = version.strip().strip('\'').strip('"')
+            line = line.strip()
+            if line.startswith('__version__') and '=' in line:
+              version = line.rsplit('=', maxsplit=1)[-1]
+              version = version.strip().strip('\'').strip('"')
+              # pytz sets __version__ to VERSION
+              if version != 'VERSION':
+                configuration['version'] = version
+              break
+
+    if not configuration['version']:
+      for version_file in glob.glob(os.path.join(source_directory, 'PKG-INFO')):
+        with open(version_file, 'r', encoding='utf8') as file_object:
+          for line in file_object:
+            if line.startswith('Version: '):
+              version = line.strip().rsplit(':', maxsplit=1)[-1]
+              configuration['version'] = version.strip()
+              break
 
     if rpm_build_dependencies:
       build_requires = rpm_build_dependencies
@@ -216,7 +225,7 @@ class RPMSpecFileGenerator(object):
 
     doc_line = self._GetDocumentationFilesDefinition(source_directory)
 
-    self._WritePython3Body(output_file_object, project_name)
+    self._WritePython3Body(output_file_object, project_definition)
 
     if has_data_package:
       self._WriteDataPackageFiles(output_file_object)
@@ -404,22 +413,22 @@ class RPMSpecFileGenerator(object):
     output_string = '\n'.join(template)
     output_file_object.write(output_string)
 
-  def _WritePython3Body(self, output_file_object, project_name):
+  def _WritePython3Body(self, output_file_object, project_definition):
     """Writes the Python 3 body.
 
     Args:
       output_file_object (file): output file-like object to write to.
-      project_name (str): name of the project.
+      project_definition (ProjectDefinition): project definition.
     """
     # TODO: handle GetInstallDefinition
 
-    if project_name == 'psutil':
-      name = '%{name}-release-%{version}'
+    if project_definition.setup_name:
+      setup_name = project_definition.setup_name
     else:
-      name = '%{name}-%{version}'
+      setup_name = '%{name}'
 
     template_mappings = {
-        'name': name}
+        'setup_name': setup_name}
 
     output_string = '\n'.join(self._SPEC_TEMPLATE_PYTHON3_BODY)
     output_string = output_string.format(**template_mappings)
@@ -577,13 +586,18 @@ class RPMSpecFileGenerator(object):
     else:
       source_extension = 'tar.gz'
 
+    if project_definition.setup_name:
+      setup_name = project_definition.setup_name
+    else:
+      setup_name = '%{name}'
+
     template_mappings = {
         'build_requires': ', '.join(build_requires),
         'description': configuration['description'],
         'group': 'Development/Libraries',
         'license': configuration['license'],
         'name': configuration['name'],
-        'source': f'%{{name}}-%{{version}}.{source_extension:s}',
+        'source': f'{setup_name:s}-%{{version}}.{source_extension:s}',
         'summary': configuration['summary'],
         'url': configuration['url'],
         'vendor': configuration['vendor'],

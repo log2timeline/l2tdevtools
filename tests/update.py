@@ -50,7 +50,7 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
   # pylint: disable=protected-access
 
   _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20240505'
+  _PROJECT_VERSION = '20251019'
 
   def testGetAvailableWheelPackages(self):
     """Tests the _GetAvailableWheelPackages function."""
@@ -69,7 +69,7 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
 
       for package_download in available_packages:
         if package_download.name == self._PROJECT_NAME:
-          expected_package_filename = '{0:s}-{1:s}-py2.py3-none-any.whl'.format(
+          expected_package_filename = '{0:s}-{1:s}-py3-none-any.whl'.format(
               self._PROJECT_NAME, self._PROJECT_VERSION)
           self.assertEqual(package_download.filename, expected_package_filename)
 
@@ -95,7 +95,7 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
         self.assertEqual(len(glob_results), 1)
 
         expected_path = os.path.join(
-            temp_directory, '{0:s}-{1:s}-py2.py3-none-any.whl'.format(
+            temp_directory, '{0:s}-{1:s}-py3-none-any.whl'.format(
                 self._PROJECT_NAME, self._PROJECT_VERSION))
         self.assertEqual(glob_results[0], expected_path)
 
