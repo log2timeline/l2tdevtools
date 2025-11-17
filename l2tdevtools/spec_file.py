@@ -4,6 +4,7 @@
 import datetime
 import glob
 import os
+import tomllib
 
 from setuptools.config import setupcfg
 
@@ -33,9 +34,6 @@ class RPMSpecFileGenerator(object):
       '']
 
   _SPEC_TEMPLATE_PYTHON3_BODY = [
-      '# %generate_buildrequires',
-      '# %pyproject_buildrequires -R',
-      '#',
       '%prep',
       '%autosetup -p1 -n %{{name}}-%{{version}}',
       '',
@@ -140,8 +138,13 @@ class RPMSpecFileGenerator(object):
     if project_definition.maintainer:
       configuration['vendor'] = project_definition.maintainer
 
-    # TODO: add support for pyproject.toml
-    # build.util.project_wheel_metadata
+    pyproject_toml_file = os.path.join(source_directory, 'pyproject.toml')
+    if os.path.isfile(pyproject_toml_file):
+      with open(pyproject_toml_file, 'rb') as file_object:
+        pyproject_toml = tomllib.load(file_object)
+
+      has_tools_package = bool(pyproject_toml.get('project', {}).get(
+          'scripts', {}))
 
     setup_cfg_file = os.path.join(source_directory, 'setup.cfg')
     if os.path.isfile(setup_cfg_file):
