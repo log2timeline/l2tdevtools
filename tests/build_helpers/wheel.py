@@ -20,7 +20,7 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
 
   _TEST_PROJECT_NAME = 'dfdatetime'
   _TEST_PROJECT_VERSION = '20190517'
-  _TEST_WHEEL_FILENAME = '{0:s}-{1:s}-py2.py3-none-any.whl'.format(
+  _TEST_WHEEL_FILENAME = '{0:s}-{1:s}-py3-none-any.whl'.format(
       _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
 
   def testInitialize(self):
@@ -102,7 +102,7 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
 
     with shared_test_lib.TempDirectory() as temp_directory:
       test_path = os.path.join(
-          temp_directory, '{0:s}-20180101-py2.py3-none-any.whl'.format(
+          temp_directory, '{0:s}-20180101-py3-none-any.whl'.format(
               self._TEST_PROJECT_NAME))
       with open(test_path, 'a', encoding='utf-8'):
         pass
@@ -185,7 +185,7 @@ class SetuptoolsWheelBuildHelperTest(shared_test_lib.BaseTestCase):
   _TEST_PROJECT_VERSION = '20190517'
   _TEST_SOURCE_PACKAGE = '{0:s}-{1:s}.tar.gz'.format(
       _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
-  _TEST_WHEEL_FILENAME = '{0:s}-{1:s}-py2.py3-none-any.whl'.format(
+  _TEST_WHEEL_FILENAME = '{0:s}-{1:s}-py3-none-any.whl'.format(
       _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
 
   def testBuild(self):
