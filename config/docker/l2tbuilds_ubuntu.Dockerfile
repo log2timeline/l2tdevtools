@@ -25,6 +25,7 @@ RUN apt-get -y update && \
         dput \
 	fakeroot \
         flex \
+        flit \
         git \
         gnupg2 \
 	libdistro-info-perl \
@@ -44,7 +45,6 @@ RUN apt-get -y update && \
         python3-all-dev \
 	python3-cffi \
 	python3-build \
-	python3-flit-core \
 	python3-hatchling \
 	python3-packaging \
 	python3-pbr \
