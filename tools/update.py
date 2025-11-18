@@ -267,7 +267,7 @@ class DependencyUpdater(object):
 
   # Some projects have different wheel names than their project names.
   _ALTERNATE_NAMES = {
-      'bencode_py': 'bencode',
+      'bencode.py': 'bencode_py',
       'flor': 'Flor',
       'lz4': 'python-lz4',
       'pyyaml': 'PyYAML',
@@ -412,10 +412,6 @@ class DependencyUpdater(object):
       # Ignore package names if user defined.
       if user_defined_package_names:
         in_package_names = package_name in user_defined_package_names
-
-        # TODO: remove this work-around.
-        if package_name == 'bencode.py':
-          in_package_names = 'bencode' in user_defined_package_names
 
         alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
         if alternate_name:
