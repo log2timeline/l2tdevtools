@@ -429,7 +429,8 @@ class DependencyUpdater(object):
         if alternate_name:
           if ((self._exclude_packages and in_package_names) or
               (not self._exclude_packages and not in_package_names)):
-            in_package_names = alternate_name in user_defined_wheel_package_names
+            in_package_names = (
+                alternate_name in user_defined_wheel_package_names)
 
         if ((self._exclude_packages and in_package_names) or
             (not self._exclude_packages and not in_package_names)):
