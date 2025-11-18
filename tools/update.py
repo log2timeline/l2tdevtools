@@ -265,12 +265,12 @@ class DependencyUpdater(object):
       'org.python.pypi.',
       'net.sourceforge.projects.']
 
-  # Some projects have different names than their module names.
+  # Some projects have different wheel names than their project names.
   _ALTERNATE_NAMES = {
+      # TODO: remove bencode.py after Python 3.14 upgrade.
       'bencode.py': 'bencode',
+      'bencode_py': 'bencode',
       'lz4': 'python-lz4',
-      'redis': 'redis-py',
-      'snappy': 'python-snappy',
       'zstd': 'python-zstd'}
 
   def __init__(
