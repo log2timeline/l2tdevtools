@@ -267,12 +267,11 @@ class DependencyUpdater(object):
 
   # Some projects have different wheel names than their project names.
   _ALTERNATE_NAMES = {
-      # TODO: remove bencode.py after Python 3.14 upgrade.
-      'bencode.py': 'bencode',
       'bencode_py': 'bencode',
       'flor': 'Flor',
       'lz4': 'python-lz4',
       'pyyaml': 'PyYAML',
+      'redis': 'redis-py',
       'zstd': 'python-zstd'}
 
   def __init__(
@@ -413,6 +412,10 @@ class DependencyUpdater(object):
       # Ignore package names if user defined.
       if user_defined_package_names:
         in_package_names = package_name in user_defined_package_names
+
+        # TODO: remove this work-around.
+        if package_name == 'bencode.py':
+          in_package_names = 'bencode' in user_defined_package_names
 
         alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
         if alternate_name:
