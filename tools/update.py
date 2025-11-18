@@ -265,8 +265,8 @@ class DependencyUpdater(object):
       'org.python.pypi.',
       'net.sourceforge.projects.']
 
-  # Some projects have different module names than their project names.
-  _MODULE_ALIASES = {
+  # Some projects have different PyPI names than their project names.
+  _PYPI_ALIASES = {
       'flor': 'Flor',
       'lz4': 'python-lz4',
       'redis': 'redis-py',
@@ -275,13 +275,16 @@ class DependencyUpdater(object):
 
   # Some projects have different wheel names in l2tbinaries than defined
   # in their project definitions.
+  # TODO: remove after l2tbinaries Python 3.14 upgrade.
   _WHEEL_ALIASES = {
-      # TODO: remove after l2tbinaries Python 3.14 upgrade.
       'bencode.py': 'bencode_py',
-      # TODO: remove after l2tbinaries Python 3.14 upgrade.
       'PyYAML': 'pyyaml',
-      # TODO: remove after l2tbinaries Python 3.14 upgrade.
       'XlsxWriter': 'xlsxwriter'}
+
+  # Some projects have different wheel names than their project names.
+  _PROJECT_ALIASES = {
+      'bencode.py': 'bencode',
+      'bencode_py': 'bencode'}
 
   def __init__(
       self, download_directory='build', download_only=False,
@@ -446,7 +449,7 @@ class DependencyUpdater(object):
       project_definition = project_definition_per_package_name.get(
           package_name, None)
       if not project_definition:
-        alternate_name = self._WHEEL_ALIASES.get(package_name, None)
+        alternate_name = self._PROJECT_ALIASES.get(package_name, None)
         if alternate_name:
           project_definition = project_definitions.get(alternate_name, None)
 
@@ -506,7 +509,7 @@ class DependencyUpdater(object):
     for project_name in user_defined_project_names:
       project_definition = project_definitions.get(project_name, None)
       if not project_definition:
-        alternate_name = self._MODULE_ALIASES.get(project_name, None)
+        alternate_name = self._PYPI_ALIASES.get(project_name, None)
         if alternate_name:
           project_definition = project_definitions.get(alternate_name, None)
 
