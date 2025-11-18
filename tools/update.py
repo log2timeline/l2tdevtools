@@ -265,14 +265,27 @@ class DependencyUpdater(object):
       'org.python.pypi.',
       'net.sourceforge.projects.']
 
-  # Some projects have different wheel names than their project names.
-  _ALTERNATE_NAMES = {
-      # TODO: remove bencode.py after Python 3.14 upgrade.
-      'bencode.py': 'bencode',
-      'bencode_py': 'bencode',
+  # Some projects have different PyPI names than their project names.
+  _PYPI_ALIASES = {
       'flor': 'Flor',
       'lz4': 'python-lz4',
-      'pyyaml': 'PyYAML',
+      'redis': 'redis-py',
+      'snappy': 'python-snappy',
+      'zstd': 'python-zstd'}
+
+  # Some projects have different wheel names in l2tbinaries than defined
+  # in their project definitions.
+  # TODO: remove after l2tbinaries Python 3.14 upgrade.
+  _WHEEL_ALIASES = {
+      'bencode.py': 'bencode_py',
+      'PyYAML': 'pyyaml',
+      'XlsxWriter': 'xlsxwriter'}
+
+  # Some projects have different wheel names than their project names.
+  _PROJECT_ALIASES = {
+      'bencode.py': 'bencode',
+      'bencode_py': 'bencode',
+      'lz4': 'python-lz4',
       'zstd': 'python-zstd'}
 
   def __init__(
@@ -376,7 +389,7 @@ class DependencyUpdater(object):
 
   def _GetWheelPackageFilenamesAndVersions(
       self, project_definitions, available_packages,
-      user_defined_package_names):
+      user_defined_wheel_package_names):
     """Determines the wheel package filenames and versions.
 
     Args:
@@ -384,10 +397,10 @@ class DependencyUpdater(object):
           per name.
       available_packages (list[PackageDownload]): packages available for
           download.
-      user_defined_package_names (list[str]): names of packages that should be
-          updated if an update is available. These package names are derived
-          from the user specified names of projects. An empty list represents
-          all available packages.
+      user_defined_wheel_package_names (list[str]): names of the wheels of
+          packages that should be updated if an update is available. These
+          package names are derived from the user specified names of projects.
+          An empty list represents all available packages.
 
     Returns:
       tuple: containing:
@@ -411,14 +424,15 @@ class DependencyUpdater(object):
           self._download_directory, package_filename)
 
       # Ignore package names if user defined.
-      if user_defined_package_names:
-        in_package_names = package_name in user_defined_package_names
+      if user_defined_wheel_package_names:
+        in_package_names = package_name in user_defined_wheel_package_names
 
-        alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
+        alternate_name = self._WHEEL_ALIASES.get(package_name, None)
         if alternate_name:
           if ((self._exclude_packages and in_package_names) or
               (not self._exclude_packages and not in_package_names)):
-            in_package_names = alternate_name in user_defined_package_names
+            in_package_names = (
+                alternate_name in user_defined_wheel_package_names)
 
         if ((self._exclude_packages and in_package_names) or
             (not self._exclude_packages and not in_package_names)):
@@ -438,7 +452,7 @@ class DependencyUpdater(object):
       project_definition = project_definition_per_package_name.get(
           package_name, None)
       if not project_definition:
-        alternate_name = self._ALTERNATE_NAMES.get(package_name, None)
+        alternate_name = self._PROJECT_ALIASES.get(package_name, None)
         if alternate_name:
           project_definition = project_definitions.get(alternate_name, None)
 
@@ -494,11 +508,11 @@ class DependencyUpdater(object):
           available. These package names are derived from the user specified
           names of projects. An empty list represents all available packages.
     """
-    user_defined_package_names = []
+    user_defined_wheel_package_names = []
     for project_name in user_defined_project_names:
       project_definition = project_definitions.get(project_name, None)
       if not project_definition:
-        alternate_name = self._ALTERNATE_NAMES.get(project_name, None)
+        alternate_name = self._PYPI_ALIASES.get(project_name, None)
         if alternate_name:
           project_definition = project_definitions.get(alternate_name, None)
 
@@ -511,9 +525,9 @@ class DependencyUpdater(object):
           project_definition, 'wheel_name', None) or project_name
 
       package_name = package_name.lower()
-      user_defined_package_names.append(package_name)
+      user_defined_wheel_package_names.append(package_name)
 
-    return user_defined_package_names
+    return user_defined_wheel_package_names
 
   def _InstallWheelPackagesWindows(self, package_filenames, package_versions):
     """Installs wheel packages on Windows.
@@ -582,7 +596,7 @@ class DependencyUpdater(object):
     """
     project_definitions = self._GetProjectDefinitions(projects_file)
 
-    user_defined_package_names = self._GetUserDefinedWheelPackageNames(
+    user_defined_wheel_package_names = self._GetUserDefinedWheelPackageNames(
         project_definitions, user_defined_project_names)
 
     available_packages = self._GetAvailableWheelPackages()
@@ -596,7 +610,7 @@ class DependencyUpdater(object):
     package_filenames, package_versions = (
         self._GetWheelPackageFilenamesAndVersions(
             project_definitions, available_packages,
-            user_defined_package_names))
+            user_defined_wheel_package_names))
 
     if self._download_only:
       return True
