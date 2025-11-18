@@ -270,7 +270,9 @@ class DependencyUpdater(object):
       # TODO: remove bencode.py after Python 3.14 upgrade.
       'bencode.py': 'bencode',
       'bencode_py': 'bencode',
+      'flor': 'Flor',
       'lz4': 'python-lz4',
+      'pyyaml': 'PyYAML',
       'zstd': 'python-zstd'}
 
   def __init__(
