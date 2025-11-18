@@ -284,7 +284,9 @@ class DependencyUpdater(object):
   # Some projects have different wheel names than their project names.
   _PROJECT_ALIASES = {
       'bencode.py': 'bencode',
-      'bencode_py': 'bencode'}
+      'bencode_py': 'bencode',
+      'lz4': 'python-lz4',
+      'zstd': 'python-zstd'}
 
   def __init__(
       self, download_directory='build', download_only=False,
