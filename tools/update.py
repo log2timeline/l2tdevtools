@@ -267,7 +267,7 @@ class DependencyUpdater(object):
 
   # Some projects have different names than their module names.
   _ALTERNATE_NAMES = {
-      'bencode_py': 'bencode.py',
+      'bencode.py': 'bencode',
       'lz4': 'python-lz4',
       'redis': 'redis-py',
       'snappy': 'python-snappy',
