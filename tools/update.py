@@ -366,7 +366,7 @@ class DependencyUpdater(object):
       (package_name, package_version, python_tag1, python_tag2,
        _) = package_filename[:-4].split('-')
 
-      if (python_tag1 not in (python_version_indicator, 'py2.py3', 'py3') or
+      if (python_tag1 not in (python_version_indicator, 'py2.py3', 'py3') and
           python_tag2 != 'abi3'):
         # Ignore packages that are for different versions of Python.
         continue
