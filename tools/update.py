@@ -363,10 +363,11 @@ class DependencyUpdater(object):
         # Ignore all other file extensions.
         continue
 
-      (package_name, package_version, python_tags,
-       _, _) = package_filename[:-4].split('-')
+      (package_name, package_version, python_tag1, python_tag2,
+       _) = package_filename[:-4].split('-')
 
-      if python_tags not in (python_version_indicator, 'py2.py3', 'py3'):
+      if (python_tag1 not in (python_version_indicator, 'py2.py3', 'py3') or
+          python_tag2 != 'abi3'):
         # Ignore packages that are for different versions of Python.
         continue
 
