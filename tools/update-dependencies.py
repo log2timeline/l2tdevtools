@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=invalid-name
 """Script to update the dependencies in various configuration files."""
@@ -22,7 +22,6 @@ from l2tdevtools.dependency_writers import gift_ppa
 from l2tdevtools.dependency_writers import jenkins_scripts
 from l2tdevtools.dependency_writers import linux_scripts
 from l2tdevtools.dependency_writers import pylint_rc
-from l2tdevtools.dependency_writers import requirements
 from l2tdevtools.dependency_writers import setup
 from l2tdevtools.dependency_writers import sphinx_docs
 from l2tdevtools.dependency_writers import tox_ini
@@ -45,9 +44,7 @@ def Main():
   dependencies_helper = dependencies.DependencyHelper()
 
   for writer_class in (
-      pylint_rc.PylintRcWriter, requirements.RequirementsWriter,
-      requirements.TestRequirementsWriter, setup.PyprojectTomlWriter,
-      setup.SetupCfgWriter, setup.SetupPyWriter):
+      pylint_rc.PylintRcWriter, setup.PyprojectTomlWriter):
     writer = writer_class(
         l2tdevtools_path, project_definition, dependencies_helper)
     writer.Write()

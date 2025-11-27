@@ -26,7 +26,7 @@ class DependencyDefinition(object):
     skip_check (bool): True if the dependency should be skipped by the
         CheckDependencies or CheckTestDependencies methods of DependencyHelper.
     skip_requires (bool): True if the dependency should be excluded from
-        requirements.txt or setup.py install_requires.
+        pyproject.toml dependencies.
     version_property (str): name of the version attribute or function.
   """
 
@@ -421,7 +421,8 @@ class DependencyHelper(object):
         requires_string = ' '.join([requires_string, ','.join(requires_part)])
 
       if module_name in ('pyxattr', 'xattr'):
-        requires_string = f'{requires_string:s} ; platform_system != "Windows"'
+        requires_string = (
+            f'{requires_string:s} ; platform_system != \\"Windows\\"')
 
       install_requires.append(requires_string)
 

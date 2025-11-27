@@ -1,4 +1,0 @@
-
-[options.package_data]
-${python_module_name} =
-${package_data}

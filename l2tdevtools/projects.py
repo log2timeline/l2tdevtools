@@ -52,7 +52,7 @@ class ProjectDefinition(object):
     rpm_dependencies (list[str]): rpm dependencies.
     rpm_name (str): RPM package name.
     rpm_template_spec (str): name of the rpm spec file.
-    setup_name (str): project name used in setup.py.
+    setup_name (str): project name used by setup.py or pyproject.toml.
     srpm_name (str): source RPM package name.
     version (ProjectVersionDefinition): version requirements.
     wheel_name (str): Python wheel package name.
