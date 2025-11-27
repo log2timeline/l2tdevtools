@@ -19,7 +19,7 @@ class RPMSpecFileGenerator(object):
 
   _DOC_FILENAMES = [
       'CHANGES', 'CHANGES.txt', 'CHANGES.TXT',
-      'README', 'README.txt', 'README.TXT']
+      'README', 'README.md', 'README.txt', 'README.TXT']
 
   _LICENSE_FILENAMES = [
       'LICENSE', 'LICENSE.txt', 'LICENSE.TXT']
@@ -405,7 +405,7 @@ class RPMSpecFileGenerator(object):
         '%files -n %{name}-data',
         '%defattr(644,root,root,755)',
         '%license LICENSE',
-        '%doc ACKNOWLEDGEMENTS AUTHORS README',
+        '%doc ACKNOWLEDGEMENTS AUTHORS README.md',
         '%{_datadir}/%{name}/*',
         '',
         '']

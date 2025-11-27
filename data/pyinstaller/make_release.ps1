@@ -191,7 +191,7 @@ New-Item -ItemType "directory" -Path "${DistPath}\licenses"
 Copy-Item -Force ACKNOWLEDGEMENTS "${DistPath}"
 Copy-Item -Force AUTHORS "${DistPath}"
 Copy-Item -Force LICENSE "${DistPath}"
-Copy-Item -Force README "${DistPath}"
+Copy-Item -Force README.md "${DistPath}"
 
 Copy-Item -Force -Recurse "dist\image_export\*" "${DistPath}"
 Copy-Item -Force -Recurse "dist\log2timeline\*" "${DistPath}"

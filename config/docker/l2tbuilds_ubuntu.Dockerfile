@@ -11,6 +11,9 @@ RUN apt-get -y update && \
     apt-get -y install apt-transport-https apt-utils && \
     apt-get -y install libterm-readline-gnu-perl software-properties-common && \
     apt-get -y upgrade && \
+    apt-get -y install \
+        locales \
+        pinentry-tty && \
     apt-get -y install --no-install-recommends \
         autoconf \
         automake \
@@ -38,9 +41,7 @@ RUN apt-get -y update && \
 	libssl-dev \
         libtool \
 	libyaml-dev \
-        locales \
         pkg-config \
-	pinentry-tty \
 	pybuild-plugin-pyproject \
         python3-all \
         python3-all-dev \
@@ -63,16 +64,16 @@ RUN apt-get -y update && \
         tox-current-env && \
     apt-get clean && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
 
-# Set terminal to UTF-8 by default
-RUN locale-gen en_US.UTF-8
-RUN update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+# Set terminal to UTF-8 by default and changes pinentry to use TTY
+RUN locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && \
+    update-alternatives --set pinentry /usr/bin/pinentry-tty
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-# Changes pinentry to use TTY
-RUN update-alternatives --set pinentry /usr/bin/pinentry-tty
-
 # Set up the l2tdevtools source and build directories
-USER ubuntu
 WORKDIR /home/ubuntu
+
+USER ubuntu
+
 RUN git clone https://github.com/log2timeline/l2tdevtools.git

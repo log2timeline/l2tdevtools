@@ -62,12 +62,12 @@ rm -rf %{{buildroot}}
 
 %files -n %{{name}}-data
 %license LICENSE
-%doc ACKNOWLEDGEMENTS AUTHORS README
+%doc ACKNOWLEDGEMENTS AUTHORS README.md
 %{{_datadir}}/%{{name}}/*
 
 %files -n python3-%{{name}}
 %license LICENSE
-%doc README
+%doc README.md
 %{{python3_sitelib}}/artifacts
 %{{python3_sitelib}}/artifacts*.egg-info
 

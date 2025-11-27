@@ -9,16 +9,11 @@ passenv =
 setenv =
   PYTHONPATH = {toxinidir}
 deps =
-  -rrequirements.txt
-  -rtest_requirements.txt
-  docformatter
   pylint >= 3.3.0, < 3.4.0
-  setuptools
+  setuptools >= 65
   yamllint >= 1.26.0
 commands =
-  docformatter --version
   pylint --version
   yamllint -v
-  docformatter --check --diff --recursive ${paths_to_lint_python}
   pylint --rcfile=.pylintrc ${paths_to_lint_python}
   yamllint -c .yamllint.yaml ${paths_to_lint_yaml}

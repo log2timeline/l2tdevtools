@@ -3,6 +3,7 @@
 
 import datetime
 import glob
+import logging
 import os
 
 from l2tdevtools.dependency_writers import interface
@@ -13,55 +14,11 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
 
   PATH = os.path.join('pyproject.toml')
 
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'pyproject.toml')
-
-  def Write(self):
-    """Writes a pyproject.toml file."""
-    path = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
-    with open(path, 'r', encoding='utf-8') as file_object:
-      file_content = file_object.read()
-
-    with open(self.PATH, 'w', encoding='utf-8') as file_object:
-      file_object.write(file_content)
-
-
-class SetupCfgWriter(interface.DependencyFileWriter):
-  """Setup configuration file writer."""
-
-  PATH = 'setup.cfg'
-
-  _DOC_FILES = ('ACKNOWLEDGEMENTS', 'AUTHORS', 'LICENSE', 'README')
-
   _PROJECTS_WITH_PACKAGE_DATA = (
       'artifacts-kb', 'dfvfs', 'dfwinreg', 'dtformats', 'esedb-kb', 'mapi-kb',
       'olecf-kb', 'plaso', 'winreg-kb', 'winsps-kb')
 
-  _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'setup.cfg')
-
-  def _DetermineSubmoduleLevels(self, python_module_name):
-    """Determines the number of submodule levels.
-
-    Args:
-      python_module_name (str): name of the Python module.
-
-    Return:
-      int: number of submodule levels.
-    """
-    submodule_glob = python_module_name
-    submodule_levels = 0
-
-    while submodule_levels < 10:
-      submodule_glob = f'{submodule_glob:s}/*'
-      submodule_paths = [
-          path for path in glob.glob(submodule_glob)
-          if os.path.isdir(path) and os.path.basename(path) != '__pycache__']
-
-      if not submodule_paths:
-        break
-
-      submodule_levels += 1
-
-    return submodule_levels
+  _TEMPLATE_DIRECTORY = os.path.join('data', 'templates', 'pyproject.toml')
 
   def _GenerateFromTemplate(self, template_filename, template_mappings):
     """Generates file context based on a template file.
@@ -79,14 +36,11 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     """
     template_filename = os.path.join(
         self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
-    return super(SetupCfgWriter, self)._GenerateFromTemplate(
+    return super(PyprojectTomlWriter, self)._GenerateFromTemplate(
         template_filename, template_mappings)
 
   def Write(self):
-    """Writes a setup.cfg file."""
-    description_long = ' '.join(
-        self._project_definition.description_long.split('\n'))
-
+    """Writes a pyproject.toml file."""
     if self._project_definition.status == 'experimental':
       development_status = 'Development Status :: 2 - Pre-Alpha'
     elif self._project_definition.status == 'alpha':
@@ -98,11 +52,7 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     else:
       development_status = ''
 
-    doc_files = [
-        doc_file for doc_file in self._DOC_FILES if os.path.isfile(doc_file)]
-
-    formatted_doc_files = [
-        f'  {doc_file:s}' for doc_file in sorted(doc_files)]
+    # TODO: handle license-files
 
     maintainer_name, _, maintainer_email = (
         self._project_definition.maintainer.partition('<'))
@@ -113,8 +63,6 @@ class SetupCfgWriter(interface.DependencyFileWriter):
 
     if self._project_definition.name.endswith('-kb'):
       python_module_name = ''.join([python_module_name[:-3], 'rc'])
-
-    # TODO: handle data directory without yaml files.
 
     package_data = []
     for data_file in glob.glob(
@@ -129,8 +77,9 @@ class SetupCfgWriter(interface.DependencyFileWriter):
       if data_file not in package_data:
         package_data.append(data_file)
 
-    formatted_package_data = [
-        f'  {data_file:s}' for data_file in sorted(package_data)]
+    readme_file = 'README.md'
+    if not os.path.isfile(readme_file):
+      readme_file = 'README'
 
     scripts_directory = 'scripts'
     if not os.path.isdir(scripts_directory):
@@ -138,12 +87,11 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     if not os.path.isdir(scripts_directory):
       scripts_directory = None
 
-    scripts = []
     if scripts_directory:
-      scripts = glob.glob(f'{scripts_directory:s}/[a-z]*.py')
-
-    formatted_scripts = [
-        f'  {script:s}' for script in sorted(scripts)]
+      if glob.glob(f'{scripts_directory:s}/[a-z]*.py'):
+        logging.warning((
+            'Scripts are not supported by pyproject.toml, change them to '
+            'console_scripts entry points.'))
 
     console_scripts_directory = os.path.join(python_module_name, 'scripts')
     if not os.path.isdir(console_scripts_directory):
@@ -153,73 +101,77 @@ class SetupCfgWriter(interface.DependencyFileWriter):
     if console_scripts_directory:
       console_scripts = glob.glob(f'{console_scripts_directory:s}/[a-z]*.py')
 
-    entry_points_console_scripts = []
-    for console_script in sorted(console_scripts):
-      console_script = console_script.replace('.py', '')
-      module_name = console_script.replace(os.path.sep, '.')
-      name = os.path.basename(console_script)
-      entry_points_console_scripts.append(f'  {name:s} = {module_name:s}:Main')
-
     date_time = datetime.datetime.now()
     version = date_time.strftime('%Y%m%d')
 
     template_mappings = {
-        'console_scripts': '\n'.join(entry_points_console_scripts),
-        'description_long': description_long,
-        'description_short': self._project_definition.description_short,
+        'description_short': (
+            self._project_definition.description_short.rstrip(".")),
         'development_status': development_status,
-        'doc_files': '\n'.join(formatted_doc_files),
-        'homepage_url': self._project_definition.homepage_url,
-        'maintainer': self._project_definition.maintainer,
         'maintainer_email': maintainer_email,
         'maintainer_name': maintainer_name,
-        'package_data': '\n'.join(formatted_package_data),
         'python_module_name': python_module_name,
-        'scripts': '\n'.join(formatted_scripts),
+        'readme_file': readme_file,
         'version': version}
 
     file_content = []
 
-    template_data = self._GenerateFromTemplate('metadata', template_mappings)
+    template_data = self._GenerateFromTemplate('header.toml', template_mappings)
     file_content.append(template_data)
-
-    if scripts:
-      template_data = self._GenerateFromTemplate(
-          'options_scripts', template_mappings)
-      file_content.append(template_data)
-
-    if package_data:
-      template_data = self._GenerateFromTemplate(
-          'options_package_data', template_mappings)
-      file_content.append(template_data)
 
     template_data = self._GenerateFromTemplate(
-        'options_packages_find', template_mappings)
+        'project.toml', template_mappings)
     file_content.append(template_data)
 
-    if entry_points_console_scripts:
-      template_data = self._GenerateFromTemplate(
-          'options_entry_points', template_mappings)
-      file_content.append(template_data)
+    python_dependencies = self._GetPyPIPythonDependencies()
+    if python_dependencies:
+      file_content.append('dependencies = [\n')
+      for dependency in python_dependencies:
+        dependency_string = str(dependency)
+        file_content.append(f'    "{dependency_string:s}",\n')
+
+      file_content.append(']\n')
+
+    if console_scripts:
+      file_content.append('\n')
+      file_content.append('[project.scripts]\n')
+
+      for console_script in sorted(console_scripts):
+        console_script = console_script.replace('.py', '')
+        module_name = console_script.replace(os.path.sep, '.')
+        name = os.path.basename(console_script)
+        file_content.append(f'{name:s} = "{module_name:s}:Main"\n')
+
+    if self._project_definition.homepage_url:
+      file_content.append('\n')
+      file_content.append('[project.urls]\n')
+
+      if os.path.isdir('docs'):
+        url = f'https://{python_module_name:s}.readthedocs.io/en/latest'
+        file_content.append(f'Documentation = "{url:s}"\n')
+
+      url = self._project_definition.homepage_url
+      file_content.append(f'Homepage = "{url:s}"\n')
+      file_content.append(f'Repository = "{url:s}"\n')
+
+    if package_data:
+      file_content.append('\n')
+      file_content.append('[tool.setuptools.package-data]\n')
+
+      file_content.append(f'{python_module_name:s} = [\n')
+      for data_file in sorted(package_data):
+        if (self._project_definition.name == 'plaso' and
+            data_file == 'data/*.yaml'):
+          data_file = 'data/*.*'
+        file_content.append(f'    "{data_file:s}",\n')
+
+      file_content.append(']\n')
+
+    template_data = self._GenerateFromTemplate(
+        'setuptools.packages.toml', template_mappings)
+    file_content.append(template_data)
 
     file_content = ''.join(file_content)
-
-    with open(self.PATH, 'w', encoding='utf-8') as file_object:
-      file_object.write(file_content)
-
-
-class SetupPyWriter(interface.DependencyFileWriter):
-  """Setup script file writer."""
-
-  PATH = os.path.join('setup.py')
-
-  _TEMPLATE_FILE = os.path.join('data', 'templates', 'setup.py')
-
-  def Write(self):
-    """Writes a setup.py file."""
-    path = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
-    with open(path, 'r', encoding='utf-8') as file_object:
-      file_content = file_object.read()
 
     with open(self.PATH, 'w', encoding='utf-8') as file_object:
       file_object.write(file_content)

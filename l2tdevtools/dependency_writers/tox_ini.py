@@ -35,6 +35,10 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
   def Write(self):
     """Writes a tox.ini file."""
+    # TODO: Write test dependencies.
+    # python_dependencies = self._GetPyPIPythonDependencies()
+    # test_dependencies = self._GetPyPITestDependencies(python_dependencies)
+
     python_module_name = self._project_definition.name
 
     if self._project_definition.name.endswith('-kb'):
@@ -54,9 +58,6 @@ class ToxIniWriter(interface.DependencyFileWriter):
       if glob.glob(os.path.join('data', '**', '*.yaml'), recursive=True):
         paths_to_lint_yaml.append('data')
 
-    if os.path.isfile('setup.py'):
-      paths_to_lint_python.append('setup.py')
-
     if os.path.isdir('scripts'):
       paths_to_lint_python.append('scripts')
 
@@ -73,7 +74,7 @@ class ToxIniWriter(interface.DependencyFileWriter):
     if os.path.isdir('tools'):
       paths_to_lint_python.append('tools')
 
-    envlist = ['py3{10,11,12,13,14}', 'coverage', 'docformatter']
+    envlist = ['py3{10,11,12,13,14}', 'coverage']
     if os.path.isdir('docs'):
       envlist.append('docs')
 
