@@ -90,7 +90,7 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
     if scripts_directory:
       if glob.glob(f'{scripts_directory:s}/[a-z]*.py'):
         logging.warning((
-            'Scripts are not  supported by pyproject.toml, change them to '
+            'Scripts are not supported by pyproject.toml, change them to '
             'console_scripts entry points.'))
 
     console_scripts_directory = os.path.join(python_module_name, 'scripts')

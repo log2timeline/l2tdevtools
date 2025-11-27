@@ -1,0 +1,16 @@
+
+[project]
+name = "${python_module_name}"
+version = "${version}"
+description = "${description_short}"
+maintainers = [
+    { name = "${maintainer_name}", email = "${maintainer_email}" },
+]
+license = "Apache-2.0"
+license-files = ["ACKNOWLEDGEMENTS", "AUTHORS", "LICENSE"]
+readme = "${readme_file}"
+classifiers = [
+    "${development_status}",
+    "Programming Language :: Python",
+]
+requires-python = ">=3.10"

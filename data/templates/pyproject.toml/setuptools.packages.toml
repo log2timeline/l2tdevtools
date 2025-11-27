@@ -1,0 +1,5 @@
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["${python_module_name}"]
+exclude = ["docs", "tests", "tests.*", "utils"]
