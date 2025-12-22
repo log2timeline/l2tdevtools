@@ -69,6 +69,25 @@ class GitHubActionsTestDocsYmlWriter(interface.DependencyFileWriter):
       file_object.write(file_content)
 
 
+class GitHubActionsTestMacOSYmlWriter(interface.DependencyFileWriter):
+  """test_macos.yml GitHub actions workflow file writer."""
+
+  _TEMPLATE_FILE = os.path.join(
+      'data', 'templates', 'github_actions', 'test_macos.yml')
+
+  PATH = os.path.join('.github', 'workflows', 'test_macos.yml')
+
+  def Write(self):
+    """Writes a test_macos.yml GitHub actions workflow file ."""
+    template_mappings = {}
+
+    template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+    file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
+      file_object.write(file_content)
+
+
 class GitHubActionsTestToxYmlWriter(interface.DependencyFileWriter):
   """test_tox.yml GitHub actions workflow file writer."""
 
