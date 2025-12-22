@@ -1,2 +1,1 @@
-- ps: If ($$isWindows) { .\config\appveyor\install.ps1 }
-- sh: config/appveyor/install.sh
+- ps: .\config\appveyor\install.ps1

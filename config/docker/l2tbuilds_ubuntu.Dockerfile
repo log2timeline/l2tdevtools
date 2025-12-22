@@ -1,4 +1,4 @@
-FROM ubuntu:noble
+FROM ubuntu:resolute
 
 # Create container with:
 # docker build -f l2tbuilds_ubuntu.Dockerfile --force-rm --no-cache -t log2timeline/l2tbuilds_ubuntu .

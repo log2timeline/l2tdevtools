@@ -52,10 +52,9 @@ def Main():
   for writer_class in (
       github_actions.GitHubActionsTestDockerYmlWriter,
       github_actions.GitHubActionsTestDocsYmlWriter,
+      github_actions.GitHubActionsTestMacOSYmlWriter,
       github_actions.GitHubActionsTestToxYmlWriter,
       appveyor_scripts.AppVeyorInstallPS1ScriptWriter,
-      appveyor_scripts.AppVeyorInstallSHScriptWriter,
-      appveyor_scripts.AppVeyorRuntestsSHScriptWriter,
       appveyor_yml.AppveyorYmlWriter,
       check_dependencies.CheckDependenciesWriter,
       dependencies_py.DependenciesPyWriter, dpkg.DPKGCompatWriter,
