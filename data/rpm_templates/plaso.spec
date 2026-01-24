@@ -46,11 +46,10 @@ Plaso (log2timeline) is a framework to create super timelines. Its purpose is to
 %autosetup -n %{{name}}-%{{version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 mkdir -p %{{buildroot}}/usr/share/plaso/
 mv %{{buildroot}}/usr/lib/python*/site-packages/plaso/data/* %{{buildroot}}/usr/share/plaso/
@@ -69,7 +68,7 @@ rm -rf %{{buildroot}}
 %license LICENSE
 %doc README.md
 %{{python3_sitelib}}/plaso
-%{{python3_sitelib}}/plaso*.egg-info
+%{{python3_sitelib}}/plaso*.dist-info
 
 %files -n %{{name}}-tools
 %{{_bindir}}/*
