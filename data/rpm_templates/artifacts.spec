@@ -46,11 +46,10 @@ A free, community-sourced, machine-readable knowledge base of forensic artifacts
 %autosetup -n %{{name}}-%{{version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 mkdir -p %{{buildroot}}/usr/share/artifacts/
 mv %{{buildroot}}/usr/lib/python*/site-packages/artifacts/data/* %{{buildroot}}/usr/share/artifacts/
@@ -69,7 +68,7 @@ rm -rf %{{buildroot}}
 %license LICENSE
 %doc README.md
 %{{python3_sitelib}}/artifacts
-%{{python3_sitelib}}/artifacts*.egg-info
+%{{python3_sitelib}}/artifacts*.dist-info
 
 %files -n %{{name}}-tools
 %{{_bindir}}/*
