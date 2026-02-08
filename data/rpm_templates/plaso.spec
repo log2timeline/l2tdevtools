@@ -15,7 +15,7 @@ BuildArch: noarch
 Vendor: Log2Timeline maintainers <log2timeline-maintainers@googlegroups.com>
 Packager: Log2Timeline maintainers <log2timeline-maintainers@googlegroups.com>
 Url: https://github.com/log2timeline/plaso
-BuildRequires: python3-devel, python3-setuptools
+BuildRequires: python3-devel, python3-pip, python3-setuptools
 
 %{{?python_disable_dependency_generator}}
 

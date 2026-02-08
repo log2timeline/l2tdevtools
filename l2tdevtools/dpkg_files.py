@@ -14,6 +14,8 @@ class DPKGBuildConfiguration(object):
   Attributes:
     has_bin_directory (bool): True if the Python module creates
         a /usr/bin directory.
+    has_dist_info_directory (bool): True if the Python module has
+        a .dist_info directory in the dist-packages directory.
     has_egg_info_directory (bool): True if the Python module has
         an .egg_info directory in the dist-packages directory.
     has_egg_info_file (bool): True if the Python module has
@@ -30,6 +32,7 @@ class DPKGBuildConfiguration(object):
     """Initializes a dpkg build configuration."""
     super(DPKGBuildConfiguration, self).__init__()
     self.has_bin_directory = False
+    self.has_dist_info_directory = False
     self.has_egg_info_directory = False
     self.has_egg_info_file = False
     self.has_module_source_files = False
@@ -509,7 +512,11 @@ class DPKGBuildFilesGenerator(object):
                   module_directory)
               for module_directory in module_directories])
 
-          if self._build_configuration.has_egg_info_directory:
+          if self._build_configuration.has_dist_info_directory:
+            template_data.append(
+                'usr/lib/python3*/dist-packages/*.dist-info/*')
+
+          elif self._build_configuration.has_egg_info_directory:
             template_data.append(
                 'usr/lib/python3*/dist-packages/*.egg-info/*')
 

@@ -2,6 +2,7 @@
 """Helper for building projects from source."""
 
 import datetime
+import fileinput
 import glob
 import logging
 import os
@@ -263,6 +264,23 @@ class DPKGBuildHelper(interface.BuildHelper):
       logging.error('Missing debian sub directory in: {0:s}'.format(
           source_directory))
       return False
+
+    if self.distribution == 'noble':
+      control_file_path = os.path.join(debian_directory, 'control')
+      for line in fileinput.input(control_file_path, inplace=True):
+        if line.startswith('Build-Depends:'):
+          line = line.rstrip() + ', pybuild-plugin-pyproject\n'
+        print(line, end='')
+
+      patches_path = os.path.join(debian_directory, 'patches')
+      if not os.path.exists(patches_path):
+        os.mkdir(patches_path)
+
+      # pyproject_patch = os.path.join(patches_path, 'pyproject.patch')
+      # TODO: add option to control patches for noble pyproject.toml builds
+
+      # TODO: create series file
+      # patches_series = os.path.join(patches_path, 'series')
 
     return True
 
@@ -831,7 +849,14 @@ class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
         for directory_entry in os.listdir(dist_packages):
           directory_entry_path = os.path.join(dist_packages, directory_entry)
 
-          if directory_entry.endswith('.egg-info'):
+          if directory_entry.endswith('.dist-info'):
+            # pylint: disable=simplifiable-if-statement
+            if os.path.isdir(directory_entry_path):
+              build_configuration.has_dist_info_directory = True
+            else:
+              build_configuration.has_dist_info_file = True
+
+          elif directory_entry.endswith('.egg-info'):
             # pylint: disable=simplifiable-if-statement
             if os.path.isdir(directory_entry_path):
               build_configuration.has_egg_info_directory = True
