@@ -33,7 +33,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       'Standards-Version: 4.1.4',
       'X-Python3-Version: >= 3.6',
       'Homepage: {homepage_url:s}',
-      '']  # yapf: disable
+      '']
 
   _DATA_PACKAGE = [
       'Package: {project_name:s}-data',
@@ -41,7 +41,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       'Depends: ${{misc:Depends}}',
       'Description: Data files for {name_description:s}',
       '{description_long:s}',
-      ''] # yapf: disable
+      '']
 
   _PYTHON3_PACKAGE = [
       'Package: python3-{python_module_name:s}',
@@ -49,7 +49,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       'Depends: {python3_dependencies:s}${{misc:Depends}}',
       'Description: Python 3 module of {python_module_description:s}',
       '{description_long:s}',
-      '']  # yapf: disable
+      '']
 
   _TOOLS_PACKAGE = [
       'Package: {project_name:s}-tools',
@@ -58,7 +58,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
        '${{misc:Depends}}'),
       'Description: {tools_description:s}',
       '{tool_description_long:s}',
-      '']  # yapf: disable
+      '']
 
   def Write(self):
     """Writes a dpkg control file."""
@@ -91,11 +91,10 @@ class DPKGControlWriter(interface.DependencyFileWriter):
         [' {0:s}'.format(line) for line in tool_description_long.split('\n')])
 
     file_content = []
-
     file_content.extend(self._PYTHON3_FILE_HEADER)
 
     data_dependency = ''
-    if os.path.isdir('data'):
+    if self._project_definition.name in ('artifacts', 'plaso'):
       data_dependency = '{0:s}-data (>= ${{binary:Version}})'.format(
           self._project_definition.name)
 
@@ -153,7 +152,7 @@ class DPKGRulesWriter(interface.DependencyFileWriter):
 
   PATH = os.path.join('config', 'dpkg', 'rules')
 
-  _FILE_CONTENT = [
+  _HEADER = [
       '#!/usr/bin/make -f',
       '',
       '%:',
@@ -164,12 +163,29 @@ class DPKGRulesWriter(interface.DependencyFileWriter):
       '',
       '']
 
+  _DATA_PACKAGE = [
+      '.PHONY: override_dh_auto_install',
+      'override_dh_auto_install:',
+      '\tdh_auto_install',
+      '\tmkdir -p debian/tmp/usr/share/{project_name:s}',
+      '\tmv debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data/* debian/tmp/usr/share/{project_name:s}',
+      '\trmdir debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data',
+      '\tfind debian/tmp/usr/bin/ -type f -exec mv {{}} {{}}.py \\;',
+      '',
+      '']
+
   def Write(self):
     """Writes a dpkg control file."""
     template_mappings = {
         'project_name': self._project_definition.name}
 
-    file_content = '\n'.join(self._FILE_CONTENT)
+    file_content = []
+    file_content.extend(self._HEADER)
+
+    if self._project_definition.name in ('artifacts', 'plaso'):
+      file_content.extend(self._DATA_PACKAGE)
+
+    file_content = '\n'.join(file_content)
     file_content = file_content.format(**template_mappings)
 
     with open(self.PATH, 'w', encoding='utf-8') as file_object:

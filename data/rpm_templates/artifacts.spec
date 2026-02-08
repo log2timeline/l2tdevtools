@@ -15,7 +15,7 @@ BuildArch: noarch
 Vendor: Forensic artifacts <forensicartifacts@googlegroups.com>
 Packager: Forensic artifacts <forensicartifacts@googlegroups.com>
 Url: https://github.com/ForensicArtifacts/artifacts
-BuildRequires: python3-devel, python3-setuptools
+BuildRequires: python3-devel, python3-pip, python3-setuptools
 
 %{{?python_disable_dependency_generator}}
 
