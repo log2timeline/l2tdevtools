@@ -2,6 +2,7 @@
 """Helper for building projects from source."""
 
 import datetime
+import fileinput
 import glob
 import logging
 import os
@@ -275,11 +276,11 @@ class DPKGBuildHelper(interface.BuildHelper):
       if not os.path.exists(patches_path):
         os.mkdir(patches_path)
 
-      pyproject_patch = os.path.join(patches_path, 'pyproject.patch')
+      # pyproject_patch = os.path.join(patches_path, 'pyproject.patch')
       # TODO: add option to control patches for noble pyproject.toml builds
 
       # TODO: create series file
-      patches_series = os.path.join(patches_path, 'series')
+      # patches_series = os.path.join(patches_path, 'series')
 
     return True
 

@@ -168,7 +168,8 @@ class DPKGRulesWriter(interface.DependencyFileWriter):
       'override_dh_auto_install:',
       '\tdh_auto_install',
       '\tmkdir -p debian/tmp/usr/share/{project_name:s}',
-      '\tmv debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data/* debian/tmp/usr/share/{project_name:s}',
+      ('\tmv debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data/* '
+       'debian/tmp/usr/share/{project_name:s}'),
       '\trmdir debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data',
       '\tfind debian/tmp/usr/bin/ -type f -exec mv {{}} {{}}.py \\;',
       '',
