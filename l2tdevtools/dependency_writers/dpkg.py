@@ -119,7 +119,9 @@ class DPKGControlWriter(interface.DependencyFileWriter):
     if python3_dependencies:
       python3_dependencies = '{0:s}, '.format(python3_dependencies)
 
-    build_dependencies = ['python3-all (>= 3.6~)', 'python3-setuptools']
+    build_dependencies = [
+        'python3-all (>= 3.6~)', 'python3-setuptools',
+        'pybuild-plugin-pyproject']
     if self._project_definition.name == 'timesketch':
       build_dependencies.insert(0, 'dh-systemd (>= 1.5)')
       build_dependencies.append('python3-pip')
@@ -168,9 +170,9 @@ class DPKGRulesWriter(interface.DependencyFileWriter):
       'override_dh_auto_install:',
       '\tdh_auto_install',
       '\tmkdir -p debian/tmp/usr/share/{project_name:s}',
-      ('\tmv debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data/* '
-       'debian/tmp/usr/share/{project_name:s}'),
-      '\trmdir debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data',
+      ('\tmv -n debian/tmp/usr/lib/python*/dist-packages/{project_name:s}'
+       '/data/* debian/tmp/usr/share/{project_name:s}'),
+      '\trm -rf debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data',
       '\tfind debian/tmp/usr/bin/ -type f -exec mv {{}} {{}}.py \\;',
       '',
       '']

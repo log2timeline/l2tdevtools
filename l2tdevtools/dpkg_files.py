@@ -398,7 +398,7 @@ class DPKGBuildFilesGenerator(object):
       control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_PYTHON3)
 
       # TODO: add configuration setting to indicate tools should be packaged.
-      if package_name not in ('mock', 'psutil'):
+      if package_name != 'psutil':
         if (self._build_configuration and
             self._build_configuration.has_bin_directory):
           control_template.extend(self._CONTROL_TEMPLATE_SETUP_PY_TOOLS)

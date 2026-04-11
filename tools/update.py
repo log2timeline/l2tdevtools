@@ -221,7 +221,8 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
       if len(matches) == 1:
         json_dict = json.loads(matches[0])
         payload = json_dict.get('payload', {})
-        tree = payload.get('tree', {})
+        code_view_tree_route = payload.get('codeViewTreeRoute', {})
+        tree = code_view_tree_route.get('tree', {})
         for item in tree.get('items', []):
           item_path = item.get('path', None)
           download_url = (
