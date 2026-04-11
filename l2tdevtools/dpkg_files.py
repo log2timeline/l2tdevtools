@@ -86,7 +86,7 @@ class DPKGBuildFilesGenerator(object):
       'Maintainer: {upstream_maintainer:s}',
       'Build-Depends: debhelper (>= 9){build_depends:s}',
       'Standards-Version: 4.1.4',
-      'X-Python3-Version: >= 3.6',
+      'X-Python3-Version: >= 3.10',
       'Homepage: {upstream_homepage:s}',
       '',
       'Package: {python3_package_name:s}',
@@ -100,7 +100,7 @@ class DPKGBuildFilesGenerator(object):
       'Package: {source_package_name:s}-tools',
       'Architecture: all',
       ('Depends: {python3_package_name:s} (>= ${{binary:Version}}), '
-       'python3 (>= 3.6~), ${{python3:Depends}}, ${{misc:Depends}}'),
+       'python3 (>= 3.10~), ${{python3:Depends}}, ${{misc:Depends}}'),
       'Description: Tools of {description_name:s}',
       ' {description_long:s}',
       '']
@@ -315,7 +315,7 @@ class DPKGBuildFilesGenerator(object):
       if self._project_definition.build_system == 'pyproject':
         build_depends.append('pybuild-plugin-pyproject')
 
-      python3_build_depends.append('python3-all (>= 3.6~)')
+      python3_build_depends.append('python3-all (>= 3.10~)')
       python3_build_depends.append('python3-setuptools')
 
       if self._project_definition.architecture_dependent:

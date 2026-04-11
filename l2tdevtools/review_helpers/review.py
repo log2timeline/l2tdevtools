@@ -20,7 +20,6 @@ class ReviewHelper(object):
       r'\[({0:s})\] '.format(
           '|'.join(project.ProjectHelper.SUPPORTED_PROJECTS)))
 
-  # Commands that trigger inspection (pylint, yapf) of changed files.
   _CODE_INSPECTION_COMMANDS = frozenset([
       'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test'])
 
