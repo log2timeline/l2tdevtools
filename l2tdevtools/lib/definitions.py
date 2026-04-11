@@ -6,4 +6,4 @@
 DEFAULT_FEDORA_DISTRIBUTION = '43'
 
 # The default Ubuntu distribution
-DEFAULT_UBUNTU_DISTRIBUTION = 'noble'
+DEFAULT_UBUNTU_DISTRIBUTION = 'resolute'
