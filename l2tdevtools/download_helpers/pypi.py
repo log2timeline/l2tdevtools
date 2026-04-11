@@ -3,8 +3,7 @@
 
 import re
 
-# pylint: disable=wrong-import-position
-import pkg_resources
+import packaging
 
 from l2tdevtools.download_helpers import project
 
@@ -66,9 +65,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       else:
         epoch = int(epoch, 10)
 
-      # Note that pkg_resources.parse_version() returns an instance of
-      # pkg_resources.SetuptoolsVersion.
-      version_object = pkg_resources.parse_version(epoch_version_string)
+      version_object = packaging.version.parse(epoch_version_string)
 
       # Convert the result of map() into a list for Python 3.
       comparable_version = version_object.base_version.split('.')

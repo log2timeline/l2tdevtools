@@ -14,8 +14,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - python-version: '3.11'
-          toxenv: 'py311,wheel'
         - python-version: '3.12'
           toxenv: 'py312,wheel'
         - python-version: '3.13'

@@ -1,4 +1,4 @@
-FROM ubuntu:noble
+FROM ubuntu:resolute
 MAINTAINER Log2Timeline <log2timeline-dev@googlegroups.com>
 
 # Create container with:
@@ -42,7 +42,6 @@ RUN apt-get -y install --no-install-recommends $(apt-cache depends python3-plaso
 RUN apt-get -y install --no-install-recommends \
   pylint \
   python3-fakeredis \
-  python3-mock \
   python3-sphinx
 
 # Clean up apt-get cache files

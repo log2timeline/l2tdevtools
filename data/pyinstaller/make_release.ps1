@@ -212,7 +212,6 @@ Foreach ($d in $dep.context.DisplayPostContext.split(': ')[2].split(',')) {
 # Remove debug, test and yet unused dependencies.
 Remove-Item -Force ${DistPath}\licenses\LICENSE.libexe
 Remove-Item -Force ${DistPath}\licenses\LICENSE.libwrc
-Remove-Item -Force ${DistPath}\licenses\LICENSE.mock
 Remove-Item -Force ${DistPath}\licenses\LICENSE.pbr
 
 # Copy the artifacts yaml files

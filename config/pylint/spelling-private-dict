@@ -107,7 +107,6 @@ whitelist
 whitespace
 xml
 xp
-yapf
 yml
 zeromq
 zlib
