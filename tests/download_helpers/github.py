@@ -213,10 +213,9 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        'https://github.com/{0:s}/{1:s}/releases/download/{2:s}/'
-        '{1:s}-{2:s}.tar.gz').format(
-            self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
-            self._PROJECT_VERSION)
+        f'https://github.com/{self._PROJECT_ORGANIZATION:s}/'
+        f'{self._PROJECT_NAME:s}/releases/download/{self._PROJECT_VERSION:s}/'
+        f'{self._PROJECT_NAME:s}-{self._PROJECT_VERSION:s}.tar.gz')
 
     self.assertEqual(download_url, expected_download_url)
 

@@ -334,10 +334,9 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     """
     rpm_name = self._project_definition.rpm_name or project_name
 
-    filenames_glob = '{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-        rpm_name, project_version, self.architecture)
     filenames_glob = os.path.join(
-        self._rpmbuild_rpms_path, self.architecture, filenames_glob)
+        self._rpmbuild_rpms_path, self.architecture,
+        f'{rpm_name:s}-*{project_version!s}-1.{self.architecture:s}.rpm')
 
     self._MoveFilesToCurrentDirectory(filenames_glob)
 
@@ -352,19 +351,18 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
     """
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source package of: {source_helper_object.project_name:s}')
       return False
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building rpm of: {0:s}'.format(source_package_filename))
+    logging.info(f'Building rpm of: {source_package_filename:s}')
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
     # rpmbuild wants the source package filename without the status indication.
-    rpm_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
-        project_name, project_version)
+    rpm_source_package_filename = f'{project_name:s}-{project_version!s}.tar.gz'
     if not os.path.exists(rpm_source_package_filename):
       shutil.copyfile(source_package_path, rpm_source_package_filename)
 
@@ -432,8 +430,8 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
     """
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source directory of: {source_helper_object.project_name:s}')
       return None
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
@@ -471,17 +469,17 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
       _, _, rpm_name = rpm_name.partition('-')
 
     # TODO: add support for rpm_python_prefix.
-    filenames_glob = 'python*-{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-        rpm_name, project_version, self.architecture)
+    python_rpm_name = f'python*-{rpm_name:s}'
+
     filenames_glob = os.path.join(
-        self._rpmbuild_rpms_path, self.architecture, filenames_glob)
+        self._rpmbuild_rpms_path, self.architecture,
+        f'{python_rpm_name:s}-*{project_version!s}-1.{self.architecture:s}.rpm')
 
     self._MoveFilesToCurrentDirectory(filenames_glob)
 
-    filenames_glob = '{0:s}-*{1!s}-1.{2:s}.rpm'.format(
-        rpm_name, project_version, self.architecture)
     filenames_glob = os.path.join(
-        self._rpmbuild_rpms_path, self.architecture, filenames_glob)
+        self._rpmbuild_rpms_path, self.architecture,
+        f'{rpm_name:s}-*{project_version!s}-1.{self.architecture:s}.rpm')
 
     self._MoveFilesToCurrentDirectory(filenames_glob)
 
@@ -496,12 +494,12 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
     """
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source package of: {source_helper_object.project_name:s}')
       return False
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building rpm of: {0:s}'.format(source_package_filename))
+    logging.info(f'Building rpm of: {source_package_filename:s}')
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
@@ -535,7 +533,7 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
     # Remove previous versions build directories.
     for filename in ('build', 'dist'):
       if os.path.exists(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         shutil.rmtree(filename, ignore_errors=True)
 
     # Remove previous versions of rpms.
@@ -568,8 +566,9 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
         srpm_name.startswith('python3-')):
       _, _, srpm_name = srpm_name.partition('-')
 
-    filenames_glob = '{0:s}-*{1!s}-1.src.rpm'.format(srpm_name, project_version)
-    filenames_glob = os.path.join(self._rpmbuild_srpms_path, filenames_glob)
+    filenames_glob = os.path.join(
+        self._rpmbuild_srpms_path,
+        f'{srpm_name:s}-*{project_version!s}-1.src.rpm')
 
     self._MoveFilesToCurrentDirectory(filenames_glob)
 
@@ -580,25 +579,22 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    filenames_to_ignore = '{0:s}-.*{1!s}-1.src.rpm'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    filenames_to_ignore = re.compile(
+        f'{project_name:s}-.*{project_version!s}-1.src.rpm')
 
-    src_rpm_filenames_glob = '{0:s}-*-1.src.rpm'.format(project_name)
-    filenames = glob.glob(src_rpm_filenames_glob)
+    src_rpm_filenames_glob = f'{project_name:s}-*-1.src.rpm'
 
-    for filename in filenames:
+    for filename in glob.glob(src_rpm_filenames_glob):
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
     filenames_glob = os.path.join(
         self.rpmbuild_path, 'SRPMS', src_rpm_filenames_glob)
-    filenames = glob.glob(filenames_glob)
 
-    for filename in filenames:
+    for filename in glob.glob(filenames_glob):
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
   def CheckBuildRequired(self, source_helper_object):
@@ -613,10 +609,7 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    srpm_filename = '{0:s}-{1!s}-1.src.rpm'.format(
-        project_name, project_version)
-
-    return not os.path.exists(srpm_filename)
+    return not os.path.exists(f'{project_name:s}-{project_version!s}-1.src.rpm')
 
   def Clean(self, source_helper_object):
     """Cleans the rpmbuild directory.
@@ -647,20 +640,18 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
     """
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source package of: {source_helper_object.project_name:s}')
       return False
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building source rpm of: {0:s}'.format(
-        source_package_filename))
+    logging.info(f'Building source rpm of: {source_package_filename:s}')
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
     # rpmbuild wants the source package filename without the status indication.
-    rpm_source_package_filename = '{0:s}-{1!s}.tar.gz'.format(
-        project_name, project_version)
+    rpm_source_package_filename = f'{project_name:s}-{project_version!s}.tar.gz'
     shutil.copyfile(source_package_path, rpm_source_package_filename)
 
     build_successful = self._BuildFromSourcePackage(
@@ -709,8 +700,8 @@ class PyprojectSRPMBuildHelper(SRPMBuildHelper):
     """
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source directory of: {source_helper_object.project_name:s}')
       return None
 
     spec_file_generator = spec_file.RPMSpecFileGenerator(self._data_path)
@@ -744,13 +735,12 @@ class PyprojectSRPMBuildHelper(SRPMBuildHelper):
     """
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source package of: {source_helper_object.project_name:s}')
       return False
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building source rpm of: {0:s}'.format(
-        source_package_filename))
+    logging.info(f'Building source rpm of: {source_package_filename:s}')
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)

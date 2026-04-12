@@ -100,13 +100,13 @@ class DPKGBuildHelper(interface.BuildHelper):
     """
     # Script to run before building, e.g. to change the dpkg packaging files.
     if os.path.exists(self._prep_script):
-      command = 'sh ../{0:s} {1:s} {2!s} {3:s} {4:s} {5:s}'.format(
-          self._prep_script, project_name, project_version, version_suffix,
-          distribution, architecture)
-      exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-          source_directory, command), shell=True)
+      command = (
+          f'sh ../{self._prep_script:s} {project_name:s} {project_version!s} '
+          f'{version_suffix:s} {distribution:s} {architecture:s}')
+      exit_code = subprocess.call(
+          f'(cd {source_directory:s} && {command:s})', shell=True)
       if exit_code != 0:
-        logging.error('Running: "{0:s}" failed.'.format(command))
+        logging.error(f'Running: "{command:s}" failed.')
         return False
 
     return True
@@ -130,13 +130,13 @@ class DPKGBuildHelper(interface.BuildHelper):
     # Script to run after building, e.g. to automatically upload the dpkg
     # package files to an apt repository.
     if os.path.exists(self._post_script):
-      command = 'sh ../{0:s} {1:s} {2!s} {3:s} {4:s} {5:s}'.format(
-          self._post_script, project_name, project_version, version_suffix,
-          distribution, architecture)
-      exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-          source_directory, command), shell=True)
+      command = (
+          f'sh ../{self._post_script:s} {project_name:s} {project_version!s} '
+          f'{version_suffix:s} {distribution:s} {architecture:s}')
+      exit_code = subprocess.call(
+          f'(cd {source_directory:s} && {command:s})', shell=True)
       if exit_code != 0:
-        logging.error('Running: "{0:s}" failed.'.format(command))
+        logging.error(f'Running: "{command:s}" failed.')
         return False
 
     return True
@@ -150,8 +150,8 @@ class DPKGBuildHelper(interface.BuildHelper):
     Returns:
       bool: True if the package is installed, False otherwise.
     """
-    command = 'dpkg-query -s {0:s} >/dev/null 2>&1'.format(package_name)
-    exit_code = subprocess.call(command, shell=True)
+    exit_code = subprocess.call(
+        f'dpkg-query -s {package_name:s} >/dev/null 2>&1', shell=True)
     return exit_code == 0
 
   def _CreateOriginalSourcePackage(
@@ -166,8 +166,8 @@ class DPKGBuildHelper(interface.BuildHelper):
     if self._project_definition.dpkg_source_name:
       project_name = self._project_definition.dpkg_source_name
 
-    deb_orig_source_package_filename = '{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
+    deb_orig_source_package_filename = (
+        f'{project_name:s}_{project_version!s}.orig.tar.gz')
     if os.path.exists(deb_orig_source_package_filename):
       return
 
@@ -233,7 +233,7 @@ class DPKGBuildHelper(interface.BuildHelper):
     # If there is a debian directory remove it and recreate it from
     # the dpkg directory.
     if os.path.exists(debian_directory):
-      logging.info('Removing: {0:s}'.format(debian_directory))
+      logging.info(f'Removing: {debian_directory:s}')
       shutil.rmtree(debian_directory, ignore_errors=True)
 
     dpkg_directory = os.path.join(source_directory, 'dpkg')
@@ -261,8 +261,7 @@ class DPKGBuildHelper(interface.BuildHelper):
         os.chdir('..')
 
     if not os.path.exists(debian_directory):
-      logging.error('Missing debian sub directory in: {0:s}'.format(
-          source_directory))
+      logging.error(f'Missing debian sub directory in: {source_directory:s}')
       return False
 
     if self.distribution == 'noble':
@@ -360,38 +359,31 @@ class DPKGBuildHelper(interface.BuildHelper):
     if self._project_definition.dpkg_source_name:
       project_name = self._project_definition.dpkg_source_name
 
-    filenames_to_ignore = '^{0:s}[-_].*{1!s}'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    filenames_to_ignore = re.compile(
+        f'^{project_name:s}[-_].*{project_version!s}')
 
     # Remove files of previous versions in the format:
     # <project>*[-_][0-9]*-[1-9]_<architecture>.*
-    filenames_glob = '{0:s}*[-_][0-9]*-[1-9]_{1:s}.*'.format(
-        project_name, self.architecture)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
+    for filename in glob.glob(
+        f'{project_name:s}*[-_][0-9]*-[1-9]_{self.architecture:s}.*'):
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         try:
           os.remove(filename)
         except PermissionError as exception:
-          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
-              filename, exception))
+          logging.info(
+              f'Unable to remove: {filename:s} with error: {exception!s}')
 
     # Remove files of previous versions in the format:
     # <project>[-_][0-9]*-[1-9].*
-    filenames_glob = '{0:s}[-_][0-9]*-[1-9].*'.format(project_name)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
+    for filename in glob.glob(f'{project_name:s}[-_][0-9]*-[1-9].*'):
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         try:
           os.remove(filename)
         except PermissionError as exception:
-          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
-              filename, exception))
+          logging.info(
+              f'Unable to remove: {filename:s} with error: {exception!s}')
 
   def _RemoveOlderOriginalSourcePackage(
       self, project_name, project_version, version_suffix=None,
@@ -407,40 +399,33 @@ class DPKGBuildHelper(interface.BuildHelper):
     if self._project_definition.dpkg_source_name:
       project_name = self._project_definition.dpkg_source_name
 
-    filenames_to_ignore = '^{0:s}_{1!s}.orig.tar.gz'.format(
-        project_name, project_version)
-
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    filenames_to_ignore = re.compile(
+        f'^{project_name:s}_{project_version!s}.orig.tar.gz')
 
     # Remove files of previous versions in the format:
     # <project>_[0-9]*<suffix>.orig.tar.gz
-    filenames_glob = '{0:s}_[0-9]*.orig.tar.gz'.format(project_name)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
+    for filename in glob.glob(f'{project_name:s}_[0-9]*.orig.tar.gz'):
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         try:
           os.remove(filename)
         except PermissionError as exception:
-          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
-              filename, exception))
+          logging.info(
+              f'Unable to remove: {filename:s} with error: {exception!s}')
 
     # Remove files of previous versions in the format:
     # <project>_[0-9]*<suffix>~<distribution>.orig.tar.gz
     if version_suffix and distribution:
-      filenames_glob = '{0:s}_[0-9]*{1:s}~{2:s}.orig.tar.gz'.format(
-          project_name, version_suffix, distribution)
-      filenames = glob.glob(filenames_glob)
-
-      for filename in filenames:
+      for filename in glob.glob(
+          f'{project_name:s}_[0-9]*{version_suffix:s}~{distribution:s}'
+          f'.orig.tar.gz'):
         if not filenames_to_ignore.match(filename):
-          logging.info('Removing: {0:s}'.format(filename))
+          logging.info(f'Removing: {filename:s}')
           try:
             os.remove(filename)
           except PermissionError as exception:
-            logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
-                filename, exception))
+            logging.info(
+                f'Unable to remove: {filename:s} with error: {exception!s}')
 
   def _RemoveOlderSourceDPKGPackages(self, project_name, project_version):
     """Removes previous versions of source dpkg packages.
@@ -452,24 +437,21 @@ class DPKGBuildHelper(interface.BuildHelper):
     if self._project_definition.dpkg_source_name:
       project_name = self._project_definition.dpkg_source_name
 
-    filenames_to_ignore = '^{0:s}[-_].*{1!s}'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    filenames_to_ignore = re.compile(
+        f'^{project_name:s}[-_].*{project_version!s}')
 
     # Remove files of previous versions in the format:
     # <project>[-_][0-9]*-[1-9]<suffix>~<distribution>_<architecture>.*
-    filenames_glob = '{0:s}[-_][0-9]*-[1-9]{1:s}~{2:s}_{3:s}.*'.format(
-        project_name, self.version_suffix, self.distribution, self.architecture)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
+    for filename in glob.glob(
+        f'{project_name:s}[-_][0-9]*-[1-9]{self.version_suffix:s}~'
+        f'{self.distribution:s}_{self.architecture:s}.*'):
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         try:
           os.remove(filename)
         except PermissionError as exception:
-          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
-              filename, exception))
+          logging.info(
+              f'Unable to remove: {filename:s} with error: {exception!s}')
 
     # Remove files of previous versions in the format:
     # <project>[-_][0-9]*-[1-9]i<suffix>~<distribution>.*
@@ -479,7 +461,7 @@ class DPKGBuildHelper(interface.BuildHelper):
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         try:
           os.remove(filename)
         except PermissionError as exception:
@@ -596,14 +578,14 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     """
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source package of: {source_helper_object.project_name:s}')
       return False
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source directory of: {source_helper_object.project_name:s}')
       return False
 
     project_version = source_helper_object.GetProjectVersion()
@@ -614,7 +596,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
         source_package_path, source_helper_object.project_name, project_version)
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building deb of: {0:s}'.format(source_package_filename))
+    logging.info(f'Building deb of: {source_package_filename:s}')
 
     if not self._CreatePackagingFiles(source_directory, project_version):
       return False
@@ -622,7 +604,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     # If there is a temporary packaging directory remove it.
     temporary_directory = os.path.join(source_directory, 'tmp')
     if os.path.exists(temporary_directory):
-      logging.info('Removing: {0:s}'.format(temporary_directory))
+      logging.info(f'Removing: {temporary_directory:s}')
       shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(

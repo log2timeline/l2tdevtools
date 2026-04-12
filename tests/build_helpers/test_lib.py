@@ -21,10 +21,9 @@ class TestSourceHelper(source_helper.SourceHelper):
     """
     super(TestSourceHelper, self).__init__(project_name, project_definition)
     self._project_version = project_version
-    self._source_directory_path = '{0:s}-{1:s}'.format(
-        project_name, project_version)
-    self._source_package_filename = '{0:s}-{1:s}.tar.gz'.format(
-        project_name, project_version)
+    self._source_directory_path = f'{project_name:s}-{project_version!s}'
+    self._source_package_filename = (
+        f'{project_name:s}-{project_version!s}.tar.gz')
 
   # pylint: disable=redundant-returns-doc
 
@@ -49,13 +48,11 @@ class TestSourceHelper(source_helper.SourceHelper):
             filename = filename.decode('utf8')
           except UnicodeDecodeError:
             logging.warning(
-                'Unable to decode filename in tar file: {0:s}'.format(
-                    source_filename))
+                f'Unable to decode filename in tar file: {source_filename:s}')
             continue
 
         if filename is None:
-          logging.warning('Missing filename in tar file: {0:s}'.format(
-              source_filename))
+          logging.warning(f'Missing filename in tar file: {source_filename:s}')
           continue
 
         if not directory_name:
@@ -64,17 +61,17 @@ class TestSourceHelper(source_helper.SourceHelper):
           directory_name, _, _ = filename.partition('/')
           if not directory_name or directory_name.startswith('..'):
             logging.error(
-                'Unsupported directory name in tar file: {0:s}'.format(
-                    source_filename))
+                f'Unsupported directory name in tar file: {source_filename:s}')
             return None
+
           if os.path.exists(directory_name):
             break
-          logging.info('Extracting: {0:s}'.format(source_filename))
+
+          logging.info(f'Extracting: {source_filename:s}')
 
         elif not filename.startswith(directory_name):
           logging.warning(
-              'Skipping: {0:s} in tar file: {1:s}'.format(
-                  filename, source_filename))
+              f'Skipping: {filename:s} in tar file: {source_filename:s}')
           continue
 
         archive.extract(tar_info)
@@ -98,7 +95,7 @@ class TestSourceHelper(source_helper.SourceHelper):
     Returns:
       str: project identifier or None on error.
     """
-    return 'com.github.log2timeline.{0:s}'.format(self.project_name)
+    return f'com.github.log2timeline.{self.project_name:s}'
 
   def GetProjectVersion(self):
     """Retrieves the version number for a given project name.
