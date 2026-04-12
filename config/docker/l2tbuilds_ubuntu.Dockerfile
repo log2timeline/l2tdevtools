@@ -53,6 +53,7 @@ RUN apt-get -y update && \
 	python3-pbr \
 	python3-pkgconfig \
 	python3-poetry-core \
+	python3-pyproject-metadata \
 	python3-pytest \
 	python3-pytest-runner \
 	python3-scikit-build-core \
