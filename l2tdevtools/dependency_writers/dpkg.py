@@ -122,9 +122,6 @@ class DPKGControlWriter(interface.DependencyFileWriter):
     build_dependencies = [
         'python3-all (>= 3.10~)', 'python3-setuptools',
         'pybuild-plugin-pyproject']
-    if self._project_definition.name == 'timesketch':
-      build_dependencies.insert(0, 'dh-systemd (>= 1.5)')
-      build_dependencies.append('python3-pip')
 
     build_dependencies = ', '.join(build_dependencies)
 

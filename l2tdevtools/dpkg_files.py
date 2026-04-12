@@ -242,17 +242,15 @@ class DPKGBuildFilesGenerator(object):
     # If timezone_hours is -1 {0:02d} will format as -1 instead of -01
     # hence we detect the sign and force a leading zero.
     if timezone_hours < 0:
-      timezone_string = '-{0:02d}{1:02d}'.format(
-          -timezone_hours, timezone_minutes)
+      timezone_hours = -timezone_hours
+      timezone_string = f'-{timezone_hours:02d}{timezone_minutes:02d}'
     else:
-      timezone_string = '+{0:02d}{1:02d}'.format(
-          timezone_hours, timezone_minutes)
+      timezone_string = f'+{timezone_hours:02d}{timezone_minutes:02d}'
 
-    date_time_string = '{0:s} {1:s}'.format(
-        time.strftime('%a, %d %b %Y %H:%M:%S'), timezone_string)
+    date_time_string = time.strftime('%a, %d %b %Y %H:%M:%S')
 
     template_values = {
-        'date_time': date_time_string,
+        'date_time': f'{date_time_string:s} {timezone_string:s}',
         'maintainer_email_address': self._EMAIL_ADDRESS,
         'project_version': self._project_version,
         'source_package_name': source_package_name}
@@ -325,14 +323,12 @@ class DPKGBuildFilesGenerator(object):
       if self._project_definition.build_system in (
           'flit', 'hatchling', 'poetry', 'scikit', 'setup_py', 'setuptools'):
         if dependency.startswith('python-'):
-          dependency = 'python3-{0:s}'.format(dependency[7:])
-          python3_build_depends.append(dependency)
+          python3_build_depends.append(f'python3-{dependency[7:]:s}')
           continue
 
         if (dependency.startswith('python2-') or
             dependency.startswith('python3-')):
-          dependency = 'python3-{0:s}'.format(dependency[8:])
-          python3_build_depends.append(dependency)
+          python3_build_depends.append(f'python3-{dependency[8:]:s}')
           continue
 
       build_depends.append(dependency)
@@ -342,7 +338,8 @@ class DPKGBuildFilesGenerator(object):
       build_depends.extend(python3_build_depends)
 
     if build_depends:
-      build_depends = ', {0:s}'.format(', '.join(build_depends))
+      build_depends = ', '.join(build_depends)
+      build_depends = f', {build_depends:s}'
     else:
       build_depends = ''
 
@@ -360,10 +357,10 @@ class DPKGBuildFilesGenerator(object):
 
     for dependency in self._project_definition.dpkg_dependencies:
       if dependency.startswith('python-'):
-        python3_depends.append('python3-{0:s}'.format(dependency[7:]))
+        python3_depends.append(f'python3-{dependency[7:]:s}')
       elif (dependency.startswith('python2-') or
             dependency.startswith('python3-')):
-        python3_depends.append('python3-{0:s}'.format(dependency[8:]))
+        python3_depends.append(f'python3-{dependency[9:]:s}')
       else:
         depends.append(dependency)
 
@@ -419,8 +416,8 @@ class DPKGBuildFilesGenerator(object):
     license_file = os.path.dirname(__file__)
     license_file = os.path.dirname(license_file)
     license_file = os.path.join(
-        license_file, 'data', 'licenses', 'LICENSE.{0:s}'.format(
-            self._project_definition.name))
+        license_file, 'data', 'licenses',
+        f'LICENSE.{self._project_definition.name:s}')
 
     filename = os.path.join(dpkg_path, 'copyright')
 
@@ -428,7 +425,7 @@ class DPKGBuildFilesGenerator(object):
       shutil.copy(license_file, filename)
 
     else:
-      logging.warning('Missing license file: {0:s}'.format(license_file))
+      logging.warning(f'Missing license file: {license_file:s}')
       with open(filename, 'wb') as file_object:
         file_object.write(b'\n')
 
@@ -495,7 +492,7 @@ class DPKGBuildFilesGenerator(object):
         output_filename = template_file
         template_data = None
       else:
-        output_filename = '{0:s}.install'.format(python3_package_name)
+        output_filename = f'{python3_package_name:s}.install'
         if not self._build_configuration:
           template_data = self._INSTALL_TEMPLATE_PYTHON3
         else:
@@ -508,8 +505,7 @@ class DPKGBuildFilesGenerator(object):
 
           module_directories = self._build_configuration.module_directories
           template_data.extend([
-              'usr/lib/python3*/dist-packages/{0:s}'.format(
-                  module_directory)
+              f'usr/lib/python3*/dist-packages/{module_directory:s}'
               for module_directory in module_directories])
 
           if self._build_configuration.has_dist_info_directory:
@@ -667,7 +663,7 @@ class DPKGBuildFilesGenerator(object):
       str: Python 3 package name.
     """
     package_name = self._GetPackageName(self._project_definition)
-    return 'python3-{0:s}'.format(package_name)
+    return f'python3-{package_name:s}'
 
   def _GetPythonSetupName(self):
     """Retrieves the Python setup.py name.

@@ -141,7 +141,27 @@ class RPMSpecFileGenerator(object):
       with open(pyproject_toml_file, 'rb') as file_object:
         pyproject_toml = tomllib.load(file_object)
 
-      if pyproject_toml.get('project', {}).get( 'scripts', {}):
+      pyproject_toml_project = pyproject_toml.get('project', {})
+
+      if not configuration['description']:
+        configuration['description'] = pyproject_toml_project.get(
+            'description', None)
+
+      if not configuration['license']:
+        configuration['license'] = pyproject_toml_project.get('license', None)
+
+      if not configuration['summary']:
+        configuration['summary'] = pyproject_toml_project.get(
+            'description', None)
+
+      # TODO: add support for configuration['vendor']
+
+      pyproject_toml_urls = pyproject_toml_project.get('urls', {})
+
+      if not configuration['url']:
+        configuration['url'] = pyproject_toml_urls.get('Homepage', None)
+
+      if pyproject_toml_project.get('scripts', {}):
         has_tools_package = True
 
     setup_cfg_file = os.path.join(source_directory, 'setup.cfg')
