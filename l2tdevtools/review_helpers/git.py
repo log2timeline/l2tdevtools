@@ -41,8 +41,7 @@ class GitHelper(cli.CLIHelper):
     Returns:
       bool: True if the path was added.
     """
-    command = 'git add -A {0:s}'.format(path)
-    exit_code, _, _ = self.RunCommand(command)
+    exit_code, _, _ = self.RunCommand(f'git add -A {path:s}')
     return exit_code == 0
 
   def CheckHasBranch(self, branch):
@@ -87,7 +86,7 @@ class GitHelper(cli.CLIHelper):
     """
     # Check for remote entries starting with upstream.
     for remote in self._GetRemotes():
-      if remote.startswith('upstream\t{0:s}'.format(self._git_repo_url)):
+      if remote.startswith(f'upstream\t{self._git_repo_url:s}'):
         return True
     return False
 
@@ -240,8 +239,8 @@ class GitHelper(cli.CLIHelper):
     Returns:
       bool: True if the pull was successful.
     """
-    command = 'git pull --squash {0:s} {1:s}'.format(git_repo_url, branch)
-    exit_code, _, _ = self.RunCommand(command)
+    exit_code, _, _ = self.RunCommand(
+        f'git pull --squash {git_repo_url:s} {branch:s}')
     return exit_code == 0
 
   def PushToOrigin(self, branch, force=False):
@@ -255,9 +254,9 @@ class GitHelper(cli.CLIHelper):
       bool: True if the push was successful.
     """
     if force:
-      command = 'git push -f --set-upstream origin {0:s}'.format(branch)
+      command = f'git push -f --set-upstream origin {branch:s}'
     else:
-      command = 'git push --set-upstream origin {0:s}'.format(branch)
+      command = f'git push --set-upstream origin {branch:s}'
 
     exit_code, _, _ = self.RunCommand(command)
     return exit_code == 0
@@ -271,8 +270,8 @@ class GitHelper(cli.CLIHelper):
     if branch == 'main':
       return
 
-    self.RunCommand('git push origin --delete {0:s}'.format(branch))
-    self.RunCommand('git branch -D {0:s}'.format(branch))
+    self.RunCommand(f'git push origin --delete {branch:s}')
+    self.RunCommand(f'git branch -D {branch:s}')
 
   def SynchronizeWithOrigin(self):
     """Synchronizes git with origin.

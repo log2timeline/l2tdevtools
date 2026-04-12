@@ -24,8 +24,7 @@ class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   @classmethod
   def setUpClass(cls):
     """Determines the project version from the latest git tag."""
-    command = 'git ls-remote --tags {0:s}'.format(cls._GIT_URL)
-    arguments = shlex.split(command)
+    arguments = shlex.split(f'git ls-remote --tags {cls._GIT_URL:s}')
 
     try:
       with subprocess.Popen(
@@ -71,10 +70,9 @@ class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        'https://github.com/{0:s}/{1:s}/releases/download/v{2:s}/'
-        'pefile-{2:s}.tar.gz').format(
-            self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
-            self._PROJECT_VERSION)
+        f'https://github.com/{self._PROJECT_ORGANIZATION:s}/'
+        f'{self._PROJECT_NAME:s}/releases/download/'
+        f'v{self._PROJECT_VERSION:s}/pefile-{self._PROJECT_VERSION:s}.tar.gz')
 
     self.assertEqual(download_url, expected_download_url)
 
@@ -85,8 +83,8 @@ class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
     project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = 'com.github.{0:s}.{1:s}'.format(
-        self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
+    expected_project_identifier = (
+        f'com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}')
 
     self.assertEqual(project_identifier, expected_project_identifier)
 
@@ -105,8 +103,7 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   @classmethod
   def setUpClass(cls):
     """Determines the project version from the latest git tag."""
-    command = 'git ls-remote --tags {0:s}'.format(cls._GIT_URL)
-    arguments = shlex.split(command)
+    arguments = shlex.split('git ls-remote --tags {cls._GIT_URL:s}')
 
     try:
       with subprocess.Popen(
@@ -145,10 +142,10 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
     expected_download_url = (
-        'https://github.com/{0:s}/{1:s}/releases/download/{3:s}/'
-        '{1:s}-{2:s}-{3:s}.tar.gz').format(
-            self._PROJECT_ORGANIZATION, self._PROJECT_NAME,
-            self._PROJECT_STATUS, self._PROJECT_VERSION)
+        f'https://github.com/{self._PROJECT_ORGANIZATION:s}/'
+        f'{self._PROJECT_NAME:s}/releases/download/{self._PROJECT_VERSION:s}/'
+        f'{self._PROJECT_NAME:s}-{self._PROJECT_STATUS:s}-'
+        f'{self._PROJECT_VERSION:s}.tar.gz')
 
     self.assertEqual(download_url, expected_download_url)
 
@@ -158,8 +155,8 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
     project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = 'com.github.{0:s}.{1:s}'.format(
-        self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
+    expected_project_identifier = (
+        f'com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}')
 
     self.assertEqual(project_identifier, expected_project_identifier)
 
@@ -177,8 +174,7 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
   @classmethod
   def setUpClass(cls):
     """Determines the project version from the latest git tag."""
-    command = 'git ls-remote --tags {0:s}'.format(cls._GIT_URL)
-    arguments = shlex.split(command)
+    arguments = shlex.split(f'git ls-remote --tags {cls._GIT_URL:s}')
 
     try:
       with subprocess.Popen(
@@ -230,8 +226,8 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
 
     project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = 'com.github.{0:s}.{1:s}'.format(
-        self._PROJECT_ORGANIZATION, self._PROJECT_NAME)
+    expected_project_identifier = (
+        f'com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}')
 
     self.assertEqual(project_identifier, expected_project_identifier)
 

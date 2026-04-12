@@ -177,20 +177,19 @@ class ProjectBuilder(object):
 
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source package of: {source_helper_object.project_name:s}')
       return []
 
     if not source_helper_object.Create():
       source_filename = source_helper_object.GetSourcePackageFilename()
-      logging.error('Extraction of source package: {0:s} failed'.format(
-          source_filename))
+      logging.error(f'Extraction of source package: {source_filename:s} failed')
       return []
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source directory of: {source_helper_object.project_name:s}')
       return []
 
     if not project_definition.build_system:
@@ -201,16 +200,16 @@ class ProjectBuilder(object):
       elif os.path.exists(os.path.join(source_directory, 'pyproject.toml')):
         project_definition.build_system = 'pyproject'
       else:
-        logging.warning('Unable to determine build system of: {0:s}'.format(
-            project_definition.name))
+        logging.warning(
+            f'Unable to determine build system of: {project_definition.name:s}')
         return []
 
     build_helper_object = build_helper.BuildHelperFactory.NewBuildHelper(
         project_definition, self._build_target, self._l2tdevtools_path,
         self.project_definitions)
     if not build_helper_object:
-      logging.warning('Unable to determine how to build: {0:s}'.format(
-          project_definition.name))
+      logging.warning(
+          f'Unable to determine how to build: {project_definition.name:s}')
       return []
 
     self._build_helpers[project_definition.name] = build_helper_object
@@ -264,10 +263,10 @@ class ProjectBuilder(object):
     if self._build_target == 'download':
       # If available run the script post-download.sh after download.
       if os.path.exists('post-download.sh'):
-        command = 'sh ./post-download.sh {0:s}'.format(source_package_path)
+        command = f'sh ./post-download.sh {source_package_path:s}'
         exit_code = subprocess.call(command, shell=True)
         if exit_code != 0:
-          logging.error('Running: "{0:s}" failed.'.format(command))
+          logging.error(f'Running: "{command:s}" failed.')
           return False
 
     self._source_helpers[project_definition.name] = source_helper_object
@@ -372,7 +371,7 @@ def Main():
     return False
 
   if options.build_target not in build_targets:
-    print('Unsupported build target: {0:s}.'.format(options.build_target))
+    print(f'Unsupported build target: {options.build_target:s}')
     print('')
     argument_parser.print_help()
     print('')
@@ -391,13 +390,13 @@ def Main():
 
   presets_file = os.path.join(config_path, 'presets.ini')
   if options.preset and not os.path.exists(presets_file):
-    print('No such config file: {0:s}.'.format(presets_file))
+    print(f'No such config file: {presets_file:s}')
     print('')
     return False
 
   projects_file = os.path.join(config_path, 'projects.ini')
   if not os.path.exists(projects_file):
-    print('No such config file: {0:s}.'.format(projects_file))
+    print(f'No such config file: {projects_file:s}')
     print('')
     return False
 
@@ -423,7 +422,7 @@ def Main():
     project_names = project_builder.ReadProjectsPreset(
         presets_file, options.preset)
     if not project_names:
-      print('Undefined preset: {0:s}'.format(options.preset))
+      print(f'Undefined preset: {options.preset:s}')
       print('')
       return False
 
@@ -448,7 +447,7 @@ def Main():
         is_disabled = True
       else:
         # If a project is manually specified ignore the disabled status.
-        logging.info('Ignoring disabled status for: {0:s}'.format(name))
+        logging.info(f'Ignoring disabled status for: {name:s}')
 
     if is_disabled:
       disabled_projects.append(name)
@@ -480,7 +479,7 @@ def Main():
     if not project_builder.Download(project_definition):
       builds.remove(project_definition)
 
-      print('Failed downloading: {0:s}'.format(project_definition.name))
+      print(f'Failed downloading: {project_definition.name:s}')
       failed_downloads.add(project_definition.name)
 
   if options.build_target != 'download':
@@ -489,31 +488,33 @@ def Main():
 
     try:
       for project_definition in list(builds):
+        project_name = project_definition.name
         dependencies = project_builder.CheckBuildDependencies(
             project_definition)
 
         if dependencies:
           builds.remove(project_definition)
+          build_dependencies = ', '.join(dependencies)
 
-          print(
-              'Unable to build: {0:s} missing build dependencies: {1:s}'.format(
-                  project_definition.name, ', '.join(dependencies)))
+          print((
+              f'Unable to build: {project_name:s} missing build dependencies: '
+              f'{build_dependencies:s}'))
           missing_build_dependencies.update(dependencies)
 
         if not project_builder.CheckProjectConfiguration(project_definition):
-          print('Detected error in configuration of: {0:s}'.format(
-              project_definition.name))
-          configuration_errors.add(project_definition.name)
+          print(f'Detected error in configuration of: {project_name:s}')
+          configuration_errors.add(project_name)
 
       for project_definition in list(builds):
-        logging.info('Building: {0:s}'.format(project_definition.name))
+        project_name = project_definition.name
+        logging.info(f'Building: {project_name:s}')
 
         # TODO: add support for dokan, bzip2
         # TODO: setup sqlite in build directory.
         if not project_builder.Build(
             project_definition, distributions=distributions):
-          print('Failed building: {0:s}'.format(project_definition.name))
-          failed_builds.add(project_definition.name)
+          print(f'Failed building: {project_name:s}')
+          failed_builds.add(project_name)
 
     finally:
       os.chdir(current_working_directory)
@@ -522,31 +523,31 @@ def Main():
     print('')
     print('Undefined projects:')
     for name in sorted(undefined_projects):
-      print('\t{0:s}'.format(name))
+      print(f'\t{name:s}')
 
   if configuration_errors:
     print('')
     print('Projects with configuration errors:')
     for name in sorted(configuration_errors):
-      print('\t{0:s}'.format(name))
+      print(f'\t{name:s}')
 
   if failed_downloads:
     print('')
     print('Failed downloading:')
     for name in sorted(failed_downloads):
-      print('\t{0:s}'.format(name))
+      print(f'\t{name:s}')
 
   if missing_build_dependencies:
     print('')
     print('Missing build dependencies:')
     for dependency in sorted(missing_build_dependencies):
-      print('\t{0:s}'.format(dependency))
+      print(f'\t{dependency:s}')
 
   if failed_builds:
     print('')
     print('Failed building:')
     for name in sorted(failed_builds):
-      print('\t{0:s}'.format(name))
+      print(f'\t{name:s}')
 
   return (not failed_downloads and not missing_build_dependencies and
           not failed_builds)

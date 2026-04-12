@@ -309,7 +309,7 @@ class RPMSpecFileGenerator(object):
     for license_file in self._LICENSE_FILENAMES:
       license_file_path = os.path.join(source_directory, license_file)
       if os.path.exists(license_file_path):
-        license_file_definition = '%license {0:s}\n'.format(license_file)
+        license_file_definition = f'%license {license_file:s}\n'
         break
 
     return license_file_definition
@@ -335,8 +335,7 @@ class RPMSpecFileGenerator(object):
 
     if (not requires.startswith('BuildRequires: ') and
         not requires.startswith('Requires: ')):
-      raise ValueError(
-          'Unsupported requires statement: "{0:s}".'.format(requires))
+      raise ValueError(f'Unsupported requires statement: "{requires:s}"')
 
     _, _, requires = requires.strip().partition(' ')
 
@@ -376,9 +375,8 @@ class RPMSpecFileGenerator(object):
 
     output_file_object.write((
         '%changelog\n'
-        '* {0:s} {1:s} {2:s}-1\n'
-        '- Auto-generated\n').format(
-            date_time_string, self._EMAIL_ADDRESS, version))
+        f'* {date_time_string:s} {self._EMAIL_ADDRESS:s} {version:s}-1\n'
+        '- Auto-generated\n'))
 
   def _WriteDataPackageDefinition(self, output_file_object, configuration):
     """Writes the data package definition.

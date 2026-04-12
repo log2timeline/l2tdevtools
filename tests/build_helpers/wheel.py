@@ -20,8 +20,6 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
 
   _TEST_PROJECT_NAME = 'dfdatetime'
   _TEST_PROJECT_VERSION = '20190517'
-  _TEST_WHEEL_FILENAME = '{0:s}-{1:s}-py3-none-any.whl'.format(
-      _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
 
   def testInitialize(self):
     """Tests the __init__ function."""
@@ -101,13 +99,17 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
         self._TEST_PROJECT_NAME, project_definition, self._TEST_PROJECT_VERSION)
 
     with shared_test_lib.TempDirectory() as temp_directory:
-      test_path = os.path.join(
-          temp_directory, '{0:s}-20180101-py3-none-any.whl'.format(
-              self._TEST_PROJECT_NAME))
+      test_filename = f'{self._TEST_PROJECT_NAME:s}-20180101-py3-none-any.whl'
+      test_path = os.path.join(temp_directory, test_filename)
+
       with open(test_path, 'a', encoding='utf-8'):
         pass
 
-      test_path = os.path.join(temp_directory, self._TEST_WHEEL_FILENAME)
+      test_wheel_filename = (
+          f'{self._TEST_PROJECT_NAME:s}-{self._TEST_PROJECT_VERSION:s}-py3-'
+          f'none-any.whl')
+
+      test_path = os.path.join(temp_directory, test_wheel_filename)
       with open(test_path, 'a', encoding='utf-8'):
         pass
 
@@ -124,7 +126,7 @@ class WheelBuildHelperTest(shared_test_lib.BaseTestCase):
 
       directory_entries = os.listdir(temp_directory)
       self.assertEqual(len(directory_entries), 1)
-      self.assertIn(self._TEST_WHEEL_FILENAME, directory_entries)
+      self.assertIn(test_wheel_filename, directory_entries)
 
 
 class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
@@ -132,8 +134,6 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
 
   _TEST_PROJECT_NAME = 'libsigscan'
   _TEST_PROJECT_VERSION = '20231201'
-  _TEST_SOURCE_PACKAGE = '{0:s}-{1:s}.tar.gz'.format(
-      _TEST_PROJECT_NAME, _TEST_PROJECT_VERSION)
 
   def testBuild(self):
     """Tests the Build function."""
@@ -151,8 +151,10 @@ class ConfigureMakeWheelBuildHelperTest(shared_test_lib.BaseTestCase):
         self._TEST_PROJECT_NAME, project_definition, self._TEST_PROJECT_VERSION)
 
     with shared_test_lib.TempDirectory() as temp_directory:
-      test_path = os.path.join(
-          l2tdevtools_path, 'test_data', self._TEST_SOURCE_PACKAGE)
+      test_filename = (
+          f'{self._TEST_PROJECT_NAME:s}-{self._TEST_PROJECT_VERSION:s}.tar.gz')
+      test_path = os.path.join(l2tdevtools_path, 'test_data', test_filename)
+
       shutil.copy(test_path, temp_directory)
 
       directory_entries = os.listdir(temp_directory)

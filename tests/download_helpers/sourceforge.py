@@ -36,10 +36,12 @@ class SourceForgeDownloadHelperTest(test_lib.BaseTestCase):
     download_url = download_helper.GetDownloadURL(
         self._PROJECT_NAME, self._PROJECT_VERSION)
 
+    project_name = self._PROJECT_NAME
+    project_version = self._PROJECT_VERSION
     expected_download_url = (
-        'https://downloads.sourceforge.net/project/{0:s}/{0:s}/{0:s}-{1:s}'
-        '/{0:s}-{1:s}.tar.gz').format(
-            self._PROJECT_NAME, self._PROJECT_VERSION)
+        f'https://downloads.sourceforge.net/project/{project_name:s}/'
+        f'{project_name:s}/{project_name:s}-{project_version:s}/'
+        f'{project_name:s}-{project_version:s}.tar.gz')
 
     self.assertEqual(download_url, expected_download_url)
 
@@ -49,8 +51,8 @@ class SourceForgeDownloadHelperTest(test_lib.BaseTestCase):
 
     project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = 'net.sourceforge.projects.{0:s}'.format(
-        self._PROJECT_NAME)
+    expected_project_identifier = (
+        f'net.sourceforge.projects.{self._PROJECT_NAME:s}')
 
     self.assertEqual(project_identifier, expected_project_identifier)
 

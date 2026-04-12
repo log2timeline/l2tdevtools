@@ -70,8 +70,8 @@ def Main():
   home_path = os.path.expanduser('~')
   netrc_path = os.path.join(home_path, '.netrc')
   if not os.path.exists(netrc_path):
-    print('{0:s} aborted - unable to find .netrc.'.format(
-        options.command.title()))
+    command = options.command.title()
+    print(f'{command:s} aborted - unable to find .netrc')
     return False
 
   review_helper = review.ReviewHelper(

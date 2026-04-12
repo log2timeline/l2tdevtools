@@ -457,8 +457,8 @@ class DPKGBuildFilesGenerator(object):
       self._GeneratePython3ModuleInstallFile(dpkg_path, template_values)
 
       install_package_name = self._GetPackageName(self._project_definition)
-      output_filename = '{0:s}-tools.install'.format(install_package_name)
-      output_filename = os.path.join(dpkg_path, output_filename)
+      output_filename = os.path.join(
+          dpkg_path, f'{install_package_name:s}-tools.install')
       self._GenerateFile(
           None, self._INSTALL_TEMPLATE_PYTHON_TOOLS, template_values,
           output_filename)

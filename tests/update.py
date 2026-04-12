@@ -38,9 +38,8 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
       self.assertIsNotNone(package_download_urls)
 
       expected_url = (
-          'https://github.com/log2timeline/l2tbinaries/raw/dev/win32/'
-          '{0:s}-{1:s}-py3-none-any.whl').format(
-              self._PROJECT_NAME, self._PROJECT_VERSION)
+          f'https://github.com/log2timeline/l2tbinaries/raw/dev/win32/'
+          f'{self._PROJECT_NAME:s}-{self._PROJECT_VERSION:s}-py3-none-any.whl')
       self.assertIn(expected_url, package_download_urls)
 
 
@@ -69,8 +68,9 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
 
       for package_download in available_packages:
         if package_download.name == self._PROJECT_NAME:
-          expected_package_filename = '{0:s}-{1:s}-py3-none-any.whl'.format(
-              self._PROJECT_NAME, self._PROJECT_VERSION)
+          expected_package_filename = (
+              f'{self._PROJECT_NAME:s}-{self._PROJECT_VERSION:s}-'
+              f'py3-none-any.whl')
           self.assertEqual(package_download.filename, expected_package_filename)
 
           expected_package_version = [self._PROJECT_VERSION]
@@ -94,9 +94,10 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
 
         self.assertEqual(len(glob_results), 1)
 
-        expected_path = os.path.join(
-            temp_directory, '{0:s}-{1:s}-py3-none-any.whl'.format(
-                self._PROJECT_NAME, self._PROJECT_VERSION))
+        expected_filename = (
+            f'{self._PROJECT_NAME:s}-{self._PROJECT_VERSION:s}-'
+            f'py3-none-any.whl')
+        expected_path = os.path.join(temp_directory, expected_filename)
         self.assertEqual(glob_results[0], expected_path)
 
 

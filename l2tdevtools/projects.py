@@ -128,21 +128,20 @@ class ProjectVersionDefinition(object):
     version_string_parts = version_string.split(',')
     number_of_version_string_parts = len(version_string_parts)
     if number_of_version_string_parts > 2:
-      logging.warning('Unsupported version string: {0:s}'.format(
-          version_string))
+      logging.warning(f'Unsupported version string: {version_string:s}')
       return
 
     self._version_string_parts = []
     for index, version_string_part in enumerate(version_string_parts):
       if index == 1 and not version_string_part.startswith('<'):
-        logging.warning('Unsupported version string part: {0:s}'.format(
-            version_string_part))
+        logging.warning(
+            f'Unsupported version string part: {version_string_part:s}')
         return
 
       matches = self._VERSION_STRING_PART_RE.findall(version_string_part)
       if not matches:
-        logging.warning('Unsupported version string part: {0:s}'.format(
-            version_string_part))
+        logging.warning(
+            f'Unsupported version string part: {version_string_part:s}')
         return
 
       self._version_string_parts.append([

@@ -91,14 +91,15 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
     sub_directory = None
 
     if operating_system != 'Windows':
-      logging.error('Operating system: {0:s} not supported.'.format(
-          operating_system))
+      logging.error(f'Operating system: {operating_system:s} not supported.')
       return None
 
     if (sys.version_info[0], sys.version_info[1]) not in (
         self._SUPPORTED_PYTHON_VERSIONS):
-      logging.error('Python version: {0:d}.{1:d} not supported.'.format(
-          sys.version_info[0], sys.version_info[1]))
+      major_version = sys.version_info[0]
+      minor_version = sys.version_info[1]
+      logging.error(
+          f'Python version: {major_version:d}.{minor_version:d} not supported.')
       return None
 
     if cpu_architecture == 'x86':
@@ -108,8 +109,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
       sub_directory = 'win64'
 
     if not sub_directory:
-      logging.error('CPU architecture: {0:s} not supported.'.format(
-          cpu_architecture))
+      logging.error(f'CPU architecture: {cpu_architecture:s} not supported.')
       return None
 
     return sub_directory
@@ -137,15 +137,11 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
       return None
 
     if use_api:
-      # TODO: add support for branch.
-      download_url = '{0:s}/contents/{1:s}'.format(
-          self._GITHUB_REPO_API_URL, sub_directory)
+      return (
+          f'{self._GITHUB_REPO_API_URL:s}/contents/{sub_directory:s}?'
+          f'ref={self._branch:s}')
 
-    else:
-      download_url = '{0:s}/tree/{1:s}/{2:s}'.format(
-          self._GITHUB_REPO_URL, self._branch, sub_directory)
-
-    return download_url
+    return f'{self._GITHUB_REPO_URL:s}/tree/{self._branch:s}/{sub_directory:s}'
 
   def GetPackageDownloadURLs(
       self, preferred_machine_type=None, preferred_operating_system=None,
@@ -226,8 +222,8 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
         for item in tree.get('items', []):
           item_path = item.get('path', None)
           download_url = (
-              'https://github.com/log2timeline/l2tbinaries/raw/{0:s}/'
-              '{1:s}').format(self._branch, item_path)
+              f'https://github.com/log2timeline/l2tbinaries/raw/'
+              f'{self._branch:s}/{item_path:s}')
           download_urls.append(download_url)
 
     return download_urls
@@ -340,8 +336,9 @@ class DependencyUpdater(object):
     Returns:
       list[PackageDownload]: packages available for download.
     """
-    python_version_indicator = 'cp{0:d}{1:d}'.format(
-        sys.version_info[0], sys.version_info[1])
+    major_version = sys.version_info[0]
+    minor_version = sys.version_info[1]
+    python_version_indicator = f'cp{major_version:d}{minor_version:d}'
 
     # The API is rate limited, so we scrape the web page instead.
     package_urls = self._download_helper.GetPackageDownloadURLs(
@@ -438,17 +435,17 @@ class DependencyUpdater(object):
 
         if ((self._exclude_packages and in_package_names) or
             (not self._exclude_packages and not in_package_names)):
-          logging.info('Skipping: {0:s} because it was excluded'.format(
-              package_name))
+          logging.info(f'Skipping: {package_name:s} because it was excluded')
           continue
 
       # Remove previous versions of a package.
-      filenames_glob = '{0:s}*{1:s}'.format(package_name, package_filename[:-4])
+      package_name_suffix = package_filename[:-4]
+      filenames_glob = f'{package_name:s}*{package_name_suffix:s}'
       filenames = glob.glob(os.path.join(
           self._download_directory, filenames_glob))
       for filename in filenames:
         if filename != package_download_path and os.path.isfile(filename):
-          logging.info('Removing: {0:s}'.format(filename))
+          logging.info(f'Removing: {filename:s}')
           os.remove(filename)
 
       project_definition = project_definition_per_package_name.get(
@@ -459,12 +456,12 @@ class DependencyUpdater(object):
           project_definition = project_definitions.get(alternate_name, None)
 
       if not project_definition:
-        logging.error('Missing project definition for package: {0:s}'.format(
-            package_name))
+        logging.error(
+            f'Missing project definition for package: {package_name:s}')
         continue
 
       if not os.path.exists(package_download_path):
-        logging.info('Downloading: {0:s}'.format(package_filename))
+        logging.info(f'Downloading: {package_filename:s}')
         os.chdir(self._download_directory)
         try:
           self._download_helper.DownloadFile(package_download.url)
@@ -519,8 +516,8 @@ class DependencyUpdater(object):
           project_definition = project_definitions.get(alternate_name, None)
 
       if not project_definition:
-        logging.error('Missing project definition for package: {0:s}'.format(
-            project_name))
+        logging.error(
+            f'Missing project definition for package: {project_name:s}')
         continue
 
       package_name = getattr(
@@ -547,13 +544,13 @@ class DependencyUpdater(object):
 
     result = True
     if package_paths:
-      logging.info('Installing: {0:s}'.format(' '.join(package_paths)))
+      package_paths = ' '.join(package_paths)
+      logging.info(f'Installing: {package_paths:s}')
 
-      command = '{0:s} -m pip install {1:s}'.format(
-          sys.executable, ' '.join(package_paths))
+      command = f'{sys.executable:s} -m pip install {package_paths:s}'
       exit_code = subprocess.call(command, shell=False)
       if exit_code != 0:
-        logging.error('Running: "{0:s}" failed.'.format(command))
+        logging.error(f'Running: "{command:s}" failed.')
         result = False
 
     return result
@@ -703,13 +700,13 @@ def Main():
 
   presets_file = os.path.join(config_path, 'presets.ini')
   if options.preset and not os.path.exists(presets_file):
-    print('No such config file: {0:s}.'.format(presets_file))
+    print(f'No such config file: {presets_file:s}')
     print('')
     return False
 
   projects_file = os.path.join(config_path, 'projects.ini')
   if not os.path.exists(projects_file):
-    print('No such config file: {0:s}.'.format(projects_file))
+    print(f'No such config file: {projects_file:s}')
     print('')
     return False
 
@@ -738,7 +735,7 @@ def Main():
     user_defined_project_names = dependency_updater.ExpandPresets(
         preset_definitions, options.preset)
     if not user_defined_project_names:
-      print('Undefined preset: {0:s}'.format(options.preset))
+      print(f'Undefined preset: {options.preset:s}')
       print('')
       return False
 

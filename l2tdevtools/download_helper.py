@@ -30,7 +30,8 @@ class DownloadHelperFactory(object):
 
     # Unify http:// and https:// URLs for the download helper check.
     if download_url.startswith('https://'):
-      download_url = 'http://{0:s}'.format(download_url[8:])
+      url_suffix = download_url[8:]
+      download_url = f'http://{url_suffix:s}'
 
     # Remove URL arguments.
     download_url, _, _ = download_url.partition('?')
@@ -52,5 +53,5 @@ class DownloadHelperFactory(object):
           download_url, release_is_archive=release_is_archive,
           release_prefix=release_prefix, release_tag_prefix=release_tag_prefix)
 
-    raise ValueError('Unsupported download URL: {0:s}.'.format(
-        project_definition.download_url))
+    raise ValueError(
+        f'Unsupported download URL: {project_definition.download_url:s}')

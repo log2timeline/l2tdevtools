@@ -93,7 +93,6 @@ class ProjectDownloadHelper(interface.DownloadHelper):
     """Downloads the project for a given project name and version.
 
     Args:
-    Args:
       project_name (str): name of the project.
       project_version (str): version of the project.
 
@@ -103,8 +102,8 @@ class ProjectDownloadHelper(interface.DownloadHelper):
     """
     download_url = self.GetDownloadURL(project_name, project_version)
     if not download_url:
-      logging.warning('Unable to determine download URL for: {0:s}'.format(
-          project_name))
+      logging.warning(
+          f'Unable to determine download URL for: {project_name:s}')
       return None
 
     filename = self.DownloadFile(download_url)
@@ -114,15 +113,14 @@ class ProjectDownloadHelper(interface.DownloadHelper):
     # release-{project version}.tar.gz
     # v{project version}.tar.gz
     github_archive_filenames = [
-        '{0!s}.tar.gz'.format(project_version),
-        'release-{0!s}.tar.gz'.format(project_version),
-        'v{0!s}.tar.gz'.format(project_version)]
+        f'{project_version!s}.tar.gz',
+        f'release-{project_version!s}.tar.gz',
+        f'v{project_version!s}.tar.gz']
 
     if filename in github_archive_filenames:
       # The desired source package filename is:
       # {project name}-{project version}.tar.gz
-      package_filename = '{0:s}-{1:s}.tar.gz'.format(
-          project_name, project_version)
+      package_filename = f'{project_name:s}-{project_version!s}.tar.gz'
 
       if os.path.exists(package_filename):
         os.remove(package_filename)

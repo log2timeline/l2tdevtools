@@ -79,23 +79,23 @@ class WheelBuildHelper(interface.BuildHelper):
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source directory of: {source_helper_object.project_name:s}')
       return False
 
     filenames_glob = os.path.join(
-        source_directory, 'dist', '{0:s}-*-*-*.whl'.format(project_name))
+        source_directory, 'dist', f'{project_name:s}-*-*-*.whl')
     filenames = glob.glob(filenames_glob)
 
     if len(filenames) != 1:
-      logging.error('Unable to find wheel file: {0:s}.'.format(filenames_glob))
+      logging.error(f'Unable to find wheel file: {filenames_glob:s}')
       return False
 
     _, _, wheel_filename = filenames[0].rpartition(os.path.sep)
     if os.path.exists(wheel_filename):
       logging.warning('Wheel file already exists.')
     else:
-      logging.info('Moving: {0:s}'.format(filenames[0]))
+      logging.info(f'Moving: {filenames[0]:s}')
       shutil.move(filenames[0], '.')
 
     return True
@@ -125,10 +125,7 @@ class WheelBuildHelper(interface.BuildHelper):
     project_name, project_version = self._GetWheelFilenameProjectInformation(
         source_helper_object)
 
-    filenames_glob = '{0:s}-{1:s}-*-*-*.whl'.format(
-        project_name, project_version)
-
-    return not glob.glob(filenames_glob)
+    return not glob.glob(f'{project_name:s}-{project_version:s}-*-*-*.whl')
 
   def Clean(self, source_helper_object):
     """Cleans the build and dist directory.
@@ -140,16 +137,12 @@ class WheelBuildHelper(interface.BuildHelper):
     project_name, project_version = self._GetWheelFilenameProjectInformation(
         source_helper_object)
 
-    filenames_to_ignore = '{0:s}-{1:s}-.*-.*-.*.whl'.format(
-        project_name, project_version)
-    filenames_to_ignore = re.compile(filenames_to_ignore)
+    filenames_to_ignore = re.compile(
+        f'{project_name:s}-{project_version:s}-.*-.*-.*.whl')
 
-    filenames_glob = '{0:s}-*-*-*.whl'.format(project_name)
-    filenames = glob.glob(filenames_glob)
-
-    for filename in filenames:
+    for filename in glob.glob(f'{project_name:s}-*-*-*.whl'):
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
 
@@ -167,26 +160,26 @@ class BuildWheelBuildHelper(WheelBuildHelper):
     """
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source package of: {source_helper_object.project_name:s}')
       return False
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source directory of: {source_helper_object.project_name:s}')
       return False
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
+    logging.info(f'Building wheel of: {source_package_filename:s}')
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = '\"{0:s}\" -m build --wheel > {1:s} 2>&1'.format(
-        sys.executable, log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
+    command = (
+        f'\"{sys.executable:s}\" -m build --wheel > {log_file_path:s} 2>&1')
+    exit_code = subprocess.call(
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return False
 
     return self._MoveWheel(source_helper_object)
@@ -213,30 +206,30 @@ class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
     """
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source package of: {source_helper_object.project_name:s}')
       return False
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(
+          f'Missing source directory of: {source_helper_object.project_name:s}')
       return False
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building wheel of: {0:s}'.format(source_package_filename))
+    logging.info(f'Building wheel of: {source_package_filename:s}')
 
     setup_py_path = os.path.join(source_directory, 'setup.py')
     if not os.path.exists(setup_py_path):
       raise RuntimeError('Missing setup.py cannot build wheel')
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = '\"{0:s}\" -m build --wheel > {1:s} 2>&1'.format(
-        sys.executable, log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
+    command = (
+        f'\"{sys.executable:s}\" -m build --wheel > {log_file_path:s} 2>&1')
+    exit_code = subprocess.call(
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return False
 
     return self._MoveWheel(source_helper_object)

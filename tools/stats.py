@@ -131,8 +131,7 @@ class DownloadHelper(object):
 
     except urllib_error.URLError as exception:
       logging.warning(
-          'Unable to download URL: {0:s} with error: {1!s}'.format(
-              download_url, exception))
+          f'Unable to download URL: {download_url:s} with error: {exception!s}')
 
     return page_content, response_headers
 
@@ -150,8 +149,8 @@ class GithubContributionsHelper(DownloadHelper):
       output_writer (OutputWriter): output writer.
     """
     download_url = (
-        'https://api.github.com/repos/{0:s}/{1:s}/stats/contributors').format(
-            organization, project_name)
+        f'https://api.github.com/repos/{organization:s}/{project_name:s}/'
+        f'stats/contributors')
 
     contributors_data, response = self._DownloadPageContent(download_url)
     if not contributors_data:
@@ -173,8 +172,8 @@ class GithubContributionsHelper(DownloadHelper):
       output_writer (OutputWriter): output writer.
     """
     download_url = (
-        'https://api.github.com/repos/{0:s}/{1:s}/pulls?state=all').format(
-            organization, project_name)
+        f'https://api.github.com/repos/{organization:s}/{project_name:s}/'
+        f'pulls?state=all')
 
     pulls_data, response = self._DownloadPageContent(download_url)
     if not pulls_data:
@@ -371,22 +370,24 @@ class StdoutWriter(object):
 
         self._header_written = True
 
-      self.Write('{0:s}\t{1:s}\t{2:s}\t{3:s}\t{4:d}\t{5:d}\t{6:d}\n'.format(
-          year, week_number, username, project_name, number_of_contributions,
-          number_of_lines_added, number_of_lines_deleted))
+      self.Write((
+          f'{year:s}\t{week_number:s}\t{username:s}\t{project_name:s}\t'
+          f'{number_of_contributions:d}\t{number_of_lines_added:d}\t'
+          f'{number_of_lines_deleted:d}\n'))
 
     elif self._output_format == 'tilde':
-      date_time_string = '{0:s}-W{1:s}-0'.format(year, week_number)
-      date_time = datetime.datetime.strptime(date_time_string, '%Y-W%W-%w')
+      date_time = datetime.datetime.strptime(
+          f'{year:s}-W{week_number:s}-0', '%Y-W%W-%w')
       date_time_string = date_time.isoformat()
 
       # TODO: add description.
       self.Write((
-          '{0:s} [github] ~ author:{1:s} ~ project:{2:s} ~ '
-          'number_of_cls:{3:d} ~ delta_added:{4:d} ~ delta_deleted:{5:d} '
-          '~ py:{4:d} ~ file_type:py ~ op_type:ADD ~\n').format(
-              date_time_string, username, project_name, number_of_contributions,
-              number_of_lines_added, number_of_lines_deleted))
+          f'{date_time_string:s} [github] ~ author:{username:s} ~ '
+          f'project:{project_name:s} ~ '
+          f'number_of_cls:{number_of_contributions:d} ~ '
+          f'delta_added:{number_of_lines_added:d} ~ '
+          f'delta_deleted:{number_of_lines_deleted:d} ~ '
+          f'py:{number_of_lines_added:d} ~ file_type:py ~ op_type:ADD ~\n'))
 
   def WriteReview(
       self, creation_time, created_by, issue_number, description, reviewers,
@@ -409,9 +410,9 @@ class StdoutWriter(object):
 
         self._header_written = True
 
-      self.Write('{0:s}\t{1:s}\t{2:d}\t{3:s}\t{4:s}\t{5:s}\n'.format(
-          creation_time, created_by, issue_number, description, reviewers,
-          status))
+      self.Write((
+          f'{creation_time:s}\t{created_by:s}\t{issue_number:d}\t'
+          f'{description:s}\t{reviewers:s}\t{status:s}\n'))
 
 
 def Main():
@@ -458,7 +459,7 @@ def Main():
 
   stats_file = os.path.join(config_path, 'stats.ini')
   if not os.path.exists(stats_file):
-    print('No such config file: {0:s}.'.format(stats_file))
+    print(f'No such config file: {stats_file:s}')
     print('')
     return False
 

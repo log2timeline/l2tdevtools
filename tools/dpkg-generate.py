@@ -49,7 +49,7 @@ def Main():
         options.config_file, 'data', 'projects.ini')
 
   if not os.path.exists(options.config_file):
-    print('No such config file: {0:s}.'.format(options.config_file))
+    print(f'No such config file: {options.config_file:s}')
     print('')
     return False
 
@@ -61,14 +61,14 @@ def Main():
         project_definition_match = project_definition
 
   if not project_definition_match:
-    print('No such package name: {0:s}.'.format(options.project_name))
+    print(f'No such package name: {options.project_name:s}')
     print('')
     return False
 
   source_path = options.source_directory
   if not source_path:
     globbed_paths = []
-    for path in glob.glob('{0:s}*'.format(options.project_name)):
+    for path in glob.glob(f'{options.project_name:s}*'):
       if not os.path.isdir(path):
         continue
       globbed_paths.append(path)
@@ -81,16 +81,16 @@ def Main():
     source_path = globbed_paths[0]
 
   if not os.path.exists(source_path):
-    print('No such source directory: {0:s}.'.format(source_path))
+    print(f'No such source directory: {source_path:s}')
     print('')
     return False
 
   source_path = os.path.abspath(source_path)
   project_version = os.path.basename(source_path)
-  if not project_version.startswith('{0:s}-'.format(options.project_name)):
+  if not project_version.startswith(f'{options.project_name:s}-'):
     print((
-        'Unable to determine project version based on source '
-        'directory: {0:s}.').format(source_path))
+        f'Unable to determine project version based on source '
+        f'directory: {source_path:s}'))
     print('')
     return False
 
@@ -98,8 +98,7 @@ def Main():
 
   dpkg_path = os.path.join(source_path, 'dpkg')
   if os.path.exists(dpkg_path):
-    print('Destination dpkg directory: {0:s} already exists.'.format(
-        dpkg_path))
+    print(f'Destination dpkg directory: {dpkg_path:s} already exists.')
     print('')
     return False
 
@@ -110,9 +109,12 @@ def Main():
       options.project_name, project_version,
       project_definition_match, data_path)
 
-  print('Generating dpkg files for: {0:s} {1:s} in: {2:s}'.format(
-      options.project_name, project_version, dpkg_path))
+  print((
+      f'Generating dpkg files for: {options.project_name:s} '
+      f'{project_version!s} in: {dpkg_path:s}'))
+
   build_files_generator.GenerateFiles(dpkg_path)
+
   print('')
 
   return True
