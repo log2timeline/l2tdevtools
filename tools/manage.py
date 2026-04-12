@@ -173,14 +173,11 @@ class GithubRepoManager(object):
       branch = track
 
     if use_api:
-      download_url = '{0:s}/contents/{1:s}?ref={2:s}'.format(
-          self._GITHUB_REPO_API_URL, sub_directory, branch)
+      return (
+          f'{self._GITHUB_REPO_API_URL:s}/contents/{sub_directory:s}?'
+          f'ref={branch:s}')
 
-    else:
-      download_url = '{0:s}/tree/{1:s}/{2:s}'.format(
-          self._GITHUB_REPO_URL, branch, sub_directory)
-
-    return download_url
+    return f'{self._GITHUB_REPO_URL:s}/tree/{branch:s}/{sub_directory:s}'
 
   def GetPackages(self, sub_directory, track, use_api=False):
     """Retrieves a list of packages of a specific sub directory.
@@ -312,8 +309,7 @@ class LaunchpadPPAManager(object):
       ppa_sources = ppa_sources.decode('utf-8')
     except UnicodeDecodeError as exception:
       logging.error(
-          'Unable to decode PPA sources list with error: {0!s}'.format(
-              exception))
+          f'Unable to decode PPA sources list with error: {exception!s}')
       return None
 
     packages = {}
@@ -387,26 +383,26 @@ class PyPIManager(object):
 
       page_content = self._download_helper.DownloadPageContent(download_url)
       if not page_content:
-        logging.error('Unable to retrieve PyPI package: {0:s} page.'.format(
-            pypi_package_name))
+        logging.error(
+            f'Unable to retrieve PyPI package: {pypi_package_name:s} page.')
         continue
 
       try:
         page_content = page_content.decode('utf-8')
       except UnicodeDecodeError as exception:
         logging.error((
-            'Unable to decode PyPI package: {0:s} page with error: '
-            '{1:s}').format(pypi_package_name, exception))
+            f'Unable to decode PyPI package: {pypi_package_name:s} page with '
+            f'error: {exception!s}'))
         continue
 
       expression_string = (
-          '<title>{0:s} ([^ ]*) : Python Package Index</title>'.format(
-              pypi_package_name))
+          f'<title>{pypi_package_name:s} ([^ ]*) : Python Package '
+          f'Index</title>')
       matches = re.findall(expression_string, page_content)
       if not matches or len(matches) != 1:
         logging.warning(
-            'Unable to determine PyPI package: {0:s} information.'.format(
-                pypi_package_name))
+            f'Unable to determine PyPI package: {pypi_package_name:s} '
+            f'information.')
         continue
 
       packages[package_name] = matches
@@ -635,9 +631,8 @@ class PackagesManager(object):
       # The directory contains various files and we are only interested
       # in the source dpkg packages that use the naming convention:
       # package_version-#ppa1~distribution_source.changes
-      name_suffix = 'ppa1~{0:s}_source.changes'.format(
-          self._ubuntu_distribution)
-      if not directory_entry.endswith(name_suffix):
+      if not directory_entry.endswith(
+          f'ppa1~{self._ubuntu_distribution:s}_source.changes'):
         continue
 
       package_name, _, _ = directory_entry.rpartition('-')
@@ -790,13 +785,11 @@ class PackagesManager(object):
         sub_directory = 'win64'
 
       else:
-        logging.error('CPU architecture: {0:s} not supported.'.format(
-            cpu_architecture))
+        logging.error(f'CPU architecture: {cpu_architecture:s} not supported.')
         return None
 
     else:
-      logging.error('Operating system: {0:s} not supported.'.format(
-          operating_system))
+      logging.error(f'Operating system: {operating_system:s} not supported.')
       return None
 
     return sub_directory
@@ -868,7 +861,7 @@ def Main():
 
   projects_file = os.path.join(config_path, 'projects.ini')
   if not os.path.exists(projects_file):
-    print('No such config file: {0:s}.'.format(projects_file))
+    print(f'No such config file: {projects_file:s}')
     print('')
     return False
 
@@ -898,8 +891,8 @@ def Main():
               reference_directory, track))
 
       diff_header = (
-          'Difference between: {0:s} and COPR project: {1:s}'.format(
-              reference_directory, track))
+          f'Difference between: {reference_directory:s} and COPR project: '
+          f'{track:s}')
 
     else:
       if track == 'dev':
@@ -913,8 +906,7 @@ def Main():
           reference_track, track)
 
       diff_header = (
-          'Difference between COPR project: {0:s} and {1:s}'.format(
-              reference_track, track))
+          f'Difference between COPR project: {reference_track:s} and {track:s}')
 
   elif action_tuple[0] == 'csv' and action_tuple[1] == 'diff':
     reference_directory = options.build_directory
@@ -923,8 +915,7 @@ def Main():
         packages_manager.CompareDirectoryWithCSV(
             reference_directory, options.csv_file))
 
-    diff_header = (
-        'Difference between: {0:s} and CSV'.format(reference_directory))
+    diff_header = f'Difference between: {reference_directory:s} and CSV'
 
   elif action_tuple[0] == 'l2tbinaries' and action_tuple[1] == 'diff':
     track = action_tuple[2]
@@ -940,8 +931,8 @@ def Main():
               reference_directory, sub_directory, track))
 
       diff_header = (
-          'Difference between: {0:s} and testing for: {1:s}'.format(
-              reference_directory, sub_directory))
+          f'Difference between: {reference_directory:s} and testing for: '
+          f'{sub_directory:s}')
 
     else:
       if track == 'dev':
@@ -955,8 +946,8 @@ def Main():
           sub_directory, reference_track, track)
 
       diff_header = (
-          'Difference between l2tbinaries tracks: {0:s} and {1:s} for: '
-          '{2:s}').format(reference_track, track, sub_directory)
+          f'Difference between l2tbinaries tracks: {reference_track:s} and '
+          f'{track:s} for: {sub_directory:s}')
 
   elif action_tuple[0] == 'launchpad' and action_tuple[1] == 'diff':
     track = action_tuple[2]
@@ -969,8 +960,8 @@ def Main():
               reference_directory, track))
 
       diff_header = (
-          'Difference between: {0:s} and Launchpad track: {1:s}'.format(
-              reference_directory, track))
+          f'Difference between: {reference_directory:s} and Launchpad track: '
+          f'{track:s}')
 
     else:
       if track == 'dev':
@@ -984,8 +975,8 @@ def Main():
           reference_track, track)
 
       diff_header = (
-          'Difference between Launchpad tracks: {0:s} and {1:s}'.format(
-              reference_track, track))
+          f'Difference between Launchpad tracks: {reference_track:s} and '
+          f'{track:s}')
 
   # elif action_tuple[0] == 'osb' and action_tuple[1] == 'diff':
 
@@ -995,8 +986,7 @@ def Main():
     new_packages, new_versions = (
         packages_manager.CompareDirectoryWithPyPI(reference_directory))
 
-    diff_header = (
-        'Difference between: {0:s} and release'.format(reference_directory))
+    diff_header = f'Difference between: {reference_directory:s} and release'
 
   if action_tuple[1] == 'diff':
     print(diff_header)
@@ -1004,12 +994,12 @@ def Main():
 
     print('New packages:')
     for package in sorted(new_packages.keys()):
-      print('  {0:s}'.format(package))
+      print(f'  {package:s}')
     print('')
 
     print('New versions:')
     for package in sorted(new_versions.keys()):
-      print('  {0:s}'.format(package))
+      print(f'  {package:s}')
     print('')
 
   return True

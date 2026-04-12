@@ -36,15 +36,14 @@ class BuildHelper(object):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    filenames_to_ignore = re.compile(
-        '^{0:s}-.*{1!s}'.format(project_name, project_version))
+    filenames_to_ignore = re.compile(f'^{project_name:s}-.*{project_version!s}')
 
     # Remove previous versions of source directories in the format:
     # <project>-[0-9]*
-    filenames = glob.glob('{0:s}-[0-9]*'.format(project_name))
+    filenames = glob.glob(f'{project_name:s}-[0-9]*')
     for filename in filenames:
       if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         shutil.rmtree(filename, ignore_errors=True)
 
   def _RemoveOlderSourcePackages(self, project_name, project_version):
@@ -54,31 +53,30 @@ class BuildHelper(object):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    filenames_to_ignore = re.compile(
-        '^{0:s}-.*{1!s}'.format(project_name, project_version))
+    filenames_to_ignore = re.compile(f'^{project_name:s}-.*{project_version!s}')
 
     # Remove previous versions of source packages in the format:
     # <project>-[0-9]*.tar.gz
-    filenames = glob.glob('{0:s}-[0-9]*.tar.gz'.format(project_name))
+    filenames = glob.glob(f'{project_name:s}-[0-9]*.tar.gz')
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
     # Remove previous versions of source packages in the format:
     # <project>-[0-9]*.tgz
-    filenames = glob.glob('{0:s}-[0-9]*.tgz'.format(project_name))
+    filenames = glob.glob(f'{project_name:s}-[0-9]*.tgz')
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
     # Remove previous versions of source packages in the format:
     # <project>-[0-9]*.zip
-    filenames = glob.glob('{0:s}-[0-9]*.zip'.format(project_name))
+    filenames = glob.glob(f'{project_name:s}-[0-9]*.zip')
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
   def CheckBuildDependencies(self):

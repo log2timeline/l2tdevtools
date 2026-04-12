@@ -86,8 +86,9 @@ class BaseRPMBuildHelper(interface.BuildHelper):
     current_path = os.getcwd()
     os.chdir(self.rpmbuild_path)
 
-    command = 'rpmbuild {0:s} {1:s} > {2:s} 2>&1'.format(
-        rpmbuild_flags, spec_filename, self.LOG_FILENAME)
+    command = (
+        f'rpmbuild {rpmbuild_flags:s} {spec_filename:s} > '
+        f'{self.LOG_FILENAME:s} 2>&1')
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
       logging.error(f'Running: "{command:s}" failed.')
@@ -109,8 +110,9 @@ class BaseRPMBuildHelper(interface.BuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
-    command = 'rpmbuild {0:s} {1:s} > {2:s} 2>&1'.format(
-        rpmbuild_flags, source_package_filename, self.LOG_FILENAME)
+    command = (
+        f'rpmbuild {rpmbuild_flags:s} {source_package_filename:s} > '
+        f'{self.LOG_FILENAME:s} 2>&1')
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
       logging.error(f'Running: "{command:s}" failed.')
@@ -127,8 +129,8 @@ class BaseRPMBuildHelper(interface.BuildHelper):
     Returns:
       bool: True if the package is installed, False otherwise.
     """
-    command = 'rpm -qi {0:s} >/dev/null 2>&1'.format(package_name)
-    exit_code = subprocess.call(command, shell=True)
+    exit_code = subprocess.call(
+        f'rpm -qi {package_name:s} >/dev/null 2>&1', shell=True)
     return exit_code == 0
 
   def _CopySourcePackageToRPMBuildSources(self, source_package_path):
@@ -266,12 +268,12 @@ class RPMBuildHelper(BaseRPMBuildHelper):
     filenames_to_ignore = re.compile(f'{project_name:s}-{project_version!s}')
 
     filenames_glob = os.path.join(
-        self.rpmbuild_path, 'BUILD', '{0:s}-*'.format(project_name))
+        self.rpmbuild_path, 'BUILD', f'{project_name:s}-*')
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         shutil.rmtree(filename, ignore_errors=True)
 
   def _RemoveOlderRPMs(self, project_name, project_version):
@@ -281,17 +283,16 @@ class RPMBuildHelper(BaseRPMBuildHelper):
       project_name (str): name of the project.
       project_version (str): version of the project.
     """
-    filenames_to_ignore = '.*{0:s}-.*{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture)
+    filenames_to_ignore = (
+        f'.*{project_name:s}-.*{project_version!s}-1.{self.architecture:s}.rpm')
     filenames_to_ignore = re.compile(filenames_to_ignore)
 
-    rpm_filenames_glob = '*{0:s}-*-1.{1:s}.rpm'.format(
-        project_name, self.architecture)
+    rpm_filenames_glob = f'*{project_name:s}-*-1.{self.architecture:s}.rpm'
     filenames = glob.glob(rpm_filenames_glob)
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
     filenames_glob = os.path.join(
@@ -300,7 +301,7 @@ class RPMBuildHelper(BaseRPMBuildHelper):
 
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
   def CheckBuildRequired(self, source_helper_object):
@@ -315,8 +316,8 @@ class RPMBuildHelper(BaseRPMBuildHelper):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    rpm_filename = '{0:s}-{1!s}-1.{2:s}.rpm'.format(
-        project_name, project_version, self.architecture)
+    rpm_filename = (
+        f'{project_name:s}-{project_version!s}-1.{self.architecture:s}.rpm')
 
     return not os.path.exists(rpm_filename)
 

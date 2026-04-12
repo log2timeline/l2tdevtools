@@ -25,8 +25,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
   @classmethod
   def setUpClass(cls):
     """Determines the project version from the latest git tag."""
-    command = 'git ls-remote --tags {0:s}'.format(cls._GIT_URL)
-    arguments = shlex.split(command)
+    arguments = shlex.split(f'git ls-remote --tags {cls._GIT_URL:s}')
 
     try:
       with subprocess.Popen(
@@ -76,10 +75,7 @@ class PyPIDownloadHelperTest(test_lib.BaseTestCase):
 
     project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = 'org.pypi.{0:s}'.format(
-        self._PROJECT_NAME)
-
-    self.assertEqual(project_identifier, expected_project_identifier)
+    self.assertEqual(project_identifier, f'org.pypi.{self._PROJECT_NAME:s}')
 
 
 if __name__ == '__main__':
