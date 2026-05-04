@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Tests for the setup configuration and script file writers."""
 
 import unittest

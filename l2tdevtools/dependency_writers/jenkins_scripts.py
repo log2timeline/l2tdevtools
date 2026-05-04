@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Writer for Jenkins script files."""
 
 import os

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Tests for the helper for managing project source code."""
 
 import unittest

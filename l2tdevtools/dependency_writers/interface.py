@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """Helper for writing files that contain dependency information."""
 
 import abc
 import string
 
 
-class DependencyFileWriter(object):
+class DependencyFileWriter:
   """Base class for dependency file writers."""
 
   def __init__(
@@ -17,7 +16,7 @@ class DependencyFileWriter(object):
       project_definition (ProjectDefinition): project definition.
       dependency_helper (DependencyHelper): dependency helper.
     """
-    super(DependencyFileWriter, self).__init__()
+    super().__init__()
     self._dependency_helper = dependency_helper
     self._l2tdevtools_path = l2tdevtools_path
     self._project_definition = project_definition

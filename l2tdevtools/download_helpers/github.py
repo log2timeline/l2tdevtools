@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
 import re
@@ -27,7 +26,7 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     if len(url_segments) < 5 or url_segments[2] != 'github.com':
       raise ValueError('Unsupported download URL.')
 
-    super(GitHubReleasesDownloadHelper, self).__init__(download_url)
+    super().__init__(download_url)
     self._organization = url_segments[3]
     self._release_is_archive = release_is_archive or False
     self._release_prefix = release_prefix or ''

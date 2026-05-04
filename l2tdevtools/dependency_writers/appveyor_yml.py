@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Writer for appveyor.yml files."""
 
 import os
@@ -32,7 +31,7 @@ class AppveyorYmlWriter(interface.DependencyFileWriter):
     """
     template_filename = os.path.join(
         self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
-    return super(AppveyorYmlWriter, self)._GenerateFromTemplate(
+    return super()._GenerateFromTemplate(
         template_filename, template_mappings)
 
   def Write(self):

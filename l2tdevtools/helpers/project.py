@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for interacting with a project."""
 
 import logging
@@ -32,6 +31,7 @@ class ProjectHelper(cli.CLIHelper):
       'acstore',
       'artifacts',
       'artifacts-kb',
+      'clitooltester',
       'dfdatetime',
       'dfkinds',
       'dfimagetools',
@@ -64,7 +64,7 @@ class ProjectHelper(cli.CLIHelper):
     Raises:
       ValueError: if the project name is not supported.
     """
-    super(ProjectHelper, self).__init__()
+    super().__init__()
     self._project_definition = None
     self.project_name = self._GetProjectName(project_path)
 

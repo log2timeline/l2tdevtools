@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Project preset definitions."""
 
 import configparser
 
 
-class PresetDefinition(object):
+class PresetDefinition:
   """Class that implements a preset definition.
 
   Attributes:
@@ -19,13 +18,13 @@ class PresetDefinition(object):
     Args:
       name (str): name of the preset.
     """
-    super(PresetDefinition, self).__init__()
+    super().__init__()
     self.name = name
     self.preset_names = None
     self.project_names = None
 
 
-class PresetDefinitionReader(object):
+class PresetDefinitionReader:
   """Preset definition reader."""
 
   def _GetConfigValue(self, config_parser, section_name, value_name):

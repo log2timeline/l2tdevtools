@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
 import re
@@ -22,7 +21,7 @@ class ZlibDownloadHelper(project.ProjectDownloadHelper):
     if len(url_segments) < 3 or url_segments[2] != 'www.zlib.net':
       raise ValueError('Unsupported download URL.')
 
-    super(ZlibDownloadHelper, self).__init__(download_url)
+    super().__init__(download_url)
     self._project_name = 'zlib'
 
   # pylint: disable=unused-argument

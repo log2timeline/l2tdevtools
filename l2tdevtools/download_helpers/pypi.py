@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
 import re
@@ -29,7 +28,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       raise ValueError('Unsupported download URL: {0:s}.'.format(
           download_url))
 
-    super(PyPIDownloadHelper, self).__init__(download_url)
+    super().__init__(download_url)
     self._project_name = url_segments[4]
     self._source_name = source_name or self._project_name
 

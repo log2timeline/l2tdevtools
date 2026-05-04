@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Writer for Debian packaging (dpkg) files."""
 
 import os

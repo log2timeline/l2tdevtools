@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for conducting code reviews."""
 
 
@@ -13,7 +12,7 @@ from l2tdevtools.review_helpers import github
 from l2tdevtools.review_helpers import pylint
 
 
-class ReviewHelper(object):
+class ReviewHelper:
   """Helper for conducting code reviews."""
 
   _PROJECT_NAME_PREFIX_REGEX = re.compile(
@@ -36,7 +35,7 @@ class ReviewHelper(object):
       all_files (Optional[bool]): True if the command should apply to all
           files. Currently this only affects the lint command.
     """
-    super(ReviewHelper, self).__init__()
+    super().__init__()
     self._active_branch = None
     self._all_files = all_files
     self._command = command

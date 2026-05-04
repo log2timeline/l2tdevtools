@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Dpkg build files generator."""
 
 import logging
@@ -8,7 +7,7 @@ import stat
 import time
 
 
-class DPKGBuildConfiguration(object):
+class DPKGBuildConfiguration:
   """Dpkg build configuration.
 
   Attributes:
@@ -30,7 +29,7 @@ class DPKGBuildConfiguration(object):
 
   def __init__(self):
     """Initializes a dpkg build configuration."""
-    super(DPKGBuildConfiguration, self).__init__()
+    super().__init__()
     self.has_bin_directory = False
     self.has_dist_info_directory = False
     self.has_egg_info_directory = False
@@ -40,7 +39,7 @@ class DPKGBuildConfiguration(object):
     self.module_directories = []
 
 
-class DPKGBuildFilesGenerator(object):
+class DPKGBuildFilesGenerator:
   """Dpkg build files generator."""
 
   _EMAIL_ADDRESS = (
@@ -194,7 +193,7 @@ class DPKGBuildFilesGenerator(object):
       build_configuration (Optional[DPKGBuildConfiguration]): the dpgk build
           configuration.
     """
-    super(DPKGBuildFilesGenerator, self).__init__()
+    super().__init__()
     self._build_configuration = build_configuration
     self._data_path = data_path
     self._dependency_definitions = dependency_definitions
@@ -344,12 +343,12 @@ class DPKGBuildFilesGenerator(object):
       build_depends = ''
 
     # description short needs to be a single line.
-    description_short = self._project_definition.description_short
+    description_short = self._project_definition.description_short or ''
     description_short = ' '.join(description_short.split('\n'))
 
     # description long needs a space at the start of every line after
     # the first.
-    description_long = self._project_definition.description_long
+    description_long = self._project_definition.description_long or ''
     description_long = '\n '.join(description_long.split('\n'))
 
     depends = []

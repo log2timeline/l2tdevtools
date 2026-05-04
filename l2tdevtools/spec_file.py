@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RPM spec file generator."""
 
 import datetime
@@ -11,7 +10,7 @@ from setuptools.config import setupcfg
 from l2tdevtools import dependencies
 
 
-class RPMSpecFileGenerator(object):
+class RPMSpecFileGenerator:
   """Class that helps in generating RPM spec files."""
 
   _EMAIL_ADDRESS = (
@@ -64,7 +63,7 @@ class RPMSpecFileGenerator(object):
       data_path (str): path to the data directory which contains the RPM
           templates sub directory.
     """
-    super(RPMSpecFileGenerator, self).__init__()
+    super().__init__()
     self._data_path = data_path
 
   def _GenerateSpecFile(

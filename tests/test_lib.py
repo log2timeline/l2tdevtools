@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Windows Registry related functions and classes for testing."""
 
 import os
@@ -43,12 +42,12 @@ class BaseTestCase(unittest.TestCase):
       raise unittest.SkipTest(f'missing test file: {filename:s}')
 
 
-class TempDirectory(object):
+class TempDirectory:
   """A self cleaning temporary directory."""
 
   def __init__(self):
     """Initializes the temporary directory."""
-    super(TempDirectory, self).__init__()
+    super().__init__()
     self.name = ''
 
   def __enter__(self):

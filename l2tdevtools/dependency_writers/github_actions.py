@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Writer for GitHub actions workflow files."""
 
 import os

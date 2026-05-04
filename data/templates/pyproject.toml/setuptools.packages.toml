@@ -1,5 +1,3 @@
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["${python_module_name}"]
-exclude = ["docs", "tests", "tests.*", "utils"]
+[tool.setuptools]
+package-dir = {"${python_module_name}" = "${python_module_name}"}

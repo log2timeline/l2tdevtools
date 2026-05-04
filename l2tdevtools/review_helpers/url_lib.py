@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for using URL library (urllib)."""
 
 import urllib.error as urllib_error
@@ -7,7 +6,7 @@ import urllib.request as urllib_request
 from l2tdevtools.lib import errors
 
 
-class URLLibHelper(object):
+class URLLibHelper:
   """URL library (urllib) helper."""
 
   def Request(self, url, post_data=None):

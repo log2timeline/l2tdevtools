@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for building projects from source."""
 
 from l2tdevtools.build_helpers import dpkg
@@ -7,7 +6,7 @@ from l2tdevtools.build_helpers import source
 from l2tdevtools.build_helpers import wheel
 
 
-class BuildHelperFactory(object):
+class BuildHelperFactory:
   """Factory class for build helpers."""
 
   _BUILD_HELPER_CLASSES = {
