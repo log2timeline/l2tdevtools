@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """Test case to have linter pass."""
 
 
-class LinterPassTestClass(object):
+class LinterPassTestClass:
   """Linter pass test class."""
 
   def __init__(self):
     """Initializes a linter pass test object."""
-    super(LinterPassTestClass, self).__init__()
+    super().__init__()
     self._attribute = None

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for building projects from source."""
 
 import logging

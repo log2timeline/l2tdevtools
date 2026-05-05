@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Script to update prebuilt versions of the projects."""
 
 import argparse
@@ -18,7 +17,7 @@ from l2tdevtools import versions
 from l2tdevtools.download_helpers import interface
 
 
-class PackageDownload(object):
+class PackageDownload:
   """Information about a package download.
 
   Attributes:
@@ -37,7 +36,7 @@ class PackageDownload(object):
       filename (str): name of the package file.
       url (str): download URL of the package file.
     """
-    super(PackageDownload, self).__init__()
+    super().__init__()
     self.filename = filename
     self.name = name
     self.url = url
@@ -62,7 +61,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
       download_url (str): download URL.
       branch (Optional[str]): git branch to download from.
     """
-    super(GithubRepoDownloadHelper, self).__init__(download_url)
+    super().__init__(download_url)
     self._branch = branch
 
   def _GetMachineTypeSubDirectory(
@@ -229,7 +228,7 @@ class GithubRepoDownloadHelper(interface.DownloadHelper):
     return download_urls
 
 
-class DependencyUpdater(object):
+class DependencyUpdater:
   """Helps in updating dependencies.
 
   Attributes:
@@ -310,7 +309,7 @@ class DependencyUpdater(object):
     """
     branch = self._GIT_BRANCH_PER_TRACK.get(download_track, 'main')
 
-    super(DependencyUpdater, self).__init__()
+    super().__init__()
     self._download_directory = download_directory
     self._download_helper = GithubRepoDownloadHelper(
         self._DOWNLOAD_URL, branch=branch)

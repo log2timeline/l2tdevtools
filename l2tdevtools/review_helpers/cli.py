@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for command line functions."""
 
 import codecs
@@ -8,7 +7,7 @@ import shlex
 import subprocess
 
 
-class CLIHelper(object):
+class CLIHelper:
   """Command line interface (CLI) helper.
 
   Attributes:
@@ -23,7 +22,7 @@ class CLIHelper(object):
       mock_responses (Optional[dict[str, str]]): mappings of commands to
           responses, for testing.
     """
-    super(CLIHelper, self).__init__()
+    super().__init__()
     self.mock_responses = mock_responses
     self.preferred_encoding = locale.getpreferredencoding()
 

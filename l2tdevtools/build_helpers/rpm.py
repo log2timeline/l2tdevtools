@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for building projects from source."""
 
 import glob
@@ -58,7 +57,7 @@ class BaseRPMBuildHelper(interface.BuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(BaseRPMBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self.architecture = platform.machine()
 
@@ -409,7 +408,7 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(PyprojectRPMBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     if not project_definition.architecture_dependent:
       self.architecture = 'noarch'
@@ -679,7 +678,7 @@ class PyprojectSRPMBuildHelper(SRPMBuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(PyprojectSRPMBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     if not project_definition.architecture_dependent:
       self.architecture = 'noarch'

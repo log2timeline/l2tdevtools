@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Script to retrieve GitHub project statistics."""
 
 import argparse
@@ -15,7 +14,7 @@ import urllib.error as urllib_error
 from urllib.request import urlopen
 
 
-class StatsDefinitionReader(object):
+class StatsDefinitionReader:
   """Class that implements a stats definition reader."""
 
   def _GetConfigValue(self, config_parser, section_name, value_name):
@@ -104,7 +103,7 @@ class StatsDefinitionReader(object):
     return usernames
 
 
-class DownloadHelper(object):
+class DownloadHelper:
   """Class that defines a download helper."""
 
   def _DownloadPageContent(self, download_url):
@@ -302,7 +301,7 @@ class GithubContributionsHelper(DownloadHelper):
             organization, project_name, output_writer)
 
 
-class StdoutWriter(object):
+class StdoutWriter:
   """Class that defines a stdout output writer."""
 
   def __init__(self, user_mappings, output_format='csv'):
@@ -313,7 +312,7 @@ class StdoutWriter(object):
           another username.
       output_format (Optional[str]): output format.
     """
-    super(StdoutWriter, self).__init__()
+    super().__init__()
     self._header_written = False
     self._output_format = output_format
     self._user_mappings = user_mappings

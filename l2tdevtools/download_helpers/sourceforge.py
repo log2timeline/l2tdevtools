@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
 import re
@@ -23,7 +22,7 @@ class SourceForgeDownloadHelper(project.ProjectDownloadHelper):
         url_segments[3] != 'projects' or url_segments[5] != 'files'):
       raise ValueError('Unsupported download URL.')
 
-    super(SourceForgeDownloadHelper, self).__init__(download_url)
+    super().__init__(download_url)
     self._project_name = url_segments[4]
 
   # pylint: disable=unused-argument

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for building projects from source."""
 
 import datetime
@@ -72,7 +71,7 @@ class DPKGBuildHelper(interface.BuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(DPKGBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self._build_host_distribution = self._GetBuildHostDistribution()
     self._prep_script = 'prep-dpkg.sh'
@@ -556,7 +555,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(ConfigureMakeDPKGBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self.architecture = platform.machine()
     self.distribution = ''
@@ -678,7 +677,7 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(ConfigureMakeSourceDPKGBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'
@@ -883,7 +882,7 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(PybuildDPKGBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self.architecture = platform.machine()
     self.distribution = ''
@@ -1046,7 +1045,7 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(PybuildSourceDPKGBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self._prep_script = 'prep-dpkg-source.sh'
     self._post_script = 'post-dpkg-source.sh'

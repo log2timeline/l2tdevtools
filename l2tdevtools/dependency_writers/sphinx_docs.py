@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Writer for Sphinx build configuration and documentation files."""
 
 import os

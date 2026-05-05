@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Writer for setup configuration and script files."""
 
 import datetime
@@ -36,7 +35,7 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
     """
     template_filename = os.path.join(
         self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
-    return super(PyprojectTomlWriter, self)._GenerateFromTemplate(
+    return super()._GenerateFromTemplate(
         template_filename, template_mappings)
 
   def Write(self):
@@ -154,6 +153,10 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
       file_content.append(f'Homepage = "{url:s}"\n')
       file_content.append(f'Repository = "{url:s}"\n')
 
+    template_data = self._GenerateFromTemplate(
+        'setuptools.packages.toml', template_mappings)
+    file_content.append(template_data)
+
     if package_data:
       file_content.append('\n')
       file_content.append('[tool.setuptools.package-data]\n')
@@ -166,10 +169,6 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
         file_content.append(f'    "{data_file:s}",\n')
 
       file_content.append(']\n')
-
-    template_data = self._GenerateFromTemplate(
-        'setuptools.packages.toml', template_mappings)
-    file_content.append(template_data)
 
     file_content = ''.join(file_content)
 

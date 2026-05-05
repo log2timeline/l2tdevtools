@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Script to manage the GIFT launchpad PPA and l2tbinaries."""
 
 import argparse
@@ -22,7 +21,7 @@ from l2tdevtools.download_helpers import interface
 from l2tdevtools.lib import definitions
 
 
-class COPRProjectManager(object):
+class COPRProjectManager:
   """Defines a COPR project manager."""
 
   _COPR_BASE_URL = 'https://copr.fedorainfracloud.org{0:s}'
@@ -46,7 +45,7 @@ class COPRProjectManager(object):
       name (str): name of the group.
       distribution (Optional[str]): name of the distribution.
     """
-    super(COPRProjectManager, self).__init__()
+    super().__init__()
     self._distribution = distribution or definitions.DEFAULT_FEDORA_DISTRIBUTION
     self._download_helper = interface.DownloadHelper('')
     self._name = name
@@ -139,7 +138,7 @@ class COPRProjectManager(object):
     return packages
 
 
-class GithubRepoManager(object):
+class GithubRepoManager:
   """Defines a GitHub repository manager."""
 
   _GITHUB_REPO_API_URL = (
@@ -150,7 +149,7 @@ class GithubRepoManager(object):
 
   def __init__(self):
     """Initializes a GitHub repository manager."""
-    super(GithubRepoManager, self).__init__()
+    super().__init__()
     self._download_helper = interface.DownloadHelper('')
 
   def _GetDownloadURL(self, sub_directory, track, use_api=False):
@@ -255,7 +254,7 @@ class GithubRepoManager(object):
     return packages
 
 
-class LaunchpadPPAManager(object):
+class LaunchpadPPAManager:
   """Defines a Launchpad PPA manager."""
 
   _LAUNCHPAD_URL = (
@@ -269,7 +268,7 @@ class LaunchpadPPAManager(object):
       name (str): name of the PPA.
       distribution (Optional[str]): name of the distribution.
     """
-    super(LaunchpadPPAManager, self).__init__()
+    super().__init__()
     self._distribution = distribution or definitions.DEFAULT_UBUNTU_DISTRIBUTION
     self._download_helper = interface.DownloadHelper('')
     self._name = name
@@ -326,14 +325,14 @@ class LaunchpadPPAManager(object):
     return packages
 
 
-class OpenSuseBuildServiceManager(object):
+class OpenSuseBuildServiceManager:
   """Defines an OpenSuse build service manager object."""
 
   # http://download.opensuse.org/repositories/home:/joachimmetz:/testing/
   # Fedora_22/src/
 
 
-class PyPIManager(object):
+class PyPIManager:
   """Defines a PyPI manager."""
 
   _PYPI_URL = 'https://pypi.python.org/pypi/{package_name:s}'
@@ -344,7 +343,7 @@ class PyPIManager(object):
     Args:
       projects_file (str): path to the projects.ini file.
     """
-    super(PyPIManager, self).__init__()
+    super().__init__()
     self._download_helper = interface.DownloadHelper('')
     self._package_names = []
     self._pypi_package_names = {}
@@ -410,7 +409,7 @@ class PyPIManager(object):
     return packages
 
 
-class PackagesManager(object):
+class PackagesManager:
   """Manages packages across various repositories."""
 
   def __init__(self, projects_file, distribution=None):
@@ -425,7 +424,7 @@ class PackagesManager(object):
     ubuntu_distribution = (
         distribution or definitions.DEFAULT_UBUNTU_DISTRIBUTION)
 
-    super(PackagesManager, self).__init__()
+    super().__init__()
     self._copr_project_manager = COPRProjectManager(
         'gift', distribution=fedora_distribution)
     self._github_repo_manager = GithubRepoManager()

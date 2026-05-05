@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "l2tdevtools"
-version = "20260411"
+version = "20260504"
 description = "Development tools for the log2timeline projects"
 maintainers = [
     { name = "Log2Timeline maintainers", email = "log2timeline-maintainers@googlegroups.com" },
@@ -16,13 +16,11 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python",
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 
 [project.urls]
 Homepage = "https://github.com/log2timeline/l2tdevtools"
 Repository = "https://github.com/log2timeline/l2tdevtools"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["l2tdevtools"]
-exclude = ["docs", "tests", "tests.*", "utils"]
+[tool.setuptools]
+package-dir = {"l2tdevtools" = "l2tdevtools"}

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Script to automate creating builds of projects."""
 
 import argparse
@@ -25,7 +24,7 @@ __file__ = os.path.abspath(__file__)
 
 # TODO: look into merging functionality with update script.
 
-class ProjectBuilder(object):
+class ProjectBuilder:
   """Class that helps in building projects.
 
   Attributes:
@@ -44,7 +43,7 @@ class ProjectBuilder(object):
       downloads_directory (str): path to the directory where projects are
           downloaded.
     """
-    super(ProjectBuilder, self).__init__()
+    super().__init__()
     self._build_helpers = {}
     self._build_target = build_target
     self._downloads_directory = downloads_directory

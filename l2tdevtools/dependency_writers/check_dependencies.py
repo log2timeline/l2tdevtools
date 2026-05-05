@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Writer for check_dependencies script."""
 
 import os

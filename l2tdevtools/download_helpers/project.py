@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
 import abc
@@ -17,7 +16,7 @@ class ProjectDownloadHelper(interface.DownloadHelper):
     Args:
       download_url (str): download URL.
     """
-    super(ProjectDownloadHelper, self).__init__(download_url)
+    super().__init__(download_url)
     self._project_name = None
 
   def _GetLatestVersion(

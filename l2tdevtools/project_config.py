@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Helper for project configuration."""
 
 import configparser
 
 
-class ProjectDefinition(object):
+class ProjectDefinition:
   """Project definition.
 
   Attributes:
@@ -21,7 +20,7 @@ class ProjectDefinition(object):
 
   def __init__(self):
     """Initializes a project configuration."""
-    super(ProjectDefinition, self).__init__()
+    super().__init__()
     self.description_long = None
     self.description_short = None
     self.git_url = None
@@ -33,7 +32,7 @@ class ProjectDefinition(object):
     self.status = 'alpha'
 
 
-class ProjectDefinitionReader(object):
+class ProjectDefinitionReader:
   """Project definition reader."""
 
   _VALUE_NAMES = frozenset([

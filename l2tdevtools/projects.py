@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Project definitions."""
 
 import configparser
@@ -6,7 +5,7 @@ import logging
 import re
 
 
-class ProjectDefinition(object):
+class ProjectDefinition:
   """Project definition.
 
   Attributes:
@@ -64,7 +63,7 @@ class ProjectDefinition(object):
     Args:
       name (str): name of the project.
     """
-    super(ProjectDefinition, self).__init__()
+    super().__init__()
     self.architecture_dependent = False
     self.build_dependencies = None
     self.build_system = None
@@ -107,7 +106,7 @@ class ProjectDefinition(object):
     self.wheel_name = None
 
 
-class ProjectVersionDefinition(object):
+class ProjectVersionDefinition:
   """Project version definition."""
 
   _VERSION_STRING_PART_RE = re.compile(
@@ -119,7 +118,7 @@ class ProjectVersionDefinition(object):
     Args:
       version_string (str): version string.
     """
-    super(ProjectVersionDefinition, self).__init__()
+    super().__init__()
     self._version_string_parts = []
 
     if not version_string:
@@ -177,7 +176,7 @@ class ProjectVersionDefinition(object):
     return self._version_string_parts[1]
 
 
-class ProjectDefinitionReader(object):
+class ProjectDefinitionReader:
   """Project definition reader."""
 
   def _GetConfigValue(self, config_parser, section_name, value_name):

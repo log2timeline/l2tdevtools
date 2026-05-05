@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
 from l2tdevtools.download_helpers import github
@@ -6,7 +5,7 @@ from l2tdevtools.download_helpers import pypi
 from l2tdevtools.download_helpers import sourceforge
 
 
-class DownloadHelperFactory(object):
+class DownloadHelperFactory:
   """Factory class for download helpers."""
 
   @classmethod

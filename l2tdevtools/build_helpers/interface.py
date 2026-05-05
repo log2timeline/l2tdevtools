@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for building projects from source."""
 
 import glob
@@ -8,7 +7,7 @@ import re
 import shutil
 
 
-class BuildHelper(object):
+class BuildHelper:
   """Helper to build projects from source."""
 
   LOG_FILENAME = 'build.log'
@@ -24,7 +23,7 @@ class BuildHelper(object):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(BuildHelper, self).__init__()
+    super().__init__()
     self._data_path = os.path.join(l2tdevtools_path, 'data')
     self._dependency_definitions = dependency_definitions
     self._project_definition = project_definition

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for interacting with git."""
 
 import os
@@ -15,7 +14,7 @@ class GitHelper(cli.CLIHelper):
     Args:
       git_repo_url (str): git repo URL.
     """
-    super(GitHelper, self).__init__()
+    super().__init__()
     self._git_repo_url = git_repo_url
     self._remotes = []
 

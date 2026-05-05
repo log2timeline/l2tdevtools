@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for building Python wheel packages (.whl)."""
 
 import glob
@@ -29,7 +28,7 @@ class WheelBuildHelper(interface.BuildHelper):
       dependency_definitions (dict[str, ProjectDefinition]): definitions of all
           projects, which is used to determine the properties of dependencies.
     """
-    super(WheelBuildHelper, self).__init__(
+    super().__init__(
         project_definition, l2tdevtools_path, dependency_definitions)
     self.architecture = None
 

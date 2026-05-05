@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for managing project source code."""
 
 import abc
@@ -12,7 +11,7 @@ import tarfile
 import zipfile
 
 
-class SourceHelper(object):
+class SourceHelper:
   """Helper to manage project source code."""
 
   def __init__(self, project_name, project_definition):
@@ -22,7 +21,7 @@ class SourceHelper(object):
       project_name (str): name of the project.
       project_definition (ProjectDefinition): project definition.
     """
-    super(SourceHelper, self).__init__()
+    super().__init__()
     self._project_definition = project_definition
     self.project_name = project_name
 
@@ -60,7 +59,7 @@ class GitRepositorySourceHelper(SourceHelper):
       project_name (str): name of the project.
       project_definition (ProjectDefinition): project definition.
     """
-    super(GitRepositorySourceHelper, self).__init__(
+    super().__init__(
         project_name, project_definition)
     self._git_url = project_definition.git_url
 
@@ -161,7 +160,7 @@ class SourcePackageHelper(SourceHelper):
           is downloaded.
       download_helper_object (DownloadHelper): download helper.
     """
-    super(SourcePackageHelper, self).__init__(project_name, project_definition)
+    super().__init__(project_name, project_definition)
     self._download_helper = download_helper_object
     self._downloads_directory = os.path.abspath(downloads_directory)
     self._project_version = None

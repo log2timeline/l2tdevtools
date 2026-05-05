@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Script to extract the database schema from SQLite database files."""
 
 import argparse
@@ -15,7 +14,7 @@ except ImportError:
   pyperclip = None
 
 
-class SQLiteSchemaExtractor(object):
+class SQLiteSchemaExtractor:
   """SQLite database file schema extractor."""
 
   _SCHEMA_QUERY = (

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Download helper object implementations."""
 
 import http.client
@@ -9,7 +8,7 @@ import urllib.error as urllib_error
 import urllib.request as urllib_request
 
 
-class DownloadHelper(object):
+class DownloadHelper:
   """Helps in downloading files and web content."""
 
   def __init__(self, download_url):
@@ -18,7 +17,7 @@ class DownloadHelper(object):
     Args:
       download_url (str): download URL.
     """
-    super(DownloadHelper, self).__init__()
+    super().__init__()
     self._cached_url = ''
     self._cached_page_content = b''
     self._download_url = download_url

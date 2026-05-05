@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Writer for Linux script files."""
 
 import os

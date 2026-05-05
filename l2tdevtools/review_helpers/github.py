@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Helper for interacting with GitHub."""
 
 import json
@@ -8,7 +7,7 @@ from l2tdevtools.review_helpers import url_lib
 from l2tdevtools.lib import errors
 
 
-class GitHubHelper(object):
+class GitHubHelper:
   """Github helper."""
 
   def __init__(self, organization, project):
@@ -18,7 +17,7 @@ class GitHubHelper(object):
       organization (str): GitHub organization name.
       project (str): GitHub project name.
     """
-    super(GitHubHelper, self).__init__()
+    super().__init__()
 
     self._organization = organization
     self._project = project

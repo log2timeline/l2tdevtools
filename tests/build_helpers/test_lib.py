@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Build helper related functions and classes for testing."""
 
 import logging
@@ -19,7 +18,7 @@ class TestSourceHelper(source_helper.SourceHelper):
       project_definition (ProjectDefinition): project definition.
       project_version (str): version of the project source code.
     """
-    super(TestSourceHelper, self).__init__(project_name, project_definition)
+    super().__init__(project_name, project_definition)
     self._project_version = project_version
     self._source_directory_path = f'{project_name:s}-{project_version!s}'
     self._source_package_filename = (
