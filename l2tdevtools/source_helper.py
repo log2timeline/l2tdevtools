@@ -79,8 +79,7 @@ class GitRepositorySourceHelper(SourceHelper):
       return None
 
     command = f'git clone {self._git_url:s}'
-    exit_code = subprocess.call(
-        f'{command:s}', shell=True)
+    exit_code = subprocess.call(f'{command:s}', shell=True)
     if exit_code != 0:
       logging.error(f'Running: "{command:s}" failed.')
       return None
@@ -111,8 +110,7 @@ class LibyalGitRepositorySourceHelper(GitRepositorySourceHelper):
       return None
 
     command = f'git clone {self._git_url:s}'
-    exit_code = subprocess.call(
-        f'{command:s}', shell=True)
+    exit_code = subprocess.call(f'{command:s}', shell=True)
     if exit_code != 0:
       logging.error(f'Running: "{command:s}" failed.')
       return None
@@ -175,8 +173,7 @@ class SourcePackageHelper(SourceHelper):
       project_name (str): name of the project.
       project_version (str): current version of the project.
     """
-    filenames_to_ignore = re.compile(
-        f'^{project_name:s}-.*{project_version!s}')
+    filenames_to_ignore = re.compile(f'^{project_name:s}-.*{project_version!s}')
 
     # Remove previous versions of source packages in the format:
     # <project>-*[0-9]*.tar.gz

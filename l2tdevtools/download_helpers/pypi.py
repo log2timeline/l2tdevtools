@@ -2,7 +2,7 @@
 
 import re
 
-import packaging
+from packaging import version as packaging_version
 
 from l2tdevtools.download_helpers import project
 
@@ -63,7 +63,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       else:
         epoch = int(epoch, 10)
 
-      version_object = packaging.version.parse(epoch_version_string)
+      version_object = packaging_version.parse(epoch_version_string)
 
       # Convert the result of map() into a list for Python 3.
       comparable_version = version_object.base_version.split('.')
