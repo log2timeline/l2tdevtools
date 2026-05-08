@@ -2,7 +2,7 @@
 
 import re
 
-import packaging
+from packaging import version as packaging_version
 
 from l2tdevtools.download_helpers import project
 
@@ -63,7 +63,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       else:
         epoch = int(epoch, 10)
 
-      version_object = packaging.version.parse(epoch_version_string)
+      version_object = packaging_version.parse(epoch_version_string)
 
       # Convert the result of map() into a list for Python 3.
       comparable_version = version_object.base_version.split('.')
@@ -104,9 +104,9 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       return None
 
     expression_string = (
-        r'"https://files.pythonhosted.org/packages/.*/.*/.*/'
-        r'{0:s}-([\d\.\!]*(post\d+)?)\.(tar\.bz2|tar\.gz|zip)"').format(
-            self._source_name)
+        f'"https://files.pythonhosted.org/packages/.*/.*/.*/'
+        f'{self._source_name:s}-([\\d\\.\\!]*(post\\d+)?)'
+        f'\\.(tar\\.bz2|tar\\.gz|zip)"')
 
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
     if not matches:

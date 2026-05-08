@@ -78,11 +78,10 @@ class GitRepositorySourceHelper(SourceHelper):
     if not self.project_name or not self._git_url:
       return None
 
-    command = 'git clone {0:s}'.format(self._git_url)
-    exit_code = subprocess.call(
-        '{0:s}'.format(command), shell=True)
+    command = f'git clone {self._git_url:s}'
+    exit_code = subprocess.call(f'{command:s}', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return None
 
     return self.project_name
@@ -110,34 +109,33 @@ class LibyalGitRepositorySourceHelper(GitRepositorySourceHelper):
     if not self.project_name or not self._git_url:
       return None
 
-    command = 'git clone {0:s}'.format(self._git_url)
-    exit_code = subprocess.call(
-        '{0:s}'.format(command), shell=True)
+    command = f'git clone {self._git_url:s}'
+    exit_code = subprocess.call(f'{command:s}', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return None
 
     source_directory = self.project_name
 
     command = './synclibs.sh'
     exit_code = subprocess.call(
-        '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return None
 
     command = './autogen.sh'
     exit_code = subprocess.call(
-        '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return None
 
     command = './configure'
     exit_code = subprocess.call(
-        '(cd {0:s} && {1:s})'.format(source_directory, command), shell=True)
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return None
 
     return source_directory
@@ -175,31 +173,30 @@ class SourcePackageHelper(SourceHelper):
       project_name (str): name of the project.
       project_version (str): current version of the project.
     """
-    filenames_to_ignore = re.compile(
-        '^{0:s}-.*{1!s}'.format(project_name, project_version))
+    filenames_to_ignore = re.compile(f'^{project_name:s}-.*{project_version!s}')
 
     # Remove previous versions of source packages in the format:
     # <project>-*[0-9]*.tar.gz
-    filenames = glob.glob('{0:s}-*[0-9]*.tar.gz'.format(project_name))
+    filenames = glob.glob(f'{project_name:s}-*[0-9]*.tar.gz')
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
     # Remove previous versions of source packages in the format:
     # <project>-*[0-9]*.tgz
-    filenames = glob.glob('{0:s}-*[0-9]*.tgz'.format(project_name))
+    filenames = glob.glob(f'{project_name:s}-*[0-9]*.tgz')
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
     # Remove previous versions of source packages in the format:
     # <project>-*[0-9]*.zip
-    filenames = glob.glob('{0:s}-*[0-9]*.zip'.format(project_name))
+    filenames = glob.glob(f'{project_name:s}-*[0-9]*.zip')
     for filename in filenames:
       if not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         os.remove(filename)
 
   def _CreateFromTar(self, source_package_filename):
@@ -224,13 +221,13 @@ class SourcePackageHelper(SourceHelper):
             filename = filename.decode(self.ENCODING)
           except UnicodeDecodeError:
             logging.warning(
-                'Unable to decode filename in tar file: {0:s}'.format(
-                    source_package_filename))
+                f'Unable to decode filename in tar file: '
+                f'{source_package_filename:s}')
             continue
 
         if filename is None:
-          logging.warning('Missing filename in tar file: {0:s}'.format(
-              source_package_filename))
+          logging.warning(
+              f'Missing filename in tar file: {source_package_filename:s}')
           continue
 
         if not directory_name:
@@ -239,19 +236,19 @@ class SourcePackageHelper(SourceHelper):
           directory_name, _, _ = filename.partition('/')
           if not directory_name or directory_name.startswith('..'):
             logging.error(
-                'Unsupported directory name in tar file: {0:s}'.format(
-                    source_package_filename))
+                f'Unsupported directory name in tar file: '
+                f'{source_package_filename:s}')
             return None
 
           if os.path.exists(directory_name):
             break
 
-          logging.info('Extracting: {0:s}'.format(source_package_filename))
+          logging.info(f'Extracting: {source_package_filename:s}')
 
         elif not filename.startswith(directory_name):
           logging.warning(
-              'Skipping: {0:s} in tar file: {1:s}'.format(
-                  filename, source_package_filename))
+              f'Skipping: {filename:s} in tar file: '
+              f'{source_package_filename:s}')
           continue
 
         archive.extract(tar_info)
@@ -274,8 +271,8 @@ class SourcePackageHelper(SourceHelper):
       for zip_info in archive.infolist():
         filename = getattr(zip_info, 'filename', None)
         if filename is None:
-          logging.warning('Missing filename in zip file: {0:s}'.format(
-              source_package_filename))
+          logging.warning(
+              f'Missing filename in zip file: {source_package_filename:s}')
           continue
 
         if not directory_name:
@@ -284,19 +281,19 @@ class SourcePackageHelper(SourceHelper):
           directory_name, _, _ = filename.partition('/')
           if not directory_name or directory_name.startswith('..'):
             logging.error(
-                'Unsupported directory name in zip file: {0:s}'.format(
-                    source_package_filename))
+                f'Unsupported directory name in zip file: '
+                f'{source_package_filename:s}')
             return None
 
           if os.path.exists(directory_name):
             break
 
-          logging.info('Extracting: {0:s}'.format(source_package_filename))
+          logging.info(f'Extracting: {source_package_filename:s}')
 
         elif not filename.startswith(directory_name):
           logging.warning(
-              'Skipping: {0:s} in zip file: {1:s}'.format(
-                  filename, source_package_filename))
+              f'Skipping: {filename:s} in zip file: '
+              f'{source_package_filename:s}')
           continue
 
         archive.extract(zip_info)
@@ -318,14 +315,14 @@ class SourcePackageHelper(SourceHelper):
       os.chdir(current_working_directory)
 
     filenames_to_ignore = re.compile(
-        '^{0:s}-.*{1!s}'.format(self.project_name, project_version))
+        f'^{self.project_name:s}-.*{project_version!s}')
 
     # Remove previous versions of source directories in the format:
     # <project>-[0-9]*
-    filenames = glob.glob('{0:s}-[0-9]*'.format(self.project_name))
+    filenames = glob.glob(f'{self.project_name:s}-[0-9]*')
     for filename in filenames:
       if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
-        logging.info('Removing: {0:s}'.format(filename))
+        logging.info(f'Removing: {filename:s}')
         shutil.rmtree(filename)
 
   def Create(self):
@@ -336,7 +333,8 @@ class SourcePackageHelper(SourceHelper):
     """
     if (not self._source_package_path or
         not os.path.exists(self._source_package_path)):
-      logging.info('Missing source package of: {0:s}'.format(self.project_name))
+      logging.info(
+          f'Missing source package of: {self.project_name:s}')
       return False
 
     directory_name = None
