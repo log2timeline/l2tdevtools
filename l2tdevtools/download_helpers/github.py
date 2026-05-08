@@ -103,8 +103,8 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     # The format of the project download URL is:
     # <a href="/{organization}/{repository}/releases/tag/{git tag}"
     expression_string = (
-        f'<a href="/{self._organization:s}/{self._repository:s}'
-        f'/releases/tag/([^"]*)"[^>]*>[^<]*</a>')
+        f'<a href="/{self._organization:s}/{self._repository:s}/releases/tag'
+        f'/([^"]*)"[^>]*>[^<]*</a>')
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
@@ -136,9 +136,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     # The format of the project download URL is:
     # <a href="/{organization}/{repository}/releases/tag/{git tag}"
     expression_string = (
-        f'<a href="/{self._organization:s}/{self._repository:s}'
-        f'/releases/tag/{self._release_tag_prefix:s}'
-        f'(.*{project_version!s}[^"]*)"[^>]*>([^<]*)</a>')
+        f'<a href="/{self._organization:s}/{self._repository:s}/releases/tag'
+        f'/{self._release_tag_prefix:s}(.*{project_version!s}[^"]*)"[^>]*>'
+        f'([^<]*)</a>')
 
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
@@ -150,16 +150,16 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
         download_url = (
             f'https://github.com/{self._organization:s}/{self._repository:s}'
             f'/archive/refs/tags/{version!s}.tar.gz')
-      elif self._release_prefix:
-        release = f'{self._release_prefix:s}{version:s}.tar.gz'
       else:
-        release = matches[0][1].replace(" ", "-")
-        release = f'{release:s}.tar.gz'
+        if self._release_prefix:
+          release = f'{self._release_prefix:s}{version:s}'
+        else:
+          release = matches[0][1].replace(" ", "-")
 
         download_url = (
             f'https://github.com/{self._organization:s}/{self._repository:s}'
             f'/releases/download/{self._release_tag_prefix:s}{version!s}'
-            f'/{release:s}')
+            f'/{release:s}.tar.gz')
 
     return download_url
 
