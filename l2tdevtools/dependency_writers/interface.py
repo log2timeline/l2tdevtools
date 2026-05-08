@@ -42,8 +42,8 @@ class DependencyFileWriter:
 
     except (KeyError, ValueError) as exception:
       raise RuntimeError(
-          'Unable to format template: {0:s} with error: {1!s}'.format(
-              template_filename, exception))
+          f'Unable to format template: {template_filename:s} '
+          f'with error: {exception!s}')
 
   def _GetDPKGDevDependencies(self):
     """Retrieves DPKG development dependencies.

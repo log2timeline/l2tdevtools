@@ -26,12 +26,12 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
     if debug_dependencies:
       for index, dependency in enumerate(sorted(debug_dependencies)):
         if index == 0:
-          line = 'DEBUG_DEPENDENCIES="{0:s}'.format(dependency)
+          line = f'DEBUG_DEPENDENCIES="{dependency:s}'
         else:
-          line = '                    {0:s}'.format(dependency)
+          line = f'                    {dependency:s}'
 
         if index + 1 == len(debug_dependencies):
-          line = '{0:s}";'.format(line)
+          line = f'{line:s}";'
 
         formatted_debug_dependencies.append(line)
 
@@ -51,12 +51,12 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
     if development_dependencies:
       for index, dependency in enumerate(sorted(development_dependencies)):
         if index == 0:
-          line = 'DEVELOPMENT_DEPENDENCIES="{0:s}'.format(dependency)
+          line = f'DEVELOPMENT_DEPENDENCIES="{dependency:s}'
         else:
-          line = '                          {0:s}'.format(dependency)
+          line = f'                          {dependency:s}'
 
         if index + 1 == len(development_dependencies):
-          line = '{0:s}";'.format(line)
+          line = f'{line:s}";'
 
         formatted_development_dependencies.append(line)
 
@@ -76,12 +76,12 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
 
     for index, dependency in enumerate(sorted(python_dependencies)):
       if index == 0:
-        line = 'PYTHON_DEPENDENCIES="{0:s}'.format(dependency)
+        line = f'PYTHON_DEPENDENCIES="{dependency:s}'
       else:
-        line = '                     {0:s}'.format(dependency)
+        line = f'                     {dependency:s}'
 
       if index + 1 == len(python_dependencies):
-        line = '{0:s}";'.format(line)
+        line = f'{line:s}";'
 
       formatted_python_dependencies.append(line)
 
@@ -100,12 +100,12 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
     if test_dependencies:
       for index, dependency in enumerate(sorted(test_dependencies)):
         if index == 0:
-          line = 'TEST_DEPENDENCIES="{0:s}'.format(dependency)
+          line = f'TEST_DEPENDENCIES="{dependency:s}'
         else:
-          line = '                   {0:s}'.format(dependency)
+          line = f'                   {dependency:s}'
 
         if index + 1 == len(test_dependencies):
-          line = '{0:s}";'.format(line)
+          line = f'{line:s}";'
 
         formatted_test_dependencies.append(line)
 
@@ -126,8 +126,7 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
       if dependency.startswith('lib') and dependency.endswith('python3'):
         dependency, _, _ = dependency.partition('-')
         debug_dependencies.extend([
-            '{0:s}-dbg'.format(dependency),
-            '{0:s}-python3-dbg'.format(dependency)])
+            f'{dependency:s}-dbg', f'{dependency:s}-python3-dbg'])
 
     return debug_dependencies
 
@@ -170,8 +169,7 @@ class UbuntuInstallationScriptWriter(interface.DependencyFileWriter):
     template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
     file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
-    script_name = 'ubuntu_install_{0:s}.sh'.format(
-        self._project_definition.name)
+    script_name = f'ubuntu_install_{self._project_definition.name:s}.sh'
     script_path = os.path.join('config', 'linux', script_name)
 
     with open(script_path, 'w', encoding='utf-8') as file_object:
