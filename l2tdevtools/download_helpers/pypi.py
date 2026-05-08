@@ -25,8 +25,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     url_segments = download_url.split('/')
     if (len(url_segments) < 5 or url_segments[2] != 'pypi.org' or
         url_segments[3] != 'project'):
-      raise ValueError('Unsupported download URL: {0:s}.'.format(
-          download_url))
+      raise ValueError(f'Unsupported download URL: {download_url:s}.')
 
     super().__init__(download_url)
     self._project_name = url_segments[4]
@@ -98,7 +97,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
       latest_version = version_definition.GetLatestVersion()
 
-    download_url = 'https://pypi.org/pypi/{0:s}/json'.format(self._project_name)
+    download_url = f'https://pypi.org/pypi/{self._project_name:s}/json'
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -128,7 +127,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     Returns:
       str: download URL of the project or None if not available.
     """
-    download_url = 'https://pypi.org/pypi/{0:s}/json'.format(self._project_name)
+    download_url = f'https://pypi.org/pypi/{self._project_name:s}/json'
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -138,9 +137,9 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     # https://files.pythonhosted.org/packages/[0-9a-f]*/[0-9a-f]*/[0-9a-f]*/
     #     {project name}-{version}.{extension}
     expression_string = (
-        '(https://files.pythonhosted.org/packages/[0-9a-f]*/[0-9a-f]*/'
-        '[0-9a-f]*/{0:s}-{1!s}[.](tar[.]bz2|tar[.]gz|zip))').format(
-            self._source_name, project_version)
+        f'(https://files.pythonhosted.org/packages/[0-9a-f]*/[0-9a-f]*/'
+        f'[0-9a-f]*/{self._source_name:s}-{project_version!s}[.]'
+        f'(tar[.]bz2|tar[.]gz|zip))')
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
@@ -154,4 +153,4 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
     Returns:
       str: project identifier.
     """
-    return 'org.pypi.{0:s}'.format(self._project_name)
+    return f'org.pypi.{self._project_name:s}'

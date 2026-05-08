@@ -45,8 +45,7 @@ class ZlibDownloadHelper(project.ProjectDownloadHelper):
     # The format of the project download URL is:
     # http://zlib.net/{project name}-{version}.tar.gz
     expression_string = (
-        '<A HREF="{0:s}-([0-9]+.[0-9]+.[0-9]+).tar.gz"').format(
-            self._project_name)
+        f'<A HREF="{self._project_name:s}-([0-9]+.[0-9]+.[0-9]+).tar.gz"')
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
@@ -67,8 +66,7 @@ class ZlibDownloadHelper(project.ProjectDownloadHelper):
     """
     # The format of the project download URL is:
     # http://zlib.net/{project name}-{version}.tar.gz
-    return 'http://zlib.net/{0:s}-{1:s}.tar.gz'.format(
-        self._project_name, project_version)
+    return f'http://zlib.net/{self._project_name:s}-{project_version:s}.tar.gz'
 
   def GetProjectIdentifier(self):
     """Retrieves the project identifier for a given project name.
@@ -76,4 +74,4 @@ class ZlibDownloadHelper(project.ProjectDownloadHelper):
     Returns:
       str: project identifier.
     """
-    return 'net.zlib.{0:s}'.format(self._project_name)
+    return f'net.zlib.{self._project_name:s}'
