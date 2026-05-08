@@ -55,24 +55,24 @@ class PylintHelper(cli.CLIHelper):
     print('Running linter on changed files.')
     failed_filenames = []
     for filename in filenames:
-      print('Checking: {0:s}'.format(filename))
+      print(f'Checking: {filename:s}')
 
-      command = 'pylint --rcfile="{0:s}" {1:s}'.format(rcfile, filename)
+      command = f'pylint --rcfile="{rcfile:s}" {filename:s}'
       # For now disable pylint 2.1.1 and later specific checks.
       if version_tuple >= (2, 1, 1):
         additional_checks = [
             'assignment-from-none', 'chained-comparison',
             'useless-object-inheritance']
-        command = '{0:s} --disable={1:s}'.format(
-            command, ','.join(additional_checks))
+        disable_checks = ','.join(additional_checks)
+        command = f'{command:s} --disable={disable_checks:s}'
 
       exit_code = subprocess.call(command, shell=True)
       if exit_code != 0:
         failed_filenames.append(filename)
 
     if failed_filenames:
-      print('\nFiles with linter errors:\n{0:s}\n'.format(
-          '\n'.join(failed_filenames)))
+      filenames_string = '\n'.join(failed_filenames)
+      print(f'\nFiles with linter errors:\n{filenames_string:s}\n')
       return False
 
     return True

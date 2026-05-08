@@ -40,10 +40,10 @@ class GitHubHelper:
     post_data = json.dumps({"assignees": assignees})
 
     github_url = (
-        'https://api.github.com/repos/{0:s}/{1:s}/issues/{2:d}/'
-        'assignees?access_token={3:s}').format(
-            self._organization, self._project, pull_request_number,
-            access_token)
+        f'https://api.github.com/repos/'
+        f'{self._organization:s}/{self._project:s}/issues/'
+        f'{pull_request_number:d}/assignees?'
+        f'access_token={access_token:s}')
 
     try:
       self._url_lib_helper.Request(github_url, post_data=post_data)
@@ -78,18 +78,18 @@ class GitHubHelper:
 
     # Note that the maintainer_can_modify is a JSON boolean value.
     post_data = (
-        '{{\n'
-        '  "title": "{0:s}",\n'
-        '  "body": "{1:s}",\n'
-        '  "head": "{2:s}",\n'
-        '  "base": "main",\n'
-        '  "maintainer_can_modify": {3:s}\n'
-        '}}\n').format(title, body, origin, maintainer_can_modify)
+        f'{{\n'
+        f'  "title": "{title:s}",\n'
+        f'  "body": "{body:s}",\n'
+        f'  "head": "{origin:s}",\n'
+        f'  "base": "main",\n'
+        f'  "maintainer_can_modify": {maintainer_can_modify:s}\n'
+        f'}}\n')
 
     github_url = (
-        'https://api.github.com/repos/{0:s}/{1:s}/pulls?'
-        'access_token={2:s}').format(
-            self._organization, self._project, access_token)
+        f'https://api.github.com/repos/'
+        f'{self._organization:s}/{self._project:s}/pulls?'
+        f'access_token={access_token:s}')
 
     response_data = self._url_lib_helper.Request(
         github_url, post_data=post_data)
@@ -118,10 +118,10 @@ class GitHubHelper:
     post_data = json.dumps({"reviewers": reviewers})
 
     github_url = (
-        'https://api.github.com/repos/{0:s}/{1:s}/pulls/{2:d}/'
-        'requested_reviewers?access_token={3:s}').format(
-            self._organization, self._project, pull_request_number,
-            access_token)
+        f'https://api.github.com/repos/'
+        f'{self._organization:s}/{self._project:s}/pulls/'
+        f'{pull_request_number:d}/requested_reviewers?'
+        f'access_token={access_token:s}')
 
     try:
       self._url_lib_helper.Request(github_url, post_data=post_data)
@@ -140,7 +140,7 @@ class GitHubHelper:
     Returns:
       str: git repository URL or None.
     """
-    return 'https://github.com/{0:s}/{1:s}.git'.format(username, self._project)
+    return f'https://github.com/{username:s}/{self._project:s}.git'
 
   def GetUsername(self, access_token):
     """Retrieves a GitHub user.
@@ -151,9 +151,7 @@ class GitHubHelper:
     Returns:
       str: GitHub user name or None if not available.
     """
-    github_url = (
-        'https://api.github.com/user?access_token={0:s}').format(
-            access_token)
+    github_url = f'https://api.github.com/user?access_token={access_token:s}'
 
     try:
       response_data = self._url_lib_helper.Request(github_url)
@@ -178,13 +176,13 @@ class GitHubHelper:
     Returns:
       dict[str,object]: JSON response or None if not available.
     """
-    github_url = 'https://api.github.com/users/{0:s}'.format(username)
+    github_url = f'https://api.github.com/users/{username:s}'
 
     try:
       response_data = self._url_lib_helper.Request(github_url)
 
     except errors.ConnectivityError as exception:
-      logging.warning('{0!s}'.format(exception))
+      logging.warning(f'{exception!s}')
       return None
 
     if isinstance(response_data, bytes):
