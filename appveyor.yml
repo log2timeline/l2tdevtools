@@ -31,7 +31,6 @@ environment:
 
 install:
 - cmd: "%PYTHON%\\python.exe -m pip install -U build pip setuptools twine wheel"
-- ps: .\config\appveyor\install.ps1
 
 build_script:
 - cmd: IF [%TARGET%]==[wheel] (
