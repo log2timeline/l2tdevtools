@@ -150,11 +150,11 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
         download_url = (
             f'https://github.com/{self._organization:s}/{self._repository:s}'
             f'/archive/refs/tags/{version!s}.tar.gz')
+      elif self._release_prefix:
+        release = f'{self._release_prefix:s}{version:s}.tar.gz'
       else:
-        if self._release_prefix:
-          release = f'{self._release_prefix:s}{version:s}.tar.gz'
-        else:
-          release = f'{matches[0][1].replace(" ", "-"):s}.tar.gz'
+        release = matches[0][1].replace(" ", "-")
+        release = f'{release:s}.tar.gz'
 
         download_url = (
             f'https://github.com/{self._organization:s}/{self._repository:s}'
