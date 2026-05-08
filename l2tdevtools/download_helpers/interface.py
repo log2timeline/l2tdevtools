@@ -37,14 +37,14 @@ class DownloadHelper:
     _, _, filename = download_url.rpartition('/')
 
     if not os.path.exists(filename):
-      logging.info('Downloading: {0:s}'.format(download_url))
+      logging.info(f'Downloading: {download_url:s}')
 
       try:
         with urllib_request.urlopen(download_url) as url_object:
           if url_object.code != 200:
             logging.warning(
-                'Unable to download URL: {0:s} with status code: {1:d}'.format(
-                    download_url, url_object.code))
+                f'Unable to download URL: {download_url:s} with status code: '
+                f'{url_object.code:d}')
             return None
 
           page_content = url_object.read()
@@ -53,8 +53,8 @@ class DownloadHelper:
 
       except (http.client.InvalidURL, urllib_error.URLError) as exception:
         logging.warning(
-            'Unable to download URL: {0:s} with error: {1!s}'.format(
-                download_url, exception))
+            f'Unable to download URL: {download_url:s} with error: '
+            f'{exception!s}')
         return None
 
     return filename
@@ -83,8 +83,8 @@ class DownloadHelper:
 
       except urllib_error.URLError as exception:
         logging.warning(
-            'Unable to download URL: {0:s} with error: {1!s}'.format(
-                download_url, exception))
+            f'Unable to download URL: {download_url:s} with error: '
+            f'{exception!s}')
         return None
 
       if encoding and isinstance(page_content, bytes):

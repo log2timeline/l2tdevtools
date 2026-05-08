@@ -2,7 +2,6 @@
 
 from l2tdevtools.download_helpers import github
 from l2tdevtools.download_helpers import pypi
-from l2tdevtools.download_helpers import sourceforge
 
 
 class DownloadHelperFactory:
@@ -38,10 +37,6 @@ class DownloadHelperFactory:
     if download_url.startswith('http://pypi.org/project/'):
       return pypi.PyPIDownloadHelper(
           download_url, source_name=project_definition.pypi_source_name)
-
-    if (download_url.startswith('http://sourceforge.net/projects/') and
-        download_url.endswith('/files')):
-      return sourceforge.SourceForgeDownloadHelper(download_url)
 
     if (download_url.startswith('http://github.com/') and
         download_url.endswith('/releases')):

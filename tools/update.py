@@ -244,23 +244,6 @@ class DependencyUpdater:
       'staging': 'staging',
       'testing': 'testing'}
 
-  _PKG_NAME_PREFIXES = [
-      'com.github.dateutil.',
-      'com.github.dfvfs.',
-      'com.github.erocarrer.',
-      'com.github.ForensicArtifacts.',
-      'com.github.kennethreitz.',
-      'com.github.google.',
-      'org.github.ipython.',
-      'com.github.libyal.',
-      'com.github.log2timeline.',
-      'com.github.sleuthkit.',
-      'com.google.code.p.',
-      'org.samba.',
-      'org.pypi.',
-      'org.python.pypi.',
-      'net.sourceforge.projects.']
-
   # Some projects have different PyPI names than their project names.
   _PYPI_ALIASES = {
       'flor': 'Flor',

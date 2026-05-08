@@ -92,8 +92,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
       latest_version = version_definition.GetLatestVersion()
 
-    download_url = 'https://github.com/{0:s}/{1:s}/releases'.format(
-        self._organization, self._repository)
+    download_url = (
+        f'https://github.com/{self._organization:s}/{self._repository:s}'
+        f'/releases')
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -102,8 +103,8 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     # The format of the project download URL is:
     # <a href="/{organization}/{repository}/releases/tag/{git tag}"
     expression_string = (
-        '<a href="/{0:s}/{1:s}/releases/tag/([^"]*)"[^>]*>[^<]*</a>').format(
-            self._organization, self._repository)
+        f'<a href="/{self._organization:s}/{self._repository:s}'
+        f'/releases/tag/([^"]*)"[^>]*>[^<]*</a>')
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
     if not matches:
@@ -124,8 +125,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
       str: download URL of the project or None if not available.
     """
     # TODO: add support for URL arguments '?after=release-2.2.0'
-    download_url = 'https://github.com/{0:s}/{1:s}/releases'.format(
-        self._organization, self._repository)
+    download_url = (
+        f'https://github.com/{self._organization:s}/{self._repository:s}'
+        f'/releases')
 
     page_content = self.DownloadPageContent(download_url)
     if not page_content:
@@ -134,10 +136,9 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     # The format of the project download URL is:
     # <a href="/{organization}/{repository}/releases/tag/{git tag}"
     expression_string = (
-        '<a href="/{0:s}/{1:s}/releases/tag/{2:s}(.*{3!s}[^"]*)"[^>]*>([^<]*)'
-        '</a>').format(
-            self._organization, self._repository, self._release_tag_prefix,
-            project_version)
+        f'<a href="/{self._organization:s}/{self._repository:s}'
+        f'/releases/tag/{self._release_tag_prefix:s}'
+        f'(.*{project_version!s}[^"]*)"[^>]*>([^<]*)</a>')
 
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
@@ -147,20 +148,18 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
 
       if self._release_is_archive:
         download_url = (
-            'https://github.com/{0:s}/{1:s}/archive/refs/tags/'
-            '{2!s}.tar.gz').format(
-                self._organization, self._repository, version)
+            f'https://github.com/{self._organization:s}/{self._repository:s}'
+            f'/archive/refs/tags/{version!s}.tar.gz')
       else:
         if self._release_prefix:
-          release = '{0:s}{1:s}.tar.gz'.format(self._release_prefix, version)
+          release = f'{self._release_prefix:s}{version:s}.tar.gz'
         else:
-          release = '{0:s}.tar.gz'.format(matches[0][1].replace(' ', '-'))
+          release = f'{matches[0][1].replace(" ", "-"):s}.tar.gz'
 
         download_url = (
-            'https://github.com/{0:s}/{1:s}/releases/download/{2:s}{3!s}/'
-            '{4:s}').format(
-                self._organization, self._repository, self._release_tag_prefix,
-                version, release)
+            f'https://github.com/{self._organization:s}/{self._repository:s}'
+            f'/releases/download/{self._release_tag_prefix:s}{version!s}'
+            f'/{release:s}')
 
     return download_url
 
@@ -170,5 +169,4 @@ class GitHubReleasesDownloadHelper(project.ProjectDownloadHelper):
     Returns:
       str: project identifier.
     """
-    return 'com.github.{0:s}.{1:s}'.format(
-        self._organization, self._repository)
+    return f'com.github.{self._organization:s}.{self._repository:s}'
