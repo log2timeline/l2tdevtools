@@ -59,11 +59,9 @@ class CLIHelper:
         error = codecs.decode(error, self.preferred_encoding)
         exit_code = process.returncode
         if exit_code != 0:
-          logging.error('Running: "{0:s}" failed with error: {1!s}.'.format(
-              command, error))
+          logging.error(f'Running: "{command:s}" failed with error: {error!s}.')
 
     except OSError as exception:
-      logging.error('Running: "{0:s}" failed with error: {1!s}'.format(
-          command, exception))
+      logging.error(f'Running: "{command:s}" failed with error: {exception!s}')
 
     return exit_code, output, error

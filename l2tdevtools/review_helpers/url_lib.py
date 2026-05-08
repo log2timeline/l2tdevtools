@@ -39,12 +39,10 @@ class URLLibHelper:
 
     except urllib_error.HTTPError as exception:
       raise errors.ConnectivityError(
-          'Failed requesting URL {0:s} with error: {1!s}'.format(
-              url, exception))
+          f'Failed requesting URL {url:s} with error: {exception!s}')
 
     if response_code not in (200, 201):
       raise errors.ConnectivityError(
-          'Failed requesting URL {0:s} with status code: {1:d}'.format(
-              url, response_code))
+          f'Failed requesting URL {url:s} with status code: {response_code:d}')
 
     return page_content

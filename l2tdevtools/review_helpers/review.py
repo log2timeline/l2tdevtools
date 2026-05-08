@@ -15,9 +15,10 @@ from l2tdevtools.review_helpers import pylint
 class ReviewHelper:
   """Helper for conducting code reviews."""
 
+  _SUPPORTED_PROJECTS_PATTERN = '|'.join(
+      project.ProjectHelper.SUPPORTED_PROJECTS)
   _PROJECT_NAME_PREFIX_REGEX = re.compile(
-      r'\[({0:s})\] '.format(
-          '|'.join(project.ProjectHelper.SUPPORTED_PROJECTS)))
+      rf'\[({_SUPPORTED_PROJECTS_PATTERN})\] ')
 
   _CODE_INSPECTION_COMMANDS = frozenset([
       'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test'])
@@ -66,17 +67,17 @@ class ReviewHelper:
       if self._command in (
           'close', 'create-pr', 'create_pr', 'lint', 'lint-test', 'lint_test'):
         if not self._git_helper.CheckHasProjectUpstream():
-          print('{0:s} aborted - missing project upstream.'.format(
-              self._command.title()))
-          print('Run: git remote add upstream {0:s}'.format(self._git_repo_url))
+          command_title = self._command.title()
+          print(f'{command_title:s} aborted - missing project upstream.')
+          print(f'Run: git remote add upstream {self._git_repo_url:s}')
           return False
 
     if self._command not in (
         'lint', 'lint-test', 'lint_test', 'test', 'update-version',
         'update_version'):
       if self._git_helper.CheckHasUncommittedChanges():
-        print('{0:s} aborted - detected uncommitted changes.'.format(
-            self._command.title()))
+        command_title = self._command.title()
+        print(f'{command_title:s} aborted - detected uncommitted changes.')
         print('Run: git commit')
         return False
 
@@ -84,14 +85,14 @@ class ReviewHelper:
       self._active_branch = self._git_helper.GetActiveBranch()
       if self._command in ('create-pr', 'create_pr'):
         if self._active_branch == 'main':
-          print('{0:s} aborted - active branch is main.'.format(
-              self._command.title()))
+          command_title = self._command.title()
+          print(f'{command_title:s} aborted - active branch is main.')
           return False
 
       elif self._command == 'close':
         if self._feature_branch == 'main':
-          print('{0:s} aborted - feature branch cannot be main.'.format(
-              self._command.title()))
+          command_title = self._command.title()
+          print(f'{command_title:s} aborted - feature branch cannot be main.')
           return False
 
         if self._active_branch != 'main':
@@ -107,14 +108,15 @@ class ReviewHelper:
       bool: True if the close was successful.
     """
     if not self._git_helper.CheckHasBranch(self._feature_branch):
-      print('No such feature branch: {0:s}'.format(self._feature_branch))
+      print(f'No such feature branch: {self._feature_branch:s}')
     else:
       self._git_helper.RemoveFeatureBranch(self._feature_branch)
 
     if not self._git_helper.SynchronizeWithUpstream():
-      print((
-          '{0:s} aborted - unable to synchronize with '
-          'upstream/main.').format(self._command.title()))
+      command_title = self._command.title()
+      print(
+          f'{command_title:s} aborted - unable to synchronize with '
+          f'upstream/main.')
 
     return True
 
@@ -130,8 +132,8 @@ class ReviewHelper:
 
     self._project_name = self._project_helper.project_name
     if not self._project_name:
-      print('{0:s} aborted - unable to determine project name.'.format(
-          self._command.title()))
+      command_title = self._command.title()
+      print(f'{command_title:s} aborted - unable to determine project name.')
       return False
 
     project_definition = self._project_helper.ReadDefinitionFile()
@@ -144,12 +146,15 @@ class ReviewHelper:
       self._github_organization, _, _ = self._github_organization.partition('/')
 
     if not self._github_organization:
-      print('{0:s} aborted - unable to determine GitHub organization.'.format(
-          self._command.title()))
+      command_title = self._command.title()
+      print(
+          f'{command_title:s} aborted - unable to determine GitHub '
+          f'organization.')
       return False
 
-    self._git_repo_url = 'https://github.com/{0:s}/{1:s}.git'.format(
-        self._github_organization, self._project_name)
+    self._git_repo_url = (
+        f'https://github.com/'
+        f'{self._github_organization:s}/{self._project_name:s}.git')
 
     self._git_helper = git.GitHelper(self._git_repo_url)
 
@@ -172,8 +177,11 @@ class ReviewHelper:
 
     pylint_helper = pylint.PylintHelper()
     if not pylint_helper.CheckUpToDateVersion():
-      print('{0:s} aborted - pylint version {1:s} or later required.'.format(
-          self._command.title(), pylint.PylintHelper.MINIMUM_VERSION))
+      command_title = self._command.title()
+      min_version = pylint.PylintHelper.MINIMUM_VERSION
+      print(
+          f'{command_title:s} aborted - pylint version {min_version:s} '
+          f'or later required.')
       return False
 
     if self._all_files:
@@ -186,8 +194,8 @@ class ReviewHelper:
 
     pylint_configuration = pylint_helper.GetRCFile(self._project_path)
     if not pylint_helper.CheckFiles(changed_python_files, pylint_configuration):
-      print('{0:s} aborted - unable to pass linter.'.format(
-          self._command.title()))
+      command_title = self._command.title()
+      print(f'{command_title:s} aborted - unable to pass linter.')
 
       return False
 
@@ -208,11 +216,11 @@ class ReviewHelper:
 
     # TODO: determine why this alters the behavior of argparse.
     # Currently affects this script being used in plaso.
-    command = '{0:s} run_tests.py'.format(sys.executable)
+    command = f'{sys.executable:s} run_tests.py'
     exit_code = subprocess.call(command, shell=True)
     if exit_code != 0:
-      print('{0:s} aborted - unable to pass review.'.format(
-          self._command.title()))
+      command_title = self._command.title()
+      print(f'{command_title:s} aborted - unable to pass review.')
 
       return False
 

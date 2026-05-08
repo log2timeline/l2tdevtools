@@ -66,7 +66,7 @@ class GitRepositorySourceHelper(SourceHelper):
   def Clean(self):
     """Removes a previous version of the source directory."""
     if os.path.exists(self.project_name):
-      logging.info('Removing: {0:s}'.format(self.project_name))
+      logging.info(f'Removing: {self.project_name:s}')
       shutil.rmtree(self.project_name)
 
   def Create(self):
