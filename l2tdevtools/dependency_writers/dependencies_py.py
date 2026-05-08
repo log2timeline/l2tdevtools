@@ -30,11 +30,11 @@ class DependenciesPyWriter(interface.DependencyFileWriter):
 
       version_property = dependency.version_property or ''
       minimum_version = dependency.minimum_version or ''
+      not_optional = not dependency.is_optional
 
       python_dependency = (
           f'    \'{dependency.name:s}\': (\'{version_property:s}\', '
-          f'\'{minimum_version:s}\', {maximum_version:s}, '
-          f'{not dependency.is_optional!s})')
+          f'\'{minimum_version:s}\', {maximum_version:s}, {not_optional!s})')
 
       python_dependencies.append(python_dependency)
 
