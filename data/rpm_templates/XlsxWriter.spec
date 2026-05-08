@@ -37,11 +37,10 @@ such as formatting and many more.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{unmangled_name}}/
 
 %clean
@@ -50,7 +49,7 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{unmangled_name}}
 %license LICENSE.txt
 %{{python3_sitelib}}/xlsxwriter/
-%{{python3_sitelib}}/xlsxwriter*.egg-info
+%{{python3_sitelib}}/xlsxwriter*.dist-info
 
 %exclude %{{_bindir}}/*
 

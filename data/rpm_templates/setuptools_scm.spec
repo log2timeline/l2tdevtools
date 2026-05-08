@@ -35,11 +35,10 @@ a scm managed file
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -48,7 +47,7 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{name}}
 %license LICENSE
 %{{python3_sitelib}}/setuptools_scm
-%{{python3_sitelib}}/setuptools_scm*.egg-info
+%{{python3_sitelib}}/setuptools_scm*.dist-info
 
 %exclude %{{_bindir}}/*
 

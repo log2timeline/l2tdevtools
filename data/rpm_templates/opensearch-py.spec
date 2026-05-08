@@ -34,11 +34,10 @@ Python client for OpenSearch.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -46,7 +45,7 @@ rm -rf %{{buildroot}}
 
 %files -n python3-opensearch
 %{{python3_sitelib}}/opensearchpy/
-%{{python3_sitelib}}/opensearch_py*.egg-info
+%{{python3_sitelib}}/opensearch_py*.dist-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1
