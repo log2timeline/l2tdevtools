@@ -25,12 +25,12 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
     if debug_dependencies:
       for index, dependency in enumerate(sorted(debug_dependencies)):
         if index == 0:
-          line = 'DEBUG_DEPENDENCIES="{0:s}'.format(dependency)
+          line = f'DEBUG_DEPENDENCIES="{dependency:s}'
         else:
-          line = '                    {0:s}'.format(dependency)
+          line = f'                    {dependency:s}'
 
         if index + 1 == len(debug_dependencies):
-          line = '{0:s}";'.format(line)
+          line = f'{line:s}";'
 
         formatted_debug_dependencies.append(line)
 
@@ -50,12 +50,12 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
     if development_dependencies:
       for index, dependency in enumerate(sorted(development_dependencies)):
         if index == 0:
-          line = 'DEVELOPMENT_DEPENDENCIES="{0:s}'.format(dependency)
+          line = f'DEVELOPMENT_DEPENDENCIES="{dependency:s}'
         else:
-          line = '                          {0:s}'.format(dependency)
+          line = f'                          {dependency:s}'
 
         if index + 1 == len(development_dependencies):
-          line = '{0:s}";'.format(line)
+          line = f'{line:s}";'
 
         formatted_development_dependencies.append(line)
 
@@ -74,12 +74,12 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
 
     for index, dependency in enumerate(sorted(python_dependencies)):
       if index == 0:
-        line = 'PYTHON3_DEPENDENCIES="{0:s}'.format(dependency)
+        line = f'PYTHON3_DEPENDENCIES="{dependency:s}'
       else:
-        line = '                      {0:s}'.format(dependency)
+        line = f'                      {dependency:s}'
 
       if index + 1 == len(python_dependencies):
-        line = '{0:s}";'.format(line)
+        line = f'{line:s}";'
 
       formatted_python_dependencies.append(line)
 
@@ -98,12 +98,12 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
     if test_dependencies:
       for index, dependency in enumerate(sorted(test_dependencies)):
         if index == 0:
-          line = 'TEST_DEPENDENCIES="{0:s}'.format(dependency)
+          line = f'TEST_DEPENDENCIES="{dependency:s}'
         else:
-          line = '                   {0:s}'.format(dependency)
+          line = f'                   {dependency:s}'
 
         if index + 1 == len(test_dependencies):
-          line = '{0:s}";'.format(line)
+          line = f'{line:s}";'
 
         formatted_test_dependencies.append(line)
 
@@ -125,8 +125,8 @@ class GIFTCOPRInstallScriptWriter(interface.DependencyFileWriter):
           dependency.endswith('python3')):
         libyal_dependency, _, _ = dependency.partition('-')
         debug_dependencies.extend([
-            '{0:s}-debuginfo'.format(libyal_dependency),
-            '{0:s}-debuginfo'.format(dependency)])
+            f'{libyal_dependency:s}-debuginfo',
+            f'{dependency:s}-debuginfo'])
 
     return debug_dependencies
 

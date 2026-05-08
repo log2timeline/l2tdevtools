@@ -63,8 +63,8 @@ class DPKGControlWriter(interface.DependencyFileWriter):
     """Writes a dpkg control file."""
     python_module_description = self._project_definition.name_description
     python_module_name = self._project_definition.name
-    tools_description = 'Tools of {0:s}'.format(
-        self._project_definition.name_description)
+    tools_description = (
+        f'Tools of {self._project_definition.name_description:s}')
     tool_description_long = self._project_definition.description_long
 
     if self._project_definition.name.endswith('-kb'):
@@ -73,29 +73,28 @@ class DPKGControlWriter(interface.DependencyFileWriter):
       python_module_description, _, _ = python_module_description.partition(
           ' knowledge base ')
       python_module_description = ''.join([
-          python_module_description,
-          ' resources ({0:s})'.format(python_module_name)])
+          python_module_description, f' resources ({python_module_name:s})'])
 
-      tools_description = 'Tools for {0:s}'.format(
-          self._project_definition.name_description)
+      tools_description = (
+          f'Tools for {self._project_definition.name_description:s}')
 
       tool_description_long, _, _ = (
           self._project_definition.name_description.rpartition(' ('))
       tool_description_long = (
-          '{0:s}{1:s} is a project to build a {2:s}.'.format(
-              self._project_definition.name[0].upper(),
-              self._project_definition.name[1:], tool_description_long))
+          f'{self._project_definition.name[0].upper()}'
+          f'{self._project_definition.name[1:]:s} '
+          f'is a project to build a {tool_description_long:s}.')
 
     tool_description_long = '\n'.join(
-        [' {0:s}'.format(line) for line in tool_description_long.split('\n')])
+        [f' {line:s}' for line in tool_description_long.split('\n')])
 
     file_content = []
     file_content.extend(self._PYTHON3_FILE_HEADER)
 
     data_dependency = ''
     if self._project_definition.name in ('artifacts', 'plaso'):
-      data_dependency = '{0:s}-data (>= ${{binary:Version}})'.format(
-          self._project_definition.name)
+      data_dependency = (
+          f'{self._project_definition.name:s}-data (>= ${{binary:Version}})')
 
       file_content.extend(self._DATA_PACKAGE)
 
@@ -107,7 +106,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
 
     description_long = self._project_definition.description_long
     description_long = '\n'.join(
-        [' {0:s}'.format(line) for line in description_long.split('\n')])
+        [f' {line:s}' for line in description_long.split('\n')])
 
     python3_dependencies = self._dependency_helper.GetDPKGDepends()
 
@@ -116,7 +115,7 @@ class DPKGControlWriter(interface.DependencyFileWriter):
 
     python3_dependencies = ', '.join(python3_dependencies)
     if python3_dependencies:
-      python3_dependencies = '{0:s}, '.format(python3_dependencies)
+      python3_dependencies = f'{python3_dependencies:s}, '
 
     build_dependencies = [
         'python3-all (>= 3.10~)', 'python3-setuptools',
