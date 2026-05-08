@@ -33,11 +33,10 @@ well as all the sections, section's information and data.
 %autosetup -n %{{name}}-%{{version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean

@@ -153,7 +153,16 @@ class RPMSpecFileGenerator:
         configuration['summary'] = pyproject_toml_project.get(
             'description', None)
 
-      # TODO: add support for configuration['vendor']
+      if not configuration['vendor']:
+        pyproject_toml_maintainers = pyproject_toml_project.get(
+            'maintainers', [])
+        if pyproject_toml_maintainers:
+          maintainer = pyproject_toml_maintainers[0]
+          configuration['vendor'] = (
+              f'{maintainer["name"]:s} <{maintainer["email"]:s}>')
+
+      if not configuration['version']:
+        configuration['version'] = pyproject_toml_project.get('version', None)
 
       pyproject_toml_urls = pyproject_toml_project.get('urls', {})
 

@@ -33,11 +33,10 @@ by Thomas Rampelberg.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -46,7 +45,7 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{name}}
 %{{python3_sitelib}}/bencode/
 %{{python3_sitelib}}/bencodepy/
-%{{python3_sitelib}}/bencode.py*.egg-info
+%{{python3_sitelib}}/bencode_py*.dist-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

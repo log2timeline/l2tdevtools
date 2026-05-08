@@ -32,11 +32,10 @@ it to compile, save and load YARA rules, and to scan files or data strings.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -45,7 +44,7 @@ rm -rf %{{buildroot}}
 %files -n python3-yara
 %license LICENSE
 %{{_libdir}}/python3*/site-packages/*.so
-%{{_libdir}}/python3*/site-packages/yara_python*.egg-info
+%{{_libdir}}/python3*/site-packages/yara_python*.dist-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

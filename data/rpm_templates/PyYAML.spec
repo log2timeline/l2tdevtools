@@ -40,11 +40,10 @@ for improved speed.
 %autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -55,7 +54,7 @@ rm -rf %{{buildroot}}
 %doc CHANGES README.md
 %{{_libdir}}/python3*/site-packages/_yaml/
 %{{_libdir}}/python3*/site-packages/yaml/
-%{{_libdir}}/python3*/site-packages/PyYAML*.egg-info
+%{{_libdir}}/python3*/site-packages/pyyaml*.dist-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

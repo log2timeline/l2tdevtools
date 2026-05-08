@@ -33,11 +33,10 @@ datetime module available in the Python standard library.
 %autosetup -n python-%{{unmangled_name}}-%{{unmangled_version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -46,7 +45,7 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{name}}
 %license LICENSE
 %{{python3_sitelib}}/dateutil/
-%{{python3_sitelib}}/python_dateutil*.egg-info
+%{{python3_sitelib}}/python_dateutil*.dist-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1

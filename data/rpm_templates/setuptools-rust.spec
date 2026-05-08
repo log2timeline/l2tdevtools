@@ -34,11 +34,10 @@ implemented with PyO3 or rust-cpython.
 %autosetup -n %{{name}}-%{{unmangled_version}}
 
 %build
-%py3_build
+%pyproject_wheel
 
 %install
-%py3_install
-rm -rf %{{buildroot}}/usr/lib/python*/site-packages/*.egg-info/requires.txt
+%pyproject_install
 rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
 
 %clean
@@ -47,7 +46,7 @@ rm -rf %{{buildroot}}
 %files -n python3-%{{name}}
 %license LICENSE
 %{{python3_sitelib}}/setuptools_rust
-%{{python3_sitelib}}/setuptools_rust*.egg-info
+%{{python3_sitelib}}/setuptools_rust*.dist-info
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1
