@@ -91,7 +91,7 @@ class ProjectHelper(cli.CLIHelper):
     # The review.py check is needed for the l2tdevtools tests.
     if (project_name != 'review.py' and
         project_name not in self.SUPPORTED_PROJECTS):
-      raise ValueError('Unsupported project name: {0:s}.'.format(project_name))
+      raise ValueError(f'Unsupported project name: {project_name:s}.')
 
     return project_name
 
@@ -105,7 +105,7 @@ class ProjectHelper(cli.CLIHelper):
       bytes: file content or None if not available.
     """
     if not os.path.exists(path):
-      logging.error('Missing file: {0:s}'.format(path))
+      logging.error(f'Missing file: {path:s}')
       return None
 
     try:
@@ -113,13 +113,13 @@ class ProjectHelper(cli.CLIHelper):
         file_contents = file_object.read()
 
     except IOError as exception:
-      logging.error('Unable to read file with error: {0!s}'.format(exception))
+      logging.error(f'Unable to read file with error: {exception!s}')
       return None
 
     try:
       file_contents = file_contents.decode('utf-8')
     except UnicodeDecodeError as exception:
-      logging.error('Unable to read file with error: {0!s}'.format(exception))
+      logging.error(f'Unable to read file with error: {exception!s}')
       return None
 
     return file_contents
@@ -131,10 +131,8 @@ class ProjectHelper(cli.CLIHelper):
       ProjectDefinition: project definition.
     """
     if self._project_definition is None:
-      project_file = '{0:s}.ini'.format(self.project_name)
-
       project_reader = project_config.ProjectDefinitionReader()
-      with open(project_file, 'r', encoding='utf-8') as file_object:
+      with open(f'{self.project_name:s}.ini', encoding='utf-8') as file_object:
         self._project_definition = project_reader.Read(file_object)
 
     return self._project_definition

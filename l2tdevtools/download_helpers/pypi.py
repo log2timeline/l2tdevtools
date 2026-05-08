@@ -104,9 +104,9 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
       return None
 
     expression_string = (
-        r'"https://files.pythonhosted.org/packages/.*/.*/.*/'
-        r'{0:s}-([\d\.\!]*(post\d+)?)\.(tar\.bz2|tar\.gz|zip)"').format(
-            self._source_name)
+        f'"https://files.pythonhosted.org/packages/.*/.*/.*/'
+        f'{self._source_name:s}-([\\d\\.\\!]*(post\\d+)?)'
+        f'\\.(tar\\.bz2|tar\\.gz|zip)"')
 
     matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
     if not matches:

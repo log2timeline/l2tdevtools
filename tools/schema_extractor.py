@@ -41,17 +41,18 @@ class SQLiteSchemaExtractor:
     table_index = 1
     number_of_tables = len(schema)
     for table_name, query in sorted(schema.items()):
-      line = '      \'{0:s}\': ('.format(table_name)
-      lines.append(line)
+      lines.append(f'      \'{table_name:s}\': (')
 
       query = query.replace('\'', '\\\'')
       query = textwrapper.wrap(query)
-      query = ['{0:s}\'{1:s} \''.format(' ' * 10, line) for line in query]
+      indentation = ' ' * 10
+      query = [f'{indentation:s}\'{line:s} \'' for line in query]
 
+      name = query[-1][:-2]
       if table_index == number_of_tables:
-        query[-1] = '{0:s}\')}}]'.format(query[-1][:-2])
+        query[-1] = f'{name:s}\')}}]'
       else:
-        query[-1] = '{0:s}\'),'.format(query[-1][:-2])
+        query[-1] = f'{name:s}\'),'
 
       lines.extend(query)
       table_index += 1
@@ -82,8 +83,7 @@ class SQLiteSchemaExtractor:
           table_name: ' '.join(query.split()) for table_name, query in rows}
 
     except sqlite3.DatabaseError as exception:
-      logging.error('Unable to query schema with error: {0!s}'.format(
-          exception))
+      logging.error(f'Unable to query schema with error: {exception!s}')
 
     finally:
       database.close()
@@ -114,15 +114,16 @@ def Main():
   options = argument_parser.parse_args()
 
   if not os.path.exists(options.database_path):
-    print('No such database file: {0:s}'.format(options.database_path))
+    print(f'No such database file: {options.database_path:s}')
     return False
 
   extractor = SQLiteSchemaExtractor()
 
   database_schema = extractor.GetDatabaseSchema(options.database_path)
   if not database_schema:
-    print('Unable to determine schema from database file: {0:s}'.format(
-        options.database_path))
+    print(
+        f'Unable to determine schema from database file: '
+        f'{options.database_path:s}')
     return False
 
   database_schema = extractor.FormatSchema(database_schema)

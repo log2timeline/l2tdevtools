@@ -454,8 +454,9 @@ class DPKGBuildHelper(interface.BuildHelper):
 
     # Remove files of previous versions in the format:
     # <project>[-_][0-9]*-[1-9]i<suffix>~<distribution>.*
-    filenames_glob = '{0:s}[-_][0-9]*-[1-9]{1:s}~{2:s}.*'.format(
-        project_name, self.version_suffix, self.distribution)
+    filenames_glob = (
+        f'{project_name:s}[-_][0-9]*-[1-9]{self.version_suffix:s}'
+        f'~{self.distribution:s}.*')
     filenames = glob.glob(filenames_glob)
 
     for filename in filenames:
@@ -464,8 +465,8 @@ class DPKGBuildHelper(interface.BuildHelper):
         try:
           os.remove(filename)
         except PermissionError as exception:
-          logging.info('Unable to remove: {0:s} with error: {1!s}'.format(
-              filename, exception))
+          logging.info(
+              f'Unable to remove: {filename:s} with error: {exception!s}')
 
   def _RunLSBReleaseCommand(self, option='-a'):
     """Runs the lsb-release command (/usr/bin/lsb_release).
@@ -533,9 +534,9 @@ class DPKGBuildHelper(interface.BuildHelper):
     for name in self._project_definition.build_dependencies:
       package_name = self._BUILD_DEPENDENCY_PACKAGE_NAMES.get(name, name)
       if package_name not in self._project_definition.dpkg_build_dependencies:
-        logging.warning((
-            'Build dependency: {0:s} not defined as dpkg build '
-            'dependency: {1:s}.').format(name, package_name))
+        logging.warning(
+            f'Build dependency: {name:s} not defined as dpkg build dependency: '
+            f'{package_name:s}')
         result = False
 
     return result
@@ -575,16 +576,16 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
+    project_name = source_helper_object.project_name
+
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info(
-          f'Missing source package of: {source_helper_object.project_name:s}')
+      logging.info(f'Missing source package of: {project_name:s}')
       return False
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info(
-          f'Missing source directory of: {source_helper_object.project_name:s}')
+      logging.info(f'Missing source directory of: {project_name:s}')
       return False
 
     project_version = source_helper_object.GetProjectVersion()
@@ -592,7 +593,7 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     self._CreateOriginalSourcePackage(
-        source_package_path, source_helper_object.project_name, project_version)
+        source_package_path, project_name, project_version)
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info(f'Building deb of: {source_package_filename:s}')
@@ -607,22 +608,21 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
       shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(
-        source_directory, source_helper_object.project_name, project_version,
-        self.version_suffix, self.distribution, self.architecture):
+        source_directory, project_name, project_version, self.version_suffix,
+        self.distribution, self.architecture):
       return False
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = 'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
-        log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
+    command = f'dpkg-buildpackage -uc -us -rfakeroot > {log_file_path:s} 2>&1'
+    exit_code = subprocess.call(
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       return False
 
     if not self._BuildFinalize(
-        source_directory, source_helper_object.project_name, project_version,
-        self.version_suffix, self.distribution, self.architecture):
+        source_directory, project_name, project_version, self.version_suffix,
+        self.distribution, self.architecture):
       return False
 
     return True
@@ -636,12 +636,11 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
+    project_name = source_helper_object.project_name
     project_version = source_helper_object.GetProjectVersion()
 
-    deb_filename = '{0:s}_{1!s}-1_{2:s}.deb'.format(
-        source_helper_object.project_name, project_version, self.architecture)
-
-    return not os.path.exists(deb_filename)
+    return not os.path.exists(
+        f'{project_name:s}_{project_version!s}-1_{self.architecture:s}.deb')
 
   def Clean(self, source_helper_object):
     """Cleans the dpkg packages in the current directory.
@@ -649,18 +648,13 @@ class ConfigureMakeDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
+    project_name = source_helper_object.project_name
     project_version = source_helper_object.GetProjectVersion()
 
-    self._RemoveOlderSourceDirectories(
-        source_helper_object.project_name, project_version)
-    self._RemoveOlderSourcePackages(
-        source_helper_object.project_name, project_version)
-
-    self._RemoveOlderOriginalSourcePackage(
-        source_helper_object.project_name, project_version)
-
-    self._RemoveOlderDPKGPackages(
-        source_helper_object.project_name, project_version)
+    self._RemoveOlderSourceDirectories(project_name, project_version)
+    self._RemoveOlderSourcePackages(project_name, project_version)
+    self._RemoveOlderOriginalSourcePackage(project_name, project_version)
+    self._RemoveOlderDPKGPackages(project_name, project_version)
 
 
 class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
@@ -694,26 +688,27 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if successful, False otherwise.
     """
+    project_name = source_helper_object.project_name
+
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(f'Missing source package of: {project_name:s}')
       return False
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(f'Missing source directory of: {project_name:s}')
       return False
 
     project_version = source_helper_object.GetProjectVersion()
 
     self._CreateOriginalSourcePackage(
-        source_package_path, source_helper_object.project_name, project_version)
+        source_package_path, project_name, project_version)
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building source deb of: {0:s} for: {1:s}'.format(
-        source_package_filename, self.distribution))
+    logging.info(
+        f'Building source deb of: {source_package_filename:s} for: '
+        f'{self.distribution:s}')
 
     if not self._CreatePackagingFiles(source_directory, project_version):
       return False
@@ -721,27 +716,27 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     # If there is a temporary packaging directory remove it.
     temporary_directory = os.path.join(source_directory, 'tmp')
     if os.path.exists(temporary_directory):
-      logging.info('Removing: {0:s}'.format(temporary_directory))
+      logging.info(f'Removing: {temporary_directory:s}')
       shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(
-        source_directory, source_helper_object.project_name, project_version,
-        self.version_suffix, self.distribution, self.architecture):
+        source_directory, project_name, project_version, self.version_suffix,
+        self.distribution, self.architecture):
       return False
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = 'debuild -S -sa > {0:s} 2>&1'.format(log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
+    command = f'debuild -S -sa > {log_file_path:s} 2>&1'
+    exit_code = subprocess.call(
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
       logging.error(
-          'Failed to run: "(cd {0:s} && {1:s})" with exit code {2:d}.'.format(
-              source_directory, command, exit_code))
+          f'Failed to run: "(cd {source_directory:s} && {command:s})" with '
+          f'exit code {exit_code:d}')
       return False
 
     if not self._BuildFinalize(
-        source_directory, source_helper_object.project_name, project_version,
-        self.version_suffix, self.distribution, self.architecture):
+        source_directory, project_name, project_version, self.version_suffix,
+        self.distribution, self.architecture):
       return False
 
     return True
@@ -755,13 +750,12 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     Returns:
       bool: True if a build is required, False otherwise.
     """
+    project_name = source_helper_object.project_name
     project_version = source_helper_object.GetProjectVersion()
 
-    changes_filename = '{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
-        source_helper_object.project_name, project_version,
-        self.version_suffix, self.distribution, self.architecture)
-
-    return not os.path.exists(changes_filename)
+    return not os.path.exists(
+        f'{project_name:s}_{project_version!s}-1{self.version_suffix:s}'
+        f'~{self.distribution:s}_{self.architecture:s}.changes')
 
   def Clean(self, source_helper_object):
     """Cleans the source dpkg packages in the current directory.
@@ -769,18 +763,13 @@ class ConfigureMakeSourceDPKGBuildHelper(DPKGBuildHelper):
     Args:
       source_helper_object (SourceHelper): source helper.
     """
+    project_name = source_helper_object.project_name
     project_version = source_helper_object.GetProjectVersion()
 
-    self._RemoveOlderSourceDirectories(
-        source_helper_object.project_name, project_version)
-    self._RemoveOlderSourcePackages(
-        source_helper_object.project_name, project_version)
-
-    self._RemoveOlderOriginalSourcePackage(
-        source_helper_object.project_name, project_version)
-
-    self._RemoveOlderSourceDPKGPackages(
-        source_helper_object.project_name, project_version)
+    self._RemoveOlderSourceDirectories(project_name, project_version)
+    self._RemoveOlderSourcePackages(project_name, project_version)
+    self._RemoveOlderOriginalSourcePackage(project_name, project_version)
+    self._RemoveOlderSourceDPKGPackages(project_name, project_version)
 
 
 class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
@@ -796,23 +785,25 @@ class PybuildDPKGBuildHelperBase(DPKGBuildHelper):
       DPKGBuildConfiguration: dpkg build configuration or None if the build
           configuration could not be determined.
     """
-    if os.path.isfile(os.path.join(source_directory, 'setup.py')):
-      command = ('{0:s} setup.py install --root=installroot > /dev/null '
-                 '2>&1').format(sys.executable)
+    if os.path.isfile(os.path.join(source_directory, 'pyproject.toml')):
+      command = (
+          f'{sys.executable:s} -m pip install --no-deps -t installroot . '
+          f'> /dev/null 2>&1')
 
-    elif os.path.isfile(os.path.join(source_directory, 'pyproject.toml')):
-      command = ('{0:s} -m pip install --no-deps -t installroot . > /dev/null '
-                 '2>&1').format(sys.executable)
+    elif os.path.isfile(os.path.join(source_directory, 'setup.py')):
+      command = (
+          f'{sys.executable:s} setup.py install --root=installroot '
+          f'> /dev/null 2>&1')
 
     else:
       return None
 
     installroot_path = os.path.join(source_directory, 'installroot')
 
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
+    exit_code = subprocess.call(
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
-      logging.error('Running: "{0:s}" failed.'.format(command))
+      logging.error(f'Running: "{command:s}" failed.')
       build_configuration = None
 
     else:
@@ -912,7 +903,7 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     else:
       project_name = source_helper_object.project_name
       if not project_name.startswith('python3-'):
-        project_name = 'python3-{0:s}'.format(project_name)
+        project_name = f'python3-{project_name:s}'
 
     project_version = source_helper_object.GetProjectVersion()
     if project_version and project_version.startswith('1!'):
@@ -930,16 +921,16 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     Returns:
       bool: True if successful, False otherwise.
     """
+    project_name = source_helper_object.project_name
+
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(f'Missing source package of: {project_name:s}')
       return False
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(f'Missing source directory of: {project_name:s}')
       return False
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
@@ -948,10 +939,10 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
     self._CreateOriginalSourcePackage(
-        source_package_path, source_helper_object.project_name, project_version)
+        source_package_path, project_name, project_version)
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building deb of: {0:s}'.format(source_package_filename))
+    logging.info(f'Building deb of: {source_package_filename:s}')
 
     if not self._CreatePackagingFiles(source_directory, project_version):
       return False
@@ -959,7 +950,7 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     # If there is a temporary packaging directory remove it.
     temporary_directory = os.path.join(source_directory, 'tmp')
     if os.path.exists(temporary_directory):
-      logging.info('Removing: {0:s}'.format(temporary_directory))
+      logging.info(f'Removing: {temporary_directory:s}')
       shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(
@@ -968,14 +959,13 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
       return False
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = 'dpkg-buildpackage -uc -us -rfakeroot > {0:s} 2>&1'.format(
-        log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
+    command = f'dpkg-buildpackage -uc -us -rfakeroot > {log_file_path:s} 2>&1'
+    exit_code = subprocess.call(
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
       logging.error(
-          'Failed to run: "(cd {0:s} && {1:s})" with exit code {2:d}.'.format(
-              source_directory, command, exit_code))
+          f'Failed to run: "(cd {source_directory:s} && {command:s})" with '
+          f'exit code {exit_code:d}')
       return False
 
     if not self._BuildFinalize(
@@ -997,10 +987,8 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    deb_filename = '{0:s}_{1!s}-1_{2:s}.deb'.format(
-        project_name, project_version, self.architecture)
-
-    return not os.path.exists(deb_filename)
+    return not os.path.exists(
+        f'{project_name:s}_{project_version!s}-1_{self.architecture:s}.deb')
 
   def Clean(self, source_helper_object):
     """Cleans the dpkg packages in the current directory.
@@ -1022,12 +1010,12 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     self._RemoveOlderDPKGPackages(project_name, project_version)
 
     if project_name.startswith('python-'):
-      project_name = 'python3-{0:s}'.format(project_name[7])
+      project_name = f'python3-{project_name[7]:s}'
       self._RemoveOlderDPKGPackages(project_name, project_version)
 
     elif (project_name.startswith('python2-') or
           project_name.startswith('python3-')):
-      project_name = 'python3-{0:s}'.format(project_name[8])
+      project_name = f'python3-{project_name[8]:s}'
       self._RemoveOlderDPKGPackages(project_name, project_version)
 
 
@@ -1070,7 +1058,7 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     else:
       project_name = source_helper_object.project_name
       if not project_name.startswith('python3-'):
-        project_name = 'python3-{0:s}'.format(project_name)
+        project_name = f'python3-{project_name:s}'
 
     project_version = source_helper_object.GetProjectVersion()
     if project_version and project_version.startswith('1!'):
@@ -1088,16 +1076,16 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     Returns:
       bool: True if successful, False otherwise.
     """
+    project_name = source_helper_object.project_name
+
     source_package_path = source_helper_object.GetSourcePackagePath()
     if not source_package_path:
-      logging.info('Missing source package of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(f'Missing source package of: {project_name:s}')
       return False
 
     source_directory = source_helper_object.GetSourceDirectoryPath()
     if not source_directory:
-      logging.info('Missing source directory of: {0:s}'.format(
-          source_helper_object.project_name))
+      logging.info(f'Missing source directory of: {project_name:s}')
       return False
 
     project_name, project_version = self._GetFilenameSafeProjectInformation(
@@ -1107,8 +1095,9 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
         source_package_path, source_helper_object.project_name, project_version)
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info('Building source deb of: {0:s} for: {1:s}'.format(
-        source_package_filename, self.distribution))
+    logging.info(
+        f'Building source deb of: {source_package_filename:s} for: '
+        f'{self.distribution:s}')
 
     if not self._CreatePackagingFiles(source_directory, project_version):
       return False
@@ -1116,7 +1105,7 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     # If there is a temporary packaging directory remove it.
     temporary_directory = os.path.join(source_directory, 'tmp')
     if os.path.exists(temporary_directory):
-      logging.info('Removing: {0:s}'.format(temporary_directory))
+      logging.info(f'Removing: {temporary_directory:s}')
       shutil.rmtree(temporary_directory, ignore_errors=True)
 
     if not self._BuildPrepare(
@@ -1125,13 +1114,13 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
       return False
 
     log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = 'debuild -S -sa > {0:s} 2>&1'.format(log_file_path)
-    exit_code = subprocess.call('(cd {0:s} && {1:s})'.format(
-        source_directory, command), shell=True)
+    command = f'debuild -S -sa > {log_file_path:s} 2>&1'
+    exit_code = subprocess.call(
+        f'(cd {source_directory:s} && {command:s})', shell=True)
     if exit_code != 0:
       logging.error(
-          'Failed to run: "(cd {0:s} && {1:s})" with exit code {2:d}.'.format(
-              source_directory, command, exit_code))
+          f'Failed to run: "(cd {source_directory:s} && {command:s})" with '
+          f'exit code {exit_code:d}')
 
     if not self._BuildFinalize(
         source_directory, project_name, project_version, self.version_suffix,
@@ -1152,11 +1141,9 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
-    changes_filename = '{0:s}_{1!s}-1{2:s}~{3:s}_{4:s}.changes'.format(
-        project_name, project_version, self.version_suffix, self.distribution,
-        self.architecture)
-
-    return not os.path.exists(changes_filename)
+    return not os.path.exists(
+        f'{project_name:s}_{project_version!s}-1{self.version_suffix:s}'
+        f'~{self.distribution:s}_{self.architecture:s}.changes')
 
   def Clean(self, source_helper_object):
     """Cleans the dpkg packages in the current directory.
