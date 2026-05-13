@@ -359,7 +359,7 @@ class DPKGBuildFilesGenerator:
         python3_depends.append(f'python3-{dependency[7:]:s}')
       elif (dependency.startswith('python2-') or
             dependency.startswith('python3-')):
-        python3_depends.append(f'python3-{dependency[9:]:s}')
+        python3_depends.append(f'python3-{dependency[8:]:s}')
       else:
         depends.append(dependency)
 

@@ -1,7 +1,6 @@
 """Helper for building projects from source."""
 
 import datetime
-import fileinput
 import glob
 import logging
 import os
@@ -262,23 +261,6 @@ class DPKGBuildHelper(interface.BuildHelper):
     if not os.path.exists(debian_directory):
       logging.error(f'Missing debian sub directory in: {source_directory:s}')
       return False
-
-    if self.distribution == 'noble':
-      control_file_path = os.path.join(debian_directory, 'control')
-      for line in fileinput.input(control_file_path, inplace=True):
-        if line.startswith('Build-Depends:'):
-          line = line.rstrip() + ', pybuild-plugin-pyproject\n'
-        print(line, end='')
-
-      patches_path = os.path.join(debian_directory, 'patches')
-      if not os.path.exists(patches_path):
-        os.mkdir(patches_path)
-
-      # pyproject_patch = os.path.join(patches_path, 'pyproject.patch')
-      # TODO: add option to control patches for noble pyproject.toml builds
-
-      # TODO: create series file
-      # patches_series = os.path.join(patches_path, 'series')
 
     return True
 
@@ -1010,12 +992,12 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     self._RemoveOlderDPKGPackages(project_name, project_version)
 
     if project_name.startswith('python-'):
-      project_name = f'python3-{project_name[7]:s}'
+      project_name = f'python3-{project_name[7:]:s}'
       self._RemoveOlderDPKGPackages(project_name, project_version)
 
     elif (project_name.startswith('python2-') or
           project_name.startswith('python3-')):
-      project_name = f'python3-{project_name[8]:s}'
+      project_name = f'python3-{project_name[8:]:s}'
       self._RemoveOlderDPKGPackages(project_name, project_version)
 
 
