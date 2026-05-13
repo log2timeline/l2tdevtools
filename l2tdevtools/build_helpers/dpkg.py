@@ -920,8 +920,11 @@ class PybuildDPKGBuildHelper(PybuildDPKGBuildHelperBase):
 
     # dpkg-buildpackage wants an source package filename without
     # the status indication and orig indication.
+
+    # Note that we need to pass the original project name to
+    # _CreateOriginalSourcePackage.
     self._CreateOriginalSourcePackage(
-        source_package_path, project_name, project_version)
+        source_package_path, source_helper_object.project_name, project_version)
 
     source_package_filename = source_helper_object.GetSourcePackageFilename()
     logging.info(f'Building deb of: {source_package_filename:s}')
@@ -1073,6 +1076,8 @@ class PybuildSourceDPKGBuildHelper(PybuildDPKGBuildHelperBase):
     project_name, project_version = self._GetFilenameSafeProjectInformation(
         source_helper_object)
 
+    # Note that we need to pass the original project name to
+    # _CreateOriginalSourcePackage.
     self._CreateOriginalSourcePackage(
         source_package_path, source_helper_object.project_name, project_version)
 
