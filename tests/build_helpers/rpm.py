@@ -3,7 +3,6 @@
 
 import unittest
 
-
 # TODO: add BaseRPMBuildHelper tests.
 # TODO: add RPMBuildHelper tests.
 # TODO: add ConfigureMakeRPMBuildHelper tests.

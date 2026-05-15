@@ -369,7 +369,7 @@ class DependencyUpdater:
                 # Ignore all other file extensions.
                 continue
 
-            (package_name, package_version, python_tag1, python_tag2, _) = (
+            package_name, package_version, python_tag1, python_tag2, _ = (
                 package_filename[:-4].split("-")
             )
 

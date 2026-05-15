@@ -15,7 +15,6 @@ from l2tdevtools import projects
 from l2tdevtools import source_helper
 from l2tdevtools.build_helpers import factory as build_helper
 
-
 # Since os.path.abspath() uses the current working directory (cwd)
 # os.path.abspath(__file__) will point to a different location if
 # cwd has been changed. Hence we preserve the absolute location of __file__.
