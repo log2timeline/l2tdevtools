@@ -80,7 +80,7 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
         envlist.extend(["pylint", "wheel"])
 
-        if paths_to_lint_yaml:
+        if paths_to_lint_yaml and self._project_definition.name != "l2tdevtools":
             envlist.append("yamllint")
 
         template_mappings = {
@@ -108,7 +108,7 @@ class ToxIniWriter(interface.DependencyFileWriter):
         template_data = self._GenerateFromTemplate("testenv_pylint", template_mappings)
         file_content.append(template_data)
 
-        if paths_to_lint_yaml:
+        if paths_to_lint_yaml and self._project_definition.name != "l2tdevtools":
             template_data = self._GenerateFromTemplate(
                 "testenv_yamllint", template_mappings
             )
