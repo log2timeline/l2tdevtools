@@ -1,0 +1,16 @@
+
+[testenv:black]
+skipsdist = True
+pip_pre = True
+passenv =
+  CFLAGS
+  CPPFLAGS
+  LDFLAGS
+setenv =
+  PYTHONPATH = {toxinidir}
+deps =
+  black
+  setuptools >= 65
+commands =
+  black --version
+  black --check .

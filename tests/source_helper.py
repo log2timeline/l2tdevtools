@@ -9,15 +9,15 @@ from tests import test_lib
 
 
 class SourceHelperTest(test_lib.BaseTestCase):
-  """Tests the helper to manager project source code."""
+    """Tests the helper to manager project source code."""
 
-  def testInitialize(self):
-    """Tests the __init__ function."""
-    source_helper_object = source_helper.SourceHelper('test', None)
-    self.assertIsNotNone(source_helper_object)
+    def testInitialize(self):
+        """Tests the __init__ function."""
+        source_helper_object = source_helper.SourceHelper("test", None)
+        self.assertIsNotNone(source_helper_object)
 
-  # TODO: more add tests.
+    # TODO: more add tests.
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()

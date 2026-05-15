@@ -13,222 +13,228 @@ from l2tdevtools.build_helpers import interface
 
 
 class WheelBuildHelper(interface.BuildHelper):
-  """Helper to build Python wheel packages (.whl)."""
+    """Helper to build Python wheel packages (.whl)."""
 
-  _NON_PYTHON_DEPENDENCIES = frozenset(['fuse', 'libcrypto', 'zlib'])
+    _NON_PYTHON_DEPENDENCIES = frozenset(["fuse", "libcrypto", "zlib"])
 
-  def __init__(
-      self, project_definition, l2tdevtools_path, dependency_definitions):
-    """Initializes a build helper.
+    def __init__(self, project_definition, l2tdevtools_path, dependency_definitions):
+        """Initializes a build helper.
 
-    Args:
-      project_definition (ProjectDefinition): definition of the project
-          to build.
-      l2tdevtools_path (str): path to the l2tdevtools directory.
-      dependency_definitions (dict[str, ProjectDefinition]): definitions of all
-          projects, which is used to determine the properties of dependencies.
-    """
-    super().__init__(
-        project_definition, l2tdevtools_path, dependency_definitions)
-    self.architecture = None
+        Args:
+          project_definition (ProjectDefinition): definition of the project
+              to build.
+          l2tdevtools_path (str): path to the l2tdevtools directory.
+          dependency_definitions (dict[str, ProjectDefinition]): definitions of all
+              projects, which is used to determine the properties of dependencies.
+        """
+        super().__init__(project_definition, l2tdevtools_path, dependency_definitions)
+        self.architecture = None
 
-    # Note that platform.machine() does not indicate if a 32-bit version of
-    # Python is running on a 64-bit machine, hence we need to use
-    # platform.architecture() instead.
-    architecture = platform.architecture()[0]
-    if architecture == '32bit':
-      self.architecture = 'win32'
-    elif architecture == '64bit':
-      self.architecture = 'win_amd64'
+        # Note that platform.machine() does not indicate if a 32-bit version of
+        # Python is running on a 64-bit machine, hence we need to use
+        # platform.architecture() instead.
+        architecture = platform.architecture()[0]
+        if architecture == "32bit":
+            self.architecture = "win32"
+        elif architecture == "64bit":
+            self.architecture = "win_amd64"
 
-  def _GetWheelFilenameProjectInformation(self, source_helper_object):
-    """Determines the project name and version used by the wheel filename.
+    def _GetWheelFilenameProjectInformation(self, source_helper_object):
+        """Determines the project name and version used by the wheel filename.
 
-    Args:
-      source_helper_object (SourceHelper): source helper.
+        Args:
+          source_helper_object (SourceHelper): source helper.
 
-    Returns:
-      tuple: containing:
+        Returns:
+          tuple: containing:
 
-        * str: project name used by the wheel filename.
-        * str: project version used by the wheel filename.
-    """
-    if self._project_definition.wheel_name:
-      project_name = self._project_definition.wheel_name
-    elif self._project_definition.setup_name:
-      project_name = self._project_definition.setup_name
-    else:
-      project_name = source_helper_object.project_name
+            * str: project name used by the wheel filename.
+            * str: project version used by the wheel filename.
+        """
+        if self._project_definition.wheel_name:
+            project_name = self._project_definition.wheel_name
+        elif self._project_definition.setup_name:
+            project_name = self._project_definition.setup_name
+        else:
+            project_name = source_helper_object.project_name
 
-    project_version = source_helper_object.GetProjectVersion()
+        project_version = source_helper_object.GetProjectVersion()
 
-    return project_name, project_version
+        return project_name, project_version
 
-  def _MoveWheel(self, source_helper_object):
-    """Moves the wheel from the dist sub directory into the build directory.
+    def _MoveWheel(self, source_helper_object):
+        """Moves the wheel from the dist sub directory into the build directory.
 
-    Args:
-      source_helper_object (SourceHelper): source helper.
+        Args:
+          source_helper_object (SourceHelper): source helper.
 
-    Returns:
-      bool: True if the move was successful, False otherwise.
-    """
-    project_name, _ = self._GetWheelFilenameProjectInformation(
-        source_helper_object)
+        Returns:
+          bool: True if the move was successful, False otherwise.
+        """
+        project_name, _ = self._GetWheelFilenameProjectInformation(source_helper_object)
 
-    source_directory = source_helper_object.GetSourceDirectoryPath()
-    if not source_directory:
-      logging.info(
-          f'Missing source directory of: {source_helper_object.project_name:s}')
-      return False
+        source_directory = source_helper_object.GetSourceDirectoryPath()
+        if not source_directory:
+            logging.info(
+                f"Missing source directory of: {source_helper_object.project_name:s}"
+            )
+            return False
 
-    filenames_glob = os.path.join(
-        source_directory, 'dist', f'{project_name:s}-*-*-*.whl')
-    filenames = glob.glob(filenames_glob)
+        filenames_glob = os.path.join(
+            source_directory, "dist", f"{project_name:s}-*-*-*.whl"
+        )
+        filenames = glob.glob(filenames_glob)
 
-    if len(filenames) != 1:
-      logging.error(f'Unable to find wheel file: {filenames_glob:s}')
-      return False
+        if len(filenames) != 1:
+            logging.error(f"Unable to find wheel file: {filenames_glob:s}")
+            return False
 
-    _, _, wheel_filename = filenames[0].rpartition(os.path.sep)
-    if os.path.exists(wheel_filename):
-      logging.warning('Wheel file already exists.')
-    else:
-      logging.info(f'Moving: {filenames[0]:s}')
-      shutil.move(filenames[0], '.')
+        _, _, wheel_filename = filenames[0].rpartition(os.path.sep)
+        if os.path.exists(wheel_filename):
+            logging.warning("Wheel file already exists.")
+        else:
+            logging.info(f"Moving: {filenames[0]:s}")
+            shutil.move(filenames[0], ".")
 
-    return True
+        return True
 
-  def CheckBuildDependencies(self):
-    """Checks if the build dependencies are met.
+    def CheckBuildDependencies(self):
+        """Checks if the build dependencies are met.
 
-    Returns:
-      list[str]: build dependency names that are not met or an empty list.
-    """
-    missing_packages = []
-    for package_name in self._project_definition.build_dependencies:
-      if package_name not in self._NON_PYTHON_DEPENDENCIES:
-        missing_packages.append(package_name)
+        Returns:
+          list[str]: build dependency names that are not met or an empty list.
+        """
+        missing_packages = []
+        for package_name in self._project_definition.build_dependencies:
+            if package_name not in self._NON_PYTHON_DEPENDENCIES:
+                missing_packages.append(package_name)
 
-    return missing_packages
+        return missing_packages
 
-  def CheckBuildRequired(self, source_helper_object):
-    """Checks if a build is required.
+    def CheckBuildRequired(self, source_helper_object):
+        """Checks if a build is required.
 
-    Args:
-      source_helper_object (SourceHelper): source helper.
+        Args:
+          source_helper_object (SourceHelper): source helper.
 
-    Returns:
-      bool: True if a build is required, False otherwise.
-    """
-    project_name, project_version = self._GetWheelFilenameProjectInformation(
-        source_helper_object)
+        Returns:
+          bool: True if a build is required, False otherwise.
+        """
+        project_name, project_version = self._GetWheelFilenameProjectInformation(
+            source_helper_object
+        )
 
-    return not glob.glob(f'{project_name:s}-{project_version:s}-*-*-*.whl')
+        return not glob.glob(f"{project_name:s}-{project_version:s}-*-*-*.whl")
 
-  def Clean(self, source_helper_object):
-    """Cleans the build and dist directory.
+    def Clean(self, source_helper_object):
+        """Cleans the build and dist directory.
 
-    Args:
-      source_helper_object (SourceHelper): source helper.
-    """
-    # Remove previous versions of wheels.
-    project_name, project_version = self._GetWheelFilenameProjectInformation(
-        source_helper_object)
+        Args:
+          source_helper_object (SourceHelper): source helper.
+        """
+        # Remove previous versions of wheels.
+        project_name, project_version = self._GetWheelFilenameProjectInformation(
+            source_helper_object
+        )
 
-    filenames_to_ignore = re.compile(
-        f'{project_name:s}-{project_version:s}-.*-.*-.*.whl')
+        filenames_to_ignore = re.compile(
+            f"{project_name:s}-{project_version:s}-.*-.*-.*.whl"
+        )
 
-    for filename in glob.glob(f'{project_name:s}-*-*-*.whl'):
-      if not filenames_to_ignore.match(filename):
-        logging.info(f'Removing: {filename:s}')
-        os.remove(filename)
+        for filename in glob.glob(f"{project_name:s}-*-*-*.whl"):
+            if not filenames_to_ignore.match(filename):
+                logging.info(f"Removing: {filename:s}")
+                os.remove(filename)
 
 
 class BuildWheelBuildHelper(WheelBuildHelper):
-  """Helper to build Python wheel packages (.whl) using build."""
+    """Helper to build Python wheel packages (.whl) using build."""
 
-  def Build(self, source_helper_object):
-    """Builds the wheel.
+    def Build(self, source_helper_object):
+        """Builds the wheel.
 
-    Args:
-      source_helper_object (SourceHelper): source helper.
+        Args:
+          source_helper_object (SourceHelper): source helper.
 
-    Returns:
-      bool: True if successful, False otherwise.
-    """
-    source_package_path = source_helper_object.GetSourcePackagePath()
-    if not source_package_path:
-      logging.info(
-          f'Missing source package of: {source_helper_object.project_name:s}')
-      return False
+        Returns:
+          bool: True if successful, False otherwise.
+        """
+        source_package_path = source_helper_object.GetSourcePackagePath()
+        if not source_package_path:
+            logging.info(
+                f"Missing source package of: {source_helper_object.project_name:s}"
+            )
+            return False
 
-    source_directory = source_helper_object.GetSourceDirectoryPath()
-    if not source_directory:
-      logging.info(
-          f'Missing source directory of: {source_helper_object.project_name:s}')
-      return False
+        source_directory = source_helper_object.GetSourceDirectoryPath()
+        if not source_directory:
+            logging.info(
+                f"Missing source directory of: {source_helper_object.project_name:s}"
+            )
+            return False
 
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info(f'Building wheel of: {source_package_filename:s}')
+        source_package_filename = source_helper_object.GetSourcePackageFilename()
+        logging.info(f"Building wheel of: {source_package_filename:s}")
 
-    log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = (
-        f'\"{sys.executable:s}\" -m build --wheel > {log_file_path:s} 2>&1')
-    exit_code = subprocess.call(
-        f'(cd {source_directory:s} && {command:s})', shell=True)
-    if exit_code != 0:
-      logging.error(f'Running: "{command:s}" failed.')
-      return False
+        log_file_path = os.path.join("..", self.LOG_FILENAME)
+        command = f'"{sys.executable:s}" -m build --wheel > {log_file_path:s} 2>&1'
+        exit_code = subprocess.call(
+            f"(cd {source_directory:s} && {command:s})", shell=True
+        )
+        if exit_code != 0:
+            logging.error(f'Running: "{command:s}" failed.')
+            return False
 
-    return self._MoveWheel(source_helper_object)
+        return self._MoveWheel(source_helper_object)
 
 
 class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
-  """Helper to build Python wheel packages (.whl).
+    """Helper to build Python wheel packages (.whl).
 
-  Builds wheel packages for projects that use configure/make as their build
-  system.
-  """
-
-  def Build(self, source_helper_object):
-    """Builds the wheel.
-
-    Args:
-      source_helper_object (SourceHelper): source helper.
-
-    Returns:
-      bool: True if successful, False otherwise.
-
-    Raises:
-      RuntimeError: if setup.py is missing and a wheel cannot be build.
+    Builds wheel packages for projects that use configure/make as their build
+    system.
     """
-    source_package_path = source_helper_object.GetSourcePackagePath()
-    if not source_package_path:
-      logging.info(
-          f'Missing source package of: {source_helper_object.project_name:s}')
-      return False
 
-    source_directory = source_helper_object.GetSourceDirectoryPath()
-    if not source_directory:
-      logging.info(
-          f'Missing source directory of: {source_helper_object.project_name:s}')
-      return False
+    def Build(self, source_helper_object):
+        """Builds the wheel.
 
-    source_package_filename = source_helper_object.GetSourcePackageFilename()
-    logging.info(f'Building wheel of: {source_package_filename:s}')
+        Args:
+          source_helper_object (SourceHelper): source helper.
 
-    setup_py_path = os.path.join(source_directory, 'setup.py')
-    if not os.path.exists(setup_py_path):
-      raise RuntimeError('Missing setup.py cannot build wheel')
+        Returns:
+          bool: True if successful, False otherwise.
 
-    log_file_path = os.path.join('..', self.LOG_FILENAME)
-    command = (
-        f'\"{sys.executable:s}\" -m build --wheel > {log_file_path:s} 2>&1')
-    exit_code = subprocess.call(
-        f'(cd {source_directory:s} && {command:s})', shell=True)
-    if exit_code != 0:
-      logging.error(f'Running: "{command:s}" failed.')
-      return False
+        Raises:
+          RuntimeError: if setup.py is missing and a wheel cannot be build.
+        """
+        source_package_path = source_helper_object.GetSourcePackagePath()
+        if not source_package_path:
+            logging.info(
+                f"Missing source package of: {source_helper_object.project_name:s}"
+            )
+            return False
 
-    return self._MoveWheel(source_helper_object)
+        source_directory = source_helper_object.GetSourceDirectoryPath()
+        if not source_directory:
+            logging.info(
+                f"Missing source directory of: {source_helper_object.project_name:s}"
+            )
+            return False
+
+        source_package_filename = source_helper_object.GetSourcePackageFilename()
+        logging.info(f"Building wheel of: {source_package_filename:s}")
+
+        setup_py_path = os.path.join(source_directory, "setup.py")
+        if not os.path.exists(setup_py_path):
+            raise RuntimeError("Missing setup.py cannot build wheel")
+
+        log_file_path = os.path.join("..", self.LOG_FILENAME)
+        command = f'"{sys.executable:s}" -m build --wheel > {log_file_path:s} 2>&1'
+        exit_code = subprocess.call(
+            f"(cd {source_directory:s} && {command:s})", shell=True
+        )
+        if exit_code != 0:
+            logging.error(f'Running: "{command:s}" failed.')
+            return False
+
+        return self._MoveWheel(source_helper_object)

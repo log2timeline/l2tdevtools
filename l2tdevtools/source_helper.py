@@ -12,422 +12,440 @@ import zipfile
 
 
 class SourceHelper:
-  """Helper to manage project source code."""
+    """Helper to manage project source code."""
 
-  def __init__(self, project_name, project_definition):
-    """Initializes a source helper.
+    def __init__(self, project_name, project_definition):
+        """Initializes a source helper.
 
-    Args:
-      project_name (str): name of the project.
-      project_definition (ProjectDefinition): project definition.
-    """
-    super().__init__()
-    self._project_definition = project_definition
-    self.project_name = project_name
+        Args:
+          project_name (str): name of the project.
+          project_definition (ProjectDefinition): project definition.
+        """
+        super().__init__()
+        self._project_definition = project_definition
+        self.project_name = project_name
 
-  @abc.abstractmethod
-  def Create(self):
-    """Creates the source directory.
+    @abc.abstractmethod
+    def Create(self):
+        """Creates the source directory.
 
-    Returns:
-      str: name of the source directory or None on error.
-    """
+        Returns:
+          str: name of the source directory or None on error.
+        """
 
-  @abc.abstractmethod
-  def GetProjectIdentifier(self):
-    """Retrieves the project identifier for a given project name.
+    @abc.abstractmethod
+    def GetProjectIdentifier(self):
+        """Retrieves the project identifier for a given project name.
 
-    Returns:
-      str: project identifier or None on error.
-    """
+        Returns:
+          str: project identifier or None on error.
+        """
 
-  # TODO: add GetProjectVersion as interface function.
+    # TODO: add GetProjectVersion as interface function.
 
-  # TODO: add GetSourceDirectoryPath as interface function.
+    # TODO: add GetSourceDirectoryPath as interface function.
 
-  # TODO: add GetSourcePackageFilename as interface function,
-  # or move into GetSourceDirectoryPath of SourcePackageHelper.
+    # TODO: add GetSourcePackageFilename as interface function,
+    # or move into GetSourceDirectoryPath of SourcePackageHelper.
 
 
 class GitRepositorySourceHelper(SourceHelper):
-  """Class that manages the source code from a git repository."""
+    """Class that manages the source code from a git repository."""
 
-  def __init__(self, project_name, project_definition):
-    """Initializes a source helper.
+    def __init__(self, project_name, project_definition):
+        """Initializes a source helper.
 
-    Args:
-      project_name (str): name of the project.
-      project_definition (ProjectDefinition): project definition.
-    """
-    super().__init__(
-        project_name, project_definition)
-    self._git_url = project_definition.git_url
+        Args:
+          project_name (str): name of the project.
+          project_definition (ProjectDefinition): project definition.
+        """
+        super().__init__(project_name, project_definition)
+        self._git_url = project_definition.git_url
 
-  def Clean(self):
-    """Removes a previous version of the source directory."""
-    if os.path.exists(self.project_name):
-      logging.info(f'Removing: {self.project_name:s}')
-      shutil.rmtree(self.project_name)
+    def Clean(self):
+        """Removes a previous version of the source directory."""
+        if os.path.exists(self.project_name):
+            logging.info(f"Removing: {self.project_name:s}")
+            shutil.rmtree(self.project_name)
 
-  def Create(self):
-    """Creates the source directory from the git repository.
+    def Create(self):
+        """Creates the source directory from the git repository.
 
-    Returns:
-      str: name of the source directory or None on error.
-    """
-    if not self.project_name or not self._git_url:
-      return None
+        Returns:
+          str: name of the source directory or None on error.
+        """
+        if not self.project_name or not self._git_url:
+            return None
 
-    command = f'git clone {self._git_url:s}'
-    exit_code = subprocess.call(f'{command:s}', shell=True)
-    if exit_code != 0:
-      logging.error(f'Running: "{command:s}" failed.')
-      return None
+        command = f"git clone {self._git_url:s}"
+        exit_code = subprocess.call(f"{command:s}", shell=True)
+        if exit_code != 0:
+            logging.error(f'Running: "{command:s}" failed.')
+            return None
 
-    return self.project_name
+        return self.project_name
 
-  # pylint: disable=redundant-returns-doc
-  def GetProjectIdentifier(self):
-    """Retrieves the project identifier for a given project name.
+    # pylint: disable=redundant-returns-doc
+    def GetProjectIdentifier(self):
+        """Retrieves the project identifier for a given project name.
 
-    Returns:
-      str: project identifier or None on error.
-    """
-    # TODO: determine project identifier based on git url.
-    return None
+        Returns:
+          str: project identifier or None on error.
+        """
+        # TODO: determine project identifier based on git url.
+        return None
 
 
 class LibyalGitRepositorySourceHelper(GitRepositorySourceHelper):
-  """Class that manages the source code from a libyal git repository."""
+    """Class that manages the source code from a libyal git repository."""
 
-  def Create(self):
-    """Creates the source directory from the git repository.
+    def Create(self):
+        """Creates the source directory from the git repository.
 
-    Returns:
-      str: name of the source directory or None on error.
-    """
-    if not self.project_name or not self._git_url:
-      return None
+        Returns:
+          str: name of the source directory or None on error.
+        """
+        if not self.project_name or not self._git_url:
+            return None
 
-    command = f'git clone {self._git_url:s}'
-    exit_code = subprocess.call(f'{command:s}', shell=True)
-    if exit_code != 0:
-      logging.error(f'Running: "{command:s}" failed.')
-      return None
+        command = f"git clone {self._git_url:s}"
+        exit_code = subprocess.call(f"{command:s}", shell=True)
+        if exit_code != 0:
+            logging.error(f'Running: "{command:s}" failed.')
+            return None
 
-    source_directory = self.project_name
+        source_directory = self.project_name
 
-    command = './synclibs.sh'
-    exit_code = subprocess.call(
-        f'(cd {source_directory:s} && {command:s})', shell=True)
-    if exit_code != 0:
-      logging.error(f'Running: "{command:s}" failed.')
-      return None
+        command = "./synclibs.sh"
+        exit_code = subprocess.call(
+            f"(cd {source_directory:s} && {command:s})", shell=True
+        )
+        if exit_code != 0:
+            logging.error(f'Running: "{command:s}" failed.')
+            return None
 
-    command = './autogen.sh'
-    exit_code = subprocess.call(
-        f'(cd {source_directory:s} && {command:s})', shell=True)
-    if exit_code != 0:
-      logging.error(f'Running: "{command:s}" failed.')
-      return None
+        command = "./autogen.sh"
+        exit_code = subprocess.call(
+            f"(cd {source_directory:s} && {command:s})", shell=True
+        )
+        if exit_code != 0:
+            logging.error(f'Running: "{command:s}" failed.')
+            return None
 
-    command = './configure'
-    exit_code = subprocess.call(
-        f'(cd {source_directory:s} && {command:s})', shell=True)
-    if exit_code != 0:
-      logging.error(f'Running: "{command:s}" failed.')
-      return None
+        command = "./configure"
+        exit_code = subprocess.call(
+            f"(cd {source_directory:s} && {command:s})", shell=True
+        )
+        if exit_code != 0:
+            logging.error(f'Running: "{command:s}" failed.')
+            return None
 
-    return source_directory
+        return source_directory
 
 
 class SourcePackageHelper(SourceHelper):
-  """Class that manages the source code from a source package."""
+    """Class that manages the source code from a source package."""
 
-  ENCODING = 'utf-8'
+    ENCODING = "utf-8"
 
-  def __init__(
-      self, project_name, project_definition, downloads_directory,
-      download_helper_object):
-    """Initializes a source package helper.
+    def __init__(
+        self,
+        project_name,
+        project_definition,
+        downloads_directory,
+        download_helper_object,
+    ):
+        """Initializes a source package helper.
 
-    Args:
-      project_name (str): name of the project.
-      project_definition (ProjectDefinition): project definition.
-      downloads_directory (str): path to the directory where source package
-          is downloaded.
-      download_helper_object (DownloadHelper): download helper.
-    """
-    super().__init__(project_name, project_definition)
-    self._download_helper = download_helper_object
-    self._downloads_directory = os.path.abspath(downloads_directory)
-    self._project_version = None
-    self._source_directory_path = None
-    self._source_package_filename = None
-    self._source_package_path = None
+        Args:
+          project_name (str): name of the project.
+          project_definition (ProjectDefinition): project definition.
+          downloads_directory (str): path to the directory where source package
+              is downloaded.
+          download_helper_object (DownloadHelper): download helper.
+        """
+        super().__init__(project_name, project_definition)
+        self._download_helper = download_helper_object
+        self._downloads_directory = os.path.abspath(downloads_directory)
+        self._project_version = None
+        self._source_directory_path = None
+        self._source_package_filename = None
+        self._source_package_path = None
 
-  def _CleanDownloads(self, project_name, project_version):
-    """Removes previous versions of downloaded source packages.
+    def _CleanDownloads(self, project_name, project_version):
+        """Removes previous versions of downloaded source packages.
 
-    Args:
-      project_name (str): name of the project.
-      project_version (str): current version of the project.
-    """
-    filenames_to_ignore = re.compile(f'^{project_name:s}-.*{project_version!s}')
+        Args:
+          project_name (str): name of the project.
+          project_version (str): current version of the project.
+        """
+        filenames_to_ignore = re.compile(f"^{project_name:s}-.*{project_version!s}")
 
-    # Remove previous versions of source packages in the format:
-    # <project>-*[0-9]*.tar.gz
-    filenames = glob.glob(f'{project_name:s}-*[0-9]*.tar.gz')
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(f'Removing: {filename:s}')
-        os.remove(filename)
+        # Remove previous versions of source packages in the format:
+        # <project>-*[0-9]*.tar.gz
+        filenames = glob.glob(f"{project_name:s}-*[0-9]*.tar.gz")
+        for filename in filenames:
+            if not filenames_to_ignore.match(filename):
+                logging.info(f"Removing: {filename:s}")
+                os.remove(filename)
 
-    # Remove previous versions of source packages in the format:
-    # <project>-*[0-9]*.tgz
-    filenames = glob.glob(f'{project_name:s}-*[0-9]*.tgz')
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(f'Removing: {filename:s}')
-        os.remove(filename)
+        # Remove previous versions of source packages in the format:
+        # <project>-*[0-9]*.tgz
+        filenames = glob.glob(f"{project_name:s}-*[0-9]*.tgz")
+        for filename in filenames:
+            if not filenames_to_ignore.match(filename):
+                logging.info(f"Removing: {filename:s}")
+                os.remove(filename)
 
-    # Remove previous versions of source packages in the format:
-    # <project>-*[0-9]*.zip
-    filenames = glob.glob(f'{project_name:s}-*[0-9]*.zip')
-    for filename in filenames:
-      if not filenames_to_ignore.match(filename):
-        logging.info(f'Removing: {filename:s}')
-        os.remove(filename)
+        # Remove previous versions of source packages in the format:
+        # <project>-*[0-9]*.zip
+        filenames = glob.glob(f"{project_name:s}-*[0-9]*.zip")
+        for filename in filenames:
+            if not filenames_to_ignore.match(filename):
+                logging.info(f"Removing: {filename:s}")
+                os.remove(filename)
 
-  def _CreateFromTar(self, source_package_filename):
-    """Creates the source directory from a .tar source package.
+    def _CreateFromTar(self, source_package_filename):
+        """Creates the source directory from a .tar source package.
 
-    Args:
-      source_package_filename (str): filename of the source package.
+        Args:
+          source_package_filename (str): filename of the source package.
 
-    Returns:
-      str: name of the source directory or None if no files can be extracted
-          from the .tar.gz source package.
-    """
-    with tarfile.open(
-        source_package_filename, 'r:*', encoding='utf-8') as archive:
-      directory_name = ''
+        Returns:
+          str: name of the source directory or None if no files can be extracted
+              from the .tar.gz source package.
+        """
+        with tarfile.open(source_package_filename, "r:*", encoding="utf-8") as archive:
+            directory_name = ""
 
-      for tar_info in archive.getmembers():
-        filename = getattr(tar_info, 'name', None)
+            for tar_info in archive.getmembers():
+                filename = getattr(tar_info, "name", None)
 
-        if isinstance(filename, bytes):
-          try:
-            filename = filename.decode(self.ENCODING)
-          except UnicodeDecodeError:
-            logging.warning(
-                f'Unable to decode filename in tar file: '
-                f'{source_package_filename:s}')
-            continue
+                if isinstance(filename, bytes):
+                    try:
+                        filename = filename.decode(self.ENCODING)
+                    except UnicodeDecodeError:
+                        logging.warning(
+                            f"Unable to decode filename in tar file: "
+                            f"{source_package_filename:s}"
+                        )
+                        continue
 
-        if filename is None:
-          logging.warning(
-              f'Missing filename in tar file: {source_package_filename:s}')
-          continue
+                if filename is None:
+                    logging.warning(
+                        f"Missing filename in tar file: {source_package_filename:s}"
+                    )
+                    continue
 
-        if not directory_name:
-          # Note that this will set directory name to an empty string
-          # if filename start with a /.
-          directory_name, _, _ = filename.partition('/')
-          if not directory_name or directory_name.startswith('..'):
-            logging.error(
-                f'Unsupported directory name in tar file: '
-                f'{source_package_filename:s}')
-            return None
+                if not directory_name:
+                    # Note that this will set directory name to an empty string
+                    # if filename start with a /.
+                    directory_name, _, _ = filename.partition("/")
+                    if not directory_name or directory_name.startswith(".."):
+                        logging.error(
+                            f"Unsupported directory name in tar file: "
+                            f"{source_package_filename:s}"
+                        )
+                        return None
 
-          if os.path.exists(directory_name):
-            break
+                    if os.path.exists(directory_name):
+                        break
 
-          logging.info(f'Extracting: {source_package_filename:s}')
+                    logging.info(f"Extracting: {source_package_filename:s}")
 
-        elif not filename.startswith(directory_name):
-          logging.warning(
-              f'Skipping: {filename:s} in tar file: '
-              f'{source_package_filename:s}')
-          continue
+                elif not filename.startswith(directory_name):
+                    logging.warning(
+                        f"Skipping: {filename:s} in tar file: "
+                        f"{source_package_filename:s}"
+                    )
+                    continue
 
-        archive.extract(tar_info)
+                archive.extract(tar_info)
 
-    return directory_name
+        return directory_name
 
-  def _CreateFromZip(self, source_package_filename):
-    """Creates the source directory from a .zip source package.
+    def _CreateFromZip(self, source_package_filename):
+        """Creates the source directory from a .zip source package.
 
-    Args:
-      source_package_filename (str): filename of the source package.
+        Args:
+          source_package_filename (str): filename of the source package.
 
-    Returns:
-      str: name of the source directory or None if no files can be extracted
-          from the .zip source package.
-    """
-    with zipfile.ZipFile(source_package_filename, 'r') as archive:
-      directory_name = ''
+        Returns:
+          str: name of the source directory or None if no files can be extracted
+              from the .zip source package.
+        """
+        with zipfile.ZipFile(source_package_filename, "r") as archive:
+            directory_name = ""
 
-      for zip_info in archive.infolist():
-        filename = getattr(zip_info, 'filename', None)
-        if filename is None:
-          logging.warning(
-              f'Missing filename in zip file: {source_package_filename:s}')
-          continue
+            for zip_info in archive.infolist():
+                filename = getattr(zip_info, "filename", None)
+                if filename is None:
+                    logging.warning(
+                        f"Missing filename in zip file: {source_package_filename:s}"
+                    )
+                    continue
 
-        if not directory_name:
-          # Note that this will set directory name to an empty string
-          # if filename start with a /.
-          directory_name, _, _ = filename.partition('/')
-          if not directory_name or directory_name.startswith('..'):
-            logging.error(
-                f'Unsupported directory name in zip file: '
-                f'{source_package_filename:s}')
-            return None
+                if not directory_name:
+                    # Note that this will set directory name to an empty string
+                    # if filename start with a /.
+                    directory_name, _, _ = filename.partition("/")
+                    if not directory_name or directory_name.startswith(".."):
+                        logging.error(
+                            f"Unsupported directory name in zip file: "
+                            f"{source_package_filename:s}"
+                        )
+                        return None
 
-          if os.path.exists(directory_name):
-            break
+                    if os.path.exists(directory_name):
+                        break
 
-          logging.info(f'Extracting: {source_package_filename:s}')
+                    logging.info(f"Extracting: {source_package_filename:s}")
 
-        elif not filename.startswith(directory_name):
-          logging.warning(
-              f'Skipping: {filename:s} in zip file: '
-              f'{source_package_filename:s}')
-          continue
+                elif not filename.startswith(directory_name):
+                    logging.warning(
+                        f"Skipping: {filename:s} in zip file: "
+                        f"{source_package_filename:s}"
+                    )
+                    continue
 
-        archive.extract(zip_info)
+                archive.extract(zip_info)
 
-    return directory_name
+        return directory_name
 
-  def Clean(self):
-    """Removes previous versions of source packages and directories."""
-    project_version = self.GetProjectVersion()
-    if not project_version:
-      return
+    def Clean(self):
+        """Removes previous versions of source packages and directories."""
+        project_version = self.GetProjectVersion()
+        if not project_version:
+            return
 
-    current_working_directory = os.getcwd()
-    os.chdir(self._downloads_directory)
+        current_working_directory = os.getcwd()
+        os.chdir(self._downloads_directory)
 
-    try:
-      self._CleanDownloads(self.project_name, project_version)
-    finally:
-      os.chdir(current_working_directory)
+        try:
+            self._CleanDownloads(self.project_name, project_version)
+        finally:
+            os.chdir(current_working_directory)
 
-    filenames_to_ignore = re.compile(
-        f'^{self.project_name:s}-.*{project_version!s}')
+        filenames_to_ignore = re.compile(
+            f"^{self.project_name:s}-.*{project_version!s}"
+        )
 
-    # Remove previous versions of source directories in the format:
-    # <project>-[0-9]*
-    filenames = glob.glob(f'{self.project_name:s}-[0-9]*')
-    for filename in filenames:
-      if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
-        logging.info(f'Removing: {filename:s}')
-        shutil.rmtree(filename)
+        # Remove previous versions of source directories in the format:
+        # <project>-[0-9]*
+        filenames = glob.glob(f"{self.project_name:s}-[0-9]*")
+        for filename in filenames:
+            if os.path.isdir(filename) and not filenames_to_ignore.match(filename):
+                logging.info(f"Removing: {filename:s}")
+                shutil.rmtree(filename)
 
-  def Create(self):
-    """Creates the source directory from the source package.
+    def Create(self):
+        """Creates the source directory from the source package.
 
-    Returns:
-      bool: True if the source directory was created successfully.
-    """
-    if (not self._source_package_path or
-        not os.path.exists(self._source_package_path)):
-      logging.info(
-          f'Missing source package of: {self.project_name:s}')
-      return False
+        Returns:
+          bool: True if the source directory was created successfully.
+        """
+        if not self._source_package_path or not os.path.exists(
+            self._source_package_path
+        ):
+            logging.info(f"Missing source package of: {self.project_name:s}")
+            return False
 
-    directory_name = None
-    if (self._source_package_path.endswith('.tar.bz2') or
-        self._source_package_path.endswith('.tar.gz') or
-        self._source_package_path.endswith('.tgz')):
-      directory_name = self._CreateFromTar(self._source_package_path)
+        directory_name = None
+        if (
+            self._source_package_path.endswith(".tar.bz2")
+            or self._source_package_path.endswith(".tar.gz")
+            or self._source_package_path.endswith(".tgz")
+        ):
+            directory_name = self._CreateFromTar(self._source_package_path)
 
-    elif self._source_package_path.endswith('.zip'):
-      directory_name = self._CreateFromZip(self._source_package_path)
+        elif self._source_package_path.endswith(".zip"):
+            directory_name = self._CreateFromZip(self._source_package_path)
 
-    self._source_directory_path = directory_name
+        self._source_directory_path = directory_name
 
-    return bool(directory_name)
+        return bool(directory_name)
 
-  def Download(self):
-    """Downloads the source package.
+    def Download(self):
+        """Downloads the source package.
 
-    Returns:
-      str: path of the source package if the download was successful or
-          if the file was already downloaded or None on error.
-    """
-    if not self._source_package_path:
-      project_version = self.GetProjectVersion()
-      if not project_version:
-        return None
+        Returns:
+          str: path of the source package if the download was successful or
+              if the file was already downloaded or None on error.
+        """
+        if not self._source_package_path:
+            project_version = self.GetProjectVersion()
+            if not project_version:
+                return None
 
-      current_working_directory = os.getcwd()
-      os.chdir(self._downloads_directory)
+            current_working_directory = os.getcwd()
+            os.chdir(self._downloads_directory)
 
-      try:
-        self._source_package_filename = self._download_helper.Download(
-            self.project_name, project_version)
-      finally:
-        os.chdir(current_working_directory)
+            try:
+                self._source_package_filename = self._download_helper.Download(
+                    self.project_name, project_version
+                )
+            finally:
+                os.chdir(current_working_directory)
 
-      if self._source_package_filename:
-        self._source_package_path = os.path.join(
-            self._downloads_directory, self._source_package_filename)
+            if self._source_package_filename:
+                self._source_package_path = os.path.join(
+                    self._downloads_directory, self._source_package_filename
+                )
 
-    return self._source_package_path
+        return self._source_package_path
 
-  def GetProjectIdentifier(self):
-    """Retrieves the project identifier for a given project name.
+    def GetProjectIdentifier(self):
+        """Retrieves the project identifier for a given project name.
 
-    Returns:
-      str: project identifier or None on error.
-    """
-    return self._download_helper.GetProjectIdentifier()
+        Returns:
+          str: project identifier or None on error.
+        """
+        return self._download_helper.GetProjectIdentifier()
 
-  def GetProjectVersion(self):
-    """Retrieves the version number for a given project name.
+    def GetProjectVersion(self):
+        """Retrieves the version number for a given project name.
 
-    Returns:
-      str: version number or None on error.
-    """
-    if not self._project_version:
-      version_definition = getattr(self._project_definition, 'version', None)
-      self._project_version = self._download_helper.GetLatestVersion(
-          self.project_name, version_definition)
+        Returns:
+          str: version number or None on error.
+        """
+        if not self._project_version:
+            version_definition = getattr(self._project_definition, "version", None)
+            self._project_version = self._download_helper.GetLatestVersion(
+                self.project_name, version_definition
+            )
 
-    return self._project_version
+        return self._project_version
 
-  def GetSourceDirectoryPath(self):
-    """Retrieves the path of the source directory.
+    def GetSourceDirectoryPath(self):
+        """Retrieves the path of the source directory.
 
-    Returns:
-      str: path of the source directory or None if not available.
-    """
-    return self._source_directory_path
+        Returns:
+          str: path of the source directory or None if not available.
+        """
+        return self._source_directory_path
 
-  def GetSourcePackageFilename(self):
-    """Retrieves the filename of the source package.
+    def GetSourcePackageFilename(self):
+        """Retrieves the filename of the source package.
 
-    This function downloads the source package if not done so previously.
+        This function downloads the source package if not done so previously.
 
-    Returns:
-      str: filename of the source package or None if not available.
-    """
-    if not self._source_package_filename:
-      self.Download()
+        Returns:
+          str: filename of the source package or None if not available.
+        """
+        if not self._source_package_filename:
+            self.Download()
 
-    return self._source_package_filename
+        return self._source_package_filename
 
-  def GetSourcePackagePath(self):
-    """Retrieves the filename of the source package.
+    def GetSourcePackagePath(self):
+        """Retrieves the filename of the source package.
 
-    This function downloads the source package if not done so previously.
+        This function downloads the source package if not done so previously.
 
-    Returns:
-      str: path of the source package or None if not available.
-    """
-    if not self._source_package_path:
-      self.Download()
+        Returns:
+          str: path of the source package or None if not available.
+        """
+        if not self._source_package_path:
+            self.Download()
 
-    return self._source_package_path
+        return self._source_package_path

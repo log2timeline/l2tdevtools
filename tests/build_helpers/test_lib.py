@@ -8,126 +8,132 @@ from l2tdevtools import source_helper
 
 
 class TestSourceHelper(source_helper.SourceHelper):
-  """Test helper to manage project source code."""
+    """Test helper to manage project source code."""
 
-  def __init__(self, project_name, project_definition, project_version):
-    """Initializes a source helper.
+    def __init__(self, project_name, project_definition, project_version):
+        """Initializes a source helper.
 
-    Args:
-      project_name (str): name of the project.
-      project_definition (ProjectDefinition): project definition.
-      project_version (str): version of the project source code.
-    """
-    super().__init__(project_name, project_definition)
-    self._project_version = project_version
-    self._source_directory_path = f'{project_name:s}-{project_version!s}'
-    self._source_package_filename = (
-        f'{project_name:s}-{project_version!s}.tar.gz')
+        Args:
+          project_name (str): name of the project.
+          project_definition (ProjectDefinition): project definition.
+          project_version (str): version of the project source code.
+        """
+        super().__init__(project_name, project_definition)
+        self._project_version = project_version
+        self._source_directory_path = f"{project_name:s}-{project_version!s}"
+        self._source_package_filename = f"{project_name:s}-{project_version!s}.tar.gz"
 
-  # pylint: disable=redundant-returns-doc
+    # pylint: disable=redundant-returns-doc
 
-  def _CreateFromTar(self, source_filename):
-    """Creates the source directory from a .tar source package.
+    def _CreateFromTar(self, source_filename):
+        """Creates the source directory from a .tar source package.
 
-    Args:
-      source_filename (str): filename of the source package.
+        Args:
+          source_filename (str): filename of the source package.
 
-    Returns:
-      str: name of the source directory or None if no files can be extracted
-          from the .tar.gz source package.
-    """
-    with tarfile.open(source_filename, 'r:*', encoding='utf-8') as archive:
-      directory_name = ''
+        Returns:
+          str: name of the source directory or None if no files can be extracted
+              from the .tar.gz source package.
+        """
+        with tarfile.open(source_filename, "r:*", encoding="utf-8") as archive:
+            directory_name = ""
 
-      for tar_info in archive.getmembers():
-        filename = getattr(tar_info, 'name', None)
+            for tar_info in archive.getmembers():
+                filename = getattr(tar_info, "name", None)
 
-        if isinstance(filename, bytes):
-          try:
-            filename = filename.decode('utf8')
-          except UnicodeDecodeError:
-            logging.warning(
-                f'Unable to decode filename in tar file: {source_filename:s}')
-            continue
+                if isinstance(filename, bytes):
+                    try:
+                        filename = filename.decode("utf8")
+                    except UnicodeDecodeError:
+                        logging.warning(
+                            f"Unable to decode filename in tar file: "
+                            f"{source_filename:s}"
+                        )
+                        continue
 
-        if filename is None:
-          logging.warning(f'Missing filename in tar file: {source_filename:s}')
-          continue
+                if filename is None:
+                    logging.warning(
+                        f"Missing filename in tar file: {source_filename:s}"
+                    )
+                    continue
 
-        if not directory_name:
-          # Note that this will set directory name to an empty string
-          # if filename start with a /.
-          directory_name, _, _ = filename.partition('/')
-          if not directory_name or directory_name.startswith('..'):
-            logging.error(
-                f'Unsupported directory name in tar file: {source_filename:s}')
-            return None
+                if not directory_name:
+                    # Note that this will set directory name to an empty string
+                    # if filename start with a /.
+                    directory_name, _, _ = filename.partition("/")
+                    if not directory_name or directory_name.startswith(".."):
+                        logging.error(
+                            f"Unsupported directory name in tar file: "
+                            f"{source_filename:s}"
+                        )
+                        return None
 
-          if os.path.exists(directory_name):
-            break
+                    if os.path.exists(directory_name):
+                        break
 
-          logging.info(f'Extracting: {source_filename:s}')
+                    logging.info(f"Extracting: {source_filename:s}")
 
-        elif not filename.startswith(directory_name):
-          logging.warning(
-              f'Skipping: {filename:s} in tar file: {source_filename:s}')
-          continue
+                elif not filename.startswith(directory_name):
+                    logging.warning(
+                        f"Skipping: {filename:s} in tar file: {source_filename:s}"
+                    )
+                    continue
 
-        archive.extract(tar_info)
+                archive.extract(tar_info)
 
-    return directory_name
+        return directory_name
 
-  def Create(self):
-    """Creates the source directory.
+    def Create(self):
+        """Creates the source directory.
 
-    Returns:
-      str: name of the source directory or None on error.
-    """
-    # TODO: use shutil.unpack_archive(test_path, temp_directory) when Python 2
-    # support has been removed.
+        Returns:
+          str: name of the source directory or None on error.
+        """
+        # TODO: use shutil.unpack_archive(test_path, temp_directory) when Python 2
+        # support has been removed.
 
-    return self._CreateFromTar(self._source_package_filename)
+        return self._CreateFromTar(self._source_package_filename)
 
-  def GetProjectIdentifier(self):
-    """Retrieves the project identifier for a given project name.
+    def GetProjectIdentifier(self):
+        """Retrieves the project identifier for a given project name.
 
-    Returns:
-      str: project identifier or None on error.
-    """
-    return f'com.github.log2timeline.{self.project_name:s}'
+        Returns:
+          str: project identifier or None on error.
+        """
+        return f"com.github.log2timeline.{self.project_name:s}"
 
-  def GetProjectVersion(self):
-    """Retrieves the version number for a given project name.
+    def GetProjectVersion(self):
+        """Retrieves the version number for a given project name.
 
-    Returns:
-      str: version number or None on error.
-    """
-    return self._project_version
+        Returns:
+          str: version number or None on error.
+        """
+        return self._project_version
 
-  def GetSourceDirectoryPath(self):
-    """Retrieves the path of the source directory.
+    def GetSourceDirectoryPath(self):
+        """Retrieves the path of the source directory.
 
-    Returns:
-      str: path of the source directory or None if not available.
-    """
-    return self._source_directory_path
+        Returns:
+          str: path of the source directory or None if not available.
+        """
+        return self._source_directory_path
 
-  def GetSourcePackageFilename(self):
-    """Retrieves the filename of the source package.
+    def GetSourcePackageFilename(self):
+        """Retrieves the filename of the source package.
 
-    This function downloads the source package if not done so previously.
+        This function downloads the source package if not done so previously.
 
-    Returns:
-      str: filename of the source package or None if not available.
-    """
-    return self._source_package_filename
+        Returns:
+          str: filename of the source package or None if not available.
+        """
+        return self._source_package_filename
 
-  def GetSourcePackagePath(self):
-    """Retrieves the path of the source package.
+    def GetSourcePackagePath(self):
+        """Retrieves the path of the source package.
 
-    This function downloads the source package if not done so previously.
+        This function downloads the source package if not done so previously.
 
-    Returns:
-      str: path of the source package or None if not available.
-    """
-    return self._source_package_filename
+        Returns:
+          str: path of the source package or None if not available.
+        """
+        return self._source_package_filename

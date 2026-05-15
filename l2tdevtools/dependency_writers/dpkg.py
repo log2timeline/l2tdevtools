@@ -6,185 +6,207 @@ from l2tdevtools.dependency_writers import interface
 
 
 class DPKGCompatWriter(interface.DependencyFileWriter):
-  """Dpkg compat file writer."""
+    """Dpkg compat file writer."""
 
-  PATH = os.path.join('config', 'dpkg', 'compat')
+    PATH = os.path.join("config", "dpkg", "compat")
 
-  _FILE_CONTENT = '9\n'
+    _FILE_CONTENT = "9\n"
 
-  def Write(self):
-    """Writes a dpkg control file."""
-    with open(self.PATH, 'w', encoding='utf-8') as file_object:
-      file_object.write(self._FILE_CONTENT)
+    def Write(self):
+        """Writes a dpkg control file."""
+        with open(self.PATH, "w", encoding="utf-8") as file_object:
+            file_object.write(self._FILE_CONTENT)
 
 
 class DPKGControlWriter(interface.DependencyFileWriter):
-  """Dpkg control file writer."""
+    """Dpkg control file writer."""
 
-  PATH = os.path.join('config', 'dpkg', 'control')
+    PATH = os.path.join("config", "dpkg", "control")
 
-  _PYTHON3_FILE_HEADER = [
-      'Source: {project_name:s}',
-      'Section: python',
-      'Priority: extra',
-      'Maintainer: {maintainer:s}',
-      'Build-Depends: debhelper (>= 9), dh-python, {build_dependencies:s}',
-      'Standards-Version: 4.1.4',
-      'X-Python3-Version: >= 3.10',
-      'Homepage: {homepage_url:s}',
-      '']
+    _PYTHON3_FILE_HEADER = [
+        "Source: {project_name:s}",
+        "Section: python",
+        "Priority: extra",
+        "Maintainer: {maintainer:s}",
+        "Build-Depends: debhelper (>= 9), dh-python, {build_dependencies:s}",
+        "Standards-Version: 4.1.4",
+        "X-Python3-Version: >= 3.10",
+        "Homepage: {homepage_url:s}",
+        "",
+    ]
 
-  _DATA_PACKAGE = [
-      'Package: {project_name:s}-data',
-      'Architecture: all',
-      'Depends: ${{misc:Depends}}',
-      'Description: Data files for {name_description:s}',
-      '{description_long:s}',
-      '']
+    _DATA_PACKAGE = [
+        "Package: {project_name:s}-data",
+        "Architecture: all",
+        "Depends: ${{misc:Depends}}",
+        "Description: Data files for {name_description:s}",
+        "{description_long:s}",
+        "",
+    ]
 
-  _PYTHON3_PACKAGE = [
-      'Package: python3-{python_module_name:s}',
-      'Architecture: all',
-      'Depends: {python3_dependencies:s}${{misc:Depends}}',
-      'Description: Python 3 module of {python_module_description:s}',
-      '{description_long:s}',
-      '']
+    _PYTHON3_PACKAGE = [
+        "Package: python3-{python_module_name:s}",
+        "Architecture: all",
+        "Depends: {python3_dependencies:s}${{misc:Depends}}",
+        "Description: Python 3 module of {python_module_description:s}",
+        "{description_long:s}",
+        "",
+    ]
 
-  _TOOLS_PACKAGE = [
-      'Package: {project_name:s}-tools',
-      'Architecture: all',
-      ('Depends: python3-{python_module_name:s} (>= ${{binary:Version}}), '
-       '${{misc:Depends}}'),
-      'Description: {tools_description:s}',
-      '{tool_description_long:s}',
-      '']
+    _TOOLS_PACKAGE = [
+        "Package: {project_name:s}-tools",
+        "Architecture: all",
+        (
+            "Depends: python3-{python_module_name:s} (>= ${{binary:Version}}), "
+            "${{misc:Depends}}"
+        ),
+        "Description: {tools_description:s}",
+        "{tool_description_long:s}",
+        "",
+    ]
 
-  def Write(self):
-    """Writes a dpkg control file."""
-    python_module_description = self._project_definition.name_description
-    python_module_name = self._project_definition.name
-    tools_description = (
-        f'Tools of {self._project_definition.name_description:s}')
-    tool_description_long = self._project_definition.description_long
+    def Write(self):
+        """Writes a dpkg control file."""
+        python_module_description = self._project_definition.name_description
+        python_module_name = self._project_definition.name
+        tools_description = f"Tools of {self._project_definition.name_description:s}"
+        tool_description_long = self._project_definition.description_long
 
-    if self._project_definition.name.endswith('-kb'):
-      python_module_name = ''.join([python_module_name[:-3], 'rc'])
+        if self._project_definition.name.endswith("-kb"):
+            python_module_name = "".join([python_module_name[:-3], "rc"])
 
-      python_module_description, _, _ = python_module_description.partition(
-          ' knowledge base ')
-      python_module_description = ''.join([
-          python_module_description, f' resources ({python_module_name:s})'])
+            python_module_description, _, _ = python_module_description.partition(
+                " knowledge base "
+            )
+            python_module_description = "".join(
+                [python_module_description, f" resources ({python_module_name:s})"]
+            )
 
-      tools_description = (
-          f'Tools for {self._project_definition.name_description:s}')
+            tools_description = (
+                f"Tools for {self._project_definition.name_description:s}"
+            )
 
-      tool_description_long, _, _ = (
-          self._project_definition.name_description.rpartition(' ('))
-      tool_description_long = (
-          f'{self._project_definition.name[0].upper()}'
-          f'{self._project_definition.name[1:]:s} '
-          f'is a project to build a {tool_description_long:s}.')
+            tool_description_long, _, _ = (
+                self._project_definition.name_description.rpartition(" (")
+            )
+            tool_description_long = (
+                f"{self._project_definition.name[0].upper()}"
+                f"{self._project_definition.name[1:]:s} "
+                f"is a project to build a {tool_description_long:s}."
+            )
 
-    tool_description_long = '\n'.join(
-        [f' {line:s}' for line in tool_description_long.split('\n')])
+        tool_description_long = "\n".join(
+            [f" {line:s}" for line in tool_description_long.split("\n")]
+        )
 
-    file_content = []
-    file_content.extend(self._PYTHON3_FILE_HEADER)
+        file_content = []
+        file_content.extend(self._PYTHON3_FILE_HEADER)
 
-    data_dependency = ''
-    if self._project_definition.name in ('artifacts', 'plaso'):
-      data_dependency = (
-          f'{self._project_definition.name:s}-data (>= ${{binary:Version}})')
+        data_dependency = ""
+        if self._project_definition.name in ("artifacts", "plaso"):
+            data_dependency = (
+                f"{self._project_definition.name:s}-data (>= ${{binary:Version}})"
+            )
 
-      file_content.extend(self._DATA_PACKAGE)
+            file_content.extend(self._DATA_PACKAGE)
 
-    file_content.extend(self._PYTHON3_PACKAGE)
+        file_content.extend(self._PYTHON3_PACKAGE)
 
-    if (os.path.isdir('scripts') or os.path.isdir('tools') or
-        os.path.isdir(os.path.join(python_module_name, 'scripts'))):
-      file_content.extend(self._TOOLS_PACKAGE)
+        if (
+            os.path.isdir("scripts")
+            or os.path.isdir("tools")
+            or os.path.isdir(os.path.join(python_module_name, "scripts"))
+        ):
+            file_content.extend(self._TOOLS_PACKAGE)
 
-    description_long = self._project_definition.description_long
-    description_long = '\n'.join(
-        [f' {line:s}' for line in description_long.split('\n')])
+        description_long = self._project_definition.description_long
+        description_long = "\n".join(
+            [f" {line:s}" for line in description_long.split("\n")]
+        )
 
-    python3_dependencies = self._dependency_helper.GetDPKGDepends()
+        python3_dependencies = self._dependency_helper.GetDPKGDepends()
 
-    if data_dependency:
-      python3_dependencies.insert(0, data_dependency)
+        if data_dependency:
+            python3_dependencies.insert(0, data_dependency)
 
-    python3_dependencies = ', '.join(python3_dependencies)
-    if python3_dependencies:
-      python3_dependencies = f'{python3_dependencies:s}, '
+        python3_dependencies = ", ".join(python3_dependencies)
+        if python3_dependencies:
+            python3_dependencies = f"{python3_dependencies:s}, "
 
-    build_dependencies = [
-        'python3-all (>= 3.10~)', 'python3-setuptools',
-        'pybuild-plugin-pyproject']
+        build_dependencies = [
+            "python3-all (>= 3.10~)",
+            "python3-setuptools",
+            "pybuild-plugin-pyproject",
+        ]
 
-    build_dependencies = ', '.join(build_dependencies)
+        build_dependencies = ", ".join(build_dependencies)
 
-    template_mappings = {
-        'build_dependencies': build_dependencies,
-        'description_long': description_long,
-        'description_short': self._project_definition.description_short,
-        'homepage_url': self._project_definition.homepage_url,
-        'maintainer': self._project_definition.maintainer,
-        'name_description': self._project_definition.name_description,
-        'project_name': self._project_definition.name,
-        'python_module_description': python_module_description,
-        'python_module_name': python_module_name,
-        'python3_dependencies': python3_dependencies,
-        'tools_description': tools_description,
-        'tool_description_long': tool_description_long}
+        template_mappings = {
+            "build_dependencies": build_dependencies,
+            "description_long": description_long,
+            "description_short": self._project_definition.description_short,
+            "homepage_url": self._project_definition.homepage_url,
+            "maintainer": self._project_definition.maintainer,
+            "name_description": self._project_definition.name_description,
+            "project_name": self._project_definition.name,
+            "python_module_description": python_module_description,
+            "python_module_name": python_module_name,
+            "python3_dependencies": python3_dependencies,
+            "tools_description": tools_description,
+            "tool_description_long": tool_description_long,
+        }
 
-    file_content = '\n'.join(file_content)
-    file_content = file_content.format(**template_mappings)
+        file_content = "\n".join(file_content)
+        file_content = file_content.format(**template_mappings)
 
-    with open(self.PATH, 'w', encoding='utf-8') as file_object:
-      file_object.write(file_content)
+        with open(self.PATH, "w", encoding="utf-8") as file_object:
+            file_object.write(file_content)
 
 
 class DPKGRulesWriter(interface.DependencyFileWriter):
-  """Dpkg rules file writer."""
+    """Dpkg rules file writer."""
 
-  PATH = os.path.join('config', 'dpkg', 'rules')
+    PATH = os.path.join("config", "dpkg", "rules")
 
-  _HEADER = [
-      '#!/usr/bin/make -f',
-      '',
-      '%:',
-      '\tdh $@ --buildsystem=pybuild --with=python3',
-      '',
-      '.PHONY: override_dh_auto_test',
-      'override_dh_auto_test:',
-      '',
-      '']
+    _HEADER = [
+        "#!/usr/bin/make -f",
+        "",
+        "%:",
+        "\tdh $@ --buildsystem=pybuild --with=python3",
+        "",
+        ".PHONY: override_dh_auto_test",
+        "override_dh_auto_test:",
+        "",
+        "",
+    ]
 
-  _DATA_PACKAGE = [
-      '.PHONY: override_dh_auto_install',
-      'override_dh_auto_install:',
-      '\tdh_auto_install',
-      '\tmkdir -p debian/tmp/usr/share/{project_name:s}',
-      ('\tmv -n debian/tmp/usr/lib/python*/dist-packages/{project_name:s}'
-       '/data/* debian/tmp/usr/share/{project_name:s}'),
-      '\trm -rf debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data',
-      '\tfind debian/tmp/usr/bin/ -type f -exec mv {{}} {{}}.py \\;',
-      '',
-      '']
+    _DATA_PACKAGE = [
+        ".PHONY: override_dh_auto_install",
+        "override_dh_auto_install:",
+        "\tdh_auto_install",
+        "\tmkdir -p debian/tmp/usr/share/{project_name:s}",
+        (
+            "\tmv -n debian/tmp/usr/lib/python*/dist-packages/{project_name:s}"
+            "/data/* debian/tmp/usr/share/{project_name:s}"
+        ),
+        "\trm -rf debian/tmp/usr/lib/python*/dist-packages/{project_name:s}/data",
+        "\tfind debian/tmp/usr/bin/ -type f -exec mv {{}} {{}}.py \\;",
+        "",
+        "",
+    ]
 
-  def Write(self):
-    """Writes a dpkg control file."""
-    template_mappings = {
-        'project_name': self._project_definition.name}
+    def Write(self):
+        """Writes a dpkg control file."""
+        template_mappings = {"project_name": self._project_definition.name}
 
-    file_content = []
-    file_content.extend(self._HEADER)
+        file_content = []
+        file_content.extend(self._HEADER)
 
-    if self._project_definition.name in ('artifacts', 'plaso'):
-      file_content.extend(self._DATA_PACKAGE)
+        if self._project_definition.name in ("artifacts", "plaso"):
+            file_content.extend(self._DATA_PACKAGE)
 
-    file_content = '\n'.join(file_content)
-    file_content = file_content.format(**template_mappings)
+        file_content = "\n".join(file_content)
+        file_content = file_content.format(**template_mappings)
 
-    with open(self.PATH, 'w', encoding='utf-8') as file_object:
-      file_object.write(file_content)
+        with open(self.PATH, "w", encoding="utf-8") as file_object:
+            file_object.write(file_content)

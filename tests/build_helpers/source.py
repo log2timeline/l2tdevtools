@@ -3,11 +3,10 @@
 
 import unittest
 
-
 # TODO: add SourceBuildHelper tests.
 # TODO: add ConfigureMakeSourceBuildHelper tests.
 # TODO: add SetupPySourceBuildHelper tests.
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()

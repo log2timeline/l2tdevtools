@@ -9,88 +9,91 @@ import urllib.request as urllib_request
 
 
 class DownloadHelper:
-  """Helps in downloading files and web content."""
+    """Helps in downloading files and web content."""
 
-  def __init__(self, download_url):
-    """Initializes a download helper.
+    def __init__(self, download_url):
+        """Initializes a download helper.
 
-    Args:
-      download_url (str): download URL.
-    """
-    super().__init__()
-    self._cached_url = ''
-    self._cached_page_content = b''
-    self._download_url = download_url
+        Args:
+          download_url (str): download URL.
+        """
+        super().__init__()
+        self._cached_url = ""
+        self._cached_page_content = b""
+        self._download_url = download_url
 
-  def DownloadFile(self, download_url):
-    """Downloads a file from the URL and returns the filename.
+    def DownloadFile(self, download_url):
+        """Downloads a file from the URL and returns the filename.
 
-    The filename is extracted from the last part of the URL.
+        The filename is extracted from the last part of the URL.
 
-    Args:
-      download_url (str): URL where to download the file.
+        Args:
+          download_url (str): URL where to download the file.
 
-    Returns:
-      str: filename if successful also if the file was already downloaded
-          or None if not available.
-    """
-    _, _, filename = download_url.rpartition('/')
+        Returns:
+          str: filename if successful also if the file was already downloaded
+              or None if not available.
+        """
+        _, _, filename = download_url.rpartition("/")
 
-    if not os.path.exists(filename):
-      logging.info(f'Downloading: {download_url:s}')
+        if not os.path.exists(filename):
+            logging.info(f"Downloading: {download_url:s}")
 
-      try:
-        with urllib_request.urlopen(download_url) as url_object:
-          if url_object.code != 200:
-            logging.warning(
-                f'Unable to download URL: {download_url:s} with status code: '
-                f'{url_object.code:d}')
+            try:
+                with urllib_request.urlopen(download_url) as url_object:
+                    if url_object.code != 200:
+                        logging.warning(
+                            f"Unable to download URL: {download_url:s} with status "
+                            f"code: {url_object.code:d}"
+                        )
+                        return None
+
+                    page_content = url_object.read()
+                    with open(filename, "wb") as file_object:
+                        file_object.write(page_content)
+
+            except (http.client.InvalidURL, urllib_error.URLError) as exception:
+                logging.warning(
+                    f"Unable to download URL: {download_url:s} with error: "
+                    f"{exception!s}"
+                )
+                return None
+
+        return filename
+
+    def DownloadPageContent(self, download_url, encoding="utf-8"):
+        """Downloads the page content from the URL and caches it.
+
+        Args:
+          download_url (str): URL where to download the page content.
+          encoding (Optional[str]): encoding of the page content, where None
+              represents no encoding (or binary data).
+
+        Returns:
+          str: page content if successful or None if not available.
+        """
+        if not download_url:
             return None
 
-          page_content = url_object.read()
-          with open(filename, 'wb') as file_object:
-            file_object.write(page_content)
+        if self._cached_url != download_url:
+            try:
+                with urllib_request.urlopen(download_url) as url_object:
+                    if url_object.code != 200:
+                        return None
 
-      except (http.client.InvalidURL, urllib_error.URLError) as exception:
-        logging.warning(
-            f'Unable to download URL: {download_url:s} with error: '
-            f'{exception!s}')
-        return None
+                    page_content = url_object.read()
 
-    return filename
+            except urllib_error.URLError as exception:
+                logging.warning(
+                    f"Unable to download URL: {download_url:s} with error: "
+                    f"{exception!s}"
+                )
+                return None
 
-  def DownloadPageContent(self, download_url, encoding='utf-8'):
-    """Downloads the page content from the URL and caches it.
+            if encoding and isinstance(page_content, bytes):
+                page_content = page_content.decode(encoding)
 
-    Args:
-      download_url (str): URL where to download the page content.
-      encoding (Optional[str]): encoding of the page content, where None
-          represents no encoding (or binary data).
+            self._cached_page_content = page_content
+            self._cached_url = download_url
 
-    Returns:
-      str: page content if successful or None if not available.
-    """
-    if not download_url:
-      return None
-
-    if self._cached_url != download_url:
-      try:
-        with urllib_request.urlopen(download_url) as url_object:
-          if url_object.code != 200:
-            return None
-
-          page_content = url_object.read()
-
-      except urllib_error.URLError as exception:
-        logging.warning(
-            f'Unable to download URL: {download_url:s} with error: '
-            f'{exception!s}')
-        return None
-
-      if encoding and isinstance(page_content, bytes):
-        page_content = page_content.decode(encoding)
-
-      self._cached_page_content = page_content
-      self._cached_url = download_url
-
-    return self._cached_page_content
+        return self._cached_page_content

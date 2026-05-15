@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "l2tdevtools"
-version = "20260508"
+version = "20260515"
 description = "Development tools for the log2timeline projects"
 maintainers = [
     { name = "Log2Timeline maintainers", email = "log2timeline-maintainers@googlegroups.com" },
@@ -21,6 +21,17 @@ requires-python = ">=3.10"
 [project.urls]
 Homepage = "https://github.com/log2timeline/l2tdevtools"
 Repository = "https://github.com/log2timeline/l2tdevtools"
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+include = "\\.pyi?$"
+force-exclude = """
+(
+    data/
+  | test_data/linter_fail.py
+)
+"""
 
 [tool.setuptools]
 package-dir = {"l2tdevtools" = "l2tdevtools"}

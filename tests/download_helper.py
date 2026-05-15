@@ -3,9 +3,8 @@
 
 import unittest
 
-
 # TODO: add tests for DownloadHelperFactory
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()

@@ -10,24 +10,24 @@ from tests import test_lib
 
 
 class BuildHelperTest(test_lib.BaseTestCase):
-  """Tests for the helper to build projects from source."""
+    """Tests for the helper to build projects from source."""
 
-  def testCheckBuildDependencies(self):
-    """Tests the CheckBuildDependencies function."""
-    project_definition = projects.ProjectDefinition('test')
-    build_helper = interface.BuildHelper(project_definition, '', {})
+    def testCheckBuildDependencies(self):
+        """Tests the CheckBuildDependencies function."""
+        project_definition = projects.ProjectDefinition("test")
+        build_helper = interface.BuildHelper(project_definition, "", {})
 
-    build_dependencies = build_helper.CheckBuildDependencies()
-    self.assertEqual(build_dependencies, [])
+        build_dependencies = build_helper.CheckBuildDependencies()
+        self.assertEqual(build_dependencies, [])
 
-  def testCheckBuildRequired(self):
-    """Tests the CheckBuildRequired function."""
-    project_definition = projects.ProjectDefinition('test')
-    build_helper = interface.BuildHelper(project_definition, '', {})
+    def testCheckBuildRequired(self):
+        """Tests the CheckBuildRequired function."""
+        project_definition = projects.ProjectDefinition("test")
+        build_helper = interface.BuildHelper(project_definition, "", {})
 
-    result = build_helper.CheckBuildRequired(None)
-    self.assertTrue(result)
+        result = build_helper.CheckBuildRequired(None)
+        self.assertTrue(result)
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()

@@ -2,8 +2,8 @@
 
 
 class Error(Exception):
-  """Generic error."""
+    """Generic error."""
 
 
 class ConnectivityError(Error):
-  """Connectivity error."""
+    """Connectivity error."""
