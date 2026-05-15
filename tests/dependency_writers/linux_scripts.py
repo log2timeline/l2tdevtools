@@ -83,9 +83,11 @@ class UbuntuInstallationScriptWriterTest(test_lib.BaseTestCase):
         """Tests the _FormatDPKGTestDependencies function."""
         test_writer = self._CreateTestWriter()
 
-        expected_formatted_test_dependencies = (
-            "TEST_DEPENDENCIES=\"python3-pbr\n"
-            "                   python3-setuptools\";"
+        expected_formatted_test_dependencies = "".join(
+            [
+                'TEST_DEPENDENCIES="python3-pbr\n',
+                '                   python3-setuptools";',
+            ]
         )
 
         python_dependencies = test_writer._GetDPKGPythonDependencies()
