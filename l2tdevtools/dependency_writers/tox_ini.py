@@ -73,11 +73,14 @@ class ToxIniWriter(interface.DependencyFileWriter):
     if os.path.isdir('tools'):
       paths_to_lint_python.append('tools')
 
-    envlist = ['py3{10,11,12,13,14}', 'coverage']
+    envlist = ['py3{10,11,12,13,14}', 'black', 'coverage']
     if os.path.isdir('docs'):
       envlist.append('docs')
 
-    envlist.extend(['lint', 'wheel'])
+    envlist.extend(['pylint', 'wheel'])
+
+    if paths_to_lint_yaml:
+      envlist.append('yamllint')
 
     template_mappings = {
         'envlist': ','.join(envlist),
@@ -91,19 +94,23 @@ class ToxIniWriter(interface.DependencyFileWriter):
     template_data = self._GenerateFromTemplate('header', template_mappings)
     file_content.append(template_data)
 
+    template_data = self._GenerateFromTemplate(
+        'testenv_black', template_mappings)
+    file_content.append(template_data)
+
     if os.path.isdir('docs'):
       template_data = self._GenerateFromTemplate(
           'testenv_docs', template_mappings)
       file_content.append(template_data)
 
-    if paths_to_lint_yaml:
-      template_name = 'testenv_lint-with_yaml'
-    else:
-      template_name = 'testenv_lint'
-
     template_data = self._GenerateFromTemplate(
-        template_name, template_mappings)
+        'testenv_pylint', template_mappings)
     file_content.append(template_data)
+
+    if paths_to_lint_yaml:
+      template_data = self._GenerateFromTemplate(
+          'testenv_yamllint', template_mappings)
+      file_content.append(template_data)
 
     file_content = ''.join(file_content)
 

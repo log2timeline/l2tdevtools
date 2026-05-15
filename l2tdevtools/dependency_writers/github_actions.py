@@ -1,8 +1,89 @@
 """Writer for GitHub actions workflow files."""
 
+import glob
 import os
 
 from l2tdevtools.dependency_writers import interface
+
+
+class GitHubActionsLintYmlWriter(interface.DependencyFileWriter):
+  """lint.yml GitHub actions workflow file writer."""
+
+  _TEMPLATE_DIRECTORY = os.path.join(
+      'data', 'templates', 'github_actions', 'lint.yml')
+
+  PATH = os.path.join('.github', 'workflows', 'lint.yml')
+
+  def _GenerateFromTemplate(self, template_filename, template_mappings):
+    """Generates file context based on a template file.
+
+    Args:
+      template_filename (str): path of the template file.
+      template_mappings (dict[str, str]): template mappings, where the key
+          maps to the name of a template variable.
+
+    Returns:
+      str: output based on the template string.
+
+    Raises:
+      RuntimeError: if the template cannot be formatted.
+    """
+    template_filename = os.path.join(
+        self._l2tdevtools_path, self._TEMPLATE_DIRECTORY, template_filename)
+    return super()._GenerateFromTemplate(
+        template_filename, template_mappings)
+
+  def Write(self):
+    """Writes a lint.yml GitHub actions workflow file ."""
+    dpkg_dependencies = self._GetDPKGPythonDependencies()
+    test_dependencies = self._GetDPKGTestDependencies(dpkg_dependencies)
+    dpkg_dependencies.extend(test_dependencies)
+    dpkg_dependencies.extend(['python3-pip', 'python3-setuptools', 'tox'])
+
+    dpkg_dev_dependencies = self._GetDPKGDevDependencies()
+
+    template_mappings = {
+        'dpkg_dependencies': ' '.join(sorted(set(dpkg_dependencies))),
+        'dpkg_dev_dependencies': ' '.join(sorted(set(dpkg_dev_dependencies)))}
+
+    python_module_name = self._project_definition.name
+
+    if self._project_definition.name.endswith('-kb'):
+      python_module_name = ''.join([python_module_name[:-3], 'rc'])
+
+    paths_to_lint_yaml = []
+
+    if os.path.isdir(python_module_name):
+      if glob.glob(os.path.join(
+          python_module_name, '**', '*.yaml'), recursive=True):
+        paths_to_lint_yaml.append(python_module_name)
+
+    if os.path.isdir('data'):
+      if glob.glob(os.path.join('data', '**', '*.yaml'), recursive=True):
+        paths_to_lint_yaml.append('data')
+
+    if os.path.isdir('test_data'):
+      if glob.glob(os.path.join('test_data', '**', '*.yaml'), recursive=True):
+        paths_to_lint_yaml.append('test_data')
+
+    if os.path.isdir('tests'):
+      if glob.glob(os.path.join('tests', '**', '*.yaml'), recursive=True):
+        paths_to_lint_yaml.append('tests')
+
+    file_content = []
+
+    template_data = self._GenerateFromTemplate('header.yml', template_mappings)
+    file_content.append(template_data)
+
+    if paths_to_lint_yaml:
+      template_data = self._GenerateFromTemplate(
+          'yamllint.yml', template_mappings)
+      file_content.append(template_data)
+
+    file_content = ''.join(file_content)
+
+    with open(self.PATH, 'w', encoding='utf-8') as file_object:
+      file_object.write(file_content)
 
 
 class GitHubActionsTestDockerYmlWriter(interface.DependencyFileWriter):

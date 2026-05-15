@@ -1,5 +1,5 @@
 
-[testenv:lint]
+[testenv:pylint]
 skipsdist = True
 pip_pre = True
 passenv =
@@ -11,9 +11,6 @@ setenv =
 deps =
   pylint >= 3.3.0, < 3.4.0
   setuptools >= 65
-  yamllint >= 1.26.0
 commands =
   pylint --version
-  yamllint -v
   pylint --rcfile=.pylintrc ${paths_to_lint_python}
-  yamllint -c .yamllint.yaml ${paths_to_lint_yaml}

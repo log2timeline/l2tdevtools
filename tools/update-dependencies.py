@@ -49,6 +49,7 @@ def Main():
     writer.Write()
 
   for writer_class in (
+      github_actions.GitHubActionsLintYmlWriter,
       github_actions.GitHubActionsTestDockerYmlWriter,
       github_actions.GitHubActionsTestDocsYmlWriter,
       github_actions.GitHubActionsTestMacOSYmlWriter,

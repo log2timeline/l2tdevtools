@@ -154,6 +154,10 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
       file_content.append(f'Repository = "{url:s}"\n')
 
     template_data = self._GenerateFromTemplate(
+        'black.toml', template_mappings)
+    file_content.append(template_data)
+
+    template_data = self._GenerateFromTemplate(
         'setuptools.packages.toml', template_mappings)
     file_content.append(template_data)
 
