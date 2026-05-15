@@ -84,7 +84,8 @@ class GIFTPPAInstallScriptWriterTest(test_lib.BaseTestCase):
         test_writer = self._CreateTestWriter()
 
         expected_formatted_test_dependencies = (
-            'TEST_DEPENDENCIES="python3-pbr\n' '                   python3-setuptools";'
+            "TEST_DEPENDENCIES=\"python3-pbr\n"
+            "                   python3-setuptools\";"
         )
 
         python_dependencies = test_writer._GetDPKGPythonDependencies()
