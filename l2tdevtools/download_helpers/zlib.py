@@ -6,72 +6,73 @@ from l2tdevtools.download_helpers import project
 
 
 class ZlibDownloadHelper(project.ProjectDownloadHelper):
-  """Helps in downloading the zlib project."""
+    """Helps in downloading the zlib project."""
 
-  def __init__(self, download_url):
-    """Initializes the download helper.
+    def __init__(self, download_url):
+        """Initializes the download helper.
 
-    Args:
-      download_url (str): download URL.
+        Args:
+          download_url (str): download URL.
 
-    Raises:
-      ValueError: if download URL is not supported.
-    """
-    url_segments = download_url.split('/')
-    if len(url_segments) < 3 or url_segments[2] != 'www.zlib.net':
-      raise ValueError('Unsupported download URL.')
+        Raises:
+          ValueError: if download URL is not supported.
+        """
+        url_segments = download_url.split("/")
+        if len(url_segments) < 3 or url_segments[2] != "www.zlib.net":
+            raise ValueError("Unsupported download URL.")
 
-    super().__init__(download_url)
-    self._project_name = 'zlib'
+        super().__init__(download_url)
+        self._project_name = "zlib"
 
-  # pylint: disable=unused-argument
-  def GetLatestVersion(self, project_name, version_definition):
-    """Retrieves the latest version number for a given project name.
+    # pylint: disable=unused-argument
+    def GetLatestVersion(self, project_name, version_definition):
+        """Retrieves the latest version number for a given project name.
 
-    Args:
-      project_name (str): name of the project.
-      version_definition (ProjectVersionDefinition): project version definition
-          or None.
+        Args:
+          project_name (str): name of the project.
+          version_definition (ProjectVersionDefinition): project version definition
+              or None.
 
-    Returns:
-      str: latest version number or None if not available.
-    """
-    download_url = 'http://www.zlib.net'
+        Returns:
+          str: latest version number or None if not available.
+        """
+        download_url = "http://www.zlib.net"
 
-    page_content = self.DownloadPageContent(download_url)
-    if not page_content:
-      return None
+        page_content = self.DownloadPageContent(download_url)
+        if not page_content:
+            return None
 
-    # The format of the project download URL is:
-    # http://zlib.net/{project name}-{version}.tar.gz
-    expression_string = (
-        f'<A HREF="{self._project_name:s}-([0-9]+.[0-9]+.[0-9]+).tar.gz"')
-    matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
+        # The format of the project download URL is:
+        # http://zlib.net/{project name}-{version}.tar.gz
+        expression_string = (
+            f'<A HREF="{self._project_name:s}-([0-9]+.[0-9]+.[0-9]+).tar.gz"'
+        )
+        matches = re.findall(expression_string, page_content, flags=re.IGNORECASE)
 
-    if not matches:
-      return None
+        if not matches:
+            return None
 
-    numeric_matches = [''.join(match.split('.')) for match in matches]
-    return matches[numeric_matches.index(max(numeric_matches))]
+        numeric_matches = ["".join(match.split(".")) for match in matches]
+        return matches[numeric_matches.index(max(numeric_matches))]
 
-  def GetDownloadURL(self, project_name, project_version):
-    """Retrieves the download URL for a given project name and version.
+    def GetDownloadURL(self, project_name, project_version):
+        """Retrieves the download URL for a given project name and version.
 
-    Args:
-      project_name (str): name of the project.
-      project_version (str): version of the project.
+        Args:
+          project_name (str): name of the project.
+          project_version (str): version of the project.
 
-    Returns:
-      str: download URL of the project or None if not available.
-    """
-    # The format of the project download URL is:
-    # http://zlib.net/{project name}-{version}.tar.gz
-    return f'http://zlib.net/{self._project_name:s}-{project_version:s}.tar.gz'
+        Returns:
+          str: download URL of the project or None if not available.
+        """
+        # The format of the project download URL is:
+        # http://zlib.net/{project name}-{version}.tar.gz
+        return f"http://zlib.net/{self._project_name:s}-{project_version:s}.tar.gz"
 
-  def GetProjectIdentifier(self):
-    """Retrieves the project identifier for a given project name.
+    def GetProjectIdentifier(self):
+        """Retrieves the project identifier for a given project name.
 
-    Returns:
-      str: project identifier.
-    """
-    return f'net.zlib.{self._project_name:s}'
+        Returns:
+          str: project identifier.
+        """
+        return f"net.zlib.{self._project_name:s}"

@@ -8,60 +8,63 @@ import subprocess
 
 
 class CLIHelper:
-  """Command line interface (CLI) helper.
+    """Command line interface (CLI) helper.
 
-  Attributes:
-    mock_responses (dict[str, str]): mappings of commands to responses.
-    preferred_encoding (str): preferred encoding of output.
-  """
-
-  def __init__(self, mock_responses=None):
-    """Initializes a CLI helper.
-
-    Args:
-      mock_responses (Optional[dict[str, str]]): mappings of commands to
-          responses, for testing.
+    Attributes:
+      mock_responses (dict[str, str]): mappings of commands to responses.
+      preferred_encoding (str): preferred encoding of output.
     """
-    super().__init__()
-    self.mock_responses = mock_responses
-    self.preferred_encoding = locale.getpreferredencoding()
 
-  def RunCommand(self, command):
-    """Runs a command.
+    def __init__(self, mock_responses=None):
+        """Initializes a CLI helper.
 
-    Args:
-      command (str): command to run.
+        Args:
+          mock_responses (Optional[dict[str, str]]): mappings of commands to
+              responses, for testing.
+        """
+        super().__init__()
+        self.mock_responses = mock_responses
+        self.preferred_encoding = locale.getpreferredencoding()
 
-    Returns:
-      tuple[int, str, str]: exit code, output that was written to stdout
-          and stderr.
+    def RunCommand(self, command):
+        """Runs a command.
 
-    Raises:
-      AttributeError: if the command is not recognized.
-    """
-    if self.mock_responses:
-      return_values = self.mock_responses.get(command, None)
-      if not return_values:
-        raise AttributeError('Unrecognized command.')
-      return return_values
+        Args:
+          command (str): command to run.
 
-    arguments = shlex.split(command)
+        Returns:
+          tuple[int, str, str]: exit code, output that was written to stdout
+              and stderr.
 
-    exit_code = 1
-    output = None
-    error = None
+        Raises:
+          AttributeError: if the command is not recognized.
+        """
+        if self.mock_responses:
+            return_values = self.mock_responses.get(command, None)
+            if not return_values:
+                raise AttributeError("Unrecognized command.")
+            return return_values
 
-    try:
-      with subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
-        output, error = process.communicate()
-        output = codecs.decode(output, self.preferred_encoding)
-        error = codecs.decode(error, self.preferred_encoding)
-        exit_code = process.returncode
-        if exit_code != 0:
-          logging.error(f'Running: "{command:s}" failed with error: {error!s}.')
+        arguments = shlex.split(command)
 
-    except OSError as exception:
-      logging.error(f'Running: "{command:s}" failed with error: {exception!s}')
+        exit_code = 1
+        output = None
+        error = None
 
-    return exit_code, output, error
+        try:
+            with subprocess.Popen(
+                arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+            ) as process:
+                output, error = process.communicate()
+                output = codecs.decode(output, self.preferred_encoding)
+                error = codecs.decode(error, self.preferred_encoding)
+                exit_code = process.returncode
+                if exit_code != 0:
+                    logging.error(
+                        f'Running: "{command:s}" failed with error: {error!s}.'
+                    )
+
+        except OSError as exception:
+            logging.error(f'Running: "{command:s}" failed with error: {exception!s}')
+
+        return exit_code, output, error

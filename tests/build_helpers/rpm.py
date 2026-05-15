@@ -14,5 +14,5 @@ import unittest
 # TODO: add PyprojectSRPMBuildHelper tests.
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()

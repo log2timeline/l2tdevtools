@@ -2,9 +2,9 @@
 
 
 class LinterPassTestClass:
-  """Linter pass test class."""
+    """Linter pass test class."""
 
-  def __init__(self):
-    """Initializes a linter pass test object."""
-    super().__init__()
-    self._attribute = None
+    def __init__(self):
+        """Initializes a linter pass test object."""
+        super().__init__()
+        self._attribute = None

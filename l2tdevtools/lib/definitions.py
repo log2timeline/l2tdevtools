@@ -1,8 +1,7 @@
 """The l2tdevtools definitions."""
 
-
 # The default Fedora distribution
-DEFAULT_FEDORA_DISTRIBUTION = '43'
+DEFAULT_FEDORA_DISTRIBUTION = "43"
 
 # The default Ubuntu distribution
-DEFAULT_UBUNTU_DISTRIBUTION = 'resolute'
+DEFAULT_UBUNTU_DISTRIBUTION = "resolute"

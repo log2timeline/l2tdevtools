@@ -11,224 +11,239 @@ from tests import test_lib
 
 
 class PefileGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
-  """Tests for the pefile GitHub releases download helper."""
+    """Tests for the pefile GitHub releases download helper."""
 
-  _DOWNLOAD_URL = 'https://github.com/erocarrera/pefile/releases'
-  _GIT_URL = 'https://github.com/erocarrera/pefile.git'
+    _DOWNLOAD_URL = "https://github.com/erocarrera/pefile/releases"
+    _GIT_URL = "https://github.com/erocarrera/pefile.git"
 
-  _PROJECT_ORGANIZATION = 'erocarrera'
-  _PROJECT_NAME = 'pefile'
-  _PROJECT_VERSION = '2024.8.26'
+    _PROJECT_ORGANIZATION = "erocarrera"
+    _PROJECT_NAME = "pefile"
+    _PROJECT_VERSION = "2024.8.26"
 
-  @classmethod
-  def setUpClass(cls):
-    """Determines the project version from the latest git tag."""
-    arguments = shlex.split(f'git ls-remote --tags {cls._GIT_URL:s}')
+    @classmethod
+    def setUpClass(cls):
+        """Determines the project version from the latest git tag."""
+        arguments = shlex.split(f"git ls-remote --tags {cls._GIT_URL:s}")
 
-    try:
-      with subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
-        output, _ = process.communicate()
-        if process.returncode != 0:
-          return
+        try:
+            with subprocess.Popen(
+                arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+            ) as process:
+                output, _ = process.communicate()
+                if process.returncode != 0:
+                    return
 
-    except OSError:
-      return
+        except OSError:
+            return
 
-    output = output.decode('ascii')
+        output = output.decode("ascii")
 
-    latest_version = ('0', '0', '0')
-    for line in output.split('\n'):
-      line = line.strip()
-      if 'refs/tags/' in line and not line.endswith('^{}'):
-        _, _, version = line.rpartition('refs/tags/')
-        if version.startswith('pefile-'):
-          version = version[7:]
-        elif version.startswith('v'):
-          version = version[1:]
-        version = tuple(version.split('.'))
-        latest_version = max(latest_version, version)
+        latest_version = ("0", "0", "0")
+        for line in output.split("\n"):
+            line = line.strip()
+            if "refs/tags/" in line and not line.endswith("^{}"):
+                _, _, version = line.rpartition("refs/tags/")
+                if version.startswith("pefile-"):
+                    version = version[7:]
+                elif version.startswith("v"):
+                    version = version[1:]
+                version = tuple(version.split("."))
+                latest_version = max(latest_version, version)
 
-    cls._PROJECT_VERSION = '.'.join(latest_version)
+        cls._PROJECT_VERSION = ".".join(latest_version)
 
-  def testGetLatestVersion(self):
-    """Tests the GetLatestVersion functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(
-        self._DOWNLOAD_URL, release_prefix='pefile-', release_tag_prefix='v')
+    def testGetLatestVersion(self):
+        """Tests the GetLatestVersion functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(
+            self._DOWNLOAD_URL, release_prefix="pefile-", release_tag_prefix="v"
+        )
 
-    latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
+        latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
 
-    self.assertEqual(latest_version, self._PROJECT_VERSION)
+        self.assertEqual(latest_version, self._PROJECT_VERSION)
 
-  def testGetDownloadURL(self):
-    """Tests the GetDownloadURL functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(
-        self._DOWNLOAD_URL, release_prefix='pefile-', release_tag_prefix='v')
+    def testGetDownloadURL(self):
+        """Tests the GetDownloadURL functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(
+            self._DOWNLOAD_URL, release_prefix="pefile-", release_tag_prefix="v"
+        )
 
-    download_url = download_helper.GetDownloadURL(
-        self._PROJECT_NAME, self._PROJECT_VERSION)
+        download_url = download_helper.GetDownloadURL(
+            self._PROJECT_NAME, self._PROJECT_VERSION
+        )
 
-    expected_download_url = (
-        f'https://github.com/{self._PROJECT_ORGANIZATION:s}/'
-        f'{self._PROJECT_NAME:s}/releases/download/'
-        f'v{self._PROJECT_VERSION:s}/pefile-{self._PROJECT_VERSION:s}.tar.gz')
+        expected_download_url = (
+            f"https://github.com/{self._PROJECT_ORGANIZATION:s}/"
+            f"{self._PROJECT_NAME:s}/releases/download/"
+            f"v{self._PROJECT_VERSION:s}/pefile-{self._PROJECT_VERSION:s}.tar.gz"
+        )
 
-    self.assertEqual(download_url, expected_download_url)
+        self.assertEqual(download_url, expected_download_url)
 
-  def testGetProjectIdentifier(self):
-    """Tests the GetProjectIdentifier functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(
-        self._DOWNLOAD_URL, release_prefix='pefile-', release_tag_prefix='v')
+    def testGetProjectIdentifier(self):
+        """Tests the GetProjectIdentifier functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(
+            self._DOWNLOAD_URL, release_prefix="pefile-", release_tag_prefix="v"
+        )
 
-    project_identifier = download_helper.GetProjectIdentifier()
+        project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = (
-        f'com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}')
+        expected_project_identifier = (
+            f"com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}"
+        )
 
-    self.assertEqual(project_identifier, expected_project_identifier)
+        self.assertEqual(project_identifier, expected_project_identifier)
 
 
 class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
-  """Tests for the libyal GitHub releases download helper."""
+    """Tests for the libyal GitHub releases download helper."""
 
-  _DOWNLOAD_URL = 'https://github.com/libyal/libevt/releases'
-  _GIT_URL = 'https://github.com/libyal/libevt.git'
+    _DOWNLOAD_URL = "https://github.com/libyal/libevt/releases"
+    _GIT_URL = "https://github.com/libyal/libevt.git"
 
-  _PROJECT_ORGANIZATION = 'libyal'
-  _PROJECT_NAME = 'libevt'
-  _PROJECT_STATUS = 'alpha'
-  _PROJECT_VERSION = '20240421'
+    _PROJECT_ORGANIZATION = "libyal"
+    _PROJECT_NAME = "libevt"
+    _PROJECT_STATUS = "alpha"
+    _PROJECT_VERSION = "20240421"
 
-  @classmethod
-  def setUpClass(cls):
-    """Determines the project version from the latest git tag."""
-    arguments = shlex.split('git ls-remote --tags {cls._GIT_URL:s}')
+    @classmethod
+    def setUpClass(cls):
+        """Determines the project version from the latest git tag."""
+        arguments = shlex.split("git ls-remote --tags {cls._GIT_URL:s}")
 
-    try:
-      with subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
-        output, _ = process.communicate()
-        if process.returncode != 0:
-          return
+        try:
+            with subprocess.Popen(
+                arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+            ) as process:
+                output, _ = process.communicate()
+                if process.returncode != 0:
+                    return
 
-    except OSError:
-      return
+        except OSError:
+            return
 
-    output = output.decode('ascii')
+        output = output.decode("ascii")
 
-    latest_version = '0'
-    for line in output.split('\n'):
-      line = line.strip()
-      if 'refs/tags/' in line and not line.endswith('^{}'):
-        _, _, version = line.rpartition('refs/tags/')
-        latest_version = max(latest_version, version)
+        latest_version = "0"
+        for line in output.split("\n"):
+            line = line.strip()
+            if "refs/tags/" in line and not line.endswith("^{}"):
+                _, _, version = line.rpartition("refs/tags/")
+                latest_version = max(latest_version, version)
 
-    cls._PROJECT_VERSION = latest_version
+        cls._PROJECT_VERSION = latest_version
 
-  def testGetLatestVersion(self):
-    """Tests the GetLatestVersion functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    def testGetLatestVersion(self):
+        """Tests the GetLatestVersion functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
+        latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
 
-    self.assertEqual(latest_version, self._PROJECT_VERSION)
+        self.assertEqual(latest_version, self._PROJECT_VERSION)
 
-  def testGetDownloadURL(self):
-    """Tests the GetDownloadURL functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    def testGetDownloadURL(self):
+        """Tests the GetDownloadURL functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    download_url = download_helper.GetDownloadURL(
-        self._PROJECT_NAME, self._PROJECT_VERSION)
+        download_url = download_helper.GetDownloadURL(
+            self._PROJECT_NAME, self._PROJECT_VERSION
+        )
 
-    expected_download_url = (
-        f'https://github.com/{self._PROJECT_ORGANIZATION:s}/'
-        f'{self._PROJECT_NAME:s}/releases/download/{self._PROJECT_VERSION:s}/'
-        f'{self._PROJECT_NAME:s}-{self._PROJECT_STATUS:s}-'
-        f'{self._PROJECT_VERSION:s}.tar.gz')
+        expected_download_url = (
+            f"https://github.com/{self._PROJECT_ORGANIZATION:s}/"
+            f"{self._PROJECT_NAME:s}/releases/download/{self._PROJECT_VERSION:s}/"
+            f"{self._PROJECT_NAME:s}-{self._PROJECT_STATUS:s}-"
+            f"{self._PROJECT_VERSION:s}.tar.gz"
+        )
 
-    self.assertEqual(download_url, expected_download_url)
+        self.assertEqual(download_url, expected_download_url)
 
-  def testGetProjectIdentifier(self):
-    """Tests the GetProjectIdentifier functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    def testGetProjectIdentifier(self):
+        """Tests the GetProjectIdentifier functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    project_identifier = download_helper.GetProjectIdentifier()
+        project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = (
-        f'com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}')
+        expected_project_identifier = (
+            f"com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}"
+        )
 
-    self.assertEqual(project_identifier, expected_project_identifier)
+        self.assertEqual(project_identifier, expected_project_identifier)
 
 
 class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
-  """Tests for the log2timeline GitHub releases download helper."""
+    """Tests for the log2timeline GitHub releases download helper."""
 
-  _DOWNLOAD_URL = 'https://github.com/log2timeline/dfvfs/releases'
-  _GIT_URL = 'https://github.com/log2timeline/dfvfs.git'
+    _DOWNLOAD_URL = "https://github.com/log2timeline/dfvfs/releases"
+    _GIT_URL = "https://github.com/log2timeline/dfvfs.git"
 
-  _PROJECT_ORGANIZATION = 'log2timeline'
-  _PROJECT_NAME = 'dfvfs'
-  _PROJECT_VERSION = '20260411'
+    _PROJECT_ORGANIZATION = "log2timeline"
+    _PROJECT_NAME = "dfvfs"
+    _PROJECT_VERSION = "20260411"
 
-  @classmethod
-  def setUpClass(cls):
-    """Determines the project version from the latest git tag."""
-    arguments = shlex.split(f'git ls-remote --tags {cls._GIT_URL:s}')
+    @classmethod
+    def setUpClass(cls):
+        """Determines the project version from the latest git tag."""
+        arguments = shlex.split(f"git ls-remote --tags {cls._GIT_URL:s}")
 
-    try:
-      with subprocess.Popen(
-          arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE) as process:
-        output, _ = process.communicate()
-        if process.returncode != 0:
-          return
+        try:
+            with subprocess.Popen(
+                arguments, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+            ) as process:
+                output, _ = process.communicate()
+                if process.returncode != 0:
+                    return
 
-    except OSError:
-      return
+        except OSError:
+            return
 
-    output = output.decode('ascii')
+        output = output.decode("ascii")
 
-    latest_version = '0'
-    for line in output.split('\n'):
-      line = line.strip()
-      if 'refs/tags/' in line and not line.endswith('^{}'):
-        _, _, version = line.rpartition('refs/tags/')
-        latest_version = max(latest_version, version)
+        latest_version = "0"
+        for line in output.split("\n"):
+            line = line.strip()
+            if "refs/tags/" in line and not line.endswith("^{}"):
+                _, _, version = line.rpartition("refs/tags/")
+                latest_version = max(latest_version, version)
 
-    cls._PROJECT_VERSION = latest_version
+        cls._PROJECT_VERSION = latest_version
 
-  def testGetLatestVersion(self):
-    """Tests the GetLatestVersion functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    def testGetLatestVersion(self):
+        """Tests the GetLatestVersion functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
+        latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
 
-    self.assertEqual(latest_version, self._PROJECT_VERSION)
+        self.assertEqual(latest_version, self._PROJECT_VERSION)
 
-  def testGetDownloadURL(self):
-    """Tests the GetDownloadURL functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    def testGetDownloadURL(self):
+        """Tests the GetDownloadURL functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    download_url = download_helper.GetDownloadURL(
-        self._PROJECT_NAME, self._PROJECT_VERSION)
+        download_url = download_helper.GetDownloadURL(
+            self._PROJECT_NAME, self._PROJECT_VERSION
+        )
 
-    expected_download_url = (
-        f'https://github.com/{self._PROJECT_ORGANIZATION:s}/'
-        f'{self._PROJECT_NAME:s}/releases/download/{self._PROJECT_VERSION:s}/'
-        f'{self._PROJECT_NAME:s}-{self._PROJECT_VERSION:s}.tar.gz')
+        expected_download_url = (
+            f"https://github.com/{self._PROJECT_ORGANIZATION:s}/"
+            f"{self._PROJECT_NAME:s}/releases/download/{self._PROJECT_VERSION:s}/"
+            f"{self._PROJECT_NAME:s}-{self._PROJECT_VERSION:s}.tar.gz"
+        )
 
-    self.assertEqual(download_url, expected_download_url)
+        self.assertEqual(download_url, expected_download_url)
 
-  def testGetProjectIdentifier(self):
-    """Tests the GetProjectIdentifier functions."""
-    download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
+    def testGetProjectIdentifier(self):
+        """Tests the GetProjectIdentifier functions."""
+        download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
-    project_identifier = download_helper.GetProjectIdentifier()
+        project_identifier = download_helper.GetProjectIdentifier()
 
-    expected_project_identifier = (
-        f'com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}')
+        expected_project_identifier = (
+            f"com.github.{self._PROJECT_ORGANIZATION:s}.{self._PROJECT_NAME:s}"
+        )
 
-    self.assertEqual(project_identifier, expected_project_identifier)
+        self.assertEqual(project_identifier, expected_project_identifier)
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()

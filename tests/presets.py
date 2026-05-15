@@ -9,16 +9,16 @@ from tests import test_lib
 
 
 class PresetDefinitionTest(test_lib.BaseTestCase):
-  """Tests for the preset definition."""
+    """Tests for the preset definition."""
 
-  def testInitialize(self):
-    """Tests the __init__ function."""
-    preset_definition = presets.PresetDefinition('test')
-    self.assertIsNotNone(preset_definition)
+    def testInitialize(self):
+        """Tests the __init__ function."""
+        preset_definition = presets.PresetDefinition("test")
+        self.assertIsNotNone(preset_definition)
 
 
 # TODO: add tests.
 
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    unittest.main()

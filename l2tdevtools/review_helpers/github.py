@@ -8,187 +8,188 @@ from l2tdevtools.lib import errors
 
 
 class GitHubHelper:
-  """Github helper."""
+    """Github helper."""
 
-  def __init__(self, organization, project):
-    """Initializes a GitHub helper.
+    def __init__(self, organization, project):
+        """Initializes a GitHub helper.
 
-    Args:
-      organization (str): GitHub organization name.
-      project (str): GitHub project name.
-    """
-    super().__init__()
+        Args:
+          organization (str): GitHub organization name.
+          project (str): GitHub project name.
+        """
+        super().__init__()
 
-    self._organization = organization
-    self._project = project
-    self._url_lib_helper = url_lib.URLLibHelper()
+        self._organization = organization
+        self._project = project
+        self._url_lib_helper = url_lib.URLLibHelper()
 
-  def AssignPullRequest(
-      self, pull_request_number, access_token, assignees):
-    """Adds assignees to a GitHub pull request.
+    def AssignPullRequest(self, pull_request_number, access_token, assignees):
+        """Adds assignees to a GitHub pull request.
 
-    Assignees are responsible that a pull request is closed or merged.
+        Assignees are responsible that a pull request is closed or merged.
 
-    Args:
-      pull_request_number (int): GitHub issue number of the pull request.
-      access_token (str): GitHub access token.
-      assignees (list[str]): GitHub usernames to assign.
+        Args:
+          pull_request_number (int): GitHub issue number of the pull request.
+          access_token (str): GitHub access token.
+          assignees (list[str]): GitHub usernames to assign.
 
-    Returns:
-      bool: True if the assignees were successfully added.
-    """
-    post_data = json.dumps({"assignees": assignees})
+        Returns:
+          bool: True if the assignees were successfully added.
+        """
+        post_data = json.dumps({"assignees": assignees})
 
-    github_url = (
-        f'https://api.github.com/repos/'
-        f'{self._organization:s}/{self._project:s}/issues/'
-        f'{pull_request_number:d}/assignees?'
-        f'access_token={access_token:s}')
+        github_url = (
+            f"https://api.github.com/repos/"
+            f"{self._organization:s}/{self._project:s}/issues/"
+            f"{pull_request_number:d}/assignees?"
+            f"access_token={access_token:s}"
+        )
 
-    try:
-      self._url_lib_helper.Request(github_url, post_data=post_data)
+        try:
+            self._url_lib_helper.Request(github_url, post_data=post_data)
 
-    except errors.ConnectivityError:
-      return False
+        except errors.ConnectivityError:
+            return False
 
-    return True
+        return True
 
-  def CreatePullRequest(self, access_token, origin, title, body, no_edit=False):
-    """Creates a pull request.
+    def CreatePullRequest(self, access_token, origin, title, body, no_edit=False):
+        """Creates a pull request.
 
-    Args:
-      access_token (str): GitHub access token.
-      origin (str): origin of the pull request, formatted as:
-          "username:feature".
-      title (str): title of the pull request.
-      body (str): body of the pull request.
-      no_edit (Optional[bool]): True if maintainers should not be allowed to
-          edit the pull request.
+        Args:
+          access_token (str): GitHub access token.
+          origin (str): origin of the pull request, formatted as:
+              "username:feature".
+          title (str): title of the pull request.
+          body (str): body of the pull request.
+          no_edit (Optional[bool]): True if maintainers should not be allowed to
+              edit the pull request.
 
-    Returns:
-      int: GitHub issue number of the pull request.
+        Returns:
+          int: GitHub issue number of the pull request.
 
-    Raises:
-      ConnectivityError: if there's an error communicating with GitHub.
-    """
-    if no_edit:
-      maintainer_can_modify = 'false'
-    else:
-      maintainer_can_modify = 'true'
+        Raises:
+          ConnectivityError: if there's an error communicating with GitHub.
+        """
+        if no_edit:
+            maintainer_can_modify = "false"
+        else:
+            maintainer_can_modify = "true"
 
-    # Note that the maintainer_can_modify is a JSON boolean value.
-    post_data = (
-        f'{{\n'
-        f'  "title": "{title:s}",\n'
-        f'  "body": "{body:s}",\n'
-        f'  "head": "{origin:s}",\n'
-        f'  "base": "main",\n'
-        f'  "maintainer_can_modify": {maintainer_can_modify:s}\n'
-        f'}}\n')
+        # Note that the maintainer_can_modify is a JSON boolean value.
+        post_data = (
+            f"{{\n"
+            f'  "title": "{title:s}",\n'
+            f'  "body": "{body:s}",\n'
+            f'  "head": "{origin:s}",\n'
+            f'  "base": "main",\n'
+            f'  "maintainer_can_modify": {maintainer_can_modify:s}\n'
+            f"}}\n"
+        )
 
-    github_url = (
-        f'https://api.github.com/repos/'
-        f'{self._organization:s}/{self._project:s}/pulls?'
-        f'access_token={access_token:s}')
+        github_url = (
+            f"https://api.github.com/repos/"
+            f"{self._organization:s}/{self._project:s}/pulls?"
+            f"access_token={access_token:s}"
+        )
 
-    response_data = self._url_lib_helper.Request(
-        github_url, post_data=post_data)
+        response_data = self._url_lib_helper.Request(github_url, post_data=post_data)
 
-    if isinstance(response_data, bytes):
-      response_data = response_data.decode('utf-8')
+        if isinstance(response_data, bytes):
+            response_data = response_data.decode("utf-8")
 
-    response_data = json.loads(response_data)
+        response_data = json.loads(response_data)
 
-    pull_request_number = response_data.get('number')
+        pull_request_number = response_data.get("number")
 
-    return pull_request_number
+        return pull_request_number
 
-  def CreatePullRequestReview(
-      self, pull_request_number, access_token, reviewers):
-    """Requests a GitHub review of a pull request.
+    def CreatePullRequestReview(self, pull_request_number, access_token, reviewers):
+        """Requests a GitHub review of a pull request.
 
-    Args:
-      pull_request_number (int): GitHub issue number of the pull request.
-      access_token (str): GitHub access token.
-      reviewers (list[str]): GitHub usernames to assign as reviewers.
+        Args:
+          pull_request_number (int): GitHub issue number of the pull request.
+          access_token (str): GitHub access token.
+          reviewers (list[str]): GitHub usernames to assign as reviewers.
 
-    Returns:
-      bool: True if the review was created.
-    """
-    post_data = json.dumps({"reviewers": reviewers})
+        Returns:
+          bool: True if the review was created.
+        """
+        post_data = json.dumps({"reviewers": reviewers})
 
-    github_url = (
-        f'https://api.github.com/repos/'
-        f'{self._organization:s}/{self._project:s}/pulls/'
-        f'{pull_request_number:d}/requested_reviewers?'
-        f'access_token={access_token:s}')
+        github_url = (
+            f"https://api.github.com/repos/"
+            f"{self._organization:s}/{self._project:s}/pulls/"
+            f"{pull_request_number:d}/requested_reviewers?"
+            f"access_token={access_token:s}"
+        )
 
-    try:
-      self._url_lib_helper.Request(github_url, post_data=post_data)
+        try:
+            self._url_lib_helper.Request(github_url, post_data=post_data)
 
-    except errors.ConnectivityError:
-      return False
+        except errors.ConnectivityError:
+            return False
 
-    return True
+        return True
 
-  def GetForkGitRepoUrl(self, username):
-    """Retrieves the git repository URL of a fork.
+    def GetForkGitRepoUrl(self, username):
+        """Retrieves the git repository URL of a fork.
 
-    Args:
-      username (str): GitHub username of the fork.
+        Args:
+          username (str): GitHub username of the fork.
 
-    Returns:
-      str: git repository URL or None.
-    """
-    return f'https://github.com/{username:s}/{self._project:s}.git'
+        Returns:
+          str: git repository URL or None.
+        """
+        return f"https://github.com/{username:s}/{self._project:s}.git"
 
-  def GetUsername(self, access_token):
-    """Retrieves a GitHub user.
+    def GetUsername(self, access_token):
+        """Retrieves a GitHub user.
 
-    Args:
-      access_token (str): GitHub access token.
+        Args:
+          access_token (str): GitHub access token.
 
-    Returns:
-      str: GitHub user name or None if not available.
-    """
-    github_url = f'https://api.github.com/user?access_token={access_token:s}'
+        Returns:
+          str: GitHub user name or None if not available.
+        """
+        github_url = f"https://api.github.com/user?access_token={access_token:s}"
 
-    try:
-      response_data = self._url_lib_helper.Request(github_url)
-    except errors.ConnectivityError:
-      return None
+        try:
+            response_data = self._url_lib_helper.Request(github_url)
+        except errors.ConnectivityError:
+            return None
 
-    if not response_data:
-      return None
+        if not response_data:
+            return None
 
-    if isinstance(response_data, bytes):
-      response_data = response_data.decode('utf-8')
+        if isinstance(response_data, bytes):
+            response_data = response_data.decode("utf-8")
 
-    response_data = json.loads(response_data)
-    return response_data.get('login', None)
+        response_data = json.loads(response_data)
+        return response_data.get("login", None)
 
-  def QueryUser(self, username):
-    """Queries a GitHub user.
+    def QueryUser(self, username):
+        """Queries a GitHub user.
 
-    Args:
-      username (str): GitHub user name.
+        Args:
+          username (str): GitHub user name.
 
-    Returns:
-      dict[str,object]: JSON response or None if not available.
-    """
-    github_url = f'https://api.github.com/users/{username:s}'
+        Returns:
+          dict[str,object]: JSON response or None if not available.
+        """
+        github_url = f"https://api.github.com/users/{username:s}"
 
-    try:
-      response_data = self._url_lib_helper.Request(github_url)
+        try:
+            response_data = self._url_lib_helper.Request(github_url)
 
-    except errors.ConnectivityError as exception:
-      logging.warning(f'{exception!s}')
-      return None
+        except errors.ConnectivityError as exception:
+            logging.warning(f"{exception!s}")
+            return None
 
-    if isinstance(response_data, bytes):
-      response_data = response_data.decode('utf-8')
+        if isinstance(response_data, bytes):
+            response_data = response_data.decode("utf-8")
 
-    if response_data:
-      return json.loads(response_data)
+        if response_data:
+            return json.loads(response_data)
 
-    return None
+        return None

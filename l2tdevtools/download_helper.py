@@ -5,47 +5,53 @@ from l2tdevtools.download_helpers import pypi
 
 
 class DownloadHelperFactory:
-  """Factory class for download helpers."""
+    """Factory class for download helpers."""
 
-  @classmethod
-  def NewDownloadHelper(cls, project_definition):
-    """Creates a new download helper.
+    @classmethod
+    def NewDownloadHelper(cls, project_definition):
+        """Creates a new download helper.
 
-    Args:
-      project_definition (ProjectDefinition): project definition.
+        Args:
+          project_definition (ProjectDefinition): project definition.
 
-    Returns:
-      DownloadHelper: download helper.
+        Returns:
+          DownloadHelper: download helper.
 
-    Raises:
-      ValueError: if no corresponding helper could be found for the download
-          URL.
-    """
-    download_url = project_definition.download_url
+        Raises:
+          ValueError: if no corresponding helper could be found for the download
+              URL.
+        """
+        download_url = project_definition.download_url
 
-    if download_url.endswith('/'):
-      download_url = download_url[:-1]
+        if download_url.endswith("/"):
+            download_url = download_url[:-1]
 
-    # Unify http:// and https:// URLs for the download helper check.
-    if download_url.startswith('https://'):
-      url_suffix = download_url[8:]
-      download_url = f'http://{url_suffix:s}'
+        # Unify http:// and https:// URLs for the download helper check.
+        if download_url.startswith("https://"):
+            url_suffix = download_url[8:]
+            download_url = f"http://{url_suffix:s}"
 
-    # Remove URL arguments.
-    download_url, _, _ = download_url.partition('?')
+        # Remove URL arguments.
+        download_url, _, _ = download_url.partition("?")
 
-    if download_url.startswith('http://pypi.org/project/'):
-      return pypi.PyPIDownloadHelper(
-          download_url, source_name=project_definition.pypi_source_name)
+        if download_url.startswith("http://pypi.org/project/"):
+            return pypi.PyPIDownloadHelper(
+                download_url, source_name=project_definition.pypi_source_name
+            )
 
-    if (download_url.startswith('http://github.com/') and
-        download_url.endswith('/releases')):
-      release_is_archive = project_definition.github_release_is_archive
-      release_prefix = project_definition.github_release_prefix
-      release_tag_prefix = project_definition.github_release_tag_prefix
-      return github.GitHubReleasesDownloadHelper(
-          download_url, release_is_archive=release_is_archive,
-          release_prefix=release_prefix, release_tag_prefix=release_tag_prefix)
+        if download_url.startswith("http://github.com/") and download_url.endswith(
+            "/releases"
+        ):
+            release_is_archive = project_definition.github_release_is_archive
+            release_prefix = project_definition.github_release_prefix
+            release_tag_prefix = project_definition.github_release_tag_prefix
+            return github.GitHubReleasesDownloadHelper(
+                download_url,
+                release_is_archive=release_is_archive,
+                release_prefix=release_prefix,
+                release_tag_prefix=release_tag_prefix,
+            )
 
-    raise ValueError(
-        f'Unsupported download URL: {project_definition.download_url:s}')
+        raise ValueError(
+            f"Unsupported download URL: {project_definition.download_url:s}"
+        )
