@@ -1,0 +1,5 @@
+
+[tool.docformatter]
+black = true
+non-cap = ${docformatter_non_cap}
+non-strict = true

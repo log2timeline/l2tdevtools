@@ -1,4 +1,4 @@
-"""Writer for setup configuration and script files."""
+"""Writer for pyproject configuration files."""
 
 import datetime
 import glob
@@ -78,7 +78,6 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
             data_file_directory = os.path.dirname(
                 data_file[len(f"{python_module_name:s}/") :]
             )
-
             data_file = "*.yaml"
             if data_file_directory:
                 data_file = "/".join([data_file_directory, data_file])
@@ -97,12 +96,11 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
             scripts_directory = None
 
         if scripts_directory:
-            if glob.glob(f"{scripts_directory:s}/[a-z]*.py"):
+            scripts_glob = os.path.join(scripts_directory, "[a-z]*.py")
+            if glob.glob(scripts_glob):
                 logging.warning(
-                    (
-                        "Scripts are not supported by pyproject.toml, change them to "
-                        "console_scripts entry points."
-                    )
+                    "Scripts are not supported by pyproject.toml, change them to "
+                    "console_scripts entry points."
                 )
 
         console_scripts_directory = os.path.join(python_module_name, "scripts")
@@ -111,23 +109,27 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
 
         console_scripts = []
         if console_scripts_directory:
-            console_scripts = glob.glob(f"{console_scripts_directory:s}/[a-z]*.py")
+            console_scripts_glob = os.path.join(console_scripts_directory, "[a-z]*.py")
+            console_scripts = glob.glob(console_scripts_glob)
 
         date_time = datetime.datetime.now()
         version = date_time.strftime("%Y%m%d")
+
+        # TODO: configure in project.ini file
+        docformatter_non_cap = "[]"
 
         template_mappings = {
             "description_short": (
                 self._project_definition.description_short.rstrip(".")
             ),
             "development_status": development_status,
+            "docformatter_non_cap": docformatter_non_cap,
             "maintainer_email": maintainer_email,
             "maintainer_name": maintainer_name,
             "python_module_name": python_module_name,
             "readme_file": readme_file,
             "version": version,
         }
-
         file_content = []
 
         template_data = self._GenerateFromTemplate("header.toml", template_mappings)
@@ -171,8 +173,11 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
         file_content.append(template_data)
 
         template_data = self._GenerateFromTemplate(
-            "setuptools.packages.toml", template_mappings
+            "docformatter.toml", template_mappings
         )
+        file_content.append(template_data)
+
+        template_data = self._GenerateFromTemplate("setuptools.toml", template_mappings)
         file_content.append(template_data)
 
         if package_data:

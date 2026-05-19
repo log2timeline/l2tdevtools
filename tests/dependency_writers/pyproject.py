@@ -4,7 +4,7 @@
 import unittest
 
 from l2tdevtools import dependencies
-from l2tdevtools.dependency_writers import setup
+from l2tdevtools.dependency_writers import pyproject
 from l2tdevtools.helpers import project
 from tests import test_lib
 
@@ -23,7 +23,7 @@ class PyprojectTomlWriterTest(test_lib.BaseTestCase):
             test_dependencies_file=test_dependencies_file,
         )
 
-        writer = setup.PyprojectTomlWriter(
+        writer = pyproject.PyprojectTomlWriter(
             l2tdevtools_path, project_definition, dependency_helper
         )
         self.assertIsNotNone(writer)
