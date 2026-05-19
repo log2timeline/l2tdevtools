@@ -49,32 +49,34 @@ class ToxIniWriter(interface.DependencyFileWriter):
         if os.path.isdir(python_module_name):
             paths_to_lint_python.append(python_module_name)
 
-            if glob.glob(
-                os.path.join(python_module_name, "**", "*.yaml"), recursive=True
-            ):
+            yaml_glob = os.path.join(python_module_name, "**", "*.yaml")
+            if glob.glob(yaml_glob, recursive=True):
                 paths_to_lint_yaml.append(python_module_name)
 
         if os.path.isdir("data"):
-            if glob.glob(os.path.join("data", "**", "*.yaml"), recursive=True):
+            yaml_glob = os.path.join("data", "**", "*.yaml")
+            if glob.glob(yaml_glob, recursive=True):
                 paths_to_lint_yaml.append("data")
 
         if os.path.isdir("scripts"):
             paths_to_lint_python.append("scripts")
 
         if os.path.isdir("test_data"):
-            if glob.glob(os.path.join("test_data", "**", "*.yaml"), recursive=True):
+            yaml_glob = os.path.join("test_data", "**", "*.yaml")
+            if glob.glob(yaml_glob, recursive=True):
                 paths_to_lint_yaml.append("test_data")
 
         if os.path.isdir("tests"):
             paths_to_lint_python.append("tests")
 
-            if glob.glob(os.path.join("tests", "**", "*.yaml"), recursive=True):
+            yaml_glob = os.path.join("tests", "**", "*.yaml")
+            if glob.glob(yaml_glob, recursive=True):
                 paths_to_lint_yaml.append("tests")
 
         if os.path.isdir("tools"):
             paths_to_lint_python.append("tools")
 
-        envlist = ["py3{10,11,12,13,14}", "black", "coverage"]
+        envlist = ["py3{10,11,12,13,14}", "black", "coverage", "docformatter"]
         if os.path.isdir("docs"):
             envlist.append("docs")
 
@@ -90,13 +92,17 @@ class ToxIniWriter(interface.DependencyFileWriter):
             "project_name": self._project_definition.name,
             "python_module_name": python_module_name,
         }
-
         file_content = []
 
         template_data = self._GenerateFromTemplate("header", template_mappings)
         file_content.append(template_data)
 
         template_data = self._GenerateFromTemplate("testenv_black", template_mappings)
+        file_content.append(template_data)
+
+        template_data = self._GenerateFromTemplate(
+            "testenv_docformatter", template_mappings
+        )
         file_content.append(template_data)
 
         if os.path.isdir("docs"):

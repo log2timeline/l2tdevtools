@@ -34,13 +34,14 @@ class DependenciesPyWriter(interface.DependencyFileWriter):
             not_optional = not dependency.is_optional
 
             python_dependency = (
-                f"    '{dependency.name:s}': ('{version_property:s}', "
-                f"'{minimum_version:s}', {maximum_version:s}, {not_optional!s})"
+                f'    "{dependency.name:s}": ("{version_property:s}", '
+                f'"{minimum_version:s}", {maximum_version:s}, {not_optional!s})'
             )
-
             python_dependencies.append(python_dependency)
 
         python_dependencies = ",\n".join(python_dependencies)
+        if python_dependencies:
+            python_dependencies = f"{python_dependencies:s},"
 
         template_mappings = {"python_dependencies": python_dependencies}
 
