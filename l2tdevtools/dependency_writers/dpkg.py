@@ -1,6 +1,7 @@
 """Writer for Debian packaging (dpkg) files."""
 
 import os
+import textwrap
 
 from l2tdevtools.dependency_writers import interface
 
@@ -81,11 +82,9 @@ class DPKGControlWriter(interface.DependencyFileWriter):
             python_module_description = "".join(
                 [python_module_description, f" resources ({python_module_name:s})"]
             )
-
             tools_description = (
                 f"Tools for {self._project_definition.name_description:s}"
             )
-
             tool_description_long, _, _ = (
                 self._project_definition.name_description.rpartition(" (")
             )
@@ -98,7 +97,6 @@ class DPKGControlWriter(interface.DependencyFileWriter):
         tool_description_long = "\n".join(
             [f" {line:s}" for line in tool_description_long.split("\n")]
         )
-
         file_content = []
         file_content.extend(self._PYTHON3_FILE_HEADER)
 
@@ -107,7 +105,6 @@ class DPKGControlWriter(interface.DependencyFileWriter):
             data_dependency = (
                 f"{self._project_definition.name:s}-data (>= ${{binary:Version}})"
             )
-
             file_content.extend(self._DATA_PACKAGE)
 
         file_content.extend(self._PYTHON3_PACKAGE)
@@ -119,11 +116,14 @@ class DPKGControlWriter(interface.DependencyFileWriter):
         ):
             file_content.extend(self._TOOLS_PACKAGE)
 
-        description_long = self._project_definition.description_long
         description_long = "\n".join(
-            [f" {line:s}" for line in description_long.split("\n")]
+            [
+                f" {line:s}"
+                for line in textwrap.wrap(
+                    self._project_definition.description_long, width=79
+                )
+            ]
         )
-
         python3_dependencies = self._dependency_helper.GetDPKGDepends()
 
         if data_dependency:
@@ -138,7 +138,6 @@ class DPKGControlWriter(interface.DependencyFileWriter):
             "python3-setuptools",
             "pybuild-plugin-pyproject",
         ]
-
         build_dependencies = ", ".join(build_dependencies)
 
         template_mappings = {
@@ -155,7 +154,6 @@ class DPKGControlWriter(interface.DependencyFileWriter):
             "tools_description": tools_description,
             "tool_description_long": tool_description_long,
         }
-
         file_content = "\n".join(file_content)
         file_content = file_content.format(**template_mappings)
 

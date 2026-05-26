@@ -2,6 +2,7 @@
 
 import logging
 import os
+import tomllib
 
 from l2tdevtools import project_config
 from l2tdevtools.review_helpers import cli
@@ -134,8 +135,50 @@ class ProjectHelper(cli.CLIHelper):
           ProjectDefinition: project definition.
         """
         if self._project_definition is None:
-            project_reader = project_config.ProjectDefinitionReader()
-            with open(f"{self.project_name:s}.ini", encoding="utf-8") as file_object:
-                self._project_definition = project_reader.Read(file_object)
+            project_ini = f"{self.project_name:s}.ini"
+
+            if os.path.isfile(project_ini):
+                logging.warning(
+                    f"{project_ini:s} has been deprecated consider migrating to "
+                    f"pyproject.toml [tool.l2tdevtools]"
+                )
+                project_reader = project_config.ProjectDefinitionReader()
+                with open(
+                    f"{self.project_name:s}.ini", encoding="utf-8"
+                ) as file_object:
+                    self._project_definition = project_reader.Read(file_object)
+
+            else:
+                with open("pyproject.toml", "rb") as file_object:
+                    pyproject_toml = tomllib.load(file_object)
+
+                project = pyproject_toml.get("project", {})
+                project_urls = project.get("urls", {})
+                tool = pyproject_toml.get("tool", {})
+                tool_l2tdevtools = tool.get("l2tdevtools", {})
+
+                maintainer = None
+                maintainers = project.get("maintainers", [])
+                if maintainers:
+                    maintainer = maintainers[0]
+                    maintainer = f'{maintainer["name"]:s} <{maintainer["email"]:s}>'
+
+                git_url = project_urls.get("Repository")
+                if git_url:
+                    git_url = f"{git_url:s}.git"
+
+                project_definition = project_config.ProjectDefinition()
+                project_definition.description_long = tool_l2tdevtools.get(
+                    "description"
+                ).rstrip()
+                project_definition.description_short = project.get("description")
+                project_definition.git_url = git_url
+                project_definition.homepage_url = project_urls.get("Homepage")
+                project_definition.maintainer = maintainer
+                project_definition.name = project.get("name")
+                project_definition.name_description = tool_l2tdevtools.get("name")
+                project_definition.status = tool_l2tdevtools.get("status")
+
+                self._project_definition = project_definition
 
         return self._project_definition

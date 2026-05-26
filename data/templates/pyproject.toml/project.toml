@@ -13,4 +13,4 @@ classifiers = [
     "${development_status}",
     "Programming Language :: Python",
 ]
-requires-python = ">=3.10"
+requires-python = ">=${minimum_python_version}"

@@ -1,0 +1,7 @@
+
+[tool.l2tdevtools]
+name = "${name_description}"
+status = "${status}"
+description = """
+${description_long}
+"""
