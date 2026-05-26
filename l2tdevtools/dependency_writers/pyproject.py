@@ -4,6 +4,8 @@ import datetime
 import glob
 import logging
 import os
+import textwrap
+import tomllib
 
 from l2tdevtools.dependency_writers import interface
 
@@ -49,16 +51,24 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
 
     def Write(self):
         """Writes a pyproject.toml file."""
-        if self._project_definition.status == "experimental":
-            development_status = "Development Status :: 2 - Pre-Alpha"
-        elif self._project_definition.status == "alpha":
-            development_status = "Development Status :: 3 - Alpha"
-        elif self._project_definition.status == "beta":
-            development_status = "Development Status :: 4 - Beta"
-        elif self._project_definition.status == "stable":
-            development_status = "Development Status :: 5 - Production/Stable"
-        else:
-            development_status = ""
+        with open(self.PATH, "rb") as file_object:
+            pyproject_toml = tomllib.load(file_object)
+
+        project = pyproject_toml.get("project", {})
+
+        minimum_python_version = "3.10"
+        requires_python = project.get("requires-python")
+        if requires_python and requires_python.startswith(">="):
+            minimum_python_version = requires_python[2:]
+
+        tool = pyproject_toml.get("tool", {})
+        tool_docformatter = tool.get("docformatter", {})
+
+        docformatter_non_cap = tool_docformatter.get("non-cap", [])
+        docformatter_non_cap = ", ".join(
+            [f'"{value:s}"' for value in docformatter_non_cap]
+        )
+        docformatter_non_cap = f"[{docformatter_non_cap:s}]"
 
         # TODO: handle license-files
 
@@ -115,19 +125,26 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
         date_time = datetime.datetime.now()
         version = date_time.strftime("%Y%m%d")
 
-        # TODO: configure in project.ini file
-        docformatter_non_cap = "[]"
-
+        description_long = " \\\n".join(
+            textwrap.wrap(self._project_definition.description_long, width=78)
+        )
         template_mappings = {
+            "black_target_version": f"py{minimum_python_version:s}".replace(".", ""),
             "description_short": (
                 self._project_definition.description_short.rstrip(".")
             ),
-            "development_status": development_status,
+            "development_status": (
+                self._project_definition.GetPythonTroveDevelopmentStatus()
+            ),
+            "description_long": f"{description_long:s} \\",
             "docformatter_non_cap": docformatter_non_cap,
             "maintainer_email": maintainer_email,
             "maintainer_name": maintainer_name,
+            "name_description": self._project_definition.name_description,
+            "status": self._project_definition.status,
             "python_module_name": python_module_name,
             "readme_file": readme_file,
+            "minimum_python_version": minimum_python_version,
             "version": version,
         }
         file_content = []
@@ -174,6 +191,11 @@ class PyprojectTomlWriter(interface.DependencyFileWriter):
 
         template_data = self._GenerateFromTemplate(
             "docformatter.toml", template_mappings
+        )
+        file_content.append(template_data)
+
+        template_data = self._GenerateFromTemplate(
+            "l2tdevtools.toml", template_mappings
         )
         file_content.append(template_data)
 

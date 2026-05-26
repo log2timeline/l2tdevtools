@@ -18,6 +18,13 @@ class ProjectDefinition:
       status (str): development status of the projects, such as "alpha" or "beta".
     """
 
+    _TROVE_DEVELOPMENT_CLASSIFIERS = {
+        "experimental": "Development Status :: 2 - Pre-Alpha",
+        "alpha": "Development Status :: 3 - Alpha",
+        "beta": "Development Status :: 4 - Beta",
+        "stable": "Development Status :: 5 - Production/Stable",
+    }
+
     def __init__(self):
         """Initializes a project configuration."""
         super().__init__()
@@ -30,6 +37,14 @@ class ProjectDefinition:
         self.name_description = None
         self.pypi_token = None
         self.status = "alpha"
+
+    def GetPythonTroveDevelopmentStatus(self):
+        """Retrieves the project status as a Python Trove classifier.
+
+        Returns:
+          str: Python Trove development status classifier.
+        """
+        return self._TROVE_DEVELOPMENT_CLASSIFIERS.get(self.status, "")
 
 
 class ProjectDefinitionReader:

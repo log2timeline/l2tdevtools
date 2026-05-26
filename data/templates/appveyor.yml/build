@@ -1,4 +1,0 @@
-
-build_script:
-- cmd: IF [%TARGET%]==[wheel] (
-    "%PYTHON%\\python.exe" -m build --wheel )
