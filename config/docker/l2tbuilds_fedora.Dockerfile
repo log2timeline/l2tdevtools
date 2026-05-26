@@ -1,4 +1,4 @@
-FROM fedora:43
+FROM fedora:44
 
 # Create container with:
 # docker build -f l2tbuilds_fedora.Dockerfile --force-rm --no-cache -t log2timeline/l2tbuilds_fedora .

@@ -5,16 +5,16 @@ FROM ubuntu:resolute
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Combining the apt-get commands into a single run reduces the size of the resulting image.
-# The apt-get installations below are interdependent and need to be done in sequence.
-RUN apt-get -y update && \
-    apt-get -y install apt-transport-https apt-utils && \
-    apt-get -y install libterm-readline-gnu-perl software-properties-common && \
-    apt-get -y upgrade && \
-    apt-get -y install \
+# Combining the apt commands into a single run reduces the size of the resulting image.
+# The apt installations below are interdependent and need to be done in sequence.
+RUN apt -y update && \
+    apt -y install apt-transport-https apt-utils && \
+    apt -y install libterm-readline-gnu-perl software-properties-common && \
+    apt -y upgrade && \
+    apt -y install \
         locales \
         pinentry-tty && \
-    apt-get -y install --no-install-recommends \
+    apt -y install --no-install-recommends \
         autoconf \
         automake \
         autopoint \
@@ -63,7 +63,7 @@ RUN apt-get -y update && \
 	python3-wheel \
         quilt \
         tox-current-env && \
-    apt-get clean && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
+    apt clean && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
 
 # Set terminal to UTF-8 by default and changes pinentry to use TTY
 RUN locale-gen en_US.UTF-8 && \
