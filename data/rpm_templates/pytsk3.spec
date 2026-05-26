@@ -14,7 +14,7 @@ Prefix: %{{_prefix}}
 Vendor: Michael Cohen and Joachim Metz <scudette@gmail.com, joachim.metz@gmail.com>
 Packager: Joachim Metz <joachim.metz@gmail.com>
 Url: https://github.com/py4n6/pytsk/
-BuildRequires: gcc, python3-devel, python3-setuptools, gcc-c++, libstdc++-devel
+BuildRequires: gcc, gcc-c++, libstdc++-devel, python3-devel, python3-pip, python3-setuptools
 
 %description
 Python bindings for the sleuthkit (http://www.sleuthkit.org/)
@@ -43,6 +43,8 @@ rm -rf %{{buildroot}}
 %doc README
 %{{_libdir}}/python3*/site-packages/pytsk3*.so
 %{{_libdir}}/python3*/site-packages/pytsk3*.dist-info
+%exclude %{{_libdir}}/python3*/site-packages/_build.py
+%exclude %{{_libdir}}/python3*/site-packages/__pycache__
 
 %changelog
 * {date_time} log2timeline development team <log2timeline-dev@googlegroups.com> {version}-1
