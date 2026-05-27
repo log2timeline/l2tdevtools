@@ -277,6 +277,7 @@ class GithubContributionsHelper(DownloadHelper):
           pulls_json (list[object]): JSON formatted pull objects.
           output_writer (OutputWriter): output writer.
         """
+
         # https://developer.github.com/v3/pulls/#list-pull-requests
         # [{
         #  "created_at": creation date and time of the CL.
