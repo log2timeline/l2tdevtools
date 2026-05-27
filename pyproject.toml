@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "l2tdevtools"
-version = "20260526"
+version = "20260527"
 description = "Development tools for the log2timeline projects"
 maintainers = [
     { name = "Log2Timeline maintainers", email = "log2timeline-maintainers@googlegroups.com" },
@@ -31,6 +31,18 @@ force-exclude = """
     data/
   | test_data/linter_fail.py
 )
+"""
+
+[tool.docformatter]
+black = true
+non-cap = ["str:"]
+non-strict = true
+
+[tool.l2tdevtools]
+name = "log2timeline development tools"
+status = "alpha"
+description = """
+Development tools for the log2timeline projects. \
 """
 
 [tool.setuptools]

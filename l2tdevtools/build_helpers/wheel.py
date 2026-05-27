@@ -191,8 +191,7 @@ class BuildWheelBuildHelper(WheelBuildHelper):
 class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
     """Helper to build Python wheel packages (.whl).
 
-    Builds wheel packages for projects that use configure/make as their build
-    system.
+    Builds wheel packages for projects that use configure/make as their build system.
     """
 
     def Build(self, source_helper_object):

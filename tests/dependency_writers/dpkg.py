@@ -15,7 +15,6 @@ class DPKGCompatWriterTest(test_lib.BaseTestCase):
 
     def testInitialize(self):
         """Tests that the writer can be initialized."""
-
         l2tdevtools_path = "/fake/l2tdevtools/"
         project_definition = project.ProjectHelper(l2tdevtools_path)
         dependencies_file = self._GetTestFilePath(["dependencies.ini"])
@@ -38,7 +37,6 @@ class DPKGControlWriterTest(test_lib.BaseTestCase):
 
     def testInitialize(self):
         """Tests that the writer can be initialized."""
-
         l2tdevtools_path = "/fake/l2tdevtools/"
         project_definition = project.ProjectHelper(l2tdevtools_path)
         dependencies_file = self._GetTestFilePath(["dependencies.ini"])
