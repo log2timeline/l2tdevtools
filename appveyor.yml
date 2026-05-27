@@ -16,6 +16,7 @@ environment:
     TARGET: tests
 
 install:
+- cmd: "%PYTHON%\\python.exe -m pip install -U build pip setuptools wheel"
 
 build: off
 
