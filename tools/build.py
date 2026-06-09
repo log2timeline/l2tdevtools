@@ -2,7 +2,6 @@
 """Script to automate creating builds of projects."""
 
 import argparse
-import io
 import logging
 import os
 import platform
@@ -79,7 +78,6 @@ class ProjectBuilder:
             log_filename = "_".join(
                 [source_helper_object.project_name, build_helper_object.LOG_FILENAME]
             )
-
             # Remove older logfiles if they exists otherwise the rename
             # fails on Windows.
             if os.path.exists(log_filename):
@@ -87,10 +85,8 @@ class ProjectBuilder:
 
             os.rename(build_helper_object.LOG_FILENAME, log_filename)
             logging.warning(
-                (
-                    f"Build of: {source_helper_object.project_name:s} failed, for more "
-                    f"information check {log_filename:s}"
-                )
+                f"Build of: {source_helper_object.project_name:s} failed, for more "
+                f"information check {log_filename:s}"
             )
 
         return False
@@ -252,14 +248,12 @@ class ProjectBuilder:
         download_helper_object = (
             download_helper.DownloadHelperFactory.NewDownloadHelper(project_definition)
         )
-
         source_helper_object = source_helper.SourcePackageHelper(
             project_definition.name,
             project_definition,
             self._downloads_directory,
             download_helper_object,
         )
-
         source_helper_object.Clean()
 
         # TODO: add a step to make sure build environment is sane
@@ -286,7 +280,7 @@ class ProjectBuilder:
         Args:
           path (str): path of the project definitions file.
         """
-        with io.open(path, "r", encoding="utf-8") as file_object:
+        with open(path, encoding="utf-8") as file_object:
             project_definition_reader = projects.ProjectDefinitionReader()
             self.project_definitions = {
                 definition.name: definition
@@ -306,7 +300,7 @@ class ProjectBuilder:
         """
         preset_definitions = {}
 
-        with io.open(path, "r", encoding="utf-8") as file_object:
+        with open(path, encoding="utf-8") as file_object:
             definition_reader = presets.PresetDefinitionReader()
             preset_definitions = {
                 preset_definition.name: preset_definition
@@ -317,19 +311,17 @@ class ProjectBuilder:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     build_targets = frozenset(
         ["download", "dpkg", "dpkg-source", "rpm", "source", "srpm", "wheel"]
     )
-
     argument_parser = argparse.ArgumentParser(
         description=("Downloads and builds the latest versions of projects.")
     )
-
     argument_parser.add_argument(
         "build_target",
         choices=sorted(build_targets),
@@ -338,7 +330,6 @@ def Main():
         default=None,
         help="The build target.",
     )
-
     default_builds_directory = os.path.join("..", "l2tbuilds")
     argument_parser.add_argument(
         "--build-directory",
@@ -352,7 +343,6 @@ def Main():
         default=default_builds_directory,
         help="The location of the build directory.",
     )
-
     argument_parser.add_argument(
         "-c",
         "--config",
@@ -365,7 +355,6 @@ def Main():
             "files e.g. projects.ini."
         ),
     )
-
     argument_parser.add_argument(
         "--distributions",
         dest="distributions",
@@ -374,7 +363,6 @@ def Main():
         default="",
         help=("comma separated list of specific distribution names to build."),
     )
-
     argument_parser.add_argument(
         "--download-directory",
         "--downloads-directory",
@@ -387,7 +375,6 @@ def Main():
         default=None,
         help="The location of the downloads directory.",
     )
-
     argument_parser.add_argument(
         "--preset",
         dest="preset",
@@ -400,7 +387,6 @@ def Main():
             "The presets are defined in the preset.ini configuration file."
         ),
     )
-
     argument_parser.add_argument(
         "--projects",
         dest="projects",
@@ -413,7 +399,6 @@ def Main():
             "configuration file."
         ),
     )
-
     options = argument_parser.parse_args()
 
     if not options.build_target:
@@ -421,14 +406,14 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     if options.build_target not in build_targets:
         print(f"Unsupported build target: {options.build_target:s}")
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     config_path = options.config_path
     if not config_path:
@@ -439,19 +424,19 @@ def Main():
     if not options.preset and not options.projects:
         print("Please define a preset or projects to build.")
         print("")
-        return False
+        return 1
 
     presets_file = os.path.join(config_path, "presets.ini")
     if options.preset and not os.path.exists(presets_file):
         print(f"No such config file: {presets_file:s}")
         print("")
-        return False
+        return 1
 
     projects_file = os.path.join(config_path, "projects.ini")
     if not os.path.exists(projects_file):
         print(f"No such config file: {projects_file:s}")
         print("")
-        return False
+        return 1
 
     if os.path.abspath(options.builds_directory).startswith(l2tdevtools_path):
         print(
@@ -459,7 +444,7 @@ def Main():
             "usage of pbr"
         )
         print("")
-        return False
+        return 1
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -471,14 +456,13 @@ def Main():
     project_builder = ProjectBuilder(
         options.build_target, l2tdevtools_path, options.downloads_directory
     )
-
     project_names = []
     if options.preset:
         project_names = project_builder.ReadProjectsPreset(presets_file, options.preset)
         if not project_names:
             print(f"Undefined preset: {options.preset:s}")
             print("")
-            return False
+            return 1
 
     elif options.projects:
         project_names = options.projects.split(",")
@@ -608,11 +592,11 @@ def Main():
         for name in sorted(failed_builds):
             print(f"\t{name:s}")
 
-    return not failed_downloads and not missing_build_dependencies and not failed_builds
+    if failed_downloads or missing_build_dependencies or failed_builds:
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

@@ -505,7 +505,7 @@ class DependencyUpdater:
         """
         project_definitions = {}
 
-        with open(projects_file, "r", encoding="utf-8") as file_object:
+        with open(projects_file, encoding="utf-8") as file_object:
             project_definition_reader = projects.ProjectDefinitionReader()
             for project_definition in project_definition_reader.Read(file_object):
                 project_definitions[project_definition.name] = project_definition
@@ -643,17 +643,16 @@ class DependencyUpdater:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     tracks = ["dev", "stable", "staging", "testing"]
 
     argument_parser = argparse.ArgumentParser(
         description=("Installs the latest versions of project dependencies.")
     )
-
     argument_parser.add_argument(
         "-c",
         "--config",
@@ -666,7 +665,6 @@ def Main():
             "files e.g. projects.ini."
         ),
     )
-
     argument_parser.add_argument(
         "--download-directory",
         "--download_directory",
@@ -677,7 +675,6 @@ def Main():
         default="build",
         help="The location of the download directory.",
     )
-
     argument_parser.add_argument(
         "--download-only",
         "--download_only",
@@ -689,7 +686,6 @@ def Main():
             "download and update the dependencies."
         ),
     )
-
     argument_parser.add_argument(
         "-e",
         "--exclude",
@@ -698,7 +694,6 @@ def Main():
         default=False,
         help=("Excludes the package names instead of including them."),
     )
-
     argument_parser.add_argument(
         "-f",
         "--force",
@@ -711,7 +706,6 @@ def Main():
             "install a dependency if not or an older version is installed."
         ),
     )
-
     argument_parser.add_argument(
         "--machine-type",
         "--machine_type",
@@ -727,7 +721,6 @@ def Main():
             "'x86' onto another 'amd64'."
         ),
     )
-
     argument_parser.add_argument(
         "--preset",
         dest="preset",
@@ -740,7 +733,6 @@ def Main():
             "The presets are defined in the preset.ini configuration file."
         ),
     )
-
     argument_parser.add_argument(
         "-t",
         "--track",
@@ -751,7 +743,6 @@ def Main():
         choices=sorted(tracks),
         help=("the l2tbinaries track to download from. The default is stable."),
     )
-
     argument_parser.add_argument(
         "-v",
         "--verbose",
@@ -760,7 +751,6 @@ def Main():
         default=False,
         help="have more verbose output.",
     )
-
     argument_parser.add_argument(
         "project_names",
         nargs="*",
@@ -774,7 +764,6 @@ def Main():
             "all available packages are updated."
         ),
     )
-
     options = argument_parser.parse_args()
 
     config_path = options.config_path
@@ -787,13 +776,13 @@ def Main():
     if options.preset and not os.path.exists(presets_file):
         print(f"No such config file: {presets_file:s}")
         print("")
-        return False
+        return 1
 
     projects_file = os.path.join(config_path, "projects.ini")
     if not os.path.exists(projects_file):
         print(f"No such config file: {projects_file:s}")
         print("")
-        return False
+        return 1
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -806,12 +795,11 @@ def Main():
         preferred_machine_type=options.machine_type,
         verbose_output=options.verbose,
     )
-
     user_defined_project_names = []
     if options.preset:
         preset_definitions = {}
 
-        with open(presets_file, "r", encoding="utf-8") as file_object:
+        with open(presets_file, encoding="utf-8") as file_object:
             definition_reader = presets.PresetDefinitionReader()
             preset_definitions = {
                 preset_definition.name: preset_definition
@@ -824,20 +812,18 @@ def Main():
         if not user_defined_project_names:
             print(f"Undefined preset: {options.preset:s}")
             print("")
-            return False
+            return 1
 
     elif options.project_names:
         user_defined_project_names = options.project_names
 
-    result = dependency_updater.UpdatePackages(
+    if not dependency_updater.UpdatePackages(
         projects_file, user_defined_project_names
-    )
+    ):
+        return 1
 
-    return result
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

@@ -2,7 +2,6 @@
 # pylint: disable=invalid-name
 """Script to update the dependencies in various configuration files."""
 
-import io
 import os
 import shutil
 import sys
@@ -27,10 +26,10 @@ from l2tdevtools.dependency_writers import tox_ini
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     l2tdevtools_path = os.path.abspath(__file__)
     l2tdevtools_path = os.path.dirname(l2tdevtools_path)
@@ -80,7 +79,7 @@ def Main():
     if os.path.exists(output_path):
         input_path = os.path.join(l2tdevtools_path, "l2tdevtools", "dependencies.py")
         file_data = []
-        with io.open(input_path, "r", encoding="utf-8") as file_object:
+        with open(input_path, encoding="utf-8") as file_object:
             for line in file_object.readlines():
                 if "# The following functions should not be included in " in line:
                     break
@@ -90,7 +89,7 @@ def Main():
         file_data.pop()
         file_data = "".join(file_data)
 
-        with io.open(output_path, "w", encoding="utf-8") as file_object:
+        with open(output_path, "w", encoding="utf-8") as file_object:
             file_object.write(file_data)
 
     # Remove old configurations and scripts.
@@ -110,11 +109,8 @@ def Main():
     if os.path.isfile(script_path):
         shutil.rmtree(script_path)
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

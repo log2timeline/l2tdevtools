@@ -9,15 +9,14 @@ from l2tdevtools.review_helpers import review
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description="Script to manage code reviews."
     )
-
     argument_parser.add_argument(
         "--project-path",
         "--project_path",
@@ -27,7 +26,6 @@ def Main():
         default=os.getcwd(),
         help=("Path to the project being reviewed."),
     )
-
     argument_parser.add_argument(
         "--allfiles",
         "--all-files",
@@ -39,7 +37,6 @@ def Main():
             "Apply command to all files, currently only affects the lint " "command."
         ),
     )
-
     commands_parser = argument_parser.add_subparsers(dest="command")
 
     close_command_parser = commands_parser.add_parser("close")
@@ -52,7 +49,6 @@ def Main():
         default=None,
         help="name of the corresponding feature branch.",
     )
-
     commands_parser.add_parser("lint")
 
     commands_parser.add_parser("lint-test")
@@ -80,14 +76,14 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     home_path = os.path.expanduser("~")
     netrc_path = os.path.join(home_path, ".netrc")
     if not os.path.exists(netrc_path):
         command = options.command.title()
         print(f"{command:s} aborted - unable to find .netrc")
-        return False
+        return 1
 
     review_helper = review.ReviewHelper(
         options.command,
@@ -96,31 +92,23 @@ def Main():
         feature_branch,
         all_files=options.all_files,
     )
-
     if not review_helper.InitializeHelpers():
-        return False
+        return 1
 
     if not review_helper.CheckLocalGitState():
-        return False
+        return 1
 
     if not review_helper.Lint():
-        return False
+        return 1
 
     if not review_helper.Test():
-        return False
+        return 1
 
-    result = False
-    if options.command == "close":
-        result = review_helper.Close()
+    if options.command == "close" and not review_helper.Close():
+        return 1
 
-    elif options.command in ("lint", "lint-test", "lint_test", "test"):
-        result = True
-
-    return result
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())
