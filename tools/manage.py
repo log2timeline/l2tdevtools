@@ -361,7 +361,7 @@ class PyPIManager:
         self._pypi_package_names = {}
 
         if projects_file:
-            with open(projects_file, "r", encoding="utf-8") as file_object:
+            with open(projects_file, encoding="utf-8") as file_object:
                 project_definition_reader = projects.ProjectDefinitionReader()
                 for project_definition in project_definition_reader.Read(file_object):
                     self._package_names.append(project_definition.name)
@@ -582,7 +582,7 @@ class PackagesManager:
             reference_packages[package_name] = package_version
 
         packages = {}
-        with open(csv_file, "r", encoding="utf-8") as file_object:
+        with open(csv_file, encoding="utf-8") as file_object:
             for row in csv.DictReader(file_object):
                 packages[row["project"]] = row["version"]
 
@@ -821,10 +821,10 @@ class PackagesManager:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     actions = frozenset(
         [
@@ -844,11 +844,9 @@ def Main():
             "pypi-diff",
         ]
     )
-
     argument_parser = argparse.ArgumentParser(
         description=("Manages the GIFT copr, launchpad PPA and l2tbinaries.")
     )
-
     argument_parser.add_argument(
         "action",
         choices=sorted(actions),
@@ -857,7 +855,6 @@ def Main():
         default=None,
         help="The action.",
     )
-
     argument_parser.add_argument(
         "--build-directory",
         "--build_directory",
@@ -868,7 +865,6 @@ def Main():
         default=os.path.join("..", "l2tbuilds"),
         help=("The location of the build directory."),
     )
-
     argument_parser.add_argument(
         "-c",
         "--config",
@@ -881,7 +877,6 @@ def Main():
             "files e.g. projects.ini."
         ),
     )
-
     argument_parser.add_argument(
         "--csv-file",
         "--csv_file",
@@ -892,7 +887,6 @@ def Main():
         default="",
         help=("The location of the CSV file."),
     )
-
     argument_parser.add_argument(
         "--distribution",
         action="store",
@@ -902,7 +896,6 @@ def Main():
         default=None,
         help="The name or version of the distribution.",
     )
-
     argument_parser.add_argument(
         "--machine-type",
         "--machine_type",
@@ -918,7 +911,6 @@ def Main():
             "'x86' onto another 'amd64'."
         ),
     )
-
     options = argument_parser.parse_args()
 
     if not options.action:
@@ -926,7 +918,7 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     config_path = options.config_path
     if not config_path:
@@ -938,7 +930,7 @@ def Main():
     if not os.path.exists(projects_file):
         print(f"No such config file: {projects_file:s}")
         print("")
-        return False
+        return 1
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
@@ -1092,11 +1084,8 @@ def Main():
             print(f"  {package:s}")
         print("")
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

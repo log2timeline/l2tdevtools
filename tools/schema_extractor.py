@@ -92,15 +92,14 @@ class SQLiteSchemaExtractor:
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     argument_parser = argparse.ArgumentParser(
         description=("Extract the database schema from a SQLite database file.")
     )
-
     if pyperclip:
         argument_parser.add_argument(
             "--to-clipboard",
@@ -119,12 +118,11 @@ def Main():
         type=str,
         help="path to the database file to extract schema from.",
     )
-
     options = argument_parser.parse_args()
 
     if not os.path.exists(options.database_path):
         print(f"No such database file: {options.database_path:s}")
-        return False
+        return 1
 
     extractor = SQLiteSchemaExtractor()
 
@@ -134,7 +132,7 @@ def Main():
             f"Unable to determine schema from database file: "
             f"{options.database_path:s}"
         )
-        return False
+        return 1
 
     database_schema = extractor.FormatSchema(database_schema)
 
@@ -143,11 +141,8 @@ def Main():
     else:
         print(database_schema)
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())

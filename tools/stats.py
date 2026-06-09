@@ -50,7 +50,6 @@ class StatsDefinitionReader:
             project_names = self._GetConfigValue(
                 config_parser, "organizations", option_name
             )
-
             if project_names is None:
                 project_names = []
             elif isinstance(project_names, str):
@@ -77,7 +76,6 @@ class StatsDefinitionReader:
             user_mapping = self._GetConfigValue(
                 config_parser, "user_mappings", option_name
             )
-
             option_name = option_name.lower()
             user_mappings[option_name] = user_mapping.lower()
 
@@ -100,7 +98,6 @@ class StatsDefinitionReader:
             email_address = self._GetConfigValue(
                 config_parser, "usernames", option_name
             )
-
             usernames[option_name] = email_address
 
         return usernames
@@ -410,14 +407,12 @@ class StdoutWriter:
 
             # TODO: add description.
             self.Write(
-                (
-                    f"{date_time_string:s} [github] ~ author:{username:s} ~ "
-                    f"project:{project_name:s} ~ "
-                    f"number_of_cls:{number_of_contributions:d} ~ "
-                    f"delta_added:{number_of_lines_added:d} ~ "
-                    f"delta_deleted:{number_of_lines_deleted:d} ~ "
-                    f"py:{number_of_lines_added:d} ~ file_type:py ~ op_type:ADD ~\n"
-                )
+                f"{date_time_string:s} [github] ~ author:{username:s} ~ "
+                f"project:{project_name:s} ~ "
+                f"number_of_cls:{number_of_contributions:d} ~ "
+                f"delta_added:{number_of_lines_added:d} ~ "
+                f"delta_deleted:{number_of_lines_deleted:d} ~ "
+                f"py:{number_of_lines_added:d} ~ file_type:py ~ op_type:ADD ~\n"
             )
 
     def WriteReview(
@@ -439,29 +434,25 @@ class StdoutWriter:
                     "creation time\tcreated by\tissue number\tdescription\treviewers\t"
                     "status\n"
                 )
-
                 self._header_written = True
 
             self.Write(
-                (
-                    f"{creation_time:s}\t{created_by:s}\t{issue_number:d}\t"
-                    f"{description:s}\t{reviewers:s}\t{status:s}\n"
-                )
+                f"{creation_time:s}\t{created_by:s}\t{issue_number:d}\t"
+                f"{description:s}\t{reviewers:s}\t{status:s}\n"
             )
 
 
 def Main():
-    """The main program function.
+    """Entry point of console script.
 
     Returns:
-      bool: True if successful or False if not.
+      int: exit code that is provided to sys.exit().
     """
     statistics_types = frozenset(["contributions"])
 
     argument_parser = argparse.ArgumentParser(
         description=("Generates an overview of project statistics of github projects.")
     )
-
     argument_parser.add_argument(
         "-c",
         "--config",
@@ -474,7 +465,6 @@ def Main():
             "files e.g. stats.ini."
         ),
     )
-
     argument_parser.add_argument(
         "-f",
         "--format",
@@ -485,7 +475,6 @@ def Main():
         default="csv",
         help="output format.",
     )
-
     argument_parser.add_argument(
         "statistics_type",
         action="store",
@@ -494,7 +483,6 @@ def Main():
         default=None,
         help="The statistics type.",
     )
-
     options = argument_parser.parse_args()
 
     if not options.statistics_type:
@@ -502,7 +490,7 @@ def Main():
         print("")
         argument_parser.print_help()
         print("")
-        return False
+        return 1
 
     config_path = options.config_path
     if not config_path:
@@ -514,12 +502,12 @@ def Main():
     if not os.path.exists(stats_file):
         print(f"No such config file: {stats_file:s}")
         print("")
-        return False
+        return 1
 
     stats_definition_reader = StatsDefinitionReader()
 
     user_mappings = {}
-    with open(stats_file, "r", encoding="utf-8") as file_object:
+    with open(stats_file, encoding="utf-8") as file_object:
         user_mappings = stats_definition_reader.ReadUserMappings(file_object)
 
     output_writer = StdoutWriter(user_mappings, output_format=options.output_format)
@@ -527,11 +515,11 @@ def Main():
     if not output_writer.Open():
         print("Unable to open output writer.")
         print("")
-        return False
+        return 1
 
     if options.statistics_type == "contributions":
         projects_per_organization = {}
-        with open(stats_file, "r", encoding="utf-8") as file_object:
+        with open(stats_file, encoding="utf-8") as file_object:
             stats_definition_reader = StatsDefinitionReader()
             projects_per_organization = (
                 stats_definition_reader.ReadProjectsPerOrganization(file_object)
@@ -540,11 +528,8 @@ def Main():
         contributions_helper = GithubContributionsHelper()
         contributions_helper.ListContributions(projects_per_organization, output_writer)
 
-    return True
+    return 0
 
 
 if __name__ == "__main__":
-    if not Main():
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    sys.exit(Main())
