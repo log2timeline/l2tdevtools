@@ -817,9 +817,7 @@ def Main():
     elif options.project_names:
         user_defined_project_names = options.project_names
 
-    if not dependency_updater.UpdatePackages(
-        projects_file, user_defined_project_names
-    ):
+    if not dependency_updater.UpdatePackages(projects_file, user_defined_project_names):
         return 1
 
     return 0
