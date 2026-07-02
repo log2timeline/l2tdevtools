@@ -35,6 +35,7 @@ RUN apt -y update && \
 	libbz2-dev \
 	libffi-dev \
 	libfuse-dev \
+	libfuse3-dev \
 	liblzma-dev \
 	libmagic-dev \
 	libsqlite3-dev \

@@ -204,7 +204,8 @@ class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
           bool: True if successful, False otherwise.
 
         Raises:
-          RuntimeError: if setup.py is missing and a wheel cannot be build.
+          RuntimeError: if pyproject.toml and setup.py are missing and a wheel cannot be
+              build.
         """
         source_package_path = source_helper_object.GetSourcePackagePath()
         if not source_package_path:
@@ -223,9 +224,13 @@ class ConfigureMakeWheelBuildHelper(WheelBuildHelper):
         source_package_filename = source_helper_object.GetSourcePackageFilename()
         logging.info(f"Building wheel of: {source_package_filename:s}")
 
-        setup_py_path = os.path.join(source_directory, "setup.py")
-        if not os.path.exists(setup_py_path):
-            raise RuntimeError("Missing setup.py cannot build wheel")
+        pyproject_toml_path = os.path.join(source_directory, "pyproject.toml")
+        if not os.path.exists(pyproject_toml_path):
+            setup_py_path = os.path.join(source_directory, "setup.py")
+            if not os.path.exists(setup_py_path):
+                raise RuntimeError(
+                    "Cannot build wheel missing pyproject.toml and setup.py"
+                )
 
         log_file_path = os.path.join("..", self.LOG_FILENAME)
         command = f'"{sys.executable:s}" -m build --wheel > {log_file_path:s} 2>&1'

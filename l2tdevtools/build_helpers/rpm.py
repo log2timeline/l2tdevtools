@@ -144,7 +144,6 @@ class BaseRPMBuildHelper(interface.BuildHelper):
         rpm_source_package_path = os.path.join(
             self._rpmbuild_sources_path, source_package_filename
         )
-
         if not os.path.exists(rpm_source_package_path):
             self._CreateRPMbuildDirectories()
 
@@ -171,7 +170,6 @@ class BaseRPMBuildHelper(interface.BuildHelper):
         spec_filename = os.path.join(
             self._rpmbuild_specs_path, f"{project_name:s}.spec"
         )
-
         with open(spec_filename, "w", encoding="utf-8") as rpm_spec_file:
             rpm_spec_file.write(spec_file_data)
 
@@ -255,7 +253,6 @@ class RPMBuildHelper(BaseRPMBuildHelper):
         filename = os.path.join(
             self.rpmbuild_path, "BUILD", f"{project_name:s}-{project_version!s}"
         )
-
         if os.path.exists(filename):
             try:
                 shutil.rmtree(filename)
@@ -324,11 +321,9 @@ class RPMBuildHelper(BaseRPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         rpm_filename = (
             f"{project_name:s}-{project_version!s}-1.{self.architecture:s}.rpm"
         )
-
         return not os.path.exists(rpm_filename)
 
 
@@ -349,7 +344,6 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
             self.architecture,
             f"{rpm_name:s}-*{project_version!s}-1.{self.architecture:s}.rpm",
         )
-
         self._MoveFilesToCurrentDirectory(filenames_glob)
 
     def Build(self, source_helper_object):
@@ -374,7 +368,6 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         # rpmbuild wants the source package filename without the status indication.
         rpm_source_package_filename = f"{project_name:s}-{project_version!s}.tar.gz"
         if not os.path.exists(rpm_source_package_filename):
@@ -383,7 +376,6 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
         build_successful = self._BuildFromSourcePackage(
             rpm_source_package_filename, rpmbuild_flags="-tb"
         )
-
         if build_successful:
             self._MoveRPMs(project_name, project_version)
 
@@ -401,7 +393,6 @@ class ConfigureMakeRPMBuildHelper(RPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         self._RemoveOlderSourceDirectories(project_name, project_version)
         self._RemoveOlderSourcePackages(project_name, project_version)
 
@@ -461,7 +452,6 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
         output_file_path = os.path.join(
             self._rpmbuild_specs_path, f"{project_name:s}.spec"
         )
-
         try:
             result = spec_file_generator.Generate(
                 self._project_definition,
@@ -505,7 +495,6 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
             self.architecture,
             f"{python_rpm_name:s}-*{project_version!s}-1.{self.architecture:s}.rpm",
         )
-
         self._MoveFilesToCurrentDirectory(filenames_glob)
 
         filenames_glob = os.path.join(
@@ -513,7 +502,6 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
             self.architecture,
             f"{rpm_name:s}-*{project_version!s}-1.{self.architecture:s}.rpm",
         )
-
         self._MoveFilesToCurrentDirectory(filenames_glob)
 
     def Build(self, source_helper_object):
@@ -538,7 +526,6 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         self._CopySourcePackageToRPMBuildSources(source_package_path)
 
         rpm_spec_file_path = self._GenerateSpecFile(
@@ -551,7 +538,6 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
         build_successful = self._BuildFromSpecFile(
             rpm_spec_file_path, rpmbuild_flags="-bb"
         )
-
         if build_successful:
             self._MoveRPMs(project_name, project_version)
 
@@ -576,7 +562,6 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         # The setup.py directory name can differ from the project name.
         setup_name = self._project_definition.setup_name or project_name
 
@@ -609,7 +594,6 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
         filenames_glob = os.path.join(
             self._rpmbuild_srpms_path, f"{srpm_name:s}-*{project_version!s}-1.src.rpm"
         )
-
         self._MoveFilesToCurrentDirectory(filenames_glob)
 
     def _RemoveOlderSourceRPMs(self, project_name, project_version):
@@ -622,7 +606,6 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
         filenames_to_ignore = re.compile(
             f"{project_name:s}-.*{project_version!s}-1.src.rpm"
         )
-
         src_rpm_filenames_glob = f"{project_name:s}-*-1.src.rpm"
 
         for filename in glob.glob(src_rpm_filenames_glob):
@@ -633,7 +616,6 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
         filenames_glob = os.path.join(
             self.rpmbuild_path, "SRPMS", src_rpm_filenames_glob
         )
-
         for filename in glob.glob(filenames_glob):
             if not filenames_to_ignore.match(filename):
                 logging.info(f"Removing: {filename:s}")
@@ -651,7 +633,6 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         return not os.path.exists(f"{project_name:s}-{project_version!s}-1.src.rpm")
 
     def Clean(self, source_helper_object):
@@ -663,7 +644,6 @@ class SRPMBuildHelper(BaseRPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         self._RemoveOlderSourceDirectories(project_name, project_version)
         self._RemoveOlderSourcePackages(project_name, project_version)
 
@@ -695,7 +675,6 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         # rpmbuild wants the source package filename without the status indication.
         rpm_source_package_filename = f"{project_name:s}-{project_version!s}.tar.gz"
         shutil.copyfile(source_package_path, rpm_source_package_filename)
@@ -703,7 +682,6 @@ class ConfigureMakeSRPMBuildHelper(SRPMBuildHelper):
         build_successful = self._BuildFromSourcePackage(
             rpm_source_package_filename, rpmbuild_flags="-ts"
         )
-
         # TODO: test binary build of source package?
 
         if build_successful:
@@ -762,7 +740,6 @@ class PyprojectSRPMBuildHelper(SRPMBuildHelper):
         output_file_path = os.path.join(
             self._rpmbuild_specs_path, f"{project_name:s}.spec"
         )
-
         try:
             result = spec_file_generator.Generate(
                 self._project_definition,
@@ -802,7 +779,6 @@ class PyprojectSRPMBuildHelper(SRPMBuildHelper):
         project_name, project_version = self._GetFilenameSafeProjectInformation(
             source_helper_object
         )
-
         self._CopySourcePackageToRPMBuildSources(source_package_path)
 
         rpm_spec_file_path = self._GenerateSpecFile(
@@ -815,7 +791,6 @@ class PyprojectSRPMBuildHelper(SRPMBuildHelper):
         build_successful = self._BuildFromSpecFile(
             rpm_spec_file_path, rpmbuild_flags="-bs"
         )
-
         # TODO: test binary build of source package?
 
         if build_successful:
