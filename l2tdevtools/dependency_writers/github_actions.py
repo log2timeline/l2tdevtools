@@ -67,7 +67,6 @@ class GitHubActionsLintYmlWriter(interface.DependencyFileWriter):
             "dpkg_dependencies": " ".join(sorted(set(dpkg_dependencies))),
             "dpkg_dev_dependencies": " ".join(sorted(set(dpkg_dev_dependencies))),
         }
-
         python_module_name = self._project_definition.name
 
         if self._project_definition.name.endswith("-kb"):
@@ -75,23 +74,11 @@ class GitHubActionsLintYmlWriter(interface.DependencyFileWriter):
 
         paths_to_lint_yaml = []
 
-        if os.path.isdir(python_module_name):
-            if glob.glob(
-                os.path.join(python_module_name, "**", "*.yaml"), recursive=True
-            ):
-                paths_to_lint_yaml.append(python_module_name)
-
-        if os.path.isdir("data"):
-            if glob.glob(os.path.join("data", "**", "*.yaml"), recursive=True):
-                paths_to_lint_yaml.append("data")
-
-        if os.path.isdir("test_data"):
-            if glob.glob(os.path.join("test_data", "**", "*.yaml"), recursive=True):
-                paths_to_lint_yaml.append("test_data")
-
-        if os.path.isdir("tests"):
-            if glob.glob(os.path.join("tests", "**", "*.yaml"), recursive=True):
-                paths_to_lint_yaml.append("tests")
+        for path in (python_module_name, "data", "test_data", "tests"):
+            if os.path.isdir(path):
+                glob_path = os.path.join(path, "**", "*.yaml")
+                if glob.glob(glob_path, recursive=True):
+                    paths_to_lint_yaml.append(path)
 
         file_content = []
 
@@ -135,7 +122,6 @@ class GitHubActionsTestDockerYmlWriter(interface.DependencyFileWriter):
                 "python3-wheel",
             ]
         )
-
         rpm_dependencies = self._GetRPMPythonDependencies()
         test_dependencies = self._GetRPMTestDependencies(rpm_dependencies)
         rpm_dependencies.extend(test_dependencies)
@@ -148,12 +134,10 @@ class GitHubActionsTestDockerYmlWriter(interface.DependencyFileWriter):
                 "python3-wheel",
             ]
         )
-
         template_mappings = {
             "dpkg_dependencies": " ".join(sorted(set(dpkg_dependencies))),
             "rpm_dependencies": " ".join(sorted(set(rpm_dependencies))),
         }
-
         template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
         file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
@@ -183,7 +167,6 @@ class GitHubActionsTestDocsYmlWriter(interface.DependencyFileWriter):
             "dpkg_dependencies": " ".join(sorted(set(dpkg_dependencies))),
             "dpkg_dev_dependencies": " ".join(sorted(set(dpkg_dev_dependencies))),
         }
-
         template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
         file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
@@ -231,8 +214,38 @@ class GitHubActionsTestToxYmlWriter(interface.DependencyFileWriter):
             "dpkg_dependencies": " ".join(sorted(set(dpkg_dependencies))),
             "dpkg_dev_dependencies": " ".join(sorted(set(dpkg_dev_dependencies))),
         }
-
         template_file = os.path.join(self._l2tdevtools_path, self._TEMPLATE_FILE)
+        file_content = self._GenerateFromTemplate(template_file, template_mappings)
+
+        with open(self.PATH, "w", encoding="utf-8") as file_object:
+            file_object.write(file_content)
+
+
+class GitHubActionsTestWindowsYmlWriter(interface.DependencyFileWriter):
+    """test_windows.yml GitHub actions workflow file writer."""
+
+    _TEMPLATE_PATH = os.path.join("data", "templates", "github_actions")
+
+    PATH = os.path.join(".github", "workflows", "test_windows.yml")
+
+    def Write(self):
+        """Writes a test_windows.yml GitHub actions workflow file ."""
+        dependencies = self._dependency_helper.GetL2TBinaries()
+        test_dependencies = self._dependency_helper.GetL2TBinaries(
+            test_dependencies=True
+        )
+        dependencies.extend(test_dependencies)
+
+        if dependencies:
+            template_file = os.path.join(
+                self._TEMPLATE_PATH, "test_windows-with_dependencies.yml"
+            )
+            template_mappings = {"dependencies": " ".join(sorted(set(dependencies)))}
+        else:
+            template_file = os.path.join(self._TEMPLATE_PATH, "test_windows.yml")
+            template_mappings = {}
+
+        template_file = os.path.join(self._l2tdevtools_path, template_file)
         file_content = self._GenerateFromTemplate(template_file, template_mappings)
 
         with open(self.PATH, "w", encoding="utf-8") as file_object:
