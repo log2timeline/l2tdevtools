@@ -14,7 +14,6 @@ class ProjectDefinition:
       maintainer (str): maintainer.
       name (str): name of the project.
       name_description (str): name of the project to use in descriptions.
-      pypi_token (str): AppVeyor encrypted PyPI token.
       status (str): development status of the projects, such as "alpha" or "beta".
     """
 
@@ -35,7 +34,6 @@ class ProjectDefinition:
         self.maintainer = None
         self.name = None
         self.name_description = None
-        self.pypi_token = None
         self.status = "alpha"
 
     def GetPythonTroveDevelopmentStatus(self):
@@ -59,7 +57,6 @@ class ProjectDefinitionReader:
             "maintainer",
             "name",
             "name_description",
-            "pypi_token",
             "status",
         ]
     )

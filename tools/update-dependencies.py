@@ -9,8 +9,6 @@ import sys
 from l2tdevtools import dependencies
 from l2tdevtools.helpers import project
 
-from l2tdevtools.dependency_writers import appveyor_scripts
-from l2tdevtools.dependency_writers import appveyor_yml
 from l2tdevtools.dependency_writers import check_dependencies
 from l2tdevtools.dependency_writers import dependencies_py
 from l2tdevtools.dependency_writers import dpkg
@@ -52,8 +50,7 @@ def Main():
         github_actions.GitHubActionsTestDocsYmlWriter,
         github_actions.GitHubActionsTestMacOSYmlWriter,
         github_actions.GitHubActionsTestToxYmlWriter,
-        appveyor_scripts.AppVeyorInstallPS1ScriptWriter,
-        appveyor_yml.AppveyorYmlWriter,
+        github_actions.GitHubActionsTestWindowsYmlWriter,
         check_dependencies.CheckDependenciesWriter,
         dependencies_py.DependenciesPyWriter,
         dpkg.DPKGCompatWriter,
