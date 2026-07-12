@@ -104,7 +104,7 @@ class LibyalGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     _PROJECT_ORGANIZATION = "libyal"
     _PROJECT_NAME = "libevt"
     _PROJECT_STATUS = "alpha"
-    _PROJECT_VERSION = "20260523"
+    _PROJECT_VERSION = "20260705"
 
     @classmethod
     def setUpClass(cls):

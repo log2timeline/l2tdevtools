@@ -1,50 +1,41 @@
-%define name bencode
-%define version {version}
-%define unmangled_name bencode.py
-%define unmangled_version {version}
-%define release 1
-
-Summary: Simple bencode parser
-Name: %{{name}}
-Version: %{{version}}
-Release: %{{release}}
-Source0: %{{unmangled_name}}-%{{unmangled_version}}.tar.gz
-License: BitTorrent Open Source License
+Name: bencode
+Version: {version}
+Release: 1
 Group: Development/Libraries
-BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-buildroot
-Prefix: %{{_prefix}}
-BuildArch: noarch
-Vendor: Dean Gardiner <me@dgardiner.net>
+License: BitTorrent Open Source License
+Summary: Simple bencode parser
 Url: https://github.com/fuzeman/bencode.py
-BuildRequires: python3-setuptools >= 17.0 , python3-devel, python3-pbr
+Vendor: Dean Gardiner <me@dgardiner.net>
+Source0: bencode_py-%{{version}}.tar.gz
+BuildArch: noarch
+BuildRequires: python3-devel, pyproject-rpm-macros, python3-pip, python3-setuptools, python3-wheel
+
+%{{?python_disable_dependency_generator}}
 
 %description
 Simple bencode parser, forked from the bencode package
 by Thomas Rampelberg.
 
 %package -n python3-%{{name}}
-Summary: Simple bencode parser for Python 3
+Summary: Python 3 module of Simple bencode parser
 
 %description -n python3-%{{name}}
 Simple bencode parser, forked from the bencode package
 by Thomas Rampelberg.
 
 %prep
-%autosetup -n %{{unmangled_name}}-%{{unmangled_version}}
+%autosetup -p1 -n bencode_py-%{{version}}
 
 %build
 %pyproject_wheel
 
 %install
 %pyproject_install
-rm -rf %{{buildroot}}/usr/share/doc/%{{name}}/
-
-%clean
-rm -rf %{{buildroot}}
-
 %files -n python3-%{{name}}
-%{{python3_sitelib}}/bencode/
-%{{python3_sitelib}}/bencodepy/
+%license LICENSE
+
+%{{python3_sitelib}}/bencode
+%{{python3_sitelib}}/bencodepy
 %{{python3_sitelib}}/bencode_py*.dist-info
 
 %changelog
