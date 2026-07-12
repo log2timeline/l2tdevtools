@@ -34,7 +34,6 @@ class RPMSpecFileGenerator:
         "%description -n %{{name}}-data",
         "{description:s}",
         "",
-        "",
     ]
 
     _SPEC_TEMPLATE_PYTHON3_BODY = [
@@ -47,7 +46,6 @@ class RPMSpecFileGenerator:
         "%install",
         "%pyproject_install",
         "",
-        "",
     ]
 
     _SPEC_TEMPLATE_TOOLS_PACKAGE_DEFINITION = [
@@ -57,7 +55,6 @@ class RPMSpecFileGenerator:
         "",
         "%description -n %{{name}}-tools",
         "{description:s}",
-        "",
         "",
     ]
 
@@ -107,7 +104,6 @@ class RPMSpecFileGenerator:
             "vendor": None,
             "version": None,
         }
-
         has_data_package = False
 
         python_module_name = project_name
@@ -124,7 +120,6 @@ class RPMSpecFileGenerator:
             os.path.isdir(tools_directory)
             and glob.glob(os.path.join(tools_directory, "*.py"))
         )
-
         if project_definition.srpm_name:
             package_name = project_definition.srpm_name
         elif project_definition.rpm_name:
@@ -167,7 +162,11 @@ class RPMSpecFileGenerator:
                 )
 
             if not configuration["license"]:
-                configuration["license"] = pyproject_toml_project.get("license", None)
+                license_value = pyproject_toml_project.get("license")
+                if isinstance(license_value, dict):
+                    license_value = license_value.get("text")
+
+                configuration["license"] = license_value
 
             if not configuration["summary"]:
                 configuration["summary"] = pyproject_toml_project.get(
@@ -262,7 +261,6 @@ class RPMSpecFileGenerator:
             build_requires,
             configuration,
         )
-
         if project_name != package_name:
             python_package_name = f"python3-{package_name:s}"
         else:
@@ -278,7 +276,6 @@ class RPMSpecFileGenerator:
             configuration,
             output_file_object,
         )
-
         if has_tools_package:
             self._WriteToolsPackageDefinition(output_file_object, configuration)
 
@@ -299,7 +296,6 @@ class RPMSpecFileGenerator:
             license_line,
             doc_line,
         )
-
         if has_tools_package:
             self._WriteToolsPackageFiles(output_file_object)
 
@@ -351,7 +347,6 @@ class RPMSpecFileGenerator:
             ),
             "rm -rf %{buildroot}/usr/share/doc/%{name}/",
         ]
-
         if project_name == "astroid":
             lines.extend(["rm -rf %{buildroot}%{python3_sitelib}/astroid/tests"])
 
@@ -359,6 +354,7 @@ class RPMSpecFileGenerator:
             lines.extend(["rm -rf %{buildroot}%{python3_sitelib}/pylint/test"])
 
         lines.append("")
+
         return "\n".join(lines)
 
     def _GetLicenseFileDefinition(self, source_directory):
@@ -441,11 +437,9 @@ class RPMSpecFileGenerator:
         date_time_string = date_time.strftime("%a %b %e %Y")
 
         output_file_object.write(
-            (
-                "%changelog\n"
-                f"* {date_time_string:s} {self._EMAIL_ADDRESS:s} {version:s}-1\n"
-                "- Auto-generated\n"
-            )
+            "%changelog\n"
+            f"* {date_time_string:s} {self._EMAIL_ADDRESS:s} {version:s}-1\n"
+            "- Auto-generated\n"
         )
 
     def _WriteDataPackageDefinition(self, output_file_object, configuration):
@@ -459,7 +453,6 @@ class RPMSpecFileGenerator:
             "description": configuration["description"],
             "summary": configuration["summary"],
         }
-
         output_string = "\n".join(self._SPEC_TEMPLATE_DATA_PACKAGE_DEFINITION)
         output_string = output_string.format(**template_mappings)
         output_file_object.write(output_string)
@@ -477,9 +470,7 @@ class RPMSpecFileGenerator:
             "%doc ACKNOWLEDGEMENTS AUTHORS README.md",
             "%{_datadir}/%{name}/*",
             "",
-            "",
         ]
-
         output_string = "\n".join(template)
         output_file_object.write(output_string)
 
@@ -536,7 +527,6 @@ class RPMSpecFileGenerator:
             "requires": ", ".join(requires),
             "summary": configuration["summary"],
         }
-
         template = ["%package -n {name:s}"]
 
         if requires:
@@ -549,10 +539,8 @@ class RPMSpecFileGenerator:
                 "%description -n {name:s}",
                 "{description:s}",
                 "",
-                "",
             ]
         )
-
         output_string = "\n".join(template)
         output_string = output_string.format(**template_mappings)
         output_file_object.write(output_string)
@@ -592,7 +580,6 @@ class RPMSpecFileGenerator:
             "name": name,
             "setup_name": setup_name,
         }
-
         template = ["%files -n {name:s}", "{license:s}", "{doc:s}"]
 
         if project_definition.architecture_dependent:
@@ -602,7 +589,6 @@ class RPMSpecFileGenerator:
                     "%{{_libdir}}/python3*/site-packages/{setup_name:s}*.dist-info",
                 ]
             )
-
         else:
             template.extend(
                 [
@@ -648,7 +634,6 @@ class RPMSpecFileGenerator:
             "rpm_requires": ", ".join(rpm_requires),
             "version": project_version,
         }
-
         template_file_path = os.path.join(
             self._data_path, "rpm_templates", project_definition.rpm_template_spec
         )
@@ -700,7 +685,6 @@ class RPMSpecFileGenerator:
             "vendor": configuration["vendor"],
             "version": configuration["version"],
         }
-
         template = [
             "Name: {name:s}",
             "Version: {version:s}",
@@ -711,7 +695,6 @@ class RPMSpecFileGenerator:
             "Url: {url:s}",
             "Vendor: {vendor:s}",
         ]
-
         template.append("Source0: {source:s}")
 
         if not project_definition.architecture_dependent:
@@ -728,10 +711,8 @@ class RPMSpecFileGenerator:
                 "%description",
                 "{description:s}",
                 "",
-                "",
             ]
         )
-
         output_string = "\n".join(template)
         output_string = output_string.format(**template_mappings)
         output_file_object.write(output_string)
@@ -748,7 +729,6 @@ class RPMSpecFileGenerator:
             "project_name": configuration["name"],
             "summary": configuration["summary"],
         }
-
         output_string = "\n".join(self._SPEC_TEMPLATE_TOOLS_PACKAGE_DEFINITION)
         output_string = output_string.format(**template_mappings)
         output_file_object.write(output_string)
@@ -790,7 +770,6 @@ class RPMSpecFileGenerator:
             "python3-setuptools",
             "python3-wheel",
         ]
-
         if project_definition.architecture_dependent:
             rpm_build_dependencies.append("gcc")
 
