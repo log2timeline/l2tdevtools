@@ -16,7 +16,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: John McNamara <jmcnamara@cpan.org>
 Url: https://github.com/jmcnamara/XlsxWriter
-BuildRequires: python3-setuptools, python3-devel
+BuildRequires: python3-devel, python3-pip, python3-setuptools
 
 %description
 XlsxWriter is a Python module for writing files in the Excel

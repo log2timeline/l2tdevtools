@@ -14,7 +14,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Andreas Dewes - DCSO GmbH <andreas.dewes@dcso.de>
 Url: https://github.com/DCSO/flor
-BuildRequires: python3-devel, python3-setuptools
+BuildRequires: python3-devel, python3-pip, python3-setuptools
 
 %description
 A Bloom filter implementation in Python

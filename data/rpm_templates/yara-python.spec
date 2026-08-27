@@ -15,7 +15,7 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Victor M. Alvarez <plusvic@gmail.com;vmalvarez@virustotal.com>
 Url: https://github.com/VirusTotal/yara-python
-BuildRequires: gcc, python3-setuptools, python3-devel, file-devel, openssl-devel
+BuildRequires: file-devel, gcc, openssl-devel, python3-devel, python3-pip, python3-setuptools
 
 %description
 This is a library for using YARA from Python. You can use

@@ -15,7 +15,7 @@ BuildRoot: %{{_tmppath}}/%{{unmangled_name}}-release-%{{version}}-%{{release}}-b
 Prefix: %{{_prefix}}
 Vendor: Kirill Simonov <xi@resolvent.net>
 Url: http://pyyaml.org/wiki/PyYAML
-BuildRequires: gcc, libyaml-devel, python3-setuptools, python3-devel
+BuildRequires: gcc, libyaml-devel, python3-devel, python3-pip, python3-setuptools
 
 %description
 Python-yaml is a complete YAML 1.1 parser and emitter
