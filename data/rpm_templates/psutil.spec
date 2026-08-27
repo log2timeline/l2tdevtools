@@ -13,7 +13,7 @@ BuildRoot: %{{_tmppath}}/%{{name}}-%{{version}}-%{{release}}-buildroot
 Prefix: %{{_prefix}}
 Vendor: Giampaolo Rodola <g.rodola@gmail.com>
 Url: https://github.com/giampaolo/psutil
-BuildRequires: gcc, python3-devel, python3-setuptools
+BuildRequires: gcc, python3-devel, python3-pip, python3-setuptools
 
 %description
 psutil is a cross-platform library for retrieving information

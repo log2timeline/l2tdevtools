@@ -16,7 +16,7 @@ Prefix: %{{_prefix}}
 BuildArch: noarch
 Vendor: Honza Král <honza.kral@gmail.com>
 Url: https://github.com/open/opensearch-py
-BuildRequires: python3-setuptools, python3-devel
+BuildRequires: python3-devel, python3-pip, python3-setuptools
 
 %{{?python_disable_dependency_generator}}
 
