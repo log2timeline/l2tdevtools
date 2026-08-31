@@ -33,9 +33,7 @@ def Main():
         dest="all_files",
         action="store_true",
         default=False,
-        help=(
-            "Apply command to all files, currently only affects the lint " "command."
-        ),
+        help="Apply the lint or test command to all files.",
     )
     commands_parser = argument_parser.add_subparsers(dest="command")
 

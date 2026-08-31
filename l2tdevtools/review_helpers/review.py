@@ -21,6 +21,16 @@ class ReviewHelper:
         ["create-pr", "create_pr", "lint", "lint-test", "lint_test"]
     )
 
+    _FULL_TEST_FILES = frozenset(
+        [
+            "dependencies.ini",
+            "pyproject.toml",
+            "run_tests.py",
+            "test_dependencies.ini",
+            "tox.ini",
+        ]
+    )
+
     def __init__(
         self, command, project_path, github_origin, feature_branch, all_files=False
     ):
@@ -31,8 +41,8 @@ class ReviewHelper:
           project_path (str): path to the project being reviewed.
           github_origin (str): GitHub origin.
           feature_branch (str): feature branch.
-          all_files (Optional[bool]): True if the command should apply to all
-              files. Currently this only affects the lint command.
+          all_files (Optional[bool]): True if lint and test commands should
+              apply to all files.
         """
         super().__init__()
         self._active_branch = None
@@ -178,6 +188,44 @@ class ReviewHelper:
 
         return True
 
+    def _GetChangedTestModules(self):
+        """Determines test modules corresponding to changed Python files.
+
+        Returns:
+          list[str]: test module names, an empty list if no Python files were
+              changed, or None if the complete test suite should be run.
+        """
+        changed_files = self._git_helper.GetChangedFiles(diffbase="main")
+        if any(changed_file in self._FULL_TEST_FILES for changed_file in changed_files):
+            return None
+
+        test_files = set()
+        project_source_prefix = f"{self._project_name:s}/"
+        for changed_file in changed_files:
+            if not changed_file.endswith(".py"):
+                continue
+
+            if os.path.basename(changed_file) in ("__init__.py", "interface.py"):
+                return None
+
+            if changed_file.startswith("tests/"):
+                test_file = changed_file
+            elif changed_file.startswith(project_source_prefix):
+                test_file = changed_file.replace(project_source_prefix, "tests/", 1)
+            else:
+                return None
+
+            test_path = os.path.join(self._project_path, test_file)
+            if not os.path.exists(test_path):
+                return None
+
+            test_files.add(test_file)
+
+        return [
+            os.path.splitext(test_file)[0].replace("/", ".").replace("\\", ".")
+            for test_file in sorted(test_files)
+        ]
+
     def Lint(self):
         """Lints a review.
 
@@ -234,10 +282,18 @@ class ReviewHelper:
         ):
             return True
 
-        # TODO: determine why this alters the behavior of argparse.
-        # Currently affects this script being used in plaso.
-        command = f"{sys.executable:s} run_tests.py"
-        exit_code = subprocess.call(command, shell=True)
+        test_modules = None
+        if not self._all_files:
+            test_modules = self._GetChangedTestModules()
+            if test_modules == []:
+                return True
+
+        if test_modules is None:
+            command = [sys.executable, "run_tests.py"]
+        else:
+            command = [sys.executable, "-m", "unittest", *test_modules]
+
+        exit_code = subprocess.call(command)
         if exit_code != 0:
             command_title = self._command.title()
             print(f"{command_title:s} aborted - unable to pass review.")
