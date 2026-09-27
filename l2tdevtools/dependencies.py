@@ -598,6 +598,7 @@ class DependencyHelper:
             "pyfwps",
             "pyfwsi",
             "pyhmac",
+            "pykeramics",
             "pylnk",
             "pyluksde",
             "pymodi",

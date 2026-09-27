@@ -76,7 +76,7 @@ class ToxIniWriter(interface.DependencyFileWriter):
         if os.path.isdir("tools"):
             paths_to_lint_python.append("tools")
 
-        envlist = ["py3{10,11,12,13,14}", "black", "coverage", "docformatter"]
+        envlist = ["py3{10,11,12,13,14,15}", "black", "coverage", "docformatter"]
         if os.path.isdir("docs"):
             envlist.append("docs")
 

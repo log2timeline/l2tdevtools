@@ -4,13 +4,14 @@ skipsdist = True
 pip_pre = True
 passenv =
   CFLAGS
+  CPATH
   CPPFLAGS
   LDFLAGS
 setenv =
   PYTHONPATH = {toxinidir}
 deps =
   black
-  setuptools >= 65
+  setuptools >= 77
 commands =
   black --version
   black .

@@ -15,7 +15,7 @@ class PyPIDownloadHelper(project.ProjectDownloadHelper):
 
         Args:
           download_url (str): download URL.
-          source_name (Optional[str]): PyPI source pacakge name, where None
+          source_name (Optional[str]): PyPI source package name, where None
               indicates the source package name is the same as the PyPI project
               name.
 
