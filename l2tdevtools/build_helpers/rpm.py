@@ -463,7 +463,7 @@ class PyprojectRPMBuildHelper(RPMBuildHelper):
             )
         except (FileNotFoundError, TypeError, ValueError) as exception:
             logging.warning(
-                f"Unable to gerenate rpm spec file with error: {exception!s}"
+                f"Unable to generate rpm spec file with error: {exception!s}"
             )
             result = False
 

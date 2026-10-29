@@ -603,7 +603,7 @@ class RPMSpecFileGenerator:
         output_string = output_string.format(**template_mappings)
         output_file_object.write(output_string)
 
-    def _WriteSpecFileFromTempate(
+    def _WriteSpecFileFromTemplate(
         self, project_definition, source_directory, project_version, output_file_object
     ):
         """Writes the RPM spec file from a template.
@@ -778,7 +778,7 @@ class RPMSpecFileGenerator:
 
         with open(output_file, "w", encoding="utf8") as output_file_object:
             if project_definition.rpm_template_spec:
-                result = self._WriteSpecFileFromTempate(
+                result = self._WriteSpecFileFromTemplate(
                     project_definition,
                     source_directory,
                     project_version,

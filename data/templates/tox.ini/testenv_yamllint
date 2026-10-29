@@ -4,12 +4,13 @@ skipsdist = True
 pip_pre = True
 passenv =
   CFLAGS
+  CPATH
   CPPFLAGS
   LDFLAGS
 setenv =
   PYTHONPATH = {toxinidir}
 deps =
-  setuptools >= 65
+  setuptools >= 77
   yamllint >= 1.26.0
 commands =
   yamllint -v

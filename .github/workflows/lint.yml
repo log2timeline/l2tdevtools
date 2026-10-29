@@ -1,18 +1,21 @@
 # Check source.
 name: lint
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
-    branches:
-    - main
   push:
-    branches:
-    - main
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   black:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Check format of Python code
       uses: psf/black@stable
       with:
@@ -20,6 +23,7 @@ jobs:
         src: "."
   pylint:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       matrix:
         python-version: ['3.14']
@@ -27,6 +31,8 @@ jobs:
       image: ubuntu:26.04
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Set up container
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -49,3 +55,15 @@ jobs:
         LANG: en_US.UTF-8
       run: |
         tox -e pylint
+  typos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+    - name: Install rumdl
+      run: cargo install --locked typos-cli
+    - name: Check for typos
+      run: |
+        typos
