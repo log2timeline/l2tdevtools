@@ -26,11 +26,9 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
         download_helper = update.GithubRepoDownloadHelper(
             self._DOWNLOAD_URL, branch="dev"
         )
-
         package_download_urls = download_helper.GetPackageDownloadURLs(
-            preferred_machine_type="x86", preferred_operating_system="Windows"
+            preferred_machine_type="amd64", preferred_operating_system="Windows"
         )
-
         if (sys.version_info[0], sys.version_info[1]) not in (
             download_helper._SUPPORTED_PYTHON_VERSIONS
         ):
@@ -40,7 +38,7 @@ class GithubRepoDownloadHelperTest(test_lib.BaseTestCase):
             self.assertIsNotNone(package_download_urls)
 
             expected_url = (
-                f"https://github.com/log2timeline/l2tbinaries/raw/dev/win32/"
+                f"https://github.com/log2timeline/l2tbinaries/raw/dev/win64/"
                 f"{self._PROJECT_NAME:s}-{self._PROJECT_VERSION:s}-py3-none-any.whl"
             )
             self.assertIn(expected_url, package_download_urls)
@@ -52,16 +50,15 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
     # pylint: disable=protected-access
 
     _PROJECT_NAME = "dfvfs"
-    _PROJECT_VERSION = "20260717"
+    _PROJECT_VERSION = "20260924"
 
     def testGetAvailableWheelPackages(self):
         """Tests the _GetAvailableWheelPackages function."""
         dependency_updater = update.DependencyUpdater(
             download_track="dev",
-            preferred_machine_type="x86",
+            preferred_machine_type="amd64",
             preferred_operating_system="Windows",
         )
-
         available_packages = dependency_updater._GetAvailableWheelPackages()
 
         if (sys.version_info[0], sys.version_info[1]) not in (
@@ -97,10 +94,9 @@ class DependencyUpdaterTest(test_lib.BaseTestCase):
                     download_directory=temp_directory,
                     download_only=True,
                     download_track="dev",
-                    preferred_machine_type="x86",
+                    preferred_machine_type="amd64",
                     preferred_operating_system="Windows",
                 )
-
                 dependency_updater.UpdatePackages(projects_file, [self._PROJECT_NAME])
 
                 glob_results = sorted(glob.glob(os.path.join(temp_directory, "*.whl")))
