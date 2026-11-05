@@ -472,6 +472,9 @@ class PackagesManager:
                 new_packages[name] = version
                 continue
 
+            if not packages[name]:
+                continue
+
             version_tuple = packages[name].split(".")
             new_version_tuple = version.split(".")
 
@@ -546,29 +549,31 @@ class PackagesManager:
             # in the source packages that use the naming convention:
             # package-version-#.tar.gz
             # package-version-#.zip
-            if not directory_entry.endswith(".tar.gz") and not directory_entry.endswith(
+            # package_version.orig.tar.gz
+            if directory_entry.endswith(".debian.tar.gz") or directory_entry.endswith(
+                "-1.tar.gz"
+            ):
+                continue
+
+            if directory_entry.endswith(".orig.tar.gz"):
+                package_name, _, _ = directory_entry.rpartition(".orig.tar.gz")
+                package_name, _, package_version = package_name.rpartition("_")
+            elif directory_entry.endswith(".tar.gz") or directory_entry.endswith(
                 ".zip"
             ):
+                package_name, _, _ = directory_entry.rpartition(".")
+                if package_name.endswith(".tar"):
+                    package_name, _, _ = package_name.rpartition(".")
+                package_name, _, package_version = package_name.rpartition("-")
+
+                if (
+                    package_name.endswith("-alpha")
+                    or package_name.endswith("-beta")
+                    or package_name.endswith("-experimental")
+                ):
+                    package_name, _, _ = package_name.rpartition("-")
+            else:
                 continue
-
-            if (
-                directory_entry.endswith(".debian.tar.gz")
-                or directory_entry.endswith(".orig.tar.gz")
-                or directory_entry.endswith("-1.tar.gz")
-            ):
-                continue
-
-            package_name, _, _ = directory_entry.rpartition(".")
-            if package_name.endswith(".tar"):
-                package_name, _, _ = package_name.rpartition(".")
-            package_name, _, package_version = package_name.rpartition("-")
-
-            if (
-                package_name.endswith("-alpha")
-                or package_name.endswith("-beta")
-                or package_name.endswith("-experimental")
-            ):
-                package_name, _, _ = package_name.rpartition("-")
 
             if package_name in reference_packages:
                 package_version_tuple = package_version.split(".")
