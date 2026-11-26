@@ -411,11 +411,15 @@ class DependencyHelper:
 
         return sorted(requires)
 
-    def _GetInstallRequires(self, dependencies, exclude_version=False):
+    def _GetInstallRequires(
+        self, dependencies, exclude_optional=False, exclude_version=False
+    ):
         """Retrieves the setup.py installation requirements.
 
         Args:
           dependencies (dict[str, DependencyDefinition]): dependencies.
+          exclude_optional (Optional[bool]): True if optional dependencies should
+              be excluded.
           exclude_version (Optional[bool]): True if the version should be excluded
               from the dependency definitions.
 
@@ -427,6 +431,9 @@ class DependencyHelper:
             dependencies.values(), key=lambda dependency: dependency.name
         ):
             if dependency.skip_requires:
+                continue
+
+            if exclude_optional and dependency.is_optional:
                 continue
 
             module_name = dependency.pypi_name or dependency.name
@@ -547,10 +554,14 @@ class DependencyHelper:
 
         return self._GetL2TBinaries(dependencies)
 
-    def GetInstallRequires(self, exclude_version=False, test_dependencies=False):
+    def GetInstallRequires(
+        self, exclude_optional=False, exclude_version=False, test_dependencies=False
+    ):
         """Retrieves the setup.py installation requirements.
 
         Args:
+          exclude_optional (Optional[bool]): True if optional dependencies should
+              be excluded.
           exclude_version (Optional[bool]): True if the version should be excluded
               from the dependency definitions.
           test_dependencies (Optional[bool]): True if the test dependencies should
@@ -564,7 +575,11 @@ class DependencyHelper:
         else:
             dependencies = self.dependencies
 
-        return self._GetInstallRequires(dependencies, exclude_version=exclude_version)
+        return self._GetInstallRequires(
+            dependencies,
+            exclude_optional=exclude_optional,
+            exclude_version=exclude_version,
+        )
 
     def GetPylintRcExtensionPkgs(self):
         """Retrieves the .pylintrc extension packages.

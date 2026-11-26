@@ -112,12 +112,16 @@ class DependencyFileWriter:
             exclude_version=exclude_version
         )
 
-    def _GetPyPITestDependencies(self, python_dependencies, exclude_version=False):
+    def _GetPyPITestDependencies(
+        self, python_dependencies, exclude_optional=False, exclude_version=False
+    ):
         """Retrieves PyPI test dependencies.
 
         Args:
           python_dependencies (list[str]): PyPI package names of Python
               dependencies.
+          exclude_optional (Optional[bool]): True if optional test dependencies
+              should be excluded.
           exclude_version (Optional[bool]): True if the version should be excluded
               from the dependency definitions.
 
@@ -125,7 +129,9 @@ class DependencyFileWriter:
           list[str]: PyPI package names of test dependencies.
         """
         test_dependencies = self._dependency_helper.GetInstallRequires(
-            exclude_version=exclude_version, test_dependencies=True
+            exclude_optional=exclude_optional,
+            exclude_version=exclude_version,
+            test_dependencies=True,
         )
 
         return [

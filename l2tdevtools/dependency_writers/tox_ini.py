@@ -34,9 +34,12 @@ class ToxIniWriter(interface.DependencyFileWriter):
 
     def Write(self):
         """Writes a tox.ini file."""
-        # TODO: Write test dependencies.
-        # python_dependencies = self._GetPyPIPythonDependencies()
-        # test_dependencies = self._GetPyPITestDependencies(python_dependencies)
+        python_dependencies = self._GetPyPIPythonDependencies()
+        # Optional test dependencies are not installed, the tests that require
+        # them are skipped.
+        test_dependencies = self._GetPyPITestDependencies(
+            python_dependencies, exclude_optional=True
+        )
 
         python_module_name = self._project_definition.name
 
@@ -52,6 +55,9 @@ class ToxIniWriter(interface.DependencyFileWriter):
             yaml_glob = os.path.join(python_module_name, "**", "*.yaml")
             if glob.glob(yaml_glob, recursive=True):
                 paths_to_lint_yaml.append(python_module_name)
+
+        if os.path.isdir("benchmarks"):
+            paths_to_lint_python.append("benchmarks")
 
         if os.path.isdir("data"):
             yaml_glob = os.path.join("data", "**", "*.yaml")
@@ -85,17 +91,37 @@ class ToxIniWriter(interface.DependencyFileWriter):
         if paths_to_lint_yaml and self._project_definition.name != "l2tdevtools":
             envlist.append("yamllint")
 
+        formatted_test_dependencies = []
+        for test_dependency in test_dependencies:
+            formatted_test_dependencies.append(f"  coverage: {test_dependency:s}\n")
+            formatted_test_dependencies.append(
+                f"  py3{{10,11,12,13,14,15}}: {test_dependency:s}\n"
+            )
+
+        benchmark_dependencies = [
+            f"  {test_dependency:s}\n" for test_dependency in test_dependencies
+        ]
+        benchmark_dependencies.append("  pytest-benchmark\n")
+
         template_mappings = {
+            "benchmark_dependencies": "".join(benchmark_dependencies),
             "envlist": ",".join(envlist),
             "paths_to_lint_python": " ".join(sorted(paths_to_lint_python)),
             "paths_to_lint_yaml": " ".join(sorted(paths_to_lint_yaml)),
             "project_name": self._project_definition.name,
             "python_module_name": python_module_name,
+            "test_dependencies": "".join(formatted_test_dependencies),
         }
         file_content = []
 
         template_data = self._GenerateFromTemplate("header", template_mappings)
         file_content.append(template_data)
+
+        if os.path.isdir("benchmarks"):
+            template_data = self._GenerateFromTemplate(
+                "testenv_benchmark", template_mappings
+            )
+            file_content.append(template_data)
 
         template_data = self._GenerateFromTemplate("testenv_black", template_mappings)
         file_content.append(template_data)
