@@ -3,6 +3,7 @@
 
 import configparser
 import io
+import os
 import unittest
 
 from l2tdevtools import dependencies
@@ -192,6 +193,33 @@ class DependencyHelperTest(test_lib.BaseTestCase):
 
         install_requires = dependency_helper.GetInstallRequires()
         self.assertEqual(len(install_requires), 1)
+
+        with test_lib.TempDirectory() as temp_directory:
+            test_dependencies_file = os.path.join(
+                temp_directory, "test_dependencies.ini"
+            )
+            with open(test_dependencies_file, "w", encoding="utf-8") as file_object:
+                file_object.write(
+                    "[fakeredis]\n"
+                    "is_optional: true\n"
+                    "minimum_version: 1.4.1\n"
+                    "\n"
+                    "[pytest]\n"
+                    "minimum_version: 7.0.0\n"
+                )
+
+            dependency_helper = dependencies.DependencyHelper(
+                dependencies_file=dependencies_file,
+                test_dependencies_file=test_dependencies_file,
+            )
+
+        install_requires = dependency_helper.GetInstallRequires(test_dependencies=True)
+        self.assertEqual(install_requires, ["fakeredis >= 1.4.1", "pytest >= 7.0.0"])
+
+        install_requires = dependency_helper.GetInstallRequires(
+            exclude_optional=True, test_dependencies=True
+        )
+        self.assertEqual(install_requires, ["pytest >= 7.0.0"])
 
     def testGetPylintRcExtensionPkgs(self):
         """Tests the GetPylintRcExtensionPkgs function."""

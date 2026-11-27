@@ -181,6 +181,9 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
     _PROJECT_NAME = "dfvfs"
     _PROJECT_VERSION = "20260411"
 
+    # Version of the latest git tag or None if it could not be determined.
+    _LATEST_TAG_VERSION = None
+
     @classmethod
     def setUpClass(cls):
         """Determines the project version from the latest git tag."""
@@ -206,15 +209,19 @@ class Log2TimelineGitHubReleasesDownloadHelperTest(test_lib.BaseTestCase):
                 _, _, version = line.rpartition("refs/tags/")
                 latest_version = max(latest_version, version)
 
+        cls._LATEST_TAG_VERSION = latest_version
         cls._PROJECT_VERSION = latest_version
 
     def testGetLatestVersion(self):
         """Tests the GetLatestVersion functions."""
+        if not self._LATEST_TAG_VERSION:
+            raise unittest.SkipTest("latest git tag version not available")
+
         download_helper = github.GitHubReleasesDownloadHelper(self._DOWNLOAD_URL)
 
         latest_version = download_helper.GetLatestVersion(self._PROJECT_NAME, None)
 
-        self.assertEqual(latest_version, self._PROJECT_VERSION)
+        self.assertEqual(latest_version, self._LATEST_TAG_VERSION)
 
     def testGetDownloadURL(self):
         """Tests the GetDownloadURL functions."""

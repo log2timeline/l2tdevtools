@@ -14,7 +14,7 @@ setenv =
   PYTHONPATH = {toxinidir}
 deps =
   coverage: coverage
-  wheel:
+${test_dependencies}  wheel:
     build
     setuptools >= 77
     wheel

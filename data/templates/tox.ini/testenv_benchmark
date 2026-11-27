@@ -1,0 +1,5 @@
+
+[testenv:benchmark]
+deps =
+${benchmark_dependencies}commands =
+  python -m pytest benchmarks
